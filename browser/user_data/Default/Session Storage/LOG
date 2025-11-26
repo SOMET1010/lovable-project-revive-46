@@ -1,3 +1,6 @@
 2025/11/26-15:07:15.283 4bf Reusing MANIFEST /workspace/browser/user_data/Default/Session Storage/MANIFEST-000001
 2025/11/26-15:07:15.289 4bf Recovering log #3
 2025/11/26-15:07:15.293 4bf Reusing old log /workspace/browser/user_data/Default/Session Storage/000003.log 
+2025/11/26-16:49:02.195 4c0 Level-0 table #5: started
+2025/11/26-16:49:02.203 4c0 Level-0 table #5: 39131 bytes OK
+2025/11/26-16:49:02.209 4c0 Delete type=0 #3
