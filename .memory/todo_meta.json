@@ -3,36 +3,29 @@
     "Coordinator": {
       "1": {
         "id": "1",
-        "content": "🚀 CORRECTION CRITIQUE : Pousser les corrections vers GitHub",
-        "details": "1. Appliquer les 13 corrections sur les 5 fichiers via GitHub Web\n2. Commit et push vers MONTOIT-STABLE/main\n3. Attendre le redéploiement Bolt automatique\n4. Cette étape résout 90% des erreurs identifiées",
+        "content": "🧪 PHASE 1: Tester les modules critiques",
+        "details": "1. Authentification & Profil (6 pages) - inscription, connexion, 2FA, vérification ANSUT\n2. Recherche & Découverte (5 pages) - filtres, carte Mapbox, recherche vocale/photo\n3. Candidature & Vérification (4 pages) - formulaire, score locataire, biométrique\n4. Contrats & Signature (6 pages) - création, signature CEV, gestion\n5. Paiements (3 pages) - Mobile Money, caution, rappels automatiques",
         "status": "pending",
         "priority": "high"
       },
       "2": {
         "id": "2",
-        "content": "🔧 CRÉER : Page /properties manquante",
-        "details": "1. Créer src/features/property/pages/PropertiesPage.tsx\n2. Ajouter la route dans le router principal\n3. Implémenter l'affichage des propriétés avec pagination\n4. Intégrer avec les corrections Supabase",
+        "content": "🔧 PHASE 2: Tester les modules importants",
+        "details": "1. Maintenance (2 pages) - demandes, suivi temps réel\n2. Communication (2 pages) - messagerie chiffrée, notifications\n3. Litiges & Médiation (3 pages) - création litiges, médiation\n4. Administration (12 pages) - feature flags, gestion utilisateurs\n5. Analytics & Reporting (4 pages) - dashboards, rapports automatiques",
         "status": "pending",
-        "priority": "high"
+        "priority": "medium"
       },
       "3": {
         "id": "3",
-        "content": "✅ VÉRIFIER : Tests post-corrections",
-        "details": "1. Tester l'absence d'erreurs HTTP 400 Supabase\n2. Vérifier l'affichage des propriétés sur l'accueil\n3. Confirmer le fonctionnement de la recherche\n4. Valider la navigation vers /properties",
+        "content": "🎭 PHASE 3: Parcours utilisateur complet",
+        "details": "1. Parcours LOCATAIRE: Inscription → Recherche → Candidature → Signature → Paiement\n2. Parcours PROPRIÉTAIRE: Publication → Gestion → Paiement → Maintenance\n3. Parcours TIERS: Validation → Médiation → Rapports\n4. Parcours ADMIN: Configuration → Monitoring → Analytics",
         "status": "pending",
         "priority": "medium"
       },
       "4": {
         "id": "4",
-        "content": "📱 AMÉLIORER : Responsivité mobile",
-        "details": "1. Implémenter menu hamburger\n2. Vérifier l'affichage sur petits écrans\n3. Tests sur différentes tailles d'écran",
-        "status": "pending",
-        "priority": "medium"
-      },
-      "5": {
-        "id": "5",
-        "content": "🎯 OPTIMISER : Page Ajouter propriété",
-        "details": "1. Améliorer /dashboard/ajouter-propriete après auth\n2. Créer page pré-ajout accessible sans auth\n3. Information aux utilisateurs non connectés",
+        "content": "🔌 PHASE 4: Tests d'intégration et performance",
+        "details": "1. Tester les 15 services externes un par un\n2. Workflows bout-en-bout complets\n3. Tests performance (bundle size, Lighthouse >90)\n4. Vérification responsive design\n5. Tests de sécurité (authentification, chiffrement)",
         "status": "pending",
         "priority": "low"
       }
