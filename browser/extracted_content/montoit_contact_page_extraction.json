@@ -1,0 +1,46 @@
+📄 Extracted from page: Mon Toit - Plateforme Immobilière Certifiée ANSUT | Côte d'Ivoire
+URL: https://montoitv35.netlify.app/contact
+
+Extracted content:
+```json
+{
+  "title": "Mon Toit - Plateforme Immobilière Certifiée ANSUT | Côte d'Ivoire",
+  "url": "https://montoitv35.netlify.app/contact",
+  "summary": "The requested page '/contact' on the Mon Toit platform resulted in a 404 'Page introuvable' error, explicitly stating 'La page /contact n'existe pas.'. An automatic redirection is announced to occur within 2 seconds. Despite the specific contact page not existing, the footer of the 404 page contains direct contact information including an email address, a phone number, and a physical address in Abidjan, Côte d'Ivoire. The page also features comprehensive navigation links, legal information, and details about the platform's certification by ANSUT.",
+  "key_points": [
+    "The page accessed at `/contact` displays a '404 Oups ! Page introuvable' error message.",
+    "The system explicitly states 'La page /contact n'existe pas.'",
+    "An automatic redirection is announced to occur within 2 seconds.",
+    "Despite the 404 error on the dedicated contact page, the footer provides direct contact information.",
+    "Contact Email: `contact@montoit.ci`",
+    "Contact Phone: `+225 07 00 00 00 00`",
+    "Physical Address: `Abidjan, Plateau, Côte d'Ivoire`",
+    "The platform is named 'Mon Toit' and is certified by ANSUT, aligning with ANSUT standards for digital public services in Côte d'Ivoire."
+  ],
+  "relevant_links": [
+    "/",
+    "/explorer",
+    "/publier",
+    "/baux",
+    "/comment-ca-marche",
+    "/aide",
+    "/auth",
+    "/recherche",
+    "/certification",
+    "/mentions-legales",
+    "/confidentialite",
+    "/artisans",
+    "/conditions-utilisation",
+    "/protection-donnees",
+    "/accessibilite",
+    "/contact",
+    "https://ansut.ci",
+    "mailto:contact@montoit.ci",
+    "tel:+2250700000000",
+    "/carte-intelligente",
+    "/favoris",
+    "/profil"
+  ],
+  "file_name": "montoit_contact_page_extraction.json"
+}
+```
