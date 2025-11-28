@@ -55,7 +55,7 @@ export default function Home() {
       const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .in('status', ['disponible', 'available'])
+        .eq('status', 'disponible')
         .order('created_at', { ascending: false })
         .limit(6);
 
@@ -72,7 +72,7 @@ export default function Home() {
   const loadStats = async () => {
     try {
       const [propertiesResult, profilesResult, citiesResult] = await Promise.all([
-        supabase.from('properties').select('id', { count: 'exact', head: true }).in('status', ['disponible', 'available']),
+        supabase.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'disponible'),
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
         supabase.from('properties').select('city').not('city', 'is', null)
       ]);

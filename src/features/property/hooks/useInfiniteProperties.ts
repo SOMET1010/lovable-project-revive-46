@@ -82,7 +82,7 @@ export function useInfiniteProperties(
       let query = supabase
         .from('properties')
         .select('id', { count: 'exact', head: true })
-        .in('status', ['disponible', 'available']);
+        .eq('status', 'disponible');
 
       // Appliquer les filtres
       if (filters.propertyCategory) {
@@ -183,7 +183,7 @@ export function useInfiniteProperties(
       let query = supabase
         .from('properties')
         .select('*')
-        .in('status', ['disponible', 'available']);
+        .eq('status', 'disponible');
 
       // Appliquer les filtres
       if (filters.propertyCategory) {

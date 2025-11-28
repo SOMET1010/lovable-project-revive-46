@@ -43,7 +43,7 @@ export default function SearchPropertiesPage() {
       let query = supabase
         .from('properties')
         .select('*')
-        .in('status', ['disponible', 'available']);
+        .eq('status', 'disponible');
 
       if (city && city.trim()) {
         query = query.ilike('city', `%${city.trim()}%`);
