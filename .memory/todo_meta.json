@@ -3,36 +3,36 @@
     "Coordinator": {
       "1": {
         "id": "1",
-        "content": "Ajouter un formulaire de contact interactif",
-        "details": "✅ TERMINÉ - Formulaire de contact déjà fonctionnel, aucune correction nécessaire",
-        "status": "completed",
+        "content": "🚀 CORRECTION CRITIQUE : Pousser les corrections vers GitHub",
+        "details": "1. Appliquer les 13 corrections sur les 5 fichiers via GitHub Web\n2. Commit et push vers MONTOIT-STABLE/main\n3. Attendre le redéploiement Bolt automatique\n4. Cette étape résout 90% des erreurs identifiées",
+        "status": "pending",
         "priority": "high"
       },
       "2": {
         "id": "2",
-        "content": "Corriger l'erreur JavaScript dans la console",
-        "details": "✅ TERMINÉ - 13 corrections appliquées dans 5 fichiers. En attente du push manuel vers GitHub pour finalisation.",
-        "status": "completed",
+        "content": "🔧 CRÉER : Page /properties manquante",
+        "details": "1. Créer src/features/property/pages/PropertiesPage.tsx\n2. Ajouter la route dans le router principal\n3. Implémenter l'affichage des propriétés avec pagination\n4. Intégrer avec les corrections Supabase",
+        "status": "pending",
         "priority": "high"
       },
       "3": {
         "id": "3",
-        "content": "Vérifier et améliorer la page Ajouter une propriété",
-        "details": "S'assurer que la page /dashboard/ajouter-propriete affiche le contenu complet après authentification. Ajouter une page de pré-ajout accessible sans auth pour informer les utilisateurs.",
+        "content": "✅ VÉRIFIER : Tests post-corrections",
+        "details": "1. Tester l'absence d'erreurs HTTP 400 Supabase\n2. Vérifier l'affichage des propriétés sur l'accueil\n3. Confirmer le fonctionnement de la recherche\n4. Valider la navigation vers /properties",
         "status": "pending",
         "priority": "medium"
       },
       "4": {
         "id": "4",
-        "content": "Améliorer la responsivité mobile",
-        "details": "Implémenter et tester un menu hamburger pour mobile. Vérifier l'affichage des pages sur petits écrans. Effectuer des tests sur différentes tailles d'écran.",
+        "content": "📱 AMÉLIORER : Responsivité mobile",
+        "details": "1. Implémenter menu hamburger\n2. Vérifier l'affichage sur petits écrans\n3. Tests sur différentes tailles d'écran",
         "status": "pending",
         "priority": "medium"
       },
       "5": {
         "id": "5",
-        "content": "Optimiser la navigation mobile",
-        "details": "Améliorer l'UX mobile en ajoutant des liens de navigation mobile appropriés et tester l'accessibilité sur tous les appareils.",
+        "content": "🎯 OPTIMISER : Page Ajouter propriété",
+        "details": "1. Améliorer /dashboard/ajouter-propriete après auth\n2. Créer page pré-ajout accessible sans auth\n3. Information aux utilisateurs non connectés",
         "status": "pending",
         "priority": "low"
       }
