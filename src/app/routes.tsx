@@ -56,6 +56,7 @@ const TenantMaintenance = lazy(() => import('@/features/tenant/pages/Maintenance
 
 const OwnerDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
 const AddProperty = lazy(() => import('@/features/owner/pages/AddPropertyPage'));
+const EditProperty = lazy(() => import('@/features/owner/pages/EditPropertyPage'));
 const PropertyStats = lazy(() => import('@/features/property/pages/PropertyStatsPage'));
 const OwnerMaintenance = lazy(() => import('@/features/tenant/pages/MaintenancePage'));
 
@@ -404,6 +405,14 @@ export const routes: RouteObject[] = [
         element: (
           <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
             <PropertyStats />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'dashboard/propriete/:id/modifier',
+        element: (
+          <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
+            <EditProperty />
           </ProtectedRoute>
         ),
       },
