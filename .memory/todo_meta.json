@@ -3,38 +3,45 @@
     "Coordinator": {
       "1": {
         "id": "1",
-        "content": "Sprint 1 (Semaine 1) - Corrections Critiques",
-        "details": "Jour 1-2: Page Inscription (fixer superposition, corriger placeholders)\nJour 3-4: Page Recherche (standardiser cards, supprimer overlay BIDJAN)\nJour 5: Page Accueil (remplacer chiffres 0+ par vrais chiffres)\nObjectif: Site sans problèmes critiques d'UX",
-        "status": "completed",
+        "content": "🔍 SPRINT 1: Audit & Analyse des Fonctionnalités Requises",
+        "details": "1. Analyser les besoins utilisateurs actuels\n2. Identifier les gaps fonctionnels de la plateforme\n3. Définir les priorités fonctionnelles\n4. Créer le cahier des charges des nouvelles features",
+        "status": "pending",
         "priority": "high"
       },
       "2": {
         "id": "2",
-        "content": "Sprint 2 (Semaine 2) - Design System Base",
-        "details": "Jour 1-2: Palette couleurs unifiée + boutons standardisés\nJour 3-4: Typographie + espacement (4pt grid)\nJour 5: Footer unifié sur toutes pages\nObjectif: Design system documenté + appliqué",
-        "status": "completed",
+        "content": "👤 SPRINT 2: Dashboard Utilisateur Personnel",
+        "details": "1. Interface utilisateur connectée\n2. Historique des recherches de propriétés\n3. Favoris et watchlist personnalisée\n4. Profil utilisateur éditable\n5. Notifications et alertes personnalisées",
+        "status": "pending",
         "priority": "high"
       },
       "3": {
         "id": "3",
-        "content": "Sprint 3 (Semaine 3) - Navigation & Composants",
-        "details": "Jour 1-2: Navigation + filtres unifiés\nJour 3-5: Composants réutilisables + iconographie\nObjectif: Composants standardisés + navigation cohérente",
-        "status": "completed",
-        "priority": "medium"
+        "content": "🏠 SPRINT 3: Gestionnaire de Propriétés (Propriétaires)",
+        "details": "1. Dashboard propriétaire avec ses biens\n2. Gestion des annonces (création, édition, suppression)\n3. Gestion des photos et descriptions\n4. Suivi des vues et contacts\n5. Statistiques de performance des annonces",
+        "status": "pending",
+        "priority": "high"
       },
       "4": {
         "id": "4",
-        "content": "Sprint 4 (Semaine 4) - Polish & QA",
-        "details": "Jour 1-2: Accessibilité WCAG AA\nJour 3-4: Responsive + performance\nJour 5: QA finale + tests utilisateurs\nObjectif: Site harmonisé, accessible, documenté",
-        "status": "completed",
+        "content": "💬 SPRINT 4: Système de Communication Intégré",
+        "details": "1. Chat temps réel entre locataires et propriétaires\n2. Système de预约 visits (prise de rendez-vous)\n3. Notifications push/email\n4. Historique des conversations\n5. Modération et signalement",
+        "status": "pending",
         "priority": "medium"
       },
       "5": {
         "id": "5",
-        "content": "Implémentation Design Tokens",
-        "details": "Intégrer design-tokens.json comme référence centrale\nAppliquer 100+ tokens sur tous les composants\nCréer système de variables CSS/SCSS",
-        "status": "completed",
-        "priority": "high"
+        "content": "📊 SPRINT 5: Analytics & Business Intelligence",
+        "details": "1. Tableau de bord admin avec métriques clés\n2. Analyse des tendances immobilières\n3. Rapports utilisateurs\n4. Heatmaps de recherche géographique\n5. KPIs de performance plateforme",
+        "status": "pending",
+        "priority": "medium"
+      },
+      "6": {
+        "id": "6",
+        "content": "📱 SPRINT 6: Fonctionnalités Mobile Avancées",
+        "details": "1. Géolocalisation et cartes interactives\n2. Recherche par géolocalisation\n3. Upload photos depuis mobile\n4. PWA (Progressive Web App)\n5. Mode hors-ligne pour favoris",
+        "status": "pending",
+        "priority": "medium"
       }
     }
   }
