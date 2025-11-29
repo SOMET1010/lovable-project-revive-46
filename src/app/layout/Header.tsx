@@ -85,6 +85,20 @@ export default function Header() {
               <Search className="h-4 w-4" />
               <span>Rechercher</span>
             </a>
+            <a
+              href="/aide"
+              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gradient-to-r hover:from-purple-50 hover:to-purple-100 hover:text-purple-700 transition-all duration-200 font-semibold whitespace-nowrap"
+            >
+              <HelpCircle className="h-4 w-4" />
+              <span>Aide</span>
+            </a>
+            <a
+              href="/contact"
+              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gradient-to-r hover:from-orange-50 hover:to-orange-100 hover:text-orange-700 transition-all duration-200 font-semibold whitespace-nowrap"
+            >
+              <Mail className="h-4 w-4" />
+              <span>Contact</span>
+            </a>
             {user && (
               <>
                 <a

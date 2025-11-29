@@ -95,6 +95,7 @@ const PrivacyPolicyPage = lazy(() => import('@/features/auth/pages/PrivacyPolicy
 const ContactPage = lazy(() => import('@/features/auth/pages/ContactPage'));
 const HelpPage = lazy(() => import('@/features/auth/pages/HelpPage'));
 const FAQPage = lazy(() => import('@/features/auth/pages/FAQPage'));
+const HowItWorksPage = lazy(() => import('@/features/auth/pages/HowItWorksPage'));
 
 export const routes: RouteObject[] = [
   {
@@ -117,6 +118,8 @@ export const routes: RouteObject[] = [
       { path: 'contact', element: <ContactPage /> },
       { path: 'aide', element: <HelpPage /> },
       { path: 'faq', element: <FAQPage /> },
+      { path: 'comment-ca-marche', element: <HowItWorksPage /> },
+      { path: 'guide', element: <HowItWorksPage /> },
       { path: 'ajouter-propriete', element: <AddPropertyLanding /> },
       { path: 'louer-mon-bien', element: <AddPropertyLanding /> },
       {

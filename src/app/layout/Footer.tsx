@@ -45,6 +45,16 @@ export default function Footer() {
                   ℹ️ À propos
                 </a>
               </li>
+              <li>
+                <a href="/aide" className="hover:text-orange-400 transition-colors hover:translate-x-2 transform inline-block duration-200 font-medium">
+                  ❓ Aide
+                </a>
+              </li>
+              <li>
+                <a href="/contact" className="hover:text-orange-400 transition-colors hover:translate-x-2 transform inline-block duration-200 font-medium">
+                  ✉️ Contact
+                </a>
+              </li>
             </ul>
           </div>
 
