@@ -5,14 +5,14 @@
         "id": "1",
         "content": "🔍 SPRINT 1: Audit & Analyse des Fonctionnalités Requises",
         "details": "1. Analyser les besoins utilisateurs actuels\n2. Identifier les gaps fonctionnels de la plateforme\n3. Définir les priorités fonctionnelles\n4. Créer le cahier des charges des nouvelles features",
-        "status": "in_progress",
+        "status": "completed",
         "priority": "high"
       },
       "2": {
         "id": "2",
         "content": "👤 SPRINT 2: Dashboard Utilisateur Personnel",
         "details": "1. Interface utilisateur connectée\n2. Historique des recherches de propriétés\n3. Favoris et watchlist personnalisée\n4. Profil utilisateur éditable\n5. Notifications et alertes personnalisées",
-        "status": "pending",
+        "status": "in_progress",
         "priority": "high"
       },
       "3": {
