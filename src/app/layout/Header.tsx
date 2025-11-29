@@ -51,7 +51,7 @@ export default function Header() {
   }, [user, profile, loadVerificationStatus]);
 
   return (
-    <header className="bg-white/80 backdrop-blur-xl shadow-lg border-b-2 border-terracotta-100 sticky top-0 z-50">
+    <header className="bg-white/80 backdrop-blur-xl shadow-lg border-b-2 border-primary-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <a href="/" className="flex items-center space-x-3 group flex-shrink-0">
@@ -63,7 +63,7 @@ export default function Header() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-extrabold tracking-tight" style={{ color: '#2563eb' }}>
+              <span className="text-xl font-extrabold tracking-tight text-primary-500">
                 Mon Toit
               </span>
               <span className="text-xs text-gray-500 font-medium">Plateforme Immobilière</span>
@@ -73,14 +73,14 @@ export default function Header() {
           <nav className="hidden md:flex items-center space-x-0.5 flex-1 justify-center px-4">
             <a
               href="/"
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gradient-to-r hover:from-terracotta-50 hover:to-coral-50 hover:text-terracotta-700 transition-all duration-200 font-semibold whitespace-nowrap"
+              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-250 ease-out font-semibold whitespace-nowrap"
             >
               <Home className="h-4 w-4" />
               <span>Accueil</span>
             </a>
             <a
               href="/recherche"
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-gray-700 hover:bg-gradient-to-r hover:from-cyan-50 hover:to-cyan-100 hover:text-cyan-700 transition-all duration-200 font-semibold whitespace-nowrap"
+              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-250 ease-out font-semibold whitespace-nowrap"
             >
               <Search className="h-4 w-4" />
               <span>Rechercher</span>

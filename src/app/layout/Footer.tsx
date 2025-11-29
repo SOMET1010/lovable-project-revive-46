@@ -4,8 +4,8 @@ export default function Footer() {
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white relative overflow-hidden shadow-premium">
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-orange-500 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-600 rounded-full blur-3xl" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary-500 rounded-full blur-3xl opacity-20" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary-700 rounded-full blur-3xl opacity-20" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
@@ -25,28 +25,28 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-white font-bold mb-5 text-lg flex items-center space-x-2">
-              <span className="text-orange-400">●</span>
+            <h3 className="text-white font-bold mb-5 text-h5 flex items-center space-x-2">
+              <span className="text-primary-500">●</span>
               <span>Liens rapides</span>
             </h3>
             <ul className="space-y-3 text-sm">
               <li>
-                <a href="/" className="hover:text-orange-400 transition-colors hover:translate-x-2 transform inline-block duration-200 font-medium">
+                <a href="/" className="hover:text-primary-500 transition-all hover:translate-x-2 transform inline-block duration-250 ease-out font-medium">
                   🏠 Accueil
                 </a>
               </li>
               <li>
-                <a href="/recherche" className="hover:text-orange-400 transition-colors hover:translate-x-2 transform inline-block duration-200 font-medium">
+                <a href="/recherche" className="hover:text-primary-500 transition-all hover:translate-x-2 transform inline-block duration-250 ease-out font-medium">
                   🔍 Rechercher
                 </a>
               </li>
               <li>
-                <a href="/a-propos" className="hover:text-orange-400 transition-colors hover:translate-x-2 transform inline-block duration-200 font-medium">
+                <a href="/a-propos" className="hover:text-primary-500 transition-all hover:translate-x-2 transform inline-block duration-250 ease-out font-medium">
                   ℹ️ À propos
                 </a>
               </li>
               <li>
-                <a href="/aide" className="hover:text-orange-400 transition-colors hover:translate-x-2 transform inline-block duration-200 font-medium">
+                <a href="/aide" className="hover:text-primary-500 transition-all hover:translate-x-2 transform inline-block duration-250 ease-out font-medium">
                   ❓ Aide
                 </a>
               </li>
@@ -89,22 +89,22 @@ export default function Footer() {
             </h3>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center space-x-3 group">
-                <div className="w-8 h-8 bg-orange-900/50 rounded-lg flex items-center justify-center group-hover:bg-orange-800 transition-colors">
-                  <Mail className="h-4 w-4 text-orange-400" />
+                <div className="w-8 h-8 bg-primary-900/50 rounded-lg flex items-center justify-center group-hover:bg-primary-800 transition-colors duration-250 ease-out">
+                  <Mail className="h-4 w-4 text-primary-500" />
                 </div>
-                <a href="mailto:contact@mon-toit.ci" className="font-medium text-white hover:text-orange-400 transition-colors">
+                <a href="mailto:contact@mon-toit.ci" className="font-medium text-white hover:text-primary-500 transition-colors duration-250 ease-out">
                   contact@mon-toit.ci
                 </a>
               </li>
               <li className="flex items-center space-x-3 group">
-                <div className="w-8 h-8 bg-orange-900/50 rounded-lg flex items-center justify-center group-hover:bg-orange-800 transition-colors">
-                  <Phone className="h-4 w-4 text-orange-400" />
+                <div className="w-8 h-8 bg-primary-900/50 rounded-lg flex items-center justify-center group-hover:bg-primary-800 transition-colors duration-250 ease-out">
+                  <Phone className="h-4 w-4 text-primary-500" />
                 </div>
                 <span className="font-medium text-gray-300 italic">Numéro disponible prochainement</span>
               </li>
               <li className="flex items-center space-x-3 group">
-                <div className="w-8 h-8 bg-orange-900/50 rounded-lg flex items-center justify-center group-hover:bg-orange-800 transition-colors">
-                  <MapPin className="h-4 w-4 text-orange-400" />
+                <div className="w-8 h-8 bg-primary-900/50 rounded-lg flex items-center justify-center group-hover:bg-primary-800 transition-colors duration-250 ease-out">
+                  <MapPin className="h-4 w-4 text-primary-500" />
                 </div>
                 <span className="font-medium text-white">Abidjan, Côte d'Ivoire</span>
               </li>
@@ -119,7 +119,7 @@ export default function Footer() {
             </p>
             <div className="flex items-center space-x-2 text-sm">
               <span className="text-gray-400">Fait avec</span>
-              <Heart className="h-4 w-4 text-coral-500 animate-pulse" />
+              <Heart className="h-4 w-4 text-primary-500 animate-pulse" />
               <span className="text-gray-400">pour l'accès universel au logement</span>
             </div>
           </div>

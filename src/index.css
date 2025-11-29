@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design System Tokens - Unification couleurs MONTOIT */
+@import './styles/design-tokens.css';
+
 @layer base {
   body {
     @apply font-body bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50;
