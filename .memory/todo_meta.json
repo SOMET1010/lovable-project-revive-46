@@ -39,8 +39,8 @@
       "6": {
         "id": "6",
         "content": "📱 SPRINT 6: Fonctionnalités Mobile Avancées",
-        "details": "1. Géolocalisation et cartes interactives\n2. Recherche par géolocalisation\n3. Upload photos depuis mobile\n4. PWA (Progressive Web App)\n5. Mode hors-ligne pour favoris",
-        "status": "pending",
+        "details": "🔄 EN COURS - Développement des fonctionnalités mobiles avancées : géolocalisation et cartes interactives, recherche par géolocalisation, upload photos mobile, PWA (Progressive Web App), mode hors-ligne pour favoris. Backend Bolt Database, intégration Google Maps API, React PWA patterns.",
+        "status": "in_progress",
         "priority": "medium"
       }
     }
