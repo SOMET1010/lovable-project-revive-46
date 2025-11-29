@@ -208,12 +208,12 @@ export default function SearchPropertiesPage() {
                 </div>
               )}
 
-              <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus-within:border-orange-500 focus-within:ring-2 focus-within:ring-orange-100 transition-all">
-                <HomeIcon className="h-5 w-5 text-gray-400" />
+              <div className="flex-1 flex items-center gap-3 px-4 py-3 bg-neutral-50 rounded-xl border border-neutral-200 focus-within:border-primary-500 focus-within:ring-2 focus-within:ring-primary-100 transition-all duration-250 ease-out">
+                <HomeIcon className="h-5 w-5 text-neutral-400" />
                 <select
                   value={propertyType}
                   onChange={(e) => setPropertyType(e.target.value)}
-                  className="flex-1 outline-none bg-transparent text-gray-900 cursor-pointer"
+                  className="flex-1 outline-none bg-transparent text-neutral-900 cursor-pointer font-medium"
                 >
                   <option value="">Tous les types</option>
                   <option value="appartement">Appartement</option>
@@ -227,7 +227,7 @@ export default function SearchPropertiesPage() {
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all duration-300 flex items-center justify-center gap-2 md:w-auto"
+                className="px-6 py-3 bg-neutral-100 text-neutral-700 font-semibold rounded-xl hover:bg-neutral-200 transition-all duration-250 ease-out flex items-center justify-center gap-2 md:w-auto"
               >
                 <SlidersHorizontal className="h-5 w-5" />
                 <span>Filtres</span>
@@ -235,7 +235,7 @@ export default function SearchPropertiesPage() {
 
               <button
                 type="submit"
-                className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                className="btn-primary flex items-center justify-center gap-2"
               >
                 <Search className="h-5 w-5" />
                 <span>Rechercher</span>
@@ -244,13 +244,13 @@ export default function SearchPropertiesPage() {
 
             {/* Advanced Filters */}
             {showFilters && (
-              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200 space-y-4 animate-slide-down">
+              <div className="bg-neutral-50 rounded-xl p-6 border border-neutral-200 space-y-4 animate-slide-down">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Filtres avancés</h3>
+                  <h3 className="text-h5 font-bold text-neutral-900">Filtres avancés</h3>
                   <button
                     type="button"
                     onClick={() => setShowFilters(false)}
-                    className="text-gray-400 hover:text-gray-600"
+                    className="text-neutral-400 hover:text-neutral-600 transition-colors duration-250 ease-out"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -258,7 +258,7 @@ export default function SearchPropertiesPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
                       Prix minimum (FCFA)
                     </label>
                     <input
@@ -266,12 +266,12 @@ export default function SearchPropertiesPage() {
                       placeholder="Ex: 50000"
                       value={minPrice}
                       onChange={(e) => setMinPrice(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                      className="input w-full"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
                       Prix maximum (FCFA)
                     </label>
                     <input
@@ -279,18 +279,18 @@ export default function SearchPropertiesPage() {
                       placeholder="Ex: 200000"
                       value={maxPrice}
                       onChange={(e) => setMaxPrice(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none"
+                      className="input w-full"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
                       Nombre de chambres
                     </label>
                     <select
                       value={bedrooms}
                       onChange={(e) => setBedrooms(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none cursor-pointer"
+                      className="input w-full cursor-pointer"
                     >
                       <option value="">Indifférent</option>
                       <option value="1">1 chambre</option>
