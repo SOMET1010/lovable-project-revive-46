@@ -86,6 +86,7 @@ const TrustAgentMediation = lazy(() => import('@/features/trust-agent/pages/Medi
 const TrustAgentAnalytics = lazy(() => import('@/features/trust-agent/pages/AnalyticsPage'));
 
 const NotificationPreferences = lazy(() => import('@/features/messaging/pages/NotificationPreferencesPage'));
+const NotificationsPage = lazy(() => import('@/features/messaging/pages/NotificationsPage'));
 const MyDisputes = lazy(() => import('@/features/dispute/pages/MyDisputesPage'));
 const CreateDispute = lazy(() => import('@/features/dispute/pages/CreateDisputePage'));
 const DisputeDetail = lazy(() => import('@/features/dispute/pages/DisputeDetailPage'));
@@ -605,6 +606,14 @@ export const routes: RouteObject[] = [
         element: (
           <ProtectedRoute allowedRoles={['trust_agent']}>
             <TrustAgentAnalytics />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'notifications',
+        element: (
+          <ProtectedRoute>
+            <NotificationsPage />
           </ProtectedRoute>
         ),
       },

@@ -1,6 +1,7 @@
 import { Home, Search, User, LogOut, Building2, MessageCircle, Calendar, FileText, Heart, Bell, Key, Award, Wrench, Users, BarChart, ChevronDown, Settings, Menu, X, Shield, Database, Activity, Cog, TestTube, Zap, UserCheck, CheckCircle, FileCheck, Info, HelpCircle, Mail, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useMessageNotifications } from '@/features/messaging';
+import NotificationCenter from '@/features/messaging/components/NotificationCenter';
 import LanguageSelector from '@/shared/ui/LanguageSelector';
 import RoleSwitcher from './RoleSwitcher';
 import { useState, useEffect, useCallback } from 'react';
@@ -363,6 +364,9 @@ export default function Header() {
           <div className="flex items-center space-x-2 flex-shrink-0">
             {user ? (
               <>
+                <div className="hidden md:block">
+                  <NotificationCenter />
+                </div>
                 <div className="hidden lg:block">
                   <RoleSwitcher />
                 </div>
