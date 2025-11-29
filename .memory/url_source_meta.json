@@ -1,0 +1,216 @@
+{
+  "_source_id": 29,
+  "sources": {
+    "Cahier des Charges Technique - Nouvelles Fonctionnalités": {
+      "https://supabase.com/docs/guides/getting-started/architecture": {
+        "id": 1,
+        "publisher": "Supabase",
+        "url": "https://supabase.com/docs/guides/getting-started/architecture",
+        "title": "Architecture Supabase - Guide Officiel",
+        "info": "Architecture complète de Supabase avec composants principaux : Postgres, GoTrue (Auth), PostgREST (API), Realtime, Storage API, Edge Functions, etc. Meilleures pratiques d'intégration et principes de conception."
+      },
+      "https://medium.com/@firmanbrilian/best-practices-for-securing-and-scaling-supabase-for-production-data-workloads-4394aba9e868": {
+        "id": 2,
+        "publisher": "Medium",
+        "url": "https://medium.com/@firmanbrilian/best-practices-for-securing-and-scaling-supabase-for-production-data-workloads-4394aba9e868",
+        "title": "Bonnes Pratiques Supabase pour Production",
+        "info": "Guide détaillé sur la sécurité (RLS par défaut, gestion des clés API), la scalabilité PostgreSQL, l'optimisation temps réel, les fonctions Edge, et l'observabilité pour les charges de travail de production."
+      },
+      "https://document360.com/fr/blog/document-de-specification-techniques/": {
+        "id": 3,
+        "publisher": "Document360",
+        "url": "https://document360.com/fr/blog/document-de-specification-techniques/",
+        "title": "Guide Spécifications Techniques",
+        "info": "Structure complète pour documents de spécifications techniques : meilleures pratiques avant rédaction, étapes de création, sections clés (résumé, solution UX/technique, tests, risques, impact)."
+      },
+      "https://www.figma.com/resource-library/what-is-wireframing/": {
+        "id": 4,
+        "publisher": "Figma",
+        "url": "https://www.figma.com/resource-library/what-is-wireframing/",
+        "title": "Guide Complet du Wireframing",
+        "info": "Définition des wireframes, types (basse/moyenne/haute fidélité), 7 meilleures pratiques UX, dimensions recommandées, processus de création et critères d'évaluation du succès."
+      }
+    },
+    "Analyse Concurrentielle Plateformes Immobilières 2025": {
+      "https://www.pap.fr/": {
+        "id": 5,
+        "publisher": "Particulier à Particulier",
+        "url": "https://www.pap.fr/",
+        "title": "PAP.fr - Site officiel première plateforme immobilière entre particuliers",
+        "info": "Analyse détaillée de PAP.fr, leader de l'immobilier entre particuliers avec 3 millions de visiteurs/mois, modèle 0% commission, fonctionnalités coaching, applications mobiles"
+      },
+      "https://www.pretto.fr/recherche-immobiliere/trouver-bien-immobilier/meilleur-site-immobilier/": {
+        "id": 6,
+        "publisher": "Pretto",
+        "url": "https://www.pretto.fr/recherche-immobiliere/trouver-bien-immobilier/meilleur-site-immobilier/",
+        "title": "Meilleurs sites de recherche immobilière : comparatif 2025",
+        "info": "Comparatif exhaustif des principales plateformes immobilières françaises (LeBonCoin, SeLoger, Logic-Immo, Bien'ici, PAP, Figaro Immo) avec analyse UX, fonctionnalités et performance"
+      },
+      "https://www.leboncoin.fr/": {
+        "id": 7,
+        "publisher": "LeBonCoin",
+        "url": "https://www.leboncoin.fr/",
+        "title": "LeBonCoin - Immobilier",
+        "info": "Fonctionnalités du moteur de recherche LeBonCoin, services gratuits pour particuliers et professionnels, innovations plateforme"
+      },
+      "https://data-b.com/actu/lintelligence-artificielle-dans-limmobilier-10-outils-indispensable-en-2025/": {
+        "id": 8,
+        "publisher": "Data-B",
+        "url": "https://data-b.com/actu/lintelligence-artificielle-dans-limmobilier-10-outils-indispensable-en-2025/",
+        "title": "L'intelligence artificielle dans l'immobilier - 10 outils indispensables 2025",
+        "info": "Analyse complète des 10 outils IA indispensables pour l'immobilier 2025 : évaluation automatisée, chatbots intelligents, visits virtuelles, optimisation annonces"
+      },
+      "https://www.mywebsite360.com/visite-virtuelle-immobilier-tendances-2025-et-conversions": {
+        "id": 9,
+        "publisher": "MyWebsite360",
+        "url": "https://www.mywebsite360.com/visite-virtuelle-immobilier-tendances-2025-et-conversions",
+        "title": "Visite virtuelle immobilier : tendances 2025 et conversions",
+        "info": "Tendances 2025 visites virtuelles : jumeaux numériques 3D, IA conversationnelle, métriques UX, Core Web Vitals, accessibilité WCAG 2.2, RGPD"
+      },
+      "https://parseur.com/fr/blog/automatisation-immobiliere": {
+        "id": 10,
+        "publisher": "Parseur",
+        "url": "https://parseur.com/fr/blog/automatisation-immobiliere",
+        "title": "Automatisation immobilière : les meilleurs outils pour 2025",
+        "info": "Guide complet automatisation immobilière 2025 : outils, workflows, intégration CRM, gains de productivité, personnalisation prospects"
+      },
+      "https://www.fidesio.com/quelle-approche-ux-ui-pour-les-sites-immobiliers": {
+        "id": 11,
+        "publisher": "Fidesio",
+        "url": "https://www.fidesio.com/quelle-approche-ux-ui-pour-les-sites-immobiliers",
+        "title": "Quelle approche UX/UI pour les sites immobiliers ?",
+        "info": "Approche UX/UI pour sites immobiliers : navigation intuitive, outils recherche puissants, micro-interactions, contenus haute qualité, exemples concrets"
+      }
+    },
+    "Analyse Plateforme MONTOIT 2025": {
+      "file:///workspace/MONTOITVPROD/src/App.tsx": {
+        "id": 12,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/App.tsx",
+        "title": "Application principale React avec routing",
+        "info": "Point d'entrée principal de l'application avec configuration du router React et Provider d'authentification"
+      },
+      "file:///workspace/MONTOITVPROD/src/app/routes.tsx": {
+        "id": 13,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/app/routes.tsx",
+        "title": "Configuration complète des routes",
+        "info": "Système de routing avec protection des pages par rôles, lazy loading et gestion des erreurs 404"
+      },
+      "file:///workspace/MONTOITVPROD/src/shared/config/features.config.ts": {
+        "id": 14,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/shared/config/features.config.ts",
+        "title": "Configuration des fonctionnalités activables",
+        "info": "Système de feature flags pour contrôler dynamiquement les fonctionnalités (IA, paiements, vérifications)"
+      },
+      "file:///workspace/MONTOITVPROD/src/app/providers/AuthProvider.tsx": {
+        "id": 15,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/app/providers/AuthProvider.tsx",
+        "title": "Service d'authentification et gestion des profils",
+        "info": "Implémentation complète avec Supabase, gestion d'erreurs, retry automatique et récupération de profils"
+      },
+      "file:///workspace/MONTOITVPROD/src/types/index.ts": {
+        "id": 16,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/types/index.ts",
+        "title": "Définitions des types TypeScript",
+        "info": "Types partagés pour propriétés, profils, paiements, messages et interfaces de formulaires"
+      },
+      "file:///workspace/MONTOITVPROD/src/services/paymentService.ts": {
+        "id": 17,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/services/paymentService.ts",
+        "title": "Service de paiement Mobile Money",
+        "info": "Intégration complète avec Orange Money, MTN Money, Moov Money et Wave, validation et calcul de frais"
+      },
+      "file:///workspace/MONTOITVPROD/src/services/ai/azureAIService.ts": {
+        "id": 18,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/services/ai/azureAIService.ts",
+        "title": "Service d'intelligence artificielle Azure",
+        "info": "Intégration Azure OpenAI avec cache, monitoring des coûts et analyse de texte (sentiment, entités)"
+      },
+      "file:///workspace/MONTOITVPROD/src/services/supabase/client.ts": {
+        "id": 19,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/services/supabase/client.ts",
+        "title": "Client Supabase et configuration",
+        "info": "Configuration du client Supabase avec gestion des sessions et auto-refresh des tokens"
+      },
+      "file:///workspace/MONTOITVPROD/src/shared/config/env.config.ts": {
+        "id": 20,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/src/shared/config/env.config.ts",
+        "title": "Configuration des variables d'environnement",
+        "info": "Validation et gestion des variables d'environnement Supabase et configuration par environnement"
+      },
+      "file:///workspace/MONTOITVPROD/tests/e2e/phone-login.spec.ts": {
+        "id": 21,
+        "publisher": "MONTOIT Team",
+        "url": "file:///workspace/MONTOITVPROD/tests/e2e/phone-login.spec.ts",
+        "title": "Tests End-to-End",
+        "info": "Tests automatisés pour l'authentification par téléphone (Orange Money, MTN, Moov)"
+      }
+    },
+    "Fonctionnalités Prioritaires MonToit": {
+      "https://www.agenceecofin.com/actualites-numerique/2508-130919-proptech-en-afrique-une-hausse-de-3650-des-investissements-au-premier-semestre-2025": {
+        "id": 22,
+        "publisher": "Agence Ecofin",
+        "url": "https://www.agenceecofin.com/actualites-numerique/2508-130919-proptech-en-afrique-une-hausse-de-3650-des-investissements-au-premier-semestre-2025",
+        "title": "Proptech en Afrique : hausse de 3650% des investissements au premier semestre 2025",
+        "info": "Boom des investissements proptech en Afrique : +3650% au S1 2025 (75M$ vs 2M$ S1 2024), urbanisation rapide et montée fintech comme moteurs de croissance"
+      },
+      "https://edana.ch/2025/10/04/creer-une-application-immobiliere-process-couts-et-fonctionnalites-cles/": {
+        "id": 23,
+        "publisher": "Edana.ch",
+        "url": "https://edana.ch/2025/10/04/creer-une-application-immobiliere-process-couts-et-fonctionnalites-cles/",
+        "title": "Créer une App Immobilière : Coûts, Fonctionnalités et Processus",
+        "info": "Tendances 2025 : IA et LLM, réalité augmentée/virtuelle, tokenisation, architecture cloud native, coûts MVP 80-150k CHF (3-6 mois)"
+      },
+      "https://trangotech.com/blog/ui-ux-for-real-estate-apps/": {
+        "id": 24,
+        "publisher": "Trango Tech",
+        "url": "https://trangotech.com/blog/ui-ux-for-real-estate-apps/",
+        "title": "7 UI/UX Best Practices for Real Estate App Development",
+        "info": "7 meilleures pratiques UX/UI 2025 : personnalisation IA, onboarding fluide, design minimaliste, filtres avancés, visites VR - 91% consommateurs préfèrent recommandations pertinentes"
+      },
+      "https://www.artefacto-ar.com/blog/usages-realite-augmentee-virtuelle-immobilier/": {
+        "id": 25,
+        "publisher": "Artefacto AR",
+        "url": "https://www.artefacto-ar.com/blog/usages-realite-augmentee-virtuelle-immobilier/",
+        "title": "4 cas d'usages de la Réalité Augmentée et Virtuelle dans l'immobilier",
+        "info": "4 cas d'usage RA/RV : découverte de biens via smartphone, visualisation projets VEFA à échelle réelle, visites virtuelles immersives à distance, aide à la décision"
+      },
+      "https://parseur.com/fr/blog/automatisation-immobiliere": {
+        "id": 26,
+        "publisher": "Parseur",
+        "url": "https://parseur.com/fr/blog/automatisation-immobiliere",
+        "title": "Automatisation immobilière : les meilleurs outils pour 2025",
+        "info": "Automatisation immobilière 2025 : ChatGPT assistant virtuel, gains de 20h/semaine, contact lead <5min multiplie conversion par 21, outils Parseur/Zapier/Realvolve"
+      },
+      "https://www.immomatin.com/evaluation/services-evaluer/immobilier-et-digital-cinq-chiffres-sont-a-retenir.html": {
+        "id": 27,
+        "publisher": "Immo Matin",
+        "url": "https://www.immomatin.com/evaluation/services-evaluer/immobilier-et-digital-cinq-chiffres-sont-a-retenir.html",
+        "title": "Immobilier et digital : cinq chiffres sont à retenir",
+        "info": "Statistiques recherche immobilière mobile : 39% des 34M mobinautes utilisent apps mobiles, 56% moins 35 ans, 77% satisfaits portails professionnels"
+      },
+      "https://sabluximmobilier.com/limpact-de-la-digitalisation-dans-le-secteur-immobilier-en-afrique/": {
+        "id": 28,
+        "publisher": "Sablux Immobilier",
+        "url": "https://sabluximmobilier.com/limpact-de-la-digitalisation-dans-le-secteur-immobilier-en-afrique/",
+        "title": "L'impact de la digitalisation dans le secteur immobilier en Afrique",
+        "info": "Besoins utilisateurs Afrique : transparence, rapidité, sécurité, personnalisation, réduction coûts 20-30%, visualisation à distance, gestion automatisée"
+      },
+      "https://garantme.fr/fr/blog/agent/marche-immobilier-une-lente-transformation-digitale": {
+        "id": 29,
+        "publisher": "Garantme",
+        "url": "https://garantme.fr/fr/blog/agent/marche-immobilier-une-lente-transformation-digitale",
+        "title": "Marché immobilier : une lente transformation digitale",
+        "info": "Freins transformation digitale : 36% agences <1 an adoption, obstacles financiers/culturels/organisationnels, solutions formation/accompagnement"
+      }
+    }
+  }
+}

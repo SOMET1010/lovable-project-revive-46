@@ -5,7 +5,7 @@
         "id": "1",
         "content": "🔍 SPRINT 1: Audit & Analyse des Fonctionnalités Requises",
         "details": "1. Analyser les besoins utilisateurs actuels\n2. Identifier les gaps fonctionnels de la plateforme\n3. Définir les priorités fonctionnelles\n4. Créer le cahier des charges des nouvelles features",
-        "status": "pending",
+        "status": "in_progress",
         "priority": "high"
       },
       "2": {
