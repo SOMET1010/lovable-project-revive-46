@@ -12,28 +12,28 @@
         "id": "2",
         "content": "👤 SPRINT 2: Dashboard Utilisateur Personnel",
         "details": "1. Interface utilisateur connectée\n2. Historique des recherches de propriétés\n3. Favoris et watchlist personnalisée\n4. Profil utilisateur éditable\n5. Notifications et alertes personnalisées",
-        "status": "in_progress",
+        "status": "completed",
         "priority": "high"
       },
       "3": {
         "id": "3",
         "content": "🏠 SPRINT 3: Gestionnaire de Propriétés (Propriétaires)",
         "details": "1. Dashboard propriétaire avec ses biens\n2. Gestion des annonces (création, édition, suppression)\n3. Gestion des photos et descriptions\n4. Suivi des vues et contacts\n5. Statistiques de performance des annonces",
-        "status": "pending",
+        "status": "completed",
         "priority": "high"
       },
       "4": {
         "id": "4",
         "content": "💬 SPRINT 4: Système de Communication Intégré",
         "details": "1. Chat temps réel entre locataires et propriétaires\n2. Système de预约 visits (prise de rendez-vous)\n3. Notifications push/email\n4. Historique des conversations\n5. Modération et signalement",
-        "status": "pending",
+        "status": "completed",
         "priority": "medium"
       },
       "5": {
         "id": "5",
         "content": "📊 SPRINT 5: Analytics & Business Intelligence",
         "details": "1. Tableau de bord admin avec métriques clés\n2. Analyse des tendances immobilières\n3. Rapports utilisateurs\n4. Heatmaps de recherche géographique\n5. KPIs de performance plateforme",
-        "status": "pending",
+        "status": "in_progress",
         "priority": "medium"
       },
       "6": {
