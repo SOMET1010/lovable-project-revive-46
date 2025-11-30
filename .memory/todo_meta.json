@@ -12,21 +12,21 @@
         "id": "2",
         "content": "Phase 1 - Design System et Foundation",
         "details": "1. Implémenter les design tokens JSON\n2. Créer la configuration CSS du design system\n3. Développer les composants de base (Button, Input, Card, etc.)\n4. Établir la grille et les espacements\n5. Configurer les breakpoints responsive",
-        "status": "pending",
+        "status": "completed",
         "priority": "high"
       },
       "3": {
         "id": "3",
         "content": "Phase 2 - Refonte Pages Critiques",
         "details": "1. Refonte Homepage avec Hero simplifié\n2. Refonte SearchPropertiesPage avec nouvelle interface\n3. Refonte PropertyDetailPage avec galerie moderne\n4. Mise à jour Navigation (Header/Footer)\n5. Implémentation des patterns de design critiques",
-        "status": "pending",
+        "status": "completed",
         "priority": "high"
       },
       "4": {
         "id": "4",
         "content": "Phase 3 - Dashboards Utilisateurs",
         "details": "1. Refonte Tenant Dashboard\n2. Refonte Owner Dashboard  \n3. Refonte Agency Dashboard\n4. Refonte Admin Dashboard\n5. Refonte Trust Agent Dashboard\n6. Harmonisation des composants dashboard",
-        "status": "pending",
+        "status": "in_progress",
         "priority": "medium"
       },
       "5": {
