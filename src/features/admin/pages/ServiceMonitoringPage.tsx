@@ -204,7 +204,7 @@ export default function AdminServiceMonitoring() {
         </div>
       </div>
 
-          {loading ? (
+      {loading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary-600)] mx-auto"></div>
         </div>
@@ -392,8 +392,5 @@ export default function AdminServiceMonitoring() {
         </>
       )}
     </div>
-  );
-}
-    </>
   );
 }

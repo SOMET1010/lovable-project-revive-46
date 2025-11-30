@@ -189,7 +189,7 @@ export class NavigationTestSuite {
   // Test 3: Vérification des redirections
   async testRedirections(): Promise<void> {
     console.log('\n🔄 TEST 3: Redirections');
-    console.log('='.performance));
+    console.log('='.repeat(50));
     
     const redirections = [
       { from: '/search', to: '/recherche' },

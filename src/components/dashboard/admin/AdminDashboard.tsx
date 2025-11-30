@@ -114,7 +114,7 @@ export function AdminDashboard() {
           {
             id: 'alert-001',
             type: 'error',
-            message: 'Pics d\\'erreur sur l\\'API de paiement',
+            message: "Pics d'erreur sur l'API de paiement",
             timestamp: '2025-11-30T16:30:00Z',
             severity: 'high',
           },
@@ -183,7 +183,7 @@ export function AdminDashboard() {
             {
               id: 'prop-003',
               title: 'Studio meublé Yopougon',
-              owner_name: 'Pierre N\\'Guessan',
+              owner_name: "Pierre N'Guessan",
               status: 'rejete',
               created_at: '2025-11-28T11:20:00Z',
               city: 'Yopougon',

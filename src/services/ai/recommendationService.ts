@@ -640,7 +640,6 @@ export class RecommendationService {
     
     return Math.round(confidence * 100) / 100;
   }
-  }
 
   /**
    * Sauvegarde les recommandations calculées en base de données
