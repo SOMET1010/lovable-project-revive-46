@@ -64,11 +64,11 @@
 }
 
 .agency-nav-item:hover {
-  @apply bg-neutral-50 text-primary-600;
+  @apply bg-gray-50 text-orange-600;
 }
 
 .agency-nav-item.active {
-  @apply bg-primary-50 text-primary-700 border border-primary-200;
+  @apply bg-orange-50 text-orange-700 border border-orange-200;
 }
 
 /* ===== HEADER STYLES ===== */

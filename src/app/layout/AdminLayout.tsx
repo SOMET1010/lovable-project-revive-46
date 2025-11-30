@@ -5,7 +5,6 @@ import {
   Users,
   Home,
   FileText,
-  CreditCard,
   AlertTriangle,
   Settings,
   Shield,

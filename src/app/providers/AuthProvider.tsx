@@ -72,10 +72,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: 'demo@montoit.ci',
           full_name: 'Utilisateur Démo',
           user_type: 'locataire',
+          active_role: 'locataire',
+          available_roles: ['locataire'],
           phone: '+225 XX XX XX XX',
+          avatar_url: null,
+          bio: null,
+          address: null,
+          city: null,
+          oneci_verified: false,
+          cnam_verified: false,
+          identity_verified: false,
+          is_verified: false,
+          profile_setup_completed: true,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
-        });
+        } as Profile);
         
         console.log('✅ Utilisateur démo initialisé');
       }, 1500);
@@ -84,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Mode production normal
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -94,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       (async () => {
         setSession(session);
         setUser(session?.user ?? null);

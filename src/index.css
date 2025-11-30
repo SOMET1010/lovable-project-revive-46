@@ -12,6 +12,9 @@
 /* Grid System - Grille responsive et espacement 8pt */
 @import './styles/grid-system.css';
 
+/* African WOW Factor Animations */
+@import './styles/african-wow-animations.css';
+
 @layer base {
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;

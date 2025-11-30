@@ -1,7 +1,8 @@
 import { supabase, handleQuery } from '../client';
 import type { Database } from '../../lib/database.types';
 
-type Application = Database['public']['Tables']['applications']['Row'];
+// Application type is used internally by Supabase query inference
+type _Application = Database['public']['Tables']['applications']['Row'];
 type ApplicationInsert = Database['public']['Tables']['applications']['Insert'];
 type ApplicationUpdate = Database['public']['Tables']['applications']['Update'];
 
@@ -40,7 +41,7 @@ export const applicationRepository = {
       return { data: [], error: null };
     }
 
-    const propertyIds = properties.map((p) => p.id);
+    const propertyIds = properties.map((p: { id: string }) => p.id);
 
     const query = supabase
       .from('applications')
@@ -90,7 +91,7 @@ export const applicationRepository = {
       return { data: 0, error: null };
     }
 
-    const propertyIds = properties.map((p) => p.id);
+    const propertyIds = properties.map((p: { id: string }) => p.id);
 
     const query = supabase
       .from('applications')

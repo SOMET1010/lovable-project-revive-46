@@ -38,8 +38,9 @@ export async function handleQuery<T>(
     return {
       data: null,
       error: {
+        name: 'UnknownError',
         message: error instanceof Error ? error.message : 'Unknown error occurred',
-        details: error instanceof Error ? error.stack : String(error),
+        details: error instanceof Error ? (error.stack || '') : String(error),
         hint: '',
         code: 'UNKNOWN_ERROR',
       },
@@ -146,14 +147,14 @@ export async function deleteFile(
 /**
  * Helper to call Edge Functions
  */
-export async function callEdgeFunction<TRequest = any, TResponse = unknown>(
+export async function callEdgeFunction<TResponse = unknown>(
   functionName: string,
-  body: TRequest
+  body: Record<string, unknown>
 ): Promise<{ data: TResponse | null; error: Error | null }> {
   try {
-    const { data, error } = await supabase.functions.invoke<TResponse>(functionName, {
-      body: body as any,
-    });
+    const { data, error } = await supabase.functions.invoke(functionName, {
+      body,
+    }) as { data: TResponse | null; error: Error | null };
 
     if (error) {
       console.error('Edge Function error:', error);

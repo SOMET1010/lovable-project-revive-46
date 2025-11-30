@@ -3,7 +3,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { useMessageNotifications } from '@/features/messaging';
 import { useState } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
-import ThemeToggle, { CompactThemeToggle } from '@/shared/ui/ThemeToggle';
+import ThemeToggle from '@/shared/ui/ThemeToggle';
 
 export default function SimplifiedHeader() {
   const { user, profile, signOut } = useAuth();
