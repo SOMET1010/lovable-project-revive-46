@@ -1,361 +1,280 @@
-# 🎯 Système de Gestion des Statuts de Candidatures
+# Module Applications - Système de Candidature Multi-Étapes
 
-## Vue d'ensemble
+Ce module fournit un système complet de candidature pour les locations immobilières avec un formulaire multi-étapes, validation côté client, upload de documents et sauvegarde automatique.
 
-Le système de gestion des statuts de candidatures est un ensemble complet de composants React qui permet de gérer le workflow et les transitions d'état des candidatures immobilières. Il respecte les standards WCAG AAA et s'intègre parfaitement dans le design system existant.
+## Composants
 
-## 📦 Composants
-
-### 1. StatusBadge
-Composant de base pour afficher un statut avec icône et couleur.
+### ApplicationForm
+Le composant principal qui orchestre l'ensemble du processus de candidature.
 
 ```tsx
-import { StatusBadge } from '@/components/applications';
+import { ApplicationForm } from '@/components/applications';
 
-<StatusBadge 
-  status="en_cours" 
-  size="md" 
-  showIcon={true} 
+<ApplicationForm
+  propertyId="property-123"
+  propertyTitle="Appartement 2 pièces - Paris 1er"
+  onSubmit={async (data, documents) => {
+    console.log('Candidature soumise:', data, documents);
+  }}
+  onSave={async (data) => {
+    console.log('Données sauvegardées:', data);
+  }}
+  autoSave={true}
+  autoSaveInterval={30000} // 30 secondes
 />
 ```
 
-**Props :**
-- `status: ApplicationStatus` - Le statut à afficher
-- `size?: 'sm' | 'md' | 'lg'` - Taille du badge
-- `showIcon?: boolean` - Afficher l'icône
-- `className?: string` - Classes CSS personnalisées
-
-### 2. ApplicationStatus
-Composant principal qui affiche le statut complet avec description et historique.
+### ApplicationProgress
+Barre de progression personnalisable avec différents formats.
 
 ```tsx
-import { ApplicationStatus } from '@/components/applications';
+import { ApplicationProgress } from '@/components/applications';
 
-<ApplicationStatus 
-  application={application}
-  showDescription={true}
-  showHistory={true}
-  onStatusClick={(status) => console.log(status)}
+// Format détaillé par défaut
+<ApplicationProgress 
+  currentStep={2} 
+  totalSteps={3} 
+  variant="detailed"
+/>
+
+// Format compact
+<ApplicationProgress 
+  currentStep={1} 
+  totalSteps={3} 
+  variant="compact"
 />
 ```
 
-**Props :**
-- `application: Application` - Objet candidature complet
-- `showDescription?: boolean` - Afficher la description
-- `showHistory?: boolean` - Afficher l'historique
-- `onStatusClick?: (status) => void` - Callback au clic
-
-### 3. StatusWorkflow
-Visualisation graphique du workflow avec progression.
+### ApplicationStep1
+Étape de saisie des informations personnelles.
 
 ```tsx
-import { StatusWorkflow } from '@/components/applications';
+import { ApplicationStep1, type ApplicationData } from '@/components/applications';
 
-<StatusWorkflow 
-  currentStatus="en_cours"
-  completedStatuses={['en_attente']}
+<ApplicationStep1
+  data={applicationData}
+  onChange={(data) => setApplicationData(prev => ({ ...prev, ...data }))}
+  onNext={() => console.log('Étape suivante')}
+  errors={{ firstName: 'Ce champ est requis' }}
+  loading={false}
 />
 ```
 
-**Props :**
-- `currentStatus: ApplicationStatus` - Statut actuel
-- `completedStatuses?: ApplicationStatus[]` - Statuts complétés
-- `className?: string` - Classes CSS personnalisées
-
-### 4. StatusHistory
-Affichage détaillé de l'historique des changements avec filtres.
+### ApplicationStep2
+Étape de téléchargement et gestion des documents.
 
 ```tsx
-import { StatusHistory } from '@/components/applications';
+import { ApplicationStep2, type DocumentFile } from '@/components/applications';
 
-<StatusHistory 
-  history={application.statusHistory}
-  showFilters={true}
-  maxVisibleItems={10}
+<ApplicationStep2
+  documents={documents}
+  onDocumentsChange={(docs) => setDocuments(docs)}
+  onNext={() => console.log('Étape suivante')}
+  onPrevious={() => console.log('Étape précédente')}
+  loading={false}
 />
 ```
 
-**Props :**
-- `history: StatusChange[]` - Liste des changements
-- `showFilters?: boolean` - Afficher les filtres
-- `maxVisibleItems?: number` - Nombre d'éléments visibles
-- `className?: string` - Classes CSS personnalisées
-
-### 5. StatusActions
-Actions contextuelles selon le statut et le rôle utilisateur.
+### ApplicationStep3
+Étape finale de validation et soumission.
 
 ```tsx
-import { StatusActions } from '@/components/applications';
+import { ApplicationStep3 } from '@/components/applications';
 
-<StatusActions
-  application={application}
-  userRole="proprietaire"
-  onStatusChange={handleStatusChange}
-  onCancel={handleCancel}
+<ApplicationStep3
+  applicationData={applicationData}
+  documents={documents}
+  onSubmit={async () => {
+    console.log('Soumission en cours...');
+  }}
+  onPrevious={() => console.log('Étape précédente')}
+  loading={false}
 />
 ```
 
-**Props :**
-- `application: Application` - Objet candidature
-- `userRole: UserRole` - Rôle de l'utilisateur
-- `onStatusChange: (status, reason?, comment?) => void` - Changement de statut
-- `onCancel?: () => void` - Callback d'annulation
-- `className?: string` - Classes CSS personnalisées
-
-## 🔄 Statuts Disponibles
-
-| Statut | Couleur | Description | Transitions |
-|--------|---------|-------------|-------------|
-| `en_attente` | Orange | Nouvelle candidature, en attente | `en_cours`, `annulee` |
-| `en_cours` | Bleu | En cours d'examen | `acceptee`, `refusee` |
-| `acceptee` | Vert | Acceptée, prête pour signature | - |
-| `refusee` | Rouge | Refusée avec motif | - |
-| `annulee` | Gris | Annulée par le candidat | - |
-
-## 🎨 Couleurs et Accessibilité
-
-Tous les composants respectent les contrastes WCAG AAA :
-
-- **Texte principal** : 16.5:1 de contraste
-- **Texte secondaire** : 8.6:1 de contraste
-- **Éléments interactifs** : Conforme AA Large
-- **Couleurs sémantiques** : Respect des standards (success, error, warning, info)
-
-## 🔧 Intégration
-
-### 1. Import des composants
+### ApplicationReview
+Aperçu des données avant soumission finale.
 
 ```tsx
-import {
-  ApplicationStatus,
-  StatusWorkflow,
-  StatusActions,
-  StatusHistory,
-  StatusBadge,
-  type Application,
-  type UserRole
-} from '@/components/applications';
+import { ApplicationReview } from '@/components/applications';
+
+<ApplicationReview
+  applicationData={applicationData}
+  documents={documents}
+  editable={true}
+/>
 ```
 
-### 2. Types TypeScript
+## Types de données
 
+### ApplicationData
 ```tsx
-interface Application {
+interface ApplicationData {
+  // Informations personnelles
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  nationality: string;
+  
+  // Adresse
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  
+  // Situation professionnelle
+  employmentStatus: 'employed' | 'self-employed' | 'unemployed' | 'retired' | 'student';
+  employerName?: string;
+  jobTitle?: string;
+  monthlyIncome?: number;
+  employmentDuration?: string;
+  
+  // Garant
+  hasGuarantor: boolean;
+  guarantorFirstName?: string;
+  guarantorLastName?: string;
+  guarantorEmail?: string;
+  guarantorPhone?: string;
+}
+```
+
+### DocumentFile
+```tsx
+interface DocumentFile {
   id: string;
-  candidateId: string;
-  propertyId: string;
-  status: ApplicationStatus;
-  statusHistory: StatusChange[];
-  submittedAt: Date;
-  updatedAt: Date;
-  currentStep?: number;
-  totalSteps?: number;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  uploadedAt: Date;
+  status: 'pending' | 'uploading' | 'uploaded' | 'error';
+  error?: string;
 }
 ```
 
-### 3. Gestion des transitions
+## Fonctionnalités
+
+### ✨ Gestion multi-étapes
+- Navigation fluide entre les étapes
+- Validation à chaque étape
+- Retour arrière possible
+
+### 📄 Upload de documents
+- Glisser-déposer de fichiers
+- Validation des types de fichiers (PDF, images)
+- Limitation de taille et nombre de fichiers
+- Prévisualisation des fichiers
+
+### 💾 Sauvegarde automatique
+- Sauvegarde locale (localStorage)
+- Sauvegarde sur serveur (via callback)
+- Intervalle configurable
+- Indicateur de sauvegarde
+
+### ✅ Validation
+- Validation côté client en temps réel
+- Messages d'erreur contextuels
+- Empêcher la navigation si données invalides
+
+### 📱 Responsive Design
+- Interface adaptative mobile/desktop
+- Compatible tous navigateurs
+- Accessibilité WCAG AAA
+
+### 🎨 Design System
+- Respect des design tokens MONTOIT
+- Couleurs et typographies cohérentes
+- Animations fluides
+- États interactifs (hover, focus, loading)
+
+## Configuration
+
+### Variables d'environnement
+- Aucun prérequis spécial
+
+### Dépendances
+- React 18+
+- TypeScript 4.5+
+- Tailwind CSS (déjà inclus dans le projet)
+
+## Exemple d'intégration complète
 
 ```tsx
-const handleStatusChange = async (
-  newStatus: ApplicationStatus,
-  reason?: string,
-  comment?: string
-) => {
-  // Appel API pour changer le statut
-  const response = await fetch('/api/applications/change-status', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      applicationId: application.id,
-      newStatus,
-      reason,
-      comment
-    })
-  });
+import React, { useState } from 'react';
+import { ApplicationForm, type ApplicationData, type DocumentFile } from '@/components/applications';
 
-  if (response.ok) {
-    // Mise à jour locale
-    setApplication(prev => ({
-      ...prev,
-      status: newStatus,
-      updatedAt: new Date(),
-      statusHistory: [
-        ...prev.statusHistory,
-        {
-          id: Date.now().toString(),
-          status: newStatus,
-          changedAt: new Date(),
-          changedBy: currentUser.id,
-          reason,
-          comment
-        }
-      ]
-    }));
-  }
-};
-```
+export function PropertyApplicationPage() {
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-### 4. Intégration avec les dashboards
-
-#### Dashboard Propriétaire
-```tsx
-const OwnerDashboard: React.FC = () => {
-  const [applications, setApplications] = useState<Application[]>([]);
-  
-  return (
-    <div className="space-y-6">
-      <h1>Mes Candidatures</h1>
+  const handleSubmit = async (data: ApplicationData, documents: DocumentFile[]) => {
+    try {
+      // Soumettre la candidature au backend
+      const response = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data, documents }),
+      });
       
-      {applications.map(application => (
-        <div key={application.id} className="p-4 rounded-lg border">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3>{application.propertyTitle}</h3>
-              <p>Candidat: {application.candidateName}</p>
-            </div>
-            <StatusBadge status={application.status} />
-          </div>
-          
-          <ApplicationStatus 
-            application={application}
-            showDescription={true}
-            showHistory={false}
-          />
-          
-          <StatusActions
-            application={application}
-            userRole="proprietaire"
-            onStatusChange={handleStatusChange}
-          />
-        </div>
-      ))}
-    </div>
-  );
-};
-```
+      if (response.ok) {
+        setIsSubmitted(true);
+      }
+    } catch (error) {
+      console.error('Erreur soumission:', error);
+    }
+  };
 
-#### Dashboard Candidat
-```tsx
-const CandidateDashboard: React.FC = () => {
-  const [myApplications, setMyApplications] = useState<Application[]>([]);
-  
+  const handleSave = async (data: Partial<ApplicationData>) => {
+    // Sauvegarde automatique
+    await fetch('/api/applications/draft', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="text-center py-16">
+        <h2 className="text-2xl font-bold text-neutral-900 mb-4">
+          Candidature soumise avec succès !
+        </h2>
+        <p className="text-neutral-600">
+          Vous recevrez un email de confirmation sous peu.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <h1>Mes Candidatures</h1>
-      
-      {myApplications.map(application => (
-        <div key={application.id} className="p-4 rounded-lg border">
-          <ApplicationStatus 
-            application={application}
-            showDescription={true}
-            showHistory={true}
-          />
-          
-          <StatusWorkflow 
-            currentStatus={application.status}
-            completedStatuses={getCompletedStatuses(application)}
-          />
-          
-          <StatusHistory 
-            history={application.statusHistory}
-            showFilters={true}
-          />
-          
-          <StatusActions
-            application={application}
-            userRole="candidat"
-            onStatusChange={handleStatusChange}
-          />
-        </div>
-      ))}
-    </div>
+    <ApplicationForm
+      propertyId="property-123"
+      propertyTitle="Appartement 2 pièces - Paris 1er"
+      onSubmit={handleSubmit}
+      onSave={handleSave}
+      autoSave={true}
+      autoSaveInterval={30000}
+    />
   );
-};
-```
-
-## 🚀 Fonctionnalités Avancées
-
-### 1. Notifications de changement
-```tsx
-// Utiliser avec un système de notifications
-useEffect(() => {
-  if (application.statusHistory.length > 0) {
-    const latest = application.statusHistory[0];
-    if (latest.changedBy !== currentUser.id) {
-      showNotification(
-        `Candidature ${latest.status}`,
-        `Statut mis à jour: ${latest.comment || latest.reason}`
-      );
-    }
-  }
-}, [application.statusHistory]);
-```
-
-### 2. Transitions automatisées
-```tsx
-// Workflow automatique basé sur le temps
-useEffect(() => {
-  if (application.status === 'en_attente') {
-    const timeInQueue = Date.now() - application.submittedAt.getTime();
-    const hoursInQueue = timeInQueue / (1000 * 60 * 60);
-    
-    if (hoursInQueue > 48) {
-      // Rappel automatique au propriétaire
-      sendReminderToOwner(application.id);
-    }
-  }
-}, [application.status, application.submittedAt]);
-```
-
-### 3. Validation des transitions
-```tsx
-const validateStatusTransition = (
-  currentStatus: ApplicationStatus,
-  newStatus: ApplicationStatus,
-  userRole: UserRole
-): boolean => {
-  const config = STATUS_CONFIGS[currentStatus];
-  return config.transitionTo?.includes(newStatus) || userRole === 'admin';
-};
-```
-
-## 🎯 Bonnes Pratiques
-
-1. **Cohérence visuelle** : Utilisez toujours les couleurs définies dans STATUS_CONFIGS
-2. **Accessibilité** : Testez avec des lecteurs d'écran
-3. **Performance** : Limitez le nombre d'éléments dans StatusHistory avec maxVisibleItems
-4. **UX** : Toujours demander confirmation pour les actions irréversibles
-5. **Audit** : Gardez un historique complet des changements
-
-## 🔗 Intégration API
-
-Les composants sont prêts pour une intégration avec votre backend :
-
-```typescript
-// Exemple d'endpoint pour changer de statut
-POST /api/applications/{id}/status
-{
-  "newStatus": "en_cours",
-  "reason": "Examen démarré",
-  "comment": "Documents en cours de vérification"
 }
 ```
 
-## 📱 Responsive
+## Accessibilité
 
-Tous les composants sont entièrement responsive :
-- StatusWorkflow s'adapte sur mobile
-- StatusHistory peut être réduit/étendu
-- StatusActions s'organise en grille sur desktop
-- Tous respectent les breakpoints définis dans le design system
+- Contrôles de formulaire entièrement accessibles (labels, descriptions, focus)
+- Navigation au clavier complète
+- Messages d'erreur announceés par les lecteurs d'écran
+- Contraste de couleurs conforme WCAG AAA
+- Animations respectueuses des préférences utilisateur
 
-## 🧪 Tests
+## Tests
 
-Les composants incluent :
-- Accessibilité avec ARIA labels
-- Responsive design
-- Transitions d'état fluides
-- Gestion d'erreurs
-- Validation des inputs
+Les composants incluent des attributs `aria-*` pour faciliter les tests d'accessibilité et d'automatisation.
 
-Le système est maintenant prêt à être intégré dans votre application !
+## Performance
+
+- Lazy loading des étapes
+- Optimisation des re-renders avec React.memo
+- Debouncing de la sauvegarde automatique
+- Compression des images uploadées (côté client)

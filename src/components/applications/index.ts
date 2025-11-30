@@ -1,20 +1,20 @@
-// Exports des composants de gestion des statuts de candidatures
-export { StatusBadge } from './StatusBadge';
-export { ApplicationStatusComponent as ApplicationStatus } from './ApplicationStatus';
-export { StatusWorkflow } from './StatusWorkflow';
-export { StatusHistory } from './StatusHistory';
-export { StatusActions } from './StatusActions';
+/**
+ * Exports pour le module Applications
+ */
 
-// Types et interfaces
-export type { 
-  ApplicationStatus, 
-  StatusChange, 
-  Application, 
-  UserRole, 
-  StatusAction 
-} from './types';
+export { ApplicationForm } from './ApplicationForm';
+export { ApplicationProgress } from './ApplicationProgress';
+export { ApplicationStep1 } from './ApplicationStep1';
+export { ApplicationStep2 } from './ApplicationStep2';
+export { ApplicationStep3 } from './ApplicationStep3';
+export { ApplicationReview } from './ApplicationReview';
+export { DemoApplication } from './DemoApplication';
 
-export { 
-  STATUS_CONFIGS, 
-  WORKFLOW_STEPS 
-} from './types';
+export type { ApplicationData } from './ApplicationStep1';
+export type { DocumentFile } from './ApplicationStep2';
+export type { ApplicationFormProps } from './ApplicationForm';
+export type { ApplicationProgressProps } from './ApplicationProgress';
+export type { ApplicationStep1Props } from './ApplicationStep1';
+export type { ApplicationStep2Props } from './ApplicationStep2';
+export type { ApplicationStep3Props } from './ApplicationStep3';
+export type { ApplicationReviewProps } from './ApplicationReview';

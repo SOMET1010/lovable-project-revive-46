@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-export { default as TenantDashboard } from './TenantDashboard';
-export { default as TenantApplicationsSection } from './sections/TenantApplicationsSection';
-=======
 /**
  * Tenant Dashboard - Exports
  * Refonte complète avec Modern Minimalism Premium
@@ -33,4 +29,3 @@ export type {
 // export { useTenantApplications } from './hooks/useTenantApplications';
 // export { useTenantVisits } from './hooks/useTenantVisits';
 // export { useTenantPayments } from './hooks/useTenantPayments';
->>>>>>> 179702229bfc197f668a7416e325de75b344681e

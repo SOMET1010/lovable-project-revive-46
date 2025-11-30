@@ -92,7 +92,103 @@ export interface PropertyFormData {
   images: File[];
 }
 
+// Notification types for applications
+export type NotificationType = 
+  | 'application_received'
+  | 'application_status_change'
+  | 'document_reminder'
+  | 'contract_deadline'
+  | 'new_message'
+  | 'payment_reminder'
+  | 'lease_expiry';
+
+export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export interface ApplicationNotification {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  read: boolean;
+  read_at: string | null;
+  action_url: string | null;
+  action_label: string | null;
+  metadata: {
+    property_id?: string;
+    application_id?: string;
+    contract_id?: string;
+    message_id?: string;
+    due_date?: string;
+    amount?: number;
+    document_type?: string;
+  };
+  priority: NotificationPriority;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NotificationSettings {
+  id: string;
+  user_id: string;
+  email_enabled: boolean;
+  push_enabled: boolean;
+  sound_enabled: boolean;
+  quiet_hours_enabled: boolean;
+  quiet_hours_start: string;
+  quiet_hours_end: string;
+  notification_types: {
+    [key in NotificationType]: {
+      email: boolean;
+      push: boolean;
+      sound: boolean;
+    };
+  };
+}
+
+export interface NotificationFilter {
+  type?: NotificationType;
+  priority?: NotificationPriority;
+  read?: boolean;
+  dateFrom?: string;
+  dateTo?: string;
+  limit?: number;
+  offset?: number;
+}
+
 // Utility types
 export type Nullable<T> = T | null;
 export type Optional<T> = T | undefined;
 export type AsyncFunction<T = void> = () => Promise<T>;
+
+// Re-export application types
+export type {
+  Application,
+  ApplicationStatus,
+  ApplicationStep,
+  DocumentType,
+  ApplicationScoreLevel,
+  ApplicationMetadata,
+  Document,
+  ApplicationScore,
+  ScoreFactor,
+  PersonalInfo,
+  Address,
+  EmergencyContact,
+  FinancialInfo,
+  CreditInfo,
+  CoApplicant,
+  Guarantees,
+  ApplicationNotification,
+  ApplicationFormData,
+  ApplicationFilters,
+  ApplicationPagination,
+  PaginatedApplications,
+  ApplicationStats,
+  ValidationErrors,
+  CreateApplicationResponse,
+  UpdateApplicationResponse,
+  UploadDocumentResponse,
+  UseApplicationsOptions,
+  UseApplicationsReturn,
+} from './application';
