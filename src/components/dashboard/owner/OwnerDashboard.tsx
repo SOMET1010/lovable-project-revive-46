@@ -24,6 +24,7 @@ import OwnerPropertiesSection from './sections/OwnerPropertiesSection';
 import OwnerTenantsSection from './sections/OwnerTenantsSection';
 import OwnerFinancesSection from './sections/OwnerFinancesSection';
 import OwnerMaintenanceSection from './sections/OwnerMaintenanceSection';
+import OwnerApplicationsSection from './sections/OwnerApplicationsSection';
 
 interface OwnerDashboardProps {
   userName?: string;
@@ -92,6 +93,8 @@ const OwnerDashboard: React.FC<OwnerDashboardProps> = ({
     switch (activeSection) {
       case 'properties':
         return <OwnerPropertiesSection />;
+      case 'applications':
+        return <OwnerApplicationsSection ownerId={1} ownerName={userName} />;
       case 'tenants':
         return <OwnerTenantsSection />;
       case 'finances':

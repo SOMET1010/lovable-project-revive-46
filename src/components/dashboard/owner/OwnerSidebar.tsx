@@ -39,6 +39,15 @@ const OwnerSidebar: React.FC<OwnerSidebarProps> = ({
       bgColor: 'bg-primary-50'
     },
     {
+      id: 'applications',
+      label: 'Candidatures',
+      icon: FileText,
+      description: 'Candidatures reçues',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      badge: '3'
+    },
+    {
       id: 'tenants',
       label: 'Locataires',
       icon: Users,

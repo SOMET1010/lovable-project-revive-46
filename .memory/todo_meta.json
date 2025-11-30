@@ -32,8 +32,8 @@
       "5": {
         "id": "5",
         "content": "Phase 4 - Features Transactionnelles",
-        "details": "1. Système de candidature\n2. Système de paiement\n3. Gestion des contrats\n4. Système de messagerie\n5. Gestion des litiges",
-        "status": "pending",
+        "details": "SYSTÈME DE CANDIDATURE COMPLET:\n1. Formulaire de candidature multi-étapes (informations personnelles, documents, validation)\n2. Gestion des statuts (en attente, en cours, acceptée, refusée)\n3. Notifications temps réel pour propriétaires et locataires\n4. Tableau de bord candidatures pour chaque rôle\n5. Intégration avec les dashboards existants (Tenant, Owner, Agency)\n\nSYSTÈMES ADDITIONNELS:\n- Système de paiement\n- Gestion des contrats\n- Système de messagerie\n- Gestion des litiges",
+        "status": "in_progress",
         "priority": "medium"
       },
       "6": {

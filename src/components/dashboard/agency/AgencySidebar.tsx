@@ -40,6 +40,15 @@ const AgencySidebar: React.FC<AgencySidebarProps> = ({
       bgColor: 'bg-primary-50'
     },
     {
+      id: 'applications',
+      label: 'Candidatures',
+      icon: FileText,
+      description: 'Gestion centralisée des candidatures',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50',
+      badge: '7'
+    },
+    {
       id: 'clients',
       label: 'Clients',
       icon: Users,

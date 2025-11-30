@@ -20,6 +20,7 @@ import AgencyPropertiesSection from './sections/AgencyPropertiesSection';
 import AgencyClientsSection from './sections/AgencyClientsSection';
 import AgencyTransactionsSection from './sections/AgencyTransactionsSection';
 import AgencyTeamSection from './sections/AgencyTeamSection';
+import AgencyApplicationsSection from './sections/AgencyApplicationsSection';
 
 interface AgencyDashboardProps {
   agencyName?: string;
@@ -91,6 +92,8 @@ const AgencyDashboard: React.FC<AgencyDashboardProps> = ({
     switch (activeSection) {
       case 'properties':
         return <AgencyPropertiesSection agencyName={agencyName} />;
+      case 'applications':
+        return <AgencyApplicationsSection agencyId={1} agencyName={agencyName} />;
       case 'clients':
         return <AgencyClientsSection />;
       case 'transactions':
