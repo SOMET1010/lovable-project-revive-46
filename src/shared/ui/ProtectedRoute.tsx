@@ -4,17 +4,28 @@ import { useAuthStore } from '@/stores/authStore';
 
 interface ProtectedRouteProps {
   children: ReactNode;
+  allowedRoles?: string[];
 }
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const navigate = useNavigate();
-  const { user, loading } = useAuthStore();
+  const { user, loading, profile } = useAuthStore();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/connexion', { replace: true });
     }
   }, [user, loading, navigate]);
+
+  // Check role-based access
+  useEffect(() => {
+    if (!loading && user && allowedRoles && allowedRoles.length > 0) {
+      const userRole = profile?.user_type || profile?.active_role;
+      if (userRole && !allowedRoles.includes(userRole)) {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [user, loading, profile, allowedRoles, navigate]);
 
   if (loading) {
     return (
