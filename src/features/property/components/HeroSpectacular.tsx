@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import '../../shared/styles/hero-troncature-fix.css';
 
 interface HeroSpectacularProps {
   onSearch: (city: string, type: string, price: string) => void;
@@ -49,7 +50,7 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
   }));
 
   return (
-    <section className="relative h-[500px] sm:h-[600px] bg-gray-900 overflow-hidden">
+    <section className="relative h-[500px] sm:h-[600px] bg-gray-900 overflow-hidden hero-overlay-enhanced">
       {/* Diaporama avec effet blur artistique */}
       {heroImages.map((image, index) => (
         <div
@@ -59,7 +60,7 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
           }`}
           style={{ backgroundImage: `url(${image})` }}
         >
-          <div className="absolute inset-0 bg-black/50"></div>
+          <div className="absolute inset-0 bg-black/70"></div>
         </div>
       ))}
 
@@ -93,7 +94,7 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
         <div className="w-full max-w-4xl">
           {/* Titre avec effet spectaculaire */}
           <div className="text-center mb-6 sm:mb-8 px-4 hero-glow-orange">
-            <h1 className="hero-title-spectacular text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 leading-tight">
+            <h1 className="hero-title-spectacular hero-text-enhanced text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 leading-tight">
               {titleVisible && title.split('').map((char, index) => (
                 <span
                   key={index}
@@ -104,7 +105,7 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
                 </span>
               ))}
             </h1>
-            <p className="hero-subtitle-spectacular text-base sm:text-lg md:text-2xl font-medium px-4">
+            <p className="hero-subtitle-spectacular hero-text-enhanced text-base sm:text-lg md:text-2xl font-medium px-4">
               {subtitle}
             </p>
           </div>
@@ -173,7 +174,7 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
               <div className="px-3 py-3 sm:py-2">
                 <button
                   type="submit"
-                  className="hero-button-ripple w-full sm:w-auto px-6 sm:px-10 py-3.5 sm:py-3 gradient-orange hover:shadow-orange-hover text-white font-semibold rounded-xl sm:rounded-full transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent min-h-[48px]"
+                  className="hero-button-ripple hero-button-enhanced w-full sm:w-auto px-6 sm:px-10 py-3.5 sm:py-3 gradient-orange hover:shadow-orange-hover text-white font-semibold rounded-xl sm:rounded-full transition-all duration-300 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-transparent min-h-[48px]"
                   aria-label="Lancer la recherche"
                 >
                   <Search className="h-5 w-5 hero-icon-animated" aria-hidden="true" />
@@ -203,12 +204,12 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
       </button>
 
       {/* Indicateurs premium */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
+      <div className="hero-slide-indicators">
         {heroImages.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`hero-indicator ${index === currentSlide ? 'active' : ''} focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-900 hover:scale-110 transition-transform duration-200`}
+            className={`hero-slide-indicator ${index === currentSlide ? 'active' : ''} focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-900 hover:scale-110 transition-transform duration-200`}
             aria-label={`Aller à la diapositive ${index + 1}`}
             aria-current={index === currentSlide ? 'true' : 'false'}
           />

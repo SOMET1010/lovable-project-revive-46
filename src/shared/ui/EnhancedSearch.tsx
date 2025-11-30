@@ -67,10 +67,10 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
 
   if (compact) {
     return (
-      <div className="glass-card rounded-2xl p-3">
-        <div className="flex items-center space-x-2">
-          <div className="flex-1 flex items-center bg-white/50 rounded-xl px-3 py-2">
-            <MapPin className="h-5 w-5 text-terracotta-500 mr-2" />
+      <div className="glass-card rounded-2xl p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 flex items-center bg-white/70 rounded-xl px-4 py-3 border-2 border-white/50 focus-within:border-terracotta-300 transition-colors">
+            <MapPin className="h-5 w-5 text-terracotta-500 mr-3 flex-shrink-0" />
             <input
               type="text"
               placeholder="Où cherchez-vous ?"
@@ -82,7 +82,7 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
           </div>
           <button
             onClick={handleSearch}
-            className="btn-primary px-4 py-2"
+            className="btn-primary px-6 py-3 flex items-center gap-2"
           >
             <Search className="h-5 w-5" />
           </button>
@@ -92,11 +92,11 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
   }
 
   return (
-    <div className="space-y-4">
-      <div className="glass-card rounded-3xl p-4">
-        <div className="flex flex-col md:flex-row items-stretch gap-3">
-          <div className="flex-1 flex items-center bg-white/70 rounded-2xl px-4 py-3 border-2 border-white/50 focus-within:border-terracotta-300 transition-colors">
-            <MapPin className="h-6 w-6 text-terracotta-500 mr-3 flex-shrink-0" />
+    <div className="space-y-6">
+      <div className="glass-card rounded-3xl p-6">
+        <div className="flex flex-col lg:flex-row items-stretch gap-4">
+          <div className="flex-1 flex items-center bg-white/80 rounded-2xl px-6 py-4 border-2 border-white/60 focus-within:border-terracotta-400 transition-all duration-300">
+            <MapPin className="h-6 w-6 text-terracotta-500 mr-4 flex-shrink-0" />
             <input
               type="text"
               placeholder="Ville ou quartier (ex: Cocody, Plateau...)"
@@ -109,7 +109,7 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
             {filters.city && (
               <button
                 onClick={() => setFilters({ ...filters, city: '' })}
-                className="ml-2 text-gray-400 hover:text-gray-600"
+                className="ml-3 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -123,10 +123,10 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
 
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`px-6 py-3 rounded-2xl font-semibold transition-all flex items-center space-x-2 ${
+            className={`px-8 py-4 rounded-2xl font-semibold transition-all flex items-center space-x-3 ${
               showAdvanced
-                ? 'bg-terracotta-500 text-white'
-                : 'bg-white/70 text-gray-700 hover:bg-white'
+                ? 'bg-terracotta-500 text-white shadow-lg'
+                : 'bg-white/80 text-gray-700 hover:bg-white border border-gray-200'
             }`}
           >
             <Filter className="h-5 w-5" />
@@ -135,24 +135,24 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
 
           <button
             onClick={handleSearch}
-            className="btn-primary flex items-center justify-center space-x-2 px-8"
+            className="btn-primary flex items-center justify-center space-x-3 px-10 py-4 text-lg font-semibold"
           >
             <Search className="h-6 w-6" />
-            <span className="text-lg">Rechercher</span>
+            <span>Rechercher</span>
           </button>
         </div>
 
         {showAdvanced && (
-          <div className="mt-4 pt-4 border-t border-white/30">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <div className="mt-6 pt-6 border-t border-white/40">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-gray-800 mb-2">
                   Type de bien
                 </label>
                 <select
                   value={filters.propertyType}
                   onChange={(e) => setFilters({ ...filters, propertyType: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-white/70 border-2 border-white/50 focus:border-terracotta-300 focus:outline-none"
+                  className="w-full px-5 py-4 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
                 >
                   <option value="">Tous les types</option>
                   <option value="appartement">Appartement</option>
@@ -162,46 +162,46 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-gray-800 mb-2">
                   Prix minimum (FCFA)
                 </label>
                 <div className="relative">
-                  <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Coins className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="number"
                     placeholder="Ex: 100000"
                     value={filters.minPrice}
                     onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/70 border-2 border-white/50 focus:border-terracotta-300 focus:outline-none"
+                    className="w-full pl-12 pr-5 py-4 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-gray-800 mb-2">
                   Prix maximum (FCFA)
                 </label>
                 <div className="relative">
-                  <Coins className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Coins className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                   <input
                     type="number"
                     placeholder="Ex: 500000"
                     value={filters.maxPrice}
                     onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/70 border-2 border-white/50 focus:border-terracotta-300 focus:outline-none"
+                    className="w-full pl-12 pr-5 py-4 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-gray-800 mb-2">
                   Chambres minimum
                 </label>
                 <select
                   value={filters.bedrooms}
                   onChange={(e) => setFilters({ ...filters, bedrooms: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl bg-white/70 border-2 border-white/50 focus:border-terracotta-300 focus:outline-none"
+                  className="w-full px-5 py-4 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
                 >
                   <option value="">Peu importe</option>
                   <option value="1">1+ chambre</option>
@@ -216,63 +216,69 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
       </div>
 
       {showQuickFilters && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {profile?.user_type === 'locataire' && recentSearches.length > 0 && (
-            <div className="flex items-center space-x-2">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              <span className="text-sm font-medium text-gray-600">Recherches récentes:</span>
-              <div className="flex flex-wrap gap-2">
-                {recentSearches.slice(0, 3).map((search, i) => (
-                  <button
-                    key={i}
-                    onClick={() => {
-                      setFilters({ ...filters, city: search });
-                      handleSearch();
-                    }}
-                    className="px-3 py-1 bg-white rounded-full text-sm text-gray-700 hover:bg-terracotta-50 hover:text-terracotta-700 transition-colors border border-gray-200"
-                  >
-                    {search}
-                  </button>
-                ))}
+            <div className="flex items-start space-x-3 p-4 bg-white/60 rounded-2xl border border-white/40">
+              <Sparkles className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <span className="text-sm font-semibold text-gray-800">Recherches récentes:</span>
+                <div className="flex flex-wrap gap-3 mt-2">
+                  {recentSearches.slice(0, 3).map((search, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        setFilters({ ...filters, city: search });
+                        handleSearch();
+                      }}
+                      className="px-4 py-2 bg-white rounded-full text-sm text-gray-700 hover:bg-terracotta-50 hover:text-terracotta-700 transition-colors border border-gray-200 font-medium"
+                    >
+                      {search}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
 
-          <div className="flex items-center space-x-2">
-            <MapPin className="h-4 w-4 text-cyan-500" />
-            <span className="text-sm font-medium text-gray-600">Villes populaires:</span>
-            <div className="flex flex-wrap gap-2">
-              {quickCities.map((city) => (
-                <button
-                  key={city}
-                  onClick={() => {
-                    setFilters({ ...filters, city });
-                    handleSearch();
-                  }}
-                  className="px-3 py-1 bg-white rounded-full text-sm text-gray-700 hover:bg-cyan-50 hover:text-cyan-700 transition-colors border border-gray-200"
-                >
-                  {city}
-                </button>
-              ))}
+          <div className="flex items-start space-x-3 p-4 bg-white/60 rounded-2xl border border-white/40">
+            <MapPin className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <span className="text-sm font-semibold text-gray-800">Villes populaires:</span>
+              <div className="flex flex-wrap gap-3 mt-2">
+                {quickCities.map((city) => (
+                  <button
+                    key={city}
+                    onClick={() => {
+                      setFilters({ ...filters, city });
+                      handleSearch();
+                    }}
+                    className="px-4 py-2 bg-white rounded-full text-sm text-gray-700 hover:bg-cyan-50 hover:text-cyan-700 transition-colors border border-gray-200 font-medium"
+                  >
+                    {city}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <Coins className="h-4 w-4 text-green-500" />
-            <span className="text-sm font-medium text-gray-600">Gammes de prix:</span>
-            <div className="flex flex-wrap gap-2">
-              {quickPriceRanges.map((range) => (
-                <button
-                  key={range.label}
-                  onClick={() => {
-                    setFilters({ ...filters, minPrice: range.min, maxPrice: range.max });
-                    handleSearch();
-                  }}
-                  className="px-3 py-1 bg-white rounded-full text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors border border-gray-200"
-                >
-                  {range.label}
-                </button>
-              ))}
+          <div className="flex items-start space-x-3 p-4 bg-white/60 rounded-2xl border border-white/40">
+            <Coins className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <span className="text-sm font-semibold text-gray-800">Gammes de prix:</span>
+              <div className="flex flex-wrap gap-3 mt-2">
+                {quickPriceRanges.map((range) => (
+                  <button
+                    key={range.label}
+                    onClick={() => {
+                      setFilters({ ...filters, minPrice: range.min, maxPrice: range.max });
+                      handleSearch();
+                    }}
+                    className="px-4 py-2 bg-white rounded-full text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors border border-gray-200 font-medium"
+                  >
+                    {range.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

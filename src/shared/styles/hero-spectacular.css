@@ -8,26 +8,31 @@
    ======================================== */
 
 .hero-title-spectacular {
+  /* Gradient avec contraste renforcé pour WCAG AA */
   background: linear-gradient(135deg, 
-    #ffffff 0%, 
-    var(--color-primary-50) 25%,
-    var(--color-primary-100) 50%,
-    var(--color-primary-700) 75%,
-    var(--color-primary-500) 100%
+    #ffffff 0%,           /* Blanc pur pour contraste maximal */
+    #f8fafc 25%,          /* Gris très clair */
+    #e2e8f0 50%,          /* Gris clair */
+    #1e293b 75%,          /* Gris foncé pour contraste */
+    #0f172a 100%          /* Gris très foncé */
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-fill-color: transparent;
   
-  /* Multi-layer text shadow pour profondeur */
-  filter: drop-shadow(0 0 30px rgba(var(--color-primary-500), 0.5))
-          drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3))
-          drop-shadow(0 8px 40px rgba(var(--color-primary-500), 0.2));
+  /* Ombres renforcées pour lisibilité sur tous backgrounds */
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.8))
+          drop-shadow(0 4px 16px rgba(0, 0, 0, 0.6))
+          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.4));
   
   /* Animation subtile de brillance */
   animation: hero-shine 3s ease-in-out infinite;
   background-size: 200% 200%;
+  
+  /* Fallback pour le contraste */
+  color: #ffffff;
+  font-weight: 700;
 }
 
 @keyframes hero-shine {
@@ -40,11 +45,16 @@
 }
 
 .hero-subtitle-spectacular {
-  color: rgba(255, 255, 255, 0.95);
+  /* Contraste WCAG AA compliant */
+  color: #ffffff;
   text-shadow: 
-    0 2px 10px rgba(0, 0, 0, 0.3),
-    0 4px 20px rgba(var(--color-primary-500), 0.2),
-    0 0 40px rgba(var(--color-primary-500), 0.1);
+    0 2px 8px rgba(0, 0, 0, 0.9),      /* Ombre plus forte */
+    0 4px 16px rgba(0, 0, 0, 0.7),      /* Ombre medium */
+    0 0 32px rgba(0, 0, 0, 0.5);        /* Ombre subtile */
+  
+  /* Amélioration de la lisibilité */
+  font-weight: 600;
+  letter-spacing: 0.025em;
   
   /* Effet glow subtil */
   animation: hero-glow 2s ease-in-out infinite alternate;
@@ -247,20 +257,22 @@
   inset: 0;
   background: radial-gradient(circle at center,
     transparent 0%,
-    transparent 40%,
-    rgba(0, 0, 0, 0.3) 100%
+    transparent 20%,
+    rgba(0, 0, 0, 0.4) 70%,   /* Assombrissement plus fort */
+    rgba(0, 0, 0, 0.8) 100%   /* Bordures très sombres */
   );
   pointer-events: none;
 }
 
-/* Vignette cinématique */
+/* Vignette cinématique renforcée pour contraste */
 .hero-vignette {
   position: absolute;
   inset: 0;
   background: radial-gradient(ellipse at center,
     transparent 0%,
-    transparent 50%,
-    rgba(0, 0, 0, 0.4) 100%
+    transparent 30%,
+    rgba(0, 0, 0, 0.3) 60%,
+    rgba(0, 0, 0, 0.7) 100%    /* Assombrissement renforcé */
   );
   pointer-events: none;
   z-index: 2;
@@ -350,12 +362,15 @@
 @media (max-width: 640px) {
   .hero-title-spectacular {
     animation: none;
+    font-size: clamp(1.5rem, 5vw, 3rem) !important;
+    line-height: 1.1 !important;
     filter: drop-shadow(0 0 20px rgba(var(--color-primary-500), 0.4))
             drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
   }
   
   .hero-subtitle-spectacular {
     animation: none;
+    font-size: clamp(0.875rem, 3vw, 1.25rem) !important;
   }
   
   .hero-particles,
@@ -365,6 +380,15 @@
   
   .hero-glow-orange::before {
     display: none;
+  }
+  
+  /* Correction troncature statistiques */
+  .hero-text-enhanced {
+    font-size: clamp(2rem, 8vw, 4rem) !important;
+    line-height: 1.1 !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 100% !important;
   }
 }
 
@@ -389,7 +413,90 @@
 }
 
 /* ========================================
-   7. DARK MODE SUPPORT
+   7. AMÉLIORATIONS LISIBILITÉ & CONTRASTE
+   ======================================== */
+
+/* Classe pour renforcer le contraste du texte hero */
+.hero-text-enhanced {
+  /* Contraste maximal WCAG AAA (7:1) */
+  color: #ffffff;
+  text-shadow: 
+    0 2px 4px rgba(0, 0, 0, 1),        /* Ombre noire forte */
+    0 4px 8px rgba(0, 0, 0, 0.9),      /* Ombre medium forte */
+    0 0 20px rgba(0, 0, 0, 0.8);       /* Glow sombre */
+  
+  /* Amélioration de la lisibilité */
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+/* Contraste renforcé pour les éléments interactifs */
+.hero-button-enhanced {
+  /* Background avec contraste renforcé */
+  background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),     /* Ombre forte */
+    0 2px 4px rgba(255, 107, 53, 0.4); /* Glow orange */
+  
+  /* États focus avec contraste renforcé */
+}
+
+.hero-button-enhanced:focus {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 0 0 4px rgba(255, 255, 255, 0.3);
+}
+
+/* Overlay renforcé pour les zones problématiques */
+.hero-overlay-enhanced {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.4) 0%,    /* Sombre en haut */
+    rgba(0, 0, 0, 0.6) 50%,   /* Plus sombre au centre */
+    rgba(0, 0, 0, 0.8) 100%   /* Très sombre en bas */
+  );
+}
+
+/* Amélioration des indicateurs de slide */
+.hero-indicator-enhanced {
+  background: rgba(255, 255, 255, 0.8);  /* Plus opaque */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  min-width: 12px !important;
+  min-height: 12px !important;
+  max-width: 32px !important;
+  max-height: 12px !important;
+}
+
+.hero-indicator-enhanced.active {
+  background: linear-gradient(90deg, #FF6B35 0%, #E55A2B 100%);
+  border-color: #ffffff;
+  box-shadow: 
+    0 0 12px rgba(255, 107, 53, 0.6),
+    0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Correction des boutons circulaires tronqués */
+@media (max-width: 640px) {
+  .hero-indicator {
+    min-width: 10px !important;
+    min-height: 10px !important;
+    max-width: 28px !important;
+    max-height: 10px !important;
+  }
+  
+  .hero-indicator.active {
+    max-width: 24px !important;
+  }
+}
+
+/* ========================================
+   8. DARK MODE SUPPORT
    ======================================== */
 
 @media (prefers-color-scheme: dark) {

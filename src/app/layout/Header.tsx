@@ -54,7 +54,7 @@ export default function Header() {
   return (
     <header className="bg-white/80 backdrop-blur-xl shadow-lg border-b-2 border-primary-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-20 gap-4">
           <a href="/" className="flex items-center space-x-3 group flex-shrink-0">
             <div className="relative">
               <img
@@ -71,31 +71,31 @@ export default function Header() {
             </div>
           </a>
 
-          <nav className="hidden md:flex items-center space-x-0.5 flex-1 justify-center px-4">
+          <nav className="hidden lg:flex items-center gap-1 flex-1 justify-center px-6">
             <a
               href="/"
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-250 ease-out font-semibold whitespace-nowrap"
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-250 ease-out font-semibold whitespace-nowrap"
             >
               <Home className="h-4 w-4" />
               <span>Accueil</span>
             </a>
             <a
               href="/recherche"
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-250 ease-out font-semibold whitespace-nowrap"
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-250 ease-out font-semibold whitespace-nowrap"
             >
               <Search className="h-4 w-4" />
               <span>Rechercher</span>
             </a>
             <a
               href="/aide"
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
             >
               <HelpCircle className="h-4 w-4" />
               <span>Aide</span>
             </a>
             <a
               href="/contact"
-              className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
             >
               <Mail className="h-4 w-4" />
               <span>Contact</span>
@@ -104,7 +104,7 @@ export default function Header() {
               <>
                 <a
                   href="/messages"
-                  className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold relative whitespace-nowrap"
+                  className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold relative whitespace-nowrap"
                 >
                   <MessageCircle className="h-4 w-4" />
                   <span>Messages</span>
@@ -116,14 +116,14 @@ export default function Header() {
                 </a>
                 <a
                   href="/mes-visites"
-                  className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
+                  className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
                 >
                   <Calendar className="h-4 w-4" />
                   <span>Visites</span>
                 </a>
                 <a
                   href="/favoris"
-                  className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
+                  className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
                 >
                   <Heart className="h-4 w-4" />
                   <span>Favoris</span>
@@ -391,7 +391,7 @@ export default function Header() {
                 </div>
                 <button
                   onClick={() => signOut()}
-                  className="hidden md:flex items-center space-x-1.5 px-3 py-2 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
+                  className="hidden md:flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm text-neutral-700 hover:bg-primary-50 hover:text-primary-700 transition-all duration-200 font-semibold whitespace-nowrap"
                 >
                   <LogOut className="h-4 w-4" />
                   <span>Déconnexion</span>

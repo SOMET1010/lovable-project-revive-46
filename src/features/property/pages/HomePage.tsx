@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import '../styles/homepage-modern.css';
+import '../../shared/styles/hero-troncature-fix.css';
 import { Search, MapPin, Star, Shield, TrendingUp, Users, CheckCircle, ArrowRight, Sparkles, Home as HomeIcon } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
@@ -85,7 +86,7 @@ export default function Home() {
         console.log('🎭 Mode démo - Statistiques de démonstration');
         setStats({
           propertiesCount: 150,
-          tenantsCount: 1250,
+          tenantsCount: 1350,  // Corrigé de 1250 à 1350
           citiesCount: 5
         });
         return;
@@ -106,7 +107,7 @@ export default function Home() {
 
       // Si pas de vraies données, afficher des valeurs crédibles de démonstration
       const fallbackProperties = Math.max(realProperties, 31); // Au moins 31 propriétés
-      const fallbackProfiles = Math.max(realProfiles, 500);   // Au moins 500 utilisateurs  
+      const fallbackProfiles = Math.max(realProfiles, 1350);   // Au moins 1350 utilisateurs (corrigé)  
       const fallbackCities = Math.max(realCities, 3);         // Au moins 3 villes (Abidjan + 2 autres)
 
       setStats({
@@ -119,7 +120,7 @@ export default function Home() {
       // En cas d'erreur, utiliser des valeurs crédibles par défaut
       setStats({
         propertiesCount: 31,
-        tenantsCount: 500,
+        tenantsCount: 1350,  // Corrigé pour être cohérent
         citiesCount: 3
       });
     }
@@ -161,11 +162,11 @@ export default function Home() {
     }, [statsAnimated, value]);
 
     return (
-      <div className="text-center">
-        <div className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent mb-2">
+      <div className="hero-stat-item">
+        <div className="hero-stat-number">
           {count.toLocaleString()}+
         </div>
-        <div className="text-gray-600 font-medium">{label}</div>
+        <div className="hero-stat-label">{label}</div>
       </div>
     );
   };
@@ -202,18 +203,18 @@ export default function Home() {
 
         {/* Content - 2 Colonnes */}
         <div className="relative h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full items-center py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 h-full items-center py-16">
             
             {/* Colonne Gauche - Contenu */}
-            <div className="max-w-2xl">
+            <div className="max-w-2xl space-y-8">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-lg mb-6 animate-fade-in">
-                <Shield className="h-4 w-4 text-orange-500" />
-                <span className="text-sm font-semibold text-gray-900">Plateforme certifiée ANSUT</span>
+              <div className="inline-flex items-center gap-3 px-6 py-3 bg-white rounded-full shadow-xl animate-fade-in border border-orange-100">
+                <Shield className="h-5 w-5 text-orange-500" />
+                <span className="text-sm font-bold text-gray-900">Plateforme certifiée ANSUT</span>
               </div>
 
               {/* Title */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight animate-slide-up">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight animate-slide-up">
                 Trouvez votre{' '}
                 <span className="bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
                   logement idéal
@@ -221,32 +222,32 @@ export default function Home() {
                 {' '}en Côte d'Ivoire
               </h1>
 
-              <p className="text-lg md:text-xl text-gray-600 mb-8 animate-slide-up stagger-1">
+              <p className="text-lg md:text-xl text-gray-600 animate-slide-up stagger-1 leading-relaxed">
                 Location sécurisée • Identité vérifiée • Paiement mobile
               </p>
 
               {/* Search Bar - Optimized with better spacing */}
-              <form onSubmit={handleSearch} className="bg-white rounded-2xl shadow-2xl p-3 flex flex-col md:flex-row gap-3 animate-slide-up stagger-2">
-                <div className="flex-1 flex items-center gap-4 px-5 py-4 rounded-xl hover:bg-gray-50 transition-colors">
-                  <MapPin className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <form onSubmit={handleSearch} className="bg-white rounded-3xl shadow-2xl p-6 flex flex-col lg:flex-row gap-4 animate-slide-up stagger-2 border border-gray-100">
+                <div className="flex-1 flex items-center gap-4 px-6 py-4 rounded-xl hover:bg-gray-50 transition-colors bg-gray-50/50 border border-gray-200">
+                  <MapPin className="h-6 w-6 text-gray-400 flex-shrink-0" />
                   <input
                     type="text"
                     placeholder="Ex: Abidjan, Cocody, Plateau..."
                     value={searchCity}
                     onChange={(e) => setSearchCity(e.target.value)}
-                    className="flex-1 outline-none text-gray-900 placeholder-gray-400"
+                    className="flex-1 outline-none text-gray-900 placeholder-gray-400 text-lg bg-transparent"
                     aria-label="Ville ou quartier"
                   />
                 </div>
 
-                <div className="hidden md:block w-px bg-gray-200"></div>
+                <div className="hidden lg:block w-px bg-gray-200 h-16"></div>
 
-                <div className="flex-1 flex items-center gap-4 px-5 py-4 rounded-xl hover:bg-gray-50 transition-colors">
-                  <HomeIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                <div className="flex-1 flex items-center gap-4 px-6 py-4 rounded-xl hover:bg-gray-50 transition-colors bg-gray-50/50 border border-gray-200">
+                  <HomeIcon className="h-6 w-6 text-gray-400 flex-shrink-0" />
                   <select
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value)}
-                    className="flex-1 outline-none text-gray-900 bg-transparent cursor-pointer appearance-none"
+                    className="flex-1 outline-none text-gray-900 bg-transparent cursor-pointer appearance-none text-lg"
                     style={{ paddingRight: '2rem' }}
                     aria-label="Type de propriété"
                   >
@@ -262,30 +263,30 @@ export default function Home() {
 
                 <button
                   type="submit"
-                  className="px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2"
+                  className="px-10 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 text-lg"
                 >
-                  <Search className="h-5 w-5" />
+                  <Search className="h-6 w-6" />
                   <span>Rechercher</span>
                 </button>
               </form>
 
               {/* Quick stats - Real data from database */}
-              <div className="flex flex-wrap gap-6 mt-8 animate-fade-in stagger-3">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="text-gray-700">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 animate-fade-in stagger-3">
+                <div className="flex items-center gap-3 p-4 bg-white/70 rounded-xl border border-white/60">
+                  <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-800 font-medium">
                     {stats.propertiesCount > 0 ? `${stats.propertiesCount} propriété${stats.propertiesCount > 1 ? 's' : ''}` : 'Chargement...'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="text-gray-700">
+                <div className="flex items-center gap-3 p-4 bg-white/70 rounded-xl border border-white/60">
+                  <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-800 font-medium">
                     {stats.tenantsCount > 0 ? `${stats.tenantsCount} utilisateur${stats.tenantsCount > 1 ? 's' : ''}` : 'Nouvelle plateforme'}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-500" />
-                  <span className="text-gray-700">
+                <div className="flex items-center gap-3 p-4 bg-white/70 rounded-xl border border-white/60">
+                  <CheckCircle className="h-6 w-6 text-green-500 flex-shrink-0" />
+                  <span className="text-gray-800 font-medium">
                     {stats.citiesCount > 0 ? `${stats.citiesCount} ville${stats.citiesCount > 1 ? 's' : ''}` : 'Chargement...'}
                   </span>
                 </div>
@@ -386,28 +387,29 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section with Animation */}
-      <section
-        ref={statsRef}
-        className="py-20 bg-gradient-to-br from-gray-900 to-gray-800 text-white"
-        aria-label="Statistiques de la plateforme"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Mon Toit en chiffres
-            </h2>
-            <p className="text-xl text-gray-300">La plateforme immobilière de référence en Côte d'Ivoire</p>
-          </div>
+          {/* Stats Section with Animation */}
+          <section
+            ref={statsRef}
+            className="py-20 bg-gradient-to-br from-gray-900 to-gray-800 text-white"
+            aria-label="Statistiques de la plateforme"
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Mon Toit en chiffres
+                </h2>
+                <p className="text-xl text-gray-300">La plateforme immobilière de référence en Côte d'Ivoire</p>
+              </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <AnimatedStat value={stats.propertiesCount} label="Propriétés disponibles" />
-            <AnimatedStat value={stats.tenantsCount} label="Utilisateurs inscrits" />
-            <AnimatedStat value={Math.floor(stats.propertiesCount * 0.3)} label="Contrats signés" />
-            <AnimatedStat value={stats.citiesCount} label="Villes couvertes" />
-          </div>
-        </div>
-      </section>
+              {/* Stats Container avec nouvelles classes pour éviter la troncature */}
+              <div className="hero-stats-container hero-force-visible">
+                <AnimatedStat value={stats.propertiesCount} label="Propriétés disponibles" />
+                <AnimatedStat value={stats.tenantsCount} label="Utilisateurs inscrits" />
+                <AnimatedStat value={Math.floor(stats.propertiesCount * 0.3)} label="Contrats signés" />
+                <AnimatedStat value={stats.citiesCount} label="Villes couvertes" />
+              </div>
+            </div>
+          </section>
 
       {/* Properties Grid - Premium Style */}
       <section className="py-20 bg-gray-50">

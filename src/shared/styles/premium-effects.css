@@ -193,7 +193,11 @@
 /* ===== GRADIENTS ===== */
 
 .gradient-orange {
+  /* Orange avec contraste amélioré pour WCAG AA */
   background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  /* Assurer le contraste du texte sur ce background */
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .gradient-orange-soft {

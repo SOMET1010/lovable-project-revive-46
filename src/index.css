@@ -198,3 +198,16 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   will-change: transform;
 }
+
+/* ========================================
+   IMPORTS DES CORRECTIONS HERO ALIGNMENT
+   ======================================== */
+
+/* Corrections d'alignement et d'espacement de la section hero */
+@import './shared/styles/hero-alignment-fix.css';
+
+/* Standardisation des boutons et éléments UI */
+@import './shared/styles/ui-standardization.css';
+
+/* Styles hero spectacular existants */
+@import './shared/styles/hero-spectacular.css';
