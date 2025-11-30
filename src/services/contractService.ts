@@ -277,4 +277,5 @@ export const contractService = {
     if (Math.random() < 0.05) {
       throw new Error('Contract generation timeout');
     }
-  },
+  }
+}
