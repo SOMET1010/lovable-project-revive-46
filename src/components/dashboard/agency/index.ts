@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // Agency Dashboard Components - Export Barrel
 // Main dashboard pour la gestion d'agences immobilières
 
@@ -202,3 +203,23 @@ export interface AgencySidebarProps {
 export interface AgencyPropertiesSectionProps {
   agencyName: string;
 }
+=======
+/**
+ * Agency Dashboard - Exports
+ * Modern Minimalism Premium
+ */
+
+export { AgencyDashboard } from './AgencyDashboard';
+export { AgencyHeader } from './AgencyHeader';
+export { AgencySidebar } from './AgencySidebar';
+
+// Sections
+export { AgencyStatsSection } from './sections/AgencyStatsSection';
+export { AgencyPropertiesSection } from './sections/AgencyPropertiesSection';
+export { AgencyClientsSection } from './sections/AgencyClientsSection';
+export { AgencyTeamSection } from './sections/AgencyTeamSection';
+export { AgencySalesSection } from './sections/AgencySalesSection';
+
+// Types
+export type { AgencyDashboardData } from './AgencyDashboard';
+>>>>>>> 179702229bfc197f668a7416e325de75b344681e

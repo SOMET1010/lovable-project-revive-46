@@ -1,0 +1,269 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === SYSTÈME DE DESIGN GLOBAL ===
+   Import des styles globaux unifiés
+   Performance optimisée et cohérence garantie */
+
+/* Design System - Variables CSS centralisées */
+@import './styles/design-system.css';
+
+/* Grid System - Grille responsive et espacement 8pt */
+@import './styles/grid-system.css';
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--color-background-surface);
+  }
+
+  * {
+    cursor: inherit;
+  }
+}
+
+@layer components {
+  .custom-cursor {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23e86244" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'), auto;
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+  }
+
+  .btn-primary {
+    background-color: var(--button-primary-bg);
+    color: var(--button-primary-color);
+    font-weight: var(--button-primary-font-weight);
+    padding: var(--spacing-3) var(--spacing-6);
+    border-radius: var(--button-primary-radius);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-base);
+    border: none;
+    cursor: pointer;
+    height: var(--button-primary-height);
+    font-size: var(--button-primary-font-size);
+  }
+
+  .btn-primary:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: var(--button-primary-transform);
+    background-color: var(--button-primary-bg-hover);
+  }
+
+  .btn-secondary {
+    background-color: #FFFFFF;
+    border: 2px solid var(--color-primary-500);
+    color: var(--color-primary-500);
+    font-weight: var(--font-weight-semibold);
+    padding: var(--spacing-3) var(--spacing-6);
+    border-radius: var(--border-radius-lg);
+    background-color: rgba(255, 107, 47, 0.05);
+    transition: all var(--animation-duration-base) var(--animation-easing-ease-out);
+    cursor: pointer;
+  }
+
+  .btn-secondary:hover {
+    transform: scale(1.05);
+    background-color: rgba(255, 107, 47, 0.1);
+  }
+
+  .card-scrapbook {
+    background-color: var(--color-background-page);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-base);
+    transition: all 500ms var(--animation-easing-ease-out);
+    cursor: pointer;
+  }
+
+  .card-scrapbook:hover {
+    box-shadow: var(--shadow-xl);
+    transform: rotate(-1deg) scale(1.05);
+  }
+
+  /* Gradients standardisés avec variables CSS */
+  .text-gradient {
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Gradient hero optimisé performance */
+  .hero-gradient {
+    background: linear-gradient(135deg, 
+      var(--color-primary-50) 0%, 
+      var(--color-primary-100) 25%, 
+      var(--color-primary-500) 50%, 
+      var(--color-primary-600) 75%, 
+      var(--color-primary-900) 100%
+    );
+  }
+
+  /* Gradient surface pour cartes */
+  .surface-gradient {
+    background: linear-gradient(145deg, 
+      var(--bg-secondary) 0%, 
+      var(--bg-primary) 100%
+    );
+  }
+
+  .badge-glow {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--spacing-1) var(--spacing-3);
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 5px var(--color-primary-500);
+    }
+    to {
+      box-shadow: 0 0 20px var(--color-primary-500), 0 0 30px var(--color-primary-500);
+    }
+  }
+}
+
+@layer utilities {
+  @keyframes scale-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.3s ease-out;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.5s ease-out;
+  }
+
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+  }
+}
+
+/* ========================================
+   OPTIMISATIONS PERFORMANCE GLOBALES
+   ======================================== */
+
+/* GPU acceleration pour animations critiques */
+.optimized-animation {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Réduction des repaints */
+.gpu-accelerated {
+  transform: translate3d(0, 0, 0);
+  will-change: auto;
+}
+
+/* Prefetch des fonts critiques */
+@font-face {
+  font-family: 'Inter';
+  font-display: swap;
+  src: local('Inter'), local('Inter Regular');
+}
+
+/* Performance des images */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimize-contrast;
+}
+
+/* Mapbox GL Styles */
+.mapboxgl-map {
+  font-family: inherit;
+}
+
+.mapboxgl-ctrl-group button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.mapboxgl-ctrl-icon {
+  display: inline-block !important;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+}
+
+.mapboxgl-ctrl button.mapboxgl-ctrl-zoom-in .mapboxgl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29'%3E%3Cpath d='M14.5 8.5c-.75 0-1.5.75-1.5 1.5v3h-3c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h3v3c0 .75.75 1.5 1.5 1.5S16 19.75 16 19v-3h3c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-3v-3c0-.75-.75-1.5-1.5-1.5z'/%3E%3C/svg%3E") !important;
+}
+
+.mapboxgl-ctrl button.mapboxgl-ctrl-zoom-out .mapboxgl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29'%3E%3Cpath d='M10 13c-.75 0-1.5.75-1.5 1.5S9.25 16 10 16h9c.75 0 1.5-.75 1.5-1.5S19.75 13 19 13h-9z'/%3E%3C/svg%3E") !important;
+}
+
+.mapboxgl-ctrl button.mapboxgl-ctrl-compass .mapboxgl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29'%3E%3Cpath d='M10.5 14l4-8 4 8h-8z' fill='%23333'/%3E%3Cpath d='M10.5 16l4 8 4-8h-8z' fill='%23ccc'/%3E%3C/svg%3E") !important;
+}
+
+.mapboxgl-ctrl button.mapboxgl-ctrl-fullscreen .mapboxgl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29'%3E%3Cpath d='M24 16v5.5c0 1.75-.75 2.5-2.5 2.5H16v-1l3-1.5-4-5.5 1-1 5.5 4 1.5-3h1zM6 16l1.5 3 5.5-4 1 1-4 5.5 3 1.5v1H7.5C5.75 24 5 23.25 5 21.5V16h1zm7-11v1l-3 1.5 4 5.5-1 1-5.5-4L6 13H5V7.5C5 5.75 5.75 5 7.5 5H13zm11 2.5c0-1.75-.75-2.5-2.5-2.5H16v1l3 1.5-4 5.5 1 1 5.5-4 1.5 3h1V7.5z'/%3E%3C/svg%3E") !important;
+}
+
+.mapboxgl-ctrl button.mapboxgl-ctrl-shrink .mapboxgl-ctrl-icon {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29'%3E%3Cpath d='M18.5 16v5.5l-1.5-1.5-4 4-1-1 4-4-1.5-1.5h4zM13 18.5l-4 4-1.5-1.5V16h4.5l-1.5 1.5 4 4-1 1zM16 10.5V5l1.5 1.5 4-4 1 1-4 4L20 9h-4zm-2.5-4l4-4L19 4V9.5h-4.5l1.5-1.5-4-4 1-1z'/%3E%3C/svg%3E") !important;
+}
+
+.mapboxgl-marker {
+  cursor: pointer;
+  will-change: transform;
+}
+
+.mapboxgl-marker svg {
+  display: block;
+}
+
+.custom-marker {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  will-change: transform;
+}
+
+/* ========================================
+   CORRECTIONS ET OPTIMISATIONS
+   ======================================== */
+
+/* Standardisation des boutons et éléments UI */
+@import './shared/styles/ui-standardization.css';
+
+/* Styles hero optimisés sans animations lourdes */
+@import './shared/styles/hero-spectacular.css';
