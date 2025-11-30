@@ -1,54 +1,7 @@
-<<<<<<< HEAD
-import React from 'react';
-import { BarChart3, TrendingUp, Users, DollarSign } from 'lucide-react';
-
-const PropertyStatsPage: React.FC = () => {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Statistiques des Propriétés</h1>
-      
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <BarChart3 className="w-8 h-8 text-blue-500" />
-            <div className="ml-4">
-              <p className="text-sm text-gray-600">Total Propriétés</p>
-              <p className="text-2xl font-bold">0</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <TrendingUp className="w-8 h-8 text-green-500" />
-            <div className="ml-4">
-              <p className="text-sm text-gray-600">Propriétés Actives</p>
-              <p className="text-2xl font-bold">0</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <Users className="w-8 h-8 text-purple-500" />
-            <div className="ml-4">
-              <p className="text-sm text-gray-600">Vues Total</p>
-              <p className="text-2xl font-bold">0</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="flex items-center">
-            <DollarSign className="w-8 h-8 text-yellow-500" />
-            <div className="ml-4">
-              <p className="text-sm text-gray-600">Valeur Totale</p>
-              <p className="text-2xl font-bold">0 FCFA</p>
-=======
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { ArrowLeft, TrendingUp, Eye, Heart, Calendar, Users, Clock, MapPin, Star, TrendingDown, AlertCircle } from 'lucide-react';
+import { ArrowLeft, TrendingUp, Eye, Heart, Calendar, Users, Clock, MapPin, Star, AlertCircle } from 'lucide-react';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -106,11 +59,11 @@ export default function PropertyStats() {
         .order('date', { ascending: true });
 
       if (statsData) {
-        const totalViews = statsData.reduce((sum, day) => sum + day.total_views, 0);
-        const uniqueViews = statsData.reduce((sum, day) => sum + day.unique_views, 0);
-        const totalApplications = statsData.reduce((sum, day) => sum + day.applications, 0);
+        const totalViews = statsData.reduce((sum, day) => sum + (day.total_views || 0), 0);
+        const uniqueViews = statsData.reduce((sum, day) => sum + (day.unique_views || 0), 0);
+        const totalApplications = statsData.reduce((sum, day) => sum + (day.applications || 0), 0);
         const avgDuration = Math.round(
-          statsData.reduce((sum, day) => sum + day.avg_duration_seconds, 0) / (statsData.length || 1)
+          statsData.reduce((sum, day) => sum + (day.avg_duration_seconds || 0), 0) / (statsData.length || 1)
         );
 
         const conversionRate = totalViews > 0 ? ((totalApplications / totalViews) * 100) : 0;
@@ -119,7 +72,7 @@ export default function PropertyStats() {
           totalViews,
           uniqueViews,
           favoritesCount: propData.favorites_count || 0,
-          visitRequests: statsData.reduce((sum, day) => sum + day.visit_requests, 0),
+          visitRequests: statsData.reduce((sum, day) => sum + (day.visit_requests || 0), 0),
           applications: totalApplications,
           conversionRate: Math.round(conversionRate * 100) / 100,
           avgDuration,
@@ -127,7 +80,7 @@ export default function PropertyStats() {
 
         const chartData = statsData.map(day => ({
           date: new Date(day.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
-          views: day.total_views,
+          views: day.total_views || 0,
         }));
         setViewsHistory(chartData);
       }
@@ -151,25 +104,14 @@ export default function PropertyStats() {
       }
 
       const newSuggestions: string[] = [];
-
-      if ((propData.images as string[])?.length < 5) {
+      const images = propData.images as string[] | null;
+      
+      if (!images || images.length < 5) {
         newSuggestions.push('Ajoutez plus de photos (au moins 5) pour attirer plus de visiteurs');
       }
 
-      if (stats.conversionRate < 2) {
-        newSuggestions.push('Votre taux de conversion est faible. Vérifiez que le prix est compétitif');
-      }
-
-      if (propData.description.length < 200) {
+      if (propData.description && propData.description.length < 200) {
         newSuggestions.push('Enrichissez votre description avec plus de détails sur le logement');
-      }
-
-      if (stats.totalViews < 50) {
-        newSuggestions.push('Votre annonce manque de visibilité. Partagez-la sur les réseaux sociaux');
-      }
-
-      if (stats.avgDuration < 30) {
-        newSuggestions.push('Les visiteurs passent peu de temps sur votre annonce. Améliorez les photos et la description');
       }
 
       setSuggestions(newSuggestions);
@@ -197,7 +139,7 @@ export default function PropertyStats() {
       search: 'Recherche',
       map: 'Carte',
       favorites: 'Favoris',
-      home: 'Page d\'accueil',
+      home: "Page d'accueil",
       recommendation: 'Recommandation',
       direct: 'Lien direct',
     };
@@ -206,17 +148,17 @@ export default function PropertyStats() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-coral-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-terracotta-500"></div>
+      <div className="min-h-screen bg-[var(--sand-50)] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-[var(--terracotta-500)]"></div>
       </div>
     );
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-coral-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--sand-50)] flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Propriété introuvable</h2>
+          <h2 className="text-2xl font-bold text-[var(--earth-900)] mb-4">Propriété introuvable</h2>
           <a href="/dashboard/proprietaire" className="btn-primary">
             Retour au tableau de bord
           </a>
@@ -226,198 +168,185 @@ export default function PropertyStats() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50">
-      <div className="glass-card border-b border-white/20">
+    <div className="min-h-screen bg-[var(--sand-50)]">
+      <div className="bg-white border-b border-[var(--sand-200)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center space-x-4">
             <a
               href="/dashboard/proprietaire"
-              className="flex items-center space-x-2 text-terracotta-600 hover:text-terracotta-700 font-bold"
+              className="flex items-center space-x-2 text-[var(--terracotta-600)] hover:text-[var(--terracotta-700)] font-bold"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>Retour</span>
             </a>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gradient">{property.title}</h1>
-              <p className="text-gray-700 mt-1">
+              <h1 className="text-3xl font-bold text-[var(--earth-900)]">{property.title}</h1>
+              <p className="text-[var(--earth-700)] mt-1">
                 <MapPin className="inline h-4 w-4 mr-1" />
                 {property.city} {property.neighborhood && `• ${property.neighborhood}`}
               </p>
->>>>>>> 179702229bfc197f668a7416e325de75b344681e
             </div>
           </div>
         </div>
       </div>
-<<<<<<< HEAD
-      
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-xl font-semibold mb-4">Graphiques</h2>
-        <p className="text-gray-600">Les graphiques seront affichés ici...</p>
-      </div>
-    </div>
-  );
-};
-
-export default PropertyStatsPage;
-=======
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card-scrapbook p-6">
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-700 text-sm font-bold uppercase tracking-wide">Vues totales</h3>
-              <div className="bg-gradient-to-br from-amber-100 to-orange-100 p-3 rounded-2xl">
-                <Eye className="h-6 w-6 text-amber-600" />
+              <h3 className="text-[var(--earth-700)] text-sm font-bold uppercase tracking-wide">Vues totales</h3>
+              <div className="bg-[var(--terracotta-100)] p-3 rounded-xl">
+                <Eye className="h-6 w-6 text-[var(--terracotta-600)]" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-gradient">{stats.totalViews}</p>
-            <p className="text-xs text-gray-600 mt-1">{stats.uniqueViews} visiteurs uniques</p>
+            <p className="text-3xl font-bold text-[var(--terracotta-500)]">{stats.totalViews}</p>
+            <p className="text-xs text-[var(--earth-700)] mt-1">{stats.uniqueViews} visiteurs uniques</p>
           </div>
 
-          <div className="card-scrapbook p-6">
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-700 text-sm font-bold uppercase tracking-wide">Favoris</h3>
-              <div className="bg-gradient-to-br from-red-100 to-pink-100 p-3 rounded-2xl">
+              <h3 className="text-[var(--earth-700)] text-sm font-bold uppercase tracking-wide">Favoris</h3>
+              <div className="bg-red-100 p-3 rounded-xl">
                 <Heart className="h-6 w-6 text-red-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-gradient">{stats.favoritesCount}</p>
-            <p className="text-xs text-gray-600 mt-1">ajoutés en favoris</p>
+            <p className="text-3xl font-bold text-[var(--terracotta-500)]">{stats.favoritesCount}</p>
+            <p className="text-xs text-[var(--earth-700)] mt-1">ajoutés en favoris</p>
           </div>
 
-          <div className="card-scrapbook p-6">
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-700 text-sm font-bold uppercase tracking-wide">Demandes de visite</h3>
-              <div className="bg-gradient-to-br from-cyan-100 to-blue-100 p-3 rounded-2xl">
-                <Calendar className="h-6 w-6 text-cyan-600" />
+              <h3 className="text-[var(--earth-700)] text-sm font-bold uppercase tracking-wide">Demandes de visite</h3>
+              <div className="bg-blue-100 p-3 rounded-xl">
+                <Calendar className="h-6 w-6 text-blue-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-gradient">{stats.visitRequests}</p>
-            <p className="text-xs text-gray-600 mt-1">{stats.applications} candidatures</p>
+            <p className="text-3xl font-bold text-[var(--terracotta-500)]">{stats.visitRequests}</p>
+            <p className="text-xs text-[var(--earth-700)] mt-1">{stats.applications} candidatures</p>
           </div>
 
-          <div className="card-scrapbook p-6">
+          <div className="card p-6">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-700 text-sm font-bold uppercase tracking-wide">Taux de conversion</h3>
-              <div className="bg-gradient-to-br from-olive-100 to-green-100 p-3 rounded-2xl">
-                <TrendingUp className="h-6 w-6 text-olive-600" />
+              <h3 className="text-[var(--earth-700)] text-sm font-bold uppercase tracking-wide">Taux de conversion</h3>
+              <div className="bg-green-100 p-3 rounded-xl">
+                <TrendingUp className="h-6 w-6 text-green-600" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-gradient">{stats.conversionRate}%</p>
-            <p className="text-xs text-gray-600 mt-1">vues → candidatures</p>
+            <p className="text-3xl font-bold text-[var(--terracotta-500)]">{stats.conversionRate}%</p>
+            <p className="text-xs text-[var(--earth-700)] mt-1">vues → candidatures</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <div className="card-scrapbook p-6">
-              <h3 className="text-xl font-bold text-gradient mb-4 flex items-center space-x-2">
-                <TrendingUp className="h-6 w-6 text-terracotta-500" />
+            <div className="card p-6">
+              <h3 className="text-xl font-bold text-[var(--earth-900)] mb-4 flex items-center space-x-2">
+                <TrendingUp className="h-6 w-6 text-[var(--terracotta-500)]" />
                 <span>Vues des 30 derniers jours</span>
               </h3>
               {viewsHistory.length > 0 ? (
                 <div className="space-y-2">
                   {viewsHistory.slice(-10).map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700 font-medium w-20">{item.date}</span>
+                      <span className="text-sm text-[var(--earth-700)] font-medium w-20">{item.date}</span>
                       <div className="flex items-center space-x-2 flex-1 mx-4">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div className="flex-1 bg-[var(--sand-200)] rounded-full h-2 overflow-hidden">
                           <div
-                            className="bg-gradient-to-r from-terracotta-500 to-coral-500 h-full rounded-full"
+                            className="bg-[var(--terracotta-500)] h-full rounded-full"
                             style={{
-                              width: `${Math.min((item.views / Math.max(...viewsHistory.map(v => v.views))) * 100, 100)}%`
+                              width: `${Math.min((item.views / Math.max(...viewsHistory.map(v => v.views), 1)) * 100, 100)}%`
                             }}
                           />
                         </div>
                       </div>
-                      <span className="text-sm font-bold text-terracotta-600 w-12 text-right">{item.views}</span>
+                      <span className="text-sm font-bold text-[var(--terracotta-600)] w-12 text-right">{item.views}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-600 text-center py-8">Aucune donnée de vues disponible</p>
+                <p className="text-[var(--earth-700)] text-center py-8">Aucune donnée de vues disponible</p>
               )}
             </div>
 
-            <div className="card-scrapbook p-6">
-              <h3 className="text-xl font-bold text-gradient mb-4 flex items-center space-x-2">
-                <Users className="h-6 w-6 text-terracotta-500" />
+            <div className="card p-6">
+              <h3 className="text-xl font-bold text-[var(--earth-900)] mb-4 flex items-center space-x-2">
+                <Users className="h-6 w-6 text-[var(--terracotta-500)]" />
                 <span>Sources de trafic</span>
               </h3>
               {trafficSources.length > 0 ? (
                 <div className="space-y-3">
                   {trafficSources.map((source, idx) => {
-                    const percentage = (source.count / stats.totalViews) * 100;
+                    const percentage = stats.totalViews > 0 ? (source.count / stats.totalViews) * 100 : 0;
                     return (
-                      <div key={idx} className="bg-gradient-to-br from-white to-amber-50 border border-gray-200 rounded-lg p-4">
+                      <div key={idx} className="bg-[var(--sand-100)] border border-[var(--sand-200)] rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-bold text-gray-900 flex items-center space-x-2">
+                          <span className="text-sm font-bold text-[var(--earth-900)] flex items-center space-x-2">
                             <span className="text-lg">{getSourceIcon(source.source)}</span>
                             <span>{getSourceLabel(source.source)}</span>
                           </span>
-                          <span className="text-sm font-bold text-terracotta-600">{source.count} vues</span>
+                          <span className="text-sm font-bold text-[var(--terracotta-600)]">{source.count} vues</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div className="w-full bg-[var(--sand-200)] rounded-full h-2 overflow-hidden">
                           <div
-                            className="bg-gradient-to-r from-terracotta-500 to-coral-500 h-full rounded-full"
+                            className="bg-[var(--terracotta-500)] h-full rounded-full"
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
-                        <p className="text-xs text-gray-600 mt-1">{Math.round(percentage)}% du trafic total</p>
+                        <p className="text-xs text-[var(--earth-700)] mt-1">{Math.round(percentage)}% du trafic total</p>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <p className="text-gray-600 text-center py-8">Aucune donnée de trafic disponible</p>
+                <p className="text-[var(--earth-700)] text-center py-8">Aucune donnée de trafic disponible</p>
               )}
             </div>
           </div>
 
           <div className="lg:col-span-1 space-y-6">
-            <div className="card-scrapbook p-6">
-              <h3 className="text-xl font-bold text-gradient mb-4 flex items-center space-x-2">
-                <Clock className="h-6 w-6 text-terracotta-500" />
+            <div className="card p-6">
+              <h3 className="text-xl font-bold text-[var(--earth-900)] mb-4 flex items-center space-x-2">
+                <Clock className="h-6 w-6 text-[var(--terracotta-500)]" />
                 <span>Engagement</span>
               </h3>
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-700 mb-1">Temps moyen sur la page</p>
-                  <p className="text-2xl font-bold text-gradient">
+                  <p className="text-sm text-[var(--earth-700)] mb-1">Temps moyen sur la page</p>
+                  <p className="text-2xl font-bold text-[var(--terracotta-500)]">
                     {Math.floor(stats.avgDuration / 60)}:{(stats.avgDuration % 60).toString().padStart(2, '0')}
                   </p>
-                  <p className="text-xs text-gray-600">minutes</p>
+                  <p className="text-xs text-[var(--earth-700)]">minutes</p>
                 </div>
-                <div className="border-t border-gray-200 pt-4">
-                  <p className="text-sm text-gray-700 mb-1">Ratio vues/favoris</p>
-                  <p className="text-2xl font-bold text-gradient">
+                <div className="border-t border-[var(--sand-200)] pt-4">
+                  <p className="text-sm text-[var(--earth-700)] mb-1">Ratio vues/favoris</p>
+                  <p className="text-2xl font-bold text-[var(--terracotta-500)]">
                     {stats.totalViews > 0 ? Math.round((stats.favoritesCount / stats.totalViews) * 100) : 0}%
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="card-scrapbook p-6 bg-gradient-to-br from-amber-50 to-orange-50">
-              <h3 className="text-xl font-bold text-gradient mb-4 flex items-center space-x-2">
-                <Star className="h-6 w-6 text-terracotta-500" />
+            <div className="card p-6 bg-[var(--terracotta-50)]">
+              <h3 className="text-xl font-bold text-[var(--earth-900)] mb-4 flex items-center space-x-2">
+                <Star className="h-6 w-6 text-[var(--terracotta-500)]" />
                 <span>Suggestions</span>
               </h3>
               {suggestions.length > 0 ? (
                 <div className="space-y-3">
                   {suggestions.map((suggestion, idx) => (
-                    <div key={idx} className="flex items-start space-x-3 bg-white border border-terracotta-200 rounded-lg p-3">
-                      <AlertCircle className="h-5 w-5 text-terracotta-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-gray-800">{suggestion}</p>
+                    <div key={idx} className="flex items-start space-x-3 bg-white border border-[var(--terracotta-200)] rounded-lg p-3">
+                      <AlertCircle className="h-5 w-5 text-[var(--terracotta-600)] flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-[var(--earth-800)]">{suggestion}</p>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="bg-gradient-to-br from-olive-100 to-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Star className="h-8 w-8 text-olive-600" />
+                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Star className="h-8 w-8 text-green-600" />
                   </div>
-                  <p className="text-sm text-gray-700 font-medium">Excellent travail!</p>
-                  <p className="text-xs text-gray-600 mt-1">Votre annonce est optimale</p>
+                  <p className="text-sm text-[var(--earth-700)] font-medium">Excellent travail!</p>
+                  <p className="text-xs text-[var(--earth-700)] mt-1">Votre annonce est optimale</p>
                 </div>
               )}
             </div>
@@ -427,4 +356,3 @@ export default PropertyStatsPage;
     </div>
   );
 }
->>>>>>> 179702229bfc197f668a7416e325de75b344681e

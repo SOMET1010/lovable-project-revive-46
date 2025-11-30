@@ -348,7 +348,7 @@ export function ApplicationReview({
             <h4 className="font-medium text-neutral-900 mb-2">Documents</h4>
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-2 h-2 bg-semantic-success rounded-full"></div>
-              <span className="text-neutral-700}>
+              <span className="text-neutral-700">
                 {documents.filter(doc => doc.status === 'uploaded').length} document(s) téléchargé(s)
               </span>
             </div>
