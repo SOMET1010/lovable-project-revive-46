@@ -25,9 +25,9 @@
       "4": {
         "id": "4",
         "content": "Amélioration des textes de la plateforme",
-        "details": "✅ LOCATED: Contenu dispersé dans FAQ, Help, HomePage (44+ références ANSUT)\n❓ ACTION NEEDED: Clarifier l'emplacement exact du fichier TEXTES_PLATEFORME.md\n\nFICHIERS IDENTIFIÉS:\n- FAQPage.tsx (14 questions/réponses)\n- HelpPage.tsx (contenu identique)\n- HomePage.tsx (contenu hero et sections)\n- TrustSection.tsx (section confiance)",
-        "status": "in_progress",
-        "priority": "high"
+        "details": "POSTPONÉ: Traitement reporté après les dashboards\nContenu identifié dans FAQ, Help, HomePage avec 44+ références ANSUT à améliorer",
+        "status": "pending",
+        "priority": "medium"
       },
       "5": {
         "id": "5",
