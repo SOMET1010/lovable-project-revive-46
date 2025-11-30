@@ -1,129 +1,3 @@
-<<<<<<< HEAD
-import React, { useState } from 'react';
-import { Search, Filter, MapPin, Bed, Bath, Ruler } from 'lucide-react';
-
-const SearchPropertiesPageSimplified: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({
-    propertyType: '',
-    minPrice: '',
-    maxPrice: '',
-    bedrooms: '',
-    city: ''
-  });
-
-  const handleSearch = () => {
-    // Logique de recherche
-    console.log('Recherche:', { searchQuery, filters });
-  };
-
-  const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-4">Rechercher des Propriétés</h1>
-        <p className="text-gray-600">Trouvez la propriété de vos rêves</p>
-      </div>
-
-      {/* Barre de recherche */}
-      <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Rechercher par ville, quartier ou type..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-          
-          <button
-            onClick={handleSearch}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Rechercher
-          </button>
-        </div>
-      </div>
-
-      {/* Filtres */}
-      <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <div className="flex items-center mb-4">
-          <Filter className="w-5 h-5 mr-2" />
-          <h2 className="text-lg font-semibold">Filtres</h2>
-        </div>
-        
-        <div className="grid md:grid-cols-5 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
-            <select
-              value={filters.propertyType}
-              onChange={(e) => handleFilterChange('propertyType', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Tous</option>
-              <option value="appartement">Appartement</option>
-              <option value="maison">Maison</option>
-              <option value="villa">Villa</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
-            <select
-              value={filters.city}
-              onChange={(e) => handleFilterChange('city', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Toutes</option>
-              <option value="abidjan">Abidjan</option>
-              <option value="yamoussoukro">Yamoussoukro</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Chambres</label>
-            <select
-              value={filters.bedrooms}
-              onChange={(e) => handleFilterChange('bedrooms', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">Toutes</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3+</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Prix min</label>
-            <input
-              type="number"
-              placeholder="0"
-              value={filters.minPrice}
-              onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Prix max</label>
-            <input
-              type="number"
-              placeholder="Illimité"
-              value={filters.maxPrice}
-              onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-            />
-=======
 import { useState, useEffect } from 'react';
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
@@ -146,7 +20,6 @@ export default function SearchPropertiesPageSimplified() {
   const navigate = useNavigate();
   const [showVoiceSearch, setShowVoiceSearch] = useState(false);
 
-  // Utilisation de useLocalStorage pour persister les filtres
   const [searchCity, setSearchCity] = useLocalStorage('search_city', '');
   const [propertyType, setPropertyType] = useLocalStorage<PropertyType | ''>('property_type', '');
   const [propertyCategory, setPropertyCategory] = useLocalStorage<PropertyCategory | ''>('property_category', '');
@@ -158,7 +31,6 @@ export default function SearchPropertiesPageSimplified() {
   const [hasParking, setHasParking] = useLocalStorage<boolean | null>('has_parking', null);
   const [hasAC, setHasAC] = useLocalStorage<boolean | null>('has_ac', null);
 
-  // Utiliser le hook d'infinite scroll avec cache
   const {
     properties,
     loading,
@@ -216,10 +88,7 @@ export default function SearchPropertiesPageSimplified() {
     setIsFurnished(null);
     setHasParking(null);
     setHasAC(null);
-
-    // Invalider le cache
     cacheService.invalidatePattern('properties_page_');
-
     await refresh();
   };
 
@@ -245,7 +114,6 @@ export default function SearchPropertiesPageSimplified() {
   return (
     <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="animate-fade-in">
@@ -258,7 +126,7 @@ export default function SearchPropertiesPageSimplified() {
             </div>
             <button
               onClick={() => setShowVoiceSearch(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-all shadow-lg hover:shadow-xl"
+              className="flex items-center gap-2 px-6 py-3 bg-[var(--terracotta-500)] text-white rounded-full hover:bg-[var(--terracotta-600)] transition-all shadow-lg hover:shadow-xl"
             >
               <Mic className="w-5 h-5" />
               <span className="hidden sm:inline">Recherche vocale</span>
@@ -267,7 +135,6 @@ export default function SearchPropertiesPageSimplified() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Filtres */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <SearchFilters
@@ -295,7 +162,6 @@ export default function SearchPropertiesPageSimplified() {
                 onReset={handleReset}
               />
 
-              {/* Stats et actions */}
               <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
                 <div>
                   {total !== null && (
@@ -308,7 +174,7 @@ export default function SearchPropertiesPageSimplified() {
                 <button
                   onClick={handleRefresh}
                   disabled={loading}
-                  className="flex items-center gap-2 px-3 py-1.5 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-3 py-1.5 text-[var(--terracotta-600)] hover:text-[var(--terracotta-700)] hover:bg-[var(--terracotta-50)] rounded-lg transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                   Rafraîchir
@@ -317,7 +183,6 @@ export default function SearchPropertiesPageSimplified() {
             </div>
           </div>
 
-          {/* Résultats avec Infinite Scroll */}
           <div className="lg:col-span-3">
             <InfiniteScroll
               onLoadMore={loadMore}
@@ -340,31 +205,10 @@ export default function SearchPropertiesPageSimplified() {
                 onPropertyClick={handlePropertyClick}
               />
             </InfiniteScroll>
->>>>>>> 179702229bfc197f668a7416e325de75b344681e
           </div>
         </div>
       </div>
 
-<<<<<<< HEAD
-      {/* Résultats */}
-      <div className="text-center py-12">
-        <div className="text-gray-400 mb-4">
-          <Search className="w-16 h-16 mx-auto" />
-        </div>
-        <h3 className="text-xl font-semibold text-gray-600 mb-2">
-          Aucun résultat trouvé
-        </h3>
-        <p className="text-gray-500">
-          Modifiez vos critères de recherche pour trouver des propriétés
-        </p>
-      </div>
-    </div>
-  );
-};
-
-export default SearchPropertiesPageSimplified;
-=======
-      {/* Voice Search Modal */}
       {showVoiceSearch && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
@@ -381,4 +225,3 @@ export default SearchPropertiesPageSimplified;
     </div>
   );
 }
->>>>>>> 179702229bfc197f668a7416e325de75b344681e
