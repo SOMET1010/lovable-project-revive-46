@@ -1,13 +1,27 @@
+/**
+ * Hook pour les notifications de messages en temps réel
+ * Avec cleanup functions robustes et monitoring des fuites de mémoire
+ */
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
+import { useCleanupRegistry } from '@/lib/cleanupRegistry';
 
 export function useMessageNotifications() {
   const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
+  const cleanup = useCleanupRegistry('useMessageNotifications');
 
   useEffect(() => {
     if (!user) return;
+
+    // Créer un AbortController avec cleanup automatique
+    const abortController = cleanup.createAbortController(
+      `message-fetch-${user.id}`,
+      'Message fetch AbortController',
+      'useMessageNotifications'
+    );
 
     const fetchUnreadCount = async () => {
       try {
@@ -27,7 +41,7 @@ export function useMessageNotifications() {
     fetchUnreadCount();
 
     const subscription = supabase
-      .channel('message_notifications')
+      .channel(`message_notifications_${user.id}`)
       .on(
         'postgres_changes',
         {
@@ -61,10 +75,27 @@ export function useMessageNotifications() {
       )
       .subscribe();
 
+    // Ajouter la subscription avec cleanup automatique
+    cleanup.addSubscription(
+      `message-notifications-${user.id}`,
+      () => {
+        try {
+          subscription.unsubscribe();
+        } catch (error) {
+          console.warn('Error unsubscribing from message notifications:', error);
+        }
+      },
+      'Message notifications real-time subscription',
+      'useMessageNotifications'
+    );
+
+    // Cleanup function avec AbortController
     return () => {
-      subscription.unsubscribe();
+      if (abortController.signal && !abortController.signal.aborted) {
+        abortController.abort();
+      }
     };
-  }, [user]);
+  }, [user, cleanup]);
 
   const requestNotificationPermission = async () => {
     if ('Notification' in window && Notification.permission === 'default') {

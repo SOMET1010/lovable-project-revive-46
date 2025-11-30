@@ -100,7 +100,7 @@ export default function AdminFeatureFlags() {
     queryKey: ["feature-flags", selectedCategory],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+      if (!session?.access_token) throw new Error("Not authenticated");
 
       const url = selectedCategory === "all"
         ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-feature-flags`
@@ -123,7 +123,7 @@ export default function AdminFeatureFlags() {
   const toggleFlagMutation = useMutation({
     mutationFn: async (flagKey: string) => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+      if (!session?.access_token) throw new Error("Not authenticated");
 
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-feature-flags/${flagKey}/toggle`,

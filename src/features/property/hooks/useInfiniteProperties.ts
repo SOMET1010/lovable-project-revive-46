@@ -69,6 +69,7 @@ export function useInfiniteProperties(
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const loadingRef = useRef(false);
+  const preloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Générer une clé de cache basée sur les filtres
   const getCacheKey = useCallback((page: number) => {
@@ -256,7 +257,12 @@ export function useInfiniteProperties(
 
       // Précharger la page suivante
       if (newProperties.length === pageSize) {
-        setTimeout(() => {
+        // Nettoyer le timeout précédent s'il existe
+        if (preloadTimeoutRef.current) {
+          clearTimeout(preloadTimeoutRef.current);
+        }
+
+        preloadTimeoutRef.current = setTimeout(() => {
           const nextCacheKey = getCacheKey(page + 1);
           if (!cacheService.has(nextCacheKey)) {
             // Précharger silencieusement
@@ -315,6 +321,10 @@ export function useInfiniteProperties(
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+      }
+      if (preloadTimeoutRef.current) {
+        clearTimeout(preloadTimeoutRef.current);
+        preloadTimeoutRef.current = null;
       }
     };
   }, [enabled, filters, loadPage, loadTotal]);

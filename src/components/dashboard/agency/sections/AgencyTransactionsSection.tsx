@@ -314,10 +314,10 @@ const AgencyTransactionsSection: React.FC = () => {
 
   const filteredTransactions = transactions.filter(transaction => {
     const matchesFilter = selectedFilter === 'all' || transaction.type === selectedFilter || transaction.status === selectedFilter;
-    const matchesSearch = transaction.property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.agent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.property.address.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = transaction.property?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.client?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.agent?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.property?.address?.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 

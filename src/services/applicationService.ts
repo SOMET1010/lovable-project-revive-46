@@ -1,9 +1,10 @@
 /**
  * Service pour la gestion des candidatures
- * API et logique métier
+ * API et logique métier avec gestion d'erreur robuste
  */
 
 import { supabase } from '@/lib/supabase';
+import { ErrorHandler } from '@/lib/errorHandler';
 import type {
   Application,
   ApplicationFormData,
@@ -23,6 +24,153 @@ import type {
 import { APPLICATION_STATUSES, STATUS_TRANSITIONS } from '@/constants/applicationStatuses';
 import { calculateApplicationScore, validateApplicationForm } from '@/utils/applicationHelpers';
 
+// Configuration de retry pour Supabase
+const SUPABASE_RETRY_CONFIG = {
+  maxRetries: 3,
+  baseDelay: 1000,
+  maxDelay: 5000,
+  timeout: 30000,
+  retryCondition: ErrorHandler.createSupabaseRetryCondition(),
+};
+
+// Context pour le logging
+const SERVICE_CONTEXT = { service: 'ApplicationService', context: { module: 'applications' } };
+
+// ============================================================================
+// UTILITAIRES AVEC RETRY
+// ============================================================================
+
+/**
+ * Upload de documents avec retry automatique
+ */
+async function uploadDocumentsWithRetry(
+  applicationId: string,
+  files: File[]
+): Promise<void> {
+  await ErrorHandler.executeWithRetry(
+    async () => {
+      await uploadDocuments(applicationId, files);
+    },
+    { ...SERVICE_CONTEXT, operation: 'uploadDocumentsWithRetry' },
+    SUPABASE_RETRY_CONFIG
+  );
+}
+
+/**
+ * Mise à jour du score avec retry automatique
+ */
+async function updateApplicationScoreWithRetry(applicationId: string, score: ApplicationScore): Promise<void> {
+  await ErrorHandler.executeWithRetry(
+    async () => {
+      await updateApplicationScore(applicationId, score);
+    },
+    { ...SERVICE_CONTEXT, operation: 'updateApplicationScoreWithRetry' },
+    SUPABASE_RETRY_CONFIG
+  );
+}
+
+/**
+ * Envoi de notification avec retry automatique
+ */
+async function sendApplicationNotificationWithRetry(
+  applicationId: string,
+  type: string,
+  data?: ApplicationNotificationData
+): Promise<void> {
+  await ErrorHandler.executeWithRetry(
+    async () => {
+      await sendApplicationNotification(applicationId, type, data);
+    },
+    { ...SERVICE_CONTEXT, operation: 'sendApplicationNotificationWithRetry' },
+    { ...SUPABASE_RETRY_CONFIG, maxRetries: 2 } // Moins de retries pour les notifications
+  );
+}
+
+/**
+ * Récupération d'application avec retry
+ */
+async function getApplicationWithRetry(id: string): Promise<any> {
+  return ErrorHandler.executeWithRetry(
+    async () => {
+      const { data, error } = await supabase
+        .from('applications')
+        .select(`
+          *,
+          property:properties(*),
+          applicant:profiles(*),
+          documents:application_documents(*)
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        throw new Error(`Supabase error: ${error.message}`);
+      }
+
+      return data;
+    },
+    { ...SERVICE_CONTEXT, operation: 'getApplicationWithRetry' },
+    SUPABASE_RETRY_CONFIG
+  );
+}
+
+/**
+ * Mise à jour de statut avec retry
+ */
+async function updateApplicationStatusWithRetry(
+  id: string,
+  newStatus: ApplicationStatus,
+  adminNotes?: string
+): Promise<any> {
+  return ErrorHandler.executeWithRetry(
+    async () => {
+      // Vérifier si la transition est autorisée
+      const { data: currentApp } = await supabase
+        .from('applications')
+        .select('status')
+        .eq('id', id)
+        .single();
+
+      if (!currentApp) {
+        throw new Error('Candidature non trouvée');
+      }
+
+      const allowedTransitions = STATUS_TRANSITIONS[currentApp.status as ApplicationStatus] || [];
+      if (!allowedTransitions.includes(newStatus)) {
+        throw new Error(`Transition de statut non autorisée: ${currentApp.status} → ${newStatus}`);
+      }
+
+      const updateData = {
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Ajouter les notes admin si fourni
+      if (adminNotes) {
+        updateData.metadata = {
+          adminNotes,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('applications')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Supabase error: ${error.message}`);
+      }
+
+      return data;
+    },
+    { ...SERVICE_CONTEXT, operation: 'updateApplicationStatusWithRetry' },
+    SUPABASE_RETRY_CONFIG
+  );
+}
+
 // ============================================================================
 // CRUD APPLICATIONS
 // ============================================================================
@@ -35,7 +183,7 @@ export async function createApplication(
   applicantId: string,
   formData: ApplicationFormData
 ): Promise<CreateApplicationResponse> {
-  try {
+  return ErrorHandler.executeWithRetry(async () => {
     // Validation des données
     const validationErrors = validateApplicationForm(formData);
     if (Object.keys(validationErrors).length > 0) {
@@ -67,7 +215,7 @@ export async function createApplication(
       updated_at: new Date().toISOString(),
     };
 
-    // Créer l'application dans Supabase
+    // Créer l'application dans Supabase avec retry
     const { data, error } = await supabase
       .from('applications')
       .insert([applicationData])
@@ -75,67 +223,39 @@ export async function createApplication(
       .single();
 
     if (error) {
-      return {
-        error: {
-          message: 'Erreur lors de la création de la candidature',
-          details: error.message,
-        },
-      };
+      throw new Error(`Supabase error: ${error.message}`);
     }
 
-    // Traiter les documents uploadés si présents
+    // Traiter les documents uploadés si présents (avec retry)
     if (formData.documents.length > 0) {
-      await uploadDocuments(data.id, formData.documents);
+      await uploadDocumentsWithRetry(data.id, formData.documents);
     }
 
-    // Calculer le score initial
+    // Calculer le score initial (avec retry)
     const application = mapFromDatabase(data);
     const score = calculateApplicationScore(application);
     
-    await updateApplicationScore(data.id, score);
+    await updateApplicationScoreWithRetry(data.id, score);
 
-    // Envoyer notification
-    await sendApplicationNotification(data.id, 'application_created');
+    // Envoyer notification (avec retry)
+    await sendApplicationNotificationWithRetry(data.id, 'application_created');
 
     return { data: { ...application, score } };
-
-  } catch (error) {
-    return {
-      error: {
-        message: 'Erreur lors de la création de la candidature',
-        details: error instanceof Error ? error.message : 'Erreur inconnue',
-      },
-    };
-  }
+  }, { ...SERVICE_CONTEXT, operation: 'createApplication' }, SUPABASE_RETRY_CONFIG);
 }
 
 /**
  * Récupérer une candidature par ID
  */
 export async function getApplication(id: string): Promise<{ data?: Application; error?: string }> {
-  try {
-    const { data, error } = await supabase
-      .from('applications')
-      .select(`
-        *,
-        property:properties(*),
-        applicant:profiles(*),
-        documents:application_documents(*)
-      `)
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      return { error: error.message };
-    }
-
-    return { data: mapFromDatabase(data) };
-
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : 'Erreur lors de la récupération',
-    };
-  }
+  return ErrorHandler.executeWithRetry(
+    async () => {
+      const data = await getApplicationWithRetry(id);
+      return { data: mapFromDatabase(data) };
+    },
+    { ...SERVICE_CONTEXT, operation: 'getApplication' },
+    SUPABASE_RETRY_CONFIG
+  );
 }
 
 /**
@@ -145,7 +265,7 @@ export async function getApplications(
   filters: ApplicationFilters = {},
   pagination: ApplicationPagination = { page: 1, pageSize: 10, sortBy: 'created_at', sortOrder: 'desc' }
 ): Promise<{ data?: PaginatedApplications; error?: string }> {
-  try {
+  return ErrorHandler.executeWithRetry(async () => {
     let query = supabase
       .from('applications')
       .select(`
@@ -187,7 +307,7 @@ export async function getApplications(
     const { data, error, count } = await query;
 
     if (error) {
-      return { error: error.message };
+      throw new Error(`Supabase error: ${error.message}`);
     }
 
     const applications = data?.map(mapFromDatabase) || [];
@@ -205,12 +325,7 @@ export async function getApplications(
         hasPrevious: pagination.page > 1,
       },
     };
-
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : 'Erreur lors de la récupération',
-    };
-  }
+  }, { ...SERVICE_CONTEXT, operation: 'getApplications' }, SUPABASE_RETRY_CONFIG);
 }
 
 /**
@@ -221,69 +336,14 @@ export async function updateApplicationStatus(
   newStatus: ApplicationStatus,
   adminNotes?: string
 ): Promise<UpdateApplicationResponse> {
-  try {
-    // Vérifier si la transition est autorisée
-    const { data: currentApp } = await supabase
-      .from('applications')
-      .select('status')
-      .eq('id', id)
-      .single();
-
-    if (!currentApp) {
-      return { error: { message: 'Candidature non trouvée' } };
-    }
-
-    const allowedTransitions = STATUS_TRANSITIONS[currentApp.status as ApplicationStatus] || [];
-    if (!allowedTransitions.includes(newStatus)) {
-      return {
-        error: {
-          message: `Transition de statut non autorisée: ${currentApp.status} → ${newStatus}`,
-        },
-      };
-    }
-
-    const updateData = {
-      status: newStatus,
-      updated_at: new Date().toISOString(),
-    };
-
-    // Ajouter les notes admin si fourni
-    if (adminNotes) {
-      updateData.metadata = {
-        adminNotes,
-        updatedAt: new Date().toISOString(),
-      };
-    }
-
-    const { data, error } = await supabase
-      .from('applications')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      return {
-        error: {
-          message: 'Erreur lors de la mise à jour du statut',
-          details: error.message,
-        },
-      };
-    }
-
-    // Envoyer notification
-    await sendApplicationNotification(id, 'status_changed', { newStatus });
+  return ErrorHandler.executeWithRetry(async () => {
+    const data = await updateApplicationStatusWithRetry(id, newStatus, adminNotes);
+    
+    // Envoyer notification avec retry
+    await sendApplicationNotificationWithRetry(id, 'status_changed', { newStatus });
 
     return { data: mapFromDatabase(data) };
-
-  } catch (error) {
-    return {
-      error: {
-        message: 'Erreur lors de la mise à jour du statut',
-        details: error instanceof Error ? error.message : 'Erreur inconnue',
-      },
-    };
-  }
+  }, { ...SERVICE_CONTEXT, operation: 'updateApplicationStatus' }, SUPABASE_RETRY_CONFIG);
 }
 
 /**
@@ -600,12 +660,34 @@ export async function getApplicationStats(): Promise<{ data?: ApplicationStats; 
 // ============================================================================
 
 /**
+ * Interface pour les données de notification de candidature
+ */
+interface ApplicationNotificationData {
+  statusChange?: {
+    from: ApplicationStatus;
+    to: ApplicationStatus;
+  };
+  documentRequired?: {
+    documentType: DocumentType;
+    reason?: string;
+  };
+  interviewScheduled?: {
+    date: Date;
+    location?: string;
+  };
+  general?: {
+    message: string;
+    actionUrl?: string;
+  };
+}
+
+/**
  * Envoyer une notification de candidature
  */
 async function sendApplicationNotification(
   applicationId: string,
   type: string,
-  data?: any
+  data?: ApplicationNotificationData
 ): Promise<void> {
   try {
     // Créer la notification en base
@@ -661,17 +743,67 @@ async function recalculateApplicationScore(applicationId: string): Promise<void>
 }
 
 /**
+ * Interface pour les données de la base de données
+ */
+interface DatabaseApplicationData {
+  id: string;
+  property_id: string;
+  applicant_id: string;
+  status: ApplicationStatus;
+  steps?: ApplicationStep[];
+  current_step: ApplicationStep;
+  created_at: string;
+  updated_at: string;
+  metadata?: {
+    personalInfo?: PersonalInfo;
+    financialInfo?: FinancialInfo;
+    guarantees?: Guarantees;
+    scoreData?: ApplicationScore;
+    [key: string]: unknown;
+  };
+  documents?: DatabaseDocumentData[];
+}
+
+interface DatabaseDocumentData {
+  id: string;
+  application_id: string;
+  type: DocumentType;
+  name: string;
+  original_name: string;
+  url: string;
+  size: number;
+  mime_type: string;
+  verified: boolean;
+  verified_by?: string;
+  verified_at?: string;
+  rejection_reason?: string;
+  created_at: string;
+}
+
+/**
  * Mapper les données de la base vers l'interface Application
  */
-function mapFromDatabase(data: any): Application {
+function mapFromDatabase(data: DatabaseApplicationData): Application {
+  // Validation des données d'entrée
+  if (!data || typeof data !== 'object') {
+    throw new Error('Données d\'application invalides');
+  }
+
+  // Validation des champs requis
+  if (!data.id || !data.property_id || !data.applicant_id) {
+    throw new Error('Champs requis manquants dans les données d\'application');
+  }
+
   return {
     id: data.id,
     propertyId: data.property_id,
     applicantId: data.applicant_id,
     status: data.status,
-    steps: data.steps || [],
+    steps: Array.isArray(data.steps) ? data.steps : [],
     currentStep: data.current_step,
-    documents: data.documents?.map(mapDocumentFromDatabase) || [],
+    documents: Array.isArray(data.documents) 
+      ? data.documents.map(dbDoc => mapDocumentFromDatabase(dbDoc)) 
+      : [],
     createdAt: new Date(data.created_at),
     updatedAt: new Date(data.updated_at),
     metadata: {
@@ -690,7 +822,17 @@ function mapFromDatabase(data: any): Application {
 /**
  * Mapper les données de document de la base
  */
-function mapDocumentFromDatabase(data: any): Document {
+function mapDocumentFromDatabase(data: DatabaseDocumentData): Document {
+  // Validation des données d'entrée
+  if (!data || typeof data !== 'object') {
+    throw new Error('Données de document invalides');
+  }
+
+  // Validation des champs requis
+  if (!data.id || !data.application_id) {
+    throw new Error('Champs requis manquants dans les données de document');
+  }
+
   return {
     id: data.id,
     applicationId: data.application_id,
@@ -710,29 +852,49 @@ function mapDocumentFromDatabase(data: any): Document {
 
 /**
  * Déterminer le type de document basé sur le nom de fichier
+ * @param fileName - Nom du fichier
+ * @returns Type de document détecté
  */
 function determineDocumentType(fileName: string): DocumentType {
+  // Validation du paramètre
+  if (!fileName || typeof fileName !== 'string') {
+    console.warn('Nom de fichier invalide pour la détermination du type:', fileName);
+    return 'autre';
+  }
+
   const name = fileName.toLowerCase();
   
-  if (name.includes('cni') || name.includes('passport') || name.includes('identite')) {
+  // Patterns de détection avec priorité
+  if (name.includes('cni') || name.includes('carte d\'identité') || name.includes('passport') || 
+      name.includes('identite') || name.includes('passeport')) {
     return 'piece_identite';
   }
   
-  if (name.includes('salaire') || name.includes('bulletin') || name.includes('pay')) {
+  if (name.includes('salaire') || name.includes('bulletin') || name.includes('pay') || 
+      name.includes('paye') || name.includes('fiche de paie')) {
     return 'bulletin_salaire';
   }
   
-  if (name.includes('impot') || name.includes('tax') || name.includes('avis')) {
+  if (name.includes('impot') || name.includes('tax') || name.includes('avis') || 
+      name.includes('d\'imposition') || name.includes('revenu')) {
     return 'avis_imposition';
   }
   
-  if (name.includes('employeur') || name.includes('work') || name.includes('employment')) {
+  if (name.includes('employeur') || name.includes('work') || name.includes('employment') || 
+      name.includes('attestation de travail') || name.includes('salary certificate')) {
     return 'attestation_employeur';
   }
   
-  if (name.includes('banque') || name.includes('bank') || name.includes('garantie')) {
+  if (name.includes('banque') || name.includes('bank') || name.includes('garantie') || 
+      name.includes('releve bancaire') || name.includes('rib')) {
     return 'garantie_bancaire';
   }
   
+  if (name.includes('releve') || name.includes('relevé') || name.includes('compte') || 
+      name.includes('statement')) {
+    return 'releve_bancaire';
+  }
+  
+  // Type par défaut
   return 'autre';
 }

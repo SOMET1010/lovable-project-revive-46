@@ -74,17 +74,17 @@ export default function AdminTestDataGenerator() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Erreur de génération');
+        throw new Error(errorData?.error || 'Erreur de génération');
       }
 
       const result = await response.json();
 
       if (result.success) {
-        setGeneratedData(result.data);
+        setGeneratedData(result.data || []);
         setSuccess(`${dataType} généré avec succès !`);
         await loadStats();
       } else {
-        throw new Error(result.error);
+        throw new Error(result.error || 'Erreur de génération');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur inconnue');

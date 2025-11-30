@@ -1,7 +1,22 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { ApplicationNotification, NotificationFilter, NotificationSettings } from '@/types';
 import { notificationService } from '@/services/notificationService';
 import { useAuth } from '@/hooks/useAuth';
+import { useAsync } from './useAsync';
+import { useCleanupRegistry } from '@/lib/cleanupRegistry';
+
+// Configuration optimisée pour les notifications
+const NOTIFICATIONS_CONFIG = {
+  staleTime: 1000 * 60 * 2, // 2 minutes
+  refetchOnWindowFocus: false,
+  refetchOnMount: false,
+  retry: 3,
+  retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+} as const;
+
+// Cache pour les notifications
+const notificationsCache = new Map<string, { data: ApplicationNotification[]; timestamp: number }>();
+const CACHE_TTL = 1000 * 60 * 2; // 2 minutes
 
 export interface UseNotificationsReturn {
   notifications: ApplicationNotification[];
@@ -40,19 +55,30 @@ export function useNotifications(): UseNotificationsReturn {
     offset: 0
   });
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [success, setSuccess] = useState(false);
   
   // Refs
   const subscriptionRef = useRef<(() => void) | null>(null);
   const soundEnabledRef = useRef(true);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const cleanup = useCleanupRegistry('useNotifications');
 
-  // Audio context for notification sounds
+  // Audio context for notification sounds avec cleanup automatique
   const initAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Ajouter l'AudioContext avec cleanup automatique
+      cleanup.addAudioContext(
+        `notification-sound-${Date.now()}`,
+        audioContextRef.current,
+        'Notification sound AudioContext',
+        'useNotifications'
+      );
     }
     return audioContextRef.current;
-  }, []);
+  }, [cleanup]);
 
   const playNotificationSound = useCallback((type: 'new' | 'read' = 'new') => {
     if (!soundEnabledRef.current || !settings?.sound_enabled) return;
@@ -85,40 +111,84 @@ export function useNotifications(): UseNotificationsReturn {
     }
   }, [initAudioContext, settings?.sound_enabled]);
 
-  // Fetch notifications
+  // Fetch notifications avec AbortController et cache optimisé
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
+
+    // Annuler la requête précédente
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // Créer un nouveau AbortController avec cleanup automatique
+    abortControllerRef.current = cleanup.createAbortController(
+      `fetch-notifications-${Date.now()}`,
+      'Notifications fetch AbortController',
+      'useNotifications.fetchNotifications'
+    );
 
     try {
       setLoading(true);
       setError(null);
+      setSuccess(false);
 
-      const data = await notificationService.getNotifications(filter.limit);
+      // Vérifier le cache
+      const cacheKey = JSON.stringify({ userId: user.id, filter });
+      const cached = notificationsCache.get(cacheKey);
       
-      // Apply filters
+      let data: ApplicationNotification[] = [];
+      
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        data = cached.data;
+      } else {
+        // Récupérer depuis l'API si pas de cache valide
+        data = await notificationService.getNotifications(filter.limit);
+        
+        // Mettre en cache
+        notificationsCache.set(cacheKey, {
+          data,
+          timestamp: Date.now(),
+        });
+      }
+      
+      // Apply filters - optimisé avec early returns
       let filteredData = data;
-      if (filter.type) {
-        filteredData = filteredData.filter(n => n.type === filter.type);
-      }
-      if (filter.priority) {
-        filteredData = filteredData.filter(n => n.priority === filter.priority);
-      }
-      if (filter.read !== undefined) {
-        filteredData = filteredData.filter(n => n.read === filter.read);
-      }
-      if (filter.dateFrom) {
-        filteredData = filteredData.filter(n => n.created_at >= filter.dateFrom!);
-      }
-      if (filter.dateTo) {
-        filteredData = filteredData.filter(n => n.created_at <= filter.dateTo!);
+      
+      if (filter.type || filter.priority || filter.read !== undefined || filter.dateFrom || filter.dateTo) {
+        filteredData = data.filter(n => {
+          if (filter.type && n.type !== filter.type) return false;
+          if (filter.priority && n.priority !== filter.priority) return false;
+          if (filter.read !== undefined && n.read !== filter.read) return false;
+          if (filter.dateFrom && n.created_at < filter.dateFrom) return false;
+          if (filter.dateTo && n.created_at > filter.dateTo) return false;
+          return true;
+        });
       }
 
       setNotifications(filteredData);
       
-      // Update unread count
-      const count = await notificationService.getUnreadCount();
+      // Update unread count - avec cache
+      const countCacheKey = `unread-count-${user.id}`;
+      const cachedCount = notificationsCache.get(countCacheKey);
+      
+      let count = 0;
+      if (cachedCount && Date.now() - cachedCount.timestamp < CACHE_TTL) {
+        count = cachedCount.data.length;
+      } else {
+        count = await notificationService.getUnreadCount();
+        notificationsCache.set(countCacheKey, {
+          data: new Array(count), // Placeholder
+          timestamp: Date.now(),
+        });
+      }
+      
       setUnreadCount(count);
-    } catch (err) {
+      setSuccess(true);
+    } catch (err: any) {
+      // Ignorer les erreurs d'annulation
+      if (err.name === 'AbortError') {
+        return;
+      }
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement des notifications');
     } finally {
       setLoading(false);
@@ -130,52 +200,81 @@ export function useNotifications(): UseNotificationsReturn {
     await fetchNotifications();
   }, [fetchNotifications]);
 
-  // Mark as read
+  // Mark as read avec optimistic update
   const markAsRead = useCallback(async (id: string) => {
     try {
-      await notificationService.markAsRead(id);
+      // Optimistic update
       setNotifications(prev => 
         prev.map(n => n.id === id ? { ...n, read: true, read_at: new Date().toISOString() } : n)
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
+      
+      // Invalider le cache
+      if (user) {
+        const cacheKey = `unread-count-${user.id}`;
+        notificationsCache.delete(cacheKey);
+      }
+      
+      await notificationService.markAsRead(id);
       playNotificationSound('read');
     } catch (err) {
+      // Rollback en cas d'erreur
+      await fetchNotifications();
       setError(err instanceof Error ? err.message : 'Erreur lors du marquage');
     }
-  }, [playNotificationSound]);
+  }, [playNotificationSound, user, fetchNotifications]);
 
-  // Mark all as read
+  // Mark all as read avec optimistic update
   const markAllAsRead = useCallback(async () => {
     try {
-      const count = await notificationService.markAllAsRead();
+      // Optimistic update
       setNotifications(prev => prev.map(n => ({ ...n, read: true, read_at: new Date().toISOString() })));
       setUnreadCount(0);
+      
+      // Invalider le cache
+      if (user) {
+        const cacheKey = `unread-count-${user.id}`;
+        notificationsCache.delete(cacheKey);
+      }
+      
+      await notificationService.markAllAsRead();
       playNotificationSound('read');
     } catch (err) {
+      // Rollback en cas d'erreur
+      await fetchNotifications();
       setError(err instanceof Error ? err.message : 'Erreur lors du marquage');
     }
-  }, [playNotificationSound]);
+  }, [playNotificationSound, user, fetchNotifications]);
 
-  // Delete notification
+  // Delete notification avec optimistic update
   const deleteNotification = useCallback(async (id: string) => {
     try {
-      await notificationService.deleteNotification(id);
+      // Optimistic update
+      const deleted = notifications.find(n => n.id === id);
       setNotifications(prev => prev.filter(n => n.id !== id));
       
-      // Update unread count if deleted notification was unread
-      const deleted = notifications.find(n => n.id === id);
       if (deleted && !deleted.read) {
         setUnreadCount(prev => Math.max(0, prev - 1));
       }
+      
+      await notificationService.deleteNotification(id);
     } catch (err) {
+      // Rollback en cas d'erreur
+      await fetchNotifications();
       setError(err instanceof Error ? err.message : 'Erreur lors de la suppression');
     }
-  }, [notifications]);
+  }, [notifications, fetchNotifications]);
 
-  // Set filter
+  // Set filter avec invalidation du cache
   const setFilter = useCallback((newFilter: Partial<NotificationFilter>) => {
     setFilterState(prev => ({ ...prev, ...newFilter }));
-  }, []);
+    
+    // Invalider le cache quand les filtres changent
+    if (user) {
+      const cacheKey = JSON.stringify({ userId: user.id, filter: { ...filter, ...newFilter } });
+      notificationsCache.delete(cacheKey);
+    }
+  }, [user, filter]);
 
   // Update settings
   const updateSettings = useCallback(async (newSettings: Partial<NotificationSettings>) => {
@@ -191,7 +290,12 @@ export function useNotifications(): UseNotificationsReturn {
     }
   }, [user, settings]);
 
-  // Subscribe to real-time notifications
+  // Clear cache
+  const clearCache = useCallback(() => {
+    notificationsCache.clear();
+  }, []);
+
+  // Subscribe to real-time notifications avec cleanup automatique
   const subscribe = useCallback(() => {
     if (!user || isSubscribed) return;
 
@@ -219,8 +323,17 @@ export function useNotifications(): UseNotificationsReturn {
     );
 
     subscriptionRef.current = unsubscribe;
+    
+    // Ajouter la subscription avec cleanup automatique
+    cleanup.addSubscription(
+      `notifications-subscription-${Date.now()}`,
+      unsubscribe,
+      'Real-time notifications subscription',
+      'useNotifications'
+    );
+    
     setIsSubscribed(true);
-  }, [user, isSubscribed, playNotificationSound, settings?.push_enabled]);
+  }, [user, isSubscribed, playNotificationSound, settings?.push_enabled, cleanup]);
 
   // Unsubscribe from real-time notifications
   const unsubscribe = useCallback(() => {
@@ -279,24 +392,42 @@ export function useNotifications(): UseNotificationsReturn {
   useEffect(() => {
     return () => {
       unsubscribe();
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
     };
   }, [unsubscribe]);
 
+  // Annuler les requêtes en cours
+  const cancel = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setLoading(false);
+  }, []);
+
   // Play sound method for external use
   const playSound = useCallback((type: 'new' | 'read' = 'new') => {
     playNotificationSound(type);
   }, [playNotificationSound]);
 
+  // Valeurs memoized pour éviter les recalculs inutiles
+  const memoizedNotifications = useMemo(() => notifications, [notifications]);
+  const memoizedUnreadCount = useMemo(() => unreadCount, [unreadCount]);
+  const memoizedFilter = useMemo(() => filter, [filter]);
+  const memoizedSettings = useMemo(() => settings, [settings]);
+
   return {
-    notifications,
-    unreadCount,
+    notifications: memoizedNotifications,
+    unreadCount: memoizedUnreadCount,
     loading,
     error,
-    filter,
-    settings,
+    filter: memoizedFilter,
+    settings: memoizedSettings,
+    success,
     
     refreshNotifications,
     markAsRead,
@@ -305,6 +436,8 @@ export function useNotifications(): UseNotificationsReturn {
     setFilter,
     updateSettings,
     playSound,
+    cancel,
+    clearCache,
     
     isSubscribed,
     subscribe,

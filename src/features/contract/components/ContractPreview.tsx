@@ -43,36 +43,54 @@ export default function ContractPreview({ contractData }: ContractPreviewProps) 
   const [showPreview, setShowPreview] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
 
+  // Vérifications de sécurité pour les données du contrat
+  if (!contractData) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-600">Données de contrat manquantes</p>
+      </div>
+    );
+  }
+
+  // Vérifications des propriétés essentielles
+  if (!contractData.property || !contractData.owner || !contractData.tenant) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-600">Informations de contrat incomplètes</p>
+      </div>
+    );
+  }
+
   const generateAndDownload = async () => {
     setGeneratingPdf(true);
     try {
       const pdf = generateLeasePDF({
         leaseId: contractData.id,
-        contractNumber: contractData.contract_number,
-        propertyTitle: contractData.property.title,
-        propertyAddress: contractData.property.address,
-        propertyCity: contractData.property.city,
-        propertyType: contractData.property.property_type,
-        surfaceArea: contractData.property.surface_area,
-        bedrooms: contractData.property.bedrooms,
-        bathrooms: contractData.property.bathrooms,
-        propertyDescription: contractData.property.description,
-        landlordName: contractData.owner.full_name,
-        landlordEmail: contractData.owner.email,
-        landlordPhone: contractData.owner.phone,
-        landlordAddress: contractData.owner.address,
-        tenantName: contractData.tenant.full_name,
-        tenantEmail: contractData.tenant.email,
-        tenantPhone: contractData.tenant.phone,
-        tenantAddress: contractData.tenant.address,
-        tenantProfession: contractData.tenant.profession,
-        monthlyRent: contractData.monthly_rent,
-        depositAmount: contractData.deposit_amount,
-        chargesAmount: contractData.charges_amount,
-        startDate: contractData.start_date,
-        endDate: contractData.end_date,
-        paymentDay: contractData.payment_day,
-        customClauses: contractData.custom_clauses
+        contractNumber: contractData.contract_number || '',
+        propertyTitle: contractData.property?.title || 'Propriété sans nom',
+        propertyAddress: contractData.property?.address || 'Adresse non spécifiée',
+        propertyCity: contractData.property?.city || 'Ville non spécifiée',
+        propertyType: contractData.property?.property_type || 'Type non spécifié',
+        surfaceArea: contractData.property?.surface_area || 0,
+        bedrooms: contractData.property?.bedrooms || 0,
+        bathrooms: contractData.property?.bathrooms || 0,
+        propertyDescription: contractData.property?.description || '',
+        landlordName: contractData.owner?.full_name || 'Propriétaire',
+        landlordEmail: contractData.owner?.email || '',
+        landlordPhone: contractData.owner?.phone || '',
+        landlordAddress: contractData.owner?.address || '',
+        tenantName: contractData.tenant?.full_name || 'Locataire',
+        tenantEmail: contractData.tenant?.email || '',
+        tenantPhone: contractData.tenant?.phone || '',
+        tenantAddress: contractData.tenant?.address || '',
+        tenantProfession: contractData.tenant?.profession || '',
+        monthlyRent: contractData.monthly_rent || 0,
+        depositAmount: contractData.deposit_amount || 0,
+        chargesAmount: contractData.charges_amount || 0,
+        startDate: contractData.start_date || '',
+        endDate: contractData.end_date || '',
+        paymentDay: contractData.payment_day || 1,
+        customClauses: contractData.custom_clauses || ''
       });
 
       pdf.save(`Contrat_${contractData.contract_number}.pdf`);
@@ -89,31 +107,31 @@ export default function ContractPreview({ contractData }: ContractPreviewProps) 
     try {
       const pdf = generateLeasePDF({
         leaseId: contractData.id,
-        contractNumber: contractData.contract_number,
-        propertyTitle: contractData.property.title,
-        propertyAddress: contractData.property.address,
-        propertyCity: contractData.property.city,
-        propertyType: contractData.property.property_type,
-        surfaceArea: contractData.property.surface_area,
-        bedrooms: contractData.property.bedrooms,
-        bathrooms: contractData.property.bathrooms,
-        propertyDescription: contractData.property.description,
-        landlordName: contractData.owner.full_name,
-        landlordEmail: contractData.owner.email,
-        landlordPhone: contractData.owner.phone,
-        landlordAddress: contractData.owner.address,
-        tenantName: contractData.tenant.full_name,
-        tenantEmail: contractData.tenant.email,
-        tenantPhone: contractData.tenant.phone,
-        tenantAddress: contractData.tenant.address,
-        tenantProfession: contractData.tenant.profession,
-        monthlyRent: contractData.monthly_rent,
-        depositAmount: contractData.deposit_amount,
-        chargesAmount: contractData.charges_amount,
-        startDate: contractData.start_date,
-        endDate: contractData.end_date,
-        paymentDay: contractData.payment_day,
-        customClauses: contractData.custom_clauses
+        contractNumber: contractData.contract_number || '',
+        propertyTitle: contractData.property?.title || 'Propriété sans nom',
+        propertyAddress: contractData.property?.address || 'Adresse non spécifiée',
+        propertyCity: contractData.property?.city || 'Ville non spécifiée',
+        propertyType: contractData.property?.property_type || 'Type non spécifié',
+        surfaceArea: contractData.property?.surface_area || 0,
+        bedrooms: contractData.property?.bedrooms || 0,
+        bathrooms: contractData.property?.bathrooms || 0,
+        propertyDescription: contractData.property?.description || '',
+        landlordName: contractData.owner?.full_name || 'Propriétaire',
+        landlordEmail: contractData.owner?.email || '',
+        landlordPhone: contractData.owner?.phone || '',
+        landlordAddress: contractData.owner?.address || '',
+        tenantName: contractData.tenant?.full_name || 'Locataire',
+        tenantEmail: contractData.tenant?.email || '',
+        tenantPhone: contractData.tenant?.phone || '',
+        tenantAddress: contractData.tenant?.address || '',
+        tenantProfession: contractData.tenant?.profession || '',
+        monthlyRent: contractData.monthly_rent || 0,
+        depositAmount: contractData.deposit_amount || 0,
+        chargesAmount: contractData.charges_amount || 0,
+        startDate: contractData.start_date || '',
+        endDate: contractData.end_date || '',
+        paymentDay: contractData.payment_day || 1,
+        customClauses: contractData.custom_clauses || ''
       });
 
       const pdfDataUri = pdf.output('dataurlstring');
@@ -128,11 +146,11 @@ export default function ContractPreview({ contractData }: ContractPreviewProps) 
   };
 
   const calculateDuration = () => {
-    const start = new Date(contractData.start_date);
-    const end = new Date(contractData.end_date);
+    const start = new Date(contractData.start_date || '');
+    const end = new Date(contractData.end_date || '');
     const months = (end.getFullYear() - start.getFullYear()) * 12 +
                    (end.getMonth() - start.getMonth());
-    return months;
+    return months || 0;
   };
 
   return (
@@ -141,7 +159,7 @@ export default function ContractPreview({ contractData }: ContractPreviewProps) 
         <FileText className="w-8 h-8 text-orange-500" />
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Aperçu du contrat</h2>
-          <p className="text-sm text-gray-600">Référence: {contractData.contract_number}</p>
+          <p className="text-sm text-gray-600">Référence: {contractData.contract_number || 'N/A'}</p>
         </div>
       </div>
 

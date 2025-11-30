@@ -1,60 +1,124 @@
 import { supabase } from '@/services/supabase/client';
+import type { 
+  ChatMessage, 
+  ChatConversation, 
+  ChatMessageMetadata, 
+  ChatConversationMetadata,
+  ChatConversationStatus,
+  ChatConversationType
+} from '@/types/monToit.types';
 
-export interface ChatMessage {
-  id: string;
-  conversation_id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  metadata?: Record<string, any>;
-  created_at: string;
+/**
+ * Paramètres pour les appels à l'IA
+ */
+interface AIRequestParams {
+  userMessage: string;
+  conversationHistory: ChatMessage[];
+  userId: string | null;
+  temperature?: number;
+  maxTokens?: number;
+  useCache?: boolean;
 }
 
-export interface ChatConversation {
-  id: string;
-  user_id: string;
-  title: string;
-  status: 'active' | 'archived';
-  created_at: string;
-  updated_at: string;
+/**
+ * Réponse de l'API IA
+ */
+interface AIResponse {
+  content: string;
+  intent?: string;
+  confidence?: number;
+  suggestions?: string[];
+  metadata?: Record<string, unknown>;
 }
 
 class ChatbotService {
+  /**
+   * Récupère ou crée une conversation de chatbot pour un utilisateur
+   * @param userId - ID de l'utilisateur
+   * @returns La conversation créée ou existante, ou null en cas d'erreur
+   */
   async getOrCreateConversation(userId: string): Promise<ChatConversation | null> {
-    const { data: existingConversations, error: fetchError } = await supabase
-      .from('chatbot_conversations')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('status', 'active')
-      .order('updated_at', { ascending: false })
-      .limit(1);
+    try {
+      const { data: existingConversations, error: fetchError } = await supabase
+        .from('chatbot_conversations')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .order('updated_at', { ascending: false })
+        .limit(1);
 
-    if (fetchError) {
-      console.error('Error fetching conversation:', fetchError);
+      if (fetchError) {
+        console.error('Erreur lors de la récupération de la conversation:', fetchError);
+        return null;
+      }
+
+      if (existingConversations && existingConversations.length > 0) {
+        // Convertir les données de la base vers l'interface ChatConversation
+        return this.mapDatabaseToChatConversation(existingConversations[0]);
+      }
+
+      const title = this.generateConversationTitle();
+      const conversationMetadata: ChatConversationMetadata = {
+        priority: 'normal',
+        category: 'ai_assistant',
+        tags: ['chatbot', 'assistance'],
+        context: {
+          platform: 'web',
+          version: '1.0',
+          userAgent: navigator.userAgent
+        }
+      };
+
+      const { data: newConversation, error: createError } = await supabase
+        .from('chatbot_conversations')
+        .insert({
+          user_id: userId,
+          title,
+          status: 'active',
+          metadata: conversationMetadata
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Erreur lors de la création de la conversation:', createError);
+        return null;
+      }
+
+      return this.mapDatabaseToChatConversation(newConversation);
+    } catch (error) {
+      console.error('Erreur inattendue dans getOrCreateConversation:', error);
       return null;
     }
+  }
 
-    if (existingConversations && existingConversations.length > 0) {
-      return existingConversations[0];
+  /**
+   * Convertit les données de la base de données vers l'interface ChatConversation
+   */
+  private mapDatabaseToChatConversation(dbData: unknown): ChatConversation {
+    // Validation du type de données
+    if (typeof dbData !== 'object' || dbData === null) {
+      throw new Error('Données de conversation invalides');
     }
 
-    const title = this.generateConversationTitle();
-
-    const { data: newConversation, error: createError } = await supabase
-      .from('chatbot_conversations')
-      .insert({
-        user_id: userId,
-        title,
-        status: 'active',
-      })
-      .select()
-      .single();
-
-    if (createError) {
-      console.error('Error creating conversation:', createError);
-      return null;
-    }
-
-    return newConversation;
+    const data = dbData as Record<string, unknown>;
+    
+    return {
+      id: String(data.id || ''),
+      userId: String(data.user_id || ''),
+      title: String(data.title || ''),
+      status: (data.status as ChatConversationStatus) || 'active',
+      type: (data.metadata as ChatConversationMetadata)?.category || 'ai_assistant',
+      metadata: (data.metadata as ChatConversationMetadata) || {
+        priority: 'normal',
+        category: 'ai_assistant'
+      },
+      messageCount: Number(data.message_count || 0),
+      createdAt: new Date(String(data.created_at || Date.now())),
+      updatedAt: new Date(String(data.updated_at || Date.now())),
+      lastMessage: undefined, // Sera rempli par un appel séparé si nécessaire
+      archivedAt: data.archived_at ? new Date(String(data.archived_at)) : undefined
+    };
   }
 
   private generateConversationTitle(): string {
@@ -78,63 +142,194 @@ class ChatbotService {
     return `${randomTitle} - ${date}`;
   }
 
+  /**
+   * Met à jour le titre d'une conversation
+   * @param conversationId - ID de la conversation
+   * @param title - Nouveau titre
+   * @returns true si la mise à jour a réussi, false sinon
+   */
   async updateConversationTitle(conversationId: string, title: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('chatbot_conversations')
-      .update({ title })
-      .eq('id', conversationId);
+    try {
+      // Validation des paramètres
+      if (!conversationId || typeof conversationId !== 'string') {
+        console.error('ID de conversation invalide:', conversationId);
+        return false;
+      }
+      
+      if (!title || typeof title !== 'string' || title.trim().length === 0) {
+        console.error('Titre invalide:', title);
+        return false;
+      }
 
-    if (error) {
-      console.error('Error updating conversation title:', error);
+      const { error } = await supabase
+        .from('chatbot_conversations')
+        .update({ 
+          title: title.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', conversationId);
+
+      if (error) {
+        console.error('Erreur lors de la mise à jour du titre de conversation:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Erreur inattendue dans updateConversationTitle:', error);
       return false;
     }
-
-    return true;
   }
 
+  /**
+   * Récupère les messages d'une conversation
+   * @param conversationId - ID de la conversation
+   * @returns Liste des messages de la conversation
+   */
   async getConversationMessages(conversationId: string): Promise<ChatMessage[]> {
-    const { data, error } = await supabase
-      .from('chatbot_messages')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true });
+    try {
+      // Validation des paramètres
+      if (!conversationId || typeof conversationId !== 'string') {
+        console.error('ID de conversation invalide:', conversationId);
+        return [];
+      }
 
-    if (error) {
-      console.error('Error fetching messages:', error);
+      const { data, error } = await supabase
+        .from('chatbot_messages')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Erreur lors de la récupération des messages:', error);
+        return [];
+      }
+
+      // Convertir les données de la base vers l'interface ChatMessage
+      return (data || []).map(dbMessage => this.mapDatabaseToChatMessage(dbMessage));
+    } catch (error) {
+      console.error('Erreur inattendue dans getConversationMessages:', error);
       return [];
     }
-
-    return data || [];
   }
 
+  /**
+   * Convertit les données de la base de données vers l'interface ChatMessage
+   */
+  private mapDatabaseToChatMessage(dbData: unknown): ChatMessage {
+    if (typeof dbData !== 'object' || dbData === null) {
+      throw new Error('Données de message invalides');
+    }
+
+    const data = dbData as Record<string, unknown>;
+    
+    return {
+      id: String(data.id || ''),
+      conversationId: String(data.conversation_id || ''),
+      role: (data.role as 'user' | 'assistant' | 'system') || 'user',
+      content: String(data.content || ''),
+      metadata: (data.metadata as ChatMessageMetadata) || {
+        intent: undefined,
+        confidence: undefined,
+        suggestions: [],
+        context: {},
+        processingTimeMs: undefined,
+        aiModel: 'unknown',
+        fallbackUsed: false
+      },
+      timestamp: new Date(String(data.created_at || Date.now())),
+      isRead: Boolean(data.is_read || false),
+      readAt: data.read_at ? new Date(String(data.read_at)) : undefined,
+      attachments: (data.attachments as unknown[])?.map(att => att as any) || [],
+      reactions: (data.reactions as unknown[])?.map(r => r as any) || []
+    };
+  }
+
+  /**
+   * Envoie un message dans une conversation
+   * @param conversationId - ID de la conversation
+   * @param content - Contenu du message
+   * @param role - Rôle de l'émetteur du message
+   * @returns Le message créé ou null en cas d'erreur
+   */
   async sendMessage(
     conversationId: string,
     content: string,
     role: 'user' | 'assistant' = 'user'
   ): Promise<ChatMessage | null> {
-    const { data, error } = await supabase
-      .from('chatbot_messages')
-      .insert({
-        conversation_id: conversationId,
-        role,
-        content,
-      })
-      .select()
-      .single();
+    try {
+      // Validation des paramètres
+      if (!conversationId || typeof conversationId !== 'string') {
+        console.error('ID de conversation invalide:', conversationId);
+        return null;
+      }
+      
+      if (!content || typeof content !== 'string' || content.trim().length === 0) {
+        console.error('Contenu de message invalide:', content);
+        return null;
+      }
 
-    if (error) {
-      console.error('Error sending message:', error);
+      if (!['user', 'assistant', 'system'].includes(role)) {
+        console.error('Rôle invalide:', role);
+        return null;
+      }
+
+      const messageMetadata: ChatMessageMetadata = {
+        intent: undefined,
+        confidence: undefined,
+        suggestions: [],
+        context: {
+          timestamp: new Date().toISOString(),
+          source: role
+        },
+        aiModel: role === 'assistant' ? 'openai-gpt4' : undefined,
+        fallbackUsed: false
+      };
+
+      const { data, error } = await supabase
+        .from('chatbot_messages')
+        .insert({
+          conversation_id: conversationId,
+          role,
+          content: content.trim(),
+          metadata: messageMetadata,
+          is_read: false
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erreur lors de l\'envoi du message:', error);
+        return null;
+      }
+
+      return this.mapDatabaseToChatMessage(data);
+    } catch (error) {
+      console.error('Erreur inattendue dans sendMessage:', error);
       return null;
     }
-
-    return data;
   }
 
-  async getAIResponse(
-    userMessage: string,
-    conversationHistory: ChatMessage[],
-    userId: string | null = null
-  ): Promise<string> {
+  /**
+   * Obtient une réponse de l'IA pour un message utilisateur
+   * @param userMessage - Message de l'utilisateur
+   * @param conversationHistory - Historique de la conversation
+   * @param userId - ID de l'utilisateur (optionnel)
+   * @returns Réponse de l'IA ou réponse de fallback en cas d'erreur
+   */
+  async getAIResponse(params: AIRequestParams): Promise<string> {
+    const { userMessage, conversationHistory, userId, temperature = 0.8, maxTokens = 1000 } = params;
+    
+    // Validation des paramètres
+    if (!userMessage || typeof userMessage !== 'string' || userMessage.trim().length === 0) {
+      console.error('Message utilisateur invalide:', userMessage);
+      return this.getFallbackResponse('Message invalide');
+    }
+
+    if (!Array.isArray(conversationHistory)) {
+      console.error('Historique de conversation invalide:', conversationHistory);
+      return this.getFallbackResponse('Erreur de conversation');
+    }
     try {
       const systemPrompt = `Tu es SUTA, l'assistant virtuel PROTECTEUR de Mon Toit, la plateforme de location immobilière sécurisée en Côte d'Ivoire.
 
@@ -228,38 +423,67 @@ Si tu ne connais pas une réponse, dis-le honnêtement et propose de contacter l
 
       const functionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chatbot`;
 
+      const requestBody = {
+        messages,
+        userId,
+        temperature,
+        maxTokens,
+        context: {
+          platform: 'mon_toit_chatbot',
+          version: '1.0',
+          timestamp: new Date().toISOString()
+        }
+      };
+
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
-        body: JSON.stringify({
-          messages,
-          userId,
-          temperature: 0.8,
-          maxTokens: 1000,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Edge function error:', errorData);
-        throw new Error(errorData.error || 'Failed to get AI response');
+        let errorData: Record<string, unknown> = {};
+        try {
+          errorData = await response.json();
+        } catch {
+          // Erreur lors du parsing JSON de la réponse d'erreur
+          errorData = { error: `HTTP ${response.status}: ${response.statusText}` };
+        }
+        console.error('Erreur de la fonction edge:', errorData);
+        throw new Error(String(errorData.error || 'Impossible d\'obtenir la réponse IA'));
       }
 
-      const data = await response.json();
-      console.log('✅ AI Response received successfully from edge function');
-      return data.content;
+      const responseData: AIResponse = await response.json();
+      console.log('✅ Réponse IA reçue avec succès de la fonction edge');
+      
+      if (!responseData.content || typeof responseData.content !== 'string') {
+        throw new Error('Contenu de réponse IA invalide');
+      }
+      
+      return responseData.content;
     } catch (error) {
-      console.error('❌ Error getting AI response:', error);
-      console.log('🔄 Using intelligent fallback system');
+      console.error('❌ Erreur lors de l\'obtention de la réponse IA:', error);
+      console.log('🔄 Utilisation du système de fallback intelligent');
 
-      return this.getFallbackResponse(userMessage);
+      // Déterminer le message à utiliser pour le fallback
+      const fallbackMessage = typeof userMessage === 'string' ? userMessage : 'message d\'erreur';
+      return this.getFallbackResponse(fallbackMessage);
     }
   }
 
+  /**
+   * Génère une réponse de fallback en cas d'erreur de l'IA
+   * @param userMessage - Message de l'utilisateur qui a causé l'erreur
+   * @returns Réponse de fallback contextualisée
+   */
   private getFallbackResponse(userMessage: string): string {
+    // Validation du paramètre
+    if (typeof userMessage !== 'string' || userMessage.trim().length === 0) {
+      userMessage = 'message utilisateur';
+    }
     const lowerMessage = userMessage.toLowerCase();
 
     if (this.detectScam(lowerMessage)) {
@@ -412,33 +636,70 @@ Dans quel quartier cherches-tu ? Je vais te trouver des options FIABLES avec bad
 ⚠️ **RAPPEL** : Processus légitime = Visite → Signature bail → Paiement plateforme → Emménagement`;
   }
 
+  /**
+   * Archive une conversation
+   * @param conversationId - ID de la conversation à archiver
+   * @returns true si l'archivage a réussi, false sinon
+   */
   async archiveConversation(conversationId: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('chatbot_conversations')
-      .update({ status: 'archived' })
-      .eq('id', conversationId);
+    try {
+      // Validation des paramètres
+      if (!conversationId || typeof conversationId !== 'string') {
+        console.error('ID de conversation invalide:', conversationId);
+        return false;
+      }
 
-    if (error) {
-      console.error('Error archiving conversation:', error);
+      const { error } = await supabase
+        .from('chatbot_conversations')
+        .update({ 
+          status: 'archived' as ChatConversationStatus,
+          archived_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', conversationId);
+
+      if (error) {
+        console.error('Erreur lors de l\'archivage de la conversation:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Erreur inattendue dans archiveConversation:', error);
       return false;
     }
-
-    return true;
   }
 
+  /**
+   * Récupère toutes les conversations d'un utilisateur
+   * @param userId - ID de l'utilisateur
+   * @returns Liste des conversations de l'utilisateur
+   */
   async getAllConversations(userId: string): Promise<ChatConversation[]> {
-    const { data, error } = await supabase
-      .from('chatbot_conversations')
-      .select('*')
-      .eq('user_id', userId)
-      .order('updated_at', { ascending: false });
+    try {
+      // Validation des paramètres
+      if (!userId || typeof userId !== 'string') {
+        console.error('ID utilisateur invalide:', userId);
+        return [];
+      }
 
-    if (error) {
-      console.error('Error fetching conversations:', error);
+      const { data, error } = await supabase
+        .from('chatbot_conversations')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        console.error('Erreur lors de la récupération des conversations:', error);
+        return [];
+      }
+
+      // Convertir les données de la base vers l'interface ChatConversation
+      return (data || []).map(dbConversation => this.mapDatabaseToChatConversation(dbConversation));
+    } catch (error) {
+      console.error('Erreur inattendue dans getAllConversations:', error);
       return [];
     }
-
-    return data || [];
   }
 }
 

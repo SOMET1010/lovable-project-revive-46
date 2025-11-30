@@ -265,7 +265,7 @@ function CreateAgentForm({ onBack, onSuccess }: any) {
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
-          id: userData.user.id,
+          id: userData?.user?.id,
           email: formData.email,
           first_name: formData.fullName.split(' ')[0],
           last_name: formData.fullName.split(' ').slice(1).join(' '),
@@ -278,7 +278,7 @@ function CreateAgentForm({ onBack, onSuccess }: any) {
       const { error: agentError } = await supabase
         .from('trust_agents')
         .insert({
-          user_id: userData.user.id,
+          user_id: userData?.user?.id,
           full_name: formData.fullName,
           email: formData.email,
           phone: formData.phone,

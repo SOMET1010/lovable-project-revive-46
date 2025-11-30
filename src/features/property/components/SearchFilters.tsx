@@ -1,7 +1,8 @@
 import { SlidersHorizontal, X, MapPin, Home, Bed, Bath, DollarSign, Sofa, ParkingCircle, Wind } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Button from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
+import { useDebouncedPropertyFilters, useDebouncedCallback } from '../../../hooks/useDebouncedQueries';
 import type { Database } from '@/shared/lib/database.types';
 
 type PropertyType = Database['public']['Tables']['properties']['Row']['property_type'];
@@ -57,6 +58,36 @@ export default function SearchFilters({
   onReset,
 }: SearchFiltersProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  
+  // Hook pour les filtres débouncés
+  const {
+    debouncedFilters,
+    updateFilters,
+    hasChanges,
+  } = useDebouncedPropertyFilters(
+    {
+      city: searchCity,
+      propertyType,
+      propertyCategory,
+      minPrice,
+      maxPrice,
+      bedrooms,
+      bathrooms,
+      isFurnished,
+      hasParking,
+      hasAC,
+    },
+    (filters) => {
+      // Callback appelé après debouncing
+      // Peut déclencher une recherche automatique si nécessaire
+      console.log('Filtres débouncés:', filters);
+    }
+  );
+
+  // Débouncer les changements de filtres pour éviter les requêtes spam
+  const debouncedUpdateFilters = useDebouncedCallback((updates: any) => {
+    updateFilters(updates);
+  }, 300);
 
   const ivoirianCities = [
     'Abidjan', 'Yamoussoukro', 'Bouaké', 'Daloa', 'San-Pédro',
@@ -103,7 +134,11 @@ export default function SearchFilters({
           </label>
           <select
             value={searchCity}
-            onChange={(e) => setSearchCity(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSearchCity(value);
+              debouncedUpdateFilters({ city: value });
+            }}
             className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           >
             <option value="">Toutes les villes</option>
@@ -123,7 +158,11 @@ export default function SearchFilters({
           </label>
           <select
             value={propertyType}
-            onChange={(e) => setPropertyType(e.target.value as PropertyType | '')}
+            onChange={(e) => {
+              const value = e.target.value as PropertyType | '';
+              setPropertyType(value);
+              debouncedUpdateFilters({ propertyType: value });
+            }}
             className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           >
             <option value="">Tous les types</option>
@@ -144,7 +183,11 @@ export default function SearchFilters({
           <input
             type="number"
             value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setMinPrice(value);
+              debouncedUpdateFilters({ minPrice: value });
+            }}
             placeholder="Ex: 50000"
             className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           />
@@ -159,7 +202,11 @@ export default function SearchFilters({
           <input
             type="number"
             value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              setMaxPrice(value);
+              debouncedUpdateFilters({ maxPrice: value });
+            }}
             placeholder="Ex: 500000"
             className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           />
@@ -189,7 +236,11 @@ export default function SearchFilters({
               </label>
               <select
                 value={bedrooms}
-                onChange={(e) => setBedrooms(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setBedrooms(value);
+                  debouncedUpdateFilters({ bedrooms: value });
+                }}
                 className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
                 <option value="">Indifférent</option>
@@ -209,7 +260,11 @@ export default function SearchFilters({
               </label>
               <select
                 value={bathrooms}
-                onChange={(e) => setBathrooms(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setBathrooms(value);
+                  debouncedUpdateFilters({ bathrooms: value });
+                }}
                 className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
                 <option value="">Indifférent</option>
@@ -227,7 +282,11 @@ export default function SearchFilters({
             <label className="block text-sm font-medium text-gray-700 mb-3">Équipements</label>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setIsFurnished(isFurnished === true ? null : true)}
+                onClick={() => {
+                  const newValue = isFurnished === true ? null : true;
+                  setIsFurnished(newValue);
+                  debouncedUpdateFilters({ isFurnished: newValue });
+                }}
                 className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
                   isFurnished === true
                     ? 'bg-blue-50 border-blue-500 text-blue-700'
@@ -240,7 +299,11 @@ export default function SearchFilters({
                 Meublé
               </button>
               <button
-                onClick={() => setHasParking(hasParking === true ? null : true)}
+                onClick={() => {
+                  const newValue = hasParking === true ? null : true;
+                  setHasParking(newValue);
+                  debouncedUpdateFilters({ hasParking: newValue });
+                }}
                 className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
                   hasParking === true
                     ? 'bg-blue-50 border-blue-500 text-blue-700'
@@ -253,7 +316,11 @@ export default function SearchFilters({
                 Parking
               </button>
               <button
-                onClick={() => setHasAC(hasAC === true ? null : true)}
+                onClick={() => {
+                  const newValue = hasAC === true ? null : true;
+                  setHasAC(newValue);
+                  debouncedUpdateFilters({ hasAC: newValue });
+                }}
                 className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
                   hasAC === true
                     ? 'bg-blue-50 border-blue-500 text-blue-700'

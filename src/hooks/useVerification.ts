@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/services/supabase/client';
 
 interface VerificationData {
@@ -22,21 +22,36 @@ export function useVerification(userId: string | undefined) {
   const [verification, setVerification] = useState<VerificationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const loadVerificationData = async () => {
     if (!userId) return;
 
     try {
+      // Annuler la requête précédente si elle existe
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Créer un nouveau AbortController
+      abortControllerRef.current = new AbortController();
+
       const { data, error: fetchError } = await supabase
         .from('user_verifications')
         .select('*')
         .eq('user_id', userId)
-        .maybeSingle();
+        .maybeSingle()
+        .abortSignal(abortControllerRef.current.signal);
 
       if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
 
       setVerification(data);
     } catch (err: any) {
+      // Ignorer les erreurs d'annulation
+      if (err.name === 'AbortError') {
+        return;
+      }
       console.error('Error loading verification:', err);
       setError('Erreur lors du chargement des données de vérification');
     } finally {
@@ -46,6 +61,13 @@ export function useVerification(userId: string | undefined) {
 
   useEffect(() => {
     loadVerificationData();
+
+    // Cleanup function
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [userId]);
 
   return { verification, loading, error, reload: loadVerificationData };

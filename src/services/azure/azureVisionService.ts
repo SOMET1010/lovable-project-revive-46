@@ -278,7 +278,7 @@ class AzureVisionService {
 
     for (const [type, keywords] of Object.entries(roomTypes)) {
       const matches = keywords.filter((keyword) =>
-        [...data.tags, ...data.objects.map((o) => o.object), data.description]
+        [...(data.tags || []), ...(data.objects || []).map((o: any) => o.object), data.description || '']
           .join(' ')
           .toLowerCase()
           .includes(keyword.toLowerCase())
@@ -291,12 +291,12 @@ class AzureVisionService {
     }
 
     const qualityFactors = {
-      hasGoodLighting: data.color.dominantColors.includes('White') ||
-        data.color.dominantColorBackground === 'White',
-      isNotBlurry: data.imageType.clipArtType === 0,
-      hasNoAdultContent: !data.adult.isAdultContent,
-      hasObjects: data.objects.length > 0,
-      hasDescription: data.description.length > 10,
+      hasGoodLighting: (data.color?.dominantColors || []).includes('White') ||
+        data.color?.dominantColorBackground === 'White',
+      isNotBlurry: (data.imageType?.clipArtType || 0) === 0,
+      hasNoAdultContent: !data.adult?.isAdultContent,
+      hasObjects: (data.objects || []).length > 0,
+      hasDescription: (data.description || '').length > 10,
     };
 
     const qualityScore = Object.values(qualityFactors).filter(Boolean).length * 20;

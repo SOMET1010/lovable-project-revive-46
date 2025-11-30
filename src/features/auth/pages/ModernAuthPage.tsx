@@ -94,7 +94,7 @@ export default function ModernAuthPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erreur lors de l\'envoi du code');
+        throw new Error(data?.error || 'Erreur lors de l\'envoi du code');
       }
 
       setSuccess(`Code envoyé par ${sendMethod === 'sms' ? 'SMS' : 'WhatsApp'}`);
@@ -131,10 +131,10 @@ export default function ModernAuthPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Code invalide');
+        throw new Error(data?.error || 'Code invalide');
       }
 
-      if (data.action === 'login') {
+      if (data?.action === 'login') {
         // Existing user - use magic link
         window.location.href = data.sessionUrl;
       } else {

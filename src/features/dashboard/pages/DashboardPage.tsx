@@ -106,12 +106,12 @@ export default function DashboardPage() {
         console.error('Erreur stats:', statsResult.error);
       }
 
-      setProfile(profileResult.data);
-      setStats(statsResult.data);
+      setProfile(profileResult.data || null);
+      setStats(statsResult.data || null);
       setFavorites(favoritesResult.data || []);
 
       // Charger les données supplémentaires
-      if (profileResult.data) {
+      if (profileResult.data?.id) {
         await Promise.all([
           loadVisits(profileResult.data.id),
           loadApplications(profileResult.data.id),

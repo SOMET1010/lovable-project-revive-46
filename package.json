@@ -17,6 +17,11 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "test:memory": "vitest run tests/memory-leaks-validation.test.ts",
+    "test:memory:watch": "vitest tests/memory-leaks-validation.test.ts --watch",
+    "memory-check": "node check-memory-leaks.js",
+    "memory-check:file": "node check-memory-leaks.js --file",
+    "memory-audit": "npm run memory-check && npm run test:memory",
     "prepare": "husky install"
   },
   "dependencies": {

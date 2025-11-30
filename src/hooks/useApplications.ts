@@ -4,6 +4,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCleanupRegistry } from '@/lib/cleanupRegistry';
 import type {
   Application,
   ApplicationFormData,
@@ -37,9 +38,11 @@ import {
 
 /**
  * Hook principal pour gérer les candidatures avec filtres et pagination
+ * Avec cleanup functions robustes
  */
 export function useApplications(options: UseApplicationsOptions = {}): UseApplicationsReturn {
   const queryClient = useQueryClient();
+  const cleanup = useCleanupRegistry('useApplications');
   const [filters, setFilters] = useState<ApplicationFilters>(options.filters || {});
   const [pagination, setPagination] = useState<ApplicationPagination>(
     options.pagination || { 
@@ -64,16 +67,24 @@ export function useApplications(options: UseApplicationsOptions = {}): UseApplic
     enabled: !options.autoRefresh,
   });
 
-  // Auto-refresh si activé
+  // Auto-refresh si activé avec cleanup automatique
   useEffect(() => {
     if (!options.autoRefresh || !options.refreshInterval) return;
 
-    const interval = setInterval(() => {
-      refetch();
-    }, options.refreshInterval);
+    const intervalId = cleanup.createInterval(
+      `applications-autorefresh-${Date.now()}`,
+      () => {
+        refetch();
+      },
+      options.refreshInterval,
+      'Auto-refresh interval for applications',
+      'useApplications'
+    );
 
-    return () => clearInterval(interval);
-  }, [options.autoRefresh, options.refreshInterval, refetch]);
+    return () => {
+      // Le cleanup automatique s'occupera de l'interval
+    };
+  }, [options.autoRefresh, options.refreshInterval, refetch, cleanup]);
 
   // Mutations
   const createApplicationMutation = useMutation({

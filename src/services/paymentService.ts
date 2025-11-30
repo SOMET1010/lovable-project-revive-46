@@ -1,8 +1,9 @@
 /**
  * Payment Service
- * Business logic for payment processing
+ * Business logic for payment processing avec gestion d'erreur robuste
  */
 
+import { ErrorHandler } from '@/lib/errorHandler';
 import type {
   MobileMoneyProvider,
   ProviderDetectionResult,
@@ -12,7 +13,166 @@ import type {
 } from '@/shared/types/payment.types';
 import { PROVIDER_PREFIXES, PROVIDER_FEES, PLATFORM_FEE_PERCENTAGE } from '@/shared/types/payment.types';
 
+// Context pour le logging
+const SERVICE_CONTEXT = { service: 'PaymentService', context: { module: 'payments' } };
+
+// Configuration de retry pour les opérations de paiement
+const PAYMENT_RETRY_CONFIG = {
+  maxRetries: 2, // Moins de retries pour les paiements
+  baseDelay: 2000, // Délai plus long pour les paiements
+  maxDelay: 10000,
+  timeout: 45000, // Timeout plus long pour les paiements
+  retryCondition: ErrorHandler.createExternalApiRetryCondition(),
+  onRetry: (attempt: number, error: any, delay: number) => {
+    console.warn(`[PaymentService] Retry attempt ${attempt} after ${delay}ms:`, error.message);
+  },
+};
+
 export class PaymentService {
+  /**
+   * Simuler un appel API externe pour traiter un paiement
+   * (Dans un vrai système, ceci ferait un appel à l'API du provider Mobile Money)
+   */
+  static async processPayment(
+    amount: number,
+    provider: MobileMoneyProvider,
+    phoneNumber: string,
+    transactionRef: string
+  ): Promise<{ success: boolean; transactionId?: string; error?: PaymentError }> {
+    return ErrorHandler.executeWithRetry(async () => {
+      // Simulation d'un appel API avec risque d'erreur
+      await this.simulateExternalApiCall();
+      
+      // Simulation de vérification du solde
+      const balanceCheck = await this.checkBalance(phoneNumber, provider);
+      if (!balanceCheck.sufficient) {
+        throw this.createPaymentError('INSUFFICIENT_BALANCE', { available: balanceCheck.available });
+      }
+
+      // Simulation du traitement du paiement
+      const paymentResult = await this.simulatePaymentProcessing(amount, provider, transactionRef);
+      
+      return paymentResult;
+    }, { ...SERVICE_CONTEXT, operation: 'processPayment' }, PAYMENT_RETRY_CONFIG);
+  }
+
+  /**
+   * Vérifier le statut d'une transaction
+   */
+  static async getTransactionStatus(transactionRef: string): Promise<{ 
+    status: 'pending' | 'completed' | 'failed';
+    details?: any;
+  }> {
+    return ErrorHandler.executeWithRetry(async () => {
+      // Simulation d'appel API pour vérifier le statut
+      await this.simulateExternalApiCall();
+      
+      // Simulation de réponse
+      const statuses = ['pending', 'completed', 'failed'] as const;
+      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+      
+      return {
+        status: randomStatus,
+        details: {
+          transactionRef,
+          checkedAt: new Date().toISOString(),
+          providerResponse: `Simulated response for ${transactionRef}`,
+        },
+      };
+    }, { ...SERVICE_CONTEXT, operation: 'getTransactionStatus' }, PAYMENT_RETRY_CONFIG);
+  }
+
+  /**
+   * Annuler une transaction en attente
+   */
+  static async cancelTransaction(transactionRef: string): Promise<{ success: boolean; error?: PaymentError }> {
+    return ErrorHandler.executeWithRetry(async () => {
+      await this.simulateExternalApiCall();
+      
+      // Simulation d'annulation
+      return { success: true };
+    }, { ...SERVICE_CONTEXT, operation: 'cancelTransaction' }, { ...PAYMENT_RETRY_CONFIG, maxRetries: 1 });
+  }
+
+  /**
+   * Envoyer OTP pour confirmation de paiement
+   */
+  static async sendPaymentOTP(phoneNumber: string, provider: MobileMoneyProvider): Promise<{ 
+    success: boolean; 
+    error?: PaymentError 
+  }> {
+    return ErrorHandler.executeWithRetry(async () => {
+      await this.simulateExternalApiCall();
+      
+      // Simulation d'envoi d'OTP
+      console.log(`[PaymentService] OTP sent to ${this.formatPhoneNumber(phoneNumber)} via ${this.getProviderName(provider)}`);
+      
+      return { success: true };
+    }, { ...SERVICE_CONTEXT, operation: 'sendPaymentOTP' }, PAYMENT_RETRY_CONFIG);
+  }
+
+  /**
+   * Vérifier le solde du compte Mobile Money
+   */
+  private static async checkBalance(
+    phoneNumber: string, 
+    provider: MobileMoneyProvider
+  ): Promise<{ sufficient: boolean; available: number }> {
+    await this.simulateExternalApiCall();
+    
+    // Simulation: solde aléatoire entre 1000 et 50000 FCFA
+    const balance = Math.floor(Math.random() * 49000) + 1000;
+    return {
+      sufficient: balance >= 1000, // Montant minimum
+      available: balance,
+    };
+  }
+
+  /**
+   * Simuler le traitement du paiement
+   */
+  private static async simulatePaymentProcessing(
+    amount: number,
+    provider: MobileMoneyProvider,
+    transactionRef: string
+  ): Promise<{ success: boolean; transactionId?: string; error?: PaymentError }> {
+    await this.simulateExternalApiCall();
+    
+    // Simulation: 10% de chance d'échec
+    if (Math.random() < 0.1) {
+      throw this.createPaymentError('PROVIDER_ERROR', { provider, amount });
+    }
+    
+    // Simulation: délai de traitement
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    return {
+      success: true,
+      transactionId: `${provider.toUpperCase()}_${transactionRef}_${Date.now()}`,
+    };
+  }
+
+  /**
+   * Simuler un appel API externe avec gestion d'erreur
+   */
+  private static async simulateExternalApiCall(): Promise<void> {
+    // Simulation de délai réseau
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+    
+    // Simulation d'erreurs réseau occasionnelles
+    if (Math.random() < 0.05) { // 5% de chance d'erreur réseau
+      const networkError = new Error('Network timeout');
+      networkError.name = 'NetworkError';
+      throw networkError;
+    }
+    
+    // Simulation d'erreurs serveur occasionnelles
+    if (Math.random() < 0.03) { // 3% de chance d'erreur serveur
+      const serverError = new Error('Internal server error');
+      serverError.status = 500;
+      throw serverError;
+    }
+  }
   /**
    * Detect Mobile Money provider from phone number
    */

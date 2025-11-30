@@ -404,7 +404,7 @@ class AnalyticsService {
     });
 
     if (error) throw error;
-    return data.data;
+    return data?.data;
   }
 
   // =====================================================
@@ -412,6 +412,25 @@ class AnalyticsService {
   // =====================================================
 
   private transformPlatformMetrics(data: any): PlatformMetrics {
+    if (!data) {
+      return {
+        date: new Date().toISOString(),
+        totalUsers: 0,
+        newUsers: 0,
+        activeUsers: 0,
+        tenantUsers: 0,
+        ownerUsers: 0,
+        totalProperties: 0,
+        newProperties: 0,
+        activeProperties: 0,
+        rentedProperties: 0,
+        totalViews: 0,
+        uniqueVisitors: 0,
+        totalSearches: 0,
+        totalFavorites: 0,
+      };
+    }
+    
     return {
       date: data.date,
       totalUsers: data.total_users,
@@ -438,6 +457,25 @@ class AnalyticsService {
   }
 
   private transformGeographicAnalytics(data: any): GeographicAnalytics {
+    if (!data) {
+      return {
+        date: new Date().toISOString(),
+        city: '',
+        neighborhood: null,
+        latitude: 0,
+        longitude: 0,
+        searchCount: 0,
+        viewCount: 0,
+        propertyCount: 0,
+        avgPrice: 0,
+        minPrice: 0,
+        maxPrice: 0,
+        demandScore: 0,
+        supplyScore: 0,
+        competitionScore: 0,
+      };
+    }
+    
     return {
       date: data.date,
       city: data.city,
@@ -457,6 +495,26 @@ class AnalyticsService {
   }
 
   private transformConversionFunnel(data: any): ConversionFunnel {
+    if (!data) {
+      return {
+        date: new Date().toISOString(),
+        step1Visitors: 0,
+        step2Searches: 0,
+        step3Views: 0,
+        step4Favorites: 0,
+        step5Applications: 0,
+        step6Visits: 0,
+        step7Leases: 0,
+        visitorToSearchRate: 0,
+        searchToViewRate: 0,
+        viewToFavoriteRate: 0,
+        favoriteToApplicationRate: 0,
+        applicationToVisitRate: 0,
+        visitToLeaseRate: 0,
+        overallConversionRate: 0,
+      };
+    }
+    
     return {
       date: data.date,
       step1Visitors: data.step_1_visitors,
