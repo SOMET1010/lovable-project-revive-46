@@ -11,9 +11,9 @@ import {
   BarChart3,
   RefreshCw,
   Download,
+  Play,
+  Pause,
 } from 'lucide-react';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 
 interface ServiceStats {
   service_name: string;
@@ -94,20 +94,20 @@ export default function AdminServiceMonitoring() {
   };
 
   const getStatusColor = (successRate: number) => {
-    if (successRate >= 95) return 'text-green-600 bg-green-100';
-    if (successRate >= 80) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
+    if (successRate >= 95) return 'text-[var(--color-semantic-success)] bg-[var(--color-semantic-success)]/10';
+    if (successRate >= 80) return 'text-[var(--color-semantic-warning)] bg-[var(--color-semantic-warning)]/10';
+    return 'text-[var(--color-semantic-error)] bg-[var(--color-semantic-error)]/10';
   };
 
   const getStatusIcon = (successRate: number) => {
-    if (successRate >= 95) return <CheckCircle className="w-5 h-5" />;
-    if (successRate >= 80) return <AlertTriangle className="w-5 h-5" />;
-    return <AlertTriangle className="w-5 h-5" />;
+    if (successRate >= 95) return <CheckCircle className="w-5 h-5 text-[var(--color-semantic-success)]" />;
+    if (successRate >= 80) return <AlertTriangle className="w-5 h-5 text-[var(--color-semantic-warning)]" />;
+    return <AlertTriangle className="w-5 h-5 text-[var(--color-semantic-error)]" />;
   };
 
   const getTrendIcon = (successRate: number) => {
-    if (successRate >= 95) return <TrendingUp className="w-4 h-4 text-green-600" />;
-    return <TrendingDown className="w-4 h-4 text-red-600" />;
+    if (successRate >= 95) return <TrendingUp className="w-4 h-4 text-[var(--color-semantic-success)]" />;
+    return <TrendingDown className="w-4 h-4 text-[var(--color-semantic-error)]" />;
   };
 
   const exportStats = () => {
@@ -133,19 +133,15 @@ export default function AdminServiceMonitoring() {
 
   if (!user || profile?.user_type !== 'admin') {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Accès refusé</h2>
-            <p className="text-gray-600">
-              Cette page est réservée aux administrateurs
-            </p>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Accès refusé</h2>
+          <p className="text-gray-600">
+            Cette page est réservée aux administrateurs
+          </p>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
@@ -157,245 +153,247 @@ export default function AdminServiceMonitoring() {
     : 0;
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-gray-50 pt-20 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <div className="flex items-center space-x-3 mb-2">
-                <Activity className="w-10 h-10 text-blue-600" />
-                <h1 className="text-4xl font-bold text-gray-900">
-                  Monitoring des Services
-                </h1>
+    <div className="p-6 space-y-6 bg-[var(--color-neutral-50)] min-h-screen">
+      {/* Header Section */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center space-x-3 mb-2">
+            <Activity className="w-8 h-8 text-[var(--color-primary-600)]" />
+            <h1 className="text-3xl font-bold text-[var(--color-neutral-900)]">
+              Monitoring Services
+            </h1>
+          </div>
+          <p className="text-[var(--color-neutral-700)]">
+            Surveillance temps réel - Services & Providers
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <select
+            value={selectedTimeRange}
+            onChange={(e) => setSelectedTimeRange(e.target.value)}
+            className="px-3 py-2 border border-[var(--color-neutral-300)] rounded-md bg-white text-[var(--color-neutral-900)] focus:ring-2 focus:ring-[var(--color-primary-600)] focus:border-transparent text-sm"
+          >
+            {timeRanges.map((range) => (
+              <option key={range.value} value={range.value}>
+                {range.label}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center space-x-1 px-3 py-2 bg-[var(--color-primary-600)] text-white rounded-md hover:bg-[var(--color-primary-700)] transition disabled:opacity-50 text-sm font-medium"
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+            <span>Actualiser</span>
+          </button>
+          <button
+            onClick={handleRunHealthCheck}
+            className="flex items-center space-x-1 px-3 py-2 bg-[var(--color-semantic-success)] text-white rounded-md hover:bg-[var(--color-semantic-success)]/90 transition text-sm font-medium"
+          >
+            <Activity className="w-4 h-4" />
+            <span>Vérifier Santé</span>
+          </button>
+          <button
+            onClick={exportStats}
+            className="flex items-center space-x-1 px-3 py-2 bg-[var(--color-neutral-600)] text-white rounded-md hover:bg-[var(--color-neutral-700)] transition text-sm font-medium"
+          >
+            <Download className="w-4 h-4" />
+            <span>Exporter</span>
+          </button>
+        </div>
+      </div>
+
+          {loading ? (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-primary-600)] mx-auto"></div>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-white rounded-lg shadow-sm border border-[var(--color-neutral-200)] p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[var(--color-neutral-700)] text-sm font-medium">Total Appels</span>
+                <BarChart3 className="w-5 h-5 text-[var(--color-primary-600)]" />
               </div>
-              <p className="text-gray-600 text-lg">
-                Surveillance en temps réel de tous les services et providers
+              <p className="text-2xl font-bold text-[var(--color-neutral-900)]">
+                {totalCalls.toLocaleString()}
               </p>
             </div>
-            <div className="flex items-center space-x-3">
-              <select
-                value={selectedTimeRange}
-                onChange={(e) => setSelectedTimeRange(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                {timeRanges.map((range) => (
-                  <option key={range.value} value={range.value}>
-                    {range.label}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-              >
-                <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-                <span>Actualiser</span>
-              </button>
-              <button
-                onClick={handleRunHealthCheck}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-              >
-                <Activity className="w-5 h-5" />
-                <span>Vérifier Santé</span>
-              </button>
-              <button
-                onClick={exportStats}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
-              >
-                <Download className="w-5 h-5" />
-                <span>Exporter</span>
-              </button>
+
+            <div className="bg-white rounded-lg shadow-sm border border-[var(--color-neutral-200)] p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[var(--color-neutral-700)] text-sm font-medium">Taux Réussite</span>
+                {getStatusIcon(overallSuccessRate)}
+              </div>
+              <p className={`text-2xl font-bold ${
+                overallSuccessRate >= 95 ? 'text-[var(--color-semantic-success)]' : 
+                overallSuccessRate >= 80 ? 'text-[var(--color-semantic-warning)]' : 
+                'text-[var(--color-semantic-error)]'
+              }`}>
+                {overallSuccessRate.toFixed(1)}%
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-[var(--color-neutral-200)] p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[var(--color-neutral-700)] text-sm font-medium">Temps Réponse</span>
+                <Clock className="w-5 h-5 text-[var(--color-primary-600)]" />
+              </div>
+              <p className="text-2xl font-bold text-[var(--color-neutral-900)]">
+                {avgResponseTime.toFixed(0)}ms
+              </p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-[var(--color-neutral-200)] p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[var(--color-neutral-700)] text-sm font-medium">Services Actifs</span>
+                <Activity className="w-5 h-5 text-[var(--color-semantic-success)]" />
+              </div>
+              <p className="text-2xl font-bold text-[var(--color-neutral-900)]">
+                {stats.length}
+              </p>
             </div>
           </div>
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600">Total d'Appels</span>
-                    <BarChart3 className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {totalCalls.toLocaleString()}
-                  </p>
+          {/* Facial Verification Cost Savings Section */}
+          {stats.filter(s => s.service_name === 'face_recognition').length > 0 && (
+            <div className="bg-gradient-to-br from-[var(--color-semantic-success)]/5 to-[var(--color-semantic-success)]/10 rounded-lg border border-[var(--color-semantic-success)]/20 p-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-[var(--color-semantic-success)]/10 rounded-full flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-[var(--color-semantic-success)]" />
                 </div>
-
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600">Taux de Réussite</span>
-                    {getStatusIcon(overallSuccessRate)}
-                  </div>
-                  <p className={`text-3xl font-bold ${overallSuccessRate >= 95 ? 'text-green-600' : overallSuccessRate >= 80 ? 'text-yellow-600' : 'text-red-600'}`}>
-                    {overallSuccessRate.toFixed(1)}%
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600">Temps Réponse Moy.</span>
-                    <Clock className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {avgResponseTime.toFixed(0)}ms
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-600">Services Actifs</span>
-                    <Activity className="w-6 h-6 text-green-600" />
-                  </div>
-                  <p className="text-3xl font-bold text-gray-900">
-                    {stats.length}
-                  </p>
+                <div>
+                  <h2 className="text-lg font-bold text-[var(--color-neutral-900)]">Reconnaissance Faciale - Économies</h2>
+                  <p className="text-xs text-[var(--color-neutral-700)]">Comparaison coûts providers</p>
                 </div>
               </div>
 
-              {/* Facial Verification Cost Savings Section */}
-              {stats.filter(s => s.service_name === 'face_recognition').length > 0 && (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl shadow-lg p-6 mb-8 border-2 border-green-200">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <Activity className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">Reconnaissance Faciale - Économies</h2>
-                      <p className="text-sm text-gray-600">Comparaison des coûts entre les providers</p>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-3 gap-3">
+                {stats.filter(s => s.service_name === 'face_recognition').map((faceStats) => {
+                  const costPerVerification = faceStats.provider === 'smileless' ? 0 :
+                                              faceStats.provider === 'azure' ? 0.75 : 0.90;
+                  const totalCost = (faceStats.success_count + faceStats.failure_count) * costPerVerification;
+                  const costSavedVsAzure = (faceStats.success_count + faceStats.failure_count) * 0.75;
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {stats.filter(s => s.service_name === 'face_recognition').map((faceStats) => {
-                      const costPerVerification = faceStats.provider === 'smileless' ? 0 :
-                                                  faceStats.provider === 'azure' ? 0.75 : 0.90;
-                      const totalCost = (faceStats.success_count + faceStats.failure_count) * costPerVerification;
-                      const costSavedVsAzure = (faceStats.success_count + faceStats.failure_count) * 0.75;
-
-                      return (
-                        <div key={faceStats.provider} className="bg-white rounded-lg p-4 shadow">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="font-semibold text-gray-900 capitalize">{faceStats.provider}</span>
-                            {faceStats.provider === 'smileless' && (
-                              <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded">
-                                GRATUIT
-                              </span>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Vérifications:</span>
-                              <span className="font-semibold">{faceStats.success_count + faceStats.failure_count}</span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Taux de réussite:</span>
-                              <span className={`font-semibold ${faceStats.success_rate >= 95 ? 'text-green-600' : 'text-yellow-600'}`}>
-                                {faceStats.success_rate.toFixed(1)}%
-                              </span>
-                            </div>
-                            <div className="flex justify-between text-sm border-t pt-2">
-                              <span className="text-gray-600">Coût total:</span>
-                              <span className="font-bold text-lg">
-                                {faceStats.provider === 'smileless' ? (
-                                  <span className="text-green-600">0 FCFA</span>
-                                ) : (
-                                  <span className="text-gray-900">{totalCost.toFixed(2)} FCFA</span>
-                                )}
-                              </span>
-                            </div>
-                            {faceStats.provider === 'smileless' && costSavedVsAzure > 0 && (
-                              <div className="bg-green-50 rounded p-2 text-center">
-                                <p className="text-xs text-green-700">Économie vs Azure:</p>
-                                <p className="font-bold text-green-600">{costSavedVsAzure.toFixed(2)} FCFA</p>
-                              </div>
-                            )}
-                          </div>
+                  return (
+                    <div key={faceStats.provider} className="bg-white rounded-md border border-[var(--color-neutral-200)] p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-semibold text-[var(--color-neutral-900)] text-sm capitalize">{faceStats.provider}</span>
+                        {faceStats.provider === 'smileless' && (
+                          <span className="px-2 py-1 bg-[var(--color-semantic-success)]/10 text-[var(--color-semantic-success)] text-xs font-bold rounded">
+                            GRATUIT
+                          </span>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[var(--color-neutral-700)]">Vérifications:</span>
+                          <span className="font-semibold">{faceStats.success_count + faceStats.failure_count}</span>
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    Détails par Service et Provider
-                  </h2>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Service
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Provider
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Taux de Réussite
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Succès
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Échecs
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Temps Réponse
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Tendance
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {stats.map((stat, index) => (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="font-semibold text-gray-900 capitalize">
-                              {stat.service_name.replace(/_/g, ' ')}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-gray-600 capitalize">{stat.provider}</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(stat.success_rate)}`}>
-                              {stat.success_rate.toFixed(2)}%
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-semibold">
-                            {stat.success_count.toLocaleString()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">
-                            {stat.failure_count.toLocaleString()}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {stat.avg_response_time ? `${stat.avg_response_time.toFixed(0)}ms` : 'N/A'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {getTrendIcon(stat.success_rate)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                        <div className="flex justify-between text-xs">
+                          <span className="text-[var(--color-neutral-700)]">Taux réussite:</span>
+                          <span className={`font-semibold ${faceStats.success_rate >= 95 ? 'text-[var(--color-semantic-success)]' : 'text-[var(--color-semantic-warning)]'}`}>
+                            {faceStats.success_rate.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs border-t pt-1">
+                          <span className="text-[var(--color-neutral-700)]">Coût total:</span>
+                          <span className="font-bold text-sm">
+                            {faceStats.provider === 'smileless' ? (
+                              <span className="text-[var(--color-semantic-success)]">0 FCFA</span>
+                            ) : (
+                              <span className="text-[var(--color-neutral-900)]">{totalCost.toFixed(2)} FCFA</span>
+                            )}
+                          </span>
+                        </div>
+                        {faceStats.provider === 'smileless' && costSavedVsAzure > 0 && (
+                          <div className="bg-[var(--color-semantic-success)]/5 rounded p-1 text-center mt-1">
+                            <p className="text-xs text-[var(--color-semantic-success)]/80">Économie vs Azure:</p>
+                            <p className="font-bold text-[var(--color-semantic-success)] text-sm">{costSavedVsAzure.toFixed(2)} FCFA</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </>
+            </div>
           )}
-        </div>
-      </div>
-      <Footer />
+
+          <div className="bg-white rounded-lg shadow-sm border border-[var(--color-neutral-200)] overflow-hidden">
+            <div className="px-4 py-3 bg-[var(--color-neutral-50)] border-b border-[var(--color-neutral-200)]">
+              <h2 className="text-lg font-bold text-[var(--color-neutral-900)]">
+                Détails Services & Providers
+              </h2>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-[var(--color-neutral-50)]">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-neutral-700)] uppercase">
+                      Service
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-neutral-700)] uppercase">
+                      Provider
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-neutral-700)] uppercase">
+                      Taux
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-neutral-700)] uppercase">
+                      Succès
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-neutral-700)] uppercase">
+                      Échecs
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-neutral-700)] uppercase">
+                      Temps
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-[var(--color-neutral-700)] uppercase">
+                      Tendance
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--color-neutral-200)]">
+                  {stats.map((stat, index) => (
+                    <tr key={index} className="hover:bg-[var(--color-neutral-50)]">
+                      <td className="px-3 py-2">
+                        <span className="font-semibold text-[var(--color-neutral-900)] capitalize text-xs">
+                          {stat.service_name.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className="text-[var(--color-neutral-700)] capitalize text-xs">{stat.provider}</span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(stat.success_rate)}`}>
+                          {stat.success_rate.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-[var(--color-semantic-success)] font-semibold text-xs">
+                        {stat.success_count.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2 text-[var(--color-semantic-error)] font-semibold text-xs">
+                        {stat.failure_count.toLocaleString()}
+                      </td>
+                      <td className="px-3 py-2 text-[var(--color-neutral-900)] text-xs">
+                        {stat.avg_response_time ? `${stat.avg_response_time.toFixed(0)}ms` : 'N/A'}
+                      </td>
+                      <td className="px-3 py-2">
+                        {getTrendIcon(stat.success_rate)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
     </>
   );
 }

@@ -3,7 +3,7 @@ import { Loader } from 'lucide-react';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'small' | 'medium' | 'large';
   loading?: boolean;
   fullWidth?: boolean;
 }
@@ -13,7 +13,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     {
       children,
       variant = 'primary',
-      size = 'md',
+      size = 'medium',
       loading = false,
       fullWidth = false,
       disabled,
@@ -22,35 +22,113 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref
   ) => {
-    const baseClasses =
-      'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-98 touch-manipulation';
+    const baseClasses = [
+      'inline-flex items-center justify-center',
+      'font-semibold font-regular',
+      'rounded-base',
+      'transition-fast ease-out',
+      'focus:outline-none focus:ring-2 focus:ring-offset-2',
+      'disabled:opacity-50 disabled:cursor-not-allowed',
+      'touch-manipulation',
+      // Accessibilité WCAG AA - target tactile minimum
+      'min-h-[var(--size-touch-target-min)]'
+    ].join(' ');
 
     const variantClasses = {
-      primary:
-        'bg-primary-500 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-md hover:shadow-lg active:bg-primary-900 transition-all duration-250 ease-out',
-      secondary:
-        'bg-transparent border-2 border-primary-500 text-primary-500 hover:bg-primary-50 hover:border-primary-700 hover:text-primary-700 focus:ring-primary-500 transition-all duration-250 ease-out',
-      outline:
-        'border-2 border-neutral-300 text-neutral-700 hover:bg-neutral-50 hover:border-neutral-400 focus:ring-neutral-400 transition-all duration-250 ease-out',
-      ghost: 'text-neutral-700 hover:bg-neutral-100 focus:ring-neutral-300 active:bg-neutral-200 transition-all duration-250 ease-out',
-      danger:
-        'bg-semantic-error text-white hover:bg-red-700 focus:ring-red-500 active:bg-red-800 shadow-md hover:shadow-lg transition-all duration-250 ease-out',
+      primary: [
+        'bg-primary-500',
+        'text-white',
+        'hover:bg-primary-700',
+        'active:bg-primary-900',
+        'focus:ring-primary-500',
+        'shadow-md',
+        'hover:shadow-lg',
+        'hover:scale-102', // Utilise transform pour l'effet hover
+      ].join(' '),
+      
+      secondary: [
+        'bg-transparent',
+        'border-2',
+        'border-primary-500',
+        'text-primary-500',
+        'hover:bg-primary-50',
+        'hover:border-primary-700',
+        'hover:text-primary-700',
+        'active:bg-primary-100',
+        'focus:ring-primary-500',
+      ].join(' '),
+      
+      outline: [
+        'border-2',
+        'border-neutral-100',
+        'text-neutral-700',
+        'hover:bg-neutral-50',
+        'hover:border-neutral-300',
+        'hover:text-neutral-900',
+        'focus:ring-neutral-500',
+      ].join(' '),
+      
+      ghost: [
+        'text-neutral-700',
+        'hover:bg-neutral-100',
+        'hover:text-neutral-900',
+        'focus:ring-neutral-300',
+        'active:bg-neutral-200',
+      ].join(' '),
+      
+      danger: [
+        'bg-semantic-error',
+        'text-white',
+        'hover:bg-red-700',
+        'active:bg-red-800',
+        'focus:ring-red-500',
+        'shadow-md',
+        'hover:shadow-lg',
+      ].join(' '),
     };
 
     const sizeClasses = {
-      sm: 'px-4 py-2 text-small min-h-[44px]', // Touch target minimum WCAG
-      md: 'px-6 py-3 text-body min-h-[48px]',  // Design system spacing
-      lg: 'px-8 py-4 text-h5 min-h-[56px]',
+      small: [
+        'px-4 py-2',
+        'text-small',
+        'min-h-[44px]', // WCAG AA minimum touch target
+      ].join(' '),
+      
+      medium: [
+        'px-6 py-3',
+        'text-body',
+        'min-h-[48px]', // Design system standard
+      ].join(' '),
+      
+      large: [
+        'px-8 py-4',
+        'text-h5',
+        'min-h-[56px]', // Large buttons for primary CTAs
+      ].join(' '),
     };
 
     const widthClass = fullWidth ? 'w-full' : '';
+    const loadingClass = loading ? 'cursor-wait' : '';
 
-    const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${widthClass} ${className}`;
+    const classes = [
+      baseClasses,
+      variantClasses[variant],
+      sizeClasses[size],
+      widthClass,
+      loadingClass,
+      className
+    ].filter(Boolean).join(' ');
 
     return (
-      <button ref={ref} disabled={disabled || loading} className={classes} {...props}>
-        {loading && <Loader className="mr-2 h-4 w-4 animate-spin" />}
-        {children}
+      <button 
+        ref={ref} 
+        disabled={disabled || loading} 
+        className={classes}
+        aria-busy={loading}
+        {...props}
+      >
+        {loading && <Loader className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+        <span className={loading ? 'opacity-70' : ''}>{children}</span>
       </button>
     );
   }

@@ -5,26 +5,30 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Couleur principale - Bleu professionnel
+        // Couleur principale - Orange MONTOIT avec variables CSS
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
-          950: '#172554',
+          50: 'var(--color-primary-50)',
+          100: 'var(--color-primary-100)',
+          500: 'var(--color-primary-500)',
+          600: 'var(--color-primary-600)',
+          700: 'var(--color-primary-700)',
+          900: 'var(--color-primary-900)',
         },
-        // Textes optimisés WCAG AA
-        text: {
-          primary: '#1a1a1a',
-          secondary: '#4a4a4a',
-          muted: '#6b7280',
-          disabled: '#9ca3af',
+        // Couleurs neutres WCAG AAA
+        neutral: {
+          50: 'var(--color-neutral-50)',
+          100: 'var(--color-neutral-100)',
+          200: 'var(--color-neutral-200)',
+          500: 'var(--color-neutral-500)',
+          700: 'var(--color-neutral-700)',
+          900: 'var(--color-neutral-900)',
+        },
+        // Couleurs sémantiques optimisées
+        semantic: {
+          success: 'var(--color-semantic-success)',
+          error: 'var(--color-semantic-error)',
+          warning: 'var(--color-semantic-warning)',
+          info: 'var(--color-semantic-info)',
         },
         terracotta: {
           50: '#fff9f7',

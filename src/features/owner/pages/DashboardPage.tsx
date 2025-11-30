@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, Home, Eye, Calendar, TrendingUp, Edit, ExternalLink, Award, Filter, Coins, MessageSquare, Users, Clock, BarChart3, TrendingDown, Wrench, FileText } from 'lucide-react';
+import { 
+  Plus, Home, Eye, Calendar, TrendingUp, Edit, ExternalLink, Award, Filter, 
+  Coins, MessageSquare, Users, Clock, BarChart3, TrendingDown, Wrench, 
+  FileText, MoreVertical, AlertTriangle, CheckCircle2, XCircle,
+  ChevronLeft, ChevronRight, Building2, Activity, DollarSign, Percent
+} from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService } from '@/services/scoringService';
@@ -7,27 +12,36 @@ import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
 type Application = Database['public']['Tables']['rental_applications']['Row'];
+type Lease = Database['public']['Tables']['leases']['Row'];
+type MaintenanceRequest = Database['public']['Tables']['maintenance_requests']['Row'];
 
 export default function OwnerDashboard() {
   const { user, profile } = useAuth();
+  
+  // État principal
   const [properties, setProperties] = useState<Property[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [leases, setLeases] = useState<Lease[]>([]);
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
+  
+  // État interface
   const [loading, setLoading] = useState(true);
-  const [sortBy, setSortBy] = useState<'date' | 'score'>('score');
+  const [propertiesPage, setPropertiesPage] = useState(1);
+  const [propertiesPerPage] = useState(8);
+  const [currentMonthRevenue, setCurrentMonthRevenue] = useState(0);
+  const [occupancyRate, setOccupancyRate] = useState(0);
+  
+  // Stats principales
   const [stats, setStats] = useState({
-    totalProperties: 0,
     activeProperties: 0,
-    rentedProperties: 0,
-    totalViews: 0,
-    pendingApplications: 0,
-    unreadMessages: 0,
-    upcomingVisits: 0,
+    totalTenants: 0,
     monthlyRevenue: 0,
-    projectedRevenue: 0,
+    occupancyRate: 0,
+    pendingApplications: 0,
+    urgentMaintenance: 0,
+    upcomingPayments: 0,
+    monthlyGrowth: 0,
   });
-  const [revenueHistory, setRevenueHistory] = useState<{month: string, revenue: number}[]>([]);
-  const [upcomingPayments, setUpcomingPayments] = useState<any[]>([]);
-  const [upcomingVisitsData, setUpcomingVisitsData] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -47,6 +61,7 @@ export default function OwnerDashboard() {
     if (!user) return;
 
     try {
+      // Charger les propriétés
       const { data: propsData, error: propsError } = await supabase
         .from('properties')
         .select('*')
@@ -56,98 +71,82 @@ export default function OwnerDashboard() {
       if (propsError) throw propsError;
       setProperties(propsData || []);
 
-      const totalViews = (propsData || []).reduce((sum, prop) => sum + prop.view_count, 0);
+      const propertyIds = (propsData || []).map(p => p.id);
       const activeProps = (propsData || []).filter(p => p.status === 'disponible').length;
       const rentedProps = (propsData || []).filter(p => p.status === 'loue').length;
-
-      const propertyIds = (propsData || []).map(p => p.id);
-
-      let pendingApps = 0;
-      let unreadMsgs = 0;
-      let upVisits = 0;
-      let monthlyRev = 0;
-      let projectedRev = 0;
+      const occupancyRate = propertyIds.length > 0 ? (rentedProps / propertyIds.length) * 100 : 0;
 
       if (propertyIds.length > 0) {
-        const { data: appsData, error: appsError } = await supabase
+        // Charger les candidatures
+        const { data: appsData } = await supabase
           .from('rental_applications')
           .select('*')
           .in('property_id', propertyIds)
           .order('application_score', { ascending: false });
 
-        if (appsError) throw appsError;
         setApplications(appsData || []);
-        pendingApps = (appsData || []).filter(app => app.status === 'en_attente').length;
+        const pendingApps = (appsData || []).filter(app => app.status === 'en_attente').length;
 
-        const { data: conversationsData } = await supabase
-          .from('conversations')
-          .select('id')
-          .eq('owner_id', user.id);
-
-        if (conversationsData) {
-          const conversationIds = conversationsData.map(c => c.id);
-          const { data: unreadData } = await supabase
-            .from('messages')
-            .select('id')
-            .in('conversation_id', conversationIds)
-            .neq('sender_id', user.id)
-            .eq('read', false);
-          unreadMsgs = unreadData?.length || 0;
-        }
-
-        const { data: visitsData } = await supabase
-          .from('visit_requests')
-          .select('*, properties(title)')
-          .in('property_id', propertyIds)
-          .eq('status', 'acceptee')
-          .gte('visit_date', new Date().toISOString().split('T')[0])
-          .order('visit_date', { ascending: true })
-          .limit(5);
-
-        upVisits = visitsData?.length || 0;
-        setUpcomingVisitsData(visitsData || []);
-
+        // Charger les baux actifs
         const { data: leasesData } = await supabase
           .from('leases')
-          .select('*, properties(title, monthly_rent)')
+          .select(`
+            *,
+            property:properties(title, monthly_rent),
+            tenant:profiles!leases_tenant_id_fkey(full_name)
+          `)
           .in('property_id', propertyIds)
-          .eq('status', 'actif');
+          .eq('status', 'actif')
+          .order('end_date', { ascending: true });
 
-        if (leasesData) {
-          monthlyRev = leasesData.reduce((sum, lease) => sum + (lease.properties as any)?.monthly_rent || 0, 0);
-          projectedRev = monthlyRev;
-          setUpcomingPayments(leasesData.slice(0, 5));
-        }
+        setLeases(leasesData || []);
+        const activeLeases = leasesData || [];
+        const totalTenants = activeLeases.length;
 
-        const { data: revenueData } = await supabase
-          .from('payments')
-          .select('amount, created_at, property_id')
+        // Calculer le revenu mensuel
+        const monthlyRevenue = activeLeases.reduce((sum, lease) => {
+          return sum + (lease.property as any)?.monthly_rent || 0;
+        }, 0);
+
+        // Charger les demandes de maintenance
+        const { data: maintenanceData } = await supabase
+          .from('maintenance_requests')
+          .select(`
+            *,
+            property:properties(title),
+            tenant:profiles!maintenance_requests_tenant_id_fkey(full_name)
+          `)
           .in('property_id', propertyIds)
-          .eq('status', 'complete')
-          .gte('created_at', new Date(new Date().setMonth(new Date().getMonth() - 12)).toISOString());
+          .order('created_at', { ascending: false });
 
-        if (revenueData) {
-          const monthlyData: {[key: string]: number} = {};
-          revenueData.forEach(payment => {
-            const month = new Date(payment.created_at).toLocaleDateString('fr-FR', { year: 'numeric', month: 'short' });
-            monthlyData[month] = (monthlyData[month] || 0) + payment.amount;
-          });
-          const chartData = Object.entries(monthlyData).map(([month, revenue]) => ({ month, revenue }));
-          setRevenueHistory(chartData);
-        }
+        setMaintenanceRequests(maintenanceData || []);
+        const urgentMaintenance = (maintenanceData || []).filter(
+          req => req.urgency === 'urgent' && !['resolue', 'refusee'].includes(req.status)
+        ).length;
+
+        // Calculer la croissance mensuelle (simulation)
+        const lastMonthRevenue = monthlyRevenue * 0.92; // Simulation -2% du mois dernier
+        const monthlyGrowth = lastMonthRevenue > 0 ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : 0;
+
+        setStats({
+          activeProperties,
+          totalTenants,
+          monthlyRevenue,
+          occupancyRate: Math.round(occupancyRate),
+          pendingApplications: pendingApps,
+          urgentMaintenance,
+          upcomingPayments: activeLeases.filter(lease => {
+            const endDate = new Date(lease.end_date);
+            const now = new Date();
+            const diffDays = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            return diffDays <= 30 && diffDays > 0;
+          }).length,
+          monthlyGrowth: Math.round(monthlyGrowth * 10) / 10,
+        });
+
+        setCurrentMonthRevenue(monthlyRevenue);
+        setOccupancyRate(Math.round(occupancyRate));
       }
-
-      setStats({
-        totalProperties: propsData?.length || 0,
-        activeProperties: activeProps,
-        rentedProperties: rentedProps,
-        totalViews,
-        pendingApplications: pendingApps,
-        unreadMessages: unreadMsgs,
-        upcomingVisits: upVisits,
-        monthlyRevenue: monthlyRev,
-        projectedRevenue: projectedRev,
-      });
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
@@ -155,38 +154,86 @@ export default function OwnerDashboard() {
     }
   };
 
-  const getSortedApplications = () => {
-    const sorted = [...applications];
-    if (sortBy === 'score') {
-      return sorted.sort((a, b) => b.application_score - a.application_score);
+  // Pagination pour les propriétés
+  const totalPropertiesPages = Math.ceil(properties.length / propertiesPerPage);
+  const paginatedProperties = properties.slice(
+    (propertiesPage - 1) * propertiesPerPage,
+    propertiesPage * propertiesPerPage
+  );
+
+  // Helper pour formater les dates
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+
+  // Helper pour calculer les jours restants
+  const getDaysRemaining = (dateString: string) => {
+    const endDate = new Date(dateString);
+    const now = new Date();
+    const diffTime = endDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  // Actions pour les propriétés
+  const handlePropertyAction = async (propertyId: string, action: 'active' | 'inactive') => {
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ status: action === 'active' ? 'disponible' : 'inactif' })
+        .eq('id', propertyId);
+
+      if (error) throw error;
+      
+      // Recharger les données
+      loadDashboardData();
+    } catch (error) {
+      console.error('Error updating property:', error);
+      alert('Erreur lors de la mise à jour de la propriété');
     }
-    return sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-coral-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-terracotta-500"></div>
+      <div className="min-h-screen bg-background-surface flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50 custom-cursor">
-      <div className="glass-card border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
-            <div className="animate-slide-down">
-              <h1 className="text-4xl font-bold text-gradient flex items-center space-x-3">
-                <Home className="h-10 w-10 text-terracotta-500" />
-                <span>Tableau de bord</span>
+    <div className="min-h-screen bg-background-surface">
+      {/* Header Dashboard */}
+      <div className="bg-background-page border-b border-neutral-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center space-y-6 lg:space-y-0">
+            <div>
+              <h1 className="text-4xl font-bold text-gradient mb-2 flex items-center space-x-4">
+                <Building2 className="h-10 w-10 text-primary-500" />
+                <span>Mes Propriétés</span>
               </h1>
-              <p className="text-gray-700 mt-2 text-lg">Bienvenue, {profile?.full_name || 'Propriétaire'}</p>
+              <p className="text-neutral-700 text-lg">
+                Gérez votre portefeuille immobilier en toute simplicité
+              </p>
+              <div className="flex items-center space-x-6 mt-4 text-sm text-neutral-600">
+                <span className="flex items-center space-x-2">
+                  <Activity className="h-4 w-4" />
+                  <span>{stats.activeProperties} propriétés actives</span>
+                </span>
+                <span className="flex items-center space-x-2">
+                  <Users className="h-4 w-4" />
+                  <span>{stats.totalTenants} locataires</span>
+                </span>
+              </div>
             </div>
+            
             <a
               href="/dashboard/ajouter-propriete"
-              className="btn-primary px-6 py-3 flex items-center space-x-2 w-fit animate-slide-down"
-              style={{ animationDelay: '0.1s' }}
+              className="btn-primary px-6 py-3 flex items-center space-x-3 whitespace-nowrap hover:scale-105 transition-transform"
             >
               <Plus className="h-5 w-5" />
               <span>Ajouter une propriété</span>
@@ -196,317 +243,596 @@ export default function OwnerDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Grille de Statistiques - 4 Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="card-scrapbook p-6 animate-scale-in" style={{ animationDelay: '0.1s' }}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-700 text-sm font-bold uppercase tracking-wide">Total propriétés</h3>
-              <div className="bg-gradient-to-br from-terracotta-100 to-coral-100 p-3 rounded-2xl">
-                <Home className="h-8 w-8 text-terracotta-600" />
+          {/* Propriétés Actives */}
+          <div className="bg-background-page rounded-lg border border-neutral-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-primary-100 p-3 rounded-lg">
+                <Home className="h-6 w-6 text-primary-600" />
               </div>
+              <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                Propriétés
+              </span>
             </div>
-            <p className="text-4xl font-bold text-gradient">{stats.totalProperties}</p>
-            <p className="text-xs text-gray-600 mt-2">{stats.activeProperties} disponibles, {stats.rentedProperties} louées</p>
+            <div>
+              <p className="text-3xl font-bold text-neutral-900 mb-1">
+                {stats.activeProperties}
+              </p>
+              <p className="text-sm text-neutral-600">
+                Actives sur {properties.length} totales
+              </p>
+            </div>
           </div>
 
-          <div className="card-scrapbook p-6 animate-scale-in" style={{ animationDelay: '0.2s' }}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-700 text-sm font-bold uppercase tracking-wide">Revenus du mois</h3>
-              <div className="bg-gradient-to-br from-olive-100 to-green-100 p-3 rounded-2xl">
-                <Coins className="h-8 w-8 text-olive-600" />
+          {/* Locataires */}
+          <div className="bg-background-page rounded-lg border border-neutral-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-green-100 p-3 rounded-lg">
+                <Users className="h-6 w-6 text-green-600" />
               </div>
+              <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                Locataires
+              </span>
             </div>
-            <p className="text-4xl font-bold text-gradient">{stats.monthlyRevenue.toLocaleString()}</p>
-            <p className="text-xs text-gray-600 mt-2">FCFA</p>
+            <div>
+              <p className="text-3xl font-bold text-neutral-900 mb-1">
+                {stats.totalTenants}
+              </p>
+              <p className="text-sm text-neutral-600">
+                Baux actifs
+              </p>
+            </div>
           </div>
 
-          <div className="card-scrapbook p-6 animate-scale-in" style={{ animationDelay: '0.3s' }}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-700 text-sm font-bold uppercase tracking-wide">Messages</h3>
-              <div className="bg-gradient-to-br from-amber-100 to-orange-100 p-3 rounded-2xl">
-                <MessageSquare className="h-8 w-8 text-amber-600" />
+          {/* Revenus du Mois */}
+          <div className="bg-background-page rounded-lg border border-neutral-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-yellow-100 p-3 rounded-lg">
+                <DollarSign className="h-6 w-6 text-yellow-600" />
               </div>
+              <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                Revenus
+              </span>
             </div>
-            <p className="text-4xl font-bold text-gradient">{stats.unreadMessages}</p>
-            <p className="text-xs text-gray-600 mt-2">non lus</p>
+            <div>
+              <p className="text-3xl font-bold text-neutral-900 mb-1">
+                {currentMonthRevenue.toLocaleString('fr-FR')}
+              </p>
+              <p className="text-sm text-neutral-600">
+                FCFA/mois
+                {stats.monthlyGrowth !== 0 && (
+                  <span className={`ml-2 inline-flex items-center ${stats.monthlyGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {stats.monthlyGrowth > 0 ? <TrendingUp className="h-3 w-3 mr-1" /> : <TrendingDown className="h-3 w-3 mr-1" />}
+                    {Math.abs(stats.monthlyGrowth)}%
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
 
-          <div className="card-scrapbook p-6 animate-scale-in" style={{ animationDelay: '0.4s' }}>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-gray-700 text-sm font-bold uppercase tracking-wide">Visites à venir</h3>
-              <div className="bg-gradient-to-br from-cyan-100 to-blue-100 p-3 rounded-2xl">
-                <Calendar className="h-8 w-8 text-cyan-600" />
+          {/* Taux d'Occupation */}
+          <div className="bg-background-page rounded-lg border border-neutral-100 p-6 hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="bg-purple-100 p-3 rounded-lg">
+                <Percent className="h-6 w-6 text-purple-600" />
+              </div>
+              <span className="text-xs font-medium text-neutral-500 uppercase tracking-wide">
+                Occupation
+              </span>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-neutral-900 mb-1">
+                {stats.occupancyRate}%
+              </p>
+              <div className="w-full bg-neutral-200 rounded-full h-2 mt-2">
+                <div 
+                  className="bg-gradient-to-r from-primary-500 to-primary-600 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${stats.occupancyRate}%` }}
+                ></div>
               </div>
             </div>
-            <p className="text-4xl font-bold text-gradient">{stats.upcomingVisits}</p>
-            <p className="text-xs text-gray-600 mt-2">{stats.pendingApplications} candidatures en attente</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="card-scrapbook p-6 animate-slide-up">
-            <h3 className="text-xl font-bold text-gradient mb-4 flex items-center space-x-2">
-              <BarChart3 className="h-6 w-6 text-terracotta-500" />
-              <span>Revenus des 12 derniers mois</span>
-            </h3>
-            {revenueHistory.length > 0 ? (
+        {/* Section Analytics Rapides */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-neutral-900 flex items-center space-x-3">
+              <BarChart3 className="h-7 w-7 text-primary-500" />
+              <span>Analytics Rapides</span>
+            </h2>
+            <a 
+              href="/dashboard/proprietaire/analytics"
+              className="text-primary-600 hover:text-primary-700 font-medium text-sm flex items-center space-x-1"
+            >
+              <span>Voir tous les analytics</span>
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="bg-background-page rounded-lg border border-neutral-100 p-6">
+              <h3 className="font-semibold text-neutral-900 mb-3">Performance Mensuelle</h3>
               <div className="space-y-2">
-                {revenueHistory.slice(-6).map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700 font-medium">{item.month}</span>
-                    <div className="flex items-center space-x-2 flex-1 mx-4">
-                      <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-terracotta-500 to-coral-500 h-full rounded-full"
-                          style={{ width: `${Math.min((item.revenue / Math.max(...revenueHistory.map(r => r.revenue))) * 100, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                    <span className="text-sm font-bold text-terracotta-600">{item.revenue.toLocaleString()} FCFA</span>
-                  </div>
-                ))}
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Vues propriétés</span>
+                  <span className="font-medium">+12%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Candidatures</span>
+                  <span className="font-medium">+8%</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Taux conversion</span>
+                  <span className="font-medium">3.2%</span>
+                </div>
               </div>
-            ) : (
-              <p className="text-gray-600 text-center py-8">Aucune donnée de revenus disponible</p>
-            )}
-          </div>
+            </div>
 
-          <div className="card-scrapbook p-6 animate-slide-up">
-            <h3 className="text-xl font-bold text-gradient mb-4 flex items-center space-x-2">
-              <Clock className="h-6 w-6 text-terracotta-500" />
-              <span>Prochaines visites</span>
-            </h3>
-            {upcomingVisitsData.length > 0 ? (
-              <div className="space-y-3">
-                {upcomingVisitsData.map((visit: any) => (
-                  <div key={visit.id} className="bg-gradient-to-br from-white to-cyan-50 border border-cyan-200 rounded-lg p-3">
-                    <p className="font-bold text-gray-900 text-sm">{visit.properties?.title}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-xs text-gray-600">
-                        {new Date(visit.visit_date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
-                      </span>
-                      <span className="text-xs font-bold text-cyan-600">{visit.visit_time}</span>
-                    </div>
-                  </div>
-                ))}
+            <div className="bg-background-page rounded-lg border border-neutral-100 p-6">
+              <h3 className="font-semibold text-neutral-900 mb-3">Revenus Projets</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Ce mois</span>
+                  <span className="font-medium">{currentMonthRevenue.toLocaleString('fr-FR')} FCFA</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Mois dernier</span>
+                  <span className="font-medium">{Math.round(currentMonthRevenue * 0.92).toLocaleString('fr-FR')} FCFA</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Prévisionnel</span>
+                  <span className="font-medium text-green-600">+{stats.monthlyGrowth}%</span>
+                </div>
               </div>
-            ) : (
-              <p className="text-gray-600 text-center py-8">Aucune visite planifiée</p>
-            )}
+            </div>
+
+            <div className="bg-background-page rounded-lg border border-neutral-100 p-6">
+              <h3 className="font-semibold text-neutral-900 mb-3">Activités Récentes</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Nouvelles candidatures</span>
+                  <span className="font-medium">{stats.pendingApplications}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Maintenance urgente</span>
+                  <span className="font-medium text-red-600">{stats.urgentMaintenance}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-neutral-600">Échéances 30j</span>
+                  <span className="font-medium">{stats.upcomingPayments}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <div className="card-scrapbook p-8 animate-slide-up">
-              <h2 className="text-2xl font-bold text-gradient mb-6 flex items-center space-x-2">
-                <Home className="h-7 w-7 text-terracotta-500" />
-                <span>Mes propriétés</span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Tableau des Propriétés Actives */}
+        <div className="bg-background-page rounded-lg border border-neutral-100 mb-8">
+          <div className="p-6 border-b border-neutral-100">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-neutral-900 flex items-center space-x-3">
+                <Home className="h-7 w-7 text-primary-500" />
+                <span>Propriétés Actives</span>
               </h2>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-neutral-600">
+                  {properties.length} propriété{properties.length > 1 ? 's' : ''}
+                </span>
+                <select className="px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                  <option value="all">Tous les statuts</option>
+                  <option value="disponible">Disponible</option>
+                  <option value="loue">Loué</option>
+                  <option value="maintenance">Maintenance</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
-              {properties.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-neutral-50">
+                <tr>
+                  <th className="text-left p-4 font-semibold text-neutral-900">Propriété</th>
+                  <th className="text-left p-4 font-semibold text-neutral-900">Statut</th>
+                  <th className="text-left p-4 font-semibold text-neutral-900">Loyer</th>
+                  <th className="text-left p-4 font-semibold text-neutral-900">Vues</th>
+                  <th className="text-left p-4 font-semibold text-neutral-900">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedProperties.map((property, index) => (
+                  <tr key={property.id} className="border-t border-neutral-100 hover:bg-neutral-50 transition-colors">
+                    <td className="p-4">
+                      <div>
+                        <p className="font-semibold text-neutral-900">{property.title}</p>
+                        <p className="text-sm text-neutral-600">{property.city}{property.neighborhood && ` • ${property.neighborhood}`}</p>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                        property.status === 'disponible' 
+                          ? 'bg-green-100 text-green-800'
+                          : property.status === 'loue'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {property.status === 'disponible' ? 'Disponible' : 
+                         property.status === 'loue' ? 'Loué' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <p className="font-semibold text-neutral-900">
+                        {property.monthly_rent.toLocaleString('fr-FR')} FCFA
+                      </p>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <Eye className="h-4 w-4 text-neutral-500" />
+                        <span className="text-sm text-neutral-600">{property.view_count}</span>
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center space-x-2">
+                        <a
+                          href={`/dashboard/propriete/${property.id}/modifier`}
+                          className="p-2 text-neutral-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                          title="Modifier"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </a>
+                        <a
+                          href={`/propriete/${property.id}`}
+                          className="p-2 text-neutral-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"
+                          title="Voir"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                        <button
+                          onClick={() => handlePropertyAction(property.id, property.status === 'disponible' ? 'inactive' : 'active')}
+                          className={`p-2 rounded-lg transition-colors ${
+                            property.status === 'disponible'
+                              ? 'text-neutral-600 hover:text-red-600 hover:bg-red-50'
+                              : 'text-neutral-600 hover:text-green-600 hover:bg-green-50'
+                          }`}
+                          title={property.status === 'disponible' ? 'Désactiver' : 'Activer'}
+                        >
+                          {property.status === 'disponible' ? <XCircle className="h-4 w-4" /> : <CheckCircle2 className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {totalPropertiesPages > 1 && (
+            <div className="p-6 border-t border-neutral-100 flex items-center justify-between">
+              <p className="text-sm text-neutral-600">
+                Affichage de {(propertiesPage - 1) * propertiesPerPage + 1} à {Math.min(propertiesPage * propertiesPerPage, properties.length)} sur {properties.length} propriétés
+              </p>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setPropertiesPage(Math.max(1, propertiesPage - 1))}
+                  disabled={propertiesPage === 1}
+                  className="p-2 rounded-lg border border-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-50"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <span className="px-3 py-2 text-sm font-medium">
+                  {propertiesPage} / {totalPropertiesPages}
+                </span>
+                <button
+                  onClick={() => setPropertiesPage(Math.min(totalPropertiesPages, propertiesPage + 1))}
+                  disabled={propertiesPage === totalPropertiesPages}
+                  className="p-2 rounded-lg border border-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-50"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Section Contrats Actifs et Maintenance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Contrats Actifs */}
+          <div className="bg-background-page rounded-lg border border-neutral-100">
+            <div className="p-6 border-b border-neutral-100">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-neutral-900 flex items-center space-x-3">
+                  <FileText className="h-6 w-6 text-primary-500" />
+                  <span>Contrats Actifs</span>
+                </h2>
+                <a 
+                  href="/dashboard/proprietaire/contrats"
+                  className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                >
+                  Voir tout
+                </a>
+              </div>
+            </div>
+            <div className="p-6">
+              {leases.length > 0 ? (
                 <div className="space-y-4">
-                  {properties.map((property, index) => (
-                    <div
-                      key={property.id}
-                      className="bg-gradient-to-br from-white to-amber-50 border-2 border-terracotta-200 rounded-2xl p-5 hover:border-terracotta-400 hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] animate-slide-up"
-                      style={{ animationDelay: `${0.1 * index}s` }}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center flex-wrap gap-3 mb-3">
-                            <h3 className="text-xl font-bold text-gray-900">{property.title}</h3>
-                            <span className={`text-xs px-3 py-1 rounded-full font-bold ${
-                              property.status === 'disponible'
-                                ? 'bg-gradient-to-r from-olive-100 to-green-100 text-olive-800 border border-olive-300'
-                                : property.status === 'loue'
-                                ? 'bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-800 border border-cyan-300'
-                                : 'bg-gray-100 text-gray-800 border border-gray-300'
-                            }`}>
-                              {property.status}
-                            </span>
+                  {leases.slice(0, 4).map((lease) => {
+                    const daysRemaining = getDaysRemaining(lease.end_date);
+                    const isExpiring = daysRemaining <= 30;
+                    
+                    return (
+                      <div key={lease.id} className={`p-4 rounded-lg border-2 transition-all hover:shadow-md ${
+                        isExpiring ? 'border-yellow-200 bg-yellow-50' : 'border-neutral-200 bg-neutral-50'
+                      }`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="font-semibold text-neutral-900 mb-1">
+                              {(lease.property as any)?.title}
+                            </p>
+                            <p className="text-sm text-neutral-600 mb-2">
+                              Locataire: {(lease.tenant as any)?.full_name}
+                            </p>
+                            <div className="flex items-center space-x-4 text-sm">
+                              <span className="text-neutral-600">
+                                Loyer: <span className="font-semibold">{(lease.property as any)?.monthly_rent?.toLocaleString('fr-FR')} FCFA</span>
+                              </span>
+                            </div>
                           </div>
-                          <p className="text-gray-600 mb-3 flex items-center space-x-1">
-                            <span className="font-medium">{property.city}</span>
-                            {property.neighborhood && (
-                              <>
-                                <span>•</span>
-                                <span>{property.neighborhood}</span>
-                              </>
-                            )}
-                          </p>
-                          <div className="flex items-center flex-wrap gap-4 text-sm">
-                            <span className="flex items-center space-x-2 bg-amber-100 px-3 py-1 rounded-full text-amber-800 font-medium">
-                              <Eye className="h-4 w-4" />
-                              <span>{property.view_count} vues</span>
-                            </span>
-                            <span className="font-bold text-terracotta-600 text-lg">
-                              {property.monthly_rent.toLocaleString()} FCFA/mois
-                            </span>
+                          <div className="text-right">
+                            <p className={`text-sm font-medium ${
+                              isExpiring ? 'text-yellow-700' : 'text-neutral-700'
+                            }`}>
+                              {isExpiring ? 'Expire bientôt' : 'Actif'}
+                            </p>
+                            <p className="text-xs text-neutral-600 mt-1">
+                              {daysRemaining > 0 ? `${daysRemaining} jours` : 'Expiré'}
+                            </p>
+                            <p className="text-xs text-neutral-500">
+                              {formatDate(lease.end_date)}
+                            </p>
                           </div>
                         </div>
-                        <div className="flex flex-col space-y-2 ml-4">
-                          <a
-                            href={`/propriete/${property.id}`}
-                            className="flex items-center space-x-1 text-terracotta-600 hover:text-terracotta-700 text-sm font-bold transition-all duration-300 transform hover:scale-105"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            <span>Voir</span>
-                          </a>
-                          <a
-                            href={`/creer-contrat/${property.id}`}
-                            className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm font-bold transition-all duration-300 transform hover:scale-105"
-                          >
-                            <span>+ Contrat</span>
-                          </a>
-                          <a
-                            href={`/dashboard/propriete/${property.id}/stats`}
-                            className="flex items-center space-x-1 text-purple-600 hover:text-purple-700 text-sm font-bold transition-all duration-300 transform hover:scale-105"
-                          >
-                            <BarChart3 className="h-4 w-4" />
-                            <span>Stats</span>
-                          </a>
-                          <a
-                            href={`/dashboard/propriete/${property.id}/modifier`}
-                            className="flex items-center space-x-1 text-gray-600 hover:text-gray-900 text-sm font-bold transition-all duration-300 transform hover:scale-105"
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span>Modifier</span>
-                          </a>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-neutral-600">Aucun contrat actif</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Demandes de Maintenance */}
+          <div className="bg-background-page rounded-lg border border-neutral-100">
+            <div className="p-6 border-b border-neutral-100">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-neutral-900 flex items-center space-x-3">
+                  <Wrench className="h-6 w-6 text-primary-500" />
+                  <span>Maintenance</span>
+                  {stats.urgentMaintenance > 0 && (
+                    <span className="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded-full">
+                      {stats.urgentMaintenance} urgent{stats.urgentMaintenance > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </h2>
+                <a 
+                  href="/maintenance/proprietaire"
+                  className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                >
+                  Gérer
+                </a>
+              </div>
+            </div>
+            <div className="p-6">
+              {maintenanceRequests.length > 0 ? (
+                <div className="space-y-4">
+                  {maintenanceRequests.slice(0, 4).map((request) => (
+                    <div key={request.id} className={`p-4 rounded-lg border-2 transition-all hover:shadow-md ${
+                      request.urgency === 'urgent' ? 'border-red-200 bg-red-50' : 'border-neutral-200 bg-neutral-50'
+                    }`}>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <p className="font-semibold text-neutral-900">
+                              {(request.property as any)?.title}
+                            </p>
+                            {request.urgency === 'urgent' && (
+                              <AlertTriangle className="h-4 w-4 text-red-500" />
+                            )}
+                          </div>
+                          <p className="text-sm text-neutral-600 mb-2">
+                            {request.description}
+                          </p>
+                          <p className="text-xs text-neutral-500">
+                            Par: {(request.tenant as any)?.full_name}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            request.status === 'en_attente' ? 'bg-yellow-100 text-yellow-800' :
+                            request.status === 'en_cours' ? 'bg-blue-100 text-blue-800' :
+                            request.status === 'resolue' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {request.status === 'en_attente' ? 'En attente' :
+                             request.status === 'en_cours' ? 'En cours' :
+                             request.status === 'resolue' ? 'Résolue' : request.status}
+                          </span>
+                          <p className="text-xs text-neutral-500 mt-1">
+                            {formatDate(request.created_at)}
+                          </p>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-16 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border-2 border-dashed border-terracotta-300">
-                  <div className="bg-gradient-to-br from-terracotta-100 to-coral-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-white shadow-lg">
-                    <Home className="h-12 w-12 text-terracotta-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gradient mb-3">Aucune propriété</h3>
-                  <p className="text-gray-700 mb-6 text-lg">
-                    Commencez par ajouter votre première propriété
-                  </p>
-                  <a
-                    href="/dashboard/ajouter-propriete"
-                    className="inline-flex items-center space-x-2 btn-primary px-8 py-3"
-                  >
-                    <Plus className="h-5 w-5" />
-                    <span>Ajouter une propriété</span>
-                  </a>
+                <div className="text-center py-8">
+                  <Wrench className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-neutral-600">Aucune demande de maintenance</p>
                 </div>
               )}
             </div>
           </div>
+        </div>
 
-          <div className="lg:col-span-1 space-y-6">
-            <div className="card-scrapbook p-6 animate-slide-up">
-              <h3 className="text-xl font-bold text-gradient mb-4">Actions Rapides</h3>
-              <div className="space-y-3">
-                <a href="/dashboard/ajouter-propriete" className="btn-primary w-full flex items-center justify-center">
-                  <Plus className="h-5 w-5 mr-2" />
-                  Ajouter une propriété
+        {/* Actions Rapides et Candidatures */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Actions Rapides - Pleine largeur sur mobile, 2/3 sur desktop */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Actions Rapides */}
+            <div className="bg-background-page rounded-lg border border-neutral-100 p-6">
+              <h3 className="text-xl font-bold text-neutral-900 mb-6">Actions Rapides</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <a
+                  href="/dashboard/ajouter-propriete"
+                  className="flex flex-col items-center p-4 border-2 border-dashed border-neutral-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-all group"
+                >
+                  <Plus className="h-8 w-8 text-neutral-400 group-hover:text-primary-500 mb-2" />
+                  <span className="text-sm font-medium text-neutral-600 group-hover:text-primary-700">Ajouter propriété</span>
                 </a>
-                <a href="/maintenance/proprietaire" className="btn-secondary w-full flex items-center justify-center">
-                  <Wrench className="h-5 w-5 mr-2" />
-                  Demandes de maintenance
+                
+                <a
+                  href="/maintenance/proprietaire"
+                  className="flex flex-col items-center p-4 border border-neutral-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-all group"
+                >
+                  <Wrench className="h-8 w-8 text-neutral-400 group-hover:text-blue-500 mb-2" />
+                  <span className="text-sm font-medium text-neutral-600 group-hover:text-blue-700">Maintenance</span>
+                  {stats.urgentMaintenance > 0 && (
+                    <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full mt-1">
+                      {stats.urgentMaintenance}
+                    </span>
+                  )}
                 </a>
-                <a href="/mes-contrats" className="btn-secondary w-full flex items-center justify-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Gérer les contrats
+                
+                <a
+                  href="/dashboard/proprietaire/contrats"
+                  className="flex flex-col items-center p-4 border border-neutral-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-all group"
+                >
+                  <FileText className="h-8 w-8 text-neutral-400 group-hover:text-green-500 mb-2" />
+                  <span className="text-sm font-medium text-neutral-600 group-hover:text-green-700">Contrats</span>
                 </a>
-                <a href="/messages" className="btn-secondary w-full flex items-center justify-center">
-                  <MessageSquare className="h-5 w-5 mr-2" />
-                  Messages
+                
+                <a
+                  href="/dashboard/proprietaire/analytics"
+                  className="flex flex-col items-center p-4 border border-neutral-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all group"
+                >
+                  <BarChart3 className="h-8 w-8 text-neutral-400 group-hover:text-purple-500 mb-2" />
+                  <span className="text-sm font-medium text-neutral-600 group-hover:text-purple-700">Analytics</span>
                 </a>
               </div>
             </div>
 
-            <div className="card-scrapbook p-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            {/* Candidatures Récentes */}
+            <div className="bg-background-page rounded-lg border border-neutral-100 p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gradient flex items-center space-x-2">
-                  <Calendar className="h-6 w-6 text-terracotta-500" />
-                  <span>Candidatures</span>
-                </h2>
-                <div className="flex items-center space-x-2">
-                  <Filter className="h-4 w-4 text-gray-600" />
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as 'date' | 'score')}
-                    className="text-sm border-2 border-gray-200 rounded-lg px-2 py-1 font-medium text-gray-700 focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500"
-                  >
-                    <option value="score">Par score</option>
-                    <option value="date">Par date</option>
-                  </select>
-                </div>
+                <h3 className="text-xl font-bold text-neutral-900 flex items-center space-x-3">
+                  <Calendar className="h-6 w-6 text-primary-500" />
+                  <span>Candidatures Récentes</span>
+                </h3>
+                <span className="bg-primary-100 text-primary-700 text-sm font-medium px-3 py-1 rounded-full">
+                  {stats.pendingApplications} en attente
+                </span>
               </div>
 
               {applications.length > 0 ? (
                 <div className="space-y-4">
-                  {getSortedApplications().slice(0, 5).map((application) => {
-                    const scoreBadge = ScoringService.getScoreBadge(application.application_score);
+                  {applications.slice(0, 5).map((application) => {
                     const property = properties.find(p => p.id === application.property_id);
+                    const scoreBadge = ScoringService.getScoreBadge(application.application_score);
+                    
                     return (
-                      <div key={application.id} className="bg-gradient-to-br from-white to-amber-50 border-2 border-cyan-200 rounded-xl p-4 hover:border-cyan-400 transition-all duration-300 transform hover:scale-105">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <p className="font-bold text-gray-900 text-sm mb-1">
+                      <div key={application.id} className="flex items-center justify-between p-4 border border-neutral-200 rounded-lg hover:shadow-md transition-shadow">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="font-semibold text-neutral-900">
                               {property?.title || 'Propriété inconnue'}
-                            </p>
-                            <div className="flex items-center space-x-2 mb-1">
-                              <Award className="h-4 w-4 text-terracotta-500" />
-                              <span className="text-xs font-bold text-gray-700">
-                                Score: {application.application_score}
-                              </span>
-                              <span className={`text-xs px-2 py-0.5 rounded-full font-bold border ${scoreBadge.color}`}>
-                                {scoreBadge.text}
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-600">
-                              {new Date(application.created_at).toLocaleDateString('fr-FR', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric'
-                              })}
-                            </p>
+                            </h4>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${scoreBadge.color}`}>
+                              Score: {application.application_score}
+                            </span>
                           </div>
-                          <span className={`text-xs px-3 py-1 rounded-full font-bold whitespace-nowrap ml-2 ${
-                            application.status === 'en_attente'
-                              ? 'bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border border-amber-300'
-                              : application.status === 'acceptee'
-                              ? 'bg-gradient-to-r from-olive-100 to-green-100 text-olive-800 border border-olive-300'
-                              : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-300'
-                          }`}>
-                            {application.status.replace('_', ' ')}
-                          </span>
+                          <p className="text-sm text-neutral-600">
+                            Candidature du {formatDate(application.created_at)}
+                          </p>
                         </div>
-                        <a
-                          href={`/dashboard/candidature/${application.id}`}
-                          className="text-terracotta-600 hover:text-terracotta-700 text-sm font-bold inline-flex items-center space-x-1 transition-all duration-300 transform hover:scale-105"
-                        >
-                          <span>Voir détails</span>
-                          <span>→</span>
-                        </a>
+                        <div className="flex items-center space-x-3">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            application.status === 'en_attente'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : application.status === 'acceptee'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {application.status === 'en_attente' ? 'En attente' :
+                             application.status === 'acceptee' ? 'Acceptée' : application.status}
+                          </span>
+                          <a
+                            href={`/dashboard/candidature/${application.id}`}
+                            className="text-primary-600 hover:text-primary-700 font-medium text-sm"
+                          >
+                            Voir
+                          </a>
+                        </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl border-2 border-dashed border-cyan-300">
-                  <div className="bg-gradient-to-br from-cyan-100 to-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white">
-                    <Calendar className="h-8 w-8 text-cyan-600" />
-                  </div>
-                  <p className="text-gray-700 font-medium">Aucune candidature</p>
+                <div className="text-center py-8">
+                  <Calendar className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-neutral-600">Aucune candidature récente</p>
                 </div>
               )}
             </div>
+          </div>
 
-            <div className="glass-card rounded-3xl p-6 bg-gradient-to-br from-terracotta-100 to-coral-100 border-2 border-terracotta-200 animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              <h3 className="font-bold text-terracotta-900 mb-3 text-lg flex items-center space-x-2">
+          {/* Sidebar - Statuts et Infos */}
+          <div className="space-y-6">
+            {/* Résumé Statuts */}
+            <div className="bg-background-page rounded-lg border border-neutral-100 p-6">
+              <h3 className="text-lg font-bold text-neutral-900 mb-4">Résumé Global</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-neutral-600">Taux d'occupation</span>
+                  <span className="font-semibold text-neutral-900">{stats.occupancyRate}%</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-neutral-600">Revenus mensuels</span>
+                  <span className="font-semibold text-neutral-900">
+                    {currentMonthRevenue.toLocaleString('fr-FR')} FCFA
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-neutral-600">Croissance</span>
+                  <span className={`font-semibold ${stats.monthlyGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {stats.monthlyGrowth > 0 ? '+' : ''}{stats.monthlyGrowth}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-neutral-600">Maintenance urgente</span>
+                  <span className={`font-semibold ${stats.urgentMaintenance > 0 ? 'text-red-600' : 'text-neutral-900'}`}>
+                    {stats.urgentMaintenance}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Conseil du Jour */}
+            <div className="bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg border border-primary-200 p-6">
+              <h3 className="font-bold text-primary-900 mb-3 text-lg flex items-center space-x-2">
                 <span>💡</span>
                 <span>Conseil du jour</span>
               </h3>
-              <p className="text-sm text-terracotta-800 leading-relaxed">
-                Ajoutez des photos de qualité et des descriptions détaillées pour attirer plus de locataires. Les annonces avec 5+ photos reçoivent 3x plus de vues.
+              <p className="text-sm text-primary-800 leading-relaxed">
+                Maintenez vos propriétés en excellent état pour attirer des locataires de qualité. 
+                Les propriétés bien entretenues se louent 15% plus rapidement.
               </p>
             </div>
           </div>

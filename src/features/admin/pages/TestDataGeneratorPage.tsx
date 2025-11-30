@@ -138,20 +138,18 @@ export default function AdminTestDataGenerator() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-2">
-            <Sparkles className="h-8 w-8 text-orange-500" />
-            <h1 className="text-3xl font-bold text-gray-900">
-              Générateur de Données de Test IA
-            </h1>
-          </div>
-          <p className="text-gray-600">
-            Utilisez l'IA Azure pour générer des données de test réalistes et
-            contextualisées pour la Côte d'Ivoire
-          </p>
+    <div className="p-6 space-y-6 bg-[var(--color-neutral-50)] min-h-screen">
+      <div>
+        <div className="flex items-center space-x-3 mb-2">
+          <Sparkles className="h-8 w-8 text-[var(--color-primary-600)]" />
+          <h1 className="text-3xl font-bold text-[var(--color-neutral-900)]">
+            Générateur Données Test IA
+          </h1>
         </div>
+        <p className="text-[var(--color-neutral-700)]">
+          Données réalistes Côte d'Ivoire via IA Azure
+        </p>
+      </div>
 
         {stats && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

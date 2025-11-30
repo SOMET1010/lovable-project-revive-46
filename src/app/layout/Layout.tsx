@@ -10,14 +10,7 @@ import DemoModeBanner from '@/shared/ui/DemoModeBanner';
 const noLayoutRoutes = ['/connexion', '/inscription', '/messages', '/auth/callback'];
 const noHeaderFooterRoutes = [
   '/messages',
-  '/admin/tableau-de-bord',
-  '/admin/utilisateurs',
-  '/admin/service-monitoring',
-  '/admin/service-configuration',
-  '/admin/test-data-generator',
-  '/admin/demo-rapide',
-  '/admin/gestion-roles',
-  '/admin/cev-management',
+  '/admin',
   '/visiter',
   '/mes-visites',
   '/creer-contrat',
@@ -27,8 +20,6 @@ const noHeaderFooterRoutes = [
   '/verification',
   '/certification-ansut',
   '/mes-certificats',
-  '/admin/api-keys',
-  '/admin/service-providers',
 ];
 
 export default function Layout() {

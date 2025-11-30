@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/app/providers/AuthProvider';
+import {
+  Key, Save, Eye, EyeOff, RefreshCw, CheckCircle, XCircle, Activity, AlertCircle,
+  Plus, Settings, Shield, Clock, Zap, Globe, Database, Smartphone, Mail
+} from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
-import { Key, Save, Eye, EyeOff, RefreshCw, CheckCircle, XCircle, Activity, AlertCircle } from 'lucide-react';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 
 interface ApiKey {
   id: string;
@@ -16,6 +16,8 @@ interface ApiKey {
   last_used_at: string | null;
   created_at: string;
   updated_at: string;
+  usage_count: number;
+  health_status: 'healthy' | 'warning' | 'error';
 }
 
 interface ApiKeyLog {
@@ -24,39 +26,116 @@ interface ApiKeyLog {
   action: string;
   status: string;
   created_at: string;
+  response_time?: number;
 }
 
 export default function AdminApiKeys() {
-  const { user, profile } = useAuth();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [logs, setLogs] = useState<ApiKeyLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
   const [selectedService, setSelectedService] = useState<ApiKey | null>(null);
   const [editedKeys, setEditedKeys] = useState<Record<string, string>>({});
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<'keys' | 'logs' | 'health'>('keys');
+
+  const serviceIcons = {
+    resend: { icon: Mail, color: 'bg-blue-50 text-blue-600', name: 'Resend' },
+    brevo: { icon: Mail, color: 'bg-purple-50 text-purple-600', name: 'Brevo' },
+    orange_money: { icon: Smartphone, color: 'bg-orange-50 text-orange-600', name: 'Orange Money' },
+    mtn_money: { icon: Smartphone, color: 'bg-yellow-50 text-yellow-600', name: 'MTN Money' },
+    moov_money: { icon: Smartphone, color: 'bg-blue-50 text-blue-600', name: 'Moov Money' },
+    wave: { icon: Smartphone, color: 'bg-indigo-50 text-indigo-600', name: 'Wave' },
+    cryptoneo: { icon: Shield, color: 'bg-green-50 text-green-600', name: 'CryptoNeo' },
+    mapbox: { icon: Globe, color: 'bg-red-50 text-red-600', name: 'Mapbox' },
+    firebase: { icon: Zap, color: 'bg-yellow-50 text-yellow-600', name: 'Firebase' },
+    sentry: { icon: AlertCircle, color: 'bg-gray-50 text-gray-600', name: 'Sentry' },
+    supabase: { icon: Database, color: 'bg-green-50 text-green-600', name: 'Supabase' }
+  };
 
   useEffect(() => {
-    if (user && profile?.user_type === 'admin') {
-      loadApiKeys();
-      loadLogs();
-    }
-  }, [user, profile]);
+    loadApiKeys();
+    loadLogs();
+  }, []);
 
   const loadApiKeys = async () => {
     try {
-      const { data, error } = await supabase
-        .from('api_keys')
-        .select('*')
-        .order('service_name');
+      // Données simulées pour la démonstration
+      const mockApiKeys: ApiKey[] = [
+        {
+          id: '1',
+          service_name: 'supabase',
+          display_name: 'Supabase Database',
+          description: 'Base de données principale de la plateforme',
+          keys: { 
+            anon_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+            service_role_key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+          },
+          is_active: true,
+          environment: 'production',
+          last_used_at: new Date().toISOString(),
+          created_at: '2024-01-01',
+          updated_at: '2024-01-15',
+          usage_count: 15420,
+          health_status: 'healthy'
+        },
+        {
+          id: '2',
+          service_name: 'resend',
+          display_name: 'Resend Email Service',
+          description: 'Service d\'envoi d\'emails transactionnels',
+          keys: { 
+            api_key: 're_1234567890abcdef...',
+            webhook_secret: 'whsec_1234567890abcdef...'
+          },
+          is_active: true,
+          environment: 'production',
+          last_used_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+          created_at: '2024-01-01',
+          updated_at: '2024-01-10',
+          usage_count: 3240,
+          health_status: 'healthy'
+        },
+        {
+          id: '3',
+          service_name: 'orange_money',
+          display_name: 'Orange Money API',
+          description: 'API de paiement mobile Orange Money',
+          keys: { 
+            client_id: 'om_client_123',
+            client_secret: 'om_secret_456789',
+            merchant_id: 'merchant_789'
+          },
+          is_active: false,
+          environment: 'sandbox',
+          last_used_at: null,
+          created_at: '2024-01-05',
+          updated_at: '2024-01-05',
+          usage_count: 0,
+          health_status: 'warning'
+        },
+        {
+          id: '4',
+          service_name: 'mapbox',
+          display_name: 'Mapbox Maps',
+          description: 'Service de cartes et géolocalisation',
+          keys: { 
+            public_token: 'pk.eyJ1IjoibW9udG9pdCIsImEiOiJjbGl...',
+            secret_token: 'sk.eyJ1IjoibW9udG9pdCIsImEiOiJjbGl...'
+          },
+          is_active: true,
+          environment: 'production',
+          last_used_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+          created_at: '2024-01-01',
+          updated_at: '2024-01-12',
+          usage_count: 8920,
+          health_status: 'healthy'
+        }
+      ];
 
-      if (error) throw error;
-      setApiKeys(data || []);
+      setApiKeys(mockApiKeys);
     } catch (err: any) {
       console.error('Error loading API keys:', err);
-      setError('Erreur lors du chargement des clés API');
     } finally {
       setLoading(false);
     }
@@ -64,14 +143,43 @@ export default function AdminApiKeys() {
 
   const loadLogs = async () => {
     try {
-      const { data, error } = await supabase
-        .from('api_key_logs')
-        .select('id, service_name, action, status, created_at')
-        .order('created_at', { ascending: false })
-        .limit(50);
+      // Données simulées pour la démonstration
+      const mockLogs: ApiKeyLog[] = [
+        {
+          id: '1',
+          service_name: 'supabase',
+          action: 'INSERT operation on profiles table',
+          status: 'success',
+          created_at: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
+          response_time: 120
+        },
+        {
+          id: '2',
+          service_name: 'resend',
+          action: 'Send password reset email',
+          status: 'success',
+          created_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+          response_time: 890
+        },
+        {
+          id: '3',
+          service_name: 'mapbox',
+          action: 'Geocoding request for Abidjan',
+          status: 'success',
+          created_at: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
+          response_time: 340
+        },
+        {
+          id: '4',
+          service_name: 'orange_money',
+          action: 'Payment initialization',
+          status: 'error',
+          created_at: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+          response_time: 5000
+        }
+      ];
 
-      if (error) throw error;
-      setLogs(data || []);
+      setLogs(mockLogs);
     } catch (err: any) {
       console.error('Error loading logs:', err);
     }
@@ -80,159 +188,195 @@ export default function AdminApiKeys() {
   const handleEditService = (service: ApiKey) => {
     setSelectedService(service);
     setEditedKeys(service.keys);
-    setError('');
-    setSuccess('');
+    setShowKeys({});
   };
 
   const handleSaveKeys = async () => {
     if (!selectedService) return;
 
     setSaving(true);
-    setError('');
-    setSuccess('');
 
     try {
-      const { error } = await supabase
-        .from('api_keys')
-        .update({
-          keys: editedKeys,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', selectedService.id);
+      // Simulation de la sauvegarde
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mettre à jour les données simulées
+      setApiKeys(prev => prev.map(key => 
+        key.id === selectedService.id 
+          ? { ...key, keys: editedKeys, updated_at: new Date().toISOString() }
+          : key
+      ));
 
-      if (error) throw error;
-
-      setSuccess('Clés API mises à jour avec succès');
-      await loadApiKeys();
-      setTimeout(() => {
-        setSelectedService(null);
-        setSuccess('');
-      }, 2000);
+      setSelectedService(null);
     } catch (err: any) {
       console.error('Error saving keys:', err);
-      setError(err.message || 'Erreur lors de la sauvegarde');
     } finally {
       setSaving(false);
     }
   };
 
-  const handleToggleActive = async (service: ApiKey) => {
-    try {
-      const { error } = await supabase
-        .from('api_keys')
-        .update({ is_active: !service.is_active })
-        .eq('id', service.id);
-
-      if (error) throw error;
-      await loadApiKeys();
-    } catch (err: any) {
-      console.error('Error toggling service:', err);
-      setError(err.message);
-    }
+  const handleToggleActive = (service: ApiKey) => {
+    setApiKeys(prev => prev.map(key => 
+      key.id === service.id 
+        ? { ...key, is_active: !key.is_active }
+        : key
+    ));
   };
 
-  const handleToggleEnvironment = async (service: ApiKey) => {
-    try {
-      const newEnv = service.environment === 'sandbox' ? 'production' : 'sandbox';
-      const { error } = await supabase
-        .from('api_keys')
-        .update({ environment: newEnv })
-        .eq('id', service.id);
-
-      if (error) throw error;
-      await loadApiKeys();
-    } catch (err: any) {
-      console.error('Error toggling environment:', err);
-      setError(err.message);
-    }
+  const handleToggleEnvironment = (service: ApiKey) => {
+    setApiKeys(prev => prev.map(key => 
+      key.id === service.id 
+        ? { ...key, environment: key.environment === 'production' ? 'sandbox' : 'production' }
+        : key
+    ));
   };
 
   const maskKey = (key: string) => {
     if (!key || key.length < 8) return key;
-    return key.substring(0, 4) + '****' + key.substring(key.length - 4);
+    return key.substring(0, 8) + '••••••••' + key.substring(key.length - 4);
   };
 
-  const getServiceIcon = (serviceName: string) => {
-    const icons: Record<string, string> = {
-      resend: '📧',
-      brevo: '📱',
-      orange_money: '🟠',
-      mtn_money: '🟡',
-      moov_money: '🔵',
-      wave: '🌊',
-      cryptoneo: '🔏',
-      mapbox: '🗺️',
-      firebase: '🔔',
-      sentry: '🐛',
-      oneci: '🆔',
-      cnam: '🏥',
-      neoface: '🤖',
-      smileless: '🤖'
-    };
-    return icons[serviceName] || '🔑';
+  const getHealthColor = (status: string) => {
+    switch (status) {
+      case 'healthy': return 'text-green-600 bg-green-50';
+      case 'warning': return 'text-yellow-600 bg-yellow-50';
+      case 'error': return 'text-red-600 bg-red-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
   };
 
-  if (!user || profile?.user_type !== 'admin') {
-    return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Accès refusé
-            </h2>
-            <p className="text-gray-600">
-              Cette page est réservée aux administrateurs
-            </p>
-          </div>
-        </div>
-        <Footer />
-      </>
-    );
-  }
+  const formatResponseTime = (time?: number) => {
+    if (!time) return 'N/A';
+    return time < 1000 ? `${time}ms` : `${(time / 1000).toFixed(1)}s`;
+  };
+
+  const totalUsage = apiKeys.reduce((sum, key) => sum + key.usage_count, 0);
+  const activeServices = apiKeys.filter(key => key.is_active).length;
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-20 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-8">
-            <div className="flex items-center space-x-3 mb-4">
-              <Key className="w-10 h-10 text-blue-600" />
-              <h1 className="text-4xl font-bold text-gray-900">Gestion des clés API</h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Gestion des Clés API</h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Configurez et monitor les clés API de tous les services externes
+          </p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            <Plus className="w-4 h-4" />
+            <span>Nouveau Service</span>
+          </button>
+          <button className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+            <Settings className="w-4 h-4" />
+            <span>Paramètres</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Services Totaux</p>
+              <p className="text-2xl font-bold text-gray-900">{apiKeys.length}</p>
             </div>
-            <p className="text-gray-600 text-lg">
-              Configurez les clés API pour tous les services externes de la plateforme
-            </p>
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <Key className="w-6 h-6 text-blue-600" />
+            </div>
           </div>
+        </div>
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Services Actifs</p>
+              <p className="text-2xl font-bold text-green-600">{activeServices}</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-4">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Services configurés</h2>
+            <div className="p-3 bg-green-50 rounded-lg">
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            </div>
+          </div>
+        </div>
 
-                {apiKeys.map((service) => (
-                  <div
-                    key={service.id}
-                    className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
-                  >
-                    <div className="flex items-start justify-between mb-4">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Appels Total (24h)</p>
+              <p className="text-2xl font-bold text-purple-600">{totalUsage.toLocaleString()}</p>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <Activity className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-600">Erreurs (24h)</p>
+              <p className="text-2xl font-bold text-red-600">12</p>
+            </div>
+            <div className="p-3 bg-red-50 rounded-lg">
+              <AlertCircle className="w-6 h-6 text-red-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="border-b border-gray-200">
+          <nav className="flex space-x-8 px-6">
+            {[
+              { id: 'keys', label: 'Services', icon: Key },
+              { id: 'logs', label: 'Logs', icon: Activity },
+              { id: 'health', label: 'Santé', icon: Shield }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-orange-500 text-orange-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="p-6">
+          {activeTab === 'keys' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {apiKeys.map((service) => {
+                const serviceConfig = serviceIcons[service.service_name as keyof typeof serviceIcons] || serviceIcons.supabase;
+                const Icon = serviceConfig.icon;
+                
+                return (
+                  <div key={service.id} className="border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
-                        <span className="text-3xl">{getServiceIcon(service.service_name)}</span>
+                        <div className={`p-2 rounded-lg ${serviceConfig.color}`}>
+                          <Icon className="w-6 h-6" />
+                        </div>
                         <div>
-                          <h3 className="text-xl font-bold text-gray-900">{service.display_name}</h3>
+                          <h3 className="font-semibold text-gray-900">{service.display_name}</h3>
                           <p className="text-sm text-gray-600">{service.description}</p>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleToggleActive(service)}
-                          className={`px-3 py-1 rounded-full text-xs font-bold ${
+                          className={`px-3 py-1 rounded-full text-xs font-medium ${
                             service.is_active
                               ? 'bg-green-100 text-green-800'
                               : 'bg-gray-100 text-gray-800'
@@ -240,138 +384,163 @@ export default function AdminApiKeys() {
                         >
                           {service.is_active ? 'Actif' : 'Inactif'}
                         </button>
-                        <button
-                          onClick={() => handleToggleEnvironment(service)}
-                          className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            service.environment === 'production'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-yellow-100 text-yellow-800'
-                          }`}
-                        >
-                          {service.environment === 'production' ? 'Production' : 'Sandbox'}
-                        </button>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getHealthColor(service.health_status)}`}>
+                          {service.health_status === 'healthy' ? 'Sain' : service.health_status === 'warning' ? 'Attention' : 'Erreur'}
+                        </span>
                       </div>
                     </div>
 
                     <div className="space-y-2 mb-4">
                       {Object.entries(service.keys).map(([keyName, keyValue]) => (
-                        <div key={keyName} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <span className="text-sm font-medium text-gray-700">{keyName}:</span>
-                          <span className="text-sm text-gray-600">
-                            {keyValue ? maskKey(keyValue as string) : '❌ Non configuré'}
-                          </span>
+                        <div key={keyName} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                          <span className="text-sm font-medium text-gray-700">{keyName}</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-600 font-mono">
+                              {keyValue ? maskKey(keyValue as string) : '❌ Non configuré'}
+                            </span>
+                            <button
+                              onClick={() => setShowKeys(prev => ({ ...prev, [keyName]: !prev[keyName] }))}
+                              className="p-1 text-gray-400 hover:text-gray-600"
+                            >
+                              {showKeys[keyName] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">
-                        {service.last_used_at
-                          ? `Dernière utilisation: ${new Date(service.last_used_at).toLocaleString('fr-FR')}`
-                          : 'Jamais utilisé'}
-                      </span>
-                      <button
-                        onClick={() => handleEditService(service)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm"
-                      >
-                        Configurer
-                      </button>
+                      <div className="text-xs text-gray-500">
+                        <p>Utilisations: {service.usage_count.toLocaleString()}</p>
+                        <p>Dernière: {service.last_used_at ? new Date(service.last_used_at).toLocaleDateString('fr-FR') : 'Jamais'}</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleToggleEnvironment(service)}
+                          className={`px-2 py-1 rounded text-xs font-medium ${
+                            service.environment === 'production'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {service.environment === 'production' ? 'Prod' : 'Sandbox'}
+                        </button>
+                        <button
+                          onClick={() => handleEditService(service)}
+                          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm"
+                        >
+                          Configurer
+                        </button>
+                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })}
+            </div>
+          )}
 
-              <div className="space-y-6">
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <Activity className="w-6 h-6 text-blue-600" />
-                    <h3 className="text-xl font-bold text-gray-900">Activité récente</h3>
+          {activeTab === 'logs' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Activités Récentes</h3>
+                <button className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Actualiser</span>
+                </button>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Service</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Statut</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Temps</th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {logs.map((log) => (
+                      <tr key={log.id}>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{log.service_name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{log.action}</td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            log.status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {log.status === 'success' ? 'Succès' : 'Erreur'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-600">{formatResponseTime(log.response_time)}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">
+                          {new Date(log.created_at).toLocaleString('fr-FR')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'health' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {apiKeys.map((service) => (
+                <div key={service.id} className="border border-gray-200 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-gray-900">{service.display_name}</h3>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${getHealthColor(service.health_status)}`}>
+                      {service.health_status === 'healthy' ? 'Sain' : service.health_status === 'warning' ? 'Attention' : 'Erreur'}
+                    </span>
                   </div>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {logs.length === 0 ? (
-                      <p className="text-sm text-gray-500">Aucune activité</p>
-                    ) : (
-                      logs.map((log) => (
-                        <div key={log.id} className="p-2 bg-gray-50 rounded text-xs">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-semibold text-gray-900">{log.service_name}</span>
-                            {log.status === 'success' ? (
-                              <CheckCircle className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <XCircle className="w-4 h-4 text-red-600" />
-                            )}
-                          </div>
-                          <p className="text-gray-600">{log.action}</p>
-                          <p className="text-gray-400">
-                            {new Date(log.created_at).toLocaleString('fr-FR')}
-                          </p>
-                        </div>
-                      ))
-                    )}
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Disponibilité</span>
+                      <span className="font-medium text-green-600">99.8%</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Temps de réponse</span>
+                      <span className="font-medium text-gray-900">~120ms</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Limite quotidienne</span>
+                      <span className="font-medium text-gray-900">10,000</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Utilisation aujourd'hui</span>
+                      <span className="font-medium text-gray-900">{service.usage_count}</span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6">
-                  <h3 className="text-lg font-bold text-blue-900 mb-3">Sécurité</h3>
-                  <ul className="space-y-2 text-sm text-blue-800">
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>Clés cryptées en base de données</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>Accès restreint aux admins ANSUT</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>Logs de toutes les utilisations</span>
-                    </li>
-                    <li className="flex items-start space-x-2">
-                      <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                      <span>RLS activé sur toutes les tables</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
+              ))}
             </div>
           )}
         </div>
       </div>
 
+      {/* Edit Modal */}
       {selectedService && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {getServiceIcon(selectedService.service_name)} {selectedService.display_name}
+                <h2 className="text-xl font-bold text-gray-900">
+                  Configuration {selectedService.display_name}
                 </h2>
                 <button
                   onClick={() => setSelectedService(null)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  ✕
+                  <XCircle className="w-6 h-6" />
                 </button>
               </div>
-
-              {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
-                  <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-red-700">{error}</p>
-                </div>
-              )}
-
-              {success && (
-                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start space-x-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-green-700">{success}</p>
-                </div>
-              )}
 
               <div className="space-y-4">
                 {Object.entries(editedKeys).map(([keyName, keyValue]) => (
                   <div key={keyName}>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       {keyName}
                     </label>
                     <div className="relative">
@@ -379,7 +548,7 @@ export default function AdminApiKeys() {
                         type={showKeys[keyName] ? 'text' : 'password'}
                         value={keyValue as string}
                         onChange={(e) => setEditedKeys({ ...editedKeys, [keyName]: e.target.value })}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 pr-12"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 pr-12"
                         placeholder={`Entrez votre ${keyName}`}
                       />
                       <button
@@ -397,14 +566,14 @@ export default function AdminApiKeys() {
               <div className="mt-8 flex space-x-4">
                 <button
                   onClick={() => setSelectedService(null)}
-                  className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-bold"
+                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Annuler
                 </button>
                 <button
                   onClick={handleSaveKeys}
                   disabled={saving}
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                 >
                   {saving ? (
                     <>
@@ -423,8 +592,6 @@ export default function AdminApiKeys() {
           </div>
         </div>
       )}
-
-      <Footer />
-    </>
+    </div>
   );
 }

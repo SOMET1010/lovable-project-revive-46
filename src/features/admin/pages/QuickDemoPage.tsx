@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Users, FileText, MessageSquare, Coins, Loader2, Check, Image } from 'lucide-react';
+import { Home, Users, FileText, MessageSquare, Coins, Loader2, Check, Image, Play } from 'lucide-react';
 import { TestDataGeneratorService } from '@/services/ai/testDataGeneratorService';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -121,20 +121,19 @@ export default function AdminQuickDemo() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
+    <div className="p-6 space-y-6 bg-[var(--color-neutral-50)] min-h-screen">
+      <div>
+        <div className="bg-white rounded-lg shadow-sm border border-[var(--color-neutral-200)] p-6">
           <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-orange-500 rounded-xl">
-              <Image className="w-8 h-8 text-white" />
+            <div className="p-3 bg-[var(--color-primary-600)] rounded-lg">
+              <Image className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Générateur de Démo Rapide
+              <h1 className="text-3xl font-bold text-[var(--color-neutral-900)]">
+                Démo Rapide
               </h1>
-              <p className="text-gray-600">
-                Créez instantanément des données de test avec des images représentatives de la Côte d'Ivoire
+              <p className="text-[var(--color-neutral-700)]">
+                Données test avec images Côte d'Ivoire
               </p>
             </div>
           </div>

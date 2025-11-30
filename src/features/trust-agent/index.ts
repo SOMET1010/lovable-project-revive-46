@@ -10,5 +10,6 @@ export { default as DashboardPage } from './pages/DashboardPage';
 export { default as MediationPage } from './pages/MediationPage';
 export { default as ModerationPage } from './pages/ModerationPage';
 export { default as RequestValidationPage } from './pages/RequestValidationPage';
+export { default as ValidationRequestsManagementPage } from './pages/ValidationRequestsManagementPage';
 
 // Components

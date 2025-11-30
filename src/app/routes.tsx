@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import Layout from '@/app/layout/Layout';
+import AdminLayout from '@/app/layout/AdminLayout';
 import ErrorBoundary from '@/shared/ui/ErrorBoundary';
 import ProtectedRoute from '@/shared/ui/ProtectedRoute';
 import SearchErrorBoundary from '@/features/tenant/components/SearchErrorBoundary';
@@ -80,7 +81,7 @@ const AdminQuickDemo = lazy(() => import('@/features/admin/pages/QuickDemoPage')
 const AdminCEVManagement = lazy(() => import('@/features/admin/pages/CEVManagementPage'));
 const AdminTrustAgents = lazy(() => import('@/features/admin/pages/TrustAgentsPage'));
 
-const TrustAgentDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
+const TrustAgentDashboard = lazy(() => import('@/features/trust-agent/pages/DashboardPage'));
 const TrustAgentModeration = lazy(() => import('@/features/trust-agent/pages/ModerationPage'));
 const TrustAgentMediation = lazy(() => import('@/features/trust-agent/pages/MediationPage'));
 const TrustAgentAnalytics = lazy(() => import('@/features/trust-agent/pages/AnalyticsPage'));
@@ -494,117 +495,84 @@ export const routes: RouteObject[] = [
           </ProtectedRoute>
         ),
       },
+      // Admin Routes with dedicated layout
       {
-        path: 'admin/tableau-de-bord',
+        path: 'admin',
         element: (
           <ProtectedRoute allowedRoles={['admin']}>
-            <AdminDashboard />
+            <AdminLayout />
           </ProtectedRoute>
         ),
-      },
-      {
-        path: 'admin/utilisateurs',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminUsers />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/gestion-roles',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminUserRoles />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/api-keys',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminApiKeys />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/service-providers',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminServiceProviders />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/service-monitoring',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminServiceMonitoring />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/service-configuration',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminServiceConfiguration />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/test-data-generator',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminTestDataGenerator />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/demo-rapide',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminQuickDemo />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/cev-management',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminCEVManagement />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/cev/:id',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminCEVManagement />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/trust-agents',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminTrustAgents />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/analytics',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminAnalytics />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'admin/market-analytics',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <MarketAnalytics />
-          </ProtectedRoute>
-        ),
+        children: [
+          {
+            path: 'tableau-de-bord',
+            element: <AdminDashboard />
+          },
+          {
+            path: 'utilisateurs',
+            element: <AdminUsers />
+          },
+          {
+            path: 'gestion-roles',
+            element: <AdminUserRoles />
+          },
+          {
+            path: 'api-keys',
+            element: <AdminApiKeys />
+          },
+          {
+            path: 'properties',
+            element: <div className="p-6"><h1 className="text-2xl font-bold">Gestion des Propriétés</h1></div>
+          },
+          {
+            path: 'transactions',
+            element: <div className="p-6"><h1 className="text-2xl font-bold">Gestion des Transactions</h1></div>
+          },
+          {
+            path: 'service-providers',
+            element: <AdminServiceProviders />
+          },
+          {
+            path: 'service-monitoring',
+            element: <AdminServiceMonitoring />
+          },
+          {
+            path: 'logs',
+            element: <div className="p-6"><h1 className="text-2xl font-bold">Logs & Erreurs</h1></div>
+          },
+          {
+            path: 'service-configuration',
+            element: <AdminServiceConfiguration />
+          },
+          {
+            path: 'test-data-generator',
+            element: <AdminTestDataGenerator />
+          },
+          {
+            path: 'demo-rapide',
+            element: <AdminQuickDemo />
+          },
+          {
+            path: 'cev-management',
+            element: <AdminCEVManagement />
+          },
+          {
+            path: 'cev/:id',
+            element: <AdminCEVManagement />
+          },
+          {
+            path: 'trust-agents',
+            element: <AdminTrustAgents />
+          },
+          {
+            path: 'analytics',
+            element: <AdminAnalytics />
+          },
+          {
+            path: 'market-analytics',
+            element: <MarketAnalytics />
+          }
+        ]
       },
       {
         path: 'market-analytics',
