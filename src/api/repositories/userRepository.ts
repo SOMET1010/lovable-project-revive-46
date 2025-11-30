@@ -1,7 +1,8 @@
 import { supabase, handleQuery } from '../client';
 import type { Database } from '../../lib/database.types';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
+// Profile type is used internally by Supabase query inference
+type _Profile = Database['public']['Tables']['profiles']['Row'];
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 export const userRepository = {
@@ -76,9 +77,10 @@ export const userRepository = {
     if (!profile) return { data: 0, error: null };
 
     let score = 0;
-    if (profile.oneci_verified) score += 2;
-    if (profile.cnam_verified) score += 1;
-    if (profile.identity_verified) score += 2;
+    const profileData = profile as { oneci_verified?: boolean; cnam_verified?: boolean; identity_verified?: boolean };
+    if (profileData.oneci_verified) score += 2;
+    if (profileData.cnam_verified) score += 1;
+    if (profileData.identity_verified) score += 2;
 
     return { data: score, error: null };
   },

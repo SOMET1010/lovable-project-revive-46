@@ -1,4 +1,4 @@
-import { Search, PlusCircle, MessageCircle, User, Menu, X, Bell, Heart, Calendar, FileText, Building2, LogOut, Shield, Settings, Award, Wrench } from 'lucide-react';
+import { Search, PlusCircle, MessageCircle, User, Menu, X, Bell, Heart, Calendar, FileText, Building2, LogOut, Shield, Settings, Award } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useMessageNotifications } from '@/features/messaging';
 import LanguageSelector from '@/shared/ui/LanguageSelector';
@@ -55,7 +55,7 @@ export default function HeaderSimplified() {
     { label: 'Vérification ANSUT', href: '/verification', icon: Shield },
   ];
 
-  const colorClasses = {
+  const colorClasses: Record<string, string> = {
     blue: 'hover:bg-blue-50 hover:text-blue-700',
     green: 'hover:bg-green-50 hover:text-green-700',
     purple: 'hover:bg-purple-50 hover:text-purple-700',
@@ -100,7 +100,7 @@ export default function HeaderSimplified() {
                 >
                   <Icon className="h-5 w-5" />
                   <span>{item.label}</span>
-                  {item.badge > 0 && (
+                  {item.badge && item.badge > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                       {item.badge > 9 ? '9+' : item.badge}
                     </span>
@@ -126,7 +126,7 @@ export default function HeaderSimplified() {
                   className={`
                     flex items-center space-x-2 px-4 py-2 rounded-lg
                     text-gray-700 font-medium transition-all duration-200
-                    ${colorClasses.gray}
+                    ${colorClasses['gray']}
                   `}
                 >
                   <User className="h-5 w-5" />
@@ -219,7 +219,7 @@ export default function HeaderSimplified() {
                     <div className="font-medium">{item.label}</div>
                     <div className="text-xs text-gray-500">{item.description}</div>
                   </div>
-                  {item.badge > 0 && (
+                  {item.badge && item.badge > 0 && (
                     <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                       {item.badge > 9 ? '9+' : item.badge}
                     </span>

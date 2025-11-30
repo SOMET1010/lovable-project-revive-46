@@ -11,7 +11,7 @@ import { logger } from '@/shared/lib/logger';
 export default function Header() {
   const { user, profile, signOut } = useAuth();
   const { unreadCount } = useMessageNotifications();
-  const [verificationStatus, setVerificationStatus] = useState({
+  const [_verificationStatus, setVerificationStatus] = useState({
     oneciVerified: false,
     faceVerified: false,
     identityVerified: false

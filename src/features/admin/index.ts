@@ -13,7 +13,6 @@ export { default as QuickDemoPage } from './pages/QuickDemoPage';
 export { default as ServiceConfigurationPage } from './pages/ServiceConfigurationPage';
 export { default as ServiceMonitoringPage } from './pages/ServiceMonitoringPage';
 export { default as ServiceProvidersPage } from './pages/ServiceProvidersPage';
-export { default as TestDataGeneratorPage } from './pages/TestDataGeneratorPage';
 export { default as TrustAgentsPage } from './pages/TrustAgentsPage';
 export { default as UserRolesPage } from './pages/UserRolesPage';
 export { default as UsersPage } from './pages/UsersPage';
