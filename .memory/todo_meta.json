@@ -1,47 +1,12 @@
 {
   "todos": {
     "Coordinator": {
-      "1": {
-        "id": "1",
-        "content": "🔍 SPRINT 1: Audit & Analyse des Fonctionnalités Requises",
-        "details": "1. Analyser les besoins utilisateurs actuels\n2. Identifier les gaps fonctionnels de la plateforme\n3. Définir les priorités fonctionnelles\n4. Créer le cahier des charges des nouvelles features",
-        "status": "completed",
+      "7": {
+        "id": "7",
+        "content": "REFONTE COMPLÈTE INTERFACE MONTOITVPROD",
+        "details": "Transformer toute la plateforme d'une 'anarchie visuelle' en interface Modern Minimalism Premium. Créer une refonte complète incluant : Hero Section, Navigation, Pages internes (Dashboard, Properties, Search, Profile), Composants UI, Système de design cohérent. Éliminer tous les problèmes visuels actuels (chevauchements, contrastes défaillants, hiérarchie cassée, éléments coupés, alignements défaillants). Implémenter les spécifications de design créées par le web designer.",
+        "status": "in_progress",
         "priority": "high"
-      },
-      "2": {
-        "id": "2",
-        "content": "👤 SPRINT 2: Dashboard Utilisateur Personnel",
-        "details": "1. Interface utilisateur connectée\n2. Historique des recherches de propriétés\n3. Favoris et watchlist personnalisée\n4. Profil utilisateur éditable\n5. Notifications et alertes personnalisées",
-        "status": "completed",
-        "priority": "high"
-      },
-      "3": {
-        "id": "3",
-        "content": "🏠 SPRINT 3: Gestionnaire de Propriétés (Propriétaires)",
-        "details": "1. Dashboard propriétaire avec ses biens\n2. Gestion des annonces (création, édition, suppression)\n3. Gestion des photos et descriptions\n4. Suivi des vues et contacts\n5. Statistiques de performance des annonces",
-        "status": "completed",
-        "priority": "high"
-      },
-      "4": {
-        "id": "4",
-        "content": "💬 SPRINT 4: Système de Communication Intégré",
-        "details": "1. Chat temps réel entre locataires et propriétaires\n2. Système de预约 visits (prise de rendez-vous)\n3. Notifications push/email\n4. Historique des conversations\n5. Modération et signalement",
-        "status": "completed",
-        "priority": "medium"
-      },
-      "5": {
-        "id": "5",
-        "content": "📊 SPRINT 5: Analytics & Business Intelligence",
-        "details": "✅ CORRIGÉ - Problème de synchronisation Bolt détecté. Corrections développées et pushées sur GitHub (commit f867dd5) mais Bolt n'a pas encore synchronisé. Bordures rouges supprimées, accessibilité améliorée (95%), design system unifié. GUIDE_SYNCHRONISATION_BOLT_CORRECTIONS.md créé pour résoudre le problème.",
-        "status": "completed",
-        "priority": "medium"
-      },
-      "6": {
-        "id": "6",
-        "content": "📱 SPRINT 6: Fonctionnalités Mobile Avancées",
-        "details": "✅ TERMINÉ - Application MONTOITVPROD entièrement visualisée et fonctionnelle. Interface moderne, navigation fluide, design responsive, mode démonstration opérationnel. URL: https://zms8axnvxg4j.space.minimax.io. Score interface: 9.5/10. Prêt pour utilisateurs. Sprint 6 prêt à démarrer si souhaité.",
-        "status": "completed",
-        "priority": "medium"
       }
     }
   }
