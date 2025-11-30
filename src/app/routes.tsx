@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 import Layout from '@/app/layout/Layout';
 import AdminLayout from '@/app/layout/AdminLayout';
@@ -45,7 +45,7 @@ const VerificationRequest = lazy(() => import('@/features/verification/pages/Req
 const IdentityVerification = lazy(() => import('@/features/auth/pages/IdentityVerificationPage'));
 const VerificationSettings = lazy(() => import('@/features/verification/pages/SettingsPage'));
 const MyCertificates = lazy(() => import('@/features/verification/pages/MyCertificatesPage'));
-const RequestTrustValidation = lazy(() => import('@/features/trust-agent/pages/RequestValidationPage'));
+// RequestTrustValidation removed - not used
 
 const RequestCEV = lazy(() => import('@/features/verification/pages/RequestCEVPage'));
 const CEVRequestDetail = lazy(() => import('@/features/verification/pages/CEVRequestDetailPage'));
@@ -76,7 +76,7 @@ const AdminApiKeys = lazy(() => import('@/features/admin/pages/ApiKeysPage'));
 const AdminServiceProviders = lazy(() => import('@/features/admin/pages/ServiceProvidersPage'));
 const AdminServiceMonitoring = lazy(() => import('@/features/admin/pages/ServiceMonitoringPage'));
 const AdminServiceConfiguration = lazy(() => import('@/features/admin/pages/ServiceConfigurationPage'));
-const AdminTestDataGenerator = lazy(() => import('@/features/admin/pages/TestDataGeneratorPage'));
+// AdminTestDataGenerator removed - file deleted
 const AdminQuickDemo = lazy(() => import('@/features/admin/pages/QuickDemoPage'));
 const AdminCEVManagement = lazy(() => import('@/features/admin/pages/CEVManagementPage'));
 const AdminTrustAgents = lazy(() => import('@/features/admin/pages/TrustAgentsPage'));
@@ -543,10 +543,6 @@ export const routes: RouteObject[] = [
           {
             path: 'service-configuration',
             element: <AdminServiceConfiguration />
-          },
-          {
-            path: 'test-data-generator',
-            element: <AdminTestDataGenerator />
           },
           {
             path: 'demo-rapide',
