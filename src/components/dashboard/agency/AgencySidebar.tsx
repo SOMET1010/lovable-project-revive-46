@@ -1,27 +1,30 @@
 import React from 'react';
 import { 
   X,
-  BarChart3, 
-  Calendar, 
-  FileText, 
-  Home, 
+  Building, 
+  Users, 
+  TrendingUp, 
   Award,
-  CheckCircle,
-  Clock,
-  TrendingUp,
+  Plus,
+  Search,
   Settings,
   LogOut,
-  Shield
+  Building2,
+  Target,
+  DollarSign,
+  FileText,
+  Calendar,
+  MessageSquare
 } from 'lucide-react';
 
-interface TrustSidebarProps {
+interface AgencySidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const TrustSidebar: React.FC<TrustSidebarProps> = ({
+const AgencySidebar: React.FC<AgencySidebarProps> = ({
   activeSection,
   onSectionChange,
   isOpen,
@@ -29,61 +32,71 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
 }) => {
   const menuItems = [
     {
-      id: 'validation',
-      label: 'Validations',
-      icon: CheckCircle,
-      description: 'Propriétés à valider et conformités',
+      id: 'properties',
+      label: 'Propriétés',
+      icon: Building,
+      description: 'Portfolio et gestion des biens',
       color: 'text-primary-600',
-      bgColor: 'bg-primary-50',
-      badge: 8
+      bgColor: 'bg-primary-50'
     },
     {
-      id: 'inspection',
-      label: 'Inspections',
-      icon: Calendar,
-      description: 'Calendrier des inspections programmées',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      badge: 3
-    },
-    {
-      id: 'reports',
-      label: 'Rapports',
-      icon: FileText,
-      description: 'Statistiques et rapports de certification',
+      id: 'clients',
+      label: 'Clients',
+      icon: Users,
+      description: 'Locataires et propriétaires',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50'
     },
     {
-      id: 'users',
-      label: 'Utilisateurs',
-      icon: Home,
-      description: 'Validation des identités et documents KYC',
+      id: 'transactions',
+      label: 'Transactions',
+      icon: DollarSign,
+      description: 'Commissions et revenus',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50'
+    },
+    {
+      id: 'team',
+      label: 'Équipe',
+      icon: Award,
+      description: 'Gestion des agents',
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      badge: 5
+      bgColor: 'bg-purple-50'
     }
   ];
 
   const quickActions = [
     {
-      label: 'Nouvelle Inspection',
-      icon: Calendar,
+      label: 'Ajouter Propriété',
+      icon: Building2,
       color: 'text-primary-600',
       bgColor: 'bg-primary-50 hover:bg-primary-100'
     },
     {
-      label: 'Valider Rapport',
-      icon: CheckCircle,
+      label: 'Nouveau Client',
+      icon: Users,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50 hover:bg-blue-100'
+    },
+    {
+      label: 'Créer Transaction',
+      icon: DollarSign,
       color: 'text-green-600',
       bgColor: 'bg-green-50 hover:bg-green-100'
     },
     {
-      label: 'Émettre Certificat',
-      icon: Award,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 hover:bg-blue-100'
+      label: 'Planifier Visite',
+      icon: Calendar,
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50 hover:bg-amber-100'
     }
+  ];
+
+  const performanceMetrics = [
+    { label: 'Taux de Conversion', value: '24.5%', trend: '+2.3%' },
+    { label: 'Temps Moyen Vente', value: '45 j', trend: '-5 j' },
+    { label: 'Satisfaction Client', value: '94%', trend: '+1%' },
+    { label: 'Objectif Mensuel', value: '87%', trend: '+12%' }
   ];
 
   return (
@@ -107,10 +120,10 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-neutral-200">
             <div className="flex items-center">
-              <Shield className="w-8 h-8 text-primary-600" />
+              <Building className="w-8 h-8 text-primary-600" />
               <div className="ml-3">
-                <h2 className="text-lg font-bold text-neutral-900">ANSUT</h2>
-                <p className="text-sm text-neutral-700">Trust Agent</p>
+                <h2 className="text-lg font-bold text-neutral-900">Agence</h2>
+                <p className="text-sm text-neutral-700">Dashboard</p>
               </div>
             </div>
             <button 
@@ -125,7 +138,7 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
           <nav className="flex-1 p-4 space-y-2">
             <div className="mb-6">
               <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
-                Navigation Principale
+                Gestion Principale
               </h3>
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -161,7 +174,7 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
             </div>
 
             {/* Quick Actions */}
-            <div className="border-t border-neutral-200 pt-6">
+            <div className="border-t border-neutral-200 pt-6 mb-6">
               <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
                 Actions Rapides
               </h3>
@@ -183,6 +196,24 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
                 })}
               </div>
             </div>
+
+            {/* Performance Metrics */}
+            <div className="border-t border-neutral-200 pt-6">
+              <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+                Performance
+              </h3>
+              <div className="space-y-3">
+                {performanceMetrics.map((metric, index) => (
+                  <div key={index} className="bg-neutral-50 rounded-lg p-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-neutral-600">{metric.label}</p>
+                      <span className="text-xs font-medium text-semantic-success">{metric.trend}</span>
+                    </div>
+                    <p className="text-sm font-bold text-neutral-900">{metric.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </nav>
 
           {/* Footer */}
@@ -190,11 +221,11 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
             <div className="bg-primary-50 rounded-lg p-4 mb-4">
               <div className="flex items-center">
                 <div className="p-2 bg-primary-500 rounded-lg">
-                  <Shield className="w-4 h-4 text-white" />
+                  <Target className="w-4 h-4 text-white" />
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-primary-900">Statut ANSUT</p>
-                  <p className="text-xs text-primary-700">Agent Certifié</p>
+                  <p className="text-sm font-medium text-primary-900">Objectif Mensuel</p>
+                  <p className="text-xs text-primary-700">87% • 2.6M F / 3M F</p>
                 </div>
               </div>
             </div>
@@ -216,4 +247,4 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
   );
 };
 
-export default TrustSidebar;
+export default AgencySidebar;

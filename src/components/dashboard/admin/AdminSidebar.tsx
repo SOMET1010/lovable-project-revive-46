@@ -2,26 +2,30 @@ import React from 'react';
 import { 
   X,
   BarChart3, 
-  Calendar, 
-  FileText, 
+  Users, 
   Home, 
-  Award,
-  CheckCircle,
-  Clock,
+  Settings, 
+  Shield,
+  Database,
+  Activity,
+  UserCheck,
+  Building,
   TrendingUp,
-  Settings,
   LogOut,
-  Shield
+  AlertTriangle,
+  Crown,
+  Monitor,
+  Wifi
 } from 'lucide-react';
 
-interface TrustSidebarProps {
+interface AdminSidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const TrustSidebar: React.FC<TrustSidebarProps> = ({
+const AdminSidebar: React.FC<AdminSidebarProps> = ({
   activeSection,
   onSectionChange,
   isOpen,
@@ -29,60 +33,80 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
 }) => {
   const menuItems = [
     {
-      id: 'validation',
-      label: 'Validations',
-      icon: CheckCircle,
-      description: 'Propriétés à valider et conformités',
-      color: 'text-primary-600',
-      bgColor: 'bg-primary-50',
-      badge: 8
-    },
-    {
-      id: 'inspection',
-      label: 'Inspections',
-      icon: Calendar,
-      description: 'Calendrier des inspections programmées',
-      color: 'text-green-600',
-      bgColor: 'bg-green-50',
-      badge: 3
-    },
-    {
-      id: 'reports',
-      label: 'Rapports',
-      icon: FileText,
-      description: 'Statistiques et rapports de certification',
+      id: 'analytics',
+      label: 'Analytics',
+      icon: BarChart3,
+      description: 'Métriques et statistiques globales',
       color: 'text-blue-600',
       bgColor: 'bg-blue-50'
     },
     {
       id: 'users',
       label: 'Utilisateurs',
+      icon: Users,
+      description: 'Gestion des comptes et rôles',
+      color: 'text-primary-600',
+      bgColor: 'bg-primary-50'
+    },
+    {
+      id: 'properties',
+      label: 'Propriétés',
       icon: Home,
-      description: 'Validation des identités et documents KYC',
+      description: 'Gestion des biens immobiliers',
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
-      badge: 5
+      bgColor: 'bg-purple-50'
+    },
+    {
+      id: 'system',
+      label: 'Système',
+      icon: Settings,
+      description: 'Configuration et maintenance',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50'
     }
   ];
 
   const quickActions = [
     {
-      label: 'Nouvelle Inspection',
-      icon: Calendar,
+      label: 'Nouvel Utilisateur',
+      icon: UserCheck,
       color: 'text-primary-600',
       bgColor: 'bg-primary-50 hover:bg-primary-100'
     },
     {
-      label: 'Valider Rapport',
-      icon: CheckCircle,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50 hover:bg-green-100'
+      label: 'Valider Propriété',
+      icon: Building,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50 hover:bg-purple-100'
     },
     {
-      label: 'Émettre Certificat',
-      icon: Award,
+      label: 'Sauvegarde',
+      icon: Database,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50 hover:bg-blue-100'
+    }
+  ];
+
+  const systemStatus = [
+    {
+      label: 'Base de données',
+      status: 'online',
+      color: 'text-semantic-success'
+    },
+    {
+      label: 'API Service',
+      status: 'online',
+      color: 'text-semantic-success'
+    },
+    {
+      label: 'Notifications',
+      status: 'warning',
+      color: 'text-semantic-warning'
+    },
+    {
+      label: 'Logs',
+      status: 'online',
+      color: 'text-semantic-success'
     }
   ];
 
@@ -107,10 +131,12 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-neutral-200">
             <div className="flex items-center">
-              <Shield className="w-8 h-8 text-primary-600" />
+              <div className="p-2 bg-primary-500 rounded-lg">
+                <Crown className="w-8 h-8 text-white" />
+              </div>
               <div className="ml-3">
                 <h2 className="text-lg font-bold text-neutral-900">ANSUT</h2>
-                <p className="text-sm text-neutral-700">Trust Agent</p>
+                <p className="text-sm text-neutral-700">Administration</p>
               </div>
             </div>
             <button 
@@ -183,26 +209,53 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
                 })}
               </div>
             </div>
+
+            {/* System Status */}
+            <div className="border-t border-neutral-200 pt-6">
+              <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+                État Système
+              </h3>
+              <div className="space-y-3">
+                {systemStatus.map((service, index) => (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className={`w-2 h-2 rounded-full mr-3 ${
+                        service.status === 'online' ? 'bg-semantic-success' :
+                        service.status === 'warning' ? 'bg-semantic-warning' : 'bg-semantic-error'
+                      }`}></div>
+                      <span className="text-sm text-neutral-700">{service.label}</span>
+                    </div>
+                    <Activity className={`w-3 h-3 ${service.color}`} />
+                  </div>
+                ))}
+              </div>
+            </div>
           </nav>
 
           {/* Footer */}
           <div className="p-4 border-t border-neutral-200">
-            <div className="bg-primary-50 rounded-lg p-4 mb-4">
-              <div className="flex items-center">
-                <div className="p-2 bg-primary-500 rounded-lg">
-                  <Shield className="w-4 h-4 text-white" />
+            {/* System Health Card */}
+            <div className="bg-gradient-to-r from-primary-50 to-blue-50 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-primary-900">Santé Système</p>
+                  <p className="text-xs text-primary-700">Excellent - 98.7%</p>
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-primary-900">Statut ANSUT</p>
-                  <p className="text-xs text-primary-700">Agent Certifié</p>
+                <div className="p-2 bg-primary-500 rounded-lg">
+                  <Monitor className="w-4 h-4 text-white" />
+                </div>
+              </div>
+              <div className="mt-3">
+                <div className="bg-primary-200 rounded-full h-1">
+                  <div className="bg-primary-500 h-1 rounded-full" style={{ width: '98.7%' }}></div>
                 </div>
               </div>
             </div>
             
             <div className="space-y-2">
               <button className="w-full flex items-center px-3 py-2 text-left text-sm text-neutral-700 hover:text-primary-600 hover:bg-neutral-50 rounded-lg transition-colors duration-200">
-                <Settings className="w-4 h-4 mr-3" />
-                Paramètres
+                <Shield className="w-4 h-4 mr-3" />
+                Sécurité
               </button>
               <button className="w-full flex items-center px-3 py-2 text-left text-sm text-neutral-700 hover:text-semantic-error hover:bg-red-50 rounded-lg transition-colors duration-200">
                 <LogOut className="w-4 h-4 mr-3" />
@@ -216,4 +269,4 @@ const TrustSidebar: React.FC<TrustSidebarProps> = ({
   );
 };
 
-export default TrustSidebar;
+export default AdminSidebar;

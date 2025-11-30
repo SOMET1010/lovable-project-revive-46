@@ -4,14 +4,21 @@ import {
   Menu, 
   Settings, 
   Award,
-  Shield,
-  User
+  Building,
+  User,
+  Phone,
+  Mail
 } from 'lucide-react';
 
-interface TrustHeaderProps {
+interface AgencyHeaderProps {
+  agencyName: string;
   userName: string;
   userAvatar?: string;
-  agentLevel: 'junior' | 'senior' | 'expert';
+  userRole: 'director' | 'manager' | 'agent';
+  roleInfo: {
+    style: string;
+    label: string;
+  };
   notifications: Array<{
     id: number;
     type: string;
@@ -23,36 +30,17 @@ interface TrustHeaderProps {
   onMenuClick: () => void;
 }
 
-const TrustHeader: React.FC<TrustHeaderProps> = ({
+const AgencyHeader: React.FC<AgencyHeaderProps> = ({
+  agencyName,
   userName,
   userAvatar,
-  agentLevel,
+  userRole,
+  roleInfo,
   notifications,
   onMenuClick
 }) => {
   const unreadNotifications = notifications.filter(n => n.priority === 'high').length;
   
-  const getLevelBadge = (level: string) => {
-    const styles = {
-      junior: 'bg-blue-100 text-blue-800',
-      senior: 'bg-green-100 text-green-800', 
-      expert: 'bg-purple-100 text-purple-800'
-    };
-    
-    const labels = {
-      junior: 'Agent Junior',
-      senior: 'Agent Senior',
-      expert: 'Agent Expert'
-    };
-
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[level as keyof typeof styles]}`}>
-        <Award className="w-3 h-3 mr-1" />
-        {labels[level as keyof typeof labels]}
-      </span>
-    );
-  };
-
   return (
     <header className="bg-white border-b border-neutral-200 sticky top-0 z-40 backdrop-blur-sm bg-white/95">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,14 +59,14 @@ const TrustHeader: React.FC<TrustHeaderProps> = ({
             <div className="flex items-center ml-4 lg:ml-0">
               <div className="flex items-center">
                 <div className="p-2 bg-primary-500 rounded-lg">
-                  <Shield className="w-6 h-6 text-white" />
+                  <Building className="w-6 h-6 text-white" />
                 </div>
                 <div className="ml-3">
                   <h1 className="text-xl font-bold text-neutral-900">
-                    Trust Agent ANSUT
+                    {agencyName}
                   </h1>
                   <p className="text-sm text-neutral-700">
-                    Plateforme de Certification Immobilière
+                    Plateforme de Gestion Immobilière
                   </p>
                 </div>
               </div>
@@ -97,22 +85,27 @@ const TrustHeader: React.FC<TrustHeaderProps> = ({
               </button>
             </div>
 
-            {/* Agent Level Badge */}
+            {/* Agency Status */}
             <div className="hidden sm:block">
-              {getLevelBadge(agentLevel)}
+              <div className="flex items-center space-x-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span>Agence Active</span>
+              </div>
+            </div>
+
+            {/* Role Badge */}
+            <div className="hidden sm:block">
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${roleInfo.style}`}>
+                <Award className="w-3 h-3 mr-1" />
+                {roleInfo.label}
+              </span>
             </div>
 
             {/* User Profile */}
             <div className="flex items-center space-x-3">
               <div className="hidden sm:block text-right">
                 <p className="text-sm font-medium text-neutral-900">{userName}</p>
-                <div className="flex flex-col gap-1">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
-                    <Shield className="w-3 h-3 mr-1" />
-                    Agent ANSUT Certifié
-                  </span>
-                  <p className="text-xs text-neutral-700">Validation & Inspection</p>
-                </div>
+                <p className="text-xs text-neutral-700">{roleInfo.label} {agencyName}</p>
               </div>
               
               <div className="relative">
@@ -144,4 +137,4 @@ const TrustHeader: React.FC<TrustHeaderProps> = ({
   );
 };
 
-export default TrustHeader;
+export default AgencyHeader;
