@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Shield, Upload, CheckCircle, XCircle, Clock, AlertCircle, FileText } from 'lucide-react';
+import { Shield, Upload, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 

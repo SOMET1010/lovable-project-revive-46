@@ -16,7 +16,7 @@ export function initSentry() {
     return;
   }
 
-  const dsn = import.meta.env.VITE_SENTRY_DSN;
+  const dsn = import.meta.env['VITE_SENTRY_DSN'];
   
   if (!dsn) {
     console.warn('[Sentry] DSN not configured, monitoring disabled');
@@ -25,32 +25,8 @@ export function initSentry() {
 
   Sentry.init({
     dsn,
-    environment: import.meta.env.VITE_ENVIRONMENT || 'production',
+    environment: import.meta.env['VITE_ENVIRONMENT'] || 'production',
     
-    // Intégrations
-    integrations: [
-      new Sentry.BrowserTracing({
-        // Tracer les navigations
-        routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-          // @ts-ignore - React Router hooks
-          window.React?.useEffect,
-          // @ts-ignore
-          window.React?.useLocation,
-          // @ts-ignore
-          window.React?.useNavigationType,
-          // @ts-ignore
-          window.React?.createRoutesFromChildren,
-          // @ts-ignore
-          window.React?.matchRoutes
-        ),
-      }),
-      new Sentry.Replay({
-        // Enregistrer les sessions avec erreurs
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
-    ],
-
     // Performance Monitoring
     tracesSampleRate: 0.1, // 10% des transactions
     
@@ -136,4 +112,3 @@ export function addBreadcrumb(message: string, data?: Record<string, any>) {
     level: 'info',
   });
 }
-
