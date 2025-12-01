@@ -54,7 +54,7 @@ export default function TrustAgentHeader({
                 </div>
                 <div>
                   <p className="text-sm font-medium text-gray-900">
-                    {profile?.first_name} {profile?.last_name}
+                    {profile?.full_name || 'Agent'}
                   </p>
                   <p className="text-xs text-gray-600">Agent Certifié Niv. 3</p>
                 </div>

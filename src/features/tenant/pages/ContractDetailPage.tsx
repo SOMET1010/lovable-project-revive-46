@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { ArrowLeft, FileText, Download, Edit, CheckCircle, X } from 'lucide-react';
+import { ArrowLeft, FileText, Edit, CheckCircle, X } from 'lucide-react';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 

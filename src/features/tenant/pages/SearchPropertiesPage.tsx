@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, MapPin, Home as HomeIcon, SlidersHorizontal, X, AlertCircle, Filter, Map as MapIcon, List, Grid3X3 } from 'lucide-react';
+import { Search, MapPin, Home as HomeIcon, X, AlertCircle, Filter, Map as MapIcon, List } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';

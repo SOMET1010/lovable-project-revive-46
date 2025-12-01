@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Coins, MessageSquare, Clock, Calendar, Heart, Search, AlertCircle, CheckCircle, FileText, Wrench } from 'lucide-react';
+import { Home, Coins, MessageSquare, Clock, Heart, Search, CheckCircle, FileText, Wrench } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import type { Database } from '@/shared/lib/database.types';
@@ -94,7 +94,7 @@ export default function TenantDashboard() {
         .eq('tenant_id', user.id);
 
       if (conversationsData) {
-        const conversationIds = conversationsData.map(c => c.id);
+        const conversationIds = conversationsData.map((c: { id: string }) => c.id);
         const { data: unreadData } = await supabase
           .from('messages')
           .select('id')
@@ -186,7 +186,7 @@ export default function TenantDashboard() {
                     <div>
                       <p className="text-sm text-gray-600">Durée du bail</p>
                       <p className="text-2xl font-bold text-gradient">
-                        {activeLease.lease_duration} mois
+                        {Math.ceil((new Date(activeLease.end_date).getTime() - new Date(activeLease.start_date).getTime()) / (1000 * 60 * 60 * 24 * 30))} mois
                       </p>
                     </div>
                   </div>

@@ -58,14 +58,14 @@ export default function MediationWorkflow({ stages }: MediationWorkflowProps) {
   };
 
   const getColorClasses = (color: string) => {
-    const classes = {
+    const classes: Record<string, string> = {
       blue: 'bg-blue-50 border-blue-200 text-blue-800',
       yellow: 'bg-yellow-50 border-yellow-200 text-yellow-800',
       orange: 'bg-orange-50 border-orange-200 text-orange-800',
       purple: 'bg-purple-50 border-purple-200 text-purple-800',
       green: 'bg-green-50 border-green-200 text-green-800'
     };
-    return classes[color] || classes.blue;
+    return classes[color] || classes['blue'];
   };
 
   return (

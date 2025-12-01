@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Bed, Bath, Maximize, Heart, Share2, Calendar, MessageCircle, 
   ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Car, Shield, 
-  Wifi, Zap, Droplets, Building, Home, Star, Phone, Mail 
+  Zap, Building, Home, Phone, Mail 
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
@@ -139,45 +139,52 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
     });
   }
 
-  if (property.parking_spaces) {
+  if (property.has_parking) {
     features.push({
       icon: <Car className="h-6 w-6" />,
-      label: 'Places de parking',
-      value: property.parking_spaces.toString(),
+      label: 'Parking',
+      value: 'Disponible',
       color: 'text-primary-500'
     });
   }
 
   if (property.property_type) {
+    const propertyTypeLabels: Record<string, string> = {
+      'maison': 'Maison',
+      'appartement': 'Appartement',
+      'villa': 'Villa',
+      'studio': 'Studio',
+      'duplex': 'Duplex',
+      'chambre': 'Chambre',
+      'bureau': 'Bureau',
+      'commerce': 'Commerce',
+      'entrepot': 'Entrepôt',
+      'terrain': 'Terrain'
+    };
     features.push({
-      icon: property.property_type === 'house' ? <Home className="h-6 w-6" /> : <Building className="h-6 w-6" />,
+      icon: property.property_type === 'maison' || property.property_type === 'villa' ? <Home className="h-6 w-6" /> : <Building className="h-6 w-6" />,
       label: 'Type de bien',
-      value: property.property_type === 'house' ? 'Maison' : 
-             property.property_type === 'apartment' ? 'Appartement' : 
-             property.property_type === 'studio' ? 'Studio' : 
-             property.property_type,
+      value: propertyTypeLabels[property.property_type] || property.property_type,
       color: 'text-primary-500'
     });
   }
 
-  // Ajouter les équipements disponibles
-  if (property.amenities && property.amenities.length > 0) {
-    const amenityIcons: { [key: string]: any } = {
-      'wifi': <Wifi className="h-5 w-5" />,
-      'electricity': <Zap className="h-5 w-5" />,
-      'water': <Droplets className="h-5 w-5" />,
-      'security': <Shield className="h-5 w-5" />
-    };
+  // Ajouter les équipements disponibles depuis les booléens
+  const amenities = [
+    { key: 'parking', available: property.has_parking, label: 'Parking', icon: <Car className="h-5 w-5" /> },
+    { key: 'garden', available: property.has_garden, label: 'Jardin', icon: <CheckCircle className="h-5 w-5" /> },
+    { key: 'furnished', available: property.is_furnished, label: 'Meublé', icon: <CheckCircle className="h-5 w-5" /> },
+    { key: 'ac', available: property.has_ac, label: 'Climatisation', icon: <Zap className="h-5 w-5" /> },
+  ].filter(a => a.available);
 
-    property.amenities.slice(0, 4).forEach((amenity) => {
-      features.push({
-        icon: amenityIcons[amenity] || <CheckCircle className="h-5 w-5" />,
-        label: amenity.charAt(0).toUpperCase() + amenity.slice(1),
-        value: 'Disponible',
-        color: 'text-semantic-success'
-      });
+  amenities.slice(0, 4).forEach((amenity) => {
+    features.push({
+      icon: amenity.icon,
+      label: amenity.label,
+      value: 'Disponible',
+      color: 'text-semantic-success'
     });
-  }
+  });
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -201,7 +208,7 @@ interface StickyCTABarProps {
   monthlyRent: number;
 }
 
-function StickyCTABar({ propertyId, monthlyRent }: StickyCTABarProps) {
+function StickyCTABar({ propertyId }: StickyCTABarProps) {
   const navigate = useNavigate();
 
   return (
@@ -232,7 +239,6 @@ export default function PropertyDetailPage() {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showStickyBar, setShowStickyBar] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (id) {
@@ -347,18 +353,10 @@ export default function PropertyDetailPage() {
                         {property.city}, {property.neighborhood}
                       </span>
                     </div>
-                    {property.rating && (
+                    {property.view_count > 0 && (
                       <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star 
-                              key={i} 
-                              className={`h-4 w-4 ${i < property.rating! ? 'text-yellow-400 fill-current' : 'text-neutral-200'}`} 
-                            />
-                          ))}
-                        </div>
                         <span className="text-sm text-neutral-500">
-                          {property.rating}/5 ({property.review_count || 0} avis)
+                          {property.view_count} vue{property.view_count > 1 ? 's' : ''}
                         </span>
                       </div>
                     )}
@@ -390,16 +388,34 @@ export default function PropertyDetailPage() {
               </div>
 
               {/* Amenities */}
-              {property.amenities && property.amenities.length > 0 && (
+              {(property.has_parking || property.has_garden || property.is_furnished || property.has_ac) && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold text-neutral-900">Équipements</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    {property.amenities.map((amenity, index) => (
-                      <div key={index} className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-100">
+                    {property.has_parking && (
+                      <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-100">
                         <CheckCircle className="h-5 w-5 text-semantic-success flex-shrink-0" />
-                        <span className="text-neutral-700 font-medium capitalize">{amenity}</span>
+                        <span className="text-neutral-700 font-medium">Parking</span>
                       </div>
-                    ))}
+                    )}
+                    {property.has_garden && (
+                      <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-100">
+                        <CheckCircle className="h-5 w-5 text-semantic-success flex-shrink-0" />
+                        <span className="text-neutral-700 font-medium">Jardin</span>
+                      </div>
+                    )}
+                    {property.is_furnished && (
+                      <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-100">
+                        <CheckCircle className="h-5 w-5 text-semantic-success flex-shrink-0" />
+                        <span className="text-neutral-700 font-medium">Meublé</span>
+                      </div>
+                    )}
+                    {property.has_ac && (
+                      <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-100">
+                        <CheckCircle className="h-5 w-5 text-semantic-success flex-shrink-0" />
+                        <span className="text-neutral-700 font-medium">Climatisation</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -419,8 +435,9 @@ export default function PropertyDetailPage() {
                         title: property.title, 
                         monthly_rent: property.monthly_rent!,
                         longitude: property.longitude,
-                        latitude: property.latitude
-                      }]}
+                        latitude: property.latitude,
+                        neighborhood: property.neighborhood || undefined
+                      } as any]}
                       singleMarker
                     />
                   ) : (

@@ -143,6 +143,9 @@ export default function ContractDetailEnhanced() {
     };
 
     const config = statusConfig[status] || statusConfig['brouillon'];
+    if (!config) {
+      return <span className="text-gray-500">{status}</span>;
+    }
     const Icon = config.icon;
 
     return (
@@ -194,7 +197,6 @@ export default function ContractDetailEnhanced() {
   }
 
   const isOwner = user.id === contract.owner_id;
-  const isTenant = user.id === contract.tenant_id;
 
   return (
     <>
