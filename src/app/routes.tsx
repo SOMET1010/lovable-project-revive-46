@@ -74,15 +74,10 @@ const AdminCEVManagement = lazy(() => import('@/features/admin/pages/CEVManageme
 const AdminTrustAgents = lazy(() => import('@/features/admin/pages/TrustAgentsPage'));
 
 const TrustAgentDashboard = lazy(() => import('@/features/trust-agent/pages/DashboardPage'));
-const TrustAgentModeration = lazy(() => import('@/features/trust-agent/pages/ModerationPage'));
-const TrustAgentMediation = lazy(() => import('@/features/trust-agent/pages/MediationPage'));
 const TrustAgentAnalytics = lazy(() => import('@/features/trust-agent/pages/AnalyticsPage'));
 
 const NotificationPreferences = lazy(() => import('@/features/messaging/pages/NotificationPreferencesPage'));
 const NotificationsPage = lazy(() => import('@/features/messaging/pages/NotificationsPage'));
-const MyDisputes = lazy(() => import('@/features/dispute/pages/MyDisputesPage'));
-const CreateDispute = lazy(() => import('@/features/dispute/pages/CreateDisputePage'));
-const DisputeDetail = lazy(() => import('@/features/dispute/pages/DisputeDetailPage'));
 
 const AboutPage = lazy(() => import('@/features/auth/pages/AboutPage'));
 const TermsOfServicePage = lazy(() => import('@/features/auth/pages/TermsOfServicePage'));
@@ -191,14 +186,9 @@ export const routes: RouteObject[] = [
         ]
       },
       { path: 'trust-agent/dashboard', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentDashboard /></ProtectedRoute> },
-      { path: 'trust-agent/moderation', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentModeration /></ProtectedRoute> },
-      { path: 'trust-agent/mediation', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentMediation /></ProtectedRoute> },
       { path: 'trust-agent/analytics', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentAnalytics /></ProtectedRoute> },
       { path: 'notifications', element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
       { path: 'notifications/preferences', element: <ProtectedRoute><NotificationPreferences /></ProtectedRoute> },
-      { path: 'mes-litiges', element: <ProtectedRoute><MyDisputes /></ProtectedRoute> },
-      { path: 'creer-litige', element: <ProtectedRoute><CreateDispute /></ProtectedRoute> },
-      { path: 'litige/:id', element: <ProtectedRoute><DisputeDetail /></ProtectedRoute> },
       { path: '*', element: <NotFound /> },
     ],
   },
