@@ -6,13 +6,35 @@
  */
 
 import { supabase } from '@/services/supabase/client';
-import type { Database } from '@/shared/lib/database.types';
-
-type UserVerification = Database['public']['Tables']['user_verifications']['Row'];
-type UserVerificationInsert = Database['public']['Tables']['user_verifications']['Insert'];
-type UserVerificationUpdate = Database['public']['Tables']['user_verifications']['Update'];
 
 type VerificationStatus = 'en_attente' | 'verifie' | 'rejete';
+
+interface UserVerificationUpdate {
+  oneci_status?: VerificationStatus;
+  cnam_status?: VerificationStatus;
+  face_verification_status?: VerificationStatus;
+  oneci_document_url?: string;
+  cnam_document_url?: string;
+  selfie_image_url?: string;
+  oneci_number?: string;
+  cnam_number?: string;
+  rejection_reason?: string;
+  identity_verified?: boolean;
+  updated_at?: string;
+}
+
+interface UserVerificationInsert {
+  user_id: string;
+  oneci_status?: VerificationStatus;
+  cnam_status?: VerificationStatus;
+  face_verification_status?: VerificationStatus;
+  oneci_document_url?: string;
+  cnam_document_url?: string;
+  selfie_image_url?: string;
+  oneci_number?: string;
+  cnam_number?: string;
+  identity_verified?: boolean;
+}
 
 /**
  * API de gestion des vérifications d'identité
@@ -197,4 +219,3 @@ export const verificationApi = {
     return { data: count || 0, error: null };
   },
 };
-

@@ -22,7 +22,6 @@ const SearchProperties = lazy(() => import('@/features/tenant/pages/SearchProper
 const PropertyDetail = lazy(() => import('@/features/tenant/pages/PropertyDetailPage'));
 const Favorites = lazy(() => import('@/features/tenant/pages/FavoritesPage'));
 const SavedSearches = lazy(() => import('@/features/tenant/pages/SavedSearchesPage'));
-const Recommendations = lazy(() => import('@/features/tenant/pages/RecommendationsPage'));
 
 const ApplicationForm = lazy(() => import('@/features/tenant/pages/ApplicationFormPage'));
 const ApplicationDetail = lazy(() => import('@/features/tenant/pages/ApplicationDetailPage'));
@@ -45,10 +44,6 @@ const VerificationRequest = lazy(() => import('@/features/verification/pages/Req
 const IdentityVerification = lazy(() => import('@/features/auth/pages/IdentityVerificationPage'));
 const VerificationSettings = lazy(() => import('@/features/verification/pages/SettingsPage'));
 const MyCertificates = lazy(() => import('@/features/verification/pages/MyCertificatesPage'));
-// RequestTrustValidation removed - not used
-
-const RequestCEV = lazy(() => import('@/features/verification/pages/RequestCEVPage'));
-const CEVRequestDetail = lazy(() => import('@/features/verification/pages/CEVRequestDetailPage'));
 
 const TenantDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
 const TenantCalendar = lazy(() => import('@/features/tenant/pages/CalendarPage'));
@@ -58,7 +53,7 @@ const TenantMaintenance = lazy(() => import('@/features/tenant/pages/Maintenance
 const OwnerDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
 const AddProperty = lazy(() => import('@/features/owner/pages/AddPropertyPage'));
 const EditProperty = lazy(() => import('@/features/owner/pages/EditPropertyPage'));
-const PropertyStats = lazy(() => import('@/features/tenant/pages/DashboardPage')); // Temporary redirect
+const PropertyStats = lazy(() => import('@/features/tenant/pages/DashboardPage'));
 const OwnerMaintenance = lazy(() => import('@/features/tenant/pages/MaintenancePage'));
 
 const AgencyDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
@@ -73,11 +68,8 @@ const AdminDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'
 const AdminUsers = lazy(() => import('@/features/admin/pages/UsersPage'));
 const AdminUserRoles = lazy(() => import('@/features/admin/pages/UserRolesPage'));
 const AdminApiKeys = lazy(() => import('@/features/admin/pages/ApiKeysPage'));
-const AdminServiceProviders = lazy(() => import('@/features/admin/pages/ServiceProvidersPage'));
 const AdminServiceMonitoring = lazy(() => import('@/features/admin/pages/ServiceMonitoringPage'));
 const AdminServiceConfiguration = lazy(() => import('@/features/admin/pages/ServiceConfigurationPage'));
-// AdminTestDataGenerator removed - file deleted
-const AdminQuickDemo = lazy(() => import('@/features/admin/pages/QuickDemoPage'));
 const AdminCEVManagement = lazy(() => import('@/features/admin/pages/CEVManagementPage'));
 const AdminTrustAgents = lazy(() => import('@/features/admin/pages/TrustAgentsPage'));
 
@@ -85,11 +77,6 @@ const TrustAgentDashboard = lazy(() => import('@/features/trust-agent/pages/Dash
 const TrustAgentModeration = lazy(() => import('@/features/trust-agent/pages/ModerationPage'));
 const TrustAgentMediation = lazy(() => import('@/features/trust-agent/pages/MediationPage'));
 const TrustAgentAnalytics = lazy(() => import('@/features/trust-agent/pages/AnalyticsPage'));
-
-// Analytics
-const AdminAnalytics = lazy(() => import('@/features/analytics/pages/AdminAnalyticsPage'));
-const OwnerAnalytics = lazy(() => import('@/features/analytics/pages/OwnerAnalyticsPage'));
-const MarketAnalytics = lazy(() => import('@/features/analytics/pages/MarketAnalyticsPage'));
 
 const NotificationPreferences = lazy(() => import('@/features/messaging/pages/NotificationPreferencesPage'));
 const NotificationsPage = lazy(() => import('@/features/messaging/pages/NotificationsPage'));
@@ -134,544 +121,85 @@ export const routes: RouteObject[] = [
       { path: 'louer-mon-bien', element: <AddPropertyLanding /> },
       {
         path: 'choix-profil',
-        element: (
-          <ProtectedRoute>
-            <ProfileSelection />
-          </ProtectedRoute>
-        ),
+        element: <ProtectedRoute><ProfileSelection /></ProtectedRoute>,
       },
       {
         path: 'profil',
-        element: (
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        ),
+        element: <ProtectedRoute><Profile /></ProtectedRoute>,
       },
       {
         path: 'dashboard',
-        element: (
-          <ProtectedRoute>
-            <UserDashboard />
-          </ProtectedRoute>
-        ),
+        element: <ProtectedRoute><UserDashboard /></ProtectedRoute>,
       },
       {
         path: 'recherche',
-        element: (
-          <SearchErrorBoundary>
-            <SearchProperties />
-          </SearchErrorBoundary>
-        )
+        element: <SearchErrorBoundary><SearchProperties /></SearchErrorBoundary>
       },
       { path: 'propriete/:id', element: <PropertyDetail /> },
       { path: 'properties/:id', element: <PropertyDetail /> },
       { path: 'proprietes/:id', element: <PropertyDetail /> },
-      {
-        path: 'favoris',
-        element: (
-          <ProtectedRoute>
-            <Favorites />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'recherches-sauvegardees',
-        element: (
-          <ProtectedRoute>
-            <SavedSearches />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'recommandations',
-        element: (
-          <ProtectedRoute>
-            <Recommendations />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'candidature/:id',
-        element: (
-          <ProtectedRoute>
-            <ApplicationForm />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'visiter/:id',
-        element: (
-          <ProtectedRoute>
-            <ScheduleVisit />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'mes-visites',
-        element: (
-          <ProtectedRoute>
-            <MyVisits />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'messages',
-        element: (
-          <ProtectedRoute>
-            <Messages />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'creer-contrat/:propertyId',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
-            <CreateContract />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'mes-contrats',
-        element: (
-          <ProtectedRoute>
-            <MyContracts />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'tous-les-contrats',
-        element: (
-          <ProtectedRoute>
-            <ContractsList />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'contrat/:id',
-        element: (
-          <ProtectedRoute>
-            <ContractDetail />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'bail/:id/details',
-        element: (
-          <ProtectedRoute>
-            <ContractDetailEnhanced />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'signer-bail/:id',
-        element: (
-          <ProtectedRoute>
-            <SignLease />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'bail/signer/:id',
-        element: (
-          <ProtectedRoute>
-            <SignLease />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'effectuer-paiement',
-        element: (
-          <ProtectedRoute>
-            <MakePayment />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'mes-paiements',
-        element: (
-          <ProtectedRoute>
-            <PaymentHistory />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'verification',
-        element: (
-          <ProtectedRoute>
-            <VerificationRequest />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'certification-ansut',
-        element: (
-          <ProtectedRoute>
-            <IdentityVerification />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'ansut-verification',
-        element: (
-          <ProtectedRoute>
-            <IdentityVerification />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'verification/parametres',
-        element: (
-          <ProtectedRoute>
-            <VerificationSettings />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'mes-certificats',
-        element: (
-          <ProtectedRoute>
-            <MyCertificates />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'request-cev',
-        element: (
-          <ProtectedRoute>
-            <RequestCEV />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'cev-request/:id',
-        element: (
-          <ProtectedRoute>
-            <CEVRequestDetail />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'dashboard/locataire',
-        element: (
-          <ProtectedRoute allowedRoles={['locataire']}>
-            <TenantDashboard />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'dashboard/locataire/calendrier',
-        element: (
-          <ProtectedRoute allowedRoles={['locataire']}>
-            <TenantCalendar />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'score-locataire',
-        element: (
-          <ProtectedRoute allowedRoles={['locataire']}>
-            <TenantScore />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'maintenance/locataire',
-        element: (
-          <ProtectedRoute allowedRoles={['locataire']}>
-            <TenantMaintenance />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'dashboard/proprietaire',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire']}>
-            <OwnerDashboard />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'dashboard/proprietaire/analytics',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
-            <OwnerAnalytics />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'dashboard/ajouter-propriete',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
-            <AddProperty />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'add-property',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
-            <AddProperty />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'dashboard/propriete/:id/stats',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
-            <PropertyStats />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'dashboard/propriete/:id/modifier',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
-            <EditProperty />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'maintenance/proprietaire',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire']}>
-            <OwnerMaintenance />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'dashboard/candidature/:id',
-        element: (
-          <ProtectedRoute allowedRoles={['proprietaire', 'agence']}>
-            <ApplicationDetail />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'agence/tableau-de-bord',
-        element: (
-          <ProtectedRoute allowedRoles={['agence']}>
-            <AgencyDashboard />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'agence/inscription',
-        element: (
-          <ProtectedRoute>
-            <AgencyRegistration />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'agence/equipe',
-        element: (
-          <ProtectedRoute allowedRoles={['agence']}>
-            <AgencyTeam />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'agence/proprietes',
-        element: (
-          <ProtectedRoute allowedRoles={['agence']}>
-            <AgencyProperties />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'agence/commissions',
-        element: (
-          <ProtectedRoute allowedRoles={['agence']}>
-            <AgencyCommissions />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'maintenance/nouvelle',
-        element: (
-          <ProtectedRoute>
-            <MaintenanceRequest />
-          </ProtectedRoute>
-        ),
-      },
-      // Admin Routes with dedicated layout
+      { path: 'favoris', element: <ProtectedRoute><Favorites /></ProtectedRoute> },
+      { path: 'recherches-sauvegardees', element: <ProtectedRoute><SavedSearches /></ProtectedRoute> },
+      { path: 'candidature/:id', element: <ProtectedRoute><ApplicationForm /></ProtectedRoute> },
+      { path: 'visiter/:id', element: <ProtectedRoute><ScheduleVisit /></ProtectedRoute> },
+      { path: 'mes-visites', element: <ProtectedRoute><MyVisits /></ProtectedRoute> },
+      { path: 'messages', element: <ProtectedRoute><Messages /></ProtectedRoute> },
+      { path: 'creer-contrat/:propertyId', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><CreateContract /></ProtectedRoute> },
+      { path: 'mes-contrats', element: <ProtectedRoute><MyContracts /></ProtectedRoute> },
+      { path: 'tous-les-contrats', element: <ProtectedRoute><ContractsList /></ProtectedRoute> },
+      { path: 'contrat/:id', element: <ProtectedRoute><ContractDetail /></ProtectedRoute> },
+      { path: 'bail/:id/details', element: <ProtectedRoute><ContractDetailEnhanced /></ProtectedRoute> },
+      { path: 'signer-bail/:id', element: <ProtectedRoute><SignLease /></ProtectedRoute> },
+      { path: 'bail/signer/:id', element: <ProtectedRoute><SignLease /></ProtectedRoute> },
+      { path: 'effectuer-paiement', element: <ProtectedRoute><MakePayment /></ProtectedRoute> },
+      { path: 'mes-paiements', element: <ProtectedRoute><PaymentHistory /></ProtectedRoute> },
+      { path: 'verification', element: <ProtectedRoute><VerificationRequest /></ProtectedRoute> },
+      { path: 'certification-ansut', element: <ProtectedRoute><IdentityVerification /></ProtectedRoute> },
+      { path: 'ansut-verification', element: <ProtectedRoute><IdentityVerification /></ProtectedRoute> },
+      { path: 'verification/parametres', element: <ProtectedRoute><VerificationSettings /></ProtectedRoute> },
+      { path: 'mes-certificats', element: <ProtectedRoute><MyCertificates /></ProtectedRoute> },
+      { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantDashboard /></ProtectedRoute> },
+      { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={['locataire']}><TenantCalendar /></ProtectedRoute> },
+      { path: 'score-locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantScore /></ProtectedRoute> },
+      { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantMaintenance /></ProtectedRoute> },
+      { path: 'dashboard/proprietaire', element: <ProtectedRoute allowedRoles={['proprietaire']}><OwnerDashboard /></ProtectedRoute> },
+      { path: 'dashboard/ajouter-propriete', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
+      { path: 'add-property', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
+      { path: 'dashboard/propriete/:id/stats', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><PropertyStats /></ProtectedRoute> },
+      { path: 'dashboard/propriete/:id/modifier', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><EditProperty /></ProtectedRoute> },
+      { path: 'maintenance/proprietaire', element: <ProtectedRoute allowedRoles={['proprietaire']}><OwnerMaintenance /></ProtectedRoute> },
+      { path: 'dashboard/candidature/:id', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><ApplicationDetail /></ProtectedRoute> },
+      { path: 'agence/tableau-de-bord', element: <ProtectedRoute allowedRoles={['agence']}><AgencyDashboard /></ProtectedRoute> },
+      { path: 'agence/inscription', element: <ProtectedRoute><AgencyRegistration /></ProtectedRoute> },
+      { path: 'agence/equipe', element: <ProtectedRoute allowedRoles={['agence']}><AgencyTeam /></ProtectedRoute> },
+      { path: 'agence/proprietes', element: <ProtectedRoute allowedRoles={['agence']}><AgencyProperties /></ProtectedRoute> },
+      { path: 'agence/commissions', element: <ProtectedRoute allowedRoles={['agence']}><AgencyCommissions /></ProtectedRoute> },
+      { path: 'maintenance/nouvelle', element: <ProtectedRoute><MaintenanceRequest /></ProtectedRoute> },
       {
         path: 'admin',
-        element: (
-          <ProtectedRoute allowedRoles={['admin']}>
-            <AdminLayout />
-          </ProtectedRoute>
-        ),
+        element: <ProtectedRoute allowedRoles={['admin']}><AdminLayout /></ProtectedRoute>,
         children: [
-          {
-            path: 'tableau-de-bord',
-            element: <AdminDashboard />
-          },
-          {
-            path: 'utilisateurs',
-            element: <AdminUsers />
-          },
-          {
-            path: 'gestion-roles',
-            element: <AdminUserRoles />
-          },
-          {
-            path: 'api-keys',
-            element: <AdminApiKeys />
-          },
-          {
-            path: 'properties',
-            element: <div className="p-6"><h1 className="text-2xl font-bold">Gestion des Propriétés</h1></div>
-          },
-          {
-            path: 'transactions',
-            element: <div className="p-6"><h1 className="text-2xl font-bold">Gestion des Transactions</h1></div>
-          },
-          {
-            path: 'service-providers',
-            element: <AdminServiceProviders />
-          },
-          {
-            path: 'service-monitoring',
-            element: <AdminServiceMonitoring />
-          },
-          {
-            path: 'logs',
-            element: <div className="p-6"><h1 className="text-2xl font-bold">Logs & Erreurs</h1></div>
-          },
-          {
-            path: 'service-configuration',
-            element: <AdminServiceConfiguration />
-          },
-          {
-            path: 'demo-rapide',
-            element: <AdminQuickDemo />
-          },
-          {
-            path: 'cev-management',
-            element: <AdminCEVManagement />
-          },
-          {
-            path: 'cev/:id',
-            element: <AdminCEVManagement />
-          },
-          {
-            path: 'trust-agents',
-            element: <AdminTrustAgents />
-          },
-          {
-            path: 'analytics',
-            element: <AdminAnalytics />
-          },
-          {
-            path: 'market-analytics',
-            element: <MarketAnalytics />
-          }
+          { path: 'tableau-de-bord', element: <AdminDashboard /> },
+          { path: 'utilisateurs', element: <AdminUsers /> },
+          { path: 'gestion-roles', element: <AdminUserRoles /> },
+          { path: 'api-keys', element: <AdminApiKeys /> },
+          { path: 'service-monitoring', element: <AdminServiceMonitoring /> },
+          { path: 'service-configuration', element: <AdminServiceConfiguration /> },
+          { path: 'cev-management', element: <AdminCEVManagement /> },
+          { path: 'cev/:id', element: <AdminCEVManagement /> },
+          { path: 'trust-agents', element: <AdminTrustAgents /> },
         ]
       },
-      {
-        path: 'market-analytics',
-        element: (
-          <ProtectedRoute>
-            <MarketAnalytics />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'trust-agent/dashboard',
-        element: (
-          <ProtectedRoute allowedRoles={['trust_agent']}>
-            <TrustAgentDashboard />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'trust-agent/moderation',
-        element: (
-          <ProtectedRoute allowedRoles={['trust_agent']}>
-            <TrustAgentModeration />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'trust-agent/mediation',
-        element: (
-          <ProtectedRoute allowedRoles={['trust_agent']}>
-            <TrustAgentMediation />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'trust-agent/analytics',
-        element: (
-          <ProtectedRoute allowedRoles={['trust_agent']}>
-            <TrustAgentAnalytics />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'notifications',
-        element: (
-          <ProtectedRoute>
-            <NotificationsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'notifications/preferences',
-        element: (
-          <ProtectedRoute>
-            <NotificationPreferences />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'mes-litiges',
-        element: (
-          <ProtectedRoute>
-            <MyDisputes />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'creer-litige',
-        element: (
-          <ProtectedRoute>
-            <CreateDispute />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: 'litige/:id',
-        element: (
-          <ProtectedRoute>
-            <DisputeDetail />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: '*',
-        element: (
-          <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="text-center">
-              <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">Page non trouvée</h2>
-              <p className="text-gray-600 mb-8">La page que vous recherchez n'existe pas.</p>
-              <a
-                href="/"
-                className="inline-block px-6 py-3 bg-terracotta-500 text-white rounded-lg hover:bg-terracotta-600 transition-colors"
-              >
-                Retour à l'accueil
-              </a>
-            </div>
-          </div>
-        ),
-      },
+      { path: 'trust-agent/dashboard', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentDashboard /></ProtectedRoute> },
+      { path: 'trust-agent/moderation', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentModeration /></ProtectedRoute> },
+      { path: 'trust-agent/mediation', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentMediation /></ProtectedRoute> },
+      { path: 'trust-agent/analytics', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentAnalytics /></ProtectedRoute> },
+      { path: 'notifications', element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
+      { path: 'notifications/preferences', element: <ProtectedRoute><NotificationPreferences /></ProtectedRoute> },
+      { path: 'mes-litiges', element: <ProtectedRoute><MyDisputes /></ProtectedRoute> },
+      { path: 'creer-litige', element: <ProtectedRoute><CreateDispute /></ProtectedRoute> },
+      { path: 'litige/:id', element: <ProtectedRoute><DisputeDetail /></ProtectedRoute> },
+      { path: '*', element: <NotFound /> },
     ],
-  },
-  {
-    path: '*',
-    element: <NotFound />,
   },
 ];

@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Shield, Upload, CheckCircle, XCircle, Clock, AlertCircle, FileText, Camera, Loader } from 'lucide-react';
+import { Shield, Upload, CheckCircle, XCircle, Clock, AlertCircle, FileText } from 'lucide-react';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
-import { apiKeyService } from '@/services/apiKeyService';
 
 interface VerificationData {
   id: string;
@@ -24,7 +23,6 @@ export default function VerificationRequest() {
   const { user, profile } = useAuth();
   const [verification, setVerification] = useState<VerificationData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
@@ -33,11 +31,6 @@ export default function VerificationRequest() {
   const [cnamNumber, setCnamNumber] = useState('');
   const [oneciFile, setOneciFile] = useState<File | null>(null);
   const [cnamFile, setCnamFile] = useState<File | null>(null);
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [verifyingONECI, setVerifyingONECI] = useState(false);
-  const [verifyingCNAM, setVerifyingCNAM] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -47,20 +40,20 @@ export default function VerificationRequest() {
 
   const loadVerificationData = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('user_verifications')
         .select('*')
         .eq('user_id', user?.id)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
 
       if (data) {
         setVerification(data);
         setOneciNumber(data.oneci_number || '');
         setCnamNumber(data.cnam_number || '');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading verification:', err);
       setError('Erreur lors du chargement des données de vérification');
     } finally {
@@ -94,106 +87,17 @@ export default function VerificationRequest() {
     const fileExt = file.name.split('.').pop();
     const fileName = `${user?.id}/${type}_${Date.now()}.${fileExt}`;
 
-    const { data, error } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('verification-documents')
       .upload(fileName, file);
 
-    if (error) throw error;
+    if (uploadError) throw uploadError;
 
     const { data: urlData } = supabase.storage
       .from('verification-documents')
       .getPublicUrl(fileName);
 
     return urlData.publicUrl;
-  };
-
-  const verifyONECI = async () => {
-    if (!oneciNumber || !firstName || !lastName || !dateOfBirth) {
-      setError('Veuillez remplir tous les champs pour la vérification ONECI');
-      return;
-    }
-
-    setVerifyingONECI(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/oneci-verification`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          cniNumber: oneciNumber,
-          firstName,
-          lastName,
-          dateOfBirth,
-          userId: user?.id
-        })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Erreur de vérification ONECI');
-      }
-
-      if (result.verified) {
-        setSuccess('✅ CNI vérifiée avec succès par ONECI');
-        await loadVerificationData();
-      } else {
-        setError('❌ La vérification ONECI a échoué. Vérifiez vos informations.');
-      }
-    } catch (err: any) {
-      console.error('ONECI verification error:', err);
-      setError(err.message || 'Erreur lors de la vérification ONECI');
-    } finally {
-      setVerifyingONECI(false);
-    }
-  };
-
-  const verifyCNAM = async () => {
-    if (!cnamNumber || !firstName || !lastName) {
-      setError('Veuillez remplir tous les champs pour la vérification CNAM');
-      return;
-    }
-
-    setVerifyingCNAM(true);
-    setError('');
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cnam-verification`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-        },
-        body: JSON.stringify({
-          cnamNumber,
-          firstName,
-          lastName,
-          userId: user?.id
-        })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Erreur de vérification CNAM');
-      }
-
-      if (result.verified) {
-        setSuccess('✅ CNAM vérifié avec succès');
-        await loadVerificationData();
-      } else {
-        setError('❌ La vérification CNAM a échoué. Vérifiez vos informations.');
-      }
-    } catch (err: any) {
-      console.error('CNAM verification error:', err);
-      setError(err.message || 'Erreur lors de la vérification CNAM');
-    } finally {
-      setVerifyingCNAM(false);
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -247,39 +151,18 @@ export default function VerificationRequest() {
         if (insertError) throw insertError;
       }
 
-      await apiKeyService.sendEmail(
-        user.email!,
-        'verification-success',
-        {
-          name: profile?.full_name || 'Utilisateur',
-          documentType: oneciUrl && cnamUrl ? 'CNI et CNAM' : oneciUrl ? 'CNI' : 'CNAM'
-        }
-      );
-
       setSuccess('Demande de vérification soumise avec succès');
       setTimeout(() => {
         loadVerificationData();
         setOneciFile(null);
         setCnamFile(null);
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la soumission';
       console.error('Error submitting verification:', err);
-      setError(err.message || 'Erreur lors de la soumission');
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'verifie':
-        return <CheckCircle className="w-6 h-6 text-green-600" />;
-      case 'rejete':
-        return <XCircle className="w-6 h-6 text-red-600" />;
-      case 'en_attente':
-        return <Clock className="w-6 h-6 text-yellow-600" />;
-      default:
-        return <AlertCircle className="w-6 h-6 text-gray-600" />;
     }
   };
 
@@ -483,13 +366,12 @@ export default function VerificationRequest() {
                       onChange={(e) => setCnamNumber(e.target.value)}
                       placeholder="Ex: CNAM1234567890"
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-terracotta-200 focus:border-terracotta-500"
-                      required={!verification?.cnam_document_url}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Carte CNAM
+                      Document CNAM
                     </label>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-terracotta-400 transition-colors">
                       <input
@@ -519,25 +401,23 @@ export default function VerificationRequest() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <button
-                  type="submit"
-                  disabled={submitting || (!oneciFile && !cnamFile && !oneciNumber && !cnamNumber)}
-                  className="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                >
-                  {submitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Envoi en cours...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="w-5 h-5" />
-                      <span>Soumettre pour vérification</span>
-                    </>
-                  )}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-gradient-to-r from-terracotta-500 to-coral-500 text-white py-4 px-6 rounded-xl font-bold text-lg hover:from-terracotta-600 hover:to-coral-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {submitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Envoi en cours...</span>
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-5 h-5" />
+                    <span>Soumettre ma demande de vérification</span>
+                  </>
+                )}
+              </button>
             </form>
           )}
         </div>

@@ -1,5 +1,4 @@
-import { Shield, CheckCircle, AlertCircle, Eye, Star, Clock } from 'lucide-react';
-import { useAuth } from '@/app/providers/AuthProvider';
+import { Shield, CheckCircle, AlertCircle, Eye, Star } from 'lucide-react';
 
 interface TrustIndicatorProps {
   userId?: string;
@@ -23,11 +22,9 @@ export default function TrustIndicator({
   size = 'md',
   userType
 }: TrustIndicatorProps) {
-  const { profile } = useAuth();
-
   const getTrustScore = () => {
     let score = 0;
-    let maxScore = 5;
+    const maxScore = 5;
 
     if (verificationStatus) {
       if (verificationStatus.oneci_verified) score += 2;

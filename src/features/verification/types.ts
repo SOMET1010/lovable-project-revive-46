@@ -6,8 +6,8 @@ import type { Database } from '@/shared/lib/database.types';
 
 // Types de base depuis la base de données
 export type UserVerification = Database['public']['Tables']['user_verifications']['Row'];
-export type UserVerificationInsert = Database['public']['Tables']['user_verifications']['Insert'];
-export type UserVerificationUpdate = Database['public']['Tables']['user_verifications']['Update'];
+export type UserVerificationInsert = Partial<UserVerification> & { user_id: string };
+export type UserVerificationUpdate = Partial<UserVerification>;
 
 // Types étendus pour l'application
 export type VerificationStatus = 'en_attente' | 'verifie' | 'rejete';
@@ -110,4 +110,3 @@ export interface VerificationRejection {
   rejected_at: string;
   can_retry: boolean;
 }
-
