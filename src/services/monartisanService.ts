@@ -232,7 +232,7 @@ class MonArtisanService {
       cancelled: 0,
     };
 
-    data.forEach((request) => {
+    data.forEach((request: any) => {
       if (request.status === 'pending' || request.status === 'submitted') {
         stats.pending++;
       } else if (request.status === 'in_progress') {

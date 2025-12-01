@@ -88,7 +88,7 @@ class ContactService {
         updateData.resolved_at = new Date().toISOString();
       }
 
-      const { data, error } = await supabase
+    const { data: updatedSubmission, error } = await supabase
         .from('contact_submissions')
         .update(updateData)
         .eq('id', id)
@@ -99,7 +99,7 @@ class ContactService {
 
       logger.info('Contact submission status updated', { id, status });
 
-      return { data, error: null };
+      return { data: updatedSubmission, error: null };
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error occurred');
       logger.error('Error updating contact submission status', error);
@@ -109,7 +109,7 @@ class ContactService {
 
   async sendEmail(to: string, subject: string, body: string): Promise<ContactServiceResponse<boolean>> {
     try {
-      const { data, error } = await supabase.functions.invoke('send-email', {
+      const { error } = await supabase.functions.invoke('send-email', {
         body: {
           to,
           subject,

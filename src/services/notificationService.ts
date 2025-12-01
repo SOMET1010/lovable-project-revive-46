@@ -165,7 +165,7 @@ export const notificationService = {
           table: 'notifications',
           filter: `user_id=eq.${userId}`
         },
-        (payload) => {
+        (payload: any) => {
           callback(payload.new as Notification);
         }
       )

@@ -96,7 +96,7 @@ export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf
 
   // Tables
   if (data.tables && data.tables.length > 0) {
-    data.tables.forEach((table, index) => {
+    data.tables.forEach((table, _index) => {
       if (yPosition > 250) {
         doc.addPage();
         yPosition = 20;
