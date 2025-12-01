@@ -20,7 +20,7 @@ interface VerificationOption {
 }
 
 export default function VerificationSettings() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
@@ -98,23 +98,23 @@ export default function VerificationSettings() {
   const loadPreferences = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      const { data: fetchedData, error: fetchError } = await supabase
         .from('user_verifications')
         .select('enable_oneci_verification, enable_cnam_verification, enable_face_verification, enable_ansut_certification')
         .eq('user_id', user?.id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (fetchError) throw fetchError;
 
-      if (data) {
+      if (fetchedData) {
         setPreferences({
-          enable_oneci_verification: data.enable_oneci_verification ?? true,
-          enable_cnam_verification: data.enable_cnam_verification ?? true,
-          enable_face_verification: data.enable_face_verification ?? true,
-          enable_ansut_certification: data.enable_ansut_certification ?? true,
+          enable_oneci_verification: fetchedData.enable_oneci_verification ?? true,
+          enable_cnam_verification: fetchedData.enable_cnam_verification ?? true,
+          enable_face_verification: fetchedData.enable_face_verification ?? true,
+          enable_ansut_certification: fetchedData.enable_ansut_certification ?? true,
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading preferences:', err);
       setError('Erreur lors du chargement des préférences');
     } finally {
@@ -135,20 +135,21 @@ export default function VerificationSettings() {
     setSuccess('');
 
     try {
-      const { data, error } = await supabase.rpc('update_verification_preferences', {
+      const { error: saveError } = await supabase.rpc('update_verification_preferences', {
         p_enable_oneci: preferences.enable_oneci_verification,
         p_enable_cnam: preferences.enable_cnam_verification,
         p_enable_face: preferences.enable_face_verification,
         p_enable_ansut: preferences.enable_ansut_certification,
       });
 
-      if (error) throw error;
+      if (saveError) throw saveError;
 
       setSuccess('Préférences enregistrées avec succès');
       setTimeout(() => setSuccess(''), 3000);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'enregistrement';
       console.error('Error saving preferences:', err);
-      setError(err.message || 'Erreur lors de l\'enregistrement');
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Shield, CheckCircle, ExternalLink, Info } from 'lucide-react';
 
 interface CEVBadgeProps {
@@ -95,4 +94,3 @@ export default function CEVBadge({
     </div>
   );
 }
-

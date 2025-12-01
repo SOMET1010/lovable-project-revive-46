@@ -1,6 +1,5 @@
 /**
  * Feature: tenant
- * 
  * Exports publics de la feature tenant
  */
 
@@ -19,7 +18,6 @@ export { default as MyContractsPage } from './pages/MyContractsPage';
 export { default as MyVisitsPage } from './pages/MyVisitsPage';
 export { default as PaymentHistoryPage } from './pages/PaymentHistoryPage';
 export { default as PropertyDetailPage } from './pages/PropertyDetailPage';
-export { default as RecommendationsPage } from './pages/RecommendationsPage';
 export { default as SavedSearchesPage } from './pages/SavedSearchesPage';
 export { default as ScheduleVisitPage } from './pages/ScheduleVisitPage';
 export { default as ScorePage } from './pages/ScorePage';

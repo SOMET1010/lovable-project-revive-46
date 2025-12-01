@@ -13,7 +13,7 @@ interface Certificate {
   issued_at: string;
   expires_at: string;
   revoked_at: string | null;
-  certificate_data: any;
+  certificate_data: Record<string, unknown>;
 }
 
 interface SignatureHistory {
@@ -22,7 +22,7 @@ interface SignatureHistory {
   action: string;
   signature_type: string;
   created_at: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
 }
 
 export default function MyCertificates() {
@@ -31,7 +31,7 @@ export default function MyCertificates() {
   const [signatureHistory, setSignatureHistory] = useState<SignatureHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [_success, _setSuccess] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -60,9 +60,10 @@ export default function MyCertificates() {
 
       setCertificates(certsRes.data || []);
       setSignatureHistory(historyRes.data || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du chargement des certificats';
       console.error('Error loading certificates:', err);
-      setError(err.message || 'Erreur lors du chargement des certificats');
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -164,13 +165,6 @@ export default function MyCertificates() {
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start space-x-3 mb-6">
               <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
               <p className="text-red-700">{error}</p>
-            </div>
-          )}
-
-          {success && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-start space-x-3 mb-6">
-              <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <p className="text-green-700">{success}</p>
             </div>
           )}
 
