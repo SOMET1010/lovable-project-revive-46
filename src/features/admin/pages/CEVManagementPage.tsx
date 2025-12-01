@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
-  Shield, Search, Filter, Download, CheckCircle, XCircle, Clock, AlertCircle,
-  Eye, TrendingUp, Coins, Users, FileText, Calendar, CreditCard,
-  RefreshCw, Plus, Settings, BarChart3, Globe, ArrowUpRight, ArrowDownRight
+  Shield, Search, Download, CheckCircle, XCircle, Clock, AlertCircle,
+  Eye, Coins, FileText, Calendar, CreditCard,
+  RefreshCw, Plus, BarChart3, ArrowUpRight, Globe
 } from 'lucide-react';
 
 interface CEVRequest {

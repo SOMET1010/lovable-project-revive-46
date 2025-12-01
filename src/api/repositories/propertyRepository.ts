@@ -126,7 +126,7 @@ export const propertyRepository = {
   /**
    * Search properties by location
    */
-  async searchByLocation(city: string, radius?: number) {
+  async searchByLocation(city: string, _radius?: number) {
     const query = supabase
       .from('properties')
       .select('*')

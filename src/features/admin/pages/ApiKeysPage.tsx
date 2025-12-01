@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import {
   Key, Save, Eye, EyeOff, RefreshCw, CheckCircle, XCircle, Activity, AlertCircle,
-  Plus, Settings, Shield, Clock, Zap, Globe, Database, Smartphone, Mail
+  Plus, Settings, Shield, Zap, Globe, Database, Smartphone, Mail
 } from 'lucide-react';
-import { supabase } from '@/services/supabase/client';
 
 interface ApiKey {
   id: string;
@@ -32,7 +31,7 @@ interface ApiKeyLog {
 export default function AdminApiKeys() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [logs, setLogs] = useState<ApiKeyLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedService, setSelectedService] = useState<ApiKey | null>(null);
   const [editedKeys, setEditedKeys] = useState<Record<string, string>>({});

@@ -2,10 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/services/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -20,11 +19,8 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -36,10 +32,8 @@ import { toast } from "sonner";
 import {
   Flag,
   CheckCircle2,
-  XCircle,
   AlertCircle,
   History,
-  Plus,
   Search,
   Filter,
 } from "lucide-react";
@@ -103,8 +97,8 @@ export default function AdminFeatureFlags() {
       if (!session?.access_token) throw new Error("Not authenticated");
 
       const url = selectedCategory === "all"
-        ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-feature-flags`
-        : `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-feature-flags?category=${selectedCategory}`;
+        ? `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/manage-feature-flags`
+        : `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/manage-feature-flags?category=${selectedCategory}`;
 
       const response = await fetch(url, {
         headers: {
@@ -126,7 +120,7 @@ export default function AdminFeatureFlags() {
       if (!session?.access_token) throw new Error("Not authenticated");
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-feature-flags/${flagKey}/toggle`,
+        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/manage-feature-flags/${flagKey}/toggle`,
         {
           method: "POST",
           headers: {
@@ -156,7 +150,7 @@ export default function AdminFeatureFlags() {
   );
 
   // Grouper les flags par catégorie
-  const flagsByCategory = filteredFlags?.reduce((acc, flag) => {
+  const flagsByCategory = (filteredFlags ?? []).reduce((acc, flag) => {
     if (!acc[flag.category]) {
       acc[flag.category] = [];
     }

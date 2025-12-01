@@ -49,6 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const demoUser = {
           id: 'demo-user-123',
           email: 'demo@montoit.ci',
+          app_metadata: {},
+          aud: 'authenticated',
+          created_at: new Date().toISOString(),
           user_metadata: { 
             full_name: 'Utilisateur Démo',
             user_type: 'locataire'

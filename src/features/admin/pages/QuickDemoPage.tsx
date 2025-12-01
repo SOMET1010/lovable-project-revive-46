@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Home, Users, FileText, MessageSquare, Coins, Loader2, Check, Image, Play } from 'lucide-react';
+import { useState } from 'react';
+import { Home, Users, FileText, Loader2, Check, Image } from 'lucide-react';
 import { TestDataGeneratorService } from '@/services/ai/testDataGeneratorService';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -34,7 +34,7 @@ export default function AdminQuickDemo() {
         const property = await TestDataGeneratorService.generateTestProperty(user.id);
 
         // Générer des images représentatives
-        const images = getPropertyImages(quartier, propertyType, 5);
+        const images = getPropertyImages(quartier || '', propertyType || '', 5);
 
         // Insérer dans la base de données
         const { data: insertedProperty, error: insertError } = await supabase

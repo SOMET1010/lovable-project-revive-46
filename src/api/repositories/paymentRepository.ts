@@ -1,13 +1,18 @@
 import { supabase } from '@/services/supabase/client';
 import type {
   Payment,
-  PaymentInsert,
   PaymentUpdate,
   PaymentRequest,
   PaymentResponse,
   PaymentFilters,
   MobileMoneyTransaction,
 } from '../../types/payment.types';
+
+interface PaymentRecord {
+  amount?: number;
+  status?: string;
+  provider?: string;
+}
 
 export class PaymentRepository {
   async initiatePayment(request: PaymentRequest): Promise<PaymentResponse> {
@@ -212,10 +217,10 @@ export class PaymentRepository {
 
       const stats = {
         totalPayments: data?.length || 0,
-        totalAmount: data?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0,
-        successfulPayments: data?.filter((p) => p.status === 'completed').length || 0,
-        failedPayments: data?.filter((p) => p.status === 'failed').length || 0,
-        pendingPayments: data?.filter((p) => p.status === 'processing' || p.status === 'pending').length || 0,
+        totalAmount: data?.reduce((sum: number, p: PaymentRecord) => sum + (p.amount || 0), 0) || 0,
+        successfulPayments: data?.filter((p: PaymentRecord) => p.status === 'completed').length || 0,
+        failedPayments: data?.filter((p: PaymentRecord) => p.status === 'failed').length || 0,
+        pendingPayments: data?.filter((p: PaymentRecord) => p.status === 'processing' || p.status === 'pending').length || 0,
         averageAmount: 0,
         byProvider: {} as Record<string, number>,
         byStatus: {} as Record<string, number>,
@@ -225,7 +230,7 @@ export class PaymentRepository {
         stats.averageAmount = stats.totalAmount / stats.totalPayments;
       }
 
-      data?.forEach((payment) => {
+      data?.forEach((payment: PaymentRecord) => {
         if (payment.provider) {
           stats.byProvider[payment.provider] = (stats.byProvider[payment.provider] || 0) + 1;
         }

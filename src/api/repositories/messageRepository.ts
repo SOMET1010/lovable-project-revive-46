@@ -1,9 +1,9 @@
 import { supabase, handleQuery } from '../client';
 import type { Database } from '../../lib/database.types';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 type Message = Database['public']['Tables']['messages']['Row'];
 type MessageInsert = Database['public']['Tables']['messages']['Insert'];
-type Conversation = Database['public']['Tables']['conversations']['Row'];
 type ConversationInsert = Database['public']['Tables']['conversations']['Insert'];
 
 export const messageRepository = {
@@ -43,11 +43,12 @@ export const messageRepository = {
     const query = supabase.from('messages').insert(message).select().single();
     const result = await handleQuery(query);
 
-    if (result.data && (message as any).conversation_id) {
+    const messageWithConversation = message as unknown as { conversation_id?: string };
+    if (result.data && messageWithConversation.conversation_id) {
       await supabase
         .from('conversations')
-        .update({ updated_at: new Date().toISOString() } as any)
-        .eq('id', (message as any).conversation_id);
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', messageWithConversation.conversation_id);
     }
 
     return result;
@@ -68,12 +69,12 @@ export const messageRepository = {
       return { data: 0, error: null };
     }
 
-    const conversationIds = conversations.map((c) => c.id);
+    const conversationIds = conversations.map((c: { id: string }) => c.id);
 
     const query = supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
-      .in('conversation_id', conversationIds as any)
+      .in('conversation_id', conversationIds as string[])
       .neq('sender_id', userId)
       .eq('is_read', false);
     return handleQuery(query);
@@ -95,7 +96,7 @@ export const messageRepository = {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
+        (payload: RealtimePostgresChangesPayload<Message>) => {
           callback(payload.new as Message);
         }
       )
