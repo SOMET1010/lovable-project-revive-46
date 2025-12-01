@@ -12,16 +12,16 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  MagnifyingGlassIcon,
-  HomeIcon,
-  PhoneIcon,
-  QuestionMarkCircleIcon,
-  UserIcon,
-  UserPlusIcon,
-  Bars3Icon,
-  XMarkIcon,
-  ChevronRightIcon
-} from '@heroicons/react/24/outline';
+  Search,
+  Home,
+  Phone,
+  HelpCircle,
+  User,
+  UserPlus,
+  Menu,
+  X,
+  ChevronRight
+} from 'lucide-react';
 
 // CORRECTION 1: Header corrigé avec navigation fonctionnelle
 export const FixedHeader: React.FC = () => {
@@ -32,25 +32,25 @@ export const FixedHeader: React.FC = () => {
     { 
       name: 'Accueil', 
       href: '/', 
-      icon: HomeIcon,
+      icon: Home,
       current: location.pathname === '/'
     },
     { 
       name: 'Rechercher', 
-      href: '/recherche', // CORRECTION: Redirection vers /recherche au lieu de /inscription
-      icon: MagnifyingGlassIcon,
+      href: '/recherche',
+      icon: Search,
       current: location.pathname === '/recherche'
     },
     { 
       name: 'Connexion', 
       href: '/connexion',
-      icon: UserIcon,
+      icon: User,
       current: location.pathname === '/connexion'
     },
     { 
       name: 'Inscription', 
       href: '/inscription',
-      icon: UserPlusIcon,
+      icon: UserPlus,
       current: location.pathname === '/inscription'
     }
   ];
@@ -67,7 +67,8 @@ export const FixedHeader: React.FC = () => {
                 alt="MonToit"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling.style.display = 'block';
+                  const sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
+                  if (sibling) sibling.style.display = 'block';
                 }}
               />
               <span className="ml-2 text-2xl font-bold text-blue-600 hidden">
@@ -107,9 +108,9 @@ export const FixedHeader: React.FC = () => {
               >
                 <span className="sr-only">Ouvrir le menu principal</span>
                 {isMenuOpen ? (
-                  <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
+                  <X className="block h-6 w-6" aria-hidden="true" />
                 ) : (
-                  <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
+                  <Menu className="block h-6 w-6" aria-hidden="true" />
                 )}
               </button>
             </div>
@@ -166,7 +167,7 @@ export const FixedBreadcrumb: React.FC<{
       {breadcrumbItems.map((item, index) => (
         <React.Fragment key={item.href}>
           {index > 0 && (
-            <ChevronRightIcon className="w-4 h-4 text-gray-400" aria-hidden="true" />
+            <ChevronRight className="w-4 h-4 text-gray-400" aria-hidden="true" />
           )}
           {index === breadcrumbItems.length - 1 ? (
             // Dernier élément (page courante) - non cliquable
@@ -299,7 +300,8 @@ export const FixedFooter: React.FC = () => {
               alt="MonToit"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
-                e.currentTarget.nextElementSibling.style.display = 'block';
+                const sibling = e.currentTarget.nextElementSibling as HTMLElement | null;
+                if (sibling) sibling.style.display = 'block';
               }}
             />
             <span className="text-2xl font-bold text-white hidden">
@@ -443,72 +445,62 @@ export const FixedMobileMenu: React.FC<{ isOpen: boolean; onClose: () => void }>
   const location = useLocation();
   
   const menuItems = [
-    { name: 'Accueil', href: '/', icon: HomeIcon },
-    { name: 'Rechercher', href: '/recherche', icon: MagnifyingGlassIcon },
-    { name: 'Contact', href: '/contact', icon: PhoneIcon },
-    { name: 'Aide', href: '/aide', icon: QuestionMarkCircleIcon },
-    { name: 'FAQ', href: '/faq', icon: QuestionMarkCircleIcon },
-    { name: 'Connexion', href: '/connexion', icon: UserIcon },
-    { name: 'Inscription', href: '/inscription', icon: UserPlusIcon }
+    { name: 'Accueil', href: '/', icon: Home },
+    { name: 'Rechercher', href: '/recherche', icon: Search },
+    { name: 'Contact', href: '/contact', icon: Phone },
+    { name: 'Aide', href: '/aide', icon: HelpCircle },
+    { name: 'FAQ', href: '/faq', icon: HelpCircle },
+    { name: 'Connexion', href: '/connexion', icon: User },
+    { name: 'Inscription', href: '/inscription', icon: UserPlus }
   ];
   
   if (!isOpen) return null;
   
   return (
-    <div className="relative z-50 lg:hidden">
-      <div className="fixed inset-0 bg-gray-900/80" onClick={onClose} />
+    <div className="fixed inset-0 z-50 lg:hidden">
+      {/* Overlay */}
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      />
       
-      <div className="fixed inset-0 flex">
-        <div className="relative mr-16 flex w-full max-w-xs flex-1">
-          <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-            <button type="button" className="-m-2.5 p-2.5" onClick={onClose}>
-              <span className="sr-only">Fermer le menu</span>
-              <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
-            </button>
-          </div>
-          
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-4">
-            <div className="flex h-16 shrink-0 items-center">
-              <Link to="/" className="flex items-center">
-                <img
-                  className="h-8 w-auto"
-                  src="/logo-montoit.png"
-                  alt="MonToit"
-                />
-                <span className="ml-2 text-xl font-bold text-blue-600">MonToit</span>
-              </Link>
-            </div>
-            <nav className="flex flex-1 flex-col">
-              <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                <li>
-                  <ul role="list" className="-mx-2 space-y-1">
-                    {menuItems.map((item) => {
-                      const IconComponent = item.icon;
-                      const isActive = location.pathname === item.href;
-                      
-                      return (
-                        <li key={item.name}>
-                          <Link
-                            to={item.href}
-                            onClick={onClose}
-                            className={`group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors duration-200 ${
-                              isActive
-                                ? 'bg-blue-50 text-blue-700'
-                                : 'text-gray-700 hover:text-blue-700 hover:bg-blue-50'
-                            }`}
-                          >
-                            <IconComponent className="h-6 w-6 shrink-0" aria-hidden="true" />
-                            {item.name}
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              </ul>
-            </nav>
-          </div>
+      {/* Menu panel */}
+      <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-white shadow-xl">
+        <div className="flex items-center justify-between px-4 py-5 border-b border-gray-200">
+          <span className="text-xl font-bold text-blue-600">MonToit</span>
+          <button
+            type="button"
+            className="rounded-md p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            onClick={onClose}
+          >
+            <span className="sr-only">Fermer le menu</span>
+            <X className="h-6 w-6" aria-hidden="true" />
+          </button>
         </div>
+        
+        <nav className="px-2 py-4">
+          {menuItems.map((item) => {
+            const IconComponent = item.icon;
+            const isActive = location.pathname === item.href;
+            
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`flex items-center px-4 py-3 text-base font-medium rounded-md transition-colors duration-200 ${
+                  isActive 
+                    ? 'bg-blue-50 text-blue-600' 
+                    : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                }`}
+                onClick={onClose}
+              >
+                <IconComponent className="w-5 h-5 mr-3" />
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );
