@@ -8,12 +8,10 @@ import { useNotifications, NotificationContainer } from '../../../shared/compone
 import { 
   Home, 
   MapPin, 
-  Camera, 
   DollarSign, 
   CheckCircle, 
   ArrowRight, 
   ArrowLeft,
-  Star,
   AlertTriangle,
   User,
   Mail,
@@ -21,8 +19,6 @@ import {
   Ruler,
   Bed,
   Bath,
-  Calendar,
-  Wifi,
   Car,
   Shield,
   Trees
@@ -42,7 +38,6 @@ const PropertyForm: React.FC = () => {
     submitForm,
     canProceedToNextStep,
     isStepValid,
-    getStepProgress,
     // Images
     addImages,
     removeImage,
@@ -50,7 +45,7 @@ const PropertyForm: React.FC = () => {
     reorderImages
   } = usePropertyForm();
 
-  const { success, error, notifications, removeNotification } = useNotifications();
+  const { success, error: showError, notifications, removeNotification } = useNotifications();
 
   const handleNext = () => {
     if (validateCurrentStep()) {
@@ -69,14 +64,14 @@ const PropertyForm: React.FC = () => {
         // Redirection vers la page de confirmation ou dashboard
       } else {
         console.error('Erreur lors de la soumission:', result.error);
-        error(
+        showError(
           'Erreur lors de la soumission',
           result.error || 'Une erreur inattendue s\'est produite'
         );
       }
-    } catch (error) {
-      console.error('Erreur inattendue lors de la soumission:', error);
-      error(
+    } catch (err) {
+      console.error('Erreur inattendue lors de la soumission:', err);
+      showError(
         'Erreur technique',
         'Une erreur technique s\'est produite. Veuillez réessayer.'
       );

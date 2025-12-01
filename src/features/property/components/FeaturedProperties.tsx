@@ -1,4 +1,4 @@
-import { MapPin, ArrowRight, Bed, Bath, Maximize, Star, Heart } from 'lucide-react';
+import { MapPin, ArrowRight, Bed, Bath, Maximize, Heart } from 'lucide-react';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Mic, MicOff, Loader2 } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import Button from '@/shared/ui/Button';
 import { toast } from '@/shared/hooks/useToast';
 
@@ -102,7 +102,7 @@ export default function VoiceSearch({ onTranscript, onError }: VoiceSearchProps)
       <Button
         onClick={toggleListening}
         variant={isListening ? 'danger' : 'outline'}
-        size="md"
+        size="medium"
         className={`relative ${isListening ? 'animate-pulse' : ''}`}
         aria-label="Recherche vocale"
       >
@@ -185,13 +185,13 @@ export function parseVoiceQuery(transcript: string): {
 
   // Parse bedrooms
   const bedroomsMatch = lowerTranscript.match(/(\d+)\s*(chambre|pièce|piece)/);
-  if (bedroomsMatch) {
+  if (bedroomsMatch?.[1]) {
     result.bedrooms = parseInt(bedroomsMatch[1]);
   }
 
   // Parse price range
   const priceMatch = lowerTranscript.match(/(\d+)\s*(mille|k|000)/);
-  if (priceMatch) {
+  if (priceMatch?.[1] && priceMatch[2]) {
     const basePrice = parseInt(priceMatch[1]);
     const multiplier = priceMatch[2] === 'mille' || priceMatch[2] === 'k' ? 1000 : 1;
     result.maxPrice = basePrice * multiplier;

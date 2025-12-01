@@ -37,8 +37,8 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
     };
   }, [previewUrls]);
 
-  // Gestion du drag & drop
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  // Gestion du drag & drop pour la zone d'upload principale
+  const handleMainDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     if (!disabled) {
       setDragOver(true);
@@ -132,7 +132,7 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
     }
   }, [disabled]);
 
-  const handleDragOver = useCallback((e: React.DragEvent, index: number) => {
+  const handleImageDragOver = useCallback((e: React.DragEvent, index: number) => {
     e.preventDefault();
     if (draggedIndex !== null && draggedIndex !== index) {
       onImagesReorder(draggedIndex, index);
@@ -156,7 +156,7 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
-        onDragOver={handleDragOver}
+        onDragOver={handleMainDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={handleUploadClick}
@@ -244,7 +244,7 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
                 `}
                 draggable={!disabled}
                 onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleDragOver(e, index)}
+                onDragOver={(e) => handleImageDragOver(e, index)}
                 onDragEnd={handleDragEnd}
               >
                 {/* Image */}

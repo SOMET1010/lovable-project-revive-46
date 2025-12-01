@@ -2,12 +2,7 @@ import React from 'react';
 import { MapPin, Home } from 'lucide-react';
 import { propertyService } from '../services/propertyService';
 
-interface City {
-  name: string;
-  properties: number;
-  image: string;
-  districts: string[];
-}
+// City interface used internally by propertyService
 
 interface CitySelectorProps {
   selectedCity: string;

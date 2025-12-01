@@ -58,7 +58,7 @@ const TenantMaintenance = lazy(() => import('@/features/tenant/pages/Maintenance
 const OwnerDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
 const AddProperty = lazy(() => import('@/features/owner/pages/AddPropertyPage'));
 const EditProperty = lazy(() => import('@/features/owner/pages/EditPropertyPage'));
-const PropertyStats = lazy(() => import('@/features/property/pages/PropertyStatsPage'));
+const PropertyStats = lazy(() => import('@/features/tenant/pages/DashboardPage')); // Temporary redirect
 const OwnerMaintenance = lazy(() => import('@/features/tenant/pages/MaintenancePage'));
 
 const AgencyDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));

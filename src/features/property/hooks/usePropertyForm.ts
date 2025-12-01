@@ -73,7 +73,6 @@ export const usePropertyForm = (): UsePropertyFormReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup des intervals au démontage
@@ -94,13 +93,17 @@ export const usePropertyForm = (): UsePropertyFormReturn => {
     }));
 
     // Effacer l'erreur du champ si elle existe
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
-    }
-  }, [errors]);
+    setErrors(prev => {
+      const fieldKey = field as keyof PropertyFormErrors;
+      if (fieldKey in prev) {
+        return {
+          ...prev,
+          [fieldKey]: undefined
+        };
+      }
+      return prev;
+    });
+  }, []);
 
   // Navigation entre les étapes
   const nextStep = useCallback(() => {
@@ -111,7 +114,7 @@ export const usePropertyForm = (): UsePropertyFormReturn => {
       }
     }
     return false;
-  }, [currentStep, formData]);
+  }, [currentStep]);
 
   const prevStep = useCallback(() => {
     if (currentStep > 0) {
@@ -179,11 +182,6 @@ export const usePropertyForm = (): UsePropertyFormReturn => {
     return !Object.values(stepErrors).some(error => error !== undefined);
   }, [validateStep]);
 
-  // Vérifier si on peut passer à l'étape suivante
-  const canProceedToNextStep = useCallback((): boolean => {
-    return isStepValid(currentStep) && currentStep < STEPS.length - 1;
-  }, [currentStep, isStepValid]);
-
   // Calculer le progrès global
   const getStepProgress = useCallback((): number => {
     return ((currentStep + 1) / STEPS.length) * 100;
@@ -210,13 +208,14 @@ export const usePropertyForm = (): UsePropertyFormReturn => {
 
   const removeImage = useCallback((index: number) => {
     const newImages = formData.images.filter((_, i) => i !== index);
-    let newMainIndex = formData.mainImageIndex;
+    const currentMainIndex = formData.mainImageIndex ?? 0;
+    let newMainIndex = currentMainIndex;
     
     // Ajuster l'index de l'image principale si nécessaire
-    if (index === formData.mainImageIndex && newImages.length > 0) {
+    if (index === currentMainIndex && newImages.length > 0) {
       newMainIndex = 0;
-    } else if (index < formData.mainImageIndex) {
-      newMainIndex = Math.max(0, newMainIndex - 1);
+    } else if (index < currentMainIndex) {
+      newMainIndex = Math.max(0, (newMainIndex ?? 0) - 1);
     }
     
     updateField('images', newImages);
@@ -236,17 +235,22 @@ export const usePropertyForm = (): UsePropertyFormReturn => {
     }
 
     const newImages = [...formData.images];
-    const [movedImage] = newImages.splice(fromIndex, 1);
+    const movedImage = newImages[fromIndex];
+    if (!movedImage) return;
+    
+    newImages.splice(fromIndex, 1);
     newImages.splice(toIndex, 0, movedImage);
 
     // Ajuster l'index de l'image principale
-    let newMainIndex = formData.mainImageIndex;
-    if (formData.mainImageIndex === fromIndex) {
+    const currentMainIndex = formData.mainImageIndex ?? 0;
+    let newMainIndex = currentMainIndex;
+    
+    if (currentMainIndex === fromIndex) {
       newMainIndex = toIndex;
-    } else if (fromIndex < formData.mainImageIndex && toIndex >= formData.mainImageIndex) {
-      newMainIndex = Math.max(0, newMainIndex - 1);
-    } else if (fromIndex > formData.mainImageIndex && toIndex <= formData.mainImageIndex) {
-      newMainIndex = newMainIndex + 1;
+    } else if (fromIndex < currentMainIndex && toIndex >= currentMainIndex) {
+      newMainIndex = Math.max(0, currentMainIndex - 1);
+    } else if (fromIndex > currentMainIndex && toIndex <= currentMainIndex) {
+      newMainIndex = currentMainIndex + 1;
     }
 
     updateField('images', newImages);
@@ -318,6 +322,9 @@ export const usePropertyForm = (): UsePropertyFormReturn => {
     setIsSubmitting(false);
     setUploadProgress(0);
   }, []);
+
+  // Calculer canProceedToNextStep comme une valeur dérivée
+  const canProceedToNextStep = isStepValid(currentStep) && currentStep < STEPS.length - 1;
 
   return {
     // État

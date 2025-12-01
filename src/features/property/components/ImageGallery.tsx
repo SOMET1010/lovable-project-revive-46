@@ -68,6 +68,7 @@ export default function ImageGallery({ images, propertyTitle }: ImageGalleryProp
   const handleDownload = async () => {
     try {
       const image = galleryImages[selectedImage];
+      if (!image) return;
       const response = await fetch(image);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
