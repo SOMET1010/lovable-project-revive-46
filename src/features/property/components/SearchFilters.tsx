@@ -1,8 +1,7 @@
 import { SlidersHorizontal, X, MapPin, Home, Bed, Bath, DollarSign, Sofa, ParkingCircle, Wind } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Button from '@/shared/ui/Button';
-import Input from '@/shared/ui/Input';
-import { useDebouncedPropertyFilters, useDebouncedCallback } from '../../../hooks/useDebouncedQueries';
+import { useDebouncedCallback } from '@/hooks/useDebounce';
 import type { Database } from '@/shared/lib/database.types';
 
 type PropertyType = Database['public']['Tables']['properties']['Row']['property_type'];
@@ -38,8 +37,8 @@ export default function SearchFilters({
   setSearchCity,
   propertyType,
   setPropertyType,
-  propertyCategory,
-  setPropertyCategory,
+  propertyCategory: _propertyCategory,
+  setPropertyCategory: _setPropertyCategory,
   minPrice,
   setMinPrice,
   maxPrice,
@@ -59,34 +58,9 @@ export default function SearchFilters({
 }: SearchFiltersProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   
-  // Hook pour les filtres débouncés
-  const {
-    debouncedFilters,
-    updateFilters,
-    hasChanges,
-  } = useDebouncedPropertyFilters(
-    {
-      city: searchCity,
-      propertyType,
-      propertyCategory,
-      minPrice,
-      maxPrice,
-      bedrooms,
-      bathrooms,
-      isFurnished,
-      hasParking,
-      hasAC,
-    },
-    (filters) => {
-      // Callback appelé après debouncing
-      // Peut déclencher une recherche automatique si nécessaire
-      console.log('Filtres débouncés:', filters);
-    }
-  );
-
-  // Débouncer les changements de filtres pour éviter les requêtes spam
-  const debouncedUpdateFilters = useDebouncedCallback((updates: any) => {
-    updateFilters(updates);
+  // Débouncer les changements de filtres
+  const debouncedUpdateFilters = useDebouncedCallback((callback: () => void) => {
+    callback();
   }, 300);
 
   const ivoirianCities = [
@@ -137,7 +111,7 @@ export default function SearchFilters({
             onChange={(e) => {
               const value = e.target.value;
               setSearchCity(value);
-              debouncedUpdateFilters({ city: value });
+              debouncedUpdateFilters(() => {});
             }}
             className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           >
@@ -161,7 +135,7 @@ export default function SearchFilters({
             onChange={(e) => {
               const value = e.target.value as PropertyType | '';
               setPropertyType(value);
-              debouncedUpdateFilters({ propertyType: value });
+              debouncedUpdateFilters(() => {});
             }}
             className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           >
@@ -186,7 +160,7 @@ export default function SearchFilters({
             onChange={(e) => {
               const value = e.target.value;
               setMinPrice(value);
-              debouncedUpdateFilters({ minPrice: value });
+              debouncedUpdateFilters(() => {});
             }}
             placeholder="Ex: 50000"
             className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -205,7 +179,7 @@ export default function SearchFilters({
             onChange={(e) => {
               const value = e.target.value;
               setMaxPrice(value);
-              debouncedUpdateFilters({ maxPrice: value });
+              debouncedUpdateFilters(() => {});
             }}
             placeholder="Ex: 500000"
             className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -239,7 +213,7 @@ export default function SearchFilters({
                 onChange={(e) => {
                   const value = e.target.value;
                   setBedrooms(value);
-                  debouncedUpdateFilters({ bedrooms: value });
+                  debouncedUpdateFilters(() => {});
                 }}
                 className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
@@ -263,7 +237,7 @@ export default function SearchFilters({
                 onChange={(e) => {
                   const value = e.target.value;
                   setBathrooms(value);
-                  debouncedUpdateFilters({ bathrooms: value });
+                  debouncedUpdateFilters(() => {});
                 }}
                 className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
@@ -285,7 +259,7 @@ export default function SearchFilters({
                 onClick={() => {
                   const newValue = isFurnished === true ? null : true;
                   setIsFurnished(newValue);
-                  debouncedUpdateFilters({ isFurnished: newValue });
+                  debouncedUpdateFilters(() => {});
                 }}
                 className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
                   isFurnished === true
@@ -302,7 +276,7 @@ export default function SearchFilters({
                 onClick={() => {
                   const newValue = hasParking === true ? null : true;
                   setHasParking(newValue);
-                  debouncedUpdateFilters({ hasParking: newValue });
+                  debouncedUpdateFilters(() => {});
                 }}
                 className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
                   hasParking === true
@@ -319,7 +293,7 @@ export default function SearchFilters({
                 onClick={() => {
                   const newValue = hasAC === true ? null : true;
                   setHasAC(newValue);
-                  debouncedUpdateFilters({ hasAC: newValue });
+                  debouncedUpdateFilters(() => {});
                 }}
                 className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
                   hasAC === true
@@ -341,7 +315,7 @@ export default function SearchFilters({
       <Button
         onClick={onSearch}
         variant="primary"
-        size="lg"
+        size="large"
         fullWidth
         className="mt-4"
       >

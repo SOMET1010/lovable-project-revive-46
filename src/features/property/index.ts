@@ -6,7 +6,6 @@
 
 // Pages
 export { default as HomePage } from './pages/HomePage';
-export { default as PropertyStatsPage } from './pages/PropertyStatsPage';
 
 // Components
 export { default as PropertyComparison } from './components/PropertyComparison';

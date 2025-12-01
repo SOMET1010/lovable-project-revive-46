@@ -129,10 +129,10 @@ function PropertyCard({ property, onClick }: PropertyCardProps) {
               <span>{property.bathrooms}</span>
             </div>
           )}
-          {property.area && (
+          {property.surface_area && (
             <div className="flex items-center">
               <Home className="h-4 w-4 mr-1" />
-              <span>{property.area}m²</span>
+              <span>{property.surface_area}m²</span>
             </div>
           )}
         </div>

@@ -5,7 +5,6 @@ import {
   Camera, 
   DollarSign, 
   CheckCircle, 
-  Circle,
   ChevronRight
 } from 'lucide-react';
 
@@ -163,21 +162,24 @@ const PropertySteps: React.FC<PropertyStepsProps> = ({
       </div>
 
       {/* Guide de l'étape actuelle */}
-      <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0">
-            {React.cloneElement(steps[currentStep].icon, { className: 'w-5 h-5 text-blue-600' })}
-          </div>
-          <div>
-            <h4 className="text-sm font-medium text-blue-800">
-              Étape {currentStep + 1}: {steps[currentStep].label}
-            </h4>
-            <p className="text-sm text-blue-700 mt-1">
-              {getStepDescription(currentStep)}
-            </p>
+      {steps[currentStep] && (
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              {React.isValidElement(steps[currentStep].icon) && 
+                React.cloneElement(steps[currentStep].icon as React.ReactElement, { className: 'w-5 h-5 text-blue-600' })}
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-blue-800">
+                Étape {currentStep + 1}: {steps[currentStep].label}
+              </h4>
+              <p className="text-sm text-blue-700 mt-1">
+                {getStepDescription(currentStep)}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

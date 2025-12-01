@@ -34,7 +34,7 @@ export default function Home() {
     try {
       if (envConfig.isDemoMode) {
         const { data } = await demoPropertyService.getAll();
-        setProperties(data?.slice(0, 6) || []);
+        setProperties((data?.slice(0, 6) || []) as Property[]);
         setLoading(false);
         return;
       }

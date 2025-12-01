@@ -65,7 +65,7 @@ export default function TrustSection() {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {trustFeatures.map((feature, index) => (
+          {trustFeatures.map((feature) => (
             <div
               key={feature.title}
               className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/10 hover:border-[var(--terracotta-500)]/50 transition-all duration-300"
