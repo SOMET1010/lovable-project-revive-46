@@ -40,7 +40,7 @@ interface ContractPreviewProps {
 }
 
 export default function ContractPreview({ contractData }: ContractPreviewProps) {
-  const [showPreview, setShowPreview] = useState(false);
+  const [_showPreview, setShowPreview] = useState(false);
   const [generatingPdf, setGeneratingPdf] = useState(false);
 
   // Vérifications de sécurité pour les données du contrat

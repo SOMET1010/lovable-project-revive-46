@@ -80,8 +80,9 @@ export function useUpdateLease() {
     mutationFn: ({ id, updates }: { id: string; updates: LeaseUpdate }) =>
       leaseRepository.update(id, updates),
     onSuccess: (data) => {
-      if (data.data) {
-        queryClient.invalidateQueries({ queryKey: ['lease', data.data.id] });
+      const leaseData = data.data as { id?: string } | null;
+      if (leaseData?.id) {
+        queryClient.invalidateQueries({ queryKey: ['lease', leaseData.id] });
         queryClient.invalidateQueries({ queryKey: ['leases'] });
       }
     },
@@ -95,8 +96,9 @@ export function useUpdateLeaseStatus() {
     mutationFn: ({ id, status }: { id: string; status: string }) =>
       leaseRepository.updateStatus(id, status),
     onSuccess: (data) => {
-      if (data.data) {
-        queryClient.invalidateQueries({ queryKey: ['lease', data.data.id] });
+      const leaseData = data.data as { id?: string } | null;
+      if (leaseData?.id) {
+        queryClient.invalidateQueries({ queryKey: ['lease', leaseData.id] });
         queryClient.invalidateQueries({ queryKey: ['leases'] });
       }
     },

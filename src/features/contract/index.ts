@@ -12,7 +12,7 @@ export { default as ContractPreview } from './components/ContractPreview';
 
 // Hooks
 export { useContract } from './hooks/useContract';
-export { useLeases, useLease, useCreateLease, useUpdateLease, useDeleteLease } from './hooks/useLeases';
+export { useLease, useTenantLeases, useLandlordLeases, usePropertyLeases, useActiveLease, useExpiringLeases, useCreateLease, useUpdateLease, useUpdateLeaseStatus } from './hooks/useLeases';
 
 // Services
 export { contractApi } from './services/contract.api';

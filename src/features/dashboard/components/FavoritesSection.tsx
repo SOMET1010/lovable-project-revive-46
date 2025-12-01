@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Heart, Trash2, Eye, MapPin, Bed, Bath, Square } from 'lucide-react';
+import { Heart, Eye, MapPin, Bed, Bath, Square } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import {
   getFavorites,
@@ -169,7 +169,7 @@ export function FavoritesSection() {
                   
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="small"
                     onClick={() => (window.location.href = `/propriete/${property.id}`)}
                   >
                     <Eye className="h-4 w-4 mr-1" />

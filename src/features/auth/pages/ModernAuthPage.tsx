@@ -46,6 +46,7 @@ export default function ModernAuthPage() {
       const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [resendTimer]);
 
   // Email Login Handler
@@ -77,11 +78,11 @@ export default function ModernAuthPage() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-auth-otp`,
+        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-auth-otp`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -114,11 +115,11 @@ export default function ModernAuthPage() {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-auth-otp`,
+        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/verify-auth-otp`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
