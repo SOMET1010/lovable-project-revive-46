@@ -11,8 +11,6 @@ import {
   BarChart3,
   RefreshCw,
   Download,
-  Play,
-  Pause,
 } from 'lucide-react';
 
 interface ServiceStats {
@@ -75,11 +73,11 @@ export default function AdminServiceMonitoring() {
   const handleRunHealthCheck = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/service-health-check`,
+        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/service-health-check`,
         {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`,
           },
         }
       );

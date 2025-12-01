@@ -1,7 +1,6 @@
 import { supabase, handleQuery } from '../client';
 import type { Database } from '../../lib/database.types';
 
-type MaintenanceRequest = Database['public']['Tables']['maintenance_requests']['Row'];
 type MaintenanceRequestInsert = Database['public']['Tables']['maintenance_requests']['Insert'];
 type MaintenanceRequestUpdate = Database['public']['Tables']['maintenance_requests']['Update'];
 
@@ -40,7 +39,7 @@ export const maintenanceRepository = {
       return { data: [], error: null };
     }
 
-    const propertyIds = properties.map((p) => p.id);
+    const propertyIds = properties.map((p: { id: string }) => p.id);
 
     const query = supabase
       .from('maintenance_requests')
@@ -81,7 +80,7 @@ export const maintenanceRepository = {
     } else if (userId && userType === 'proprietaire') {
       const { data: properties } = await supabase.from('properties').select('id').eq('owner_id', userId);
       if (properties && properties.length > 0) {
-        const propertyIds = properties.map((p) => p.id);
+        const propertyIds = properties.map((p: { id: string }) => p.id);
         query = query.in('property_id', propertyIds);
       }
     }
@@ -101,7 +100,7 @@ export const maintenanceRepository = {
     } else if (userType === 'proprietaire') {
       const { data: properties } = await supabase.from('properties').select('id').eq('owner_id', userId);
       if (properties && properties.length > 0) {
-        const propertyIds = properties.map((p) => p.id);
+        const propertyIds = properties.map((p: { id: string }) => p.id);
         query = query.in('property_id', propertyIds);
       }
     }

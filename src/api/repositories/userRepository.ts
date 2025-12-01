@@ -1,8 +1,6 @@
 import { supabase, handleQuery } from '../client';
 import type { Database } from '../../lib/database.types';
 
-// Profile type is used internally by Supabase query inference
-type _Profile = Database['public']['Tables']['profiles']['Row'];
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 export const userRepository = {

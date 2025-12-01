@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, UserPlus, Edit, Pause, Play, TrendingUp, Award } from 'lucide-react';
+import { Shield, UserPlus, Edit, Pause, Play, Award } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -144,8 +144,8 @@ export default function AdminTrustAgents() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, color }: any) {
-  const colors = {
+function StatCard({ icon: Icon, label, value, color }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string | number; color: 'indigo' | 'green' | 'orange' | 'yellow' }) {
+  const colors: Record<string, string> = {
     indigo: 'from-indigo-500 to-indigo-600',
     green: 'from-green-500 to-green-600',
     orange: 'from-orange-500 to-orange-600',

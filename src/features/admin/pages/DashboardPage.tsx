@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
-  Users, Home, FileText, CreditCard, AlertTriangle, CheckCircle,
-  TrendingUp, Activity, Shield, Settings, Key, BarChart3,
-  ArrowUpRight, ArrowDownRight, Eye, Clock, Globe, Smartphone,
-  AlertCircle, Info, Zap, DollarSign, UserPlus, Building,
-  Calendar, MessageSquare, RefreshCw, Download
+  Users, Home, FileText, AlertTriangle, CheckCircle,
+  Activity, BarChart3, Settings,
+  ArrowUpRight, ArrowDownRight, Eye,
+  AlertCircle, Info, DollarSign, UserPlus,
+  RefreshCw, Download
 } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
 
@@ -55,7 +55,7 @@ interface RecentActivity {
 }
 
 export default function AdminDashboard() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);

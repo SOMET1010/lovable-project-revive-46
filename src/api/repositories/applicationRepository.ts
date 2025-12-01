@@ -1,8 +1,6 @@
 import { supabase, handleQuery } from '../client';
 import type { Database } from '../../lib/database.types';
 
-// Application type is used internally by Supabase query inference
-type _Application = Database['public']['Tables']['applications']['Row'];
 type ApplicationInsert = Database['public']['Tables']['applications']['Insert'];
 type ApplicationUpdate = Database['public']['Tables']['applications']['Update'];
 
@@ -62,9 +60,9 @@ export const applicationRepository = {
   },
 
   async updateStatus(id: string, status: string, reviewNotes?: string) {
-    const updates: any = { status };
+    const updates: Record<string, string> = { status };
     if (reviewNotes) {
-      updates.review_notes = reviewNotes;
+      updates['review_notes'] = reviewNotes;
     }
     const query = supabase.from('applications').update(updates).eq('id', id).select().single();
     return handleQuery(query);

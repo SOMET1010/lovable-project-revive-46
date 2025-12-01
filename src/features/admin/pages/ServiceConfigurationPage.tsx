@@ -3,7 +3,6 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
   Settings,
-  Save,
   AlertTriangle,
   CheckCircle,
   Power,
@@ -153,7 +152,7 @@ export default function AdminServiceConfiguration() {
     );
   }
 
-  const groupedConfigs: GroupedConfigs = configs.reduce((acc, config) => {
+  const groupedConfigs: GroupedConfigs = (configs ?? []).reduce((acc, config) => {
     if (!acc[config.service_name]) {
       acc[config.service_name] = [];
     }

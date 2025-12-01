@@ -1,7 +1,6 @@
 import { supabase, handleQuery } from '../client';
 import type { Database } from '../../lib/database.types';
 
-type Lease = Database['public']['Tables']['leases']['Row'];
 type LeaseInsert = Database['public']['Tables']['leases']['Insert'];
 type LeaseUpdate = Database['public']['Tables']['leases']['Update'];
 
