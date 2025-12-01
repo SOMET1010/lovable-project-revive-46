@@ -1,4 +1,4 @@
-import { Home as HomeIcon, Star } from 'lucide-react';
+import { Home as HomeIcon } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
 import type { Database } from '@/shared/lib/database.types';
 
@@ -38,7 +38,7 @@ export default function PropertyCard({ property, showBadge, badgeText }: Propert
         
         {/* Price Badge */}
         <div className="absolute top-3 right-3 px-3 py-1 glass rounded-lg text-sm font-semibold text-gray-900 shadow-premium">
-          {FormatService.formatPrice(property.monthly_rent)}
+          {FormatService.formatCurrency(property.monthly_rent)}
         </div>
 
         {/* Optional Badge (Nouveau, etc.) */}
@@ -55,12 +55,6 @@ export default function PropertyCard({ property, showBadge, badgeText }: Propert
           <h3 className="font-semibold text-gray-800 text-sm sm:text-base truncate flex-1">
             {property.city}, {property.neighborhood}
           </h3>
-          {property.rating && (
-            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-              <Star className="h-3 w-3 sm:h-4 sm:w-4 fill-current text-gray-800" />
-              <span className="text-xs sm:text-sm font-semibold text-gray-800">{property.rating}</span>
-            </div>
-          )}
         </div>
 
         <p className="text-gray-700 text-xs sm:text-sm truncate mb-1">

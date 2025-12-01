@@ -75,7 +75,7 @@ export default function InfiniteScroll({
         const entry = entries[0];
 
         // Si le sentinel est visible et qu'on peut charger plus
-        if (entry.isIntersecting && hasMore && !loadingRef.current && !loading) {
+        if (entry && entry.isIntersecting && hasMore && !loadingRef.current && !loading) {
           loadingRef.current = true;
 
           try {

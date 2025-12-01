@@ -196,7 +196,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
         ))}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .otp-input-box::-webkit-outer-spin-button,
         .otp-input-box::-webkit-inner-spin-button {
           -webkit-appearance: none;

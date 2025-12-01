@@ -35,7 +35,7 @@ interface LazyWrapperProps {
 export const LazyWrapper: React.FC<LazyWrapperProps> = ({ 
   children, 
   fallback, 
-  errorFallback 
+  errorFallback: _errorFallback 
 }) => {
   return (
     <Suspense 
@@ -128,26 +128,28 @@ export const createLazyComponent = (
 };
 
 // Composants pré-chargés pour optimisation
+// Note: Ces imports sont commentés car les composants n'existent pas encore
 export const preloadComponents = {
-  PropertyForm: () => import('./PropertyForm'),
-  PropertyImageUpload: () => import('./PropertyImageUpload'),
-  CitySelector: () => import('./CitySelector'),
-  ContactForm: () => import('../../shared/components/ContactForm')
+  // PropertyForm: () => import('./PropertyForm'),
+  // PropertyImageUpload: () => import('./PropertyImageUpload'),
+  // CitySelector: () => import('./CitySelector'),
+  // ContactForm: () => import('../../shared/components/ContactForm')
 };
 
 // Hook pour pré-charger les composants
+// Note: Désactivé car les composants n'existent pas encore
 export const useComponentPreloader = () => {
-  const preload = React.useCallback((componentName: keyof typeof preloadComponents) => {
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        preloadComponents[componentName]();
-      });
-    } else {
-      // Fallback pour les navigateurs qui ne supportent pas requestIdleCallback
-      setTimeout(() => {
-        preloadComponents[componentName]();
-      }, 100);
-    }
+  const preload = React.useCallback((_componentName: keyof typeof preloadComponents) => {
+    // Désactivé temporairement
+    // if ('requestIdleCallback' in window) {
+    //   requestIdleCallback(() => {
+    //     preloadComponents[componentName]();
+    //   });
+    // } else {
+    //   setTimeout(() => {
+    //     preloadComponents[componentName]();
+    //   }, 100);
+    // }
   }, []);
 
   return { preload };
@@ -184,8 +186,8 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const img = entry.target as HTMLImageElement;
-            if (img.dataset.src) {
-              img.src = img.dataset.src;
+            if (img.dataset['src']) {
+              img.src = img.dataset['src'];
               img.removeAttribute('data-src');
             }
             observer.unobserve(img);
