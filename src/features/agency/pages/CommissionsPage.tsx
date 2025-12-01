@@ -77,21 +77,21 @@ export default function AgencyCommissions() {
 
       setCommissions(commissionsData || []);
 
-      const total = (commissionsData || []).reduce((sum, c) => sum + c.amount, 0);
+      const total = (commissionsData || []).reduce((sum: number, c: Commission) => sum + c.amount, 0);
       const paid = (commissionsData || [])
-        .filter(c => c.status === 'paid')
-        .reduce((sum, c) => sum + c.amount, 0);
+        .filter((c: Commission) => c.status === 'paid')
+        .reduce((sum: number, c: Commission) => sum + c.amount, 0);
       const pending = (commissionsData || [])
-        .filter(c => c.status === 'pending')
-        .reduce((sum, c) => sum + c.amount, 0);
+        .filter((c: Commission) => c.status === 'pending')
+        .reduce((sum: number, c: Commission) => sum + c.amount, 0);
 
       const thisMonth = (commissionsData || [])
-        .filter(c => {
+        .filter((c: Commission) => {
           const date = new Date(c.created_at);
           const now = new Date();
           return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
         })
-        .reduce((sum, c) => sum + c.amount, 0);
+        .reduce((sum: number, c: Commission) => sum + c.amount, 0);
 
       setStats({
         totalCommissions: total,
@@ -103,13 +103,13 @@ export default function AgencyCommissions() {
       const monthly = Array.from({ length: 6 }, (_, i) => {
         const month = new Date();
         month.setMonth(month.getMonth() - (5 - i));
-        const monthCommissions = (commissionsData || []).filter(c => {
+        const monthCommissions = (commissionsData || []).filter((c: Commission) => {
           const date = new Date(c.created_at);
           return date.getMonth() === month.getMonth() && date.getFullYear() === month.getFullYear();
         });
         return {
           label: month.toLocaleDateString('fr-FR', { month: 'short' }),
-          value: monthCommissions.reduce((sum, c) => sum + c.amount, 0) / 1000
+          value: monthCommissions.reduce((sum: number, c: Commission) => sum + c.amount, 0) / 1000
         };
       });
 

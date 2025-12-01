@@ -50,7 +50,7 @@ export default function AgencyRegistration() {
     const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `${path}/${fileName}`;
 
-    const { error: uploadError, data } = await supabase.storage
+    const { error: uploadError, data: _data } = await supabase.storage
       .from('documents')
       .upload(filePath, file);
 

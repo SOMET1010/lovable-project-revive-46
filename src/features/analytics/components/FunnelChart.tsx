@@ -27,8 +27,9 @@ export function FunnelChart({ steps, title }: FunnelChartProps) {
       <div className="space-y-2">
         {steps.map((step, index) => {
           const widthPercent = (step.value / maxValue) * 100;
+          const prevStep = index > 0 ? steps[index - 1] : null;
           const dropoffRate =
-            index > 0 ? ((steps[index - 1].value - step.value) / steps[index - 1].value) * 100 : 0;
+            prevStep ? ((prevStep.value - step.value) / prevStep.value) * 100 : 0;
 
           return (
             <div key={index} className="space-y-1">
@@ -73,7 +74,9 @@ export function FunnelChart({ steps, title }: FunnelChartProps) {
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-600">Taux de conversion global</span>
           <span className="font-bold text-primary-600">
-            {((steps[steps.length - 1].value / steps[0].value) * 100).toFixed(2)}%
+            {steps.length > 0 && steps[0]?.value
+              ? (((steps[steps.length - 1]?.value ?? 0) / steps[0].value) * 100).toFixed(2)
+              : 0}%
           </span>
         </div>
       </div>

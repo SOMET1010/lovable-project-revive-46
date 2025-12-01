@@ -3,7 +3,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
   Users, UserPlus, Mail, Phone, Shield, Trash2, CheckCircle,
-  Clock, XCircle, Edit, Award, TrendingUp
+  Clock, XCircle
 } from 'lucide-react';
 
 interface TeamMember {
@@ -154,13 +154,14 @@ export default function AgencyTeam() {
   };
 
   const getStatusBadge = (status: string) => {
-    const configs: Record<string, any> = {
-      active: { icon: CheckCircle, color: 'bg-green-100 text-green-800', label: 'Actif' },
+    const defaultConfig = { icon: CheckCircle, color: 'bg-green-100 text-green-800', label: 'Actif' };
+    const configs: Record<string, { icon: typeof CheckCircle; color: string; label: string }> = {
+      active: defaultConfig,
       invited: { icon: Clock, color: 'bg-yellow-100 text-yellow-800', label: 'Invité' },
       suspended: { icon: XCircle, color: 'bg-red-100 text-red-800', label: 'Suspendu' }
     };
 
-    const config = configs[status] || configs.active;
+    const config = configs[status] || defaultConfig;
     const Icon = config.icon;
 
     return (

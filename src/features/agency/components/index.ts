@@ -12,8 +12,3 @@ export { default as Sidebar } from './Sidebar';
 export { default as StatCard, PerformanceCard } from './StatCard';
 export { default as PropertiesTable } from './PropertiesTable';
 export { default as RegistrationRequests } from './RegistrationRequests';
-
-// Types
-export type { 
-  FilterOptions 
-} from './RegistrationRequests';

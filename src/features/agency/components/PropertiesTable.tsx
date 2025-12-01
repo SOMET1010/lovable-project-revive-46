@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
-  Home, Eye, Settings, Search, Filter, MoreHorizontal,
-  MapPin, Calendar, User, DollarSign, Tag
+  Home, Eye, Settings, Search, MoreHorizontal,
+  MapPin, Calendar, DollarSign, Tag
 } from 'lucide-react';
 
 interface PropertyAssignment {

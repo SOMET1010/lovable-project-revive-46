@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   UserPlus, Clock, CheckCircle, XCircle, Mail, Phone, 
-  Calendar, FileText, Award, Star, MapPin, Briefcase,
-  Eye, MessageSquare, Filter, Search
+  Calendar, Award, Star, Briefcase,
+  Eye, Search
 } from 'lucide-react';
 
 interface RegistrationRequest {

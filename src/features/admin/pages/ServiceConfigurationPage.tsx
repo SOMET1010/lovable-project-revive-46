@@ -156,7 +156,7 @@ export default function AdminServiceConfiguration() {
     if (!acc[config.service_name]) {
       acc[config.service_name] = [];
     }
-    acc[config.service_name].push(config);
+    acc[config.service_name]?.push(config);
     return acc;
   }, {} as GroupedConfigs);
 
