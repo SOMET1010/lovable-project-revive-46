@@ -18,7 +18,7 @@ interface ValidationMetricsProps {
 export default function ValidationMetrics({ stats, period = 'month' }: ValidationMetricsProps) {
   const [hoveredMetric, setHoveredMetric] = useState<string | null>(null);
 
-  const formatTime = (hours: number) => {
+  const _formatTime = (hours: number) => {
     if (hours < 24) {
       return `${hours.toFixed(1)}h`;
     } else {
@@ -85,7 +85,7 @@ export default function ValidationMetrics({ stats, period = 'month' }: Validatio
     return 'text-red-600';
   };
 
-  const isPositiveTrend = (key: string, trend: 'up' | 'down') => {
+  const _isPositiveTrend = (key: string, _trend: 'up' | 'down') => {
     switch (key) {
       case 'successRate':
       case 'satisfactionScore':

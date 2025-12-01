@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, AlertTriangle, XCircle, ArrowUpCircle } from 'lucide-react';
+import { CheckCircle, Clock, AlertTriangle, ArrowUpCircle } from 'lucide-react';
 
 interface DisputeStatusBadgeProps {
   status: 'assigned' | 'under_mediation' | 'awaiting_response' | 'resolved' | 'escalated';

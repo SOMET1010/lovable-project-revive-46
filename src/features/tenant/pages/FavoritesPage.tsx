@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Heart, MapPin, Home, Bed, Bath, X, Edit2, Save, Trash2 } from 'lucide-react';
+import { Heart, MapPin, Home, Bed, Bath, X, Edit2, Save } from 'lucide-react';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 

@@ -2,17 +2,15 @@ import { useState } from 'react';
 import { 
   Send, 
   MessageSquare, 
-  AlertTriangle, 
   CheckCircle, 
   Clock, 
   FileText, 
   UserCheck,
   Phone,
   Mail,
-  Eye,
   ArrowUp,
   Download,
-  Plus
+  Zap
 } from 'lucide-react';
 
 interface QuickActionButton {
@@ -101,7 +99,7 @@ export default function QuickActionsPanel({
       orange: 'text-orange-600 hover:bg-orange-50 border-orange-200',
       indigo: 'text-indigo-600 hover:bg-indigo-50 border-indigo-200'
     };
-    return classes[color] || classes.blue;
+    return classes[color as keyof typeof classes] || classes['blue'];
   };
 
   return (

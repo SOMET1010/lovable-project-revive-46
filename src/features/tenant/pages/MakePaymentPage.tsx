@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { CreditCard, Smartphone, Building, Coins, AlertCircle, CheckCircle, ArrowLeft, Loader } from 'lucide-react';
+import { CreditCard, Smartphone, Building, Coins, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { apiKeyService } from '@/services/apiKeyService';

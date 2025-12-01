@@ -85,7 +85,7 @@ export default function TenantCalendar() {
         .eq('status', 'complete');
 
       if (paymentsData) {
-        paymentsData.forEach(payment => {
+        paymentsData.forEach((payment: { id: string; created_at: string; amount: number; status: string }) => {
           calendarEvents.push({
             id: payment.id,
             date: new Date(payment.created_at),
@@ -126,7 +126,7 @@ export default function TenantCalendar() {
         .lte('scheduled_date', endOfMonth.toISOString().split('T')[0]);
 
       if (maintenanceData) {
-        maintenanceData.forEach(maintenance => {
+        maintenanceData.forEach((maintenance: { id: string; scheduled_date: string | null; issue_type: string }) => {
           calendarEvents.push({
             id: maintenance.id,
             date: new Date(maintenance.scheduled_date!),

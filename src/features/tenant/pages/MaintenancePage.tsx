@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Wrench, Plus, Clock, CheckCircle, XCircle, Calendar, AlertCircle } from 'lucide-react';
+import { Wrench, Plus, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 
 interface MaintenanceRequest {
   id: string;
@@ -69,7 +69,7 @@ export default function TenantMaintenance() {
       refusee: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Refusée' }
     };
 
-    const config = configs[status] || configs.en_attente;
+    const config = configs[status] || configs['en_attente'];
     const Icon = config.icon;
 
     return (
@@ -87,7 +87,7 @@ export default function TenantMaintenance() {
       high: 'text-orange-600',
       urgent: 'text-red-600'
     };
-    return colors[urgency] || colors.medium;
+    return colors[urgency] || colors['medium'];
   };
 
   const getIssueTypeLabel = (type: string) => {

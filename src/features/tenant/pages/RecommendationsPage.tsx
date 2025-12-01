@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { recommendationEngine } from '@/services/ai/recommendationEngine';
-import { Sparkles, TrendingUp, Clock, Heart, MessageCircle, Eye, ChevronRight } from 'lucide-react';
+import { Sparkles, TrendingUp, Clock, Eye, ChevronRight, MapPin } from 'lucide-react';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -59,7 +59,7 @@ export default function Recommendations() {
             <span>{Math.round(score)}% match</span>
           </div>
         )}
-        {property.status === 'available' && (
+        {property.status === 'disponible' && (
           <div className="absolute top-3 left-3 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
             Disponible
           </div>
@@ -108,13 +108,8 @@ export default function Recommendations() {
           <div className="flex items-center space-x-3 text-xs text-gray-500">
             <span className="flex items-center">
               <Eye className="h-3 w-3 mr-1" />
-              {property.views_count || 0}
+              {property.view_count || 0}
             </span>
-            {property.rating && (
-              <span className="flex items-center">
-                ⭐ {property.rating.toFixed(1)}
-              </span>
-            )}
           </div>
           <button className="text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 text-sm font-medium">
             Voir détails →

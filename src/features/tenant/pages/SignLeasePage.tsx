@@ -50,7 +50,7 @@ export default function SignLease() {
   const [signing, setSigning] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [otpCode, setOtpCode] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
+  const [_otpSent, setOtpSent] = useState(false);
   const [sendingOTP, setSendingOTP] = useState(false);
   const [verifyingOTP, setVerifyingOTP] = useState(false);
   const [error, setError] = useState('');
@@ -112,7 +112,7 @@ export default function SignLease() {
   };
 
   const requestOTP = async () => {
-    if (!profile?.identity_verified) {
+    if (!profile?.is_verified) {
       setError('Vous devez être vérifié Mon Toit pour signer un bail');
       return;
     }
@@ -121,11 +121,11 @@ export default function SignLease() {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-sms`, {
+      const response = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-sms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
         },
         body: JSON.stringify({
           phoneNumber: profile.phone,
@@ -158,11 +158,11 @@ export default function SignLease() {
     setError('');
 
     try {
-      const verifyResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cryptoneo-signature`, {
+      const verifyResponse = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/cryptoneo-signature`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
         },
         body: JSON.stringify({
           action: 'verify_otp',
@@ -178,11 +178,11 @@ export default function SignLease() {
 
       setSigning(true);
 
-      const signResponse = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cryptoneo-signature`, {
+      const signResponse = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/cryptoneo-signature`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
         },
         body: JSON.stringify({
           action: 'sign_document',
@@ -196,7 +196,7 @@ export default function SignLease() {
         throw new Error('Erreur lors de la signature du document');
       }
 
-      const signResult = await signResponse.json();
+      await signResponse.json();
 
       setSuccess('✅ Bail signé avec succès!');
       setShowOTPModal(false);
@@ -224,11 +224,11 @@ export default function SignLease() {
 
   const sendNotificationToLandlord = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+      await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
         },
         body: JSON.stringify({
           to: landlordProfile?.email,
@@ -250,11 +250,11 @@ export default function SignLease() {
   const sendFinalConfirmationEmails = async () => {
     try {
       await Promise.all([
-        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
+        fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-email`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+            'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
           },
           body: JSON.stringify({
             to: landlordProfile?.email,
@@ -339,7 +339,6 @@ export default function SignLease() {
   }
 
   const isLandlord = lease.landlord_id === user.id;
-  const isTenant = lease.tenant_id === user.id;
   const hasUserSigned = isLandlord ? lease.landlord_signed_at : lease.tenant_signed_at;
   const otherPartySigned = isLandlord ? lease.tenant_signed_at : lease.landlord_signed_at;
 
@@ -372,7 +371,7 @@ export default function SignLease() {
             </div>
           )}
 
-          {!profile?.identity_verified && (
+          {!profile?.is_verified && (
             <div className="bg-amber-50 border-2 border-amber-300 rounded-xl p-6 mb-6">
               <div className="flex items-start space-x-4">
                 <Shield className="w-8 h-8 text-amber-600 flex-shrink-0" />
@@ -504,7 +503,7 @@ export default function SignLease() {
             </div>
           </div>
 
-          {!hasUserSigned && profile?.identity_verified && (
+          {!hasUserSigned && profile?.is_verified && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
               <div className="text-center">
                 <Shield className="w-16 h-16 text-terracotta-500 mx-auto mb-4" />

@@ -4,7 +4,6 @@ import {
   Clock, 
   CheckCircle, 
   TrendingUp, 
-  Users, 
   MessageSquare, 
   FileText,
   AlertTriangle,
@@ -12,9 +11,6 @@ import {
   Activity,
   Send,
   Eye,
-  ThumbsUp,
-  Calendar,
-  Filter,
   Search,
   ChevronRight,
   ArrowUpRight,
@@ -84,7 +80,7 @@ export default function TrustAgentMediationDashboard() {
   const [validations, setValidations] = useState<ValidationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [disputeFilter, setDisputeFilter] = useState<'all' | 'assigned' | 'under_mediation' | 'urgent'>('assigned');
-  const [validationFilter, setValidationFilter] = useState<'all' | 'pending' | 'high'>('pending');
+  const [_validationFilter, setValidationFilter] = useState<'all' | 'pending' | 'high'>('pending');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -345,7 +341,7 @@ export default function TrustAgentMediationDashboard() {
               </button>
               <div className="text-right">
                 <p className="text-sm font-medium text-gray-900">
-                  {profile?.first_name} {profile?.last_name}
+                  {profile?.full_name || 'Agent'}
                 </p>
                 <p className="text-xs text-gray-600">Agent Certifié Niv. 3</p>
               </div>

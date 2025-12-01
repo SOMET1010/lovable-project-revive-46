@@ -109,16 +109,15 @@ export default function ApplicationForm() {
   const calculateApplicationScore = () => {
     let score = 50;
 
-    if (profile?.is_verified) score += 20;
-    if (profile?.oneci_verified) score += 15;
-    if (profile?.cnam_verified) score += 15;
+    // is_verified combine les vérifications ONECI/CNAM
+    if (profile?.is_verified) score += 30;
 
-    if (profile?.full_name) score += 2;
-    if (profile?.phone) score += 2;
-    if (profile?.city) score += 2;
+    if (profile?.full_name) score += 4;
+    if (profile?.phone) score += 4;
+    if (profile?.city) score += 4;
     if (profile?.bio) score += 3;
     if (profile?.avatar_url) score += 3;
-    if (profile?.address) score += 3;
+    if (profile?.address) score += 2;
 
     return Math.min(score, 100);
   };
@@ -271,17 +270,17 @@ export default function ApplicationForm() {
                 <span>Statut de vérification</span>
               </h2>
               <div className="bg-white rounded-xl p-5 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
                   <div className="flex-1">
-                    <span className="text-gray-700 font-medium block">Vérification d'identité ONECI</span>
-                    <span className="text-xs text-gray-500">Document CNI authentifié</span>
+                    <span className="text-gray-700 font-medium block">Vérification d'identité</span>
+                    <span className="text-xs text-gray-500">Document CNI authentifié via ONECI/CNAM</span>
                   </div>
                   <span className={`font-bold px-4 py-2 rounded-full ${
-                    profile?.oneci_verified
+                    profile?.is_verified
                       ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border border-blue-300'
                       : 'bg-gray-100 text-gray-500 border border-gray-300'
                   }`}>
-                    {profile?.oneci_verified ? '✓ Vérifié' : '✗ Non vérifié'}
+                    {profile?.is_verified ? '✓ Vérifié' : '✗ Non vérifié'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between pb-3 border-b border-gray-200">
@@ -294,13 +293,13 @@ export default function ApplicationForm() {
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-medium">Vérification CNAM</span>
+                  <span className="text-gray-700 font-medium">Profil complet</span>
                   <span className={`font-bold px-4 py-2 rounded-full ${
-                    profile?.cnam_verified
+                    profile?.profile_setup_completed
                       ? 'bg-gradient-to-r from-olive-100 to-green-100 text-olive-800 border border-olive-300'
                       : 'bg-gray-100 text-gray-500 border border-gray-300'
                   }`}>
-                    {profile?.cnam_verified ? '✓ Vérifié' : '✗ Non vérifié'}
+                    {profile?.profile_setup_completed ? '✓ Complet' : '✗ Incomplet'}
                   </span>
                 </div>
               </div>

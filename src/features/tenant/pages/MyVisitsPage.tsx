@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Calendar, Clock, MapPin, Video, X, Check, MessageCircle, Star } from 'lucide-react';
+import { Calendar, Clock, MapPin, Video, X, MessageCircle, Star } from 'lucide-react';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 

@@ -87,7 +87,7 @@ export default function TenantScore() {
 
     setCalculating(true);
     try {
-      const { data, error } = await supabase.rpc('calculate_tenant_score', {
+      const { data: _data, error } = await supabase.rpc('calculate_tenant_score', {
         p_user_id: user.id
       });
 
