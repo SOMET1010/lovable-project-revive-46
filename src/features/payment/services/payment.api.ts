@@ -7,7 +7,6 @@
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 
-type Payment = Database['public']['Tables']['payments']['Row'];
 type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
 type PaymentUpdate = Database['public']['Tables']['payments']['Update'];
 
@@ -181,7 +180,7 @@ export const paymentApi = {
 
     if (error) throw error;
 
-    const total = data?.reduce((sum, payment) => sum + (payment.amount || 0), 0) || 0;
+    const total = data?.reduce((sum: number, payment: { amount: number | null }) => sum + (payment.amount || 0), 0) || 0;
     return { data: total, error: null };
   },
 

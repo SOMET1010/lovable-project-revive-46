@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { contractService } from '@/services/contractService';
 import { SignatureStatusBadge } from '@/shared/components/SignatureStatusBadge';
 import {
-  FileText, Download, Eye, CheckCircle, Clock, AlertCircle,
-  FileSignature, Search, Filter, Calendar, MapPin
+  FileText, Download, Eye, CheckCircle, Clock,
+  FileSignature, Search, Calendar, MapPin
 } from 'lucide-react';
 
 interface Contract {
@@ -91,21 +90,13 @@ export default function ContractsList() {
     return 'pending';
   };
 
-  const handleDownload = async (contract: Contract) => {
-    try {
-      const url = contract.signed_pdf_url || contract.pdf_document_url;
-      if (!url) {
-        alert('Aucun document disponible');
-        return;
-      }
-
-      const response = await fetch(url);
-      const blob = await response.blob();
-      contractService.downloadContract(blob, `contrat-${contract.id}.pdf`);
-    } catch (err) {
-      console.error('Error downloading contract:', err);
-      alert('Erreur lors du téléchargement');
+  const handleDownload = (contract: Contract) => {
+    const url = contract.signed_pdf_url || contract.pdf_document_url;
+    if (!url) {
+      alert('Aucun document disponible');
+      return;
     }
+    window.open(url, '_blank');
   };
 
   const filteredContracts = contracts.filter(contract => {

@@ -51,7 +51,7 @@ const PROVIDER_INFO = {
 };
 
 export default function MobileMoneyPayment({
-  userId,
+  userId: _userId,
   leaseId,
   amount,
   description,
@@ -220,7 +220,7 @@ export default function MobileMoneyPayment({
             {(Object.keys(PROVIDER_INFO) as MobileMoneyProvider[]).map((key) => {
               const info = PROVIDER_INFO[key];
               const isSelected = provider === key;
-              const colorClasses = {
+              const colorClasses: Record<string, string> = {
                 orange: 'border-orange-500 bg-orange-50',
                 yellow: 'border-yellow-500 bg-yellow-50',
                 blue: 'border-blue-500 bg-blue-50',
@@ -233,7 +233,7 @@ export default function MobileMoneyPayment({
                   onClick={() => setProvider(key)}
                   className={`p-4 border-2 rounded-xl flex flex-col items-center gap-2 transition-all ${
                     isSelected
-                      ? colorClasses[info.color]
+                      ? colorClasses[info.color] || ''
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >

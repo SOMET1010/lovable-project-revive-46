@@ -346,7 +346,7 @@ export default function CreateDispute() {
                     <p className="text-sm font-medium text-gray-700">
                       Fichiers joints ({formData.evidenceFiles.length})
                     </p>
-                    {formData.evidenceFiles.map((file, index) => (
+                    {formData.evidenceFiles.map((_file, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between bg-gray-50 rounded-lg p-3"

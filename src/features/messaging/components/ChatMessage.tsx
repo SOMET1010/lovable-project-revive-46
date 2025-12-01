@@ -13,7 +13,7 @@ function formatMessage(text: string): JSX.Element[] {
   const lines = text.split('\n');
   let keyCounter = 0;
 
-  lines.forEach((line, lineIndex) => {
+  lines.forEach((line) => {
     if (!line.trim()) {
       elements.push(<br key={`br-${keyCounter++}`} />);
       return;
@@ -33,7 +33,7 @@ function formatMessage(text: string): JSX.Element[] {
       );
     } else if (line.match(/^[\d]+\.\s/)) {
       const match = line.match(/^([\d]+)\.\s(.+)$/);
-      if (match) {
+      if (match && match[1] && match[2]) {
         elements.push(
           <div key={`ol-${keyCounter++}`} className="flex gap-2 my-1">
             <span className="font-semibold text-terracotta-600">{match[1]}.</span>
@@ -43,7 +43,7 @@ function formatMessage(text: string): JSX.Element[] {
       }
     } else if (line.match(/^[•●▪︎◦∙]\s/) || line.match(/^[-*]\s/)) {
       const match = line.match(/^[•●▪︎◦∙\-*]\s(.+)$/);
-      if (match) {
+      if (match && match[1]) {
         elements.push(
           <div key={`ul-${keyCounter++}`} className="flex gap-2 my-1">
             <span className="text-terracotta-600">•</span>
@@ -76,37 +76,28 @@ function formatMessage(text: string): JSX.Element[] {
 
 function formatInlineText(text: string): (string | JSX.Element)[] {
   const elements: (string | JSX.Element)[] = [];
-  let current = text;
   let keyCounter = 0;
 
   const patterns = [
-    { regex: /\*\*(.+?)\*\*/g, render: (match: string) => <strong key={`b-${keyCounter++}`}>{match}</strong> },
-    { regex: /\*(.+?)\*/g, render: (match: string) => <em key={`i-${keyCounter++}`}>{match}</em> },
-    { regex: /`(.+?)`/g, render: (match: string) => <code key={`c-${keyCounter++}`} className="bg-gray-100 px-1 rounded text-sm">{match}</code> },
-    { regex: /\[(.+?)\]\((.+?)\)/g, render: (text: string, url: string) => (
-      <a key={`a-${keyCounter++}`} href={url} target="_blank" rel="noopener noreferrer" className="text-terracotta-600 hover:underline inline-flex items-center gap-1">
-        {text}
-        <ExternalLink className="h-3 w-3" />
-      </a>
-    )},
+    { regex: /\*\*(.+?)\*\*/g, type: 'bold' },
+    { regex: /\*(.+?)\*/g, type: 'italic' },
+    { regex: /`(.+?)`/g, type: 'code' },
+    { regex: /\[(.+?)\]\((.+?)\)/g, type: 'link' },
   ];
 
-  const parts: Array<{ text: string; type: 'text' | 'bold' | 'italic' | 'code' | 'link'; data?: any }> = [];
   let lastIndex = 0;
 
-  const allMatches: Array<{ index: number; length: number; type: string; data: any }> = [];
+  const allMatches: Array<{ index: number; length: number; type: string; data: RegExpExecArray }> = [];
 
-  patterns.forEach((pattern, patternIndex) => {
-    const regex = new RegExp(pattern.regex);
-    let match;
-    const testText = text;
+  patterns.forEach((pattern) => {
     const globalRegex = new RegExp(pattern.regex.source, 'g');
+    let match;
 
-    while ((match = globalRegex.exec(testText)) !== null) {
+    while ((match = globalRegex.exec(text)) !== null) {
       allMatches.push({
         index: match.index,
         length: match[0].length,
-        type: ['bold', 'italic', 'code', 'link'][patternIndex],
+        type: pattern.type,
         data: match,
       });
     }

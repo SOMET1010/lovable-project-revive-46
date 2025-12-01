@@ -22,6 +22,7 @@ export default function NotificationCenter() {
 
       return () => unsubscribe();
     }
+    return undefined;
   }, [user]);
 
   const loadNotifications = async () => {
@@ -78,7 +79,7 @@ export default function NotificationCenter() {
       high: 'bg-orange-100 text-orange-800',
       urgent: 'bg-red-100 text-red-800'
     };
-    return colors[priority] || colors.normal;
+    return colors[priority] || colors['normal'];
   };
 
   const getTimeAgo = (date: string) => {

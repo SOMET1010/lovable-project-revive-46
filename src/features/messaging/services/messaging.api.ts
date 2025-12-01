@@ -7,9 +7,8 @@
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 
-type Message = Database['public']['Tables']['messages']['Row'];
+// Types utilisés pour les insertions
 type MessageInsert = Database['public']['Tables']['messages']['Insert'];
-type Conversation = Database['public']['Tables']['conversations']['Row'];
 type ConversationInsert = Database['public']['Tables']['conversations']['Insert'];
 
 /**
@@ -53,8 +52,8 @@ export const messagingApi = {
       .from('conversations')
       .select('*')
       .or(
-        `and(participant1_id.eq.${conversation.participant1_id},participant2_id.eq.${conversation.participant2_id}),` +
-        `and(participant1_id.eq.${conversation.participant2_id},participant2_id.eq.${conversation.participant1_id})`
+        `and(user1_id.eq.${conversation.user1_id},user2_id.eq.${conversation.user2_id}),` +
+        `and(user1_id.eq.${conversation.user2_id},user2_id.eq.${conversation.user1_id})`
       )
       .maybeSingle();
 
@@ -98,11 +97,8 @@ export const messagingApi = {
 
     if (error) throw error;
 
-    // Mettre à jour la date de dernière mise à jour de la conversation
-    await supabase
-      .from('conversations')
-      .update({ updated_at: new Date().toISOString() })
-      .eq('id', message.conversation_id);
+    // Note: conversation_id n'existe pas dans la table messages selon le schema actuel
+    // La mise à jour de la conversation doit être gérée différemment si nécessaire
 
     return { data, error: null };
   },
@@ -151,7 +147,7 @@ export const messagingApi = {
       return { data: 0, error: null };
     }
 
-    const conversationIds = conversations.map(c => c.id);
+    const conversationIds = conversations.map((c: { id: string }) => c.id);
 
     // Compter les messages non lus dans ces conversations
     const { count, error } = await supabase

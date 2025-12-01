@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Bell, Check, CheckCheck, Trash2, Filter, X, ExternalLink } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, Filter, ExternalLink } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { notificationService, Notification } from '@/services/notificationService';
 import { Button } from '@/shared/ui/Button';
@@ -111,7 +111,7 @@ export default function NotificationsPage() {
       high: 'bg-orange-100 text-orange-800 border-orange-300',
       urgent: 'bg-red-100 text-red-800 border-red-300'
     };
-    return colors[priority] || colors.normal;
+    return colors[priority] || colors['normal'];
   };
 
   const getTypeLabel = (type: string) => {
@@ -174,7 +174,7 @@ export default function NotificationsPage() {
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
-                size="sm"
+                size="small"
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <Filter className="h-4 w-4 mr-2" />
@@ -183,7 +183,7 @@ export default function NotificationsPage() {
               {unreadCount > 0 && (
                 <Button
                   variant="primary"
-                  size="sm"
+                  size="small"
                   onClick={handleMarkAllAsRead}
                 >
                   <CheckCheck className="h-4 w-4 mr-2" />
