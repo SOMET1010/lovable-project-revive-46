@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
 import { messagingApi } from '../services/messaging.api';
 import type { Database } from '@/shared/lib/database.types';
 
@@ -79,7 +78,8 @@ export function useMarkAsRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (conversationId: string, userId: string) => messagingApi.markConversationAsRead(conversationId, userId),
+    mutationFn: ({ conversationId, userId }: { conversationId: string; userId: string }) => 
+      messagingApi.markConversationAsRead(conversationId, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
       queryClient.invalidateQueries({ queryKey: ['messages', 'unread'] });

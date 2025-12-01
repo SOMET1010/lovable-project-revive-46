@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { leaseRepository } from '../api/repositories';
+import { leaseRepository } from '@/api/repositories';
 import type { Database } from '@/shared/lib/database.types';
 
 type LeaseInsert = Database['public']['Tables']['leases']['Insert'];
