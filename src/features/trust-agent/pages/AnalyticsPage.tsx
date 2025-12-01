@@ -61,13 +61,16 @@ export default function TrustAgentAnalytics() {
       .select('*')
       .gte('created_at', startDate.toISOString());
 
-    const completed = validations?.filter(v => v.status === 'approved' || v.status === 'rejected') || [];
-    const approved = validations?.filter(v => v.status === 'approved') || [];
-    const resolvedDisputes = disputes?.filter(d => d.status === 'resolved') || [];
-    const allDisputes = disputes?.filter(d => d.status !== 'open') || [];
+    interface ValidationRecord { status: string; validated_at?: string; requested_at?: string; }
+    interface DisputeRecord { status: string; resolved_at?: string; opened_at?: string; }
+
+    const completed = validations?.filter((v: ValidationRecord) => v.status === 'approved' || v.status === 'rejected') || [];
+    const approved = validations?.filter((v: ValidationRecord) => v.status === 'approved') || [];
+    const resolvedDisputes = disputes?.filter((d: DisputeRecord) => d.status === 'resolved') || [];
+    const allDisputes = disputes?.filter((d: DisputeRecord) => d.status !== 'open') || [];
 
     const avgValTime = completed.length > 0
-      ? completed.reduce((acc, v) => {
+      ? completed.reduce((acc: number, v: ValidationRecord) => {
           if (!v.validated_at || !v.requested_at) return acc;
           const diff = new Date(v.validated_at).getTime() - new Date(v.requested_at).getTime();
           return acc + (diff / (1000 * 60 * 60));
@@ -75,7 +78,7 @@ export default function TrustAgentAnalytics() {
       : 0;
 
     const avgMedTime = resolvedDisputes.length > 0
-      ? resolvedDisputes.reduce((acc, d) => {
+      ? resolvedDisputes.reduce((acc: number, d: DisputeRecord) => {
           if (!d.resolved_at || !d.opened_at) return acc;
           const diff = new Date(d.resolved_at).getTime() - new Date(d.opened_at).getTime();
           return acc + (diff / (1000 * 60 * 60 * 24));
@@ -111,8 +114,8 @@ export default function TrustAgentAnalytics() {
         .gte('validated_at', date.toISOString())
         .lt('validated_at', nextDate.toISOString());
 
-      const approved = validations?.filter(v => v.status === 'approved').length || 0;
-      const rejected = validations?.filter(v => v.status === 'rejected').length || 0;
+      const approved = validations?.filter((v: { status: string }) => v.status === 'approved').length || 0;
+      const rejected = validations?.filter((v: { status: string }) => v.status === 'rejected').length || 0;
 
       data.push({
         name: date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }),
@@ -255,9 +258,11 @@ export default function TrustAgentAnalytics() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">📊 Validations par jour</h2>
             <div className="h-80">
               <SimpleBarChart
-                data={validationsChart}
-                dataKeys={['Approuvées', 'Rejetées']}
-                colors={['#10b981', '#ef4444']}
+                data={validationsChart.map((item: { name: string; Approuvées: number; Rejetées: number }) => ({
+                  label: item.name,
+                  value: item.Approuvées + item.Rejetées
+                }))}
+                color="#10b981"
               />
             </div>
           </div>
@@ -266,8 +271,10 @@ export default function TrustAgentAnalytics() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">📈 Litiges ouverts par jour</h2>
             <div className="h-80">
               <SimpleLineChart
-                data={disputesChart}
-                dataKey="value"
+                data={disputesChart.map((item: { name: string; value: number }) => ({
+                  label: item.name,
+                  value: item.value
+                }))}
                 color="#3b82f6"
               />
             </div>
@@ -354,7 +361,7 @@ function PeriodButton({ label, active, onClick }: any) {
 }
 
 function MetricCard({ icon: Icon, label, value, subtitle, color }: any) {
-  const colors = {
+  const colors: Record<string, string> = {
     blue: 'from-blue-500 to-blue-600',
     green: 'from-green-500 to-green-600',
     orange: 'from-orange-500 to-orange-600',
@@ -363,7 +370,7 @@ function MetricCard({ icon: Icon, label, value, subtitle, color }: any) {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <Icon className={`w-8 h-8 bg-gradient-to-r ${colors[color]} text-white p-1.5 rounded-lg mb-3`} />
+      <Icon className={`w-8 h-8 bg-gradient-to-r ${colors[color as keyof typeof colors]} text-white p-1.5 rounded-lg mb-3`} />
       <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
       <p className="text-sm text-gray-600 mb-1">{label}</p>
       <p className="text-xs text-gray-500">{subtitle}</p>
@@ -375,7 +382,7 @@ function ProgressBar({ label, value, color, target }: any) {
   const percentage = Math.min(100, value);
   const isAboveTarget = value >= target;
 
-  const colors = {
+  const colors: Record<string, string> = {
     green: isAboveTarget ? 'bg-green-600' : 'bg-yellow-600',
     blue: isAboveTarget ? 'bg-blue-600' : 'bg-orange-600'
   };
@@ -388,7 +395,7 @@ function ProgressBar({ label, value, color, target }: any) {
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div
-          className={`h-2 rounded-full ${colors[color]} transition-all`}
+          className={`h-2 rounded-full ${colors[color as keyof typeof colors]} transition-all`}
           style={{ width: `${percentage}%` }}
         />
       </div>

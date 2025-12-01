@@ -10,7 +10,8 @@ import {
   Mail,
   ArrowUp,
   Download,
-  Zap
+  Zap,
+  ChevronRight
 } from 'lucide-react';
 
 interface QuickActionButton {
@@ -219,22 +220,5 @@ function SpecialActionButton({
       <Icon className={`w-5 h-5 ${color}`} />
       <span className="text-xs font-medium text-gray-700">{label}</span>
     </button>
-  );
-}
-
-// Composant Zap icon personnalisé (pour éviter les conflits)
-function Zap({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-    </svg>
-  );
-}
-
-function ChevronRight({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
   );
 }

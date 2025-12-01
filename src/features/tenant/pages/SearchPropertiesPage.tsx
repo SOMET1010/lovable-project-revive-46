@@ -585,7 +585,7 @@ export default function SearchPropertiesPage() {
             {/* Mapbox Map - Pleine largeur */}
             <div className="h-[600px] rounded-xl overflow-hidden shadow-lg border border-neutral-100">
               <MapboxMap
-                properties={properties}
+                properties={properties.filter(p => p.longitude !== null && p.latitude !== null) as any}
                 height="100%"
                 fitBounds={properties.length > 0}
                 clustering={properties.length > 10}
