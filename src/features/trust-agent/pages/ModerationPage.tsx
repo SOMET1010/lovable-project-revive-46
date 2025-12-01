@@ -152,7 +152,7 @@ function StatCard({ icon: Icon, label, value, color }: any) {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <Icon className={`w-8 h-8 bg-gradient-to-r ${colors[color]} text-white p-1.5 rounded-lg mb-2`} />
+      <Icon className={`w-8 h-8 bg-gradient-to-r ${colors[color as keyof typeof colors]} text-white p-1.5 rounded-lg mb-2`} />
       <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
       <p className="text-sm text-gray-600">{label}</p>
     </div>

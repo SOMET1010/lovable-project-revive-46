@@ -18,7 +18,8 @@ import {
   Plus,
   Settings
 } from 'lucide-react';
-import { trustValidationService } from '@/services/trustValidationService';
+// Trust validation service available if needed
+// import { trustValidationService } from '@/services/trustValidationService';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 interface MediationStats {
@@ -80,7 +81,7 @@ export default function TrustAgentMediationDashboard() {
   const [validations, setValidations] = useState<ValidationRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [disputeFilter, setDisputeFilter] = useState<'all' | 'assigned' | 'under_mediation' | 'urgent'>('assigned');
-  const [_validationFilter, setValidationFilter] = useState<'all' | 'pending' | 'high'>('pending');
+  const [validationFilter, _setValidationFilter] = useState<'all' | 'pending' | 'high'>('pending');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -672,19 +673,20 @@ function StatCard({
     down: 'text-red-600'
   };
 
-  const trendIcons = {
+  const trendIcons: Record<string, any> = {
     up: ArrowUpRight,
     down: ArrowDownRight
   };
 
   const TrendIcon = trend ? trendIcons[trend] : null;
+  const colorClass = colors[color as keyof typeof colors];
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 relative overflow-hidden">
-      <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${colors[color]} opacity-10 rounded-bl-full`}></div>
+      <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${colorClass} opacity-10 rounded-bl-full`}></div>
       <div className="relative">
         <div className="flex items-center justify-between mb-3">
-          <Icon className={`w-8 h-8 bg-gradient-to-r ${colors[color]} text-white p-1.5 rounded-lg`} />
+          <Icon className={`w-8 h-8 bg-gradient-to-r ${colorClass} text-white p-1.5 rounded-lg`} />
           {badge && (
             <span className="text-xs font-semibold px-2 py-1 bg-red-100 text-red-700 rounded-full">
               {badge}
@@ -697,7 +699,7 @@ function StatCard({
           <p className="text-xs text-gray-500">{subtitle}</p>
         )}
         {change && TrendIcon && (
-          <div className={`flex items-center gap-1 text-sm mt-2 ${trendColors[trend]}`}>
+          <div className={`flex items-center gap-1 text-sm mt-2 ${trendColors[trend as keyof typeof trendColors]}`}>
             <TrendIcon className="w-4 h-4" />
             <span>{change}</span>
           </div>
@@ -722,7 +724,7 @@ function WorkflowCard({ stage, count, color, description }: {
   };
 
   return (
-    <div className={`p-4 rounded-lg border-2 ${colorClasses[color]} text-center`}>
+    <div className={`p-4 rounded-lg border-2 ${colorClasses[color as keyof typeof colorClasses]} text-center`}>
       <p className="text-sm font-medium mb-1">{stage}</p>
       <p className="text-2xl font-bold">{count}</p>
       <p className="text-xs opacity-75">{description}</p>

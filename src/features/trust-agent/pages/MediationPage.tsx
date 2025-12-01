@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, MessageSquare, Clock, CheckCircle, AlertTriangle, Send, ArrowUpCircle } from 'lucide-react';
+import { Shield, MessageSquare, Clock, CheckCircle, AlertTriangle, ArrowUpCircle } from 'lucide-react';
 import { disputeService } from '@/services/trustValidationService';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -165,7 +165,7 @@ function StatCard({ icon: Icon, label, value, color }: any) {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <Icon className={`w-8 h-8 bg-gradient-to-r ${colors[color]} text-white p-1.5 rounded-lg mb-2`} />
+      <Icon className={`w-8 h-8 bg-gradient-to-r ${colors[color as keyof typeof colors]} text-white p-1.5 rounded-lg mb-2`} />
       <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
       <p className="text-sm text-gray-600">{label}</p>
     </div>
@@ -234,7 +234,8 @@ function DisputeCard({ dispute, onClick }: any) {
 
 function MediationDetail({ dispute, messages, onBack, onUpdate }: any) {
   const [resolution, setResolution] = useState('');
-  const [newMessage, setNewMessage] = useState('');
+  const [_newMessage, setNewMessage] = useState('');
+  void setNewMessage;
   const [sending, setSending] = useState(false);
   const [escalateReason, setEscalateReason] = useState('');
   const [showEscalate, setShowEscalate] = useState(false);
