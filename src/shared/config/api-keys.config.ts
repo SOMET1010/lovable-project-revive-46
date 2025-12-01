@@ -61,114 +61,114 @@ interface LLMConfig extends ApiConfig {}
 
 class ApiKeysConfig {
   readonly supabase: SupabaseConfig = {
-    url: import.meta.env.VITE_SUPABASE_URL || '',
-    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-    serviceRoleKey: import.meta.env.SUPABASE_SERVICE_ROLE_KEY,
+    url: import.meta.env['VITE_SUPABASE_URL'] || '',
+    anonKey: import.meta.env['VITE_SUPABASE_ANON_KEY'] || '',
+    serviceRoleKey: import.meta.env['SUPABASE_SERVICE_ROLE_KEY'],
   };
 
   readonly azure = {
     openai: {
-      key: import.meta.env.VITE_AZURE_OPENAI_API_KEY || '',
-      endpoint: import.meta.env.VITE_AZURE_OPENAI_ENDPOINT || '',
-      deploymentName: import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o-mini',
-      apiVersion: import.meta.env.VITE_AZURE_OPENAI_API_VERSION || '2024-10-21',
-      isConfigured: !!(import.meta.env.VITE_AZURE_OPENAI_API_KEY && import.meta.env.VITE_AZURE_OPENAI_ENDPOINT),
+      key: import.meta.env['VITE_AZURE_OPENAI_API_KEY'] || '',
+      endpoint: import.meta.env['VITE_AZURE_OPENAI_ENDPOINT'] || '',
+      deploymentName: import.meta.env['VITE_AZURE_OPENAI_DEPLOYMENT_NAME'] || 'gpt-4o-mini',
+      apiVersion: import.meta.env['VITE_AZURE_OPENAI_API_VERSION'] || '2024-10-21',
+      isConfigured: !!(import.meta.env['VITE_AZURE_OPENAI_API_KEY'] && import.meta.env['VITE_AZURE_OPENAI_ENDPOINT']),
     } as AzureOpenAIConfig,
 
     aiServices: {
-      key: import.meta.env.VITE_AZURE_AI_SERVICES_API_KEY || '',
-      endpoint: import.meta.env.VITE_AZURE_AI_SERVICES_ENDPOINT || '',
-      isConfigured: !!(import.meta.env.VITE_AZURE_AI_SERVICES_API_KEY && import.meta.env.VITE_AZURE_AI_SERVICES_ENDPOINT),
+      key: import.meta.env['VITE_AZURE_AI_SERVICES_API_KEY'] || '',
+      endpoint: import.meta.env['VITE_AZURE_AI_SERVICES_ENDPOINT'] || '',
+      isConfigured: !!(import.meta.env['VITE_AZURE_AI_SERVICES_API_KEY'] && import.meta.env['VITE_AZURE_AI_SERVICES_ENDPOINT']),
     } as AzureAIServicesConfig,
 
     speech: {
-      key: import.meta.env.AZURE_SPEECH_API_KEY || '',
-      endpoint: import.meta.env.AZURE_SPEECH_TTS_ENDPOINT || '',
-      region: import.meta.env.AZURE_SPEECH_REGION || 'eastus',
-      sttEndpoint: import.meta.env.AZURE_SPEECH_STT_ENDPOINT || '',
-      ttsEndpoint: import.meta.env.AZURE_SPEECH_TTS_ENDPOINT || '',
-      isConfigured: !!(import.meta.env.AZURE_SPEECH_API_KEY),
+      key: import.meta.env['AZURE_SPEECH_API_KEY'] || '',
+      endpoint: import.meta.env['AZURE_SPEECH_TTS_ENDPOINT'] || '',
+      region: import.meta.env['AZURE_SPEECH_REGION'] || 'eastus',
+      sttEndpoint: import.meta.env['AZURE_SPEECH_STT_ENDPOINT'] || '',
+      ttsEndpoint: import.meta.env['AZURE_SPEECH_TTS_ENDPOINT'] || '',
+      isConfigured: !!(import.meta.env['AZURE_SPEECH_API_KEY']),
     } as AzureSpeechConfig,
   };
 
   readonly maps = {
     mapbox: {
-      key: import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || '',
+      key: import.meta.env['VITE_MAPBOX_PUBLIC_TOKEN'] || '',
       endpoint: 'https://api.mapbox.com',
-      isConfigured: !!import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN,
+      isConfigured: !!import.meta.env['VITE_MAPBOX_PUBLIC_TOKEN'],
     } as MapConfig,
 
     googleMaps: {
-      key: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+      key: import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] || '',
       endpoint: 'https://maps.googleapis.com',
-      isConfigured: !!import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+      isConfigured: !!import.meta.env['VITE_GOOGLE_MAPS_API_KEY'],
     } as MapConfig,
   };
 
   readonly payment = {
     inTouch: {
-      baseUrl: import.meta.env.VITE_INTOUCH_BASE_URL || 'https://apidist.gutouch.net',
-      username: import.meta.env.VITE_INTOUCH_USERNAME || '',
-      password: import.meta.env.VITE_INTOUCH_PASSWORD || '',
-      partnerId: import.meta.env.VITE_INTOUCH_PARTNER_ID || '',
-      loginApi: import.meta.env.VITE_INTOUCH_LOGIN_API || '',
-      passwordApi: import.meta.env.VITE_INTOUCH_PASSWORD_API || '',
-      isConfigured: !!(import.meta.env.VITE_INTOUCH_USERNAME && import.meta.env.VITE_INTOUCH_PASSWORD),
+      baseUrl: import.meta.env['VITE_INTOUCH_BASE_URL'] || 'https://apidist.gutouch.net',
+      username: import.meta.env['VITE_INTOUCH_USERNAME'] || '',
+      password: import.meta.env['VITE_INTOUCH_PASSWORD'] || '',
+      partnerId: import.meta.env['VITE_INTOUCH_PARTNER_ID'] || '',
+      loginApi: import.meta.env['VITE_INTOUCH_LOGIN_API'] || '',
+      passwordApi: import.meta.env['VITE_INTOUCH_PASSWORD_API'] || '',
+      isConfigured: !!(import.meta.env['VITE_INTOUCH_USERNAME'] && import.meta.env['VITE_INTOUCH_PASSWORD']),
     } as PaymentConfig,
   };
 
   readonly verification = {
     neoface: {
-      key: import.meta.env.NEOFACE_BEARER_TOKEN || '',
+      key: import.meta.env['NEOFACE_BEARER_TOKEN'] || '',
       endpoint: '',
-      apiBase: import.meta.env.NEOFACE_API_BASE || 'https://neoface.aineo.ai/api/v2',
-      isConfigured: !!import.meta.env.NEOFACE_BEARER_TOKEN,
+      apiBase: import.meta.env['NEOFACE_API_BASE'] || 'https://neoface.aineo.ai/api/v2',
+      isConfigured: !!import.meta.env['NEOFACE_BEARER_TOKEN'],
     } as FacialVerificationConfig,
 
     smileless: {
-      key: import.meta.env.SMILELESS_TOKEN || '',
+      key: import.meta.env['SMILELESS_TOKEN'] || '',
       endpoint: '',
-      apiBase: import.meta.env.SMILELESS_API_BASE || 'https://neoface.aineo.ai/api',
-      isConfigured: !!import.meta.env.SMILELESS_TOKEN,
+      apiBase: import.meta.env['SMILELESS_API_BASE'] || 'https://neoface.aineo.ai/api',
+      isConfigured: !!import.meta.env['SMILELESS_TOKEN'],
     } as FacialVerificationConfig,
   };
 
   readonly signature = {
     cryptoneo: {
-      appKey: import.meta.env.CRYPTONEO_APP_KEY || '',
-      appSecret: import.meta.env.CRYPTONEO_APP_SECRET || '',
-      baseUrl: import.meta.env.CRYPTONEO_BASE_URL || 'https://ansut.cryptoneoplatforms.com/esignaturedemo',
-      isConfigured: !!(import.meta.env.CRYPTONEO_APP_KEY && import.meta.env.CRYPTONEO_APP_SECRET),
+      appKey: import.meta.env['CRYPTONEO_APP_KEY'] || '',
+      appSecret: import.meta.env['CRYPTONEO_APP_SECRET'] || '',
+      baseUrl: import.meta.env['CRYPTONEO_BASE_URL'] || 'https://ansut.cryptoneoplatforms.com/esignaturedemo',
+      isConfigured: !!(import.meta.env['CRYPTONEO_APP_KEY'] && import.meta.env['CRYPTONEO_APP_SECRET']),
     } as SignatureConfig,
   };
 
   readonly communication = {
     email: {
-      key: import.meta.env.RESEND_API_KEY || '',
+      key: import.meta.env['RESEND_API_KEY'] || '',
       endpoint: 'https://api.resend.com',
-      fromEmail: import.meta.env.RESEND_FROM_EMAIL || 'no-reply@notifications.ansut.ci',
-      domain: import.meta.env.RESEND_DOMAIN || 'notifications.ansut.ci',
-      isConfigured: !!import.meta.env.RESEND_API_KEY,
+      fromEmail: import.meta.env['RESEND_FROM_EMAIL'] || 'no-reply@notifications.ansut.ci',
+      domain: import.meta.env['RESEND_DOMAIN'] || 'notifications.ansut.ci',
+      isConfigured: !!import.meta.env['RESEND_API_KEY'],
     } as EmailConfig,
 
     sms: {
-      key: import.meta.env.BREVO_API_KEY || '',
+      key: import.meta.env['BREVO_API_KEY'] || '',
       endpoint: 'https://api.brevo.com',
-      isConfigured: !!import.meta.env.BREVO_API_KEY,
+      isConfigured: !!import.meta.env['BREVO_API_KEY'],
     } as ApiConfig,
   };
 
   readonly llm = {
     gemini: {
-      key: import.meta.env.GEMINI_API_KEY || '',
+      key: import.meta.env['GEMINI_API_KEY'] || '',
       endpoint: 'https://generativelanguage.googleapis.com',
-      isConfigured: !!import.meta.env.GEMINI_API_KEY,
+      isConfigured: !!import.meta.env['GEMINI_API_KEY'],
     } as LLMConfig,
 
     deepseek: {
-      key: import.meta.env.DEEPSEEK_API_KEY || '',
+      key: import.meta.env['DEEPSEEK_API_KEY'] || '',
       endpoint: 'https://api.deepseek.com',
-      isConfigured: !!import.meta.env.DEEPSEEK_API_KEY,
+      isConfigured: !!import.meta.env['DEEPSEEK_API_KEY'],
     } as LLMConfig,
   };
 

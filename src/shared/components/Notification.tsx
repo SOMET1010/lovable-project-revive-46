@@ -29,6 +29,7 @@ const Notification: React.FC<NotificationProps> = ({
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [duration]);
 
   const handleClose = () => {
