@@ -7,7 +7,5 @@
 // Pages
 export { default as AnalyticsPage } from './pages/AnalyticsPage';
 export { default as DashboardPage } from './pages/DashboardPage';
-export { default as MediationPage } from './pages/MediationPage';
-export { default as ModerationPage } from './pages/ModerationPage';
 
 // Components

@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
 
 interface Props {
@@ -24,7 +24,7 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log de l'erreur
     console.error('ErrorBoundary a capturé une erreur:', error, errorInfo);
 
@@ -52,7 +52,7 @@ class ErrorBoundary extends Component<Props, State> {
     this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       // Interface personnalisée si fournie
       if (this.props.fallback) {
@@ -100,7 +100,7 @@ class ErrorBoundary extends Component<Props, State> {
                 </div>
 
                 {/* Détails de l'erreur en mode développement */}
-                {process.env.NODE_ENV === 'development' && this.state.error && (
+                {process.env['NODE_ENV'] === 'development' && this.state.error && (
                   <details className="mt-6 text-left">
                     <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
                       Détails techniques (développement)

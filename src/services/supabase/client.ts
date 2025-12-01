@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from './database.types';
+import type { Database } from '@/shared/lib/database.types';
 import { envConfig } from '@/shared/config/env.config';
 
 // Client Supabase pour le mode demo (mock)
@@ -138,7 +138,7 @@ const createDemoSupabaseClient = () => {
       signOut: () => Promise.resolve({ error: null }),
       signInWithOAuth: () => Promise.resolve({ error: { message: 'Mode démo - OAuth non disponible' } })
     },
-    from: (table: string) => ({
+    from: (_table: string) => ({
       select: () => createMockQuery(),
       update: () => ({
         eq: () => Promise.resolve({ data: null, error: null })
@@ -152,9 +152,9 @@ const createDemoSupabaseClient = () => {
     functions: {
       invoke: () => Promise.resolve({ data: null, error: { message: 'Mode démo - Fonctions non disponibles' } })
     },
-    channel: (name: string) => {
+    channel: (_name: string) => {
       const channel = {
-        on: (event: string, config: any, callback: any) => {
+        on: (_event: string, _config: any, _callback: any) => {
           // Retourner le même objet pour permettre les appels en chaîne .on().on()
           return channel;
         },
@@ -176,8 +176,8 @@ const createDemoSupabaseClient = () => {
 
 // Client Supabase normal
 const createNormalSupabaseClient = () => {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
+  const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(

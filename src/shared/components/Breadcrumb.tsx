@@ -275,6 +275,10 @@ export const BreadcrumbCompact: React.FC<BreadcrumbProps> = (props) => {
   const lastItem = breadcrumbItems[breadcrumbItems.length - 1];
   const previousItem = breadcrumbItems[breadcrumbItems.length - 2];
   
+  if (!lastItem) {
+    return null;
+  }
+  
   return (
     <nav
       aria-label="Fil d'Ariane"
