@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, User, Mail, Phone, MapPin, Shield, CheckCircle, XCircle, Award, Clock, FileText, TrendingUp } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, MapPin, Shield, CheckCircle, XCircle, Award, Clock, FileText } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService, ScoreBreakdown } from '@/services/scoringService';
@@ -72,8 +72,8 @@ export default function ApplicationDetail() {
 
       const breakdown = await ScoringService.calculateApplicationScore(appData.applicant_id);
       setScoreBreakdown(breakdown);
-    } catch (error: any) {
-      console.error('Error loading application:', error);
+    } catch (err: unknown) {
+      console.error('Error loading application:', err);
       setError('Erreur lors du chargement de la candidature');
     } finally {
       setLoading(false);
@@ -105,8 +105,9 @@ export default function ApplicationDetail() {
       });
 
       setApplication({ ...application, status: newStatus });
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la mise à jour');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
+      setError(errorMessage);
     } finally {
       setUpdating(false);
     }
@@ -233,10 +234,10 @@ export default function ApplicationDetail() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <span className="text-gray-700 font-medium block">Vérification d'identité ONECI</span>
+                      <span className="text-gray-700 font-medium block">Vérification d'identité</span>
                       <span className="text-xs text-gray-500">Document CNI authentifié</span>
                     </div>
-                    {applicantProfile.oneci_verified ? (
+                    {applicantProfile.is_verified ? (
                       <CheckCircle className="h-6 w-6 text-olive-600" />
                     ) : (
                       <XCircle className="h-6 w-6 text-gray-400" />
@@ -248,17 +249,6 @@ export default function ApplicationDetail() {
                       <span className="text-xs text-gray-500">Contrats avec cachet électronique visible</span>
                     </div>
                     {applicantProfile.is_verified ? (
-                      <CheckCircle className="h-6 w-6 text-olive-600" />
-                    ) : (
-                      <XCircle className="h-6 w-6 text-gray-400" />
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <span className="text-gray-700 font-medium block">Vérification CNAM</span>
-                      <span className="text-xs text-gray-500">Affiliation CNAM vérifiée</span>
-                    </div>
-                    {applicantProfile.cnam_verified ? (
                       <CheckCircle className="h-6 w-6 text-olive-600" />
                     ) : (
                       <XCircle className="h-6 w-6 text-gray-400" />

@@ -3,7 +3,7 @@
  */
 
 import React, { useState } from 'react';
-import { useFAQ } from '../hooks/useFAQ';
+import { useFAQ, FAQItem } from '../hooks/useFAQ';
 import FAQAccordion from '../components/FAQAccordion';
 import { 
   Search as SearchIcon, 
@@ -134,7 +134,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 
 // Composant de statistiques FAQ
 interface FAQStatsProps {
-  categories: { questionCount: number }[];
+  categories: { id?: string; questionCount: number }[];
   selectedCategory: string;
 }
 
@@ -142,7 +142,7 @@ const FAQStats: React.FC<FAQStatsProps> = ({ categories, selectedCategory }) => 
   const totalQuestions = categories.reduce((sum, cat) => sum + cat.questionCount, 0);
   
   const selectedCategoryData = selectedCategory !== 'tous' 
-    ? categories.find((cat: { id?: string; questionCount: number }) => (cat as { id: string }).id === selectedCategory)
+    ? categories.find((cat) => cat.id === selectedCategory)
     : null;
   
   const currentQuestionCount = selectedCategoryData 
@@ -218,11 +218,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
 };
 
 const FAQPage: React.FC = () => {
+  const faqData = useFAQ();
+  
   const {
     categories,
     filteredItems,
     openItems,
-    _hasOpenItems,
     selectedCategory,
     searchQuery,
     searchResults,
@@ -233,37 +234,12 @@ const FAQPage: React.FC = () => {
     setSearchQuery,
     markHelpful,
     incrementViewCount,
-    _getFAQByCategory,
-    getPopularQuestions,
-    getRecentQuestions
-  } = useFAQ() as {
-    categories: { id: string; title: string; description: string; icon: string; questionCount: number; color: string }[];
-    filteredItems: { id: string; question: string; answer: string; helpful: number; notHelpful: number; tags: string[]; viewCount: number; lastUpdated: string }[];
-    openItems: Set<string>;
-    _hasOpenItems: boolean;
-    selectedCategory: string;
-    searchQuery: string;
-    searchResults: { item: { id: string; question: string; answer: string; helpful: number; notHelpful: number; tags: string[]; viewCount: number; lastUpdated: string }; relevanceScore: number; matchedTerms: string[] }[];
-    loading: boolean;
-    error: string | null;
-    toggleItem: (id: string) => void;
-    setSelectedCategory: (category: string) => void;
-    setSearchQuery: (query: string) => void;
-    markHelpful: (id: string, isHelpful: boolean) => void;
-    incrementViewCount: (id: string) => void;
-    _getFAQByCategory: (category: string) => unknown[];
-    getPopularQuestions: (count: number) => unknown[];
-    getRecentQuestions: (count: number) => unknown[];
-  };
+  } = faqData;
 
-  // Gérer l'affichage des résultats
-  const displayItems = searchQuery.trim() 
-    ? searchResults.map(result => result.item)
-    : filteredItems;
-
-  // Questions populaires et récentes (pour les suggestions) - prefixed with _ since not used in render
-  const _popularQuestions = React.useMemo(() => getPopularQuestions(3), [getPopularQuestions]);
-  const _recentQuestions = React.useMemo(() => getRecentQuestions(3), [getRecentQuestions]);
+  // Gérer l'affichage des résultats - add category to items
+  const displayItems: FAQItem[] = searchQuery.trim() 
+    ? searchResults.map(result => ({ ...result.item, category: '' }))
+    : filteredItems.map(item => ({ ...item, category: selectedCategory }));
 
   // État de la recherche
   const [_showSuggestions, _setShowSuggestions] = useState(false);
@@ -467,44 +443,19 @@ const FAQPage: React.FC = () => {
               </div>
             </section>
 
-            {/* Questions et accordéon */}
+            {/* Liste des questions */}
             <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {selectedCategory === 'tous' 
-                    ? 'Toutes les Questions' 
-                    : categories.find(cat => cat.id === selectedCategory)?.title || 'Questions'
-                  }
-                </h2>
-                
-                {displayItems.length > 0 && (
-                  <div className="text-sm text-gray-600">
-                    {displayItems.length} question{displayItems.length > 1 ? 's' : ''}
-                  </div>
-                )}
-              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                {selectedCategory === 'tous' ? 'Toutes les questions' : `Questions - ${categories.find(c => c.id === selectedCategory)?.title || ''}`}
+              </h2>
               
-              {displayItems.length > 0 ? (
-                <FAQAccordion
-                  items={displayItems}
-                  openItems={openItems}
-                  onToggleItem={toggleItem}
-                  onMarkHelpful={markHelpful}
-                  onIncrementViewCount={incrementViewCount}
-                  showHelpfulness={true}
-                  showStats={true}
-                />
-              ) : (
-                <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
-                  <HelpCircleIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Aucune question dans cette catégorie
-                  </h3>
-                  <p className="text-gray-600">
-                    Sélectionnez une autre catégorie ou consultez toutes les questions.
-                  </p>
-                </div>
-              )}
+              <FAQAccordion
+                items={displayItems}
+                openItems={openItems}
+                onToggleItem={toggleItem}
+                onMarkHelpful={markHelpful}
+                onIncrementViewCount={incrementViewCount}
+              />
             </section>
           </>
         )}

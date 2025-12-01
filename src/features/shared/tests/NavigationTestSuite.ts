@@ -1,14 +1,10 @@
 /**
  * SCRIPT DE TEST COMPLET - NAVIGATION MONTOIT
- * ============================================
- * 
- * Script pour valider toutes les corrections de navigation
- * Teste tous les liens, redirections et fonctionnalités
  */
 
 // Configuration de test
 const NAVIGATION_TEST_CONFIG = {
-  baseUrl: 'http://localhost:3000', // À adapter selon votre environnement
+  baseUrl: 'http://localhost:3000',
   timeout: 10000,
   expectedRoutes: [
     '/',
@@ -63,7 +59,7 @@ class NavigationTestUtils {
       const timeoutId = setTimeout(() => controller.abort(), config.timeout);
       
       const response = await fetch(url, {
-        method: 'HEAD', // Plus rapide que GET
+        method: 'HEAD',
         signal: controller.signal,
         redirect: 'follow'
       });
@@ -105,13 +101,11 @@ class NavigationTestUtils {
       const html = await response.text();
       const loadTime = Date.now() - startTime;
       
-      // Vérifications basiques
       const hasTitle = html.includes('<title>') && html.includes('</title>');
       const hasBreadcrumb = html.includes('breadcrumb') || html.includes('Fil d\'Ariane');
       const hasNavigation = html.includes('nav') || html.includes('header');
       const hasFooter = html.includes('footer') || html.includes('Footer');
       
-      // Extraire le titre
       const titleMatch = html.match(/<title>(.*?)<\/title>/i);
       const title = titleMatch ? titleMatch[1] : undefined;
       
@@ -124,7 +118,7 @@ class NavigationTestUtils {
         hasFooter,
         title
       };
-    } catch (error) {
+    } catch {
       return {
         path,
         loadTime: Date.now() - startTime,
@@ -139,9 +133,8 @@ class NavigationTestUtils {
 
 // Tests principaux
 export class NavigationTestSuite {
-  private results: any[] = [];
+  private results: unknown[] = [];
   
-  // Test 1: Vérification des routes principales
   async testMainRoutes(): Promise<void> {
     console.log('\n🧭 TEST 1: Routes Principales');
     console.log('='.repeat(50));
@@ -158,7 +151,6 @@ export class NavigationTestSuite {
     }
   }
   
-  // Test 2: Vérification des liens sociaux
   async testSocialLinks(): Promise<void> {
     console.log('\n📱 TEST 2: Liens Sociaux');
     console.log('='.repeat(50));
@@ -186,7 +178,6 @@ export class NavigationTestSuite {
     }
   }
   
-  // Test 3: Vérification des redirections
   async testRedirections(): Promise<void> {
     console.log('\n🔄 TEST 3: Redirections');
     console.log('='.repeat(50));
@@ -221,7 +212,6 @@ export class NavigationTestSuite {
     }
   }
   
-  // Test 4: Vérification du contenu des pages
   async testPageContent(): Promise<void> {
     console.log('\n📄 TEST 4: Contenu des Pages');
     console.log('='.repeat(50));
@@ -239,12 +229,10 @@ export class NavigationTestSuite {
     }
   }
   
-  // Test 5: Vérification de la recherche
   async testSearchFunctionality(): Promise<void> {
     console.log('\n🔍 TEST 5: Fonctionnalité de Recherche');
     console.log('='.repeat(50));
     
-    // Simuler une requête de recherche
     try {
       const searchUrl = `${NAVIGATION_TEST_CONFIG.baseUrl}/recherche?q=test&city=abidjan`;
       const response = await fetch(searchUrl);
@@ -264,14 +252,12 @@ export class NavigationTestSuite {
     }
   }
   
-  // Test 6: Vérification de l'accessibilité
   async testAccessibility(): Promise<void> {
     console.log('\n♿ TEST 6: Accessibilité');
     console.log('='.repeat(50));
     
     const mainPage = await NavigationTestUtils.testPageLoad('/');
     
-    // Tests d'accessibilité basiques
     const accessibilityTests = [
       { name: 'Titre de page', passed: mainPage.hasTitle },
       { name: 'Structure HTML', passed: mainPage.hasNavigation || mainPage.hasFooter },
@@ -285,13 +271,12 @@ export class NavigationTestSuite {
     });
   }
   
-  // Génération du rapport final
   generateReport(): void {
     console.log('\n📊 RAPPORT FINAL');
     console.log('='.repeat(50));
     
     const totalTests = this.results.length;
-    const passedTests = this.results.filter(r => {
+    const passedTests = this.results.filter((r: any) => {
       if (r.type === 'route') return r.status === 'success';
       if (r.type === 'social') return r.valid;
       if (r.type === 'redirect') return r.correct;
@@ -313,11 +298,10 @@ export class NavigationTestSuite {
       console.log('❌ CRITIQUE - Corrections majeures requises');
     }
     
-    // Détails par catégorie
-    const categories = [...new Set(this.results.map(r => r.type))];
+    const categories = [...new Set(this.results.map((r: any) => r.type))];
     categories.forEach(category => {
-      const categoryResults = this.results.filter(r => r.type === category);
-      const categoryPassed = categoryResults.filter(r => {
+      const categoryResults = this.results.filter((r: any) => r.type === category);
+      const categoryPassed = categoryResults.filter((r: any) => {
         if (category === 'route') return r.status === 'success';
         if (category === 'social') return r.valid;
         if (category === 'redirect') return r.correct;
@@ -332,7 +316,6 @@ export class NavigationTestSuite {
     });
   }
   
-  // Exporter les résultats en JSON
   exportResults(): string {
     return JSON.stringify({
       timestamp: new Date().toISOString(),
@@ -343,7 +326,7 @@ export class NavigationTestSuite {
 }
 
 // Fonction principale de test
-export async function runNavigationTests(): Promise<void> {
+export async function runNavigationTests(): Promise<string> {
   console.log('🧪 DÉBUT DES TESTS DE NAVIGATION MONTOIT');
   console.log('='.repeat(60));
   console.log(`Base URL: ${NAVIGATION_TEST_CONFIG.baseUrl}`);
@@ -352,7 +335,6 @@ export async function runNavigationTests(): Promise<void> {
   
   const testSuite = new NavigationTestSuite();
   
-  // Exécuter tous les tests
   await testSuite.testMainRoutes();
   await testSuite.testSocialLinks();
   await testSuite.testRedirections();
@@ -360,10 +342,8 @@ export async function runNavigationTests(): Promise<void> {
   await testSuite.testSearchFunctionality();
   await testSuite.testAccessibility();
   
-  // Générer le rapport
   testSuite.generateReport();
   
-  // Sauvegarder les résultats
   const resultsJson = testSuite.exportResults();
   console.log('\n💾 Résultats sauvegardés en JSON');
   
@@ -372,7 +352,6 @@ export async function runNavigationTests(): Promise<void> {
 
 // Exécution en ligne de commande
 if (typeof window === 'undefined') {
-  // Node.js environment
   runNavigationTests().catch(console.error);
 }
 

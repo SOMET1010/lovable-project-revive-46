@@ -28,7 +28,7 @@ class SearchErrorBoundary extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('SearchErrorBoundary caught an error:', error, errorInfo);
 
     this.setState({
@@ -57,7 +57,7 @@ class SearchErrorBoundary extends Component<Props, State> {
     window.location.href = '/recherche';
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -76,7 +76,7 @@ class SearchErrorBoundary extends Component<Props, State> {
                 Nos équipes ont été notifiées et travaillent sur une solution.
               </p>
 
-              {process.env.NODE_ENV === 'development' && this.state.error && (
+              {process.env['NODE_ENV'] === 'development' && this.state.error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 text-left">
                   <h3 className="font-semibold text-red-900 mb-2">Détails de l'erreur (dev only)</h3>
                   <pre className="text-xs text-red-800 overflow-auto">

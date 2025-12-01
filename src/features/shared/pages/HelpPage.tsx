@@ -41,9 +41,7 @@ interface HelpSectionCardProps {
   title: string;
   description: string;
   icon: string;
-  href: string;
   category: string;
-  order: number;
   onClick: () => void;
 }
 
@@ -51,9 +49,7 @@ const HelpSectionCard: React.FC<HelpSectionCardProps> = ({
   title,
   description,
   icon,
-  href,
   category,
-  order,
   onClick
 }) => {
   const IconComponent = getSectionIcon(icon);
@@ -96,7 +92,6 @@ const HelpSectionCard: React.FC<HelpSectionCardProps> = ({
 interface TutorialSlideProps {
   title: string;
   description: string;
-  image: string;
   duration: string;
   difficulty: 'Débutant' | 'Intermédiaire' | 'Avancé';
   category: string;
@@ -107,7 +102,6 @@ interface TutorialSlideProps {
 const TutorialSlide: React.FC<TutorialSlideProps> = ({
   title,
   description,
-  image,
   duration,
   difficulty,
   category,
@@ -181,7 +175,7 @@ const TutorialSlide: React.FC<TutorialSlideProps> = ({
 // Composant Carrousel simple
 interface SimpleCarouselProps {
   items: any[];
-  renderItem: (item: any, index: number) => React.ReactNode;
+  renderItem: (item: any) => React.ReactNode;
   className?: string;
 }
 
@@ -210,7 +204,7 @@ const SimpleCarousel: React.FC<SimpleCarouselProps> = ({ items, renderItem, clas
         >
           {items.map((item, index) => (
             <div key={index} className="flex-none w-80">
-              {renderItem(item, index)}
+              {renderItem(item)}
             </div>
           ))}
         </div>
@@ -296,9 +290,7 @@ const HelpPage: React.FC = () => {
     helpSections,
     filteredSections,
     selectedCategory,
-    tutorials,
     filteredTutorials,
-    selectedTutorial,
     searchQuery,
     searchResults,
     loading,
@@ -307,7 +299,6 @@ const HelpPage: React.FC = () => {
     setSelectedTutorial,
     setSelectedArticle,
     setSearchQuery,
-    getRecommendedArticles
   } = useHelp();
 
   // Extraire les catégories uniques des sections
@@ -367,7 +358,7 @@ const HelpPage: React.FC = () => {
               Centre d'Aide MonToit
             </h1>
             <p className="text-xl text-gray-600 mb-6">
-              Tout ce que vous devez savoir pour充分利用 la plateforme MonToit
+              Tout ce que vous devez savoir pour utiliser la plateforme MonToit
             </p>
             
             {/* Barre de recherche */}
@@ -393,23 +384,18 @@ const HelpPage: React.FC = () => {
               Résultats de recherche ({searchResults.length})
             </h2>
             <div className="space-y-4">
-              {searchResults.map((result, index) => (
+              {searchResults.map((result: any) => (
                 <div 
-                  key={result.item.id}
+                  key={result.id || result.title}
                   className="bg-white p-6 rounded-lg border border-gray-200 hover:border-blue-300 cursor-pointer transition-all duration-200"
-                  onClick={() => setSelectedArticle(result.item)}
+                  onClick={() => setSelectedArticle(result)}
                 >
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {result.item.question}
+                    {result.title}
                   </h3>
                   <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                    {result.item.answer.substring(0, 150)}...
+                    {result.description || result.answer?.substring(0, 150) || ''}
                   </p>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>{result.item.helpful} personnes ont trouvé cela utile</span>
-                    <span>•</span>
-                    <span>{result.matchedTerms.join(', ')}</span>
-                  </div>
                 </div>
               ))}
             </div>
@@ -455,7 +441,10 @@ const HelpPage: React.FC = () => {
                   {displaySections.map((section) => (
                     <HelpSectionCard
                       key={section.title}
-                      {...section}
+                      title={section.title}
+                      description={section.description}
+                      icon={section.icon}
+                      category={section.category}
                       onClick={() => console.log('Navigate to section:', section.href)}
                     />
                   ))}
@@ -485,10 +474,15 @@ const HelpPage: React.FC = () => {
               {displayTutorials.length > 0 ? (
                 <SimpleCarousel
                   items={displayTutorials}
-                  renderItem={(tutorial, index) => (
+                  renderItem={(tutorial) => (
                     <TutorialSlide
                       key={tutorial.id}
-                      {...tutorial}
+                      title={tutorial.title}
+                      description={tutorial.description}
+                      duration={tutorial.duration}
+                      difficulty={tutorial.difficulty}
+                      category={tutorial.category}
+                      steps={tutorial.steps}
                       onClick={() => setSelectedTutorial(tutorial)}
                     />
                   )}
