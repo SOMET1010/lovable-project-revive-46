@@ -154,7 +154,7 @@ export default function AdminFeatureFlags() {
     if (!acc[flag.category]) {
       acc[flag.category] = [];
     }
-    acc[flag.category].push(flag);
+    acc[flag.category]?.push(flag);
     return acc;
   }, {} as Record<string, FeatureFlag[]>);
 

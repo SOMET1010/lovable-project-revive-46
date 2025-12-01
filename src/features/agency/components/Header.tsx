@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  Menu, Bell, Search, Settings, Download, Filter,
+  Menu, Bell, Search, Settings, Download,
   User, LogOut, HelpCircle, ChevronDown
 } from 'lucide-react';
 
@@ -25,8 +25,8 @@ const timeRangeOptions = [
 
 export default function Header({ 
   onToggleSidebar, 
-  sidebarOpen, 
-  agencyName, 
+  sidebarOpen: _sidebarOpen, 
+  agencyName,
   agencyLogo,
   pendingNotifications = 0,
   userEmail,

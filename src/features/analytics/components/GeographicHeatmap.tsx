@@ -3,7 +3,7 @@
  * Heatmap géographique des zones de demande avec Google Maps
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { GoogleMap, useJsApiLoader, HeatmapLayer } from '@react-google-maps/api';
 import { GeographicAnalytics } from '@/services/analyticsService';
 import { Loader2 } from 'lucide-react';
@@ -23,7 +23,7 @@ export function GeographicHeatmap({
   zoom = 11,
   height = 500,
 }: GeographicHeatmapProps) {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+  const apiKey = (import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] as string) || '';
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
@@ -31,7 +31,7 @@ export function GeographicHeatmap({
     libraries,
   });
 
-  const [map, setMap] = useState<google.maps.Map | null>(null);
+  const [_map, setMap] = useState<google.maps.Map | null>(null);
 
   // Préparer les données pour la heatmap
   const heatmapData = useMemo(() => {

@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
-  Users, Search, Filter, MoreHorizontal, Shield, Eye, Edit, Trash2,
-  UserCheck, UserX, Mail, Phone, MapPin, Calendar, TrendingUp,
-  AlertTriangle, CheckCircle, Clock, RefreshCw, Download, Upload,
-  ChevronDown, ChevronUp, User, Building, PhoneCall, Globe
+  Users, Search, Filter, Shield, Eye, Edit, Trash2,
+  UserCheck, RefreshCw, Download, Upload,
+  ChevronDown, ChevronUp, User, Building, Phone
 } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
 
@@ -69,7 +68,7 @@ const LOCATIONS = [
 ];
 
 export default function AdminUsers() {
-  const { user } = useAuth();
+  const { user: _user } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);

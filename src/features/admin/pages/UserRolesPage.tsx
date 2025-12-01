@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
-  Shield, Search, Save, AlertCircle, CheckCircle, User, Crown, Building2, 
-  Users as UsersIcon, UserCheck, Plus, Trash2, Edit, Eye, Settings
+  Search, Save, AlertCircle, CheckCircle, User, Crown, Building2, 
+  Users as UsersIcon, UserCheck, Plus, Edit, Eye, Settings
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 

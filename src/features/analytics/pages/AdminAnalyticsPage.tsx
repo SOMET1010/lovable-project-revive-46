@@ -44,7 +44,7 @@ export default function AdminAnalyticsPage() {
 
   useEffect(() => {
     // Vérifier que l'utilisateur est admin
-    if (!profile?.is_admin) {
+    if (!(profile as Record<string, unknown>)?.['is_admin']) {
       window.location.href = '/dashboard';
       return;
     }
@@ -59,17 +59,17 @@ export default function AdminAnalyticsPage() {
       const { startDate, endDate } = getPeriodDates();
 
       // Charger les métriques de plateforme
-      const platformMetrics = await analyticsService.getPlatformMetrics(startDate, endDate);
+      const platformMetrics = await analyticsService.getPlatformMetrics(startDate ?? '', endDate ?? '');
 
       if (platformMetrics.length > 0) {
         const latest = platformMetrics[platformMetrics.length - 1];
         setMetrics({
-          totalUsers: latest.totalUsers,
-          newUsers: platformMetrics.reduce((sum, m) => sum + m.newUsers, 0),
-          totalProperties: latest.totalProperties,
-          totalViews: platformMetrics.reduce((sum, m) => sum + m.totalViews, 0),
-          totalRevenue: latest.totalRevenue,
-          avgConversionRate: latest.viewToApplicationRate,
+          totalUsers: latest?.totalUsers ?? 0,
+          newUsers: platformMetrics.reduce((sum, m) => sum + (m?.newUsers ?? 0), 0),
+          totalProperties: latest?.totalProperties ?? 0,
+          totalViews: platformMetrics.reduce((sum, m) => sum + (m?.totalViews ?? 0), 0),
+          totalRevenue: latest?.totalRevenue ?? 0,
+          avgConversionRate: latest?.viewToApplicationRate ?? 0,
         });
 
         // Préparer données séries temporelles
@@ -83,7 +83,7 @@ export default function AdminAnalyticsPage() {
       }
 
       // Charger le funnel de conversion
-      const funnel = await analyticsService.getAggregatedFunnel(startDate, endDate);
+      const funnel = await analyticsService.getAggregatedFunnel(startDate ?? '', endDate ?? '');
       setFunnelData(funnel);
 
       // Charger analytics géographiques
@@ -129,7 +129,7 @@ export default function AdminAnalyticsPage() {
       {
         title: 'Rapport Analytics MONTOIT',
         subtitle: 'Vue d\'ensemble de la plateforme',
-        period: { startDate, endDate },
+        period: { startDate: startDate ?? '', endDate: endDate ?? '' },
         summary: [
           { label: 'Utilisateurs totaux', value: formatNumber(metrics.totalUsers) },
           { label: 'Nouveaux utilisateurs', value: formatNumber(metrics.newUsers) },

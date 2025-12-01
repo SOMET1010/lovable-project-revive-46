@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { analyticsService } from '@/services/analyticsService';
-import { exportToPDF, formatCurrency, formatNumber } from '@/services/exportService';
+import { exportToPDF, formatNumber } from '@/services/exportService';
 import { MetricCard } from '../components/MetricCard';
 import { TimeSeriesChart } from '../components/TimeSeriesChart';
 import { ArrowLeft, Download, Eye, Heart, Calendar, FileText } from 'lucide-react';
@@ -46,8 +46,8 @@ export default function OwnerAnalyticsPage() {
       // Charger les stats du propriétaire
       const ownerStats = await analyticsService.getOwnerPropertiesStats(
         user!.id,
-        startDate,
-        endDate
+        startDate ?? '',
+        endDate ?? ''
       );
 
       setStats(ownerStats);
@@ -62,8 +62,8 @@ export default function OwnerAnalyticsPage() {
         const propertyStatsPromises = properties.map(async (prop: any) => {
           const propStats = await analyticsService.getPropertyStats(
             prop.id,
-            startDate,
-            endDate
+            startDate ?? '',
+            endDate ?? ''
           );
 
           const totalViews = propStats.reduce((sum, s) => sum + s.totalViews, 0);
@@ -90,8 +90,8 @@ export default function OwnerAnalyticsPage() {
         // Préparer données séries temporelles (agrégées)
         if (properties.length > 0) {
           const allStats = await Promise.all(
-            properties.map((p: any) =>
-              analyticsService.getPropertyStats(p.id, startDate, endDate)
+            properties.map((p: { id: string; title: string }) =>
+              analyticsService.getPropertyStats(p.id, startDate ?? '', endDate ?? '')
             )
           );
 
@@ -135,7 +135,7 @@ export default function OwnerAnalyticsPage() {
       {
         title: 'Rapport Analytics Propriétaire',
         subtitle: profile?.full_name || '',
-        period: { startDate, endDate },
+        period: { startDate: startDate ?? '', endDate: endDate ?? '' },
         summary: [
           { label: 'Nombre de propriétés', value: formatNumber(stats.properties) },
           { label: 'Vues totales', value: formatNumber(stats.totalViews) },

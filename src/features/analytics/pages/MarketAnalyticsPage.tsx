@@ -21,7 +21,7 @@ export default function MarketAnalyticsPage() {
 
   useEffect(() => {
     // Vérifier que l'utilisateur est admin ou propriétaire
-    if (!profile?.is_admin && profile?.active_role !== 'proprietaire') {
+    if (!(profile as Record<string, unknown>)?.['is_admin'] && profile?.active_role !== 'proprietaire') {
       window.location.href = '/dashboard';
       return;
     }
@@ -36,7 +36,7 @@ export default function MarketAnalyticsPage() {
       const { startDate, endDate } = getPeriodDates();
 
       // Charger analytics géographiques
-      const geoAnalytics = await analyticsService.getGeographicAnalytics(startDate, endDate);
+      const geoAnalytics = await analyticsService.getGeographicAnalytics(startDate ?? '', endDate ?? '');
 
       // Agréger par ville
       const cityMap: any = {};
@@ -126,7 +126,7 @@ export default function MarketAnalyticsPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link
-                to={profile?.is_admin ? '/admin/analytics' : '/dashboard/proprietaire/analytics'}
+                to={(profile as Record<string, unknown>)?.['is_admin'] ? '/admin/analytics' : '/dashboard/proprietaire/analytics'}
                 className="flex items-center space-x-2 text-primary-600 hover:text-primary-700 font-medium"
               >
                 <ArrowLeft className="h-5 w-5" />
