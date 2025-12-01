@@ -38,7 +38,6 @@ const PropertyForm: React.FC = () => {
     validateCurrentStep,
     submitForm,
     canProceedToNextStep,
-    isStepValid,
     // Images
     addImages,
     removeImage,
@@ -62,7 +61,6 @@ const PropertyForm: React.FC = () => {
           'Propriété créée avec succès !',
           'Votre propriété a été publiée et sera bientôt visible par les acheteurs potentiels.'
         );
-        // Redirection vers la page de confirmation ou dashboard
       } else {
         console.error('Erreur lors de la soumission:', result.error);
         showError(
@@ -258,7 +256,7 @@ const PropertyForm: React.FC = () => {
           selectedDistrict={formData.district}
           onCitySelect={(city) => {
             updateField('city', city);
-            updateField('district', ''); // Reset district when city changes
+            updateField('district', '');
           }}
           onDistrictSelect={(district) => updateField('district', district)}
           disabled={isSubmitting}
@@ -489,11 +487,15 @@ const PropertyForm: React.FC = () => {
     <div className="max-w-4xl mx-auto">
       <NotificationContainer 
         notifications={notifications} 
-        onRemove={removeNotification}
+        onClose={removeNotification}
       />
       
       {/* Indicateur de progression */}
-      <PropertySteps currentStep={currentStep} />
+      <PropertySteps 
+        currentStep={currentStep} 
+        completedSteps={Array.from({ length: currentStep }, (_, i) => i < currentStep)}
+        stepValidations={Array.from({ length: 5 }, (_, i) => i < currentStep)}
+      />
 
       {/* Contenu de l'étape */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">

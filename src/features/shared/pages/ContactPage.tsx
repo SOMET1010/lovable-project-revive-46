@@ -2,33 +2,32 @@ import React from 'react';
 import PageLayout from '../../../shared/components/PageLayout';
 import Breadcrumb from '../../../shared/components/Breadcrumb';
 import ContactForm from '../components/ContactForm';
-import FeatureCard from '../../../shared/components/FeatureCard';
-import { PhoneIcon, MailIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { Phone, Mail, MapPin, Clock } from 'lucide-react';
 
 const ContactPage: React.FC = () => {
   const contactInfo = [
     {
       title: "Email",
       description: "contact@montoit.ci",
-      icon: MailIcon,
+      icon: Mail,
       href: "mailto:contact@montoit.ci"
     },
     {
       title: "Téléphone",
       description: "+225 27 XX XX XX XX",
-      icon: PhoneIcon,
+      icon: Phone,
       href: "tel:+22500000000"
     },
     {
       title: "Adresse",
       description: "Plateau, Abidjan, Côte d'Ivoire",
-      icon: MapPinIcon,
+      icon: MapPin,
       href: "#"
     },
     {
       title: "Heures d'ouverture",
       description: "Lun-Ven: 8h00-18h00, Sam: 9h00-15h00",
-      icon: ClockIcon,
+      icon: Clock,
       href: "#"
     }
   ];
@@ -77,16 +76,25 @@ const ContactPage: React.FC = () => {
           
           {/* Informations de contact */}
           <div className="space-y-6">
-            {contactInfo.map((info, index) => (
-              <FeatureCard
-                key={index}
-                title={info.title}
-                description={info.description}
-                icon={info.icon}
-                href={info.href}
-                className="h-auto"
-              />
-            ))}
+            {contactInfo.map((info, index) => {
+              const IconComponent = info.icon;
+              return (
+                <div 
+                  key={index} 
+                  className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow"
+                >
+                  <a href={info.href} className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <IconComponent className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{info.title}</h3>
+                      <p className="text-gray-600">{info.description}</p>
+                    </div>
+                  </a>
+                </div>
+              );
+            })}
             
             {/* Liens rapides */}
             <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6">
@@ -118,7 +126,7 @@ const ContactPage: React.FC = () => {
             <div className="grid md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <PhoneIcon className="w-6 h-6 text-blue-600" />
+                  <Phone className="w-6 h-6 text-blue-600" />
                 </div>
                 <h4 className="font-medium text-gray-900 mb-2">Support réactif</h4>
                 <p className="text-sm text-gray-600">
@@ -127,7 +135,7 @@ const ContactPage: React.FC = () => {
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <MailIcon className="w-6 h-6 text-green-600" />
+                  <Mail className="w-6 h-6 text-green-600" />
                 </div>
                 <h4 className="font-medium text-gray-900 mb-2">Équipe dédiée</h4>
                 <p className="text-sm text-gray-600">
@@ -136,7 +144,7 @@ const ContactPage: React.FC = () => {
               </div>
               <div className="text-center">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <MapPinIcon className="w-6 h-6 text-purple-600" />
+                  <MapPin className="w-6 h-6 text-purple-600" />
                 </div>
                 <h4 className="font-medium text-gray-900 mb-2">Service local</h4>
                 <p className="text-sm text-gray-600">

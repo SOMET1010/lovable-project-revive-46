@@ -1,24 +1,16 @@
 /**
  * PAGE DE RECHERCHE FONCTIONNELLE - MONTOIT
- * ===========================================
- * 
- * Page de recherche complète pour remplacer la redirection incorrecte vers /inscription
- * avec filtres avancés, recherche en temps réel et résultats paginés
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  MagnifyingGlassIcon,
-  AdjustmentsHorizontalIcon,
-  MapPinIcon,
-  HomeIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
-  FunnelIcon,
-  XMarkIcon,
-  ChevronDownIcon,
-  UserGroupIcon
-} from '@heroicons/react/24/outline';
+  Search as MagnifyingGlassIcon,
+  MapPin as MapPinIcon,
+  Home as HomeIcon,
+  SlidersHorizontal as FunnelIcon,
+  X as XMarkIcon,
+  ChevronDown as ChevronDownIcon
+} from 'lucide-react';
 
 // Types de propriétés disponibles
 const PROPERTY_TYPES = [
@@ -46,26 +38,6 @@ const POPULAR_CITIES = [
   'Odienné'
 ];
 
-// Gammes de prix
-const PRICE_RANGES = {
-  location: [
-    { min: 0, max: 50000, label: 'Moins de 50 000 FCFA' },
-    { min: 50000, max: 100000, label: '50 000 - 100 000 FCFA' },
-    { min: 100000, max: 200000, label: '100 000 - 200 000 FCFA' },
-    { min: 200000, max: 300000, label: '200 000 - 300 000 FCFA' },
-    { min: 300000, max: 500000, label: '300 000 - 500 000 FCFA' },
-    { min: 500000, max: Infinity, label: 'Plus de 500 000 FCFA' }
-  ],
-  purchase: [
-    { min: 0, max: 25000000, label: 'Moins de 25M FCFA' },
-    { min: 25000000, max: 50000000, label: '25M - 50M FCFA' },
-    { min: 50000000, max: 100000000, label: '50M - 100M FCFA' },
-    { min: 100000000, max: 200000000, label: '100M - 200M FCFA' },
-    { min: 200000000, max: 500000000, label: '200M - 500M FCFA' },
-    { min: 500000000, max: Infinity, label: 'Plus de 500M FCFA' }
-  ]
-};
-
 // Interface pour les filtres de recherche
 interface SearchFilters {
   query: string;
@@ -81,7 +53,7 @@ interface SearchFilters {
   terrace: boolean | null;
 }
 
-// Données de démonstration (à remplacer par un appel API)
+// Données de démonstration
 const SAMPLE_PROPERTIES = [
   {
     id: 1,
@@ -242,7 +214,7 @@ const AdvancedFilters: React.FC<{
   isOpen: boolean;
   onToggle: () => void;
 }> = ({ filters, onFiltersChange, isOpen, onToggle }) => {
-  const updateFilter = (key: keyof SearchFilters, value: any) => {
+  const updateFilter = (key: keyof SearchFilters, value: unknown) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
@@ -458,171 +430,106 @@ const SearchPage: React.FC = () => {
   // Filtrer les propriétés
   const filteredProperties = useMemo(() => {
     return SAMPLE_PROPERTIES.filter((property) => {
-      // Recherche textuelle
       if (filters.query && !property.title.toLowerCase().includes(filters.query.toLowerCase()) &&
           !property.description.toLowerCase().includes(filters.query.toLowerCase())) {
         return false;
       }
       
-      // Ville
       if (filters.city && property.city !== filters.city) {
         return false;
       }
       
-      // Type de bien
       if (filters.propertyType && property.type !== filters.propertyType) {
         return false;
       }
       
-      // Type de transaction
       if (property.priceType !== filters.priceType) {
         return false;
       }
       
-      // Chambres
       if (filters.bedrooms && property.bedrooms !== filters.bedrooms) {
         return false;
       }
       
-      // Salles de bain
       if (filters.bathrooms && property.bathrooms !== filters.bathrooms) {
         return false;
       }
       
-      // Équipements
       if (filters.furnished && !property.furnished) {
         return false;
       }
       if (filters.parking && !property.parking) {
         return false;
       }
-      if (filters.garden && !property.garden) {
-        return false;
-      }
-      if (filters.terrace && !property.terrace) {
-        return false;
-      }
       
       return true;
     });
   }, [filters]);
-  
+
   // Pagination
-  const paginatedProperties = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredProperties.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredProperties, currentPage, itemsPerPage]);
-  
   const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
-  
+  const paginatedProperties = filteredProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        {/* En-tête */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Rechercher un bien immobilier
-          </h1>
-          <p className="text-gray-600">
-            Trouvez votre logement idéal parmi {SAMPLE_PROPERTIES.length} propriétés disponibles
-          </p>
-        </div>
-        
-        {/* Barre de recherche principale */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher par titre, description..."
-                  value={filters.query}
-                  onChange={(e) => setFilters({ ...filters, query: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+      {/* En-tête de recherche */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Barre de recherche */}
+            <div className="flex-1 relative">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Rechercher une propriété..."
+                value={filters.query}
+                onChange={(e) => setFilters({ ...filters, query: e.target.value })}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
-            <div className="flex space-x-4">
+            
+            {/* Filtres rapides */}
+            <div className="flex gap-2">
               <select
                 value={filters.city}
                 onChange={(e) => setFilters({ ...filters, city: e.target.value })}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Toutes les villes</option>
                 {POPULAR_CITIES.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
+                  <option key={city} value={city}>{city}</option>
                 ))}
               </select>
-              <select
-                value={filters.propertyType}
-                onChange={(e) => setFilters({ ...filters, propertyType: e.target.value })}
-                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Tous les types</option>
-                {PROPERTY_TYPES.map((type) => (
-                  <option key={type.id} value={type.id}>
-                    {type.name}
-                  </option>
-                ))}
-              </select>
-              <div className="flex rounded-lg overflow-hidden border border-gray-300">
-                <button
-                  onClick={() => setFilters({ ...filters, priceType: 'location' })}
-                  className={`px-4 py-3 font-medium transition-colors duration-200 ${
-                    filters.priceType === 'location'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  Location
-                </button>
-                <button
-                  onClick={() => setFilters({ ...filters, priceType: 'purchase' })}
-                  className={`px-4 py-3 font-medium transition-colors duration-200 ${
-                    filters.priceType === 'purchase'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  Achat
-                </button>
-              </div>
+              
+              <AdvancedFilters
+                filters={filters}
+                onFiltersChange={setFilters}
+                isOpen={isFiltersOpen}
+                onToggle={() => setIsFiltersOpen(!isFiltersOpen)}
+              />
             </div>
           </div>
         </div>
-        
-        {/* Filtres avancés */}
+      </div>
+
+      {/* Contenu principal */}
+      <div className="container mx-auto px-4 py-8">
+        {/* Résumé des résultats */}
         <div className="mb-6">
-          <AdvancedFilters
-            filters={filters}
-            onFiltersChange={setFilters}
-            isOpen={isFiltersOpen}
-            onToggle={() => setIsFiltersOpen(!isFiltersOpen)}
-          />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            {filteredProperties.length} propriété{filteredProperties.length > 1 ? 's' : ''} trouvée{filteredProperties.length > 1 ? 's' : ''}
+          </h1>
+          <p className="text-gray-600">
+            {filters.priceType === 'location' ? 'À louer' : 'À vendre'}
+            {filters.city && ` à ${filters.city}`}
+            {filters.propertyType && ` - ${PROPERTY_TYPES.find(t => t.id === filters.propertyType)?.name}`}
+          </p>
         </div>
-        
-        {/* Résultats */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {filteredProperties.length} résultat{filteredProperties.length > 1 ? 's' : ''} trouvé{filteredProperties.length > 1 ? 's' : ''}
-            </h2>
-            
-            {/* Tri */}
-            <select className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <option>Trier par pertinence</option>
-              <option>Prix croissant</option>
-              <option>Prix décroissant</option>
-              <option>Plus récent</option>
-              <option>Plus ancien</option>
-            </select>
-          </div>
-        </div>
-        
-        {/* Liste des propriétés */}
+
+        {/* Grille des propriétés */}
         {paginatedProperties.length > 0 ? (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -630,52 +537,38 @@ const SearchPage: React.FC = () => {
                 <PropertyCard key={property.id} property={property} />
               ))}
             </div>
-            
+
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center">
-                <nav className="flex space-x-2">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Précédent
-                  </button>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      className={`px-3 py-2 border rounded-lg ${
-                        page === currentPage
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                  
-                  <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-                  >
-                    Suivant
-                  </button>
-                </nav>
+              <div className="flex justify-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                >
+                  Précédent
+                </button>
+                <span className="px-4 py-2">
+                  Page {currentPage} sur {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50"
+                >
+                  Suivant
+                </button>
               </div>
             )}
           </>
         ) : (
           <div className="text-center py-12">
-            <HomeIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Aucun résultat trouvé
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Essayez de modifier vos critères de recherche ou d'élargir votre zone géographique.
+            <MagnifyingGlassIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Aucune propriété trouvée
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Essayez de modifier vos critères de recherche
             </p>
             <button
               onClick={() => setFilters({
@@ -693,7 +586,7 @@ const SearchPage: React.FC = () => {
               })}
               className="text-blue-600 hover:text-blue-800 font-medium"
             >
-              Réinitialiser tous les filtres
+              Réinitialiser les filtres
             </button>
           </div>
         )}

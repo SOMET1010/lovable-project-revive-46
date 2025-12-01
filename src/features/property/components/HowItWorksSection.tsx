@@ -61,11 +61,11 @@ export default function HowItWorksSection() {
           {steps.map((step, index) => (
             <div key={step.title} className="relative group">
               {/* Connector Line (Desktop) */}
-              {index < steps.length - 1 && steps[index + 1] && (
+              {index < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-16 left-[60%] w-full h-0.5 bg-[var(--sand-300)]">
                   <div 
                     className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
-                    style={{ background: steps[index + 1].color }}
+                    style={{ background: steps[index + 1]?.color }}
                   />
                 </div>
               )}

@@ -2,7 +2,7 @@
  * Composant Accordéon pour les FAQ avec animations et accessibilité
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { 
   ChevronDownIcon, 
   ThumbsUpIcon, 
@@ -35,12 +35,9 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
   maxHeight = '500px',
   className = ''
 }) => {
-  const _contentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
   // Gérer l'animation d'ouverture/fermeture
   const handleToggle = (item: FAQItem) => {
     if (!openItems.has(item.id)) {
-      // Incrémenter le compteur de vues seulement lors de la première ouverture
       onIncrementViewCount(item.id);
     }
     onToggleItem(item.id);
@@ -180,24 +177,20 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                     <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
                       {item.answer.split('\n').map((paragraph, pIndex) => {
                         if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
-                          // Titre en gras
                           return (
                             <h4 key={pIndex} className="font-semibold text-gray-900 mt-4 mb-2 first:mt-0">
                               {paragraph.slice(2, -2)}
                             </h4>
                           );
                         } else if (paragraph.startsWith('- ')) {
-                          // Élément de liste
                           return (
                             <li key={pIndex} className="ml-4 mb-1">
                               {paragraph.slice(2)}
                             </li>
                           );
                         } else if (paragraph.trim() === '') {
-                          // Ligne vide
                           return <br key={pIndex} />;
                         } else {
-                          // Paragraphe normal
                           return (
                             <p key={pIndex} className="mb-3 last:mb-0">
                               {paragraph}
@@ -215,12 +208,10 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                             Cette réponse vous a-t-elle été utile ?
                           </span>
                           <div className="flex items-center gap-3">
-                            {/* Pourcentage d'utilité */}
                             <div className="text-sm text-gray-500">
                               {helpfulPercentage}% utile
                             </div>
                             
-                            {/* Boutons d'évaluation */}
                             <div className="flex items-center gap-2">
                               <button
                                 className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 hover:scale-105 text-green-700 hover:bg-green-50 hover:text-green-800"
@@ -249,7 +240,6 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                           </div>
                         </div>
                         
-                        {/* Barre de progression de l'utilité */}
                         <div className="mt-3">
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div 
