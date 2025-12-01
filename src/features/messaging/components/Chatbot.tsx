@@ -12,12 +12,11 @@ import {
   FileText,
   HelpCircle,
   Sparkles,
-  ChevronDown,
   Clock,
 } from 'lucide-react';
-import { chatbotService, ChatMessage as ChatMessageType, ChatConversation } from '@/services/chatbotService';
+import { chatbotService } from '@/services/chatbotService';
+import type { ChatMessage as ChatMessageType, ChatConversation } from '@/types/monToit.types';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useNavigate } from 'react-router-dom';
 import ChatMessage from './ChatMessage';
 
 interface QuickAction {
@@ -85,7 +84,6 @@ export default function Chatbot() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -120,7 +118,7 @@ export default function Chatbot() {
       if (msgs.length === 0) {
         const welcomeMessage: ChatMessageType = {
           id: 'welcome',
-          conversation_id: conv.id,
+          conversationId: conv.id,
           role: 'assistant',
           content: `🛡️ **Bonjour ! Je suis SUTA, votre assistant protecteur Mon Toit.**
 
@@ -134,7 +132,16 @@ Je suis là pour vous aider à :
 **⚠️ Règle n°1 : Ne payez JAMAIS avant d'avoir visité !**
 
 Comment puis-je vous aider aujourd'hui ? 😊`,
-          created_at: new Date().toISOString(),
+          timestamp: new Date(),
+          metadata: {
+            intent: undefined,
+            confidence: undefined,
+            suggestions: [],
+            context: {},
+            aiModel: 'system',
+            fallbackUsed: false
+          },
+          isRead: true
         };
         setMessages([welcomeMessage]);
         setShowQuickActions(true);
@@ -163,7 +170,11 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
     }
 
     try {
-      const aiResponse = await chatbotService.getAIResponse(textToSend, messages, user.id);
+      const aiResponse = await chatbotService.getAIResponse({
+        userMessage: textToSend,
+        conversationHistory: messages,
+        userId: user.id
+      });
 
       const assistantMessage = await chatbotService.sendMessage(
         conversation.id,
@@ -306,7 +317,7 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
                   >
                     <div className="text-sm font-medium text-gray-900">{conv.title}</div>
                     <div className="text-xs text-gray-500">
-                      {new Date(conv.updated_at).toLocaleDateString('fr-FR')}
+                      {new Date(conv.updatedAt).toLocaleDateString('fr-FR')}
                     </div>
                   </button>
                 ))}
@@ -320,7 +331,7 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
                 key={message.id}
                 role={message.role}
                 content={message.content}
-                timestamp={message.created_at}
+                timestamp={message.timestamp instanceof Date ? message.timestamp.toISOString() : String(message.timestamp)}
                 isNew={index === messages.length - 1}
               />
             ))}

@@ -232,7 +232,7 @@ describe('useMessages', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate(newConversation);
+      result.current.mutate({ user1_id: 'user-123', user2_id: 'user-456' });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -265,7 +265,7 @@ describe('useMessages', () => {
         wrapper: createWrapper(),
       });
 
-      result.current.mutate(newMessage);
+      result.current.mutate({ sender_id: 'user-123', receiver_id: 'user-456', content: 'Hello world' });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
@@ -307,7 +307,7 @@ describe('useMessages', () => {
 
       const { result } = renderHook(() => useSendMessage(), { wrapper });
 
-      result.current.mutate(newMessage);
+      result.current.mutate({ sender_id: 'user-123', receiver_id: 'user-456', content: 'Test message' });
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true));
 

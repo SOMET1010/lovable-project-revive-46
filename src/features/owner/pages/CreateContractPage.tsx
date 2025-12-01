@@ -51,7 +51,6 @@ export default function CreateContract() {
   const [searchEmail, setSearchEmail] = useState('');
   const [searchingTenant, setSearchingTenant] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
-  const [showPreview, setShowPreview] = useState(false);
 
   const [formData, setFormData] = useState({
     template_id: '',
@@ -344,24 +343,24 @@ export default function CreateContract() {
                   {searchingTenant ? 'Recherche...' : 'Rechercher'}
                 </button>
               </div>
-              {tenants.length > 0 && (
-                <div className={`mt-3 p-3 rounded-lg border ${tenants[0].identity_verified ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
-                  <p className={`text-sm font-semibold ${tenants[0].identity_verified ? 'text-green-800' : 'text-yellow-800'}`}>
+              {tenants.length > 0 && tenants[0] && (
+                <div className={`mt-3 p-3 rounded-lg border ${tenants[0]?.identity_verified ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
+                  <p className={`text-sm font-semibold ${tenants[0]?.identity_verified ? 'text-green-800' : 'text-yellow-800'}`}>
                     Locataire trouvé :
-                    {tenants[0].identity_verified ? ' ✓ Identité vérifiée' : ' ⚠️ Identité non vérifiée'}
+                    {tenants[0]?.identity_verified ? ' ✓ Identité vérifiée' : ' ⚠️ Identité non vérifiée'}
                   </p>
-                  <p className={`text-sm ${tenants[0].identity_verified ? 'text-green-700' : 'text-yellow-700'}`}>
-                    {tenants[0].full_name} - {tenants[0].email}
+                  <p className={`text-sm ${tenants[0]?.identity_verified ? 'text-green-700' : 'text-yellow-700'}`}>
+                    {tenants[0]?.full_name} - {tenants[0]?.email}
                   </p>
-                  <p className={`text-sm ${tenants[0].identity_verified ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {tenants[0].phone}
+                  <p className={`text-sm ${tenants[0]?.identity_verified ? 'text-green-600' : 'text-yellow-600'}`}>
+                    {tenants[0]?.phone}
                   </p>
-                  {tenants[0].address && (
-                    <p className={`text-sm ${tenants[0].identity_verified ? 'text-green-600' : 'text-yellow-600'}`}>
-                      {tenants[0].address}
+                  {tenants[0]?.address && (
+                    <p className={`text-sm ${tenants[0]?.identity_verified ? 'text-green-600' : 'text-yellow-600'}`}>
+                      {tenants[0]?.address}
                     </p>
                   )}
-                  {!tenants[0].identity_verified && (
+                  {!tenants[0]?.identity_verified && (
                     <p className="text-xs text-yellow-700 mt-2">
                       Le locataire devra compléter la vérification de son identité avant de pouvoir signer le contrat.
                     </p>

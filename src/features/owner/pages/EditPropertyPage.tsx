@@ -3,8 +3,8 @@
  * Permet aux propriétaires de modifier leurs propriétés existantes
  */
 
-import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Save, Upload, X, Image as ImageIcon, Loader2, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Save, Upload, X, Loader2, Trash2 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES } from '@/shared/lib/constants/app.constants';
@@ -147,7 +147,10 @@ export default function EditPropertyPage() {
   const removeNewImage = (index: number) => {
     const newFiles = imageFiles.filter((_, i) => i !== index);
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    URL.revokeObjectURL(imagePreviews[index]);
+    const previewToRevoke = imagePreviews[index];
+    if (previewToRevoke) {
+      URL.revokeObjectURL(previewToRevoke);
+    }
     setImageFiles(newFiles);
     setImagePreviews(newPreviews);
   };

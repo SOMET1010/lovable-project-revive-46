@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Wrench, CheckCircle, XCircle, Calendar, AlertCircle, Clock } from 'lucide-react';
+import { Wrench, CheckCircle, XCircle, Calendar, Clock } from 'lucide-react';
 
 interface MaintenanceRequest {
   id: string;
@@ -57,7 +57,7 @@ export default function OwnerMaintenance() {
         return;
       }
 
-      const propertyIds = propertiesData.map(p => p.id);
+      const propertyIds = propertiesData.map((p: { id: string }) => p.id);
 
       let query = supabase
         .from('maintenance_requests')
@@ -122,7 +122,7 @@ export default function OwnerMaintenance() {
       refusee: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Refusée' }
     };
 
-    const config = configs[status] || configs.en_attente;
+    const config = configs[status] || configs['en_attente'];
     const Icon = config.icon;
 
     return (

@@ -40,7 +40,7 @@ export default function AddProperty() {
     const category = formData.property_category;
     const currentType = formData.property_type;
 
-    const validTypes = category === 'commercial'
+    const validTypes: string[] = category === 'commercial'
       ? COMMERCIAL_PROPERTY_TYPES.map(pt => pt.value)
       : RESIDENTIAL_PROPERTY_TYPES.map(pt => pt.value);
 
@@ -89,7 +89,10 @@ export default function AddProperty() {
     const newFiles = imageFiles.filter((_, i) => i !== index);
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
 
-    URL.revokeObjectURL(imagePreviews[index]);
+    const previewToRevoke = imagePreviews[index];
+    if (previewToRevoke) {
+      URL.revokeObjectURL(previewToRevoke);
+    }
 
     setImageFiles(newFiles);
     setImagePreviews(newPreviews);
@@ -102,7 +105,7 @@ export default function AddProperty() {
       const fileExt = file.name.split('.').pop();
       const fileName = `${propertyId}/${Math.random().toString(36).substring(7)}.${fileExt}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('property-images')
         .upload(fileName, file);
 

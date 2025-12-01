@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { MessageCircle, Send, Paperclip, Search, Archive, X } from 'lucide-react';
+import { MessageCircle, Send, Paperclip, Search, Archive } from 'lucide-react';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 
@@ -93,7 +93,7 @@ export default function Messages() {
       if (error) throw error;
 
       const conversationsWithDetails = await Promise.all(
-        (convos || []).map(async (convo) => {
+        (convos || []).map(async (convo: { id: string; participant_1_id: string; participant_2_id: string; property_id: string | null; last_message_at: string; participant_1_archived: boolean; participant_2_archived: boolean }) => {
           const otherUserId = convo.participant_1_id === user?.id
             ? convo.participant_2_id
             : convo.participant_1_id;
@@ -158,7 +158,7 @@ export default function Messages() {
       if (error) throw error;
 
       const messagesWithProfiles = await Promise.all(
-        (data || []).map(async (msg) => {
+        (data || []).map(async (msg: { id: string; conversation_id: string; sender_id: string; receiver_id: string; content: string; is_read: boolean; read_at: string | null; created_at: string; deleted_by_sender: boolean; deleted_by_receiver: boolean }) => {
           const { data: profile } = await supabase
             .from('profiles')
             .select('id, full_name, avatar_url')
