@@ -6,12 +6,10 @@ import type { Database } from '@/shared/lib/database.types';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapboxMap from '@/shared/ui/MapboxMap';
 import { CITY_NAMES, ABIDJAN_NEIGHBORHOODS } from '@/shared/data/cities';
-import { usePerformanceMonitoring, trackSearchEvent, trackError } from '@/hooks/usePerformanceMonitoring';
 
 type Property = Database['public']['Tables']['properties']['Row'];
 
 export default function SearchPropertiesPage() {
-  usePerformanceMonitoring('SearchPropertiesPage');
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
@@ -39,7 +37,6 @@ export default function SearchPropertiesPage() {
   }, [searchParams]);
 
   const searchProperties = useCallback(async () => {
-    const startTime = performance.now();
     setLoading(true);
     setError(null);
 
@@ -86,33 +83,12 @@ export default function SearchPropertiesPage() {
         throw new Error(queryError.message || 'Erreur lors de la recherche');
       }
 
-      const endTime = performance.now();
-      const loadTime = endTime - startTime;
-
       setProperties(data || []);
-
-      trackSearchEvent({
-        city: city || undefined,
-        propertyType: propertyType || undefined,
-        resultsCount: data?.length || 0,
-        loadTime,
-      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
       console.error('Error searching properties:', err);
       setError(errorMessage);
       setProperties([]);
-
-      if (err instanceof Error) {
-        trackError(err, {
-          context: 'searchProperties',
-          city,
-          propertyType,
-          minPrice,
-          maxPrice,
-          bedrooms,
-        });
-      }
     } finally {
       setLoading(false);
     }

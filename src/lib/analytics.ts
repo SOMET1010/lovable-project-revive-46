@@ -16,7 +16,7 @@ export function initAnalytics() {
     return;
   }
 
-  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
+  const measurementId = import.meta.env['VITE_GA_MEASUREMENT_ID'];
 
   if (!measurementId) {
     console.warn('[Analytics] Measurement ID not configured, tracking disabled');

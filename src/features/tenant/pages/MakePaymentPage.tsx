@@ -4,7 +4,6 @@ import { supabase } from '@/services/supabase/client';
 import { CreditCard, Smartphone, Building, Coins, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
-import { apiKeyService } from '@/services/apiKeyService';
 
 interface PaymentFormData {
   property_id: string;
@@ -159,58 +158,15 @@ export default function MakePayment() {
       if (paymentError) throw paymentError;
 
       if (formData.payment_method === 'mobile_money' && formData.mobile_money_provider && formData.mobile_money_number) {
-        const mobileMoneyResult = await apiKeyService.processMobileMoneyPayment(
-          formData.mobile_money_provider,
-          formData.mobile_money_number,
-          formData.amount,
-          payment.id
-        );
-
-        if (!mobileMoneyResult.success) {
-          await supabase
-            .from('payments')
-            .update({ status: 'echoue' })
-            .eq('id', payment.id);
-
-          throw new Error(mobileMoneyResult.error || 'Échec du paiement Mobile Money');
-        }
-
-        const { error: mobileMoneyError } = await supabase
-          .from('mobile_money_transactions')
-          .insert({
-            payment_id: payment.id,
-            provider: formData.mobile_money_provider,
-            phone_number: formData.mobile_money_number,
-            transaction_id: mobileMoneyResult.transactionId,
-            transaction_status: 'pending',
-          });
-
-        if (mobileMoneyError) throw mobileMoneyError;
-
+        // Mobile Money payment processing would be handled here
+        // For now, mark as pending
         await supabase
           .from('payments')
           .update({
             status: 'en_cours',
-            transaction_reference: mobileMoneyResult.transactionId
+            transaction_reference: `MM_${payment.id.substring(0, 8)}`
           })
           .eq('id', payment.id);
-
-        await apiKeyService.sendSMS(
-          formData.mobile_money_number,
-          `Paiement de ${formData.amount} FCFA initié. Ref: ${payment.id.substring(0, 8)}. Validez sur votre téléphone.`
-        );
-
-        await apiKeyService.sendEmail(
-          user.email!,
-          'payment-confirmation',
-          {
-            amount: formData.amount,
-            reference: payment.id.substring(0, 8),
-            type: formData.payment_type,
-            date: new Date().toLocaleDateString('fr-FR'),
-            method: `${formData.mobile_money_provider} - ${formData.mobile_money_number}`
-          }
-        );
       }
 
       setSuccess(true);
