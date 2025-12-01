@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Bell, Check, CheckCheck, Trash2, Eye } from 'lucide-react';
+import { Bell, Check, CheckCheck, Eye } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import {
   getNotifications,
@@ -194,7 +194,7 @@ export function NotificationsSection() {
           {unreadCount > 0 && (
             <Button
               variant="outline"
-              size="sm"
+              size="small"
               onClick={handleMarkAllAsRead}
               title="Marquer tout comme lu"
             >
@@ -254,15 +254,18 @@ export function NotificationsSection() {
                   </div>
 
                   {/* Action data */}
-                  {notification.data && notification.data.action_url && (
+                  {notification.data && (notification.data as Record<string, string | undefined>)?.['action_url'] && (
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="small"
                       className="mt-3"
-                      onClick={() => window.location.href = notification.data.action_url}
+                      onClick={() => {
+                        const actionUrl = (notification.data as Record<string, string | undefined>)?.['action_url'];
+                        if (actionUrl) window.location.href = actionUrl;
+                      }}
                     >
                       <Eye className="h-4 w-4 mr-2" />
-                      {notification.data.action_label || 'Voir'}
+                      Voir
                     </Button>
                   )}
                 </div>

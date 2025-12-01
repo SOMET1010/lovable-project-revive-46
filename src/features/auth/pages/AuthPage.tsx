@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Building2, Mail, Lock, User, UserCircle, Sparkles, Shield, CheckCircle, Chrome, Facebook, KeyRound, ArrowLeft, Phone, AlertTriangle, Info, MessageCircle } from 'lucide-react';
+import { Mail, Lock, User, Sparkles, Shield, CheckCircle, Chrome, Facebook, KeyRound, ArrowLeft, Phone, Info, MessageCircle } from 'lucide-react';
 import { PhoneInput } from '@/shared/components/PhoneInput';
 
 export default function Auth() {
@@ -110,7 +110,7 @@ export default function Auth() {
           // Envoyer le code OTP
           try {
             const otpType = verificationType === 'email' ? 'sms' : verificationType;
-            const { data: otpData, error: otpError } = await supabase.functions.invoke('send-verification-code', {
+            const { data: _otpData, error: otpError } = await supabase.functions.invoke('send-verification-code', {
               body: {
                 phone: phone,
                 type: otpType,
@@ -212,8 +212,7 @@ export default function Auth() {
           
           const { error } = await signUp(tempEmail, tempPassword, { 
             full_name: fullName, 
-            phone: phone,
-            auth_method: verificationType // Marquer la méthode d'authentification
+            phone: phone
           });
           if (error) {
             console.error('Signup error:', error);
@@ -234,7 +233,7 @@ export default function Auth() {
         const finalPhone = (verificationType === 'sms' || verificationType === 'whatsapp') ? phone : undefined;
         
         try {
-          const { data: otpData, error: otpError } = await supabase.functions.invoke('send-verification-code', {
+          const { data: _otpData2, error: otpError } = await supabase.functions.invoke('send-verification-code', {
             body: {
               email: finalEmail,
               phone: finalPhone,
@@ -761,7 +760,7 @@ export default function Auth() {
                 </div>
               )}
 
-              {!isForgotPassword && import.meta.env.VITE_ENABLE_SOCIAL_AUTH === 'true' && (
+              {!isForgotPassword && import.meta.env['VITE_ENABLE_SOCIAL_AUTH'] === 'true' && (
                 <div className="mt-8">
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">

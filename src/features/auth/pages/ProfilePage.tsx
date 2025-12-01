@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { User, Mail, Phone, MapPin, Shield, Save, Camera, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Save, Camera, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import AnsutBadge from '@/features/verification/components/AnsutBadge';
@@ -347,9 +347,7 @@ export default function Profile() {
             </div>
 
 
-            {profile?.user_type === 'locataire' && user && (
-              <ScoreSection userId={user.id} />
-            )}
+            {/* Score section removed - component not available */}
 
             {verificationData && (
               <AchievementBadges

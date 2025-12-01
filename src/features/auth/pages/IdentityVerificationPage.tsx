@@ -10,6 +10,16 @@ import SmilelessVerification from '@/shared/ui/SmilelessVerification';
 import NeofaceVerification from '@/shared/ui/NeofaceVerification';
 import { FEATURES } from '@/shared/config/features.config';
 
+// Helper function to map French status to English
+const mapStatusToEnglish = (status: 'en_attente' | 'verifie' | 'rejete'): 'pending' | 'verified' | 'failed' => {
+  const statusMap: Record<string, 'pending' | 'verified' | 'failed'> = {
+    'en_attente': 'pending',
+    'verifie': 'verified',
+    'rejete': 'failed'
+  };
+  return statusMap[status] || 'pending';
+};
+
 interface VerificationData {
   id: string;
   user_id: string;
@@ -28,7 +38,7 @@ interface VerificationData {
 }
 
 export default function IdentityVerification() {
-  const { user, profile } = useAuth();
+  const { user, profile: _profile } = useAuth();
   const [verification, setVerification] = useState<VerificationData | null>(null);
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState('');
@@ -130,7 +140,7 @@ export default function IdentityVerification() {
     const fileExt = file.name.split('.').pop();
     const fileName = `${user?.id}/${type}_${Date.now()}.${fileExt}`;
 
-    const { data, error } = await supabase.storage
+    const { data: _uploadData, error } = await supabase.storage
       .from('verification-documents')
       .upload(fileName, file);
 
@@ -181,11 +191,11 @@ export default function IdentityVerification() {
         if (updateError) throw updateError;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/oneci-verification`, {
+      const response = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/oneci-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
         },
         body: JSON.stringify({
           cniNumber: oneciNumber,
@@ -240,11 +250,11 @@ export default function IdentityVerification() {
 
       if (updateError) throw updateError;
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/cnam-verification`, {
+      const response = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/cnam-verification`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
         },
         body: JSON.stringify({
           cnamNumber,
@@ -340,11 +350,11 @@ export default function IdentityVerification() {
 
       if (updateError) throw updateError;
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/smileless-face-verify`, {
+      const response = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/smileless-face-verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
         },
         body: JSON.stringify({
           action: 'upload_document',
@@ -390,8 +400,8 @@ export default function IdentityVerification() {
     setError(`❌ Vérification NeoFace V2 échouée: ${errorMsg}`);
   };
 
-  const handleSmilelessVerified = async (result: any) => {
-    setSuccess(`✅ Vérification faciale réussie avec Smileless! Score: ${(result.matching_score * 100).toFixed(0)}%`);
+  const handleSmilelessVerified = async () => {
+    setSuccess('✅ Vérification faciale réussie avec Smileless!');
 
     await supabase
       .from('user_verifications')
@@ -475,7 +485,7 @@ export default function IdentityVerification() {
                       <span>Étape 1: ONECI</span>
                     </h2>
                     {verification?.oneci_status && (
-                      <VerificationBadge type="oneci" status={verification.oneci_status} />
+                      <VerificationBadge type="oneci" status={mapStatusToEnglish(verification.oneci_status)} />
                     )}
                   </div>
 
@@ -622,7 +632,7 @@ export default function IdentityVerification() {
                         <span>Étape 2: CNAM (Optionnel)</span>
                       </h2>
                       {verification?.cnam_status && (
-                        <VerificationBadge type="cnam" status={verification.cnam_status} />
+                        <VerificationBadge type="cnam" status={mapStatusToEnglish(verification.cnam_status)} />
                       )}
                     </div>
 
@@ -732,7 +742,7 @@ export default function IdentityVerification() {
                         <span>Étape 3: Reconnaissance faciale</span>
                       </h2>
                       {verification?.face_verification_status && (
-                        <VerificationBadge type="face" status={verification.face_verification_status} />
+                        <VerificationBadge type="face" status={mapStatusToEnglish(verification.face_verification_status)} />
                       )}
                     </div>
 

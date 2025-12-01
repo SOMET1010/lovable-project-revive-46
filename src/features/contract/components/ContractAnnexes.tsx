@@ -76,7 +76,7 @@ export default function ContractAnnexes({ contractId, onUploadComplete }: Contra
       const fileExt = file.name.split('.').pop();
       const fileName = `${contractId}/${annexId}_${Date.now()}.${fileExt}`;
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { data: _uploadData, error: uploadError } = await supabase.storage
         .from('contracts')
         .upload(fileName, file, {
           cacheControl: '3600',

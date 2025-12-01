@@ -4,15 +4,14 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   message?: string;
-  action?: string;
+  action?: string; // Reserved for future use
 }
 
-export default function AuthModal({ isOpen, onClose, message, action }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, message }: AuthModalProps) {
   if (!isOpen) return null;
 
   const defaultMessage = "Pour accéder à cette fonctionnalité, vous devez être connecté";
   const displayMessage = message || defaultMessage;
-  const displayAction = action || "cette action";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

@@ -7,7 +7,6 @@
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 
-type Lease = Database['public']['Tables']['leases']['Row'];
 type LeaseInsert = Database['public']['Tables']['leases']['Insert'];
 type LeaseUpdate = Database['public']['Tables']['leases']['Update'];
 
@@ -130,23 +129,23 @@ export const contractApi = {
    * Signe un contrat (locataire ou propriétaire)
    */
   sign: async (id: string, role: 'tenant' | 'landlord', signatureData: { otp_verified_at: string; signed_at: string; signed_pdf_url?: string }) => {
-    const updates: LeaseUpdate = {};
+    const updates: Record<string, unknown> = {};
 
     if (role === 'tenant') {
-      updates.tenant_otp_verified_at = signatureData.otp_verified_at;
-      updates.tenant_signed_at = signatureData.signed_at;
+      updates['tenant_otp_verified_at'] = signatureData.otp_verified_at;
+      updates['tenant_signed_at'] = signatureData.signed_at;
     } else {
-      updates.landlord_otp_verified_at = signatureData.otp_verified_at;
-      updates.landlord_signed_at = signatureData.signed_at;
+      updates['landlord_otp_verified_at'] = signatureData.otp_verified_at;
+      updates['landlord_signed_at'] = signatureData.signed_at;
     }
 
     if (signatureData.signed_pdf_url) {
-      updates.signed_pdf_url = signatureData.signed_pdf_url;
+      updates['signed_pdf_url'] = signatureData.signed_pdf_url;
     }
 
     const { data, error } = await supabase
       .from('leases')
-      .update(updates)
+      .update(updates as LeaseUpdate)
       .eq('id', id)
       .select()
       .single();

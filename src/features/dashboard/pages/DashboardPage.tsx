@@ -10,23 +10,19 @@ import {
   Calendar, 
   MessageSquare, 
   FileText, 
-  Star,
   MapPin,
   Clock,
   ChevronRight,
   TrendingUp,
-  Bell,
   Eye
 } from 'lucide-react';
 import {
   getUserProfile,
   getDashboardStats,
   getFavorites,
-  getNotifications,
   type UserProfile,
   type DashboardStats,
   type FavoriteProperty,
-  type NotificationItem,
 } from '@/services/userDashboardService';
 import { supabase } from '@/services/supabase/client';
 

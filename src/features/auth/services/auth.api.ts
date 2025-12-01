@@ -7,7 +7,6 @@
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 
-type Profile = Database['public']['Tables']['profiles']['Row'];
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
 export interface SignUpData {

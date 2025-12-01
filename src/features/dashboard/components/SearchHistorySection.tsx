@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Clock, Search, Trash2, RefreshCw, MapPin, Home } from 'lucide-react';
+import { Clock, Search, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import {
   getSearchHistory,
@@ -154,7 +154,7 @@ export function SearchHistorySection() {
         {history.length > 0 && (
           <Button
             variant="outline"
-            size="sm"
+            size="small"
             onClick={handleClearAll}
           >
             <Trash2 className="h-4 w-4 mr-2" />
@@ -199,7 +199,7 @@ export function SearchHistorySection() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="small"
                   onClick={() => handleRepeatSearch(item)}
                   title="Relancer cette recherche"
                 >
@@ -208,7 +208,7 @@ export function SearchHistorySection() {
                 
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="small"
                   onClick={() => handleDeleteItem(item.id)}
                   title="Supprimer"
                 >

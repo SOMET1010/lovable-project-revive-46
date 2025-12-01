@@ -36,6 +36,7 @@ export default function AuthCallback() {
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [user, profile, loading]);
 
   return (
