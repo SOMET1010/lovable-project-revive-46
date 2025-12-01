@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useContact, ContactFormData } from '../hooks/useContact';
-import LoadingStates from '../../../shared/components/LoadingStates';
-import { ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { LoadingOverlay } from '../../../shared/components/LoadingStates';
+import { AlertCircle, CheckCircle } from 'lucide-react';
 
 interface FormErrors {
   name?: string;
@@ -45,7 +45,7 @@ const ContactForm: React.FC = () => {
         if (typeof value === 'string' && value.trim().length < 2) {
           return 'Le nom doit contenir au moins 2 caractères';
         }
-        break;
+        return undefined;
       
       case 'email':
         if (!value) return 'L\'adresse email est requise';
@@ -53,11 +53,11 @@ const ContactForm: React.FC = () => {
         if (typeof value === 'string' && !emailRegex.test(value)) {
           return 'Veuillez saisir une adresse email valide';
         }
-        break;
+        return undefined;
       
       case 'subject':
         if (!value) return 'Veuillez sélectionner un sujet';
-        break;
+        return undefined;
       
       case 'message':
         if (!value) return 'Le message est requis';
@@ -67,11 +67,14 @@ const ContactForm: React.FC = () => {
         if (typeof value === 'string' && value.trim().length > 1000) {
           return 'Le message ne peut pas dépasser 1000 caractères';
         }
-        break;
+        return undefined;
       
       case 'privacy':
         if (!value) return 'Vous devez accepter la politique de confidentialité';
-        break;
+        return undefined;
+      
+      default:
+        return undefined;
     }
   };
 
@@ -87,10 +90,10 @@ const ContactForm: React.FC = () => {
     }));
 
     // Validation en temps réel
-    const error = validateField(name, newValue);
+    const fieldError = validateField(name, (newValue ?? '') as string | boolean);
     setErrors(prev => ({
       ...prev,
-      [name]: error
+      [name]: fieldError
     }));
   };
 
@@ -105,10 +108,10 @@ const ContactForm: React.FC = () => {
       [name]: true
     }));
 
-    const error = validateField(name, fieldValue);
+    const fieldError = validateField(name, (fieldValue ?? '') as string | boolean);
     setErrors(prev => ({
       ...prev,
-      [name]: error
+      [name]: fieldError
     }));
   };
 
@@ -117,9 +120,9 @@ const ContactForm: React.FC = () => {
     const newErrors: FormErrors = {};
     
     Object.keys(formData).forEach(key => {
-      const error = validateField(key, formData[key as keyof typeof formData]);
-      if (error) {
-        newErrors[key as keyof FormErrors] = error;
+      const fieldError = validateField(key, formData[key as keyof typeof formData]);
+      if (fieldError) {
+        newErrors[key as keyof FormErrors] = fieldError;
       }
     });
 
@@ -186,14 +189,14 @@ const ContactForm: React.FC = () => {
       {/* Messages de succès/erreur globaux */}
       {success && (
         <div className="success-message flex items-center mb-6">
-          <CheckCircleIcon className="w-5 h-5 mr-2" />
+          <CheckCircle className="w-5 h-5 mr-2" />
           <span>Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.</span>
         </div>
       )}
       
       {error && (
         <div className="error-message flex items-center mb-6">
-          <ExclamationCircleIcon className="w-5 h-5 mr-2" />
+          <AlertCircle className="w-5 h-5 mr-2" />
           <span>{error}</span>
         </div>
       )}
@@ -213,16 +216,16 @@ const ContactForm: React.FC = () => {
             onBlur={handleBlur}
             required
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-              errors.name && touched.name 
+              errors['name'] && touched['name'] 
                 ? 'border-red-300 bg-red-50' 
                 : 'border-gray-300 bg-white'
             }`}
             placeholder="Votre nom et prénom"
           />
-          {errors.name && touched.name && (
+          {errors['name'] && touched['name'] && (
             <p className="mt-1 text-sm text-red-600 flex items-center">
-              <ExclamationCircleIcon className="w-4 h-4 mr-1" />
-              {errors.name}
+              <AlertCircle className="w-4 h-4 mr-1" />
+              {errors['name']}
             </p>
           )}
         </div>
@@ -241,16 +244,16 @@ const ContactForm: React.FC = () => {
             onBlur={handleBlur}
             required
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-              errors.email && touched.email 
+              errors['email'] && touched['email'] 
                 ? 'border-red-300 bg-red-50' 
                 : 'border-gray-300 bg-white'
             }`}
             placeholder="votre.email@exemple.com"
           />
-          {errors.email && touched.email && (
+          {errors['email'] && touched['email'] && (
             <p className="mt-1 text-sm text-red-600 flex items-center">
-              <ExclamationCircleIcon className="w-4 h-4 mr-1" />
-              {errors.email}
+              <AlertCircle className="w-4 h-4 mr-1" />
+              {errors['email']}
             </p>
           )}
         </div>
@@ -268,7 +271,7 @@ const ContactForm: React.FC = () => {
             onBlur={handleBlur}
             required
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-              errors.subject && touched.subject 
+              errors['subject'] && touched['subject'] 
                 ? 'border-red-300 bg-red-50' 
                 : 'border-gray-300 bg-white'
             }`}
@@ -279,10 +282,10 @@ const ContactForm: React.FC = () => {
               </option>
             ))}
           </select>
-          {errors.subject && touched.subject && (
+          {errors['subject'] && touched['subject'] && (
             <p className="mt-1 text-sm text-red-600 flex items-center">
-              <ExclamationCircleIcon className="w-4 h-4 mr-1" />
-              {errors.subject}
+              <AlertCircle className="w-4 h-4 mr-1" />
+              {errors['subject']}
             </p>
           )}
         </div>
@@ -301,17 +304,17 @@ const ContactForm: React.FC = () => {
             rows={6}
             required
             className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical transition-colors ${
-              errors.message && touched.message 
+              errors['message'] && touched['message'] 
                 ? 'border-red-300 bg-red-50' 
                 : 'border-gray-300 bg-white'
             }`}
             placeholder="Décrivez votre demande en détail..."
           />
           <div className="flex justify-between items-center mt-1">
-            {errors.message && touched.message ? (
+            {errors['message'] && touched['message'] ? (
               <p className="text-sm text-red-600 flex items-center">
-                <ExclamationCircleIcon className="w-4 h-4 mr-1" />
-                {errors.message}
+                <AlertCircle className="w-4 h-4 mr-1" />
+                {errors['message']}
               </p>
             ) : (
               <div></div>
@@ -332,7 +335,7 @@ const ContactForm: React.FC = () => {
             onChange={handleChange}
             onBlur={handleBlur}
             className={`mt-1 h-4 w-4 rounded border-gray-300 focus:ring-blue-500 ${
-              errors.privacy && touched.privacy 
+              errors['privacy'] && touched['privacy'] 
                 ? 'border-red-300' 
                 : 'border-gray-300'
             }`}
@@ -345,16 +348,16 @@ const ContactForm: React.FC = () => {
             de MonToit dans le but de traiter ma demande. *
           </label>
         </div>
-        {errors.privacy && touched.privacy && (
+        {errors['privacy'] && touched['privacy'] && (
           <p className="text-sm text-red-600 flex items-center">
-            <ExclamationCircleIcon className="w-4 h-4 mr-1" />
-            {errors.privacy}
+            <AlertCircle className="w-4 h-4 mr-1" />
+            {errors['privacy']}
           </p>
         )}
         
         {/* Boutons */}
         <div className="flex gap-4 pt-4">
-          <LoadingStates isLoading={isLoading} className="flex-1">
+          <LoadingOverlay isLoading={isLoading} className="flex-1">
             <button 
               type="submit" 
               disabled={isLoading}
@@ -362,7 +365,7 @@ const ContactForm: React.FC = () => {
             >
               {isLoading ? 'Envoi en cours...' : 'Envoyer le message'}
             </button>
-          </LoadingStates>
+          </LoadingOverlay>
           
           <button
             type="button"

@@ -34,7 +34,7 @@ export default function Home() {
     try {
       if (envConfig.isDemoMode) {
         const { data } = await demoPropertyService.getAll();
-        setProperties((data?.slice(0, 6) || []) as Property[]);
+        setProperties((data?.slice(0, 6) || []) as unknown as Property[]);
         setLoading(false);
         return;
       }
@@ -74,7 +74,7 @@ export default function Home() {
         supabase.from('properties').select('city').not('city', 'is', null)
       ]);
 
-      const uniqueCities = new Set(citiesResult.data?.map(p => p.city).filter(Boolean));
+      const uniqueCities = new Set(citiesResult.data?.map((p: { city: string | null }) => p.city).filter(Boolean));
       const realProperties = propertiesResult.count || 0;
       const realProfiles = profilesResult.count || 0;
       const realCities = uniqueCities.size;

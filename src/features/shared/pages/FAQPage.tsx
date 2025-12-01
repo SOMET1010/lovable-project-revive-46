@@ -6,19 +6,19 @@ import React, { useState } from 'react';
 import { useFAQ } from '../hooks/useFAQ';
 import FAQAccordion from '../components/FAQAccordion';
 import { 
-  SearchIcon, 
-  UserIcon, 
-  HomeIcon, 
-  MessageCircleIcon, 
-  CreditCardIcon,
-  ShieldIcon,
-  WrenchIcon,
-  TrendingUpIcon,
-  ClockIcon,
-  ChevronRightIcon,
-  HelpCircleIcon,
-  FilterIcon,
-  BookOpenIcon
+  Search as SearchIcon, 
+  User as UserIcon, 
+  Home as HomeIcon, 
+  MessageCircle as MessageCircleIcon, 
+  CreditCard as CreditCardIcon,
+  Shield as ShieldIcon,
+  Wrench as WrenchIcon,
+  TrendingUp as TrendingUpIcon,
+  Clock as ClockIcon,
+  ChevronRight as ChevronRightIcon,
+  HelpCircle as HelpCircleIcon,
+  Filter as FilterIcon,
+  BookOpen as BookOpenIcon
 } from 'lucide-react';
 
 // Icônes pour les catégories
@@ -62,7 +62,6 @@ interface CategoryCardProps {
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({
-  id,
   title,
   description,
   icon,
@@ -135,7 +134,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({
 
 // Composant de statistiques FAQ
 interface FAQStatsProps {
-  categories: any[];
+  categories: { questionCount: number }[];
   selectedCategory: string;
 }
 
@@ -143,7 +142,7 @@ const FAQStats: React.FC<FAQStatsProps> = ({ categories, selectedCategory }) => 
   const totalQuestions = categories.reduce((sum, cat) => sum + cat.questionCount, 0);
   
   const selectedCategoryData = selectedCategory !== 'tous' 
-    ? categories.find(cat => cat.id === selectedCategory)
+    ? categories.find((cat: { id?: string; questionCount: number }) => (cat as { id: string }).id === selectedCategory)
     : null;
   
   const currentQuestionCount = selectedCategoryData 
@@ -223,7 +222,7 @@ const FAQPage: React.FC = () => {
     categories,
     filteredItems,
     openItems,
-    hasOpenItems,
+    _hasOpenItems,
     selectedCategory,
     searchQuery,
     searchResults,
@@ -234,22 +233,40 @@ const FAQPage: React.FC = () => {
     setSearchQuery,
     markHelpful,
     incrementViewCount,
-    getFAQByCategory,
+    _getFAQByCategory,
     getPopularQuestions,
     getRecentQuestions
-  } = useFAQ();
+  } = useFAQ() as {
+    categories: { id: string; title: string; description: string; icon: string; questionCount: number; color: string }[];
+    filteredItems: { id: string; question: string; answer: string; helpful: number; notHelpful: number; tags: string[]; viewCount: number; lastUpdated: string }[];
+    openItems: Set<string>;
+    _hasOpenItems: boolean;
+    selectedCategory: string;
+    searchQuery: string;
+    searchResults: { item: { id: string; question: string; answer: string; helpful: number; notHelpful: number; tags: string[]; viewCount: number; lastUpdated: string }; relevanceScore: number; matchedTerms: string[] }[];
+    loading: boolean;
+    error: string | null;
+    toggleItem: (id: string) => void;
+    setSelectedCategory: (category: string) => void;
+    setSearchQuery: (query: string) => void;
+    markHelpful: (id: string, isHelpful: boolean) => void;
+    incrementViewCount: (id: string) => void;
+    _getFAQByCategory: (category: string) => unknown[];
+    getPopularQuestions: (count: number) => unknown[];
+    getRecentQuestions: (count: number) => unknown[];
+  };
 
   // Gérer l'affichage des résultats
   const displayItems = searchQuery.trim() 
     ? searchResults.map(result => result.item)
     : filteredItems;
 
-  // Questions populaires et récentes (pour les suggestions)
-  const popularQuestions = React.useMemo(() => getPopularQuestions(3), [getPopularQuestions]);
-  const recentQuestions = React.useMemo(() => getRecentQuestions(3), [getRecentQuestions]);
+  // Questions populaires et récentes (pour les suggestions) - prefixed with _ since not used in render
+  const _popularQuestions = React.useMemo(() => getPopularQuestions(3), [getPopularQuestions]);
+  const _recentQuestions = React.useMemo(() => getRecentQuestions(3), [getRecentQuestions]);
 
   // État de la recherche
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [_showSuggestions, _setShowSuggestions] = useState(false);
 
   if (loading) {
     return (
@@ -316,7 +333,7 @@ const FAQPage: React.FC = () => {
             
             {searchResults.length > 0 ? (
               <div className="space-y-4">
-                {searchResults.map((result, index) => (
+                {searchResults.map((result) => (
                   <div 
                     key={result.item.id}
                     className="bg-white p-6 rounded-lg border border-gray-200 hover:border-blue-300 cursor-pointer transition-all duration-200"
@@ -476,55 +493,20 @@ const FAQPage: React.FC = () => {
                   onIncrementViewCount={incrementViewCount}
                   showHelpfulness={true}
                   showStats={true}
-                  maxHeight="600px"
                 />
               ) : (
-                <div className="text-center py-12">
+                <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
                   <HelpCircleIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">
                     Aucune question dans cette catégorie
                   </h3>
-                  <p className="text-gray-600 mb-6">
-                    Cette catégorie ne contient pas encore de questions ou aucun résultat ne correspond à vos critères.
+                  <p className="text-gray-600">
+                    Sélectionnez une autre catégorie ou consultez toutes les questions.
                   </p>
-                  <button
-                    onClick={() => setSelectedCategory('tous')}
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    Voir toutes les questions
-                  </button>
                 </div>
               )}
             </section>
           </>
-        )}
-
-        {/* Section contact support */}
-        {!searchQuery.trim() && displayItems.length > 0 && (
-          <section className="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Vous ne trouvez pas la réponse ?
-            </h2>
-            <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Notre équipe support est là pour vous aider. Contactez-nous pour obtenir une assistance personnalisée.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
-                href="/contact" 
-                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                <MessageCircleIcon className="w-5 h-5 mr-2" />
-                Contactez le Support
-              </a>
-              <a 
-                href="/help" 
-                className="inline-flex items-center px-6 py-3 bg-white text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
-              >
-                <BookOpenIcon className="w-5 h-5 mr-2" />
-                Centre d'Aide
-              </a>
-            </div>
-          </section>
         )}
       </div>
     </div>

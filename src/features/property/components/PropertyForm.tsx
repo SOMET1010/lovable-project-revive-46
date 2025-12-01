@@ -5,6 +5,7 @@ import PropertyImageUpload from './PropertyImageUpload';
 import CitySelector from './CitySelector';
 import { propertyService } from '../services/propertyService';
 import { useNotifications, NotificationContainer } from '../../../shared/components/Notification';
+import { PropertyData } from '../services/propertyService';
 import { 
   Home, 
   MapPin, 
@@ -98,7 +99,6 @@ const PropertyForm: React.FC = () => {
   // Étape 1: Informations générales
   const renderInformationsStep = () => {
     const propertyTypes = propertyService.getPropertyTypes();
-    const amenities = propertyService.getAmenities();
 
     return (
       <div className="space-y-6">
@@ -236,8 +236,8 @@ const PropertyForm: React.FC = () => {
               <label key={amenity.key} className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={formData[amenity.key as keyof typeof formData] as boolean}
-                  onChange={(e) => updateField(amenity.key, e.target.checked)}
+                  checked={formData[amenity.key as keyof PropertyData] as boolean}
+                  onChange={(e) => updateField(amenity.key as keyof PropertyData, e.target.checked)}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm text-gray-700">{amenity.label}</span>
@@ -401,6 +401,9 @@ const PropertyForm: React.FC = () => {
 
   // Étape 5: Validation
   const renderValidationStep = () => {
+    const mainImageIndex = formData.mainImageIndex ?? 0;
+    const mainImage = formData.images[mainImageIndex];
+    
     return (
       <div className="space-y-6">
         <div className="text-center">
@@ -440,10 +443,10 @@ const PropertyForm: React.FC = () => {
               </div>
             </div>
 
-            {formData.images.length > 0 && (
+            {formData.images.length > 0 && mainImage && (
               <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
                 <img
-                  src={URL.createObjectURL(formData.images[formData.mainImageIndex || 0])}
+                  src={URL.createObjectURL(mainImage)}
                   alt="Image principale"
                   className="w-full h-full object-cover"
                 />
@@ -463,13 +466,17 @@ const PropertyForm: React.FC = () => {
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
               <div className="flex-1">
                 <p className="text-sm text-blue-800">Création de votre propriété...</p>
-                <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
-                </div>
-                <p className="text-xs text-blue-600 mt-1">{uploadProgress}%</p>
+                {uploadProgress > 0 && (
+                  <div className="mt-2">
+                    <div className="bg-blue-200 rounded-full h-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-blue-600 mt-1">{uploadProgress}% téléchargé</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -480,32 +487,26 @@ const PropertyForm: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Étapes */}
-      <PropertySteps
-        currentStep={currentStep}
-        completedSteps={Array.from({ length: 5 }, (_, i) => i < currentStep)}
-        stepValidations={Array.from({ length: 5 }, (_, i) => isStepValid(i))}
-        onStepClick={(step) => {
-          // Permettre la navigation vers les étapes validées
-          if (step <= currentStep || isStepValid(step - 1)) {
-            // Implementation de la navigation
-          }
-        }}
-        disabled={isSubmitting}
+      <NotificationContainer 
+        notifications={notifications} 
+        onRemove={removeNotification}
       />
+      
+      {/* Indicateur de progression */}
+      <PropertySteps currentStep={currentStep} />
 
       {/* Contenu de l'étape */}
-      <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mt-6">
         {renderStepContent()}
       </div>
 
-      {/* Boutons de navigation */}
-      <div className="flex justify-between">
+      {/* Navigation */}
+      <div className="flex justify-between mt-6">
         <button
           type="button"
           onClick={prevStep}
           disabled={currentStep === 0 || isSubmitting}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Précédent
@@ -515,8 +516,8 @@ const PropertyForm: React.FC = () => {
           <button
             type="button"
             onClick={handleNext}
-            disabled={!canProceedToNextStep() || isSubmitting}
-            className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!canProceedToNextStep || isSubmitting}
+            className="flex items-center px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Suivant
             <ArrowRight className="w-4 h-4 ml-2" />
@@ -525,29 +526,23 @@ const PropertyForm: React.FC = () => {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting || !isStepValid(currentStep)}
-            className="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Publication...
+                Publication en cours...
               </>
             ) : (
               <>
-                <Star className="w-4 h-4 mr-2" />
+                <CheckCircle className="w-4 h-4 mr-2" />
                 Publier la propriété
               </>
             )}
           </button>
         )}
       </div>
-
-      {/* Container de notifications */}
-      <NotificationContainer
-        notifications={notifications}
-        onClose={removeNotification}
-      />
     </div>
   );
 };

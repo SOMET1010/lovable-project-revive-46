@@ -2,7 +2,7 @@
  * Composant Accordéon pour les FAQ avec animations et accessibilité
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { 
   ChevronDownIcon, 
   ThumbsUpIcon, 
@@ -35,7 +35,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
   maxHeight = '500px',
   className = ''
 }) => {
-  const contentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const _contentRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Gérer l'animation d'ouverture/fermeture
   const handleToggle = (item: FAQItem) => {
@@ -74,7 +74,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
   return (
     <div className={`faq-accordion ${className}`}>
       <div className="space-y-3">
-        {items.map((item, index) => {
+        {items.map((item) => {
           const isOpen = openItems.has(item.id);
           const helpfulPercentage = getHelpfulnessPercentage(item.helpful, item.notHelpful);
 
@@ -223,14 +223,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                             {/* Boutons d'évaluation */}
                             <div className="flex items-center gap-2">
                               <button
-                                className={`
-                                  inline-flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium
-                                  transition-all duration-200 hover:scale-105
-                                  ${
-                                    // Style pour le bouton "Utile" (pas d'état persistant dans ce composant)
-                                    'text-green-700 hover:bg-green-50 hover:text-green-800'
-                                  }
-                                `}
+                                className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 hover:scale-105 text-green-700 hover:bg-green-50 hover:text-green-800"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onMarkHelpful(item.id, true);
@@ -242,14 +235,7 @@ const FAQAccordion: React.FC<FAQAccordionProps> = ({
                               </button>
                               
                               <button
-                                className={`
-                                  inline-flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium
-                                  transition-all duration-200 hover:scale-105
-                                  ${
-                                    // Style pour le bouton "Pas utile" (pas d'état persistant dans ce composant)
-                                    'text-red-700 hover:bg-red-50 hover:text-red-800'
-                                  }
-                                `}
+                                className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 hover:scale-105 text-red-700 hover:bg-red-50 hover:text-red-800"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onMarkHelpful(item.id, false);

@@ -165,6 +165,8 @@ class PropertyService {
 
       for (let i = 0; i < images.length; i++) {
         const image = images[i];
+        if (!image) continue;
+        
         const fileName = `${Date.now()}_${i}_${image.name}`;
         const filePath = `${folderName}/${fileName}`;
 
@@ -178,7 +180,7 @@ class PropertyService {
           throw new Error(`Le fichier ${image.name} n'est pas une image valide`);
         }
 
-        const { data, error } = await getSupabaseClient().storage
+        const { error } = await getSupabaseClient().storage
           .from('property-images')
           .upload(filePath, image, {
             cacheControl: '3600',

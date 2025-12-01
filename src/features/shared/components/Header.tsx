@@ -1,30 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
-  Bars3Icon,
-  MagnifyingGlassIcon,
-  HomeIcon,
-  PlusCircleIcon,
-  PhoneIcon,
-  QuestionMarkCircleIcon,
-  UserIcon
-} from '@heroicons/react/24/outline';
-import MobileMenu from '../mobile/responsive/components/MobileMenu';
-import { useMobileMenu } from '../features/shared/hooks/useMobileMenu';
+  Menu,
+  X,
+  Search,
+  Home,
+  PlusCircle,
+  Phone,
+  HelpCircle,
+  User
+} from 'lucide-react';
 
 interface HeaderProps {
   className?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({ className = '' }) => {
-  const { toggleMenu } = useMobileMenu();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   // Éléments de navigation desktop
   const navigationItems = [
-    { label: 'Accueil', href: '/', icon: HomeIcon },
-    { label: 'Rechercher', href: '/recherche', icon: MagnifyingGlassIcon },
-    { label: 'Ajouter un bien', href: '/ajouter-bien', icon: PlusCircleIcon },
-    { label: 'Contact', href: '/contact', icon: PhoneIcon },
-    { label: 'Aide', href: '/aide', icon: QuestionMarkCircleIcon }
+    { label: 'Accueil', href: '/', icon: Home },
+    { label: 'Rechercher', href: '/recherche', icon: Search },
+    { label: 'Ajouter un bien', href: '/ajouter-bien', icon: PlusCircle },
+    { label: 'Contact', href: '/contact', icon: Phone },
+    { label: 'Aide', href: '/aide', icon: HelpCircle }
   ];
 
   return (
@@ -35,49 +38,54 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
             
             {/* Logo */}
             <div className="flex items-center">
-              <a
-                href="/"
+              <Link
+                to="/"
                 className="flex items-center space-x-2 text-xl font-bold text-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md p-1"
                 aria-label="MonToit - Accueil"
               >
-                <HomeIcon className="w-8 h-8" />
+                <Home className="w-8 h-8" />
                 <span className="hidden sm:block">MonToit</span>
-              </a>
+              </Link>
             </div>
 
             {/* Navigation desktop */}
             <nav className="hidden md:flex space-x-8" aria-label="Navigation principale">
               {navigationItems.map((item) => {
                 const IconComponent = item.icon;
+                const isActive = location.pathname === item.href;
                 return (
-                  <a
+                  <Link
                     key={item.label}
-                    href={item.href}
-                    className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    to={item.href}
+                    className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      isActive 
+                        ? 'text-blue-600 bg-blue-50' 
+                        : 'text-gray-700 hover:text-blue-600'
+                    }`}
                   >
                     <IconComponent className="w-4 h-4" />
                     <span>{item.label}</span>
-                  </a>
+                  </Link>
                 );
               })}
             </nav>
 
             {/* Actions utilisateur desktop */}
             <div className="hidden md:flex items-center space-x-4">
-              <a
-                href="/mon-compte"
+              <Link
+                to="/mon-compte"
                 className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <UserIcon className="w-4 h-4" />
+                <User className="w-4 h-4" />
                 <span>Mon Compte</span>
-              </a>
+              </Link>
               
-              <a
-                href="/ajouter-bien"
+              <Link
+                to="/ajouter-bien"
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 Publier un bien
-              </a>
+              </Link>
             </div>
 
             {/* Bouton menu mobile */}
@@ -86,11 +94,11 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
                 id="mobile-menu-toggle"
                 onClick={toggleMenu}
                 className="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
-                aria-label="Ouvrir le menu de navigation"
-                aria-expanded="false"
+                aria-label={isMenuOpen ? "Fermer le menu" : "Ouvrir le menu de navigation"}
+                aria-expanded={isMenuOpen}
                 aria-controls="mobile-menu"
               >
-                <Bars3Icon className="w-6 h-6" />
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
@@ -98,7 +106,41 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       </header>
 
       {/* Menu mobile */}
-      <MobileMenu />
+      {isMenuOpen && (
+        <div id="mobile-menu" className="md:hidden bg-white border-b border-gray-200 shadow-lg">
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {navigationItems.map((item) => {
+              const IconComponent = item.icon;
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
+                    isActive 
+                      ? 'text-blue-600 bg-blue-50' 
+                      : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <IconComponent className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+            <div className="border-t border-gray-200 pt-2 mt-2">
+              <Link
+                to="/mon-compte"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+              >
+                <User className="w-5 h-5" />
+                <span>Mon Compte</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

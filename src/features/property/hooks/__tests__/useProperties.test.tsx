@@ -130,11 +130,12 @@ describe('useProperties', () => {
     it('should create a property', async () => {
       const newProperty = {
         title: 'Nouveau Appartement',
-        type: 'apartment' as const,
-        price: 150000,
+        owner_id: 'user-123',
+        property_type: 'appartement' as const,
+        monthly_rent: 150000,
         city: 'Abidjan',
         address: '123 Rue Test',
-        area: 75,
+        surface_area: 75,
       };
 
       const createdProperty = { id: '1', ...newProperty };
@@ -159,11 +160,12 @@ describe('useProperties', () => {
     it('should handle creation errors', async () => {
       const newProperty = {
         title: 'Nouveau Appartement',
-        type: 'apartment' as const,
-        price: 150000,
+        owner_id: 'user-123',
+        property_type: 'appartement' as const,
+        monthly_rent: 150000,
         city: 'Abidjan',
         address: '123 Rue Test',
-        area: 75,
+        surface_area: 75,
       };
 
       const error = new Error('Failed to create property');
@@ -182,4 +184,3 @@ describe('useProperties', () => {
     });
   });
 });
-
