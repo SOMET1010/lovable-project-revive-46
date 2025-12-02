@@ -29,7 +29,7 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
 
     this.setState({
@@ -58,7 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.href = '/';
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-terracotta-50 via-coral-50 to-amber-50 flex items-center justify-center p-4">

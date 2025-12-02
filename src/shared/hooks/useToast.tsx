@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Info, AlertTriangle, X } from 'lucide-react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -20,8 +20,8 @@ let toastCount = 0;
 const listeners = new Set<(toasts: Toast[]) => void>();
 let toasts: Toast[] = [];
 
-function notify(listeners: Set<(toasts: Toast[]) => void>, toasts: Toast[]) {
-  listeners.forEach((listener) => listener([...toasts]));
+function notify(listenerSet: Set<(toasts: Toast[]) => void>, toastList: Toast[]) {
+  listenerSet.forEach((listener) => listener([...toastList]));
 }
 
 export function toast(message: string, options?: { type?: ToastType; description?: string; duration?: number; action?: ToastAction }) {
@@ -89,7 +89,7 @@ export function useToast() {
 }
 
 export function ToastContainer() {
-  const { toasts, dismiss } = useToast();
+  const { toasts: currentToasts, dismiss } = useToast();
 
   const icons = {
     success: <CheckCircle className="h-5 w-5 text-green-600" />,
@@ -105,24 +105,24 @@ export function ToastContainer() {
     warning: 'bg-yellow-50 border-yellow-200',
   };
 
-  if (toasts.length === 0) return null;
+  if (currentToasts.length === 0) return null;
 
   return (
     <div className="fixed bottom-4 right-4 z-50 space-y-2 max-w-md">
-      {toasts.map((toast) => (
+      {currentToasts.map((t) => (
         <div
-          key={toast.id}
-          className={`${bgColors[toast.type]} border-2 rounded-xl p-4 shadow-lg animate-slide-up flex items-start gap-3 min-w-[320px]`}
+          key={t.id}
+          className={`${bgColors[t.type]} border-2 rounded-xl p-4 shadow-lg animate-slide-up flex items-start gap-3 min-w-[320px]`}
         >
-          <div className="flex-shrink-0">{icons[toast.type]}</div>
+          <div className="flex-shrink-0">{icons[t.type]}</div>
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 text-sm">{toast.message}</p>
-            {toast.description && (
-              <p className="text-sm text-gray-600 mt-1">{toast.description}</p>
+            <p className="font-semibold text-gray-900 text-sm">{t.message}</p>
+            {t.description && (
+              <p className="text-sm text-gray-600 mt-1">{t.description}</p>
             )}
           </div>
           <button
-            onClick={() => dismiss(toast.id)}
+            onClick={() => dismiss(t.id)}
             className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
           >
             <X className="h-5 w-5" />

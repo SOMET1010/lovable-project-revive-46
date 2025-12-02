@@ -1,11 +1,5 @@
 /**
  * Service de cache localStorage avec TTL et gestion de taille
- *
- * Fonctionnalités :
- * - Cache avec expiration (TTL)
- * - Limite de taille (5MB par défaut)
- * - Compression pour économiser l'espace
- * - Éviction LRU (Least Recently Used)
  */
 
 interface CacheEntry<T = any> {
@@ -220,7 +214,10 @@ class CacheService {
     // Supprimer les 10% les plus anciens
     const toRemove = Math.ceil(entries.length * 0.1);
     for (let i = 0; i < toRemove && i < entries.length; i++) {
-      localStorage.removeItem(entries[i].key);
+      const entry = entries[i];
+      if (entry?.key) {
+        localStorage.removeItem(entry.key);
+      }
     }
   }
 

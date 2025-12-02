@@ -256,7 +256,7 @@ export const generateLeasePDF = (leaseData: LeaseData): jsPDF => {
 
   addLine(`Fait électroniquement via la plateforme Mon Toit - ${new Date().toLocaleDateString('fr-FR')}`, { size: 10, spacing: 15 });
 
-  const signatureY = yPosition;
+  // signatureY position stored for potential future use
   addPageIfNeeded(40);
 
   doc.setFontSize(10);
@@ -286,12 +286,12 @@ export const generateLeasePDF = (leaseData: LeaseData): jsPDF => {
 export const uploadPDFToStorage = async (
   pdf: jsPDF,
   leaseId: string,
-  supabase: any
+  supabaseClient: any
 ): Promise<string> => {
   const pdfBlob = pdf.output('blob');
   const fileName = `leases/${leaseId}/contract_${Date.now()}.pdf`;
 
-  const { data, error } = await supabase.storage
+  const { error } = await supabaseClient.storage
     .from('contracts')
     .upload(fileName, pdfBlob, {
       contentType: 'application/pdf',
@@ -300,7 +300,7 @@ export const uploadPDFToStorage = async (
 
   if (error) throw error;
 
-  const { data: urlData } = supabase.storage
+  const { data: urlData } = supabaseClient.storage
     .from('contracts')
     .getPublicUrl(fileName);
 

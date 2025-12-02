@@ -15,9 +15,9 @@ interface EnvConfig {
 }
 
 function validateEnv(): EnvConfig {
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  const demoMode = import.meta.env.VITE_DEMO_MODE === 'true';
+  const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
+  const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
+  const demoMode = import.meta.env['VITE_DEMO_MODE'] === 'true';
 
   // Vérifier si les variables Supabase sont configurées et valides
   const isSupabaseConfigured = 
@@ -39,7 +39,7 @@ function validateEnv(): EnvConfig {
     supabase: {
       url: supabaseUrl || 'https://demo.supabase.co',
       anonKey: supabaseAnonKey || 'demo-anon-key-for-interface-only',
-      isConfigured: isSupabaseConfigured,
+      isConfigured: !!isSupabaseConfigured,
     },
   };
 }
