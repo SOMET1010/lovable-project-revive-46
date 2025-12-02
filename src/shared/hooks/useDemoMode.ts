@@ -39,7 +39,6 @@ const setupApiInterceptors = () => {
 
   // Intercepter les appels supabase.from()
   if (typeof window !== 'undefined' && (window as any).supabase) {
-    const originalSupabase = (window as any).supabase;
     console.log('🎭 Interception des appels Supabase réels');
   }
 };

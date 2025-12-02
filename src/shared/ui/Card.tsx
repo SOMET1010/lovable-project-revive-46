@@ -1,4 +1,4 @@
-import { HTMLAttributes, ReactNode } from 'react';
+import React, { HTMLAttributes, ReactNode } from 'react';
 
 export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   variant?: 'default' | 'bordered' | 'elevated' | 'interactive';
@@ -88,24 +88,15 @@ export function Card({
     className
   ].filter(Boolean).join(' ');
 
-  const CardWrapper = clickable ? 'button' : 'div';
-  const ComponentProps = clickable ? {
-    ...props,
-    onClick,
-    type: 'button' as const,
-    'aria-pressed': undefined,
-  } : props;
-
-  return (
-    <CardWrapper 
-      className={classes}
-      role={role}
-      {...ComponentProps}
-    >
-      {children}
-      
-      {/* Indicateur visuel pour les éléments cliquables */}
-      {clickable && (
+  if (clickable) {
+    return (
+      <button 
+        className={classes}
+        role={role}
+        onClick={onClick as React.MouseEventHandler<HTMLButtonElement>}
+        type="button"
+      >
+        {children}
         <div 
           className="absolute inset-0 rounded-lg opacity-0 hover:opacity-100 focus:opacity-100 transition-base"
           aria-hidden="true"
@@ -113,12 +104,22 @@ export function Card({
             background: 'linear-gradient(to bottom right, rgba(255, 108, 47, 0.05), rgba(255, 108, 47, 0.1))'
           }}
         />
-      )}
-    </CardWrapper>
+      </button>
+    );
+  }
+
+  return (
+    <div 
+      className={classes}
+      role={role}
+      {...props}
+    >
+      {children}
+    </div>
   );
 }
 
-export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {
+export interface CardHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: ReactNode;
   subtitle?: ReactNode;
   action?: ReactNode;

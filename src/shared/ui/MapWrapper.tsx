@@ -35,12 +35,12 @@ interface MapWrapperProps {
 }
 
 export default function MapWrapper(props: MapWrapperProps) {
-  const [mapError, setMapError] = useState(false);
+  const [_mapError, setMapError] = useState(false);
   const [useAzureFallback, setUseAzureFallback] = useState(false);
 
   useEffect(() => {
     const checkMapboxToken = () => {
-      const token = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || import.meta.env.VITE_MAPBOX_TOKEN;
+      const token = import.meta.env['VITE_MAPBOX_PUBLIC_TOKEN'] || import.meta.env['VITE_MAPBOX_TOKEN'];
       if (!token || token === '' || token === 'undefined') {
         console.warn('Mapbox token not configured, using Azure Maps fallback');
         setUseAzureFallback(true);
@@ -112,8 +112,8 @@ export default function MapWrapper(props: MapWrapperProps) {
 function AzureMapsComponent({
   properties,
   height = '500px',
-  center = [-4.0083, 5.36],
-  zoom = 12,
+  center: _center = [-4.0083, 5.36],
+  zoom: _zoom = 12,
   onMarkerClick,
 }: MapWrapperProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);

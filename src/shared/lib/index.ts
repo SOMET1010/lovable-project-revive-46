@@ -2,7 +2,7 @@
  * Export centralisé des utilitaires et helpers
  */
 
-export { supabase } from './supabase';
+export { supabase } from '@/services/supabase/client';
 export type { Database } from './database.types';
 
 export * from './constants/app.constants';

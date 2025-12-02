@@ -92,8 +92,8 @@ export const supabase = {
 
 // Configuration automatique (remplacer par vos vraies clés)
 const SUPABASE_CONFIG: SupabaseConfig = {
-  url: process.env.REACT_APP_SUPABASE_URL || 'https://your-project.supabase.co',
-  anonKey: process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-anon-key'
+  url: import.meta.env['VITE_SUPABASE_URL'] || 'https://your-project.supabase.co',
+  anonKey: import.meta.env['VITE_SUPABASE_ANON_KEY'] || 'your-anon-key'
 };
 
 // Initialisation automatique

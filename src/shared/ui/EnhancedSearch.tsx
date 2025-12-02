@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Home, Coins, Filter, X, Sparkles } from 'lucide-react';
+import { Search, MapPin, Coins, Filter, X, Sparkles } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 interface SearchFilters {

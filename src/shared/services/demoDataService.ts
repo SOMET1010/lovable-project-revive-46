@@ -151,7 +151,7 @@ export const demoPropertyService = {
     return { data: results, error: null };
   },
 
-  async getFavorites(userId: string) {
+  async getFavorites(_userId: string) {
     await simulateNetworkDelay();
     return { data: demoProperties.slice(0, 2), error: null };
   }
@@ -159,7 +159,7 @@ export const demoPropertyService = {
 
 // Service mock pour les messages
 export const demoMessageService = {
-  async getConversations(userId: string) {
+  async getConversations(_userId: string) {
     await simulateNetworkDelay();
     return { 
       data: [
@@ -167,8 +167,8 @@ export const demoMessageService = {
           id: 'conv-1',
           property_id: '1',
           property_title: 'Magnifique villa moderne à Cocody',
-          last_message: demoMessages[1].content,
-          last_message_time: demoMessages[1].created_at,
+          last_message: demoMessages[1]?.content ?? '',
+          last_message_time: demoMessages[1]?.created_at ?? '',
           unread_count: 1
         }
       ], 
@@ -199,7 +199,7 @@ export const demoMessageService = {
 
 // Service mock pour les profils
 export const demoProfileService = {
-  async getProfile(userId: string) {
+  async getProfile(_userId: string) {
     await simulateNetworkDelay();
     return {
       data: {

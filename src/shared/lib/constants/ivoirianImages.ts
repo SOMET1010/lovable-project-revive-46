@@ -176,9 +176,9 @@ export function getPropertyImages(
   }
 
   // Compléter avec des images d'intérieur
-  images.push(INTERIOR_IMAGES.salon[0]);
-  images.push(INTERIOR_IMAGES.cuisine[0]);
-  images.push(INTERIOR_IMAGES.chambre[0]);
+  images.push(INTERIOR_IMAGES.salon[0] ?? '');
+  images.push(INTERIOR_IMAGES.cuisine[0] ?? '');
+  images.push(INTERIOR_IMAGES.chambre[0] ?? '');
 
   // Retourner le nombre demandé d'images uniques
   const uniqueImages = [...new Set(images)];
@@ -200,19 +200,19 @@ export function getMainPropertyImage(propertyType: string): string {
   const typeKey = propertyType.toLowerCase();
 
   if (typeKey.includes('villa')) {
-    return PROPERTY_TYPE_IMAGES.villa[0];
+    return PROPERTY_TYPE_IMAGES.villa[0] ?? '';
   } else if (typeKey.includes('appartement')) {
-    return PROPERTY_TYPE_IMAGES.appartement[0];
+    return PROPERTY_TYPE_IMAGES.appartement[0] ?? '';
   } else if (typeKey.includes('studio')) {
-    return PROPERTY_TYPE_IMAGES.studio[0];
+    return PROPERTY_TYPE_IMAGES.studio[0] ?? '';
   } else if (typeKey.includes('duplex')) {
-    return PROPERTY_TYPE_IMAGES.duplex[0];
+    return PROPERTY_TYPE_IMAGES.duplex[0] ?? '';
   } else if (typeKey.includes('maison')) {
-    return PROPERTY_TYPE_IMAGES.maison[0];
+    return PROPERTY_TYPE_IMAGES.maison[0] ?? '';
   }
 
   // Par défaut, une image moderne
-  return PROPERTY_TYPE_IMAGES.appartement[0];
+  return PROPERTY_TYPE_IMAGES.appartement[0] ?? '';
 }
 
 /**
@@ -220,5 +220,5 @@ export function getMainPropertyImage(propertyType: string): string {
  */
 export function getRandomIvoirianPropertyImage(): string {
   const allImages = Object.values(PROPERTY_TYPE_IMAGES).flat();
-  return allImages[Math.floor(Math.random() * allImages.length)];
+  return allImages[Math.floor(Math.random() * allImages.length)] ?? '';
 }

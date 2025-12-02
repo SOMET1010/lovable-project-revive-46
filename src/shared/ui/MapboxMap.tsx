@@ -40,7 +40,7 @@ export default function MapboxMap({
   highlightedPropertyId,
   onMarkerClick,
   onBoundsChange,
-  clustering = false,
+  clustering: _clustering = false,
   draggableMarker = false,
   showRadius = false,
   radiusKm = 1,
@@ -55,7 +55,7 @@ export default function MapboxMap({
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || 'pk.eyJ1IjoicHNvbWV0IiwiYSI6ImNtYTgwZ2xmMzEzdWcyaXM2ZG45d3A4NmEifQ.MYXzdc5CREmcvtBLvfV0Lg';
+  const MAPBOX_TOKEN = import.meta.env['VITE_MAPBOX_PUBLIC_TOKEN'] || 'pk.eyJ1IjoicHNvbWV0IiwiYSI6ImNtYTgwZ2xmMzEzdWcyaXM2ZG45d3A4NmEifQ.MYXzdc5CREmcvtBLvfV0Lg';
 
   const getMarkerColor = (property: Property) => {
     if (property.status === 'disponible') return '#10B981';
@@ -92,7 +92,9 @@ export default function MapboxMap({
         map.current.on('moveend', () => {
           if (map.current) {
             const bounds = map.current.getBounds();
-            onBoundsChange(bounds);
+            if (bounds) {
+              onBoundsChange(bounds);
+            }
           }
         });
       }
@@ -128,6 +130,8 @@ export default function MapboxMap({
 
     if (singleMarker && properties.length > 0) {
       const property = properties[0];
+      if (!property) return;
+      
       const color = getMarkerColor(property);
 
       const marker = new mapboxgl.Marker({
@@ -239,6 +243,8 @@ export default function MapboxMap({
 
     if (showRadius && properties.length > 0 && map.current) {
       const property = properties[0];
+      if (!property) return;
+      
       const radiusInMeters = radiusKm * 1000;
 
       const circle = {
