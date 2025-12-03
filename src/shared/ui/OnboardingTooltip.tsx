@@ -79,12 +79,16 @@ export default function OnboardingTooltip({ steps, onComplete, storageKey }: Onb
               />
             </div>
 
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              {step.title}
-            </h3>
-            <p className="text-gray-600 leading-relaxed">
-              {step.description}
-            </p>
+            {step && (
+              <>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  {step.title}
+                </h3>
+                <p className="text-gray-600 leading-relaxed">
+                  {step.description}
+                </p>
+              </>
+            )}
           </div>
 
           <div className="flex items-center justify-between space-x-4">
