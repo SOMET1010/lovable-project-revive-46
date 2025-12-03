@@ -1,183 +1,157 @@
-import { Search, Shield, FileSignature, Key, ArrowRight } from 'lucide-react';
+import { Search, Shield, Key, ArrowRight } from 'lucide-react';
 
 const steps = [
   {
     icon: Search,
     number: '01',
     title: 'Recherchez',
-    description: 'Explorez notre catalogue de propriétés vérifiées. Filtrez par ville, budget et type de logement.',
+    description: 'Explorez des centaines de logements vérifiés selon vos critères : localisation, budget, type de bien.',
   },
   {
     icon: Shield,
     number: '02',
     title: 'Vérifiez',
-    description: 'Toutes les propriétés et propriétaires sont certifiés ANSUT. Visitez en toute confiance.',
-  },
-  {
-    icon: FileSignature,
-    number: '03',
-    title: 'Candidatez',
-    description: 'Envoyez votre dossier en ligne. Suivez l\'avancement de votre candidature en temps réel.',
+    description: 'Consultez les avis, les documents certifiés et l\'identité vérifiée de chaque propriétaire.',
   },
   {
     icon: Key,
-    number: '04',
+    number: '03',
     title: 'Emménagez',
-    description: 'Signez votre bail électronique et payez via Mobile Money. Les clés sont à vous !',
+    description: 'Signez votre contrat en ligne et payez en toute sécurité via Mobile Money ou carte bancaire.',
   },
 ];
 
 /**
- * HowItWorksSection - Modern Minimalism Premium Design
+ * HowItWorksSection - Premium Design
  * 
  * Features:
- * - White background with subtle gray cards
- * - Clean 4-step grid
- * - Orange accent on step numbers
- * - 96px section padding
+ * - 96px vertical padding
+ * - Step numbers in orange
+ * - Clean cards with hover effects
+ * - Arrow connectors between steps
  */
 export default function HowItWorksSection() {
   return (
     <section 
+      className="relative"
       style={{ 
-        backgroundColor: 'var(--color-background-page)',
-        paddingTop: 'var(--spacing-24)',
-        paddingBottom: 'var(--spacing-24)'
+        backgroundColor: '#FAFAFA',
+        paddingTop: '96px',
+        paddingBottom: '96px'
       }}
     >
-      <div className="container">
+      <div className="container mx-auto px-4 md:px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
           <span 
-            className="inline-block px-4 py-2 rounded-full text-sm font-semibold mb-4"
+            className="inline-block px-5 py-2 rounded-full text-sm font-semibold mb-6"
             style={{ 
-              backgroundColor: 'var(--color-primary-50)',
-              color: 'var(--color-primary-600)'
+              backgroundColor: 'rgba(255, 108, 47, 0.1)',
+              color: '#FF6C2F'
             }}
           >
-            Simple & Rapide
+            Comment ça marche
           </span>
           <h2 
-            className="font-bold mb-4"
+            className="font-bold mb-5"
             style={{ 
-              fontSize: 'clamp(28px, 4vw, 40px)',
-              color: 'var(--color-neutral-900)'
+              fontSize: 'clamp(28px, 4vw, 44px)',
+              color: '#171717',
+              letterSpacing: '-0.02em'
             }}
           >
-            Comment ça marche ?
+            Trouvez votre logement en 3 étapes
           </h2>
           <p 
             className="max-w-2xl mx-auto"
             style={{ 
               fontSize: '18px',
-              lineHeight: '1.6',
-              color: 'var(--color-neutral-700)'
+              lineHeight: '1.7',
+              color: '#525252'
             }}
           >
-            Trouvez et louez votre logement en 4 étapes simples, en toute sécurité
+            Un processus simple, transparent et sécurisé pour vous accompagner
           </p>
         </div>
 
         {/* Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
           {steps.map((step, index) => (
-            <div 
-              key={step.title} 
-              className="relative group transition-all duration-300"
-              style={{ 
-                backgroundColor: 'var(--color-background-surface)',
-                borderRadius: 'var(--border-radius-lg)',
-                padding: 'var(--spacing-8)',
-                boxShadow: 'var(--shadow-base)'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                e.currentTarget.style.transform = 'translateY(-4px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = 'var(--shadow-base)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            >
-              {/* Number Badge */}
-              <div 
-                className="absolute -top-4 -right-4 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
-                style={{ 
-                  backgroundColor: 'var(--color-primary-500)',
-                  boxShadow: 'var(--shadow-md)'
-                }}
-              >
-                {step.number}
-              </div>
-              
-              {/* Icon */}
-              <div 
-                className="w-14 h-14 flex items-center justify-center mb-5 transition-transform group-hover:scale-110"
-                style={{ 
-                  backgroundColor: 'var(--color-primary-50)',
-                  borderRadius: 'var(--border-radius-md)'
-                }}
-              >
-                <step.icon 
-                  className="h-7 w-7" 
-                  style={{ color: 'var(--color-primary-500)' }}
-                />
-              </div>
-              
-              {/* Content */}
-              <h3 
-                className="font-semibold mb-3"
-                style={{ 
-                  fontSize: '20px',
-                  color: 'var(--color-neutral-900)'
-                }}
-              >
-                {step.title}
-              </h3>
-              <p 
-                className="leading-relaxed"
-                style={{ 
-                  fontSize: '15px',
-                  color: 'var(--color-neutral-700)'
-                }}
-              >
-                {step.description}
-              </p>
-
-              {/* Connector Line (Desktop) */}
+            <div key={step.title} className="relative">
+              {/* Connector Arrow (hidden on mobile and last item) */}
               {index < steps.length - 1 && (
-                <div 
-                  className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5"
-                  style={{ backgroundColor: 'var(--color-neutral-200)' }}
-                />
+                <div className="hidden md:flex absolute top-1/3 -right-6 lg:-right-8 z-10">
+                  <ArrowRight className="w-6 h-6 text-gray-300" />
+                </div>
               )}
+
+              {/* Step Card */}
+              <div
+                className="group h-full text-center transition-all duration-300"
+                style={{ 
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '20px',
+                  padding: '48px 32px',
+                  border: '1px solid #E5E5E5'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 20px 40px -10px rgba(0, 0, 0, 0.1)';
+                  e.currentTarget.style.transform = 'translateY(-8px)';
+                  e.currentTarget.style.borderColor = '#FF6C2F';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = '#E5E5E5';
+                }}
+              >
+                {/* Step Number */}
+                <div 
+                  className="inline-block font-bold mb-6"
+                  style={{ 
+                    fontSize: '14px',
+                    color: '#FF6C2F',
+                    letterSpacing: '0.1em'
+                  }}
+                >
+                  ÉTAPE {step.number}
+                </div>
+
+                {/* Icon */}
+                <div 
+                  className="w-20 h-20 mx-auto mb-6 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                  style={{ 
+                    backgroundColor: 'rgba(255, 108, 47, 0.1)',
+                    borderRadius: '20px'
+                  }}
+                >
+                  <step.icon className="h-10 w-10" style={{ color: '#FF6C2F' }} />
+                </div>
+                
+                {/* Title */}
+                <h3 
+                  className="font-bold mb-4"
+                  style={{ 
+                    fontSize: '24px',
+                    color: '#171717'
+                  }}
+                >
+                  {step.title}
+                </h3>
+                
+                {/* Description */}
+                <p 
+                  style={{ 
+                    fontSize: '16px',
+                    lineHeight: '1.7',
+                    color: '#525252'
+                  }}
+                >
+                  {step.description}
+                </p>
+              </div>
             </div>
           ))}
-        </div>
-
-        {/* CTA */}
-        <div className="mt-16 text-center">
-          <a
-            href="/recherche"
-            className="inline-flex items-center gap-3 text-white font-semibold transition-all"
-            style={{ 
-              backgroundColor: 'var(--color-primary-500)',
-              padding: '16px 32px',
-              borderRadius: 'var(--border-radius-md)',
-              fontSize: '16px'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-primary-600)';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--color-primary-500)';
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            <span>Commencer ma recherche</span>
-            <ArrowRight className="h-5 w-5" />
-          </a>
         </div>
       </div>
     </section>

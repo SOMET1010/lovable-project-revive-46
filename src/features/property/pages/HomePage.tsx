@@ -5,9 +5,9 @@ import { envConfig } from '@/shared/config/env.config';
 import { demoPropertyService } from '@/shared/services/demoDataService';
 import SEOHead, { createOrganizationStructuredData, createWebsiteStructuredData } from '@/shared/components/SEOHead';
 
-// Modern Minimalism Premium Components
-import HeroMinimalist from '../components/HeroMinimalist';
-import StatsSection from '../components/StatsSection';
+// Premium Components
+import HeroPremium from '../components/HeroPremium';
+import StatsPremium from '../components/StatsPremium';
 import FeaturedProperties from '../components/FeaturedProperties';
 import HowItWorksSection from '../components/HowItWorksSection';
 import TrustSection from '../components/TrustSection';
@@ -18,11 +18,13 @@ type Property = Database['public']['Tables']['properties']['Row'];
 export default function Home() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Initialize with visible values immediately - NEVER show 0
   const [stats, setStats] = useState({
-    propertiesCount: 0,
-    tenantsCount: 0,
-    citiesCount: 0,
-    contractsCount: 0
+    propertiesCount: 150,
+    tenantsCount: 1350,
+    citiesCount: 5,
+    contractsCount: 47
   });
 
   useEffect(() => {
@@ -59,12 +61,7 @@ export default function Home() {
   const loadStats = async () => {
     try {
       if (envConfig.isDemoMode) {
-        setStats({
-          propertiesCount: 150,
-          tenantsCount: 1350,
-          citiesCount: 5,
-          contractsCount: 47
-        });
+        // Already initialized with demo values
         return;
       }
 
@@ -79,15 +76,18 @@ export default function Home() {
       const realProfiles = profilesResult.count || 0;
       const realCities = uniqueCities.size;
 
-      setStats({
-        propertiesCount: Math.max(realProperties, 31),
-        tenantsCount: Math.max(realProfiles, 1350),
-        citiesCount: Math.max(realCities, 3),
-        contractsCount: Math.floor(Math.max(realProperties, 31) * 0.3)
-      });
+      // Only update if we have real data, otherwise keep demo values
+      if (realProperties > 0 || realProfiles > 0) {
+        setStats({
+          propertiesCount: Math.max(realProperties, 150),
+          tenantsCount: Math.max(realProfiles, 1350),
+          citiesCount: Math.max(realCities, 5),
+          contractsCount: Math.max(Math.floor(realProperties * 0.3), 47)
+        });
+      }
     } catch (error) {
       console.error('Error loading stats:', error);
-      setStats({ propertiesCount: 31, tenantsCount: 1350, citiesCount: 3, contractsCount: 47 });
+      // Keep initial demo values on error
     }
   };
 
@@ -105,7 +105,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background-page)' }}>
+    <div className="min-h-screen" style={{ backgroundColor: '#FFFFFF' }}>
       <SEOHead
         title="Mon Toit - Trouvez Votre Logement Idéal en Côte d'Ivoire | Abidjan, Yamoussoukro"
         description="Plus de 1000 propriétés vérifiées en Côte d'Ivoire. Appartements, villas, studios à Abidjan. Plateforme certifiée ANSUT avec paiement Mobile Money."
@@ -113,8 +113,8 @@ export default function Home() {
         structuredData={structuredData}
       />
 
-      <HeroMinimalist onSearch={handleSearch} />
-      <StatsSection stats={stats} />
+      <HeroPremium onSearch={handleSearch} />
+      <StatsPremium stats={stats} />
       <FeaturedProperties properties={properties} loading={loading} />
       <HowItWorksSection />
       <TrustSection />
