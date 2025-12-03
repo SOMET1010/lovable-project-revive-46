@@ -62,7 +62,7 @@ export const ROUTES = {
     LIST: '/mes-contrats',
     DETAIL: '/contrat/:id',
     DETAIL_ENHANCED: '/contrat/:id/detaille',
-    CREATE: '/creer-contrat/:propertyId/:tenantId',
+    CREATE: '/creer-contrat/:propertyId',
     SIGN: '/signer-bail/:id',
   },
 
@@ -139,8 +139,8 @@ export function getScheduleVisitRoute(propertyId: string): string {
   return ROUTES.VISITS.SCHEDULE.replace(':id', propertyId);
 }
 
-export function getCreateContractRoute(propertyId: string, tenantId: string): string {
-  return ROUTES.CONTRACTS.CREATE.replace(':propertyId', propertyId).replace(':tenantId', tenantId);
+export function getCreateContractRoute(propertyId: string): string {
+  return ROUTES.CONTRACTS.CREATE.replace(':propertyId', propertyId);
 }
 
 export function getApplicationFormRoute(propertyId: string): string {
