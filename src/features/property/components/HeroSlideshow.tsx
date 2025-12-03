@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import '@/shared/styles/hero-troncature-fix.css';
 
 interface Slide {
   image: string;
