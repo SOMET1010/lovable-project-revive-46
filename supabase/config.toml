@@ -1,1 +1,7 @@
 project_id = "silkjqepcbhlflbdtvgg"
+
+[functions.ai-chatbot]
+verify_jwt = false
+
+[functions.suta-chat]
+verify_jwt = false
