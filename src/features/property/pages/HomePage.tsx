@@ -5,8 +5,8 @@ import { envConfig } from '@/shared/config/env.config';
 import { demoPropertyService } from '@/shared/services/demoDataService';
 import SEOHead, { createOrganizationStructuredData, createWebsiteStructuredData } from '@/shared/components/SEOHead';
 
-// New African Design Components
-import HeroAfrican from '../components/HeroAfrican';
+// Modern Minimalism Premium Components
+import HeroMinimalist from '../components/HeroMinimalist';
 import StatsSection from '../components/StatsSection';
 import FeaturedProperties from '../components/FeaturedProperties';
 import HowItWorksSection from '../components/HowItWorksSection';
@@ -105,7 +105,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--sand-50)]">
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-background-page)' }}>
       <SEOHead
         title="Mon Toit - Trouvez Votre Logement Idéal en Côte d'Ivoire | Abidjan, Yamoussoukro"
         description="Plus de 1000 propriétés vérifiées en Côte d'Ivoire. Appartements, villas, studios à Abidjan. Plateforme certifiée ANSUT avec paiement Mobile Money."
@@ -113,7 +113,7 @@ export default function Home() {
         structuredData={structuredData}
       />
 
-      <HeroAfrican onSearch={handleSearch} />
+      <HeroMinimalist onSearch={handleSearch} />
       <StatsSection stats={stats} />
       <FeaturedProperties properties={properties} loading={loading} />
       <HowItWorksSection />

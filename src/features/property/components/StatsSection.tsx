@@ -54,12 +54,28 @@ function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: strin
   }, [isVisible, value]);
 
   return (
-    <div ref={ref} className="font-display text-h1 font-bold text-[var(--terracotta-500)]">
+    <div 
+      ref={ref} 
+      className="font-bold"
+      style={{ 
+        fontSize: 'clamp(32px, 4vw, 48px)',
+        color: 'var(--color-primary-500)'
+      }}
+    >
       {count.toLocaleString()}{suffix}
     </div>
   );
 }
 
+/**
+ * StatsSection - Modern Minimalism Premium Design
+ * 
+ * Features:
+ * - Clean white background
+ * - 96px vertical padding
+ * - Subtle shadows on cards
+ * - Orange accents only on numbers
+ */
 export default function StatsSection({ stats }: StatsSectionProps) {
   const statItems = [
     {
@@ -93,74 +109,124 @@ export default function StatsSection({ stats }: StatsSectionProps) {
   ];
 
   return (
-    <section className="py-20 md:py-28 bg-white relative overflow-hidden">
-      {/* Subtle Pattern Background */}
-      <div className="absolute inset-0 pattern-dots opacity-30" />
-      
-      <div className="container relative z-10">
+    <section 
+      className="relative overflow-hidden"
+      style={{ 
+        backgroundColor: 'var(--color-background-page)',
+        paddingTop: 'var(--spacing-24)',
+        paddingBottom: 'var(--spacing-24)'
+      }}
+    >
+      <div className="container">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-2 rounded-full bg-[var(--terracotta-100)] text-[var(--terracotta-600)] text-sm font-semibold mb-4">
+          <span 
+            className="inline-block px-4 py-2 rounded-full text-sm font-semibold mb-4"
+            style={{ 
+              backgroundColor: 'var(--color-primary-50)',
+              color: 'var(--color-primary-600)'
+            }}
+          >
             Nos Chiffres
           </span>
-          <h2 className="text-h1 font-display text-[var(--earth-900)] mb-4">
+          <h2 
+            className="font-bold mb-4"
+            style={{ 
+              fontSize: 'clamp(28px, 4vw, 40px)',
+              color: 'var(--color-neutral-900)'
+            }}
+          >
             La confiance de milliers d'Ivoiriens
           </h2>
-          <p className="text-body-lg text-[var(--earth-700)] max-w-2xl mx-auto">
+          <p 
+            className="max-w-2xl mx-auto"
+            style={{ 
+              fontSize: '18px',
+              lineHeight: '1.6',
+              color: 'var(--color-neutral-700)'
+            }}
+          >
             Mon Toit connecte chaque jour propriétaires et locataires dans un environnement sécurisé et certifié
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {statItems.map((stat, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {statItems.map((stat) => (
             <div
               key={stat.label}
-              className="group relative bg-[var(--sand-50)] rounded-2xl p-8 text-center hover:bg-white hover:shadow-xl transition-all duration-300 border border-transparent hover:border-[var(--terracotta-200)]"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="group text-center transition-all duration-300"
+              style={{ 
+                backgroundColor: 'var(--color-background-surface)',
+                borderRadius: 'var(--border-radius-lg)',
+                padding: 'var(--spacing-8)',
+                boxShadow: 'var(--shadow-base)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                e.currentTarget.style.transform = 'translateY(-4px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = 'var(--shadow-base)';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
               {/* Icon */}
-              <div className="w-16 h-16 mx-auto mb-6 rounded-xl bg-gradient-to-br from-[var(--terracotta-500)] to-[var(--terracotta-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <stat.icon className="h-8 w-8 text-white" />
+              <div 
+                className="w-14 h-14 mx-auto mb-5 flex items-center justify-center transition-transform group-hover:scale-110"
+                style={{ 
+                  backgroundColor: 'var(--color-primary-500)',
+                  borderRadius: 'var(--border-radius-md)'
+                }}
+              >
+                <stat.icon className="h-7 w-7 text-white" />
               </div>
               
               {/* Counter */}
               <AnimatedCounter value={stat.value} suffix={stat.suffix} />
               
               {/* Label */}
-              <h3 className="text-h4 font-semibold text-[var(--earth-900)] mt-2 mb-1">
+              <h3 
+                className="font-semibold mt-2 mb-1"
+                style={{ 
+                  fontSize: '18px',
+                  color: 'var(--color-neutral-900)'
+                }}
+              >
                 {stat.label}
               </h3>
               
               {/* Description */}
-              <p className="text-sm text-[var(--earth-700)]">
+              <p style={{ fontSize: '14px', color: 'var(--color-neutral-700)' }}>
                 {stat.description}
               </p>
-              
-              {/* Decorative Corner */}
-              <div className="absolute top-0 right-0 w-20 h-20 overflow-hidden rounded-tr-2xl">
-                <div 
-                  className="absolute -top-10 -right-10 w-20 h-20 rotate-45 bg-[var(--terracotta-100)] opacity-0 group-hover:opacity-100 transition-opacity"
-                />
-              </div>
             </div>
           ))}
         </div>
 
         {/* Trust Badges */}
-        <div className="mt-16 flex flex-wrap items-center justify-center gap-8">
-          <div className="flex items-center gap-3 text-[var(--earth-700)]">
-            <Shield className="h-6 w-6 text-[var(--forest-500)]" />
+        <div 
+          className="mt-16 flex flex-wrap items-center justify-center gap-8"
+          style={{ color: 'var(--color-neutral-700)' }}
+        >
+          <div className="flex items-center gap-3">
+            <Shield className="h-6 w-6" style={{ color: 'var(--color-semantic-success)' }} />
             <span className="font-medium">Certifié ANSUT</span>
           </div>
-          <div className="w-px h-8 bg-[var(--sand-300)] hidden sm:block" />
-          <div className="flex items-center gap-3 text-[var(--earth-700)]">
-            <TrendingUp className="h-6 w-6 text-[var(--terracotta-500)]" />
+          <div 
+            className="w-px h-8 hidden sm:block"
+            style={{ backgroundColor: 'var(--color-neutral-200)' }}
+          />
+          <div className="flex items-center gap-3">
+            <TrendingUp className="h-6 w-6" style={{ color: 'var(--color-primary-500)' }} />
             <span className="font-medium">98% Satisfaction</span>
           </div>
-          <div className="w-px h-8 bg-[var(--sand-300)] hidden sm:block" />
-          <div className="flex items-center gap-3 text-[var(--earth-700)]">
-            <Users className="h-6 w-6 text-[var(--gold-500)]" />
+          <div 
+            className="w-px h-8 hidden sm:block"
+            style={{ backgroundColor: 'var(--color-neutral-200)' }}
+          />
+          <div className="flex items-center gap-3">
+            <Users className="h-6 w-6" style={{ color: 'var(--color-semantic-info)' }} />
             <span className="font-medium">Support 24/7</span>
           </div>
         </div>
