@@ -3,7 +3,6 @@ import { Mail, Phone, MapPin, Send, CheckCircle, AlertCircle, MessageCircle, Hel
 import { useContact } from '../hooks/useContact';
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
-import '../../../features/property/styles/homepage-modern.css';
 
 export default function ContactPage() {
   const { submitContact, isSubmitting, isSubmitted, error } = useContact();

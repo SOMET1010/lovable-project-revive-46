@@ -2,7 +2,6 @@ import { Search, Shield, FileText, CreditCard, Home as HomeIcon, Users, CheckCir
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
 import SEOHead from '@/shared/components/SEOHead';
-import '../../../features/property/styles/homepage-modern.css';
 
 interface StepCardProps {
   number: number;
