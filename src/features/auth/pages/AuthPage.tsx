@@ -14,6 +14,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
+  const [userType, setUserType] = useState<'locataire' | 'proprietaire' | 'agence'>('locataire');
   const [verificationType, setVerificationType] = useState<'email' | 'sms' | 'whatsapp'>('email');
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
   const [loading, setLoading] = useState(false);
@@ -192,7 +193,7 @@ export default function Auth() {
             return;
           }
           
-          const { error } = await signUp(email, password, { full_name: fullName, phone: phone || '' });
+          const { error } = await signUp(email, password, { full_name: fullName, phone: phone || '', user_type: userType });
           if (error) {
             console.error('Signup error:', error);
             if (error.message?.includes('already registered') || error.message?.includes('User already registered')) {
@@ -212,7 +213,8 @@ export default function Auth() {
           
           const { error } = await signUp(tempEmail, tempPassword, { 
             full_name: fullName, 
-            phone: phone
+            phone: phone,
+            user_type: userType
           });
           if (error) {
             console.error('Signup error:', error);
@@ -600,6 +602,48 @@ export default function Auth() {
                         label={`Numéro de téléphone${(verificationType !== 'sms' && verificationType !== 'whatsapp') ? ' (optionnel)' : ''}`}
                         autoValidate={true}
                       />
+                    </div>
+
+                    {/* Sélection du type d'utilisateur */}
+                    <div className="animate-slide-down" style={{ animationDelay: '0.1s' }}>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Je suis
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setUserType('locataire')}
+                          className={`p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                            userType === 'locataire'
+                              ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
+                              : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                          }`}
+                        >
+                          🏠 Locataire
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUserType('proprietaire')}
+                          className={`p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                            userType === 'proprietaire'
+                              ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
+                              : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                          }`}
+                        >
+                          🔑 Propriétaire
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUserType('agence')}
+                          className={`p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                            userType === 'agence'
+                              ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
+                              : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                          }`}
+                        >
+                          🏢 Agence
+                        </button>
+                      </div>
                     </div>
                   </>
                 )}
