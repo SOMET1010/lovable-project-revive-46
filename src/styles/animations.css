@@ -442,42 +442,14 @@
   animation-fill-mode: backwards;
 }
 
-.stagger-5 {
-  animation-delay: 0.5s;
-  animation-fill-mode: backwards;
-}
-
-.stagger-6 {
-  animation-delay: 0.6s;
-  animation-fill-mode: backwards;
-}
-
-.stagger-7 {
-  animation-delay: 0.7s;
-  animation-fill-mode: backwards;
-}
-
-.stagger-8 {
-  animation-delay: 0.8s;
-  animation-fill-mode: backwards;
-}
-
 /* Stagger delays alternatifs */
 .stagger-delay-1 { animation-delay: 0.1s; }
 .stagger-delay-2 { animation-delay: 0.2s; }
-.stagger-delay-3 { animation-delay: 0.3s; }
-.stagger-delay-4 { animation-delay: 0.4s; }
-.stagger-delay-5 { animation-delay: 0.5s; }
-.stagger-delay-6 { animation-delay: 0.6s; }
-.stagger-delay-7 { animation-delay: 0.7s; }
-.stagger-delay-8 { animation-delay: 0.8s; }
 
 /* Animation delays fixes */
 .delay-100 { animation-delay: 100ms; }
 .delay-200 { animation-delay: 200ms; }
 .delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
 
 .animation-delay-200 {
   animation-delay: 0.2s;
@@ -533,26 +505,7 @@
   transform: scale(1.05);
 }
 
-/* Link underline animation */
-.link-underline-animate {
-  position: relative;
-}
-
-.link-underline-animate::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 50%;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #e86244, #d4a574);
-  transition: all 0.3s ease;
-}
-
-.link-underline-animate:hover::after {
-  width: 100%;
-  left: 0;
-}
+/* Button ripple */
 
 /* Button ripple */
 .btn-ripple {
@@ -624,12 +577,6 @@
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
 }
 
-.glass-african-dark {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
 /* Gradients */
 .gradient-terracotta-gold {
@@ -665,12 +612,6 @@
   background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
 }
 
-.pattern-bogolan {
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(232, 98, 68, 0.08) 2px, transparent 2px),
-    radial-gradient(circle at 75% 75%, rgba(212, 165, 116, 0.08) 2px, transparent 2px);
-  background-size: 30px 30px;
-}
 
 /* 3D tilt effect */
 .tilt-3d {
@@ -726,12 +667,6 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
 
 /* Premium shadows */
 .shadow-premium-hover {
@@ -773,13 +708,6 @@
   box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
 }
 
-.hover-brightness {
-  transition: filter 0.3s ease;
-}
-
-.hover-brightness:hover {
-  filter: brightness(1.1);
-}
 
 /* Premium button */
 .btn-premium {
@@ -981,7 +909,6 @@ html {
   .hover-glow-terracotta:hover,
   .hover-scale:hover,
   .hover-glow:hover,
-  .hover-brightness:hover,
   .tilt-3d:hover,
   .card-premium:hover {
     transform: none !important;
