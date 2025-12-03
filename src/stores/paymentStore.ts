@@ -11,6 +11,7 @@ import type {
   PaymentCalculation,
   PaymentError,
 } from '@/shared/types/payment.types';
+import { PaymentErrorCode } from '@/shared/types/payment.types';
 
 const paymentRepo = new PaymentRepository();
 
@@ -126,10 +127,10 @@ export const usePaymentStore = create<PaymentState>()(
             logger.info('Payment initiated successfully', { paymentId: response.paymentId });
             return response;
           } catch (error) {
-            logger.error('Payment initiation failed', error);
+            logger.error('Payment initiation failed', error instanceof Error ? error : undefined);
 
             const paymentError: PaymentError = {
-              code: 'UNKNOWN_ERROR',
+              code: PaymentErrorCode.UNKNOWN_ERROR,
               message:
                 error instanceof Error
                   ? error.message
@@ -147,7 +148,8 @@ export const usePaymentStore = create<PaymentState>()(
           try {
             logger.info('Checking payment status', { paymentId });
 
-            const status = await paymentRepo.checkPaymentStatus(paymentId);
+            const payment = await paymentRepo.getPaymentById(paymentId);
+            const status = (payment?.status as PaymentStatus) || 'failed';
 
             if (get().currentPayment?.paymentId === paymentId) {
               set({
@@ -160,7 +162,7 @@ export const usePaymentStore = create<PaymentState>()(
 
             return status;
           } catch (error) {
-            logger.error('Error checking payment status', error, { paymentId });
+            logger.error('Error checking payment status', error instanceof Error ? error : undefined, { paymentId });
             return 'failed';
           }
         },
@@ -170,7 +172,7 @@ export const usePaymentStore = create<PaymentState>()(
           try {
             logger.info('Cancelling payment', { paymentId });
 
-            await paymentRepo.cancelPayment(paymentId);
+            await paymentRepo.updatePaymentStatus(paymentId, { status: 'cancelled' as const });
 
             if (get().currentPayment?.paymentId === paymentId) {
               set({
@@ -184,7 +186,7 @@ export const usePaymentStore = create<PaymentState>()(
 
             logger.info('Payment cancelled successfully', { paymentId });
           } catch (error) {
-            logger.error('Error cancelling payment', error, { paymentId });
+            logger.error('Error cancelling payment', error instanceof Error ? error : undefined, { paymentId });
             throw error;
           }
         },
@@ -196,12 +198,12 @@ export const usePaymentStore = create<PaymentState>()(
           try {
             logger.info('Fetching payment history', { tenantId });
 
-            const payments = await paymentRepo.getPaymentsByTenant(tenantId);
+            const payments = await paymentRepo.getPaymentHistory({ tenantId });
 
             set({ payments, paymentsFetching: false });
             logger.info('Payment history fetched', { count: payments.length });
           } catch (error) {
-            logger.error('Error fetching payment history', error, { tenantId });
+            logger.error('Error fetching payment history', error instanceof Error ? error : undefined, { tenantId });
             set({ paymentsFetching: false });
           }
         },

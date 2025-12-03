@@ -11,7 +11,7 @@ interface SmilelessVerificationProps {
 }
 
 const SmilelessVerification: React.FC<SmilelessVerificationProps> = ({
-  userId,
+  userId: _userId,
   cniPhotoUrl,
   onVerified,
   onFailed,
@@ -98,4 +98,3 @@ const SmilelessVerification: React.FC<SmilelessVerificationProps> = ({
 };
 
 export default SmilelessVerification;
-

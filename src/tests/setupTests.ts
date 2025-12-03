@@ -1,17 +1,18 @@
 // Configuration des tests pour éviter les erreurs JavaScript
-import '@testing-library/jest-dom';
+import { vi, beforeAll, afterAll } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 
 // Mock global pour les APIs du navigateur
-global.fetch = jest.fn();
-global.URL.createObjectURL = jest.fn(() => 'mock-url');
-global.URL.revokeObjectURL = jest.fn();
+global.fetch = vi.fn();
+global.URL.createObjectURL = vi.fn(() => 'mock-url');
+global.URL.revokeObjectURL = vi.fn();
 
 // Mock du localStorage
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
@@ -19,10 +20,10 @@ Object.defineProperty(window, 'localStorage', {
 
 // Mock du sessionStorage
 const sessionStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 };
 Object.defineProperty(window, 'sessionStorage', {
   value: sessionStorageMock
@@ -30,27 +31,29 @@ Object.defineProperty(window, 'sessionStorage', {
 
 // Mock de l'intersection observer
 global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
+  readonly root: Element | null = null;
+  readonly rootMargin: string = '';
+  readonly thresholds: ReadonlyArray<number> = [];
+  
+  constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
   observe() { return null; }
   disconnect() { return null; }
   unobserve() { return null; }
+  takeRecords(): IntersectionObserverEntry[] { return []; }
 };
 
 // Mock de resize observer
 global.ResizeObserver = class ResizeObserver {
-  constructor() {}
+  constructor(_callback: ResizeObserverCallback) {}
   observe() { return null; }
   disconnect() { return null; }
   unobserve() { return null; }
 };
 
-// Configuration des timeouts pour les tests
-jest.setTimeout(30000);
-
 // Configuration de console pour les tests
 const originalError = console.error;
 beforeAll(() => {
-  console.error = (...args) => {
+  console.error = (...args: unknown[]) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('Warning: ReactDOM.render is no longer supported')
