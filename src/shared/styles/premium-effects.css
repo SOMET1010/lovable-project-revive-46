@@ -1,5 +1,27 @@
 /* Premium Effects & Animations for Mon Toit */
 
+/* ===== PARALLAX EFFECTS ===== */
+
+/* Container pour contenu avec parallax */
+.parallax-container {
+  overflow: hidden;
+  position: relative;
+}
+
+/* Image avec parallax */
+.parallax-image {
+  will-change: transform;
+  transition: transform 0.05s linear;
+}
+
+/* Désactivation pour accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  .parallax-image {
+    transform: none !important;
+    will-change: auto;
+  }
+}
+
 /* ===== BADGE NOTIFICATION PULSE ===== */
 @keyframes badgeNotificationPulse {
   0%, 100% {

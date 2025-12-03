@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, MapPin, Home, Coins } from 'lucide-react';
+import { useParallax } from '@/shared/hooks';
 
 interface HeroSimplifiedProps {
   onSearch: (filters: SearchFilters) => void;
@@ -23,6 +24,7 @@ export default function HeroSimplified({
   const [city, setCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
+  const { offset, isEnabled } = useParallax({ factor: 0.2 });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,12 +54,16 @@ export default function HeroSimplified({
       role="banner"
       aria-label="Section de recherche de propriétés"
     >
-      {/* Image de fond statique */}
-      <div className="absolute inset-0">
+      {/* Image de fond avec Parallax */}
+      <div className="absolute inset-0 overflow-hidden">
         <img
           src={backgroundImage}
           alt="Résidence moderne"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover motion-reduce:transform-none"
+          style={{
+            transform: isEnabled ? `translateY(${offset}px) scale(1.1)` : 'scale(1)',
+            willChange: isEnabled ? 'transform' : 'auto',
+          }}
           loading="eager"
         />
       </div>
