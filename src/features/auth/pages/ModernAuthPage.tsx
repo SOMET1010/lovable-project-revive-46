@@ -39,6 +39,7 @@ export default function ModernAuthPage() {
   const [regPhone, setRegPhone] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regConfirm, setRegConfirm] = useState('');
+  const [regUserType, setRegUserType] = useState<'locataire' | 'proprietaire' | 'agence'>('locataire');
 
   // Timer countdown
   useEffect(() => {
@@ -173,6 +174,7 @@ export default function ModernAuthPage() {
           data: {
             full_name: regName,
             phone: regPhone,
+            user_type: regUserType,
           },
         },
       });
@@ -556,6 +558,46 @@ export default function ModernAuthPage() {
                     className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
                     required
                   />
+                </div>
+              </div>
+
+              {/* Sélection du type d'utilisateur */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Je suis</label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRegUserType('locataire')}
+                    className={`p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                      regUserType === 'locataire'
+                        ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700 shadow-md'
+                        : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    🏠 Locataire
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRegUserType('proprietaire')}
+                    className={`p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                      regUserType === 'proprietaire'
+                        ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700 shadow-md'
+                        : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    🔑 Propriétaire
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRegUserType('agence')}
+                    className={`p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                      regUserType === 'agence'
+                        ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700 shadow-md'
+                        : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    🏢 Agence
+                  </button>
                 </div>
               </div>
 
