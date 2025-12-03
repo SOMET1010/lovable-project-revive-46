@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import '../../shared/styles/hero-troncature-fix.css';
 
@@ -12,6 +12,30 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
   const [propertyType, setPropertyType] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
   const [titleVisible, setTitleVisible] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
+  
+  // Check for reduced motion preference
+  const prefersReducedMotion = typeof window !== 'undefined' 
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
+    : false;
+
+  // Parallax scroll handler
+  const handleScroll = useCallback(() => {
+    if (!prefersReducedMotion) {
+      setScrollY(window.scrollY);
+    }
+  }, [prefersReducedMotion]);
+
+  // Scroll listener for parallax
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [handleScroll, prefersReducedMotion]);
+
+  // Calculate parallax transform (subtle 0.3 factor)
+  const parallaxOffset = prefersReducedMotion ? 0 : scrollY * 0.3;
 
   const heroImages = [
     '/images/hero/hero1.jpg',
@@ -51,15 +75,25 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
 
   return (
     <section className="relative h-[500px] sm:h-[600px] bg-gray-900 overflow-hidden hero-overlay-enhanced">
-      {/* Diaporama avec effet blur artistique */}
+      {/* Diaporama avec effet parallaxe */}
       {heroImages.map((image, index) => (
         <div
           key={image}
-          className={`hero-slide-image absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+          className={`hero-slide-image absolute inset-0 transition-opacity duration-1000 ${
             index === currentSlide ? 'opacity-100' : 'opacity-0'
           }`}
-          style={{ backgroundImage: `url(${image})` }}
+          style={{
+            transform: `translateY(${parallaxOffset}px) scale(1.1)`,
+            willChange: prefersReducedMotion ? 'auto' : 'transform',
+          }}
         >
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ 
+              backgroundImage: `url(${image})`,
+              transform: 'scale(1.1)', // Extra scale to prevent white edges during parallax
+            }}
+          />
           <div className="absolute inset-0 bg-black/70"></div>
         </div>
       ))}
