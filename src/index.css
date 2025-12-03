@@ -5,11 +5,17 @@
 /* Design System - Variables CSS centralisées */
 @import './styles/design-system.css';
 
-/* Animations consolidées */
+/* Animations consolidées (inclut premium-effects) */
 @import './styles/animations.css';
 
-/* Styles hero optimisés */
+/* Styles hero */
 @import './shared/styles/hero-spectacular.css';
+
+/* Styles mobile et layout */
+@import './shared/styles/mobile-optimization.css';
+@import './shared/styles/mobile-menu.css';
+@import './shared/styles/breadcrumb.css';
+@import './shared/styles/header-footer-premium.css';
 
 @tailwind base;
 @tailwind components;
