@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { Button } from './Button';
-import { Input } from './Input';
+import Input from './Input';
 import { Card, CardHeader, CardBody, CardFooter, CardTitle, CardDescription } from './Card';
 
 // Icônes d'exemple (sans lucide-react pour éviter les dépendances)
@@ -22,11 +22,11 @@ const LockIcon = () => (
 );
 
 export function UIComponentsDemo() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Record<string, string>>({
     email: '',
     password: '',
   });
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -37,18 +37,18 @@ export function UIComponentsDemo() {
   };
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
+    const newErrors: Record<string, string> = {};
     
-    if (!formData.email) {
-      newErrors.email = 'L\'adresse email est requise';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Format d\'email invalide';
+    if (!formData['email']) {
+      newErrors['email'] = 'L\'adresse email est requise';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData['email'] ?? '')) {
+      newErrors['email'] = 'Format d\'email invalide';
     }
     
-    if (!formData.password) {
-      newErrors.password = 'Le mot de passe est requis';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Le mot de passe doit contenir au moins 8 caractères';
+    if (!formData['password']) {
+      newErrors['password'] = 'Le mot de passe est requis';
+    } else if ((formData['password']?.length ?? 0) < 8) {
+      newErrors['password'] = 'Le mot de passe doit contenir au moins 8 caractères';
     }
     
     setErrors(newErrors);
@@ -121,9 +121,9 @@ export function UIComponentsDemo() {
               <Input
                 label="Adresse email"
                 type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                error={errors.email}
+                value={formData['email'] ?? ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('email', e.target.value)}
+                error={errors['email']}
                 helperText="Nous ne partageons jamais votre email"
                 leftIcon={<MailIcon />}
                 required
@@ -134,9 +134,9 @@ export function UIComponentsDemo() {
               <Input
                 label="Mot de passe"
                 type="password"
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                error={errors.password}
+                value={formData['password'] ?? ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleInputChange('password', e.target.value)}
+                error={errors['password']}
                 helperText="Au moins 8 caractères"
                 leftIcon={<LockIcon />}
                 required

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './Car
 interface NeofaceVerificationProps {
   userId: string;
   cniPhotoUrl: string;
-  onVerified: (verificationData: any) => void;
+  onVerified: (verificationData: unknown) => void;
   onFailed: (error: string) => void;
 }
 
@@ -37,9 +37,9 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const [isVerifying, setIsVerifying] = useState(false);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'waiting' | 'polling' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
-  const [documentId, setDocumentId] = useState<string | null>(null);
+  const [_documentId, setDocumentId] = useState<string | null>(null);
   const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
-  const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [_verificationId, setVerificationId] = useState<string | null>(null);
   const [matchingScore, setMatchingScore] = useState<number | null>(null);
   const [attempts, setAttempts] = useState(0);
   const [progress, setProgress] = useState('');
@@ -62,8 +62,8 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   }, []);
 
   const uploadDocument = async (): Promise<VerificationResponse> => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
+    const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
 
     const response = await fetch(`${supabaseUrl}/functions/v1/neoface-verify`, {
       method: 'POST',
@@ -90,8 +90,8 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     docId: string,
     verifyId: string
   ): Promise<StatusResponse> => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
+    const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
 
     const response = await fetch(`${supabaseUrl}/functions/v1/neoface-verify`, {
       method: 'POST',
@@ -294,7 +294,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
                 <Button
                   onClick={handleReopenWindow}
                   variant="outline"
-                  size="sm"
+                  size="small"
                   className="mt-2"
                 >
                   Rouvrir la fenêtre

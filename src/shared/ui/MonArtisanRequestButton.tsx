@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Wrench, Send, X, Calendar, Coins, Clock } from 'lucide-react';
-import { monartisanService } from '../services/monartisanService';
+import { monartisanService } from '@/shared/services/monartisanService';
 
 interface MonArtisanRequestButtonProps {
   maintenanceRequestId: string;
@@ -103,7 +103,7 @@ export default function MonArtisanRequestButton({
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        urgency_level: e.target.value as any,
+                        urgency_level: e.target.value as 'low' | 'medium' | 'high' | 'emergency',
                       })
                     }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"

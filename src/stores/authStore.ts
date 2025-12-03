@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { User, Session, AuthError } from '@supabase/supabase-js';
+import { User, Session, AuthError, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 import { testDatabaseConnection } from '@/shared/lib/helpers/supabaseHealthCheck';
@@ -64,6 +64,9 @@ export const useAuthStore = create<AuthState>()(
                 const demoUser = {
                   id: 'demo-user-123',
                   email: 'demo@montoit.ci',
+                  aud: 'authenticated',
+                  created_at: new Date().toISOString(),
+                  app_metadata: {},
                   user_metadata: { 
                     full_name: 'Utilisateur Démo',
                     user_type: 'locataire'
@@ -85,7 +88,15 @@ export const useAuthStore = create<AuthState>()(
                     email: 'demo@montoit.ci',
                     full_name: 'Utilisateur Démo',
                     user_type: 'locataire',
+                    active_role: 'locataire',
+                    available_roles: ['locataire'],
                     phone: '+225 XX XX XX XX',
+                    avatar_url: null,
+                    bio: null,
+                    city: 'Abidjan',
+                    address: null,
+                    is_verified: false,
+                    profile_setup_completed: true,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString()
                   },
@@ -110,7 +121,7 @@ export const useAuthStore = create<AuthState>()(
             set({ initialized: true, loading: false });
 
             // Set up auth state listener
-            supabase.auth.onAuthStateChange((_event, session) => {
+            supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
               (async () => {
                 set({ session, user: session?.user ?? null });
                 if (session?.user) {
@@ -226,7 +237,7 @@ export const useAuthStore = create<AuthState>()(
 
             console.log('[AuthStore] Profile loaded successfully');
             set({ profile: data, loading: false, profileError: null, retryCount: 0 });
-          } catch (error: any) {
+          } catch (error: unknown) {
             console.error('[AuthStore] Unexpected error loading profile:', error);
 
             if (retryAttempt < MAX_RETRIES) {
@@ -240,7 +251,7 @@ export const useAuthStore = create<AuthState>()(
               profileError: {
                 type: 'unknown',
                 message: 'Erreur inattendue',
-                details: error.message || 'Une erreur inconnue s\'est produite.',
+                details: error instanceof Error ? error.message : 'Une erreur inconnue s\'est produite.',
                 timestamp: new Date()
               },
               loading: false

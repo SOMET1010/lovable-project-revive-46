@@ -1,11 +1,12 @@
-import React, { HTMLAttributes, ReactNode } from 'react';
+import { HTMLAttributes, ReactNode, MouseEventHandler } from 'react';
 
-export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+export interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onClick'> {
   variant?: 'default' | 'bordered' | 'elevated' | 'interactive';
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   hoverable?: boolean;
   clickable?: boolean;
   role?: string;
+  onClick?: MouseEventHandler<HTMLElement>;
 }
 
 export function Card({
@@ -93,7 +94,7 @@ export function Card({
       <button 
         className={classes}
         role={role}
-        onClick={onClick as React.MouseEventHandler<HTMLButtonElement>}
+        onClick={onClick as MouseEventHandler<HTMLButtonElement>}
         type="button"
       >
         {children}
@@ -112,6 +113,7 @@ export function Card({
     <div 
       className={classes}
       role={role}
+      onClick={onClick as MouseEventHandler<HTMLDivElement>}
       {...props}
     >
       {children}

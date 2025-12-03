@@ -77,18 +77,22 @@ export default function SimpleLineChart({
           </g>
         ))}
 
-        {data.map((item, index) => (
-          <text
-            key={index}
-            x={points[index].x}
-            y={height - 5}
-            textAnchor="middle"
-            className="text-xs fill-gray-600"
-            style={{ fontSize: '10px' }}
-          >
-            {item.label}
-          </text>
-        ))}
+        {data.map((item, index) => {
+          const point = points[index];
+          if (!point) return null;
+          return (
+            <text
+              key={index}
+              x={point.x}
+              y={height - 5}
+              textAnchor="middle"
+              className="text-xs fill-gray-600"
+              style={{ fontSize: '10px' }}
+            >
+              {item.label}
+            </text>
+          );
+        })}
       </svg>
     </div>
   );
