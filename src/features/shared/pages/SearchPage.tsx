@@ -123,12 +123,12 @@ const PropertyCard: React.FC<{ property: typeof SAMPLE_PROPERTIES[0] }> = ({ pro
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-      <div className="relative">
+    <div className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300">
+      <div className="relative overflow-hidden">
         <img
           src={property.mainImage}
           alt={property.title}
-          className="w-full h-48 object-cover"
+          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
           onError={(e) => {
             e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(property.title)}&background=3b82f6&color=fff&size=400`;
           }}

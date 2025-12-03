@@ -19,7 +19,7 @@ function PropertyCard({ property }: { property: Property }) {
         <img
           src={property.images?.[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'}
           alt={property.title || 'Propriété'}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         
         {/* Gradient Overlay */}

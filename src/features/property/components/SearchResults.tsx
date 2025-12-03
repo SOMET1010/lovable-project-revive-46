@@ -64,14 +64,14 @@ function PropertyCard({ property, onClick }: PropertyCardProps) {
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+      className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
     >
       {/* Image */}
       <div className="relative h-48 overflow-hidden">
         <img
           src={mainImage}
           alt={property.title}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
         {property.property_category === 'commercial' && (
