@@ -92,9 +92,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       'items-center'
     ].filter(Boolean).join(' ');
 
-    const leftIconClasses = leftIcon ? 'pl-4 pr-3' : 'pl-4 pr-4';
-    const rightIconClasses = rightIcon ? 'pr-4 pl-3' : 'pl-4 pr-4';
-    const inputPadding = leftIcon && rightIcon ? 'px-3' : leftIcon ? 'pr-3' : rightIcon ? 'pl-3' : '';
+    // Variables for potential future icon padding adjustments (currently handled inline)
 
     return (
       <div className={containerClasses}>

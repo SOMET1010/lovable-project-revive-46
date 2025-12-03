@@ -7,6 +7,7 @@ import type {
   PaymentRequest,
   PaymentResponse,
   PaymentStatus,
+  PaymentUpdate,
   MobileMoneyProvider,
   PaymentCalculation,
   PaymentError,
@@ -172,7 +173,7 @@ export const usePaymentStore = create<PaymentState>()(
           try {
             logger.info('Cancelling payment', { paymentId });
 
-            await paymentRepo.updatePaymentStatus(paymentId, { status: 'cancelled' as const });
+            await paymentRepo.updatePaymentStatus(paymentId, { status: 'cancelled' } as unknown as PaymentUpdate);
 
             if (get().currentPayment?.paymentId === paymentId) {
               set({

@@ -94,7 +94,8 @@ export default function LanguageSelector({
     }
   };
 
-  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === currentLanguage) || SUPPORTED_LANGUAGES[0];
+  const defaultLang: Language = SUPPORTED_LANGUAGES[0]!;
+  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === currentLanguage) ?? defaultLang;
 
   return (
     <div className="relative">

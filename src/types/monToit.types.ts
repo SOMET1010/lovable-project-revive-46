@@ -3,7 +3,41 @@
  * Remplace les types 'any' incorrects par des interfaces typées
  */
 
-import type { Database } from '@/shared/lib/database.types';
+// Database type removed - not used in this file
+
+/**
+ * Adresse
+ */
+export interface Address {
+  street: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  neighborhood?: string;
+}
+
+/**
+ * Contact d'urgence
+ */
+export interface EmergencyContact {
+  name: string;
+  relationship: string;
+  phone: string;
+  email?: string;
+}
+
+/**
+ * Métadonnées de candidature
+ */
+export interface ApplicationMetadata {
+  ipAddress?: string;
+  userAgent?: string;
+  referrer?: string;
+  submittedFrom: 'web' | 'mobile' | 'admin';
+  priority: 'normale' | 'elevee' | 'urgente';
+  notes?: string;
+  adminNotes?: string;
+}
 
 // ============================================================================
 // TYPES UTILISATEUR ET PROFIL

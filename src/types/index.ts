@@ -161,7 +161,7 @@ export type Nullable<T> = T | null;
 export type Optional<T> = T | undefined;
 export type AsyncFunction<T = void> = () => Promise<T>;
 
-// Re-export application types
+// Re-export application types (excluding ApplicationNotification which is defined locally)
 export type {
   Application,
   ApplicationStatus,
@@ -179,7 +179,6 @@ export type {
   CreditInfo,
   CoApplicant,
   Guarantees,
-  ApplicationNotification,
   ApplicationFormData,
   ApplicationFilters,
   ApplicationPagination,

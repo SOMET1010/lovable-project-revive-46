@@ -4,6 +4,13 @@
 
 import type { Database } from '@/shared/lib/database.types';
 
+// Type pour les erreurs API
+export interface ApiError {
+  message: string;
+  code?: string;
+  details?: unknown;
+}
+
 // Types de base pour les candidatures
 export type ApplicationStatus = 'en_attente' | 'en_cours' | 'acceptee' | 'refusee' | 'annulee';
 
