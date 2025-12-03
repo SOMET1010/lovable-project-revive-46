@@ -10,8 +10,6 @@ import {
   ArrowDown,
   Coins,
 } from 'lucide-react';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 
 interface ServiceConfig {
   id: string;

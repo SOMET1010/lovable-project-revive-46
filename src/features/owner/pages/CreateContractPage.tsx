@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { ArrowLeft, FileText, Calendar, Coins } from 'lucide-react';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 
 interface Property {
   id: string;

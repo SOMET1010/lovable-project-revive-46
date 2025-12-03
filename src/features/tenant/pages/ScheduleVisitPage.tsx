@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Calendar, Clock, Video, MapPin, ArrowLeft, Check } from 'lucide-react';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 
 interface Property {
   id: string;
@@ -144,258 +142,238 @@ export default function ScheduleVisit() {
 
   if (!user) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Connexion requise
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Veuillez vous connecter pour planifier une visite
-            </p>
-            <a
-              href="/connexion"
-              className="btn-primary inline-block"
-            >
-              Se connecter
-            </a>
-          </div>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <Calendar className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-neutral-900 mb-2">
+            Connexion requise
+          </h2>
+          <p className="text-neutral-600 mb-4">
+            Veuillez vous connecter pour planifier une visite
+          </p>
+          <a
+            href="/connexion"
+            className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
+          >
+            Se connecter
+          </a>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Chargement...</p>
-          </div>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+          <p className="text-neutral-600">Chargement...</p>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   if (!property) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-gray-600">Propriété non trouvée</p>
-          </div>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-neutral-600">Propriété non trouvée</p>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   if (success) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-10 h-10 text-green-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Visite planifiée avec succès !
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Vous recevrez une confirmation par email
-            </p>
-            <p className="text-sm text-gray-500">
-              Redirection en cours...
-            </p>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Check className="w-10 h-10 text-green-600" />
           </div>
+          <h2 className="text-2xl font-bold text-neutral-900 mb-2">
+            Visite planifiée avec succès !
+          </h2>
+          <p className="text-neutral-600 mb-4">
+            Vous recevrez une confirmation par email
+          </p>
+          <p className="text-sm text-neutral-500">
+            Redirection en cours...
+          </p>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-gray-50 pt-20 pb-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <button
-            onClick={() => window.history.back()}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-6"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Retour</span>
-          </button>
+    <div className="min-h-screen bg-neutral-50 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button
+          onClick={() => window.history.back()}
+          className="flex items-center space-x-2 text-neutral-600 hover:text-neutral-900 mb-6"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Retour</span>
+        </button>
 
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
-            <div className="flex items-center space-x-4 p-6">
-              {property.main_image && (
-                <img
-                  src={property.main_image}
-                  alt={property.title}
-                  className="w-24 h-24 rounded-lg object-cover"
-                />
-              )}
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  Planifier une visite
-                </h1>
-                <p className="text-gray-600">{property.title}</p>
-                <p className="text-sm text-gray-500">{property.address}, {property.city}</p>
-              </div>
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
+          <div className="flex items-center space-x-4 p-6">
+            {property.main_image && (
+              <img
+                src={property.main_image}
+                alt={property.title}
+                className="w-24 h-24 rounded-lg object-cover"
+              />
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-neutral-900 mb-2">
+                Planifier une visite
+              </h1>
+              <p className="text-neutral-600">{property.title}</p>
+              <p className="text-sm text-neutral-500">{property.address}, {property.city}</p>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-6 space-y-6">
+          <div>
+            <label className="block text-sm font-semibold text-neutral-900 mb-3">
+              Type de visite
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setVisitType('physique')}
+                className={`p-4 rounded-lg border-2 transition ${
+                  visitType === 'physique'
+                    ? 'border-primary-500 bg-primary-50'
+                    : 'border-neutral-200 hover:border-neutral-300'
+                }`}
+              >
+                <MapPin className={`w-8 h-8 mx-auto mb-2 ${
+                  visitType === 'physique' ? 'text-primary-500' : 'text-neutral-400'
+                }`} />
+                <p className="font-semibold text-neutral-900">Visite physique</p>
+                <p className="text-xs text-neutral-500 mt-1">Visitez le bien en personne</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setVisitType('virtuelle')}
+                className={`p-4 rounded-lg border-2 transition ${
+                  visitType === 'virtuelle'
+                    ? 'border-primary-500 bg-primary-50'
+                    : 'border-neutral-200 hover:border-neutral-300'
+                }`}
+              >
+                <Video className={`w-8 h-8 mx-auto mb-2 ${
+                  visitType === 'virtuelle' ? 'text-primary-500' : 'text-neutral-400'
+                }`} />
+                <p className="font-semibold text-neutral-900">Visite virtuelle</p>
+                <p className="text-xs text-neutral-500 mt-1">Visitez par vidéo conférence</p>
+              </button>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg p-6 space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-3">
-                Type de visite
-              </label>
-              <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-neutral-900 mb-3">
+              <Calendar className="w-4 h-4 inline mr-2" />
+              Choisir une date
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              {getNextDays(14).map((date) => (
                 <button
+                  key={date.toISOString()}
                   type="button"
-                  onClick={() => setVisitType('physique')}
-                  className={`p-4 rounded-lg border-2 transition ${
-                    visitType === 'physique'
-                      ? 'border-orange-500 bg-orange-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                  onClick={() => {
+                    setSelectedDate(date);
+                    setSelectedTime('');
+                  }}
+                  className={`p-3 rounded-lg border-2 transition text-center ${
+                    selectedDate?.toDateString() === date.toDateString()
+                      ? 'border-primary-500 bg-primary-50'
+                      : 'border-neutral-200 hover:border-neutral-300'
                   }`}
                 >
-                  <MapPin className={`w-8 h-8 mx-auto mb-2 ${
-                    visitType === 'physique' ? 'text-orange-500' : 'text-gray-400'
-                  }`} />
-                  <p className="font-semibold text-gray-900">Visite physique</p>
-                  <p className="text-xs text-gray-500 mt-1">Visitez le bien en personne</p>
+                  <p className={`text-sm font-semibold ${
+                    selectedDate?.toDateString() === date.toDateString()
+                      ? 'text-primary-600'
+                      : 'text-neutral-900'
+                  }`}>
+                    {formatDate(date)}
+                  </p>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setVisitType('virtuelle')}
-                  className={`p-4 rounded-lg border-2 transition ${
-                    visitType === 'virtuelle'
-                      ? 'border-orange-500 bg-orange-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <Video className={`w-8 h-8 mx-auto mb-2 ${
-                    visitType === 'virtuelle' ? 'text-orange-500' : 'text-gray-400'
-                  }`} />
-                  <p className="font-semibold text-gray-900">Visite virtuelle</p>
-                  <p className="text-xs text-gray-500 mt-1">Visitez par vidéo conférence</p>
-                </button>
-              </div>
+              ))}
             </div>
+          </div>
 
+          {selectedDate && (
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-3">
-                <Calendar className="w-4 h-4 inline mr-2" />
-                Choisir une date
+              <label className="block text-sm font-semibold text-neutral-900 mb-3">
+                <Clock className="w-4 h-4 inline mr-2" />
+                Choisir un horaire
               </label>
-              <div className="grid grid-cols-3 gap-3">
-                {getNextDays(14).map((date) => (
-                  <button
-                    key={date.toISOString()}
-                    type="button"
-                    onClick={() => {
-                      setSelectedDate(date);
-                      setSelectedTime('');
-                    }}
-                    className={`p-3 rounded-lg border-2 transition text-center ${
-                      selectedDate?.toDateString() === date.toDateString()
-                        ? 'border-orange-500 bg-orange-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <p className={`text-sm font-semibold ${
-                      selectedDate?.toDateString() === date.toDateString()
-                        ? 'text-orange-600'
-                        : 'text-gray-900'
-                    }`}>
-                      {formatDate(date)}
-                    </p>
-                  </button>
-                ))}
-              </div>
+              {loadingSlots ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto"></div>
+                </div>
+              ) : availableSlots.length === 0 ? (
+                <div className="text-center py-8 text-neutral-500">
+                  Aucun créneau disponible pour cette date
+                </div>
+              ) : (
+                <div className="grid grid-cols-4 gap-3">
+                  {availableSlots.map((slot) => (
+                    <button
+                      key={slot.time_slot}
+                      type="button"
+                      onClick={() => setSelectedTime(slot.time_slot)}
+                      disabled={!slot.is_available}
+                      className={`p-3 rounded-lg border-2 transition ${
+                        selectedTime === slot.time_slot
+                          ? 'border-primary-500 bg-primary-50 text-primary-600'
+                          : slot.is_available
+                          ? 'border-neutral-200 hover:border-neutral-300 text-neutral-900'
+                          : 'border-neutral-100 bg-neutral-50 text-neutral-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {formatTime(slot.time_slot)}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+          )}
 
-            {selectedDate && (
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  <Clock className="w-4 h-4 inline mr-2" />
-                  Choisir un horaire
-                </label>
-                {loadingSlots ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-                  </div>
-                ) : availableSlots.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    Aucun créneau disponible pour cette date
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-4 gap-3">
-                    {availableSlots.map((slot) => (
-                      <button
-                        key={slot.time_slot}
-                        type="button"
-                        onClick={() => setSelectedTime(slot.time_slot)}
-                        disabled={!slot.is_available}
-                        className={`p-3 rounded-lg border-2 transition ${
-                          selectedTime === slot.time_slot
-                            ? 'border-orange-500 bg-orange-50 text-orange-600'
-                            : slot.is_available
-                            ? 'border-gray-200 hover:border-gray-300 text-gray-900'
-                            : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
-                        }`}
-                      >
-                        {formatTime(slot.time_slot)}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+          <div>
+            <label className="block text-sm font-semibold text-neutral-900 mb-2">
+              Notes supplémentaires (optionnel)
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={4}
+              placeholder="Ajoutez des informations supplémentaires pour le propriétaire..."
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Notes supplémentaires (optionnel)
-              </label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={4}
-                placeholder="Ajoutez des informations supplémentaires pour le propriétaire..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
-
-            <div className="flex items-center justify-between pt-4 border-t">
-              <button
-                type="button"
-                onClick={() => window.history.back()}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
-              >
-                Annuler
-              </button>
-              <button
-                type="submit"
-                disabled={!selectedDate || !selectedTime || submitting}
-                className="px-8 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? 'Planification...' : 'Confirmer la visite'}
-              </button>
-            </div>
-          </form>
-        </div>
+          <div className="flex items-center justify-between pt-4 border-t">
+            <button
+              type="button"
+              onClick={() => window.history.back()}
+              className="px-6 py-3 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              disabled={!selectedDate || !selectedTime || submitting}
+              className="px-8 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? 'Planification...' : 'Confirmer la visite'}
+            </button>
+          </div>
+        </form>
       </div>
-      <Footer />
-    </>
+    </div>
   );
 }
