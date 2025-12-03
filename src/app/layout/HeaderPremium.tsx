@@ -3,14 +3,22 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { useMessageNotifications } from '@/features/messaging';
 import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
+import { useLocation } from 'react-router-dom';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();
   const { unreadCount } = useMessageNotifications();
   const { isMobile } = useBreakpoint();
+  const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // Fonction pour détecter la page active
+  const isActive = (href: string) => {
+    if (href === '/') return location.pathname === '/';
+    return location.pathname.startsWith(href);
+  };
 
   const isOwner = profile?.user_type === 'proprietaire' || profile?.active_role === 'proprietaire';
 
@@ -67,17 +75,23 @@ export default function HeaderPremium() {
             <nav className="hidden md:flex items-center space-x-8">
               <a
                 href="/"
-                className="text-neutral-700 hover:text-primary-500 font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none"
+                className={`font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none ${
+                  isActive('/') ? 'text-primary-500' : 'text-neutral-700 hover:text-primary-500'
+                }`}
               >
                 Accueil
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform scale-x-0 origin-left transition-transform duration-300 ease-out group-hover:scale-x-100 motion-reduce:transition-none" />
+                <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform origin-left transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                  isActive('/') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                }`} />
               </a>
 
               {mainNavItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-neutral-700 hover:text-primary-500 font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none"
+                  className={`font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none ${
+                    isActive(item.href) ? 'text-primary-500' : 'text-neutral-700 hover:text-primary-500'
+                  }`}
                 >
                   <span className="flex items-center gap-1">
                     {item.label}
@@ -87,7 +101,9 @@ export default function HeaderPremium() {
                       </span>
                     )}
                   </span>
-                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform scale-x-0 origin-left transition-transform duration-300 ease-out group-hover:scale-x-100 motion-reduce:transition-none" />
+                  <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform origin-left transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                    isActive(item.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                  }`} />
                 </a>
               ))}
             </nav>
@@ -209,7 +225,11 @@ export default function HeaderPremium() {
             <a
               href="/"
               onClick={() => setShowMobileMenu(false)}
-              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors"
+              className={`flex items-center space-x-3 px-4 py-3 rounded-r-lg transition-colors ${
+                isActive('/') 
+                  ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-500' 
+                  : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-500'
+              }`}
             >
               <Home className="h-5 w-5" />
               <span className="font-medium">Accueil</span>
@@ -220,7 +240,11 @@ export default function HeaderPremium() {
                 key={item.label}
                 href={item.href}
                 onClick={() => setShowMobileMenu(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors"
+                className={`flex items-center space-x-3 px-4 py-3 rounded-r-lg transition-colors ${
+                  isActive(item.href) 
+                    ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-500' 
+                    : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-500'
+                }`}
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
@@ -237,7 +261,11 @@ export default function HeaderPremium() {
                 key={item.label}
                 href={item.href}
                 onClick={() => setShowMobileMenu(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors"
+                className={`flex items-center space-x-3 px-4 py-3 rounded-r-lg transition-colors ${
+                  isActive(item.href) 
+                    ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-500' 
+                    : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-500'
+                }`}
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
