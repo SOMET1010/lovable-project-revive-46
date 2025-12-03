@@ -7,75 +7,57 @@ export default function FooterPremium() {
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implémenter l'inscription newsletter
     setSubscribed(true);
     setEmail('');
     setTimeout(() => setSubscribed(false), 3000);
   };
 
-  // Générer 15 particules aléatoires
-  const particles = Array.from({ length: 15 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 20}s`,
-    duration: `${20 + Math.random() * 10}s`,
-  }));
-
-  // Générer 5 particules pour le copyright
-  const copyrightParticles = Array.from({ length: 5 }, (_, i) => ({
-    id: i,
-    left: `${20 + i * 15}%`,
-    delay: `${i * 0.8}s`,
-  }));
-
   return (
-    <footer className="footer-premium">
-      {/* Wave animée en haut */}
-      <div className="footer-wave" />
-
-      {/* Particules flottantes */}
-      <div className="footer-particles">
-        {particles.map((particle) => (
-          <div
-            key={particle.id}
-            className="footer-particle"
-            style={{
-              left: particle.left,
-              animationDelay: particle.delay,
-              animationDuration: particle.duration,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-          {/* À propos */}
+    <footer className="bg-neutral-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          {/* Logo & Description */}
           <div>
-            <div className="flex items-center space-x-3 mb-6 group">
+            <div className="flex items-center space-x-3 mb-6">
               <img
                 src="/logo-montoit.png"
                 alt="Mon Toit Logo"
-                className="h-12 w-12 object-contain group-hover:scale-110 transition-all duration-300"
+                className="h-10 w-10 object-contain"
               />
-              <span className="text-2xl font-bold text-white">MON TOIT</span>
+              <span className="text-xl font-bold text-white">Mon Toit</span>
             </div>
-            <p className="text-sm text-gray-400 leading-relaxed mb-6">
+            <p className="text-sm text-neutral-400 leading-relaxed mb-6">
               Plateforme immobilière certifiée pour un accès universel au logement en Côte d'Ivoire.
             </p>
             
-            {/* Social Icons Premium */}
+            {/* Social Icons Simple */}
             <div className="flex items-center space-x-3">
-              <a href="#" className="footer-social-icon" aria-label="Facebook">
+              <a 
+                href="#" 
+                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
+                aria-label="Facebook"
+              >
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="footer-social-icon" aria-label="Twitter">
+              <a 
+                href="#" 
+                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
+                aria-label="Twitter"
+              >
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="footer-social-icon" aria-label="Instagram">
+              <a 
+                href="#" 
+                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
+                aria-label="Instagram"
+              >
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="footer-social-icon" aria-label="LinkedIn">
+              <a 
+                href="#" 
+                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
+                aria-label="LinkedIn"
+              >
                 <Linkedin className="h-5 w-5" />
               </a>
             </div>
@@ -83,67 +65,59 @@ export default function FooterPremium() {
 
           {/* Liens rapides */}
           <div>
-            <h3 className="footer-section-title">Liens rapides</h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <a href="/" className="footer-link">
-                  Accueil
-                </a>
-              </li>
-              <li>
-                <a href="/recherche" className="footer-link">
-                  Rechercher
-                </a>
-              </li>
-              <li>
-                <a href="/a-propos" className="footer-link">
-                  À propos
-                </a>
-              </li>
-              <li>
-                <a href="/comment-ca-marche" className="footer-link">
-                  Comment ça marche
-                </a>
-              </li>
-              <li>
-                <a href="/contact" className="footer-link">
-                  Contact
-                </a>
-              </li>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
+              Liens rapides
+            </h3>
+            <ul className="space-y-3">
+              {[
+                { label: 'Accueil', href: '/' },
+                { label: 'Rechercher', href: '/recherche' },
+                { label: 'À propos', href: '/a-propos' },
+                { label: 'Comment ça marche', href: '/comment-ca-marche' },
+                { label: 'Contact', href: '/contact' },
+              ].map((link) => (
+                <li key={link.label}>
+                  <a 
+                    href={link.href} 
+                    className="text-sm text-neutral-400 hover:text-primary-500 transition-colors duration-200"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Légal */}
           <div>
-            <h3 className="footer-section-title">Légal</h3>
-            <ul className="space-y-3 text-sm">
-              <li>
-                <a href="/conditions-utilisation" className="footer-link">
-                  Conditions d'utilisation
-                </a>
-              </li>
-              <li>
-                <a href="/politique-confidentialite" className="footer-link">
-                  Politique de confidentialité
-                </a>
-              </li>
-              <li>
-                <a href="/mentions-legales" className="footer-link">
-                  Mentions légales
-                </a>
-              </li>
-              <li>
-                <a href="/cgv" className="footer-link">
-                  CGV
-                </a>
-              </li>
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
+              Légal
+            </h3>
+            <ul className="space-y-3">
+              {[
+                { label: "Conditions d'utilisation", href: '/conditions-utilisation' },
+                { label: 'Politique de confidentialité', href: '/politique-confidentialite' },
+                { label: 'Mentions légales', href: '/mentions-legales' },
+                { label: 'CGV', href: '/cgv' },
+              ].map((link) => (
+                <li key={link.label}>
+                  <a 
+                    href={link.href} 
+                    className="text-sm text-neutral-400 hover:text-primary-500 transition-colors duration-200"
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          {/* Newsletter */}
+          {/* Newsletter & Contact */}
           <div>
-            <h3 className="footer-section-title">Newsletter</h3>
-            <p className="text-sm text-gray-400 mb-4">
+            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
+              Newsletter
+            </h3>
+            <p className="text-sm text-neutral-400 mb-4">
               Recevez nos dernières offres et actualités
             </p>
             
@@ -154,12 +128,14 @@ export default function FooterPremium() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="votre@email.com"
                 required
-                className="footer-newsletter-input w-full"
+                className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors duration-200"
               />
               <button
                 type="submit"
-                className={`footer-newsletter-btn w-full flex items-center justify-center space-x-2 ${
-                  subscribed ? 'footer-newsletter-success' : ''
+                className={`w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-all duration-200 ${
+                  subscribed 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-primary-500 text-white hover:bg-primary-600'
                 }`}
               >
                 <Send className="h-4 w-4" />
@@ -168,65 +144,52 @@ export default function FooterPremium() {
             </form>
 
             {/* Contact Info */}
-            <div className="mt-6 space-y-2 text-sm text-gray-400">
-              <div className="flex items-center space-x-2">
-                <Phone className="h-4 w-4 text-orange-400" />
-                <span>+225 XX XX XX XX XX</span>
+            <div className="mt-6 space-y-3">
+              <div className="flex items-center space-x-3 text-sm">
+                <Phone className="h-4 w-4 text-primary-500 flex-shrink-0" />
+                <span className="text-neutral-400">+225 XX XX XX XX XX</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="h-4 w-4 text-orange-400" />
-                <span>contact@montoit.ci</span>
+              <div className="flex items-center space-x-3 text-sm">
+                <Mail className="h-4 w-4 text-primary-500 flex-shrink-0" />
+                <span className="text-neutral-400">contact@montoit.ci</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4 text-orange-400" />
-                <span>Abidjan, Côte d'Ivoire</span>
+              <div className="flex items-center space-x-3 text-sm">
+                <MapPin className="h-4 w-4 text-primary-500 flex-shrink-0" />
+                <span className="text-neutral-400">Abidjan, Côte d'Ivoire</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Séparateur animé */}
-        <div className="footer-separator mb-8" />
-
-        {/* Copyright avec Style */}
-        <div className="footer-copyright">
-          {/* Particules qui montent */}
-          <div className="footer-copyright-particles">
-            {copyrightParticles.map((particle) => (
-              <div
-                key={particle.id}
-                className="footer-copyright-particle"
-                style={{
-                  left: particle.left,
-                  animationDelay: particle.delay,
-                }}
-              />
-            ))}
-          </div>
-
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 relative z-10">
-            <p className="footer-copyright-text text-sm">
+        {/* Separator */}
+        <div className="border-t border-neutral-800 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <p className="text-sm text-neutral-500">
               © {new Date().getFullYear()} Mon Toit. Tous droits réservés.
             </p>
             
-            <div className="flex items-center space-x-6 text-sm">
-              <a href="/aide" className="footer-link">
-                Aide
-              </a>
-              <a href="/faq" className="footer-link">
-                FAQ
-              </a>
-              <a href="/blog" className="footer-link">
-                Blog
-              </a>
+            <div className="flex items-center space-x-6">
+              {[
+                { label: 'Aide', href: '/aide' },
+                { label: 'FAQ', href: '/faq' },
+                { label: 'Blog', href: '/blog' },
+              ].map((link) => (
+                <a 
+                  key={link.label}
+                  href={link.href} 
+                  className="text-sm text-neutral-500 hover:text-primary-500 transition-colors duration-200"
+                >
+                  {link.label}
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* Badge ANSUT */}
+          {/* Badge ANSUT Simple */}
           <div className="mt-6 flex justify-center">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-xs text-gray-400">Certifié ANSUT</span>
+            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-neutral-800 rounded-full">
+              <div className="w-2 h-2 bg-green-500 rounded-full" />
+              <span className="text-xs text-neutral-400">Certifié ANSUT</span>
             </div>
           </div>
         </div>
