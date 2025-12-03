@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import '@/shared/styles/hero-troncature-fix.css';
 
 interface HeroSpectacularProps {
   onSearch: (city: string, type: string, price: string) => void;

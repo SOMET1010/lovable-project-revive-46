@@ -11,6 +11,9 @@
 /* Styles hero */
 @import './shared/styles/hero-spectacular.css';
 
+/* Styles hero troncature fix */
+@import './shared/styles/hero-troncature-fix.css';
+
 /* Styles mobile et layout */
 @import './shared/styles/mobile-optimization.css';
 @import './shared/styles/mobile-menu.css';
