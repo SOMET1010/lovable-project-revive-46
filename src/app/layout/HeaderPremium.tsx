@@ -3,7 +3,6 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { useMessageNotifications } from '@/features/messaging';
 import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
-import ThemeToggle from '@/shared/ui/ThemeToggle';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();
@@ -15,7 +14,6 @@ export default function HeaderPremium() {
 
   const isOwner = profile?.user_type === 'proprietaire' || profile?.active_role === 'proprietaire';
 
-  // Détecter le scroll pour effet glassmorphism
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
@@ -41,95 +39,94 @@ export default function HeaderPremium() {
 
   return (
     <>
-      <header className={`header-premium ${scrolled ? 'scrolled' : ''}`}>
+      <header 
+        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-200 ${
+          scrolled ? 'shadow-sm border-b border-neutral-200' : 'border-b border-neutral-100'
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 md:h-20">
-            {/* Logo Animé */}
-            <a href="/" className="header-logo header-logo-animated flex items-center space-x-2 md:space-x-3 flex-shrink-0">
-              <div className="relative">
-                <img
-                  src="/logo-montoit.png"
-                  alt="Mon Toit"
-                  className="h-10 w-10 md:h-12 md:w-12 object-contain"
-                />
-              </div>
+          <div className="flex justify-between items-center h-[72px]">
+            {/* Logo Minimaliste */}
+            <a href="/" className="flex items-center space-x-3 group">
+              <img
+                src="/logo-montoit.png"
+                alt="Mon Toit"
+                className="h-10 w-10 object-contain transition-transform duration-200 group-hover:scale-105"
+              />
               <div className="flex flex-col">
-                <span className="text-lg md:text-xl font-bold gradient-text-orange">
-                  Mon Toit
-                </span>
+                <span className="text-xl font-bold text-neutral-900">Mon Toit</span>
                 {!isMobile && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">Plateforme Immobilière</span>
+                  <span className="text-xs text-neutral-500 font-medium">Plateforme Immobilière</span>
                 )}
               </div>
             </a>
 
-            {/* Desktop Navigation Premium */}
-            <nav className="hidden md:flex items-center space-x-1">
+            {/* Desktop Navigation Minimaliste */}
+            <nav className="hidden md:flex items-center space-x-8">
               <a
                 href="/"
-                className="header-nav-link header-nav-link-animated flex items-center space-x-2"
-                style={{ animationDelay: '0.1s' }}
+                className="text-neutral-700 hover:text-primary-500 font-medium transition-colors duration-200 relative group"
               >
-                <Home className="h-5 w-5" />
-                <span>Accueil</span>
+                Accueil
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-200 group-hover:w-full" />
               </a>
 
-              {mainNavItems.map((item, index) => (
+              {mainNavItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="header-nav-link header-nav-link-animated flex items-center space-x-2 relative"
-                  style={{ animationDelay: `${0.2 + index * 0.1}s` }}
+                  className="text-neutral-700 hover:text-primary-500 font-medium transition-colors duration-200 relative group"
                 >
-                  <item.icon className="h-5 w-5 header-btn-icon" />
-                  <span>{item.label}</span>
-                  {item.badge && item.badge > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
-                      {item.badge > 9 ? '9+' : item.badge}
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1">
+                    {item.label}
+                    {item.badge && item.badge > 0 && (
+                      <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        {item.badge > 9 ? '9+' : item.badge}
+                      </span>
+                    )}
+                  </span>
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-200 group-hover:w-full" />
                 </a>
               ))}
+            </nav>
 
-              <div className="ml-2">
-                <ThemeToggle />
-              </div>
-
+            {/* Actions Desktop */}
+            <div className="hidden md:flex items-center space-x-3">
               {user ? (
-                <div className="relative ml-2">
+                <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     onBlur={() => setTimeout(() => setShowUserMenu(false), 200)}
-                    className="header-btn-primary flex items-center space-x-2"
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors duration-200"
                   >
-                    <User className="h-5 w-5 header-btn-icon" />
+                    <User className="h-4 w-4" />
                     <span>Mon Compte</span>
                   </button>
 
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-56 glass rounded-xl shadow-premium border border-gray-200 dark:border-gray-700 py-2 z-50 animate-fade-in">
-                      <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                        <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50 animate-fade-in">
+                      <div className="px-4 py-3 border-b border-neutral-100">
+                        <p className="text-sm font-semibold text-neutral-900 truncate">
                           {profile?.full_name || 'Utilisateur'}
                         </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                        <p className="text-xs text-neutral-500 truncate">{user.email}</p>
                       </div>
 
                       {userMenuItems.map((item) => (
                         <a
                           key={item.label}
                           href={item.href}
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all duration-200"
+                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors duration-150"
                         >
                           <item.icon className="h-4 w-4" />
                           <span>{item.label}</span>
                         </a>
                       ))}
 
-                      <div className="border-t border-gray-100 dark:border-gray-700 mt-2 pt-2">
+                      <div className="border-t border-neutral-100 mt-2 pt-2">
                         <button
                           onClick={signOut}
-                          className="flex items-center space-x-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 w-full"
+                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 w-full"
                         >
                           <LogOut className="h-4 w-4" />
                           <span>Déconnexion</span>
@@ -139,22 +136,27 @@ export default function HeaderPremium() {
                   )}
                 </div>
               ) : (
-                <div className="flex items-center space-x-2 ml-2">
-                  <a href="/connexion" className="header-btn-secondary flex items-center space-x-2">
-                    <User className="h-5 w-5 header-btn-icon" />
-                    <span>Connexion</span>
+                <>
+                  <a 
+                    href="/connexion" 
+                    className="px-4 py-2 rounded-lg border border-neutral-300 text-neutral-700 font-medium hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-200"
+                  >
+                    Connexion
                   </a>
-                  <a href="/inscription" className="header-btn-primary flex items-center space-x-2">
-                    <span>Inscription</span>
+                  <a 
+                    href="/inscription" 
+                    className="px-5 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors duration-200"
+                  >
+                    Inscription
                   </a>
-                </div>
+                </>
               )}
-            </nav>
+            </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+              className="md:hidden p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors duration-200"
             >
               {showMobileMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -162,38 +164,64 @@ export default function HeaderPremium() {
         </div>
       </header>
 
-      {/* Mobile Menu Premium */}
-      <div className={`header-mobile-backdrop ${showMobileMenu ? 'open' : ''}`} onClick={() => setShowMobileMenu(false)} />
-      <div className={`header-mobile-menu ${showMobileMenu ? 'open' : ''}`}>
-        <div className="p-6 space-y-4">
+      {/* Spacer for fixed header */}
+      <div className="h-[72px]" />
+
+      {/* Mobile Menu Overlay */}
+      {showMobileMenu && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40 md:hidden"
+          onClick={() => setShowMobileMenu(false)}
+        />
+      )}
+
+      {/* Mobile Menu Drawer */}
+      <div 
+        className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 transform transition-transform duration-300 ease-out md:hidden ${
+          showMobileMenu ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="p-6 space-y-6">
+          {/* Close Button */}
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowMobileMenu(false)}
+              className="p-2 rounded-lg text-neutral-500 hover:bg-neutral-100 transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
           {/* User Info Mobile */}
           {user && (
-            <div className="header-mobile-item pb-4 border-b border-gray-200 dark:border-gray-700">
-              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+            <div className="pb-4 border-b border-neutral-200">
+              <p className="text-sm font-semibold text-neutral-900 truncate">
                 {profile?.full_name || 'Utilisateur'}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+              <p className="text-xs text-neutral-500 truncate">{user.email}</p>
             </div>
           )}
 
           {/* Navigation Mobile */}
-          <div className="space-y-2">
+          <nav className="space-y-1">
             <a
               href="/"
-              className="header-mobile-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all"
+              onClick={() => setShowMobileMenu(false)}
+              className="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors"
             >
               <Home className="h-5 w-5" />
-              <span className="font-semibold">Accueil</span>
+              <span className="font-medium">Accueil</span>
             </a>
 
             {mainNavItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className="header-mobile-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all relative"
+                onClick={() => setShowMobileMenu(false)}
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors"
               >
                 <item.icon className="h-5 w-5" />
-                <span className="font-semibold">{item.label}</span>
+                <span className="font-medium">{item.label}</span>
                 {item.badge && item.badge > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {item.badge > 9 ? '9+' : item.badge}
@@ -206,20 +234,24 @@ export default function HeaderPremium() {
               <a
                 key={item.label}
                 href={item.href}
-                className="header-mobile-item flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-orange-900/20 hover:text-orange-600 dark:hover:text-orange-400 transition-all"
+                onClick={() => setShowMobileMenu(false)}
+                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors"
               >
                 <item.icon className="h-5 w-5" />
-                <span className="font-semibold">{item.label}</span>
+                <span className="font-medium">{item.label}</span>
               </a>
             ))}
-          </div>
+          </nav>
 
           {/* Actions Mobile */}
-          <div className="header-mobile-item pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          <div className="pt-4 border-t border-neutral-200 space-y-3">
             {user ? (
               <button
-                onClick={signOut}
-                className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-xl text-red-600 dark:text-red-400 border-2 border-red-600 dark:border-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all font-semibold"
+                onClick={() => {
+                  signOut();
+                  setShowMobileMenu(false);
+                }}
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg text-red-600 border border-red-200 hover:bg-red-50 transition-colors font-medium"
               >
                 <LogOut className="h-5 w-5" />
                 <span>Déconnexion</span>
@@ -228,16 +260,17 @@ export default function HeaderPremium() {
               <>
                 <a
                   href="/connexion"
-                  className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-xl text-orange-600 dark:text-orange-400 border-2 border-orange-600 dark:border-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all font-semibold"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="flex items-center justify-center w-full px-4 py-3 rounded-lg text-neutral-700 border border-neutral-300 hover:bg-neutral-50 transition-colors font-medium"
                 >
-                  <User className="h-5 w-5" />
-                  <span>Connexion</span>
+                  Connexion
                 </a>
                 <a
                   href="/inscription"
-                  className="flex items-center justify-center w-full px-4 py-3 rounded-xl gradient-orange text-white hover:shadow-orange-hover transition-all font-semibold"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="flex items-center justify-center w-full px-4 py-3 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors font-medium"
                 >
-                  <span>Inscription</span>
+                  Inscription
                 </a>
               </>
             )}
