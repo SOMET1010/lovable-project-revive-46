@@ -5,7 +5,6 @@ import FooterPremium from './FooterPremium';
 import Chatbot from '@/features/messaging/components/Chatbot';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { ToastContainer } from '@/shared/hooks/useToast';
-import DemoModeBanner from '@/shared/ui/DemoModeBanner';
 import PageTransition from '@/shared/ui/PageTransition';
 
 const noLayoutRoutes = ['/connexion', '/inscription', '/messages', '/auth/callback'];
@@ -34,7 +33,6 @@ export default function Layout() {
   if (!shouldShowLayout) {
     return (
       <ErrorBoundary>
-        <DemoModeBanner />
         <Suspense
           fallback={
             <div className="min-h-screen flex items-center justify-center">
@@ -51,7 +49,6 @@ export default function Layout() {
 
   return (
     <ErrorBoundary>
-      <DemoModeBanner />
       {shouldShowHeaderFooter && <HeaderPremium />}
       <ToastContainer />
       <Suspense
