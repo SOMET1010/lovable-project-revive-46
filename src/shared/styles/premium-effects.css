@@ -1,5 +1,21 @@
 /* Premium Effects & Animations for Mon Toit */
 
+/* ===== BADGE NOTIFICATION PULSE ===== */
+@keyframes badgeNotificationPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+}
+
+.badge-notification-pulse {
+  animation: badgeNotificationPulse 2s ease-in-out infinite;
+}
+
 /* ===== ANIMATIONS ===== */
 
 /* Fade In */
