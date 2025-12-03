@@ -40,42 +40,44 @@ export default function HeaderPremium() {
   return (
     <>
       <header 
-        className={`fixed top-0 left-0 right-0 z-50 bg-white transition-all duration-200 ${
-          scrolled ? 'shadow-sm border-b border-neutral-200' : 'border-b border-neutral-100'
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out motion-reduce:transition-none ${
+          scrolled 
+            ? 'bg-white shadow-md border-b border-neutral-200 backdrop-blur-md' 
+            : 'bg-white/95 border-b border-neutral-100'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
-            {/* Logo Minimaliste */}
+            {/* Logo Minimaliste avec micro-interaction */}
             <a href="/" className="flex items-center space-x-3 group">
               <img
                 src="/logo-montoit.png"
                 alt="Mon Toit"
-                className="h-10 w-10 object-contain transition-transform duration-200 group-hover:scale-105"
+                className="h-10 w-10 object-contain transition-transform duration-300 ease-out group-hover:scale-110 group-hover:rotate-3 motion-reduce:transform-none"
               />
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-neutral-900">Mon Toit</span>
+                <span className="text-xl font-bold text-neutral-900 transition-colors duration-200 group-hover:text-primary-500">Mon Toit</span>
                 {!isMobile && (
                   <span className="text-xs text-neutral-500 font-medium">Plateforme Immobilière</span>
                 )}
               </div>
             </a>
 
-            {/* Desktop Navigation Minimaliste */}
+            {/* Desktop Navigation avec underline fluide gauche→droite */}
             <nav className="hidden md:flex items-center space-x-8">
               <a
                 href="/"
-                className="text-neutral-700 hover:text-primary-500 font-medium transition-colors duration-200 relative group"
+                className="text-neutral-700 hover:text-primary-500 font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none"
               >
                 Accueil
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-200 group-hover:w-full" />
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform scale-x-0 origin-left transition-transform duration-300 ease-out group-hover:scale-x-100 motion-reduce:transition-none" />
               </a>
 
               {mainNavItems.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="text-neutral-700 hover:text-primary-500 font-medium transition-colors duration-200 relative group"
+                  className="text-neutral-700 hover:text-primary-500 font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none"
                 >
                   <span className="flex items-center gap-1">
                     {item.label}
@@ -85,19 +87,19 @@ export default function HeaderPremium() {
                       </span>
                     )}
                   </span>
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-500 transition-all duration-200 group-hover:w-full" />
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform scale-x-0 origin-left transition-transform duration-300 ease-out group-hover:scale-x-100 motion-reduce:transition-none" />
                 </a>
               ))}
             </nav>
 
-            {/* Actions Desktop */}
+            {/* Actions Desktop avec effet lift */}
             <div className="hidden md:flex items-center space-x-3">
               {user ? (
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     onBlur={() => setTimeout(() => setShowUserMenu(false), 200)}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors duration-200"
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 transition-all duration-200 motion-reduce:transform-none"
                   >
                     <User className="h-4 w-4" />
                     <span>Mon Compte</span>
@@ -136,16 +138,16 @@ export default function HeaderPremium() {
                   )}
                 </div>
               ) : (
-                <>
+              <>
                   <a 
                     href="/connexion" 
-                    className="px-4 py-2 rounded-lg border border-neutral-300 text-neutral-700 font-medium hover:border-neutral-400 hover:bg-neutral-50 transition-all duration-200"
+                    className="px-4 py-2 rounded-lg border border-neutral-300 text-neutral-700 font-medium hover:border-neutral-400 hover:bg-neutral-50 hover:-translate-y-0.5 transition-all duration-200 motion-reduce:transform-none"
                   >
                     Connexion
                   </a>
                   <a 
                     href="/inscription" 
-                    className="px-5 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors duration-200"
+                    className="px-5 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 transition-all duration-200 motion-reduce:transform-none"
                   >
                     Inscription
                   </a>
