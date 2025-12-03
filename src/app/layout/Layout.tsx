@@ -6,6 +6,7 @@ import Chatbot from '@/features/messaging/components/Chatbot';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { ToastContainer } from '@/shared/hooks/useToast';
 import DemoModeBanner from '@/shared/ui/DemoModeBanner';
+import PageTransition from '@/shared/ui/PageTransition';
 
 const noLayoutRoutes = ['/connexion', '/inscription', '/messages', '/auth/callback'];
 const noHeaderFooterRoutes = [
@@ -61,7 +62,9 @@ export default function Layout() {
         }
       >
         <main className={shouldShowHeaderFooter ? 'min-h-screen' : ''}>
-          <Outlet />
+          <PageTransition key={location.pathname}>
+            <Outlet />
+          </PageTransition>
         </main>
       </Suspense>
       {shouldShowHeaderFooter && <FooterPremium />}
