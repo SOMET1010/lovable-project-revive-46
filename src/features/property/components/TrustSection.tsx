@@ -27,68 +27,114 @@ const trustFeatures = [
   },
 ];
 
+/**
+ * TrustSection - Modern Minimalism Premium Design
+ * 
+ * Features:
+ * - Dark neutral background (#171717)
+ * - Clean feature cards with subtle borders
+ * - Orange accent badges
+ * - 96px section padding
+ */
 export default function TrustSection() {
   return (
-    <section className="py-20 md:py-28 bg-[var(--earth-900)] text-white relative overflow-hidden">
-      {/* African Pattern Background */}
-      <div 
-        className="absolute inset-0 opacity-5"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10zm10 8c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm40 40c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }}
-      />
-      
-      {/* Gradient Orbs */}
-      <div 
-        className="absolute top-0 left-0 w-96 h-96 rounded-full opacity-10"
-        style={{ background: 'radial-gradient(circle, var(--terracotta-500) 0%, transparent 70%)' }}
-      />
-      <div 
-        className="absolute bottom-0 right-0 w-80 h-80 rounded-full opacity-10"
-        style={{ background: 'radial-gradient(circle, var(--gold-500) 0%, transparent 70%)' }}
-      />
-      
+    <section 
+      className="relative overflow-hidden"
+      style={{ 
+        backgroundColor: 'var(--color-neutral-900)',
+        paddingTop: 'var(--spacing-24)',
+        paddingBottom: 'var(--spacing-24)'
+      }}
+    >
       <div className="container relative z-10">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-[var(--gold-400)] text-sm font-semibold mb-6">
+          <span 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold mb-6"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              color: 'var(--color-primary-500)'
+            }}
+          >
             <CheckCircle className="h-4 w-4" />
             Plateforme de confiance
           </span>
-          <h2 className="text-h1 font-display text-white mb-4">
+          <h2 
+            className="font-bold text-white mb-4"
+            style={{ fontSize: 'clamp(28px, 4vw, 40px)' }}
+          >
             Pourquoi choisir Mon Toit ?
           </h2>
-          <p className="text-body-lg text-white/80 max-w-2xl mx-auto">
+          <p 
+            className="max-w-2xl mx-auto"
+            style={{ 
+              fontSize: '18px',
+              lineHeight: '1.6',
+              color: 'rgba(255, 255, 255, 0.8)'
+            }}
+          >
             La seule plateforme immobilière en Côte d'Ivoire avec une triple garantie de sécurité
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {trustFeatures.map((feature) => (
             <div
               key={feature.title}
-              className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10 hover:bg-white/10 hover:border-[var(--terracotta-500)]/50 transition-all duration-300"
+              className="group relative transition-all duration-300"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                borderRadius: 'var(--border-radius-lg)',
+                padding: 'var(--spacing-8)',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)';
+                e.currentTarget.style.borderColor = 'var(--color-primary-500)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+              }}
             >
               {/* Highlight Badge */}
               <div className="absolute -top-3 right-6">
-                <span className="px-3 py-1 bg-gradient-to-r from-[var(--terracotta-500)] to-[var(--terracotta-600)] text-white text-xs font-bold rounded-full">
+                <span 
+                  className="px-3 py-1 text-white text-xs font-bold rounded-full"
+                  style={{ backgroundColor: 'var(--color-primary-500)' }}
+                >
                   {feature.highlight}
                 </span>
               </div>
               
-              <div className="flex items-start gap-6">
+              <div className="flex items-start gap-5">
                 {/* Icon */}
-                <div className="flex-shrink-0 w-16 h-16 rounded-xl bg-gradient-to-br from-[var(--terracotta-500)] to-[var(--terracotta-600)] flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <feature.icon className="h-8 w-8 text-white" />
+                <div 
+                  className="flex-shrink-0 w-14 h-14 flex items-center justify-center transition-transform group-hover:scale-110"
+                  style={{ 
+                    backgroundColor: 'var(--color-primary-500)',
+                    borderRadius: 'var(--border-radius-md)'
+                  }}
+                >
+                  <feature.icon className="h-7 w-7 text-white" />
                 </div>
                 
                 {/* Content */}
                 <div>
-                  <h3 className="text-h3 font-semibold text-white mb-3">
+                  <h3 
+                    className="font-semibold text-white mb-2"
+                    style={{ fontSize: '20px' }}
+                  >
                     {feature.title}
                   </h3>
-                  <p className="text-white/70 leading-relaxed">
+                  <p 
+                    className="leading-relaxed"
+                    style={{ 
+                      fontSize: '15px',
+                      color: 'rgba(255, 255, 255, 0.7)'
+                    }}
+                  >
                     {feature.description}
                   </p>
                 </div>
@@ -101,13 +147,33 @@ export default function TrustSection() {
         <div className="mt-16 flex flex-col sm:flex-row items-center justify-center gap-6">
           <a
             href="/inscription"
-            className="btn-gold inline-flex items-center gap-2 text-lg px-8 h-14"
+            className="inline-flex items-center gap-2 font-semibold text-white transition-all"
+            style={{ 
+              backgroundColor: 'var(--color-primary-500)',
+              padding: '14px 28px',
+              borderRadius: 'var(--border-radius-md)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-primary-600)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--color-primary-500)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
           >
             <span>Créer mon compte gratuit</span>
           </a>
           <a
             href="/contact"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 transition-colors"
+            style={{ color: 'rgba(255, 255, 255, 0.7)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'white';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'rgba(255, 255, 255, 0.7)';
+            }}
           >
             <Phone className="h-5 w-5" />
             <span>Besoin d'aide ? Contactez-nous</span>
