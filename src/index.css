@@ -9,11 +9,11 @@
 /* Design System - Variables CSS centralisées */
 @import './styles/design-system.css';
 
-/* Grid System - Grille responsive et espacement 8pt */
-@import './styles/grid-system.css';
+/* Animations consolidées */
+@import './styles/animations.css';
 
-/* African WOW Factor Animations */
-@import './styles/african-wow-animations.css';
+/* Styles hero optimisés */
+@import './shared/styles/hero-spectacular.css';
 
 @layer base {
   body {
@@ -35,62 +35,6 @@
     @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
   }
 
-  /* Boutons Premium - Modern Minimalism Design */
-  .btn-primary {
-    background-color: var(--color-primary-500);
-    color: var(--color-text-inverse);
-    font-weight: var(--font-weight-semibold);
-    padding: var(--spacing-3) var(--spacing-6);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-base);
-    transition: var(--transition-base);
-    border: none;
-    cursor: pointer;
-    height: var(--button-primary-height);
-    font-size: var(--font-size-body);
-    transform: translateY(0) scale(1);
-  }
-
-  .btn-primary:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px) scale(1.02);
-    background-color: var(--color-primary-600);
-  }
-
-  .btn-secondary {
-    background-color: transparent;
-    border: 2px solid var(--color-primary-500);
-    color: var(--color-primary-600);
-    font-weight: var(--font-weight-semibold);
-    padding: var(--spacing-3) var(--spacing-6);
-    border-radius: var(--border-radius-md);
-    transition: var(--transition-base);
-    cursor: pointer;
-  }
-
-  .btn-secondary:hover {
-    background-color: var(--color-primary-50);
-    transform: translateY(-1px) scale(1.01);
-    border-color: var(--color-primary-600);
-    color: var(--color-primary-700);
-  }
-
-  /* Cartes Premium - Modern Minimalism Design */
-  .card-premium {
-    background-color: var(--color-background-surface);
-    border-radius: var(--border-radius-lg);
-    box-shadow: var(--shadow-base);
-    transition: var(--transition-base);
-    cursor: pointer;
-    border: 1px solid var(--color-neutral-200);
-  }
-
-  .card-premium:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-4px) scale(1.02);
-    border-color: var(--color-primary-200);
-  }
-
   /* Gradients standardisés avec variables CSS */
   .text-gradient {
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
@@ -99,15 +43,14 @@
     color: transparent;
   }
 
-  /* Simplification selon Modern Minimalism Premium - Éviter gradients inutiles */
+  /* Hero simple - Modern Minimalism Premium */
   .hero-simple {
     background: var(--color-background-page);
-    /* Une seule image statique, pas de gradients */
   }
 
-  /* Indicateur de focus premium - Orange avec transparence selon tokens */
+  /* Indicateur de focus premium */
   .focus-premium {
-    box-shadow: var(--shadow-focus); /* 0 0 0 3px rgba(255, 108, 47, 0.15) */
+    box-shadow: var(--shadow-focus);
   }
 
   .badge-glow {
@@ -118,60 +61,6 @@
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
     animation: glow 2s ease-in-out infinite alternate;
-  }
-
-  @keyframes glow {
-    from {
-      box-shadow: 0 0 5px var(--color-primary-500);
-    }
-    to {
-      box-shadow: 0 0 20px var(--color-primary-500), 0 0 30px var(--color-primary-500);
-    }
-  }
-}
-
-@layer utilities {
-  @keyframes scale-in {
-    0% {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes fade-in {
-    0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-
-  @keyframes slide-in {
-    0% {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  .animate-scale-in {
-    animation: scale-in 0.3s ease-out;
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.5s ease-out;
-  }
-
-  .animate-slide-in {
-    animation: slide-in 0.3s ease-out;
   }
 }
 
@@ -258,13 +147,3 @@ img {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   will-change: transform;
 }
-
-/* ========================================
-   CORRECTIONS ET OPTIMISATIONS
-   ======================================== */
-
-/* Standardisation des boutons et éléments UI */
-@import './shared/styles/ui-standardization.css';
-
-/* Styles hero optimisés sans animations lourdes */
-@import './shared/styles/hero-spectacular.css';
