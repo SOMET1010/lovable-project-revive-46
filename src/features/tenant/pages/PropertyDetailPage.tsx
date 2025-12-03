@@ -3,11 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Bed, Bath, Maximize, Heart, Share2, Calendar, MessageCircle, 
   ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Car, Shield, 
-  Zap, Building, Home, Phone, Mail 
+  Zap, Building, Home, Phone, Mail, FileText 
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 import MapWrapper from '@/shared/ui/MapWrapper';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { getCreateContractRoute } from '@/shared/config/routes.config';
 
 type Property = Database['public']['Tables']['properties']['Row'];
 
@@ -206,27 +208,40 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
 interface StickyCTABarProps {
   propertyId: string;
   monthlyRent: number;
+  isOwnerOrAgency?: boolean;
 }
 
-function StickyCTABar({ propertyId }: StickyCTABarProps) {
+function StickyCTABar({ propertyId, isOwnerOrAgency }: StickyCTABarProps) {
   const navigate = useNavigate();
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 p-4 shadow-lg z-50 md:hidden">
       <div className="flex gap-3 max-w-sm mx-auto">
-        <button
-          onClick={() => navigate(`/visites/planifier/${propertyId}`)}
-          className="flex-1 px-4 py-3 border-2 border-primary-500 text-primary-500 font-semibold rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
-        >
-          <Calendar className="h-5 w-5" />
-          <span>Planifier visite</span>
-        </button>
-        <button
-          onClick={() => navigate(`/postuler/${propertyId}`)}
-          className="flex-1 px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
-        >
-          Postuler
-        </button>
+        {isOwnerOrAgency ? (
+          <button
+            onClick={() => navigate(getCreateContractRoute(propertyId))}
+            className="flex-1 px-4 py-3 bg-semantic-success text-white font-semibold rounded-lg hover:opacity-90 transition-colors flex items-center justify-center gap-2"
+          >
+            <FileText className="h-5 w-5" />
+            <span>Créer contrat</span>
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate(`/visites/planifier/${propertyId}`)}
+              className="flex-1 px-4 py-3 border-2 border-primary-500 text-primary-500 font-semibold rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+            >
+              <Calendar className="h-5 w-5" />
+              <span>Planifier visite</span>
+            </button>
+            <button
+              onClick={() => navigate(`/postuler/${propertyId}`)}
+              className="flex-1 px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Postuler
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -235,10 +250,18 @@ function StickyCTABar({ propertyId }: StickyCTABarProps) {
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showStickyBar, setShowStickyBar] = useState(false);
+
+  // Check if current user is the property owner or an agency/proprietaire
+  const isOwnerOrAgency = user && property && (
+    user.id === property.owner_id || 
+    profile?.user_type === 'agence' ||
+    profile?.user_type === 'proprietaire'
+  );
 
   useEffect(() => {
     if (id) {
@@ -493,6 +516,16 @@ export default function PropertyDetailPage() {
                     <MessageCircle className="h-5 w-5" />
                     <span>Envoyer un message</span>
                   </button>
+
+                  {isOwnerOrAgency && (
+                    <button
+                      onClick={() => navigate(getCreateContractRoute(property.id))}
+                      className="w-full px-6 py-4 bg-semantic-success hover:opacity-90 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                    >
+                      <FileText className="h-5 w-5" />
+                      <span>Créer un contrat</span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="mt-8 p-4 bg-primary-50 rounded-lg border border-primary-100">
@@ -543,7 +576,8 @@ export default function PropertyDetailPage() {
       {showStickyBar && (
         <StickyCTABar 
           propertyId={property.id} 
-          monthlyRent={property.monthly_rent || 0} 
+          monthlyRent={property.monthly_rent || 0}
+          isOwnerOrAgency={!!isOwnerOrAgency}
         />
       )}
 
