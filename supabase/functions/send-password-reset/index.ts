@@ -33,12 +33,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Find user by email using listUsers with filter
-    const { data: usersData, error: userError } = await supabaseClient.auth.admin.listUsers({
-      filter: `email.eq.${email}`
-    });
+    // Find user by email using listUsers
+    const { data: usersData, error: userError } = await supabaseClient.auth.admin.listUsers();
     
-    const userData = usersData?.users?.[0];
+    const userData = usersData?.users?.find(u => u.email === email);
 
     if (userError || !userData) {
       return new Response(
@@ -62,7 +60,7 @@ Deno.serve(async (req: Request) => {
     const { error: insertError } = await supabaseClient
       .from('password_reset_tokens')
       .insert({
-        user_id: userData.user.id,
+        user_id: userData.id,
         token: token,
         email: email,
         expires_at: expiresAt.toISOString(),

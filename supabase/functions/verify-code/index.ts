@@ -63,13 +63,17 @@ Deno.serve(async (req: Request) => {
 
     // Log successful verification
     // Log API usage (ignore errors)
-    supabaseClient.rpc('log_api_usage', {
-      p_service_name: 'verification',
-      p_action: `verify_${type}`,
-      p_status: 'success',
-      p_request_data: { type, verified: true },
-      p_response_data: { userId: verificationResult.user_id }
-    }).then(() => {}).catch(() => {});
+    (async () => {
+      try {
+        await supabaseClient.rpc('log_api_usage', {
+          p_service_name: 'verification',
+          p_action: `verify_${type}`,
+          p_status: 'success',
+          p_request_data: { type, verified: true },
+          p_response_data: { userId: verificationResult.user_id }
+        });
+      } catch { /* ignore */ }
+    })();
 
     return new Response(
       JSON.stringify({
