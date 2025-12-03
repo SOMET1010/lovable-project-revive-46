@@ -162,7 +162,8 @@ Deno.serve(async (req: Request) => {
         .eq("id", existingPayment.lease_id)
         .maybeSingle();
 
-      const landlordId = lease?.landlord_id || lease?.properties?.owner_id;
+      const propertiesData = lease?.properties as { owner_id: string }[] | undefined;
+      const landlordId = lease?.landlord_id || propertiesData?.[0]?.owner_id;
 
       if (landlordId) {
         const { data: landlord } = await supabaseClient
@@ -194,13 +195,14 @@ Deno.serve(async (req: Request) => {
           .maybeSingle();
 
         if (!existingTransfer) {
+          const paymentData = existingPayment as { id: string; provider?: string };
           await supabaseClient.from("landlord_transfers").insert({
-            payment_id: existingPayment.id,
+            payment_id: paymentData.id,
             landlord_id: landlordId,
             amount: amount,
             fees: totalFees,
             net_amount: landlordAmount,
-            provider: existingPayment.provider,
+            provider: paymentData.provider || 'unknown',
             phone_number: landlord?.phone || "",
             partner_transaction_id: `MTT_TRANSFER_${Date.now()}_${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
             status: "pending",

@@ -69,10 +69,12 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
+    const userRoles = roleData?.user_roles as { name: string } | { name: string }[] | undefined;
+    const roleName = Array.isArray(userRoles) ? userRoles[0]?.name : userRoles?.name;
     if (
       roleError ||
       !roleData ||
-      roleData.user_roles?.name !== "admin"
+      roleName !== "admin"
     ) {
       return new Response(
         JSON.stringify({ error: "Forbidden - Admin access required" }),
@@ -305,7 +307,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error in manage-feature-flags:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

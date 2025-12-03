@@ -1,11 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  MessageCircle,
   X,
   Send,
   Trash2,
   Loader,
-  Shield,
   Home,
   Calendar,
   CreditCard,
@@ -13,11 +11,13 @@ import {
   HelpCircle,
   Sparkles,
   Clock,
+  Shield,
 } from 'lucide-react';
 import { chatbotService } from '@/services/chatbotService';
 import type { ChatMessage as ChatMessageType, ChatConversation } from '@/types/monToit.types';
 import { useAuth } from '@/app/providers/AuthProvider';
 import ChatMessage from './ChatMessage';
+import sutaAvatar from '@/assets/suta-avatar.jpg';
 
 interface QuickAction {
   icon: typeof Shield;
@@ -239,25 +239,42 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
 
   return (
     <>
+      {/* Bouton flottant avec avatar SUTA */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 bg-gradient-to-r from-terracotta-500 to-coral-500 text-white rounded-full p-4 shadow-2xl hover:shadow-glow transition-all duration-300 hover:scale-110 z-50 group"
-          aria-label="Ouvrir le chat"
+          className="fixed bottom-6 right-6 z-50 group"
+          aria-label="Ouvrir le chat SUTA"
         >
-          <MessageCircle className="h-7 w-7 group-hover:animate-bounce" />
-          <span className="absolute -top-1 -right-1 bg-green-500 w-4 h-4 rounded-full animate-pulse border-2 border-white" />
+          <div className="relative">
+            <img
+              src={sutaAvatar}
+              alt="SUTA Assistant"
+              className="w-16 h-16 rounded-full border-4 border-white shadow-2xl object-cover transition-transform duration-300 group-hover:scale-110"
+            />
+            <span className="absolute -top-1 -right-1 bg-green-500 w-5 h-5 rounded-full animate-pulse border-2 border-white" />
+            <span className="absolute -bottom-1 -left-1 bg-gradient-to-r from-terracotta-500 to-coral-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shadow-lg">
+              SUTA
+            </span>
+          </div>
         </button>
       )}
 
+      {/* Fenêtre de chat */}
       {isOpen && (
         <div className="fixed bottom-6 right-6 w-[420px] h-[650px] bg-white rounded-3xl shadow-2xl flex flex-col z-50 border border-gray-200 animate-scale-in overflow-hidden">
+          {/* Header avec avatar SUTA */}
           <div className="bg-gradient-to-r from-terracotta-500 via-coral-500 to-terracotta-600 text-white p-4 flex items-center justify-between relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-50" />
 
             <div className="flex items-center gap-3 relative z-10">
-              <div className="bg-white/20 backdrop-blur-sm p-2.5 rounded-full ring-2 ring-white/30">
-                <Shield className="h-6 w-6" />
+              <div className="relative">
+                <img
+                  src={sutaAvatar}
+                  alt="SUTA"
+                  className="w-12 h-12 rounded-full border-2 border-white/50 object-cover shadow-lg"
+                />
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
               </div>
               <div>
                 <h3 className="font-bold text-lg flex items-center gap-2">
@@ -266,7 +283,7 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
                 </h3>
                 <p className="text-xs text-white/90 flex items-center gap-1">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  Assistant Protecteur • Toujours disponible
+                  Assistant Protecteur • En ligne
                 </p>
               </div>
             </div>
@@ -301,6 +318,7 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
             </div>
           </div>
 
+          {/* Historique des conversations */}
           {showHistory && (
             <div className="bg-gray-50 border-b border-gray-200 p-3 max-h-48 overflow-y-auto">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Conversations récentes</h4>
@@ -325,6 +343,7 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
             </div>
           )}
 
+          {/* Zone des messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50 to-white">
             {messages.map((message, index) => (
               <ChatMessage
@@ -336,11 +355,14 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
               />
             ))}
 
+            {/* Indicateur de chargement avec avatar SUTA */}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-white" />
-                </div>
+                <img
+                  src={sutaAvatar}
+                  alt="SUTA"
+                  className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                />
                 <div className="bg-white rounded-2xl rounded-tl-none px-4 py-3 border-2 border-gray-200 shadow-sm">
                   <div className="flex items-center gap-2">
                     <Loader className="h-4 w-4 animate-spin text-terracotta-500" />
@@ -350,6 +372,7 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
               </div>
             )}
 
+            {/* Actions rapides */}
             {showQuickActions && messages.length <= 1 && (
               <div className="animate-fade-in">
                 <div className="text-center mb-4">
@@ -399,6 +422,7 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Zone de saisie */}
           <div className="p-4 border-t border-gray-200 bg-white">
             <div className="flex items-end gap-2">
               <textarea
@@ -425,7 +449,7 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
                 🛡️ Assistance sécurisée 24/7 par IA
               </p>
               <p className="text-xs text-gray-400">
-                Alimenté par Azure AI
+                Alimenté par Lovable AI
               </p>
             </div>
           </div>

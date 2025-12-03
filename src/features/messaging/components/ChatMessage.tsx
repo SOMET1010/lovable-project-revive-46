@@ -1,5 +1,6 @@
 import { memo } from 'react';
-import { Bot, User, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import { User, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import sutaAvatar from '@/assets/suta-avatar.jpg';
 
 interface ChatMessageProps {
   role: 'user' | 'assistant' | 'system';
@@ -149,17 +150,18 @@ function ChatMessage({ role, content, timestamp, isNew = false }: ChatMessagePro
     <div
       className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${isNew ? 'animate-slide-in' : ''}`}
     >
-      <div
-        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-          isUser
-            ? 'bg-gradient-to-br from-terracotta-500 to-coral-500'
-            : 'bg-gradient-to-br from-green-500 to-emerald-600'
-        }`}
-      >
+      {/* Avatar */}
+      <div className="flex-shrink-0">
         {isUser ? (
-          <User className="h-4 w-4 text-white" />
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-terracotta-500 to-coral-500 flex items-center justify-center">
+            <User className="h-4 w-4 text-white" />
+          </div>
         ) : (
-          <Bot className="h-5 w-5 text-white" />
+          <img
+            src={sutaAvatar}
+            alt="SUTA"
+            className="w-8 h-8 rounded-full object-cover shadow-md"
+          />
         )}
       </div>
 
