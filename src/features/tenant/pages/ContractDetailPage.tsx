@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
+import Header from '@/app/layout/Header';
+import Footer from '@/app/layout/Footer';
 import { ArrowLeft, FileText, Edit, CheckCircle, X } from 'lucide-react';
 
 interface Contract {

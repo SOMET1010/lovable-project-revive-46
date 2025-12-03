@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
+import Header from '@/app/layout/Header';
+import Footer from '@/app/layout/Footer';
 import { ArrowLeft, FileText, Send, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import ContractPreview from '@/features/contract/components/ContractPreview';
 import ContractAnnexes from '@/features/contract/components/ContractAnnexes';

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
+import Header from '@/app/layout/Header';
+import Footer from '@/app/layout/Footer';
 import { Shield, Upload, CheckCircle, AlertCircle, FileText, Camera, Loader, X } from 'lucide-react';
 import VerificationBadge from '@/shared/ui/VerificationBadge';
 import AnsutBadge from '@/features/verification/components/AnsutBadge';
