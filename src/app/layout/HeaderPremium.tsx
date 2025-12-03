@@ -81,7 +81,7 @@ export default function HeaderPremium() {
                 >
                   <span className="flex items-center gap-1">
                     {item.label}
-                    {item.badge && item.badge > 0 && (
+                    {item.badge !== undefined && item.badge > 0 && (
                       <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                         {item.badge > 9 ? '9+' : item.badge}
                       </span>
@@ -224,7 +224,7 @@ export default function HeaderPremium() {
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
-                {item.badge && item.badge > 0 && (
+                {item.badge !== undefined && item.badge > 0 && (
                   <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
                     {item.badge > 9 ? '9+' : item.badge}
                   </span>
