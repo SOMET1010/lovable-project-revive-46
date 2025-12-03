@@ -138,9 +138,12 @@ function formatInlineText(text: string): (string | JSX.Element)[] {
 function ChatMessage({ role, content, timestamp, isNew = false }: ChatMessageProps) {
   const isUser = role === 'user';
   const isAssistant = role === 'assistant';
+  
+  // Safety check for undefined content
+  const safeContent = content ?? '';
 
-  const hasAlert = content.includes('🚨') || content.includes('ALERTE') || content.includes('ARNAQUE');
-  const hasSuccess = content.includes('✅') || content.includes('PROTÉGÉ');
+  const hasAlert = safeContent.includes('🚨') || safeContent.includes('ALERTE') || safeContent.includes('ARNAQUE');
+  const hasSuccess = safeContent.includes('✅') || safeContent.includes('PROTÉGÉ');
 
   return (
     <div
@@ -187,7 +190,7 @@ function ChatMessage({ role, content, timestamp, isNew = false }: ChatMessagePro
           )}
 
           <div className={`text-sm leading-relaxed ${isUser ? 'text-white' : 'text-gray-800'}`}>
-            {formatMessage(content)}
+            {formatMessage(safeContent)}
           </div>
         </div>
 
