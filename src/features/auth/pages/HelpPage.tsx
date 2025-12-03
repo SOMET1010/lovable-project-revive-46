@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { ChevronDown, Search, MessageCircle, HelpCircle, Shield, CreditCard, Home, User, Mail, Phone } from 'lucide-react';
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
-import '../../../features/property/styles/homepage-modern.css';
 
 interface FAQItem {
   question: string;
