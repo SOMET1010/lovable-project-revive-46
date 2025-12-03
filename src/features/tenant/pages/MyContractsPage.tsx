@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { FileText, Eye, Edit, X, CheckCircle } from 'lucide-react';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 
 interface Contract {
   id: string;
