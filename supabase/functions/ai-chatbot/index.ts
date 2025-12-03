@@ -1,196 +1,134 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const SUTA_SYSTEM_PROMPT = `Tu es SUTA (Smart User Technology Assistant), l'assistant virtuel intelligent de Mon Toit, la plateforme de location immobilière certifiée en Côte d'Ivoire.
+
+Tu es professionnel, chaleureux et expert en immobilier ivoirien. Tu connais parfaitement :
+- La location immobilière en Côte d'Ivoire (lois, pratiques, quartiers)
+- Les différents quartiers d'Abidjan (Cocody, Marcory, Yopougon, Plateau, Treichville, etc.)
+- Les types de biens (appartements, studios, villas, bureaux, commerces)
+- Les prix du marché immobilier ivoirien
+- Les bonnes pratiques pour éviter les arnaques
+
+Tes responsabilités :
+1. Aider les locataires à trouver un logement sécurisé
+2. Guider les propriétaires dans la publication de leurs biens
+3. Protéger les utilisateurs contre les arnaques immobilières
+4. Expliquer les processus de location et les contrats
+5. Répondre aux questions sur la plateforme Mon Toit
+
+⚠️ RÈGLES DE SÉCURITÉ IMPORTANTES :
+- Toujours rappeler de NE JAMAIS payer avant une visite physique
+- Alerter sur les signes d'arnaques (prix trop bas, urgence, demande d'avance)
+- Recommander les visites accompagnées et les paiements sécurisés
+
+Style de communication :
+- Tutoiement amical mais professionnel
+- Réponses concises et actionnables (max 200 mots)
+- Utilise des emojis avec parcimonie (max 2 par message)
+- Adapté au contexte ivoirien
+
+Si tu ne connais pas une information, redis-le honnêtement.`;
+
 interface ChatMessage {
-  role: string;
+  role: 'user' | 'assistant' | 'system';
   content: string;
 }
 
-Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { messages, userId, temperature = 0.8, maxTokens = 800 } = await req.json();
+    const { message, userId, conversationHistory = [] } = await req.json();
 
-    if (!messages || !Array.isArray(messages)) {
-      return new Response(
-        JSON.stringify({ error: "Messages array is required" }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+    console.log(`[SUTA] Processing message for user: ${userId}`);
+
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      console.error('[SUTA] LOVABLE_API_KEY not configured');
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('🤖 Chatbot request received');
-    console.log('Messages count:', messages.length);
-    console.log('User ID:', userId);
+    // Build messages for API
+    const messages: ChatMessage[] = [
+      { role: 'system', content: SUTA_SYSTEM_PROMPT },
+      ...conversationHistory.slice(-10).map((msg: ChatMessage) => ({
+        role: msg.role,
+        content: msg.content
+      })),
+      { role: 'user', content: message }
+    ];
 
-    // Essayer Azure d'abord
-    const azureEndpoint = Deno.env.get("AZURE_OPENAI_ENDPOINT");
-    const azureApiKey = Deno.env.get("AZURE_OPENAI_API_KEY");
-    const deploymentName = Deno.env.get("AZURE_OPENAI_DEPLOYMENT_NAME");
-    const apiVersion = Deno.env.get("AZURE_OPENAI_API_VERSION");
+    console.log(`[SUTA] Calling Lovable AI Gateway with ${messages.length} messages`);
 
-    // Si Azure est configuré, l'utiliser
-    if (azureEndpoint && azureApiKey && deploymentName && apiVersion) {
-      console.log('✅ Using Azure OpenAI');
-      console.log('Deployment:', deploymentName);
-
-      try {
-        const url = `${azureEndpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
-
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "api-key": azureApiKey,
-          },
-          body: JSON.stringify({
-            messages,
-            temperature,
-            max_tokens: maxTokens,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Azure OpenAI error:", response.status, errorText);
-          throw new Error(`Azure error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const content = data.choices[0].message.content;
-        const tokensUsed = data.usage?.total_tokens || 0;
-
-        console.log('✅ Azure response OK, tokens:', tokensUsed);
-
-        return new Response(
-          JSON.stringify({
-            content,
-            tokensUsed,
-            model: deploymentName,
-          }),
-          {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          }
-        );
-      } catch (azureError) {
-        console.warn('⚠️ Azure failed, falling back to Gemini:', azureError.message);
-      }
-    } else {
-      console.log('⚠️ Azure not configured, using Gemini');
-    }
-
-    // Fallback sur Gemini
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-
-    if (!geminiApiKey) {
-      console.error('❌ No AI provider configured');
-      return new Response(
-        JSON.stringify({
-          error: "No AI provider configured. Please add AZURE_OPENAI_* or GEMINI_API_KEY secrets.",
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    console.log('🔄 Using Gemini as fallback');
-
-    // Convertir les messages au format Gemini
-    const formattedMessages = messages.map((msg: ChatMessage) => {
-      return `${msg.role === 'system' ? 'Instructions' : msg.role === 'user' ? 'Question' : 'Réponse'}: ${msg.content}`;
-    }).join('\n\n');
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
-
-    const response = await fetch(url, {
-      method: "POST",
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: formattedMessages
-          }]
-        }],
-        generationConfig: {
-          temperature: temperature,
-          maxOutputTokens: maxTokens,
-        }
+        model: 'google/gemini-2.5-flash',
+        messages,
+        temperature: 0.7,
+        max_tokens: 800,
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Gemini error:", response.status, errorText);
-      return new Response(
-        JSON.stringify({
-          error: `Gemini error: ${response.status}`,
-          details: errorText,
-        }),
-        {
-          status: response.status,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
+      console.error(`[SUTA] AI Gateway error: ${response.status}`, errorText);
+
+      if (response.status === 429) {
+        return new Response(JSON.stringify({ 
+          error: 'Rate limit exceeded',
+          response: "⏳ Trop de demandes en ce moment. Merci de patienter quelques secondes et réessayer."
+        }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ 
+          error: 'Payment required',
+          response: "💳 Le service est temporairement indisponible. Veuillez contacter le support."
+        }), {
+          status: 402,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      throw new Error(`AI Gateway error: ${response.status}`);
     }
 
     const data = await response.json();
+    const aiResponse = data.choices?.[0]?.message?.content || "Désolé, je n'ai pas pu générer une réponse.";
 
-    if (!data.candidates || data.candidates.length === 0) {
-      console.error("Gemini returned no candidates");
-      return new Response(
-        JSON.stringify({
-          error: "No response from Gemini",
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
+    console.log(`[SUTA] Response generated successfully, tokens: ${data.usage?.total_tokens || 'N/A'}`);
 
-    const content = data.candidates[0].content.parts[0].text;
-    const tokensUsed = data.usageMetadata?.totalTokenCount || 0;
+    return new Response(JSON.stringify({ 
+      response: aiResponse,
+      model: 'google/gemini-2.5-flash',
+      tokensUsed: data.usage?.total_tokens || 0
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
 
-    console.log('✅ Gemini response OK, tokens:', tokensUsed);
-
-    return new Response(
-      JSON.stringify({
-        content,
-        tokensUsed,
-        model: "gemini-1.5-flash",
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
   } catch (error) {
-    console.error("Error in ai-chatbot function:", error);
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
-    );
+    console.error('[SUTA] Error:', error);
+    return new Response(JSON.stringify({ 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      response: "❌ Désolé, je rencontre des difficultés techniques. Veuillez réessayer ou contacter le support."
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
