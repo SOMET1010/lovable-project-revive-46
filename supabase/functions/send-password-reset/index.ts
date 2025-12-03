@@ -1,5 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -34,9 +33,14 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserByEmail(email);
+    // Find user by email using listUsers with filter
+    const { data: usersData, error: userError } = await supabaseClient.auth.admin.listUsers({
+      filter: `email.eq.${email}`
+    });
+    
+    const userData = usersData?.users?.[0];
 
-    if (userError || !userData || !userData.user) {
+    if (userError || !userData) {
       return new Response(
         JSON.stringify({
           error: 'Aucun compte associé à cette adresse email',

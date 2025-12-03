@@ -1,5 +1,4 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -63,13 +62,14 @@ Deno.serve(async (req: Request) => {
     }
 
     // Log successful verification
-    await supabaseClient.rpc('log_api_usage', {
+    // Log API usage (ignore errors)
+    supabaseClient.rpc('log_api_usage', {
       p_service_name: 'verification',
       p_action: `verify_${type}`,
       p_status: 'success',
       p_request_data: { type, verified: true },
       p_response_data: { userId: verificationResult.user_id }
-    }).catch(() => {}); // Ignore logging errors
+    }).then(() => {}).catch(() => {});
 
     return new Response(
       JSON.stringify({

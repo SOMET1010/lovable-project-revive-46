@@ -1,4 +1,3 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { ServiceManager, ServiceConfig } from '../_shared/serviceManager.ts';
 
 const corsHeaders = {
@@ -104,7 +103,7 @@ Deno.serve(async (req: Request) => {
       },
 
       azure: async (config: ServiceConfig, params: any) => {
-        const { SmsClient } = await import('npm:@azure/communication-sms');
+        const { SmsClient } = await import('https://esm.sh/@azure/communication-sms');
         const connectionString = Deno.env.get('AZURE_COMMUNICATION_CONNECTION_STRING');
 
         if (!connectionString) {
