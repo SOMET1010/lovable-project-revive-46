@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, MapPin, Home, ChevronDown, Sparkles } from 'lucide-react';
+import { useParallax } from '@/shared/hooks';
 
 interface HeroPremiumProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
@@ -46,6 +47,7 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
   const [city, setCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
+  const { offset, isEnabled } = useParallax({ factor: 0.25 });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,12 +56,16 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
 
   return (
     <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-      {/* Background Image - Premium Quality */}
-      <div className="absolute inset-0">
+      {/* Background Image - Premium Quality with Parallax */}
+      <div className="absolute inset-0 overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
           alt="Villa moderne de luxe"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover motion-reduce:transform-none"
+          style={{
+            transform: isEnabled ? `translateY(${offset}px) scale(1.15)` : 'scale(1)',
+            willChange: isEnabled ? 'transform' : 'auto',
+          }}
           loading="eager"
         />
         {/* Premium Gradient Overlay */}

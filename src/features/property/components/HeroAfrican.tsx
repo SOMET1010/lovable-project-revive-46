@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search, MapPin, Home, ChevronDown } from 'lucide-react';
+import { useParallax } from '@/shared/hooks';
 
 interface HeroAfricanProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
@@ -37,6 +38,7 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
   const [city, setCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
+  const { offset, isEnabled } = useParallax({ factor: 0.2 });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,12 +47,16 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
 
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0">
+      {/* Background Image with Overlay and Parallax */}
+      <div className="absolute inset-0 overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
           alt="Belle villa africaine"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover motion-reduce:transform-none"
+          style={{
+            transform: isEnabled ? `translateY(${offset}px) scale(1.15)` : 'scale(1)',
+            willChange: isEnabled ? 'transform' : 'auto',
+          }}
         />
         {/* Gradient Overlay - Warm terracotta tones */}
         <div 
