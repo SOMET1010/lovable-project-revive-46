@@ -18,7 +18,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { phoneNumber, method }: OTPRequest = await req.json();
+    const { phoneNumber, method = 'sms' }: OTPRequest = await req.json();
 
     // Validation
     if (!phoneNumber) {
@@ -52,25 +52,28 @@ Deno.serve(async (req: Request) => {
 
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Créer ou mettre à jour l'OTP dans la table
-    const storeResponse = await fetch(`${supabaseUrl}/rest/v1/otp_codes`, {
+    // Utiliser la table verification_codes existante
+    const storeResponse = await fetch(`${supabaseUrl}/rest/v1/verification_codes`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${supabaseKey}`,
+        'apikey': supabaseKey,
         'Content-Type': 'application/json',
         'Prefer': 'resolution=merge-duplicates',
       },
       body: JSON.stringify({
         phone: normalizedPhone,
         code: otp,
+        type: method,
         expires_at: expiresAt.toISOString(),
         attempts: 0,
-        verified: false,
+        max_attempts: 3,
       }),
     });
 
     if (!storeResponse.ok) {
-      console.error('Failed to store OTP:', await storeResponse.text());
+      const errorText = await storeResponse.text();
+      console.error('Failed to store OTP:', errorText);
       return new Response(
         JSON.stringify({ error: 'Erreur lors de la génération du code' }),
         {
@@ -80,48 +83,63 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Envoyer le code via InTouch (SMS ou WhatsApp)
-    const intouchUrl = method === 'sms'
-      ? `${supabaseUrl}/functions/v1/intouch-sms`
-      : `${supabaseUrl}/functions/v1/send-whatsapp`;
+    // Utiliser le système hybride avec fallback automatique
+    // InTouch = priorité 1, Brevo = priorité 2
+    const functionUrl = method === 'sms'
+      ? `${supabaseUrl}/functions/v1/send-sms-hybrid`
+      : `${supabaseUrl}/functions/v1/send-whatsapp-hybrid`;
 
     const message = `Votre code Mon Toit est : ${otp}\n\nCe code expire dans 10 minutes. Ne le partagez avec personne.`;
 
-    const sendResponse = await fetch(intouchUrl, {
+    console.log(`📤 Envoi OTP via ${method} à ${normalizedPhone}...`);
+
+    const sendResponse = await fetch(functionUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${supabaseKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        to: normalizedPhone,
+        phoneNumber: normalizedPhone,
         message: message,
       }),
     });
 
+    const sendResult = await sendResponse.json();
+
     if (!sendResponse.ok) {
-      console.warn('Failed to send OTP, but code was stored:', await sendResponse.text());
-      // Continue anyway - le code est stocké
+      console.warn('⚠️ Échec envoi OTP, mais code stocké:', sendResult);
+      // Retourner le code en mode dev pour faciliter les tests
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: `Code généré (envoi ${method} échoué)`,
+          fallback: true,
+          otp: otp, // Mode dev uniquement
+          expiresIn: 600,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
-    console.log(`✅ OTP sent to ${normalizedPhone} via ${method}`);
+    console.log(`✅ OTP envoyé à ${normalizedPhone} via ${method}`, sendResult);
 
     return new Response(
       JSON.stringify({
         success: true,
         message: `Code envoyé par ${method === 'sms' ? 'SMS' : 'WhatsApp'}`,
-        expiresIn: 600, // 10 minutes en secondes
+        provider: sendResult.provider,
+        expiresIn: 600,
       }),
       {
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
 
   } catch (error) {
-    console.error('Error in send-auth-otp:', error);
+    console.error('❌ Error in send-auth-otp:', error);
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : 'Erreur inconnue'

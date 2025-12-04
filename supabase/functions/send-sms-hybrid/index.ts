@@ -71,33 +71,42 @@ Deno.serve(async (req: Request) => {
 
     // Define handlers for each SMS provider
     const handlers = {
-      intouch: async (config: ServiceConfig, params: any) => {
-        const response = await fetch(
-          `${Deno.env.get('INTOUCH_BASE_URL')}sms/send`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${Deno.env.get('INTOUCH_USERNAME')}:${Deno.env.get('INTOUCH_PASSWORD')}`,
-            },
-            body: JSON.stringify({
-              sender: config.config.sender || params.sender,
-              recipient: params.phoneNumber,
-              message: params.message,
-              partner_id: Deno.env.get('INTOUCH_PARTNER_ID'),
-            }),
-          }
-        );
+      intouch: async (config: ServiceConfig, params: { phoneNumber: string; message: string; sender: string }) => {
+        const baseUrl = Deno.env.get('INTOUCH_BASE_URL');
+        const partnerId = Deno.env.get('INTOUCH_PARTNER_ID');
+        const username = Deno.env.get('INTOUCH_USERNAME');
+        const password = Deno.env.get('INTOUCH_PASSWORD');
+
+        if (!baseUrl || !partnerId || !username || !password) {
+          throw new Error('InTouch credentials not configured');
+        }
+
+        // InTouch SMS API - format correct
+        const response = await fetch(`${baseUrl}/apidist/sec/${partnerId}/sms`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${btoa(`${partnerId}:${username}`)}`,
+          },
+          body: JSON.stringify({
+            recipient_phone_number: params.phoneNumber.replace('+', ''),
+            message: params.message,
+            sender: config.config?.sender || params.sender || 'MonToit',
+          }),
+        });
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`INTOUCH SMS failed: ${response.status} - ${errorText}`);
+          console.error('InTouch SMS error:', errorText);
+          throw new Error(`InTouch SMS failed: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('✅ InTouch SMS success:', data);
+
         return {
           success: true,
-          messageId: data.message_id || data.id,
+          messageId: data.message_id || data.id || data.transaction_id,
           provider: 'intouch',
         };
       },

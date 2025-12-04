@@ -5,3 +5,21 @@ verify_jwt = false
 
 [functions.suta-chat]
 verify_jwt = false
+
+[functions.send-auth-otp]
+verify_jwt = false
+
+[functions.send-sms-hybrid]
+verify_jwt = false
+
+[functions.send-whatsapp-hybrid]
+verify_jwt = false
+
+[functions.send-whatsapp-otp]
+verify_jwt = false
+
+[functions.send-whatsapp-brevo]
+verify_jwt = false
+
+[functions.intouch-sms]
+verify_jwt = false
