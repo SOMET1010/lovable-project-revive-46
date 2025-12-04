@@ -545,13 +545,14 @@ export default function Auth() {
                       Nom complet
                     </label>
                     <div className="relative">
-                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--color-neutral-400)]" />
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--color-neutral-400)] pointer-events-none z-10" />
                       <input
                         type="text"
                         required
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 border border-[var(--color-neutral-200)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)] transition-all bg-white text-[var(--color-neutral-900)]"
+                        className="w-full pr-4 py-3 border border-[var(--color-neutral-200)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)] transition-all bg-white text-[var(--color-neutral-900)]"
+                        style={{ paddingLeft: '44px' }}
                         placeholder="Votre nom complet"
                       />
                     </div>
@@ -626,13 +627,14 @@ export default function Auth() {
                     Email {!isLogin && verificationType !== 'email' && <span className="text-[var(--color-neutral-500)] text-xs font-normal">(optionnel)</span>}
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--color-neutral-400)]" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--color-neutral-400)] pointer-events-none z-10" />
                     <input
                       type="email"
                       required={(isLogin && loginMethod === 'email') || (!isLogin && verificationType === 'email')}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 border border-[var(--color-neutral-200)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)] transition-all bg-white text-[var(--color-neutral-900)]"
+                      className="w-full pr-4 py-3 border border-[var(--color-neutral-200)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)] transition-all bg-white text-[var(--color-neutral-900)]"
+                      style={{ paddingLeft: '44px' }}
                       placeholder="votre@email.com"
                     />
                   </div>
@@ -646,7 +648,7 @@ export default function Auth() {
                     Mot de passe
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--color-neutral-400)]" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[var(--color-neutral-400)] pointer-events-none z-10" />
                     <input
                       type="password"
                       required
@@ -657,7 +659,8 @@ export default function Auth() {
                           setPasswordStrength(validatePassword(e.target.value));
                         }
                       }}
-                      className="w-full pl-12 pr-4 py-3 border border-[var(--color-neutral-200)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)] transition-all bg-white text-[var(--color-neutral-900)]"
+                      className="w-full pr-4 py-3 border border-[var(--color-neutral-200)] rounded-xl focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)] transition-all bg-white text-[var(--color-neutral-900)]"
+                      style={{ paddingLeft: '44px' }}
                       placeholder="••••••••"
                       minLength={8}
                     />
