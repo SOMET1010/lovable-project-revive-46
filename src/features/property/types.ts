@@ -20,6 +20,11 @@ export interface PropertyWithOwner extends Property {
   };
 }
 
+export interface PropertyWithOwnerScore extends Property {
+  owner_trust_score?: number | null;
+  owner_full_name?: string | null;
+}
+
 export interface PropertyFilters {
   city?: string;
   type?: 'apartment' | 'house' | 'studio' | 'villa' | 'land' | 'commercial';
