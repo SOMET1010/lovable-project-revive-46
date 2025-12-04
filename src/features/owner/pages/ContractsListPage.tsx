@@ -114,55 +114,55 @@ export default function ContractsList() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-olive-50 to-amber-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600"></div>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-olive-50 to-amber-50 py-12">
+    <div className="min-h-screen bg-neutral-50 py-12">
       <div className="max-w-7xl mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center space-x-3">
-            <FileText className="w-10 h-10 text-terracotta-600" />
+          <h1 className="text-3xl font-bold text-neutral-900 mb-2 flex items-center gap-3">
+            <FileText className="w-8 h-8 text-primary-500" />
             <span>Mes Contrats</span>
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-lg text-neutral-600">
             Gérez vos baux et signatures électroniques
           </p>
         </div>
 
-        <div className="card-scrapbook p-6 mb-8">
+        <div className="bg-white rounded-2xl p-6 shadow-card mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-neutral-400" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Rechercher par propriété, ville, nom..."
-                className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-olive-200 focus:border-olive-500"
+                className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-200 focus:border-primary-500 transition-colors"
               />
             </div>
 
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               <button
                 onClick={() => setFilter('all')}
-                className={`px-4 py-3 rounded-xl font-bold transition-all ${
+                className={`px-4 py-3 rounded-xl font-semibold transition-colors ${
                   filter === 'all'
-                    ? 'bg-olive-600 text-white'
-                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-olive-300'
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300'
                 }`}
               >
                 Tous
               </button>
               <button
                 onClick={() => setFilter('pending')}
-                className={`px-4 py-3 rounded-xl font-bold transition-all flex items-center space-x-2 ${
+                className={`px-4 py-3 rounded-xl font-semibold transition-colors flex items-center gap-2 ${
                   filter === 'pending'
-                    ? 'bg-yellow-600 text-white'
-                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-yellow-300'
+                    ? 'bg-yellow-500 text-white'
+                    : 'bg-white text-neutral-700 border border-neutral-200 hover:border-yellow-300'
                 }`}
               >
                 <Clock className="w-4 h-4" />
@@ -170,10 +170,10 @@ export default function ContractsList() {
               </button>
               <button
                 onClick={() => setFilter('signed')}
-                className={`px-4 py-3 rounded-xl font-bold transition-all flex items-center space-x-2 ${
+                className={`px-4 py-3 rounded-xl font-semibold transition-colors flex items-center gap-2 ${
                   filter === 'signed'
-                    ? 'bg-green-600 text-white'
-                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-green-300'
+                    ? 'bg-green-500 text-white'
+                    : 'bg-white text-neutral-700 border border-neutral-200 hover:border-green-300'
                 }`}
               >
                 <CheckCircle className="w-4 h-4" />
@@ -184,10 +184,10 @@ export default function ContractsList() {
         </div>
 
         {filteredContracts.length === 0 ? (
-          <div className="card-scrapbook p-12 text-center">
-            <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Aucun contrat trouvé</h3>
-            <p className="text-gray-600">
+          <div className="bg-white rounded-2xl p-12 shadow-card text-center">
+            <FileText className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-neutral-900 mb-2">Aucun contrat trouvé</h3>
+            <p className="text-neutral-600">
               {filter !== 'all'
                 ? 'Essayez de changer le filtre'
                 : 'Vos contrats apparaîtront ici'}
@@ -196,20 +196,20 @@ export default function ContractsList() {
         ) : (
           <div className="grid grid-cols-1 gap-6">
             {filteredContracts.map((contract) => (
-              <div key={contract.id} className="card-scrapbook p-6 hover:shadow-xl transition-shadow">
+              <div key={contract.id} className="bg-white rounded-2xl p-6 shadow-card hover:shadow-lg transition-shadow">
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-1">
+                        <h3 className="text-xl font-bold text-neutral-900 mb-1">
                           {contract.property?.title}
                         </h3>
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <span className="flex items-center space-x-1">
+                        <div className="flex items-center gap-4 text-sm text-neutral-600">
+                          <span className="flex items-center gap-1">
                             <MapPin className="w-4 h-4" />
                             <span>{contract.property?.address}, {contract.property?.city}</span>
                           </span>
-                          <span className="flex items-center space-x-1">
+                          <span className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
                             <span>{new Date(contract.start_date).toLocaleDateString('fr-FR')}</span>
                           </span>
@@ -223,47 +223,47 @@ export default function ContractsList() {
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600 mb-1">Loyer mensuel</p>
-                        <p className="text-lg font-bold text-gray-900">
+                      <div className="bg-neutral-50 rounded-lg p-3">
+                        <p className="text-xs text-neutral-600 mb-1">Loyer mensuel</p>
+                        <p className="text-lg font-bold text-neutral-900">
                           {contract.monthly_rent.toLocaleString('fr-FR')} FCFA
                         </p>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600 mb-1">
+                      <div className="bg-neutral-50 rounded-lg p-3">
+                        <p className="text-xs text-neutral-600 mb-1">
                           {isTenant(contract) ? 'Propriétaire' : 'Locataire'}
                         </p>
-                        <p className="text-sm font-bold text-gray-900">
+                        <p className="text-sm font-bold text-neutral-900">
                           {isTenant(contract)
                             ? contract.landlord?.full_name
                             : contract.tenant?.full_name}
                         </p>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600 mb-1">Statut</p>
-                        <p className="text-sm font-bold text-gray-900">
+                      <div className="bg-neutral-50 rounded-lg p-3">
+                        <p className="text-xs text-neutral-600 mb-1">Statut</p>
+                        <p className="text-sm font-bold text-neutral-900">
                           {contract.status === 'actif' ? 'Actif' :
                            contract.status === 'en_attente_signature' ? 'En attente' :
                            contract.status}
                         </p>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-xs text-gray-600 mb-1">Créé le</p>
-                        <p className="text-sm font-bold text-gray-900">
+                      <div className="bg-neutral-50 rounded-lg p-3">
+                        <p className="text-xs text-neutral-600 mb-1">Créé le</p>
+                        <p className="text-sm font-bold text-neutral-900">
                           {new Date(contract.created_at).toLocaleDateString('fr-FR')}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       {contract.tenant_signed_at && (
-                        <div className="flex items-center space-x-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                        <div className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
                           <CheckCircle className="w-3 h-3" />
                           <span>Locataire: {new Date(contract.tenant_signed_at).toLocaleDateString('fr-FR')}</span>
                         </div>
                       )}
                       {contract.landlord_signed_at && (
-                        <div className="flex items-center space-x-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                        <div className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
                           <CheckCircle className="w-3 h-3" />
                           <span>Propriétaire: {new Date(contract.landlord_signed_at).toLocaleDateString('fr-FR')}</span>
                         </div>
@@ -271,11 +271,11 @@ export default function ContractsList() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col space-y-2 lg:w-48">
+                  <div className="flex flex-col gap-2 lg:w-48">
                     {!contract.tenant_signed_at && isTenant(contract) && (
                       <a
                         href={`/bail/signer/${contract.id}`}
-                        className="btn-primary py-3 flex items-center justify-center space-x-2"
+                        className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
                       >
                         <FileSignature className="w-4 h-4" />
                         <span>Signer</span>
@@ -284,7 +284,7 @@ export default function ContractsList() {
                     {!contract.landlord_signed_at && !isTenant(contract) && (
                       <a
                         href={`/bail/signer/${contract.id}`}
-                        className="btn-primary py-3 flex items-center justify-center space-x-2"
+                        className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
                       >
                         <FileSignature className="w-4 h-4" />
                         <span>Signer</span>
@@ -292,7 +292,7 @@ export default function ContractsList() {
                     )}
                     <a
                       href={`/bail/${contract.id}`}
-                      className="btn-secondary py-3 flex items-center justify-center space-x-2"
+                      className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
                     >
                       <Eye className="w-4 h-4" />
                       <span>Voir</span>
@@ -300,7 +300,7 @@ export default function ContractsList() {
                     {(contract.pdf_document_url || contract.signed_pdf_url) && (
                       <button
                         onClick={() => handleDownload(contract)}
-                        className="btn-secondary py-3 flex items-center justify-center space-x-2"
+                        className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
                       >
                         <Download className="w-4 h-4" />
                         <span>PDF</span>
