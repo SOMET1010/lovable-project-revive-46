@@ -73,3 +73,6 @@ export { Progress } from './Progress';
 export { Table as DataTable, StatsTable } from './DataTable';
 export { Badge as BadgeCustom } from './BadgeCustom';
 export type { BadgeProps as BadgeCustomProps } from './BadgeCustom';
+
+export { ScoreBadge } from './ScoreBadge';
+export type { ScoreBadgeProps } from './ScoreBadge';
