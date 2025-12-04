@@ -19,18 +19,13 @@ interface Contract {
   id: string;
   property_id: string;
   monthly_rent: number;
-  deposit_amount: number;
-  charges_amount: number;
+  deposit_amount: number | null;
   owner_id: string;
-  property: {
-    title: string;
-    address: string;
-    city: string;
-    main_image: string;
-  };
-  owner: {
-    full_name: string;
-  };
+  property_title: string;
+  property_address: string | null;
+  property_city: string;
+  property_main_image: string | null;
+  owner_name: string;
 }
 
 export default function MakePayment() {
@@ -59,35 +54,48 @@ export default function MakePayment() {
   }, [user]);
 
   const loadUserContracts = async () => {
+    if (!user) return;
+    
     try {
-      const { data, error } = await supabase
+      // Load contracts first
+      const { data: contractsData, error: contractsError } = await supabase
         .from('lease_contracts')
-        .select(`
-          id,
-          property_id,
-          monthly_rent,
-          deposit_amount,
-          charges_amount,
-          owner_id,
-          properties!inner(title, address, city, main_image),
-          owner:profiles!lease_contracts_owner_id_fkey(full_name)
-        `)
-        .eq('tenant_id', user?.id)
+        .select('id, property_id, monthly_rent, deposit_amount, owner_id')
+        .eq('tenant_id', user.id)
         .eq('status', 'actif')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (contractsError) throw contractsError;
 
-      const formattedContracts = (data || []).map((contract: any) => ({
+      // Format contracts with placeholder data
+      const formattedContracts: Contract[] = (contractsData || []).map((contract: any) => ({
         id: contract.id,
         property_id: contract.property_id,
         monthly_rent: contract.monthly_rent,
         deposit_amount: contract.deposit_amount,
-        charges_amount: contract.charges_amount,
         owner_id: contract.owner_id,
-        property: contract.properties,
-        owner: contract.owner
+        property_title: 'Propriété',
+        property_address: null,
+        property_city: '',
+        property_main_image: null,
+        owner_name: 'Propriétaire'
       }));
+
+      // Load property details for each contract
+      for (const contract of formattedContracts) {
+        const { data: propertyData } = await supabase
+          .from('properties')
+          .select('title, address, city, main_image')
+          .eq('id', contract.property_id)
+          .single();
+        
+        if (propertyData) {
+          contract.property_title = propertyData.title;
+          contract.property_address = propertyData.address;
+          contract.property_city = propertyData.city;
+          contract.property_main_image = propertyData.main_image;
+        }
+      }
 
       setContracts(formattedContracts);
     } catch (err: any) {
@@ -117,10 +125,10 @@ export default function MakePayment() {
         amount = selectedContract.monthly_rent;
         break;
       case 'depot_garantie':
-        amount = selectedContract.deposit_amount;
+        amount = selectedContract.deposit_amount || 0;
         break;
       case 'charges':
-        amount = selectedContract.charges_amount;
+        amount = 0;
         break;
       default:
         amount = 0;
@@ -145,8 +153,9 @@ export default function MakePayment() {
         .from('payments')
         .insert({
           payer_id: user.id,
-          receiver_id: formData.receiver_id,
-          property_id: formData.property_id,
+          receiver_id: formData.receiver_id || null,
+          property_id: formData.property_id || null,
+          contract_id: selectedContract.id,
           amount: formData.amount,
           payment_type: formData.payment_type,
           payment_method: formData.payment_method,
@@ -158,13 +167,11 @@ export default function MakePayment() {
       if (paymentError) throw paymentError;
 
       if (formData.payment_method === 'mobile_money' && formData.mobile_money_provider && formData.mobile_money_number) {
-        // Mobile Money payment processing would be handled here
-        // For now, mark as pending
         await supabase
           .from('payments')
           .update({
             status: 'en_cours',
-            transaction_reference: `MM_${payment.id.substring(0, 8)}`
+            transaction_ref: `MM_${payment.id.substring(0, 8)}`
           })
           .eq('id', payment.id);
       }
@@ -260,23 +267,23 @@ export default function MakePayment() {
                         >
                           <div className="flex items-start space-x-4">
                             <img
-                              src={contract.property.main_image || 'https://via.placeholder.com/100'}
-                              alt={contract.property.title}
+                              src={contract.property_main_image || 'https://via.placeholder.com/100'}
+                              alt={contract.property_title}
                               className="w-20 h-20 rounded-lg object-cover"
                             />
                             <div className="flex-1">
                               <h3 className="text-lg font-bold text-gray-900 mb-1">
-                                {contract.property.title}
+                                {contract.property_title}
                               </h3>
                               <p className="text-sm text-gray-600 mb-2">
-                                {contract.property.address}, {contract.property.city}
+                                {contract.property_address}, {contract.property_city}
                               </p>
                               <div className="flex items-center space-x-4 text-sm">
                                 <span className="font-semibold text-terracotta-600">
                                   Loyer: {contract.monthly_rent.toLocaleString()} FCFA
                                 </span>
                                 <span className="text-gray-500">
-                                  Propriétaire: {contract.owner.full_name}
+                                  Propriétaire: {contract.owner_name}
                                 </span>
                               </div>
                             </div>
@@ -301,14 +308,14 @@ export default function MakePayment() {
                     <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                       <div className="flex items-start space-x-3">
                         <img
-                          src={selectedContract.property.main_image || 'https://via.placeholder.com/80'}
-                          alt={selectedContract.property.title}
+                          src={selectedContract.property_main_image || 'https://via.placeholder.com/80'}
+                          alt={selectedContract.property_title}
                           className="w-16 h-16 rounded-lg object-cover"
                         />
                         <div>
-                          <h3 className="font-bold text-gray-900">{selectedContract.property.title}</h3>
-                          <p className="text-sm text-gray-600">{selectedContract.property.address}</p>
-                          <p className="text-sm text-gray-500">À: {selectedContract.owner.full_name}</p>
+                          <h3 className="font-bold text-gray-900">{selectedContract.property_title}</h3>
+                          <p className="text-sm text-gray-600">{selectedContract.property_address}</p>
+                          <p className="text-sm text-gray-500">À: {selectedContract.owner_name}</p>
                         </div>
                       </div>
                     </div>
@@ -321,8 +328,8 @@ export default function MakePayment() {
                         <div className="grid grid-cols-2 gap-4">
                           {[
                             { value: 'loyer', label: 'Loyer mensuel', amount: selectedContract.monthly_rent },
-                            { value: 'depot_garantie', label: 'Dépôt de garantie', amount: selectedContract.deposit_amount },
-                            { value: 'charges', label: 'Charges', amount: selectedContract.charges_amount },
+                            { value: 'depot_garantie', label: 'Dépôt de garantie', amount: selectedContract.deposit_amount || 0 },
+                            { value: 'charges', label: 'Charges', amount: 0 },
                             { value: 'frais_agence', label: 'Frais d\'agence', amount: 0 },
                           ].map((type) => (
                             <button
@@ -416,43 +423,32 @@ export default function MakePayment() {
                             </label>
                             <input
                               type="tel"
-                              placeholder="+225 XX XX XX XX XX"
                               value={formData.mobile_money_number}
                               onChange={(e) => setFormData({ ...formData, mobile_money_number: e.target.value })}
+                              placeholder="Ex: 07 XX XX XX XX"
                               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-terracotta-200 focus:border-terracotta-500"
                               required
                             />
-                            <p className="text-xs text-gray-500 mt-2">
-                              Vous recevrez une notification sur votre téléphone pour confirmer le paiement
-                            </p>
                           </div>
                         </div>
                       )}
                     </div>
 
-                    <div className="mt-8 p-4 bg-gradient-to-r from-terracotta-50 to-coral-50 border-2 border-terracotta-200 rounded-xl">
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg font-bold text-gray-900">Total à payer</span>
-                        <span className="text-2xl font-bold text-gradient">
-                          {formData.amount.toLocaleString()} FCFA
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 flex space-x-4">
+                    <div className="mt-8 flex space-x-4">
                       <button
                         type="button"
                         onClick={() => setSelectedContract(null)}
-                        className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-bold"
+                        className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-semibold"
                       >
-                        Annuler
+                        Changer de propriété
                       </button>
                       <button
                         type="submit"
                         disabled={submitting || formData.amount <= 0}
-                        className="flex-1 btn-primary px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 px-6 py-3 bg-terracotta-500 text-white rounded-xl hover:bg-terracotta-600 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                       >
-                        {submitting ? 'Traitement...' : 'Confirmer le paiement'}
+                        <Coins className="w-5 h-5" />
+                        <span>{submitting ? 'Traitement...' : `Payer ${formData.amount.toLocaleString()} FCFA`}</span>
                       </button>
                     </div>
                   </div>

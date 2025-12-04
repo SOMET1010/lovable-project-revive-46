@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      api_keys: {
+        Row: {
+          api_key: string
+          api_secret: string | null
+          config: Json | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_used_at: string | null
+          service_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          api_key: string
+          api_secret?: string | null
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          service_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          api_key?: string
+          api_secret?: string | null
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used_at?: string | null
+          service_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       chatbot_conversations: {
         Row: {
           archived_at: string | null
@@ -198,6 +234,36 @@ export type Database = {
           },
         ]
       }
+      feature_flags: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          description: string | null
+          feature_name: string
+          id: string
+          is_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          description?: string | null
+          feature_name: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          description?: string | null
+          feature_name?: string
+          id?: string
+          is_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       lease_contracts: {
         Row: {
           contract_number: string
@@ -256,40 +322,61 @@ export type Database = {
       }
       maintenance_requests: {
         Row: {
+          actual_cost: number | null
+          completed_date: string | null
           contract_id: string | null
           created_at: string | null
           description: string | null
+          estimated_cost: number | null
           id: string
+          images: string[] | null
           issue_type: string
           priority: string | null
+          property_id: string | null
+          rejection_reason: string | null
           resolved_at: string | null
           scheduled_date: string | null
           status: string | null
           tenant_id: string
+          urgency: string | null
         }
         Insert: {
+          actual_cost?: number | null
+          completed_date?: string | null
           contract_id?: string | null
           created_at?: string | null
           description?: string | null
+          estimated_cost?: number | null
           id?: string
+          images?: string[] | null
           issue_type: string
           priority?: string | null
+          property_id?: string | null
+          rejection_reason?: string | null
           resolved_at?: string | null
           scheduled_date?: string | null
           status?: string | null
           tenant_id: string
+          urgency?: string | null
         }
         Update: {
+          actual_cost?: number | null
+          completed_date?: string | null
           contract_id?: string | null
           created_at?: string | null
           description?: string | null
+          estimated_cost?: number | null
           id?: string
+          images?: string[] | null
           issue_type?: string
           priority?: string | null
+          property_id?: string | null
+          rejection_reason?: string | null
           resolved_at?: string | null
           scheduled_date?: string | null
           status?: string | null
           tenant_id?: string
+          urgency?: string | null
         }
         Relationships: [
           {
@@ -297,6 +384,13 @@ export type Database = {
             columns: ["contract_id"]
             isOneToOne: false
             referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
             referencedColumns: ["id"]
           },
         ]
@@ -328,15 +422,61 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          action_url: string | null
+          channel: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          read_at: string | null
+          title: string
+          type: string | null
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          channel?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          read_at?: string | null
+          title: string
+          type?: string | null
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          channel?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
           contract_id: string | null
           created_at: string | null
+          due_date: string | null
           id: string
+          paid_date: string | null
           payer_id: string
           payment_method: string | null
           payment_type: string
+          property_id: string | null
+          receiver_id: string | null
           status: string | null
           transaction_ref: string | null
         }
@@ -344,10 +484,14 @@ export type Database = {
           amount: number
           contract_id?: string | null
           created_at?: string | null
+          due_date?: string | null
           id?: string
+          paid_date?: string | null
           payer_id: string
           payment_method?: string | null
           payment_type: string
+          property_id?: string | null
+          receiver_id?: string | null
           status?: string | null
           transaction_ref?: string | null
         }
@@ -355,10 +499,14 @@ export type Database = {
           amount?: number
           contract_id?: string | null
           created_at?: string | null
+          due_date?: string | null
           id?: string
+          paid_date?: string | null
           payer_id?: string
           payment_method?: string | null
           payment_type?: string
+          property_id?: string | null
+          receiver_id?: string | null
           status?: string | null
           transaction_ref?: string | null
         }
@@ -370,53 +518,96 @@ export type Database = {
             referencedRelation: "lease_contracts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "payments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
         ]
       }
       profiles: {
         Row: {
+          active_role: string | null
           address: string | null
           avatar_url: string | null
           bio: string | null
           city: string | null
+          cnam_verified: boolean | null
           created_at: string | null
           email: string | null
+          facial_verification_date: string | null
+          facial_verification_image_url: string | null
+          facial_verification_score: number | null
+          facial_verification_status: string | null
           full_name: string | null
           id: string
           is_verified: boolean | null
+          oneci_data: Json | null
+          oneci_number: string | null
+          oneci_verification_date: string | null
+          oneci_verified: boolean | null
           phone: string | null
           profile_setup_completed: boolean | null
+          reliability_score: number | null
+          trust_score: number | null
           updated_at: string | null
           user_id: string | null
           user_type: string | null
         }
         Insert: {
+          active_role?: string | null
           address?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          cnam_verified?: boolean | null
           created_at?: string | null
           email?: string | null
+          facial_verification_date?: string | null
+          facial_verification_image_url?: string | null
+          facial_verification_score?: number | null
+          facial_verification_status?: string | null
           full_name?: string | null
           id?: string
           is_verified?: boolean | null
+          oneci_data?: Json | null
+          oneci_number?: string | null
+          oneci_verification_date?: string | null
+          oneci_verified?: boolean | null
           phone?: string | null
           profile_setup_completed?: boolean | null
+          reliability_score?: number | null
+          trust_score?: number | null
           updated_at?: string | null
           user_id?: string | null
           user_type?: string | null
         }
         Update: {
+          active_role?: string | null
           address?: string | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          cnam_verified?: boolean | null
           created_at?: string | null
           email?: string | null
+          facial_verification_date?: string | null
+          facial_verification_image_url?: string | null
+          facial_verification_score?: number | null
+          facial_verification_status?: string | null
           full_name?: string | null
           id?: string
           is_verified?: boolean | null
+          oneci_data?: Json | null
+          oneci_number?: string | null
+          oneci_verification_date?: string | null
+          oneci_verified?: boolean | null
           phone?: string | null
           profile_setup_completed?: boolean | null
+          reliability_score?: number | null
+          trust_score?: number | null
           updated_at?: string | null
           user_id?: string | null
           user_type?: string | null
@@ -427,11 +618,19 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[] | null
+          ansut_certificate_url: string | null
+          ansut_verification_date: string | null
+          ansut_verified: boolean | null
           bathrooms: number | null
           bedrooms: number | null
+          charges_amount: number | null
           city: string
           created_at: string | null
+          deposit_amount: number | null
           description: string | null
+          has_ac: boolean | null
+          has_garden: boolean | null
+          has_parking: boolean | null
           id: string
           images: string[] | null
           is_furnished: boolean | null
@@ -448,16 +647,24 @@ export type Database = {
           surface_area: number | null
           title: string
           updated_at: string | null
-          views: number | null
+          view_count: number | null
         }
         Insert: {
           address?: string | null
           amenities?: string[] | null
+          ansut_certificate_url?: string | null
+          ansut_verification_date?: string | null
+          ansut_verified?: boolean | null
           bathrooms?: number | null
           bedrooms?: number | null
+          charges_amount?: number | null
           city: string
           created_at?: string | null
+          deposit_amount?: number | null
           description?: string | null
+          has_ac?: boolean | null
+          has_garden?: boolean | null
+          has_parking?: boolean | null
           id?: string
           images?: string[] | null
           is_furnished?: boolean | null
@@ -474,16 +681,24 @@ export type Database = {
           surface_area?: number | null
           title: string
           updated_at?: string | null
-          views?: number | null
+          view_count?: number | null
         }
         Update: {
           address?: string | null
           amenities?: string[] | null
+          ansut_certificate_url?: string | null
+          ansut_verification_date?: string | null
+          ansut_verified?: boolean | null
           bathrooms?: number | null
           bedrooms?: number | null
+          charges_amount?: number | null
           city?: string
           created_at?: string | null
+          deposit_amount?: number | null
           description?: string | null
+          has_ac?: boolean | null
+          has_garden?: boolean | null
+          has_parking?: boolean | null
           id?: string
           images?: string[] | null
           is_furnished?: boolean | null
@@ -500,7 +715,55 @@ export type Database = {
           surface_area?: number | null
           title?: string
           updated_at?: string | null
-          views?: number | null
+          view_count?: number | null
+        }
+        Relationships: []
+      }
+      property_alerts: {
+        Row: {
+          city: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_notified_at: string | null
+          max_bedrooms: number | null
+          max_price: number | null
+          min_bedrooms: number | null
+          min_price: number | null
+          neighborhood: string | null
+          property_type: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_notified_at?: string | null
+          max_bedrooms?: number | null
+          max_price?: number | null
+          min_bedrooms?: number | null
+          min_price?: number | null
+          neighborhood?: string | null
+          property_type?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_notified_at?: string | null
+          max_bedrooms?: number | null
+          max_price?: number | null
+          min_bedrooms?: number | null
+          min_price?: number | null
+          neighborhood?: string | null
+          property_type?: string | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -538,6 +801,53 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "rental_applications_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string | null
+          id: string
+          is_visible: boolean | null
+          property_id: string | null
+          rating: number
+          review_type: string | null
+          reviewee_id: string | null
+          reviewer_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          property_id?: string | null
+          rating: number
+          review_type?: string | null
+          reviewee_id?: string | null
+          reviewer_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          is_visible?: boolean | null
+          property_id?: string | null
+          rating?: number
+          review_type?: string | null
+          reviewee_id?: string | null
+          reviewer_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -729,37 +1039,55 @@ export type Database = {
       }
       visit_requests: {
         Row: {
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string | null
+          feedback: string | null
           id: string
           notes: string | null
           owner_id: string | null
           property_id: string
+          rating: number | null
           status: string | null
           tenant_id: string
           visit_date: string
           visit_time: string
+          visit_type: string | null
+          visitor_notes: string | null
         }
         Insert: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string | null
+          feedback?: string | null
           id?: string
           notes?: string | null
           owner_id?: string | null
           property_id: string
+          rating?: number | null
           status?: string | null
           tenant_id: string
           visit_date: string
           visit_time: string
+          visit_type?: string | null
+          visitor_notes?: string | null
         }
         Update: {
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string | null
+          feedback?: string | null
           id?: string
           notes?: string | null
           owner_id?: string | null
           property_id?: string
+          rating?: number | null
           status?: string | null
           tenant_id?: string
           visit_date?: string
           visit_time?: string
+          visit_type?: string | null
+          visitor_notes?: string | null
         }
         Relationships: [
           {

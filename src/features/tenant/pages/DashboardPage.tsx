@@ -61,14 +61,14 @@ export default function TenantDashboard() {
     try {
       // Load active lease contract
       const { data: leaseData } = await supabase
-        .from('lease_contracts' as any)
+        .from('lease_contracts')
         .select('*')
         .eq('tenant_id', user.id)
         .eq('status', 'actif')
         .maybeSingle();
 
       if (leaseData) {
-        const lease = leaseData as LeaseContract;
+        const lease = leaseData as unknown as LeaseContract;
         
         // Load property data
         const { data: propertyData } = await supabase
@@ -96,16 +96,16 @@ export default function TenantDashboard() {
 
         // Load payments
         const { data: paymentsData } = await supabase
-          .from('payments' as any)
+          .from('payments')
           .select('*')
           .eq('payer_id', user.id)
           .order('created_at', { ascending: false })
           .limit(5);
 
-        setRecentPayments((paymentsData || []) as Payment[]);
+        setRecentPayments((paymentsData || []) as unknown as Payment[]);
 
-        const lastPayment = (paymentsData as Payment[] | null)?.[0];
-        const isLate = lastPayment && new Date(lastPayment.created_at) < new Date(nextPaymentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const lastPayment = (paymentsData as unknown as Payment[] | null)?.[0];
+        const isLate = lastPayment && lastPayment.created_at && new Date(lastPayment.created_at) < new Date(nextPaymentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 
         setStats(prev => ({
           ...prev,

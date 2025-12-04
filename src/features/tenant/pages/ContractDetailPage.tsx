@@ -59,14 +59,14 @@ export default function ContractDetail() {
   const loadContract = async () => {
     try {
       const { data, error } = await supabase
-        .from('lease_contracts' as any)
+        .from('lease_contracts')
         .select('*')
         .eq('id', contractId)
         .single();
 
       if (error) throw error;
       
-      const contractData = data as LeaseContract;
+      const contractData = data as unknown as LeaseContract;
 
       if (!contractData || (contractData.owner_id !== user?.id && contractData.tenant_id !== user?.id)) {
         alert('Vous n\'avez pas accès à ce contrat');

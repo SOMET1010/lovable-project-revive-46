@@ -32,13 +32,13 @@ export default function MaintenanceRequest() {
 
     try {
       const { data, error } = await supabase
-        .from('leases')
+        .from('lease_contracts')
         .select('*, properties(*)')
         .eq('tenant_id', user.id)
         .eq('status', 'actif')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error) throw error;
 
       setActiveLease(data);
     } catch (err) {
@@ -100,24 +100,14 @@ export default function MaintenanceRequest() {
         .insert({
           tenant_id: user.id,
           property_id: activeLease.property_id,
-          lease_id: activeLease.id,
+          contract_id: activeLease.id,
           issue_type: formData.issue_type,
-          urgency: formData.urgency,
+          priority: formData.urgency,
           description: formData.description,
           images: imageUrls
         });
 
       if (error) throw error;
-
-      await supabase.rpc('create_notification', {
-        p_user_id: activeLease.properties.owner_id,
-        p_type: 'maintenance_request',
-        p_title: 'Nouvelle demande de maintenance',
-        p_message: `Une demande de maintenance ${formData.urgency === 'urgent' ? 'urgente' : ''} a été soumise pour ${activeLease.properties.title}`,
-        p_channels: ['in_app', 'email', 'sms'],
-        p_action_url: '/proprietaire/maintenance',
-        p_priority: formData.urgency === 'urgent' ? 'urgent' : 'normal'
-      });
 
       setSuccess(true);
       setFormData({ issue_type: 'plumbing', urgency: 'medium', description: '' });
@@ -181,8 +171,8 @@ export default function MaintenanceRequest() {
         <div className="card-scrapbook p-6 mb-6">
           <h3 className="text-lg font-bold text-gray-900 mb-3">Propriété concernée</h3>
           <div className="p-4 bg-gray-50 rounded-lg">
-            <p className="font-bold text-gray-900">{activeLease.properties.title}</p>
-            <p className="text-sm text-gray-600">{activeLease.properties.address}, {activeLease.properties.city}</p>
+            <p className="font-bold text-gray-900">{activeLease.properties?.title}</p>
+            <p className="text-sm text-gray-600">{activeLease.properties?.address}, {activeLease.properties?.city}</p>
           </div>
         </div>
 
