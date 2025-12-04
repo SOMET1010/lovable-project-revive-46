@@ -21,28 +21,13 @@ export type { SkeletonProps } from './Skeleton';
 
 export { default as UIComponentsDemo } from './UIComponentsDemo';
 
-// Radix UI primitives (lowercase imports)
-export { Button as ButtonRadix, buttonVariants } from './button';
-export type { ButtonProps as ButtonRadixProps } from './button';
-
-export { 
-  Card as CardRadix, 
-  CardHeader as CardHeaderRadix, 
-  CardFooter as CardFooterRadix, 
-  CardTitle as CardTitleRadix, 
-  CardDescription as CardDescriptionRadix, 
-  CardContent as CardContentRadix 
-} from './card';
-
-export { Input as InputRadix } from './input';
-
 export { Label } from './label';
 
 export { Textarea } from './textarea';
 
 export { Switch } from './switch';
 
-export { Tabs as TabsRadix, TabsList, TabsTrigger, TabsContent } from './tabs';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 
 export {
   Dialog,

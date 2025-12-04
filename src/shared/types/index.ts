@@ -14,9 +14,10 @@ export type Profile = Database['public']['Tables']['profiles']['Row'];
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
-export type Lease = Database['public']['Tables']['leases']['Row'];
-export type LeaseInsert = Database['public']['Tables']['leases']['Insert'];
-export type LeaseUpdate = Database['public']['Tables']['leases']['Update'];
+// Use lease_contracts instead of leases
+export type Lease = Database['public']['Tables']['lease_contracts']['Row'];
+export type LeaseInsert = Database['public']['Tables']['lease_contracts']['Insert'];
+export type LeaseUpdate = Database['public']['Tables']['lease_contracts']['Update'];
 
 export type Payment = Database['public']['Tables']['payments']['Row'];
 export type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
@@ -195,5 +196,14 @@ export type {
 // Re-export monToit types
 export * from './monToit.types';
 
-// Re-export payment types
-export * from './payment.types';
+// Re-export payment types (excluding conflicting ones)
+export type {
+  PaymentRequest,
+  PaymentResponse,
+  PaymentCalculation,
+  PaymentError,
+  PaymentFilters,
+  PaymentReceipt,
+  MobileMoneyProvider,
+  PaymentErrorCode,
+} from './payment.types';

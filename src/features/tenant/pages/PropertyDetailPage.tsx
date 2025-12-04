@@ -468,12 +468,13 @@ export default function PropertyDetailPage() {
                       zoom={15}
                       height="400px"
                       properties={[{ 
-                        ...property, 
                         id: property.id, 
                         title: property.title, 
                         latitude: property.latitude,
                         longitude: property.longitude,
-                        monthly_rent: property.monthly_rent
+                        monthly_rent: property.monthly_rent,
+                        status: property.status ?? 'disponible',
+                        city: property.city
                       }]}
                     />
                   ) : (
