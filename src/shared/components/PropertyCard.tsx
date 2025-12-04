@@ -1,5 +1,6 @@
 import { Home as HomeIcon } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
+import { ScoreBadge } from '@/shared/ui';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -8,9 +9,10 @@ interface PropertyCardProps {
   property: Property;
   showBadge?: boolean;
   badgeText?: string;
+  ownerTrustScore?: number | null;
 }
 
-export default function PropertyCard({ property, showBadge, badgeText }: PropertyCardProps) {
+export default function PropertyCard({ property, showBadge, badgeText, ownerTrustScore }: PropertyCardProps) {
   return (
     <a
       href={`/propriete/${property.id}`}
@@ -45,6 +47,13 @@ export default function PropertyCard({ property, showBadge, badgeText }: Propert
         {showBadge && badgeText && (
           <div className="absolute top-3 left-3 px-3 py-1 bg-green-500 text-white rounded-lg text-xs font-semibold shadow-premium badge-pulse">
             {badgeText}
+          </div>
+        )}
+
+        {/* Owner Trust Score Badge */}
+        {ownerTrustScore !== undefined && ownerTrustScore !== null && (
+          <div className="absolute bottom-3 left-3">
+            <ScoreBadge score={ownerTrustScore} variant="compact" size="sm" />
           </div>
         )}
       </div>
