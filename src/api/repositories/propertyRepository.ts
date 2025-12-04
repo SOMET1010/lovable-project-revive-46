@@ -4,7 +4,7 @@
  */
 
 import { supabase, handleQuery, handlePaginatedQuery } from '../client';
-import type { Property, PropertyInsert, PropertyUpdate, PropertyFilters } from '../../types';
+import type { Property, PropertyInsert, PropertyUpdate, PropertyFilters } from '@/shared/types';
 
 export const propertyRepository = {
   /**
