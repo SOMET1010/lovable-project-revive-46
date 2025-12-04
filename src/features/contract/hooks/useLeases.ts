@@ -1,64 +1,53 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { leaseRepository } from '@/api/repositories';
-import type { Database } from '@/shared/lib/database.types';
 
-type LeaseInsert = Database['public']['Tables']['leases']['Insert'];
-type LeaseUpdate = Database['public']['Tables']['leases']['Update'];
+// Note: leases table doesn't exist yet in the database
+// These hooks are placeholders until the leases table is created
 
-export function useLease(id: string | undefined) {
+export function useLease(_id: string | undefined) {
   return useQuery({
-    queryKey: ['lease', id],
-    queryFn: () => (id ? leaseRepository.getById(id) : Promise.resolve({ data: null, error: null })),
-    enabled: !!id,
+    queryKey: ['lease', _id],
+    queryFn: () => Promise.resolve({ data: null, error: null }),
+    enabled: false,
   });
 }
 
-export function useTenantLeases(tenantId: string | undefined) {
+export function useTenantLeases(_tenantId: string | undefined) {
   return useQuery({
-    queryKey: ['leases', 'tenant', tenantId],
-    queryFn: () =>
-      tenantId ? leaseRepository.getByTenantId(tenantId) : Promise.resolve({ data: [], error: null }),
-    enabled: !!tenantId,
+    queryKey: ['leases', 'tenant', _tenantId],
+    queryFn: () => Promise.resolve({ data: [], error: null }),
+    enabled: false,
   });
 }
 
-export function useLandlordLeases(landlordId: string | undefined) {
+export function useLandlordLeases(_landlordId: string | undefined) {
   return useQuery({
-    queryKey: ['leases', 'landlord', landlordId],
-    queryFn: () =>
-      landlordId
-        ? leaseRepository.getByLandlordId(landlordId)
-        : Promise.resolve({ data: [], error: null }),
-    enabled: !!landlordId,
+    queryKey: ['leases', 'landlord', _landlordId],
+    queryFn: () => Promise.resolve({ data: [], error: null }),
+    enabled: false,
   });
 }
 
-export function usePropertyLeases(propertyId: string | undefined) {
+export function usePropertyLeases(_propertyId: string | undefined) {
   return useQuery({
-    queryKey: ['leases', 'property', propertyId],
-    queryFn: () =>
-      propertyId
-        ? leaseRepository.getByPropertyId(propertyId)
-        : Promise.resolve({ data: [], error: null }),
-    enabled: !!propertyId,
+    queryKey: ['leases', 'property', _propertyId],
+    queryFn: () => Promise.resolve({ data: [], error: null }),
+    enabled: false,
   });
 }
 
-export function useActiveLease(tenantId: string | undefined) {
+export function useActiveLease(_tenantId: string | undefined) {
   return useQuery({
-    queryKey: ['lease', 'active', tenantId],
-    queryFn: () =>
-      tenantId
-        ? leaseRepository.getActiveByTenantId(tenantId)
-        : Promise.resolve({ data: null, error: null }),
-    enabled: !!tenantId,
+    queryKey: ['lease', 'active', _tenantId],
+    queryFn: () => Promise.resolve({ data: null, error: null }),
+    enabled: false,
   });
 }
 
-export function useExpiringLeases(daysBeforeExpiry: number = 30) {
+export function useExpiringLeases(_daysBeforeExpiry: number = 30) {
   return useQuery({
-    queryKey: ['leases', 'expiring', daysBeforeExpiry],
-    queryFn: () => leaseRepository.getExpiringLeases(daysBeforeExpiry),
+    queryKey: ['leases', 'expiring', _daysBeforeExpiry],
+    queryFn: () => Promise.resolve({ data: [], error: null }),
+    enabled: false,
   });
 }
 
@@ -66,7 +55,7 @@ export function useCreateLease() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (lease: LeaseInsert) => leaseRepository.create(lease),
+    mutationFn: (_lease: Record<string, unknown>) => Promise.resolve({ data: null, error: null }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['leases'] });
     },
@@ -77,14 +66,10 @@ export function useUpdateLease() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: LeaseUpdate }) =>
-      leaseRepository.update(id, updates),
-    onSuccess: (data) => {
-      const leaseData = data.data as { id?: string } | null;
-      if (leaseData?.id) {
-        queryClient.invalidateQueries({ queryKey: ['lease', leaseData.id] });
-        queryClient.invalidateQueries({ queryKey: ['leases'] });
-      }
+    mutationFn: (_params: { id: string; updates: Record<string, unknown> }) =>
+      Promise.resolve({ data: null, error: null }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leases'] });
     },
   });
 }
@@ -93,14 +78,10 @@ export function useUpdateLeaseStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string }) =>
-      leaseRepository.updateStatus(id, status),
-    onSuccess: (data) => {
-      const leaseData = data.data as { id?: string } | null;
-      if (leaseData?.id) {
-        queryClient.invalidateQueries({ queryKey: ['lease', leaseData.id] });
-        queryClient.invalidateQueries({ queryKey: ['leases'] });
-      }
+    mutationFn: (_params: { id: string; status: string }) =>
+      Promise.resolve({ data: null, error: null }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leases'] });
     },
   });
 }

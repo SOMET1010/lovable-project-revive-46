@@ -21,7 +21,11 @@ export default function AuthCallback() {
       }
 
       if (user && !loading) {
-        if (!profile?.profile_setup_completed) {
+        // Check if profile setup is completed using user_type
+        // If user_type is still default 'tenant' and no full_name, redirect to profile selection
+        const needsSetup = !profile?.user_type || profile?.user_type === 'tenant';
+        
+        if (needsSetup && !profile?.full_name) {
           window.location.href = '/choix-profil';
         } else {
           window.location.href = '/';

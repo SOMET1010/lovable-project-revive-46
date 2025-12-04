@@ -133,36 +133,74 @@ export type Database = {
           },
         ]
       }
+      favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          property_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          property_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          property_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
+          city: string | null
           created_at: string | null
           email: string | null
           full_name: string | null
           id: string
           phone: string | null
+          profile_setup_completed: boolean | null
           updated_at: string | null
           user_id: string | null
           user_type: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
+          city?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
+          profile_setup_completed?: boolean | null
           updated_at?: string | null
           user_id?: string | null
           user_type?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
+          city?: string | null
           created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
+          profile_setup_completed?: boolean | null
           updated_at?: string | null
           user_id?: string | null
           user_type?: string | null

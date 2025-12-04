@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Building2, Home, UserCircle, Briefcase, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function ProfileSelection() {
   const { user, profile } = useAuth();
@@ -77,7 +77,6 @@ export default function ProfileSelection() {
         .from('profiles')
         .update({
           user_type: selectedType,
-          profile_setup_completed: true,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -91,8 +90,9 @@ export default function ProfileSelection() {
       } else if (selectedType === 'agence') {
         window.location.href = '/agence/inscription';
       }
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la mise à jour du profil');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour du profil';
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -102,7 +102,8 @@ export default function ProfileSelection() {
     return null;
   }
 
-  if (profile?.profile_setup_completed) {
+  // If user already has a type set (not default), redirect to home
+  if (profile?.user_type && profile.user_type !== 'tenant') {
     window.location.href = '/';
     return null;
   }

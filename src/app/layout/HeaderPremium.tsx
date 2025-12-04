@@ -14,13 +14,13 @@ export default function HeaderPremium() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // Fonction pour détecter la page active
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
     return location.pathname.startsWith(href);
   };
 
-  const isOwner = profile?.user_type === 'proprietaire' || profile?.active_role === 'proprietaire';
+  // Simplified: only use user_type
+  const isOwner = profile?.user_type === 'proprietaire';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,7 +56,7 @@ export default function HeaderPremium() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
-            {/* Logo Minimaliste avec micro-interaction */}
+            {/* Logo */}
             <a href="/" className="flex items-center space-x-3 group">
               <img
                 src="/logo-montoit.png"
@@ -71,7 +71,7 @@ export default function HeaderPremium() {
               </div>
             </a>
 
-            {/* Desktop Navigation avec underline fluide gauche→droite */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
               <a
                 href="/"
@@ -108,7 +108,7 @@ export default function HeaderPremium() {
               ))}
             </nav>
 
-            {/* Actions Desktop avec effet lift */}
+            {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-3">
               {user ? (
                 <div className="relative">
@@ -182,7 +182,7 @@ export default function HeaderPremium() {
         </div>
       </header>
 
-      {/* Spacer for fixed header */}
+      {/* Spacer */}
       <div className="h-[72px]" />
 
       {/* Mobile Menu Overlay */}
@@ -200,7 +200,6 @@ export default function HeaderPremium() {
         }`}
       >
         <div className="p-6 space-y-6">
-          {/* Close Button */}
           <div className="flex justify-end">
             <button
               onClick={() => setShowMobileMenu(false)}
@@ -210,7 +209,6 @@ export default function HeaderPremium() {
             </button>
           </div>
 
-          {/* User Info Mobile */}
           {user && (
             <div className="pb-4 border-b border-neutral-200">
               <p className="text-sm font-semibold text-neutral-900 truncate">
@@ -220,7 +218,6 @@ export default function HeaderPremium() {
             </div>
           )}
 
-          {/* Navigation Mobile */}
           <nav className="space-y-1">
             <a
               href="/"
@@ -273,7 +270,6 @@ export default function HeaderPremium() {
             ))}
           </nav>
 
-          {/* Actions Mobile */}
           <div className="pt-4 border-t border-neutral-200 space-y-3">
             {user ? (
               <button
