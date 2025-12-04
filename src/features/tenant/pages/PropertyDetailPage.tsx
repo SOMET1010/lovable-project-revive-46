@@ -3,14 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MapPin, Bed, Bath, Maximize, Heart, Share2, Calendar, 
   ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Car, 
-  Zap, Building, Home, FileText 
+  Zap, Building, Home, FileText, Shield 
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import MapWrapper from '@/shared/ui/MapWrapper';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { getCreateContractRoute } from '@/shared/config/routes.config';
+import { ScoreBadge } from '@/shared/ui';
 
-// Extended property type with new columns
+// Extended property type with new columns and owner profile
 interface Property {
   id: string;
   title: string;
@@ -39,6 +40,13 @@ interface Property {
   owner_id: string | null;
   created_at: string | null;
   updated_at: string | null;
+  // Owner profile fields
+  owner_trust_score?: number | null;
+  owner_full_name?: string | null;
+  owner_avatar_url?: string | null;
+  owner_is_verified?: boolean | null;
+  owner_oneci_verified?: boolean | null;
+  owner_cnam_verified?: boolean | null;
 }
 
 interface ImageGalleryProps {
@@ -302,16 +310,33 @@ export default function PropertyDetailPage() {
     try {
       const { data, error } = await supabase
         .from('properties')
-        .select('*')
+        .select(`
+          *,
+          profiles:owner_id (
+            full_name,
+            avatar_url,
+            trust_score,
+            is_verified,
+            oneci_verified,
+            cnam_verified
+          )
+        `)
         .eq('id', propertyId)
         .single();
 
       if (error) throw error;
       
-      // Cast to our extended Property type with null -> undefined conversion
+      // Cast to our extended Property type with owner profile data
+      const profileData = (data as any).profiles;
       const propertyData = {
         ...data,
-        status: data.status ?? undefined
+        status: data.status ?? undefined,
+        owner_trust_score: profileData?.trust_score ?? null,
+        owner_full_name: profileData?.full_name ?? null,
+        owner_avatar_url: profileData?.avatar_url ?? null,
+        owner_is_verified: profileData?.is_verified ?? null,
+        owner_oneci_verified: profileData?.oneci_verified ?? null,
+        owner_cnam_verified: profileData?.cnam_verified ?? null,
       } as unknown as Property;
       setProperty(propertyData);
     } catch (error) {
@@ -495,6 +520,7 @@ export default function PropertyDetailPage() {
 
           <div className="lg:col-span-4">
             <div className="sticky top-8 space-y-6">
+              {/* Prix et CTA */}
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-neutral-100">
                 <div className="space-y-6">
                   <div>
@@ -529,6 +555,71 @@ export default function PropertyDetailPage() {
                           Postuler maintenant
                         </button>
                       </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Profil Propriétaire */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-neutral-100">
+                <h3 className="text-lg font-semibold text-neutral-900 mb-4">Propriétaire</h3>
+                
+                <div className="flex items-center gap-4">
+                  {/* Avatar */}
+                  <div className="relative">
+                    <img
+                      src={property.owner_avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(property.owner_full_name || 'P')}&background=FF6C2F&color=fff`}
+                      alt={property.owner_full_name || 'Propriétaire'}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-neutral-100"
+                    />
+                    {property.owner_is_verified && (
+                      <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
+                        <CheckCircle className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Infos */}
+                  <div className="flex-1">
+                    <div className="font-semibold text-neutral-900">
+                      {property.owner_full_name || 'Propriétaire'}
+                    </div>
+                    
+                    {/* Trust Score Badge */}
+                    {property.owner_trust_score != null && (
+                      <div className="mt-2">
+                        <ScoreBadge 
+                          score={property.owner_trust_score} 
+                          variant="detailed" 
+                          size="md"
+                          showVerified={property.owner_is_verified ?? false}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Badges de vérification */}
+                <div className="mt-4 pt-4 border-t border-neutral-100">
+                  <div className="text-sm text-neutral-500 mb-2">Vérifications</div>
+                  <div className="flex flex-wrap gap-2">
+                    {property.owner_is_verified && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
+                        <CheckCircle className="h-3 w-3" /> Identité vérifiée
+                      </span>
+                    )}
+                    {property.owner_oneci_verified && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                        <Shield className="h-3 w-3" /> ONECI
+                      </span>
+                    )}
+                    {property.owner_cnam_verified && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full">
+                        <Shield className="h-3 w-3" /> CNAM
+                      </span>
+                    )}
+                    {!property.owner_is_verified && !property.owner_oneci_verified && !property.owner_cnam_verified && (
+                      <span className="text-xs text-neutral-400">Aucune vérification</span>
                     )}
                   </div>
                 </div>
