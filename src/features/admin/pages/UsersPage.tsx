@@ -130,22 +130,6 @@ export default function AdminUsers() {
     );
   };
 
-  const _handleUserTypeChange = async (userId: string, newType: string) => {
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ user_type: newType })
-        .eq('id', userId);
-
-      if (error) throw error;
-
-      setUsers(prev => prev.map(user => 
-        user.id === userId ? { ...user, user_type: newType } : user
-      ));
-    } catch (err) {
-      console.error('Error updating user type:', err);
-    }
-  };
 
   const handleBulkAction = async (action: string) => {
     if (selectedUsers.length === 0) return;
