@@ -90,14 +90,14 @@ export const supabase = {
   })
 };
 
-// Configuration automatique (remplacer par vos vraies clés)
+// Configuration automatique
 const SUPABASE_CONFIG: SupabaseConfig = {
-  url: import.meta.env['VITE_SUPABASE_URL'] || 'https://your-project.supabase.co',
-  anonKey: import.meta.env['VITE_SUPABASE_ANON_KEY'] || 'your-anon-key'
+  url: import.meta.env['VITE_SUPABASE_URL'] ?? '',
+  anonKey: import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'] ?? ''
 };
 
-// Initialisation automatique
-if (typeof window !== 'undefined') {
+// Initialisation automatique seulement si les variables sont définies
+if (typeof window !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
   supabaseService.initialize(SUPABASE_CONFIG);
 }
 
