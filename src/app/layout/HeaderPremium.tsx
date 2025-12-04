@@ -92,11 +92,6 @@ export default function HeaderPremium() {
                 >
                   <span className="flex items-center gap-1">
                     {item.label}
-                    {item.badge !== undefined && item.badge > 0 && (
-                      <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center badge-notification-pulse motion-reduce:animate-none">
-                        {item.badge > 9 ? '9+' : item.badge}
-                      </span>
-                    )}
                   </span>
                   <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform origin-left transition-transform duration-300 ease-out motion-reduce:transition-none ${
                     isActive(item.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
@@ -242,11 +237,6 @@ export default function HeaderPremium() {
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center badge-notification-pulse motion-reduce:animate-none">
-                    {item.badge > 9 ? '9+' : item.badge}
-                  </span>
-                )}
               </a>
             ))}
 

@@ -22,7 +22,6 @@ const Favorites = lazy(() => import('@/features/tenant/pages/FavoritesPage'));
 const SavedSearches = lazy(() => import('@/features/tenant/pages/SavedSearchesPage'));
 
 const ApplicationForm = lazy(() => import('@/features/tenant/pages/ApplicationFormPage'));
-const ApplicationDetail = lazy(() => import('@/features/tenant/pages/ApplicationDetailPage'));
 const ScheduleVisit = lazy(() => import('@/features/tenant/pages/ScheduleVisitPage'));
 const MyVisits = lazy(() => import('@/features/tenant/pages/MyVisitsPage'));
 
@@ -112,7 +111,7 @@ export const routes: RouteObject[] = [
       { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantMaintenance /></ProtectedRoute> },
       { path: 'dashboard/ajouter-propriete', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
       { path: 'add-property', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
-      { path: 'dashboard/candidature/:id', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><ApplicationDetail /></ProtectedRoute> },
+      { path: 'dashboard/candidature/:id', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><ApplicationForm /></ProtectedRoute> },
       { path: 'maintenance/nouvelle', element: <ProtectedRoute><MaintenanceRequest /></ProtectedRoute> },
       {
         path: 'admin',

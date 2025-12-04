@@ -15,7 +15,10 @@ export function useProperties(filters?: any) {
 export function useProperty(id: string | undefined) {
   return useQuery({
     queryKey: ['property', id],
-    queryFn: () => (id ? propertyApi.getById(id) : Promise.resolve({ data: null, error: null })),
+    queryFn: async () => {
+      if (!id) return { data: null, error: null };
+      return propertyApi.getById(id);
+    },
     enabled: !!id,
   });
 }

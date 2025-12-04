@@ -8,8 +8,6 @@
 export { default as HomePage } from './pages/HomePage';
 
 // Components
-export { default as PropertyComparison } from './components/PropertyComparison';
-export { default as PropertyMap } from './components/PropertyMap';
 export { default as QuickSearch } from './components/QuickSearch';
 export { default as HeroSlideshow } from './components/HeroSlideshow';
 export { default as HeroSpectacular } from './components/HeroSpectacular';
