@@ -31,12 +31,24 @@ export interface Message {
   content: string;
   is_read: boolean;
   created_at: string;
+  // Attachment fields
+  attachment_url?: string | null;
+  attachment_type?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   // Joined data
   sender?: {
     id: string;
     full_name: string | null;
     avatar_url: string | null;
   };
+}
+
+export interface Attachment {
+  url: string;
+  type: 'image' | 'document';
+  name: string;
+  size: number;
 }
 
 class MessagingService {
@@ -169,7 +181,8 @@ class MessagingService {
     conversationId: string,
     senderId: string,
     receiverId: string,
-    content: string
+    content: string,
+    attachment?: Attachment | null
   ): Promise<Message | null> {
     const { data, error } = await supabase
       .from('messages')
@@ -179,6 +192,10 @@ class MessagingService {
         receiver_id: receiverId,
         content,
         is_read: false,
+        attachment_url: attachment?.url ?? null,
+        attachment_type: attachment?.type ?? null,
+        attachment_name: attachment?.name ?? null,
+        attachment_size: attachment?.size ?? null,
       })
       .select()
       .single();
@@ -189,6 +206,33 @@ class MessagingService {
     }
 
     return data as Message;
+  }
+
+  async uploadAttachment(file: File, conversationId: string): Promise<Attachment | null> {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${conversationId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage
+      .from('message-attachments')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error('Error uploading attachment:', uploadError);
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('message-attachments')
+      .getPublicUrl(fileName);
+
+    const type: 'image' | 'document' = file.type.startsWith('image/') ? 'image' : 'document';
+
+    return {
+      url: publicUrl,
+      type,
+      name: file.name,
+      size: file.size,
+    };
   }
 
   async markAsRead(conversationId: string, userId: string): Promise<void> {

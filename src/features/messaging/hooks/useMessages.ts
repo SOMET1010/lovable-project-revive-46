@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { messagingService, Message } from '../services/messaging.service';
+import { messagingService, Message, Attachment } from '../services/messaging.service';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -60,16 +60,26 @@ export function useMessages(conversationId: string | null) {
   }, [conversationId, user?.id]);
 
   const sendMessage = useCallback(
-    async (receiverId: string, content: string) => {
-      if (!conversationId || !user?.id || !content.trim()) return null;
+    async (receiverId: string, content: string, attachment?: Attachment | null) => {
+      if (!conversationId || !user?.id) return null;
+      if (!content.trim() && !attachment) return null;
 
       setSending(true);
       try {
+        let uploadedAttachment: Attachment | null = null;
+
+        // Upload attachment if present
+        if (attachment && (attachment as Attachment & { file?: File }).file) {
+          const file = (attachment as Attachment & { file: File }).file;
+          uploadedAttachment = await messagingService.uploadAttachment(file, conversationId);
+        }
+
         const message = await messagingService.sendMessage(
           conversationId,
           user.id,
           receiverId,
-          content.trim()
+          content.trim(),
+          uploadedAttachment
         );
         return message;
       } finally {

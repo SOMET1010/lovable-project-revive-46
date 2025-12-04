@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Home, ArrowLeft, MoreVertical, Phone, Video } from 'lucide-react';
-import { Message, Conversation } from '../services/messaging.service';
+import { Message, Conversation, Attachment } from '../services/messaging.service';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 
@@ -10,7 +10,7 @@ interface MessageThreadProps {
   currentUserId: string;
   loading: boolean;
   sending: boolean;
-  onSend: (receiverId: string, content: string) => Promise<unknown>;
+  onSend: (receiverId: string, content: string, attachment?: Attachment | null) => Promise<unknown>;
   onBack?: () => void;
 }
 
@@ -42,8 +42,8 @@ export function MessageThread({
       ? conversation.participant_2_id
       : conversation.participant_1_id;
 
-  const handleSend = async (content: string) => {
-    await onSend(otherParticipantId, content);
+  const handleSend = async (content: string, attachment?: Attachment | null) => {
+    await onSend(otherParticipantId, content, attachment);
   };
 
   const participantName = conversation.other_participant?.full_name ?? 'Utilisateur';
