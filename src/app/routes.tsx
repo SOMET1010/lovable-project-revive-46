@@ -30,6 +30,7 @@ const MyVisits = lazy(() => import('@/features/tenant/pages/MyVisitsPage'));
 const TenantDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
 const TenantCalendar = lazy(() => import('@/features/tenant/pages/CalendarPage'));
 const TenantMaintenance = lazy(() => import('@/features/tenant/pages/MaintenancePage'));
+const TenantScorePage = lazy(() => import('@/features/tenant/pages/ScorePage'));
 
 const AddProperty = lazy(() => import('@/features/owner/pages/AddPropertyPage'));
 
@@ -100,6 +101,7 @@ export const routes: RouteObject[] = [
       { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantDashboard /></ProtectedRoute> },
       { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={['locataire']}><TenantCalendar /></ProtectedRoute> },
       { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantMaintenance /></ProtectedRoute> },
+      { path: 'mon-score', element: <ProtectedRoute allowedRoles={['locataire']}><TenantScorePage /></ProtectedRoute> },
       { path: 'dashboard/ajouter-propriete', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
       { path: 'add-property', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
       { path: 'dashboard/candidature/:id', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><ApplicationForm /></ProtectedRoute> },

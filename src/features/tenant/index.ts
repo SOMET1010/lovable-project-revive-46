@@ -20,5 +20,6 @@ export { default as SavedSearchesPage } from './pages/SavedSearchesPage';
 export { default as ScheduleVisitPage } from './pages/ScheduleVisitPage';
 export { default as SearchPropertiesPage } from './pages/SearchPropertiesPage';
 export { default as SignLeasePage } from './pages/SignLeasePage';
+export { default as ScorePage } from './pages/ScorePage';
 
 // Components
