@@ -5,7 +5,7 @@
  * et utilise le CacheService pour optimiser les performances.
  */
 
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { cacheService } from '@/shared/services/cacheService';
 import type { Database } from '@/shared/lib/database.types';
 import type { PropertyWithOwnerScore } from '../types';
