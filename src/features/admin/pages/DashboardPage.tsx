@@ -3,8 +3,8 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
   Users, Home, FileText, AlertTriangle, CheckCircle,
-  Activity, BarChart3, Settings,
-  ArrowUpRight, ArrowDownRight, Eye,
+  Activity, BarChart3,
+  ArrowUpRight, ArrowDownRight,
   AlertCircle, Info, DollarSign, UserPlus,
   RefreshCw, Download
 } from 'lucide-react';
@@ -33,7 +33,7 @@ interface MetricCard {
   value: string | number;
   change: number;
   changeType: 'increase' | 'decrease' | 'neutral';
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   bgColor: string;
   isFormatted?: boolean;
@@ -52,9 +52,9 @@ interface RecentActivity {
   id: string;
   action: string;
   entity_type: string;
-  user: string;
-  created_at: string;
-  details: any;
+  user_email: string | null;
+  created_at: string | null;
+  details: unknown;
 }
 
 export default function AdminDashboard() {
@@ -75,10 +75,9 @@ export default function AdminDashboard() {
 
   const checkAdminAccess = async () => {
     try {
-      // Use the secure has_role function to check admin access
       const { data: hasAdminRole, error } = await supabase
         .rpc('has_role', { 
-          _user_id: user?.id, 
+          _user_id: user?.id ?? '', 
           _role: 'admin' 
         });
 
@@ -104,17 +103,20 @@ export default function AdminDashboard() {
 
       if (statsError) throw statsError;
 
-      setStats(statsData);
+      if (statsData && typeof statsData === 'object' && !Array.isArray(statsData)) {
+        setStats(statsData as unknown as PlatformStats);
+      }
 
       const { data: activitiesData } = await supabase
         .from('admin_audit_logs')
-        .select('*')
+        .select('id, action, entity_type, user_email, created_at, details')
         .order('created_at', { ascending: false })
         .limit(20);
 
-      setActivities(activitiesData || []);
+      if (activitiesData) {
+        setActivities(activitiesData);
+      }
 
-      // Simulate system alerts
       setAlerts([
         {
           id: '1',
@@ -165,7 +167,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // Metric Cards Data
   const metricCards: MetricCard[] = [
     {
       title: 'Utilisateurs Actifs',
@@ -262,7 +263,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Actions */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard Administrateur</h1>
@@ -296,7 +296,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stats Grid Monitoring */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {metricCards.map((card, index) => {
           const Icon = card.icon;
@@ -331,11 +330,8 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* System Monitoring Charts */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Performance Chart */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Performance Système</h2>
@@ -363,41 +359,6 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* API Response Times */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Temps de Réponse API</h2>
-            <div className="space-y-4">
-              {[
-                { name: '/api/auth/login', avgTime: '245ms', status: 'good' },
-                { name: '/api/properties/search', avgTime: '1.2s', status: 'warning' },
-                { name: '/api/payments/process', avgTime: '567ms', status: 'good' },
-                { name: '/api/notifications/send', avgTime: '2.1s', status: 'error' }
-              ].map((api, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-medium text-gray-900">{api.name}</p>
-                    <p className="text-sm text-gray-600">Moyenne sur 24h</p>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      api.status === 'good' ? 'bg-green-100 text-green-800' :
-                      api.status === 'warning' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {api.avgTime}
-                    </span>
-                    <div className={`w-2 h-2 rounded-full ${
-                      api.status === 'good' ? 'bg-green-500' :
-                      api.status === 'warning' ? 'bg-yellow-500' :
-                      'bg-red-500'
-                    }`}></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Real-time Activity Feed */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Activité en Temps Réel</h2>
@@ -411,9 +372,9 @@ export default function AdminDashboard() {
                   <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                    <p className="text-xs text-gray-600">{activity.entity_type} • {activity.user}</p>
+                    <p className="text-xs text-gray-600">{activity.entity_type} • {activity.user_email || 'Système'}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {FormatService.formatRelativeTime(activity.created_at)}
+                      {activity.created_at ? FormatService.formatRelativeTime(activity.created_at) : 'Récemment'}
                     </p>
                   </div>
                 </div>
@@ -427,9 +388,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Right Column - Alerts & Quick Actions */}
         <div className="space-y-6">
-          {/* System Alerts */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Alertes Système</h2>
@@ -458,57 +417,22 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Quick Actions */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-6">Actions Rapides</h2>
             <div className="space-y-3">
               {[
                 { name: 'Gérer Utilisateurs', icon: Users, href: '/admin/utilisateurs', color: 'bg-blue-50 text-blue-700' },
-                { name: 'Voir Propriétés', icon: Home, href: '/admin/properties', color: 'bg-green-50 text-green-700' },
-                { name: 'Monitoring API', icon: Activity, href: '/admin/service-monitoring', color: 'bg-red-50 text-red-700' },
+                { name: 'Voir Propriétés', icon: Home, href: '/recherche', color: 'bg-green-50 text-green-700' },
                 { name: 'Gestion CEV', icon: CheckCircle, href: '/admin/cev-management', color: 'bg-purple-50 text-purple-700' },
-                { name: 'Config Services', icon: Settings, href: '/admin/service-configuration', color: 'bg-gray-50 text-gray-700' },
-                { name: 'Générer Données', icon: Eye, href: '/admin/test-data-generator', color: 'bg-orange-50 text-orange-700' }
-              ].map((action, index) => {
-                const Icon = action.icon;
-                return (
-                  <button
-                    key={index}
-                    onClick={() => window.location.href = action.href}
-                    className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${action.color} hover:opacity-80`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="font-medium">{action.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* System Health */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Santé Système</h2>
-            <div className="space-y-4">
-              {[
-                { service: 'Base de données', status: 'healthy', uptime: '99.9%', response: '45ms' },
-                { service: 'API Authentification', status: 'healthy', uptime: '99.8%', response: '120ms' },
-                { service: 'Service Paiement', status: 'warning', uptime: '98.2%', response: '890ms' },
-                { service: 'Notifications', status: 'healthy', uptime: '99.9%', response: '67ms' }
-              ].map((service, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-3 h-3 rounded-full ${
-                      service.status === 'healthy' ? 'bg-green-500' :
-                      service.status === 'warning' ? 'bg-yellow-500' :
-                      'bg-red-500'
-                    }`}></div>
-                    <div>
-                      <p className="font-medium text-sm text-gray-900">{service.service}</p>
-                      <p className="text-xs text-gray-600">{service.uptime} uptime</p>
-                    </div>
-                  </div>
-                  <span className="text-xs text-gray-500">{service.response}</span>
-                </div>
+              ].map((action, index) => (
+                <a
+                  key={index}
+                  href={action.href}
+                  className={`flex items-center space-x-3 p-3 rounded-lg ${action.color} hover:opacity-80 transition-opacity`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  <span className="font-medium">{action.name}</span>
+                </a>
               ))}
             </div>
           </div>

@@ -53,14 +53,7 @@ const TenantMaintenance = lazy(() => import('@/features/tenant/pages/Maintenance
 const OwnerDashboard = lazy(() => import('@/features/owner/pages/DashboardPage'));
 const AddProperty = lazy(() => import('@/features/owner/pages/AddPropertyPage'));
 const EditProperty = lazy(() => import('@/features/owner/pages/EditPropertyPage'));
-const PropertyStats = lazy(() => import('@/features/owner/pages/DashboardPage'));
 const OwnerMaintenance = lazy(() => import('@/features/owner/pages/MaintenancePage'));
-
-const AgencyDashboard = lazy(() => import('@/features/agency/pages/DashboardPage'));
-const AgencyRegistration = lazy(() => import('@/features/agency/pages/RegistrationPage'));
-const AgencyTeam = lazy(() => import('@/features/agency/pages/TeamPage'));
-const AgencyProperties = lazy(() => import('@/features/agency/pages/PropertiesPage'));
-const AgencyCommissions = lazy(() => import('@/features/agency/pages/CommissionsPage'));
 
 const MaintenanceRequest = lazy(() => import('@/features/tenant/pages/MaintenanceRequestPage'));
 
@@ -68,8 +61,6 @@ const AdminDashboard = lazy(() => import('@/features/admin/pages/DashboardPage')
 const AdminUsers = lazy(() => import('@/features/admin/pages/UsersPage'));
 const AdminUserRoles = lazy(() => import('@/features/admin/pages/UserRolesPage'));
 const AdminApiKeys = lazy(() => import('@/features/admin/pages/ApiKeysPage'));
-const AdminServiceMonitoring = lazy(() => import('@/features/admin/pages/ServiceMonitoringPage'));
-const AdminServiceConfiguration = lazy(() => import('@/features/admin/pages/ServiceConfigurationPage'));
 const AdminCEVManagement = lazy(() => import('@/features/admin/pages/CEVManagementPage'));
 const AdminTrustAgents = lazy(() => import('@/features/admin/pages/TrustAgentsPage'));
 
@@ -160,15 +151,10 @@ export const routes: RouteObject[] = [
       { path: 'dashboard/proprietaire', element: <ProtectedRoute allowedRoles={['proprietaire']}><OwnerDashboard /></ProtectedRoute> },
       { path: 'dashboard/ajouter-propriete', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
       { path: 'add-property', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
-      { path: 'dashboard/propriete/:id/stats', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><PropertyStats /></ProtectedRoute> },
+      { path: 'dashboard/propriete/:id/stats', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><OwnerDashboard /></ProtectedRoute> },
       { path: 'dashboard/propriete/:id/modifier', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><EditProperty /></ProtectedRoute> },
       { path: 'maintenance/proprietaire', element: <ProtectedRoute allowedRoles={['proprietaire']}><OwnerMaintenance /></ProtectedRoute> },
       { path: 'dashboard/candidature/:id', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><ApplicationDetail /></ProtectedRoute> },
-      { path: 'agence/tableau-de-bord', element: <ProtectedRoute allowedRoles={['agence']}><AgencyDashboard /></ProtectedRoute> },
-      { path: 'agence/inscription', element: <ProtectedRoute><AgencyRegistration /></ProtectedRoute> },
-      { path: 'agence/equipe', element: <ProtectedRoute allowedRoles={['agence']}><AgencyTeam /></ProtectedRoute> },
-      { path: 'agence/proprietes', element: <ProtectedRoute allowedRoles={['agence']}><AgencyProperties /></ProtectedRoute> },
-      { path: 'agence/commissions', element: <ProtectedRoute allowedRoles={['agence']}><AgencyCommissions /></ProtectedRoute> },
       { path: 'maintenance/nouvelle', element: <ProtectedRoute><MaintenanceRequest /></ProtectedRoute> },
       {
         path: 'admin',
@@ -178,8 +164,6 @@ export const routes: RouteObject[] = [
           { path: 'utilisateurs', element: <AdminUsers /> },
           { path: 'gestion-roles', element: <AdminUserRoles /> },
           { path: 'api-keys', element: <AdminApiKeys /> },
-          { path: 'service-monitoring', element: <AdminServiceMonitoring /> },
-          { path: 'service-configuration', element: <AdminServiceConfiguration /> },
           { path: 'cev-management', element: <AdminCEVManagement /> },
           { path: 'cev/:id', element: <AdminCEVManagement /> },
           { path: 'trust-agents', element: <AdminTrustAgents /> },

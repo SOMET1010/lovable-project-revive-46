@@ -7,9 +7,6 @@
 export { default as ApiKeysPage } from './pages/ApiKeysPage';
 export { default as CEVManagementPage } from './pages/CEVManagementPage';
 export { default as DashboardPage } from './pages/DashboardPage';
-export { default as FeatureFlagsPage } from './pages/FeatureFlagsPage';
-export { default as ServiceConfigurationPage } from './pages/ServiceConfigurationPage';
-export { default as ServiceMonitoringPage } from './pages/ServiceMonitoringPage';
 export { default as TrustAgentsPage } from './pages/TrustAgentsPage';
 export { default as UserRolesPage } from './pages/UserRolesPage';
 export { default as UsersPage } from './pages/UsersPage';
