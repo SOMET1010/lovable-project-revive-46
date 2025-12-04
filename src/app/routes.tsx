@@ -25,13 +25,10 @@ const ApplicationForm = lazy(() => import('@/features/tenant/pages/ApplicationFo
 const ScheduleVisit = lazy(() => import('@/features/tenant/pages/ScheduleVisitPage'));
 const MyVisits = lazy(() => import('@/features/tenant/pages/MyVisitsPage'));
 
-const VerificationRequest = lazy(() => import('@/features/verification/pages/RequestPage'));
-const VerificationSettings = lazy(() => import('@/features/verification/pages/SettingsPage'));
-const MyCertificates = lazy(() => import('@/features/verification/pages/MyCertificatesPage'));
+// Verification pages removed - tables don't exist
 
 const TenantDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
 const TenantCalendar = lazy(() => import('@/features/tenant/pages/CalendarPage'));
-const TenantScore = lazy(() => import('@/features/tenant/pages/ScorePage'));
 const TenantMaintenance = lazy(() => import('@/features/tenant/pages/MaintenancePage'));
 
 const AddProperty = lazy(() => import('@/features/owner/pages/AddPropertyPage'));
@@ -44,9 +41,6 @@ const AdminUserRoles = lazy(() => import('@/features/admin/pages/UserRolesPage')
 const AdminApiKeys = lazy(() => import('@/features/admin/pages/ApiKeysPage'));
 const AdminCEVManagement = lazy(() => import('@/features/admin/pages/CEVManagementPage'));
 const AdminTrustAgents = lazy(() => import('@/features/admin/pages/TrustAgentsPage'));
-
-const TrustAgentDashboard = lazy(() => import('@/features/trust-agent/pages/DashboardPage'));
-const TrustAgentAnalytics = lazy(() => import('@/features/trust-agent/pages/AnalyticsPage'));
 
 const AboutPage = lazy(() => import('@/features/auth/pages/AboutPage'));
 const TermsOfServicePage = lazy(() => import('@/features/auth/pages/TermsOfServicePage'));
@@ -102,12 +96,9 @@ export const routes: RouteObject[] = [
       { path: 'candidature/:id', element: <ProtectedRoute><ApplicationForm /></ProtectedRoute> },
       { path: 'visiter/:id', element: <ProtectedRoute><ScheduleVisit /></ProtectedRoute> },
       { path: 'mes-visites', element: <ProtectedRoute><MyVisits /></ProtectedRoute> },
-      { path: 'verification', element: <ProtectedRoute><VerificationRequest /></ProtectedRoute> },
-      { path: 'verification/parametres', element: <ProtectedRoute><VerificationSettings /></ProtectedRoute> },
-      { path: 'mes-certificats', element: <ProtectedRoute><MyCertificates /></ProtectedRoute> },
+      { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantDashboard /></ProtectedRoute> },
       { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantDashboard /></ProtectedRoute> },
       { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={['locataire']}><TenantCalendar /></ProtectedRoute> },
-      { path: 'score-locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantScore /></ProtectedRoute> },
       { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantMaintenance /></ProtectedRoute> },
       { path: 'dashboard/ajouter-propriete', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
       { path: 'add-property', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
@@ -126,8 +117,6 @@ export const routes: RouteObject[] = [
           { path: 'trust-agents', element: <AdminTrustAgents /> },
         ]
       },
-      { path: 'trust-agent/dashboard', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentDashboard /></ProtectedRoute> },
-      { path: 'trust-agent/analytics', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentAnalytics /></ProtectedRoute> },
       { path: '*', element: <NotFound /> },
     ],
   },

@@ -6,16 +6,27 @@ import { Calendar, Clock, Video, MapPin, ArrowLeft, Check } from 'lucide-react';
 interface Property {
   id: string;
   title: string;
-  address: string;
+  address: string | null;
   city: string;
-  main_image: string;
-  owner_id: string;
+  main_image: string | null;
+  owner_id: string | null;
 }
 
 interface TimeSlot {
-  time_slot: string;
-  is_available: boolean;
+  time: string;
+  available: boolean;
 }
+
+// Static time slots since RPC doesn't exist
+const DEFAULT_TIME_SLOTS: TimeSlot[] = [
+  { time: '09:00', available: true },
+  { time: '10:00', available: true },
+  { time: '11:00', available: true },
+  { time: '14:00', available: true },
+  { time: '15:00', available: true },
+  { time: '16:00', available: true },
+  { time: '17:00', available: true },
+];
 
 export default function ScheduleVisit() {
   const { user } = useAuth();
@@ -29,12 +40,13 @@ export default function ScheduleVisit() {
   const [visitType, setVisitType] = useState<'physique' | 'virtuelle'>('physique');
   const [notes, setNotes] = useState('');
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
 
   const propertyId = window.location.pathname.split('/').pop();
 
   useEffect(() => {
-    loadProperty();
+    if (propertyId) {
+      loadProperty();
+    }
   }, [propertyId]);
 
   useEffect(() => {
@@ -44,6 +56,11 @@ export default function ScheduleVisit() {
   }, [selectedDate, property]);
 
   const loadProperty = async () => {
+    if (!propertyId) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       const { data, error } = await supabase
         .from('properties')
@@ -52,7 +69,8 @@ export default function ScheduleVisit() {
         .single();
 
       if (error) throw error;
-      setProperty(data);
+      
+      setProperty(data as Property);
     } catch (error) {
       console.error('Error loading property:', error);
     } finally {
@@ -63,23 +81,28 @@ export default function ScheduleVisit() {
   const loadAvailableSlots = async () => {
     if (!selectedDate || !property) return;
 
-    setLoadingSlots(true);
+    // Check existing visits for the selected date
+    const dateStr = selectedDate.toISOString().split('T')[0] ?? '';
+    
     try {
-      const dateStr = selectedDate.toISOString().split('T')[0];
+      const { data: existingVisits } = await supabase
+        .from('visit_requests')
+        .select('visit_time')
+        .eq('property_id', property.id)
+        .eq('visit_date', dateStr)
+        .in('status', ['en_attente', 'confirmee']);
 
-      const { data, error } = await supabase
-        .rpc('get_available_time_slots', {
-          p_property_id: property.id,
-          p_date: dateStr
-        });
-
-      if (error) throw error;
-      setAvailableSlots(data || []);
+      const bookedTimes = new Set((existingVisits || []).map(v => v.visit_time?.substring(0, 5)));
+      
+      const slots = DEFAULT_TIME_SLOTS.map(slot => ({
+        ...slot,
+        available: !bookedTimes.has(slot.time)
+      }));
+      
+      setAvailableSlots(slots);
     } catch (error) {
-      console.error('Error loading time slots:', error);
-      setAvailableSlots([]);
-    } finally {
-      setLoadingSlots(false);
+      console.error('Error loading slots:', error);
+      setAvailableSlots(DEFAULT_TIME_SLOTS);
     }
   };
 
@@ -90,15 +113,15 @@ export default function ScheduleVisit() {
     setSubmitting(true);
     try {
       const { error } = await supabase
-        .from('property_visits')
+        .from('visit_requests')
         .insert({
           property_id: property.id,
-          visitor_id: user.id,
-          owner_id: property.owner_id,
+          tenant_id: user.id,
           visit_type: visitType,
           visit_date: selectedDate.toISOString().split('T')[0],
           visit_time: selectedTime,
-          visitor_notes: notes || null
+          visitor_notes: notes || null,
+          status: 'en_attente'
         });
 
       if (error) throw error;
@@ -134,10 +157,6 @@ export default function ScheduleVisit() {
       day: 'numeric',
       month: 'short'
     });
-  };
-
-  const formatTime = (time: string) => {
-    return time.slice(0, 5);
   };
 
   if (!user) {
@@ -229,7 +248,7 @@ export default function ScheduleVisit() {
                 Planifier une visite
               </h1>
               <p className="text-neutral-600">{property.title}</p>
-              <p className="text-sm text-neutral-500">{property.address}, {property.city}</p>
+              <p className="text-sm text-neutral-500">{property.address || ''}, {property.city}</p>
             </div>
           </div>
         </div>
@@ -278,7 +297,7 @@ export default function ScheduleVisit() {
               <Calendar className="w-4 h-4 inline mr-2" />
               Choisir une date
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
               {getNextDays(14).map((date) => (
                 <button
                   key={date.toISOString()}
@@ -311,11 +330,7 @@ export default function ScheduleVisit() {
                 <Clock className="w-4 h-4 inline mr-2" />
                 Choisir un horaire
               </label>
-              {loadingSlots ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto"></div>
-                </div>
-              ) : availableSlots.length === 0 ? (
+              {availableSlots.length === 0 ? (
                 <div className="text-center py-8 text-neutral-500">
                   Aucun créneau disponible pour cette date
                 </div>
@@ -323,19 +338,19 @@ export default function ScheduleVisit() {
                 <div className="grid grid-cols-4 gap-3">
                   {availableSlots.map((slot) => (
                     <button
-                      key={slot.time_slot}
+                      key={slot.time}
                       type="button"
-                      onClick={() => setSelectedTime(slot.time_slot)}
-                      disabled={!slot.is_available}
+                      onClick={() => setSelectedTime(slot.time)}
+                      disabled={!slot.available}
                       className={`p-3 rounded-lg border-2 transition ${
-                        selectedTime === slot.time_slot
+                        selectedTime === slot.time
                           ? 'border-primary-500 bg-primary-50 text-primary-600'
-                          : slot.is_available
+                          : slot.available
                           ? 'border-neutral-200 hover:border-neutral-300 text-neutral-900'
                           : 'border-neutral-100 bg-neutral-50 text-neutral-400 cursor-not-allowed'
                       }`}
                     >
-                      {formatTime(slot.time_slot)}
+                      {slot.time}
                     </button>
                   ))}
                 </div>

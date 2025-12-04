@@ -4,55 +4,44 @@ import { supabase } from '@/services/supabase/client';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { FileText, Shield, CheckCircle, AlertCircle, Lock, Loader, Download } from 'lucide-react';
-import AnsutBadge from '@/features/verification/components/AnsutBadge';
 
-interface Lease {
+interface LeaseContract {
   id: string;
+  contract_number: string;
   property_id: string;
-  landlord_id: string;
+  owner_id: string;
   tenant_id: string;
   monthly_rent: number;
-  deposit_amount: number;
-  charges_amount: number;
+  deposit_amount: number | null;
   start_date: string;
   end_date: string;
-  status: string;
-  pdf_document_url: string;
-  signed_pdf_url: string;
-  tenant_signed_at: string | null;
-  landlord_signed_at: string | null;
-  tenant_otp_verified_at: string | null;
-  landlord_otp_verified_at: string | null;
-  custom_clauses: string | null;
-  payment_day: number;
+  status: string | null;
+  signed_at: string | null;
+  created_at: string | null;
 }
 
 interface Property {
   title: string;
-  address: string;
+  address: string | null;
   city: string;
 }
 
 interface UserProfile {
-  full_name: string;
-  email: string;
-  phone: string;
-  identity_verified: boolean;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  is_verified: boolean | null;
 }
 
 export default function SignLease() {
   const { user, profile } = useAuth();
-  const [lease, setLease] = useState<Lease | null>(null);
+  const [lease, setLease] = useState<LeaseContract | null>(null);
   const [property, setProperty] = useState<Property | null>(null);
-  const [landlordProfile, setLandlordProfile] = useState<UserProfile | null>(null);
+  const [ownerProfile, setOwnerProfile] = useState<UserProfile | null>(null);
   const [tenantProfile, setTenantProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [signing, setSigning] = useState(false);
-  const [showOTPModal, setShowOTPModal] = useState(false);
-  const [otpCode, setOtpCode] = useState('');
-  const [_otpSent, setOtpSent] = useState(false);
-  const [sendingOTP, setSendingOTP] = useState(false);
-  const [verifyingOTP, setVerifyingOTP] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -65,23 +54,26 @@ export default function SignLease() {
   }, [user, leaseId]);
 
   const loadLeaseData = async () => {
+    if (!leaseId) return;
+    
     try {
       const { data: leaseData, error: leaseError } = await supabase
-        .from('leases')
+        .from('lease_contracts')
         .select('*')
         .eq('id', leaseId)
         .single();
 
       if (leaseError) throw leaseError;
 
-      if (leaseData.landlord_id !== user?.id && leaseData.tenant_id !== user?.id) {
+      if (leaseData.owner_id !== user?.id && leaseData.tenant_id !== user?.id) {
         setError('Vous n\'êtes pas autorisé à accéder à ce bail');
+        setLoading(false);
         return;
       }
 
-      setLease(leaseData);
+      setLease(leaseData as LeaseContract);
 
-      const [propertyRes, landlordRes, tenantRes] = await Promise.all([
+      const [propertyRes, ownerRes, tenantRes] = await Promise.all([
         supabase
           .from('properties')
           .select('title, address, city')
@@ -89,19 +81,19 @@ export default function SignLease() {
           .single(),
         supabase
           .from('profiles')
-          .select('full_name, email, phone, identity_verified')
-          .eq('id', leaseData.landlord_id)
+          .select('full_name, email, phone, is_verified')
+          .eq('user_id', leaseData.owner_id)
           .single(),
         supabase
           .from('profiles')
-          .select('full_name, email, phone, identity_verified')
-          .eq('id', leaseData.tenant_id)
+          .select('full_name, email, phone, is_verified')
+          .eq('user_id', leaseData.tenant_id)
           .single()
       ]);
 
-      if (propertyRes.data) setProperty(propertyRes.data);
-      if (landlordRes.data) setLandlordProfile(landlordRes.data);
-      if (tenantRes.data) setTenantProfile(tenantRes.data);
+      if (propertyRes.data) setProperty(propertyRes.data as Property);
+      if (ownerRes.data) setOwnerProfile(ownerRes.data as UserProfile);
+      if (tenantRes.data) setTenantProfile(tenantRes.data as UserProfile);
 
     } catch (err: any) {
       console.error('Error loading lease:', err);
@@ -111,104 +103,24 @@ export default function SignLease() {
     }
   };
 
-  const requestOTP = async () => {
-    if (!profile?.is_verified) {
-      setError('Vous devez être vérifié Mon Toit pour signer un bail');
-      return;
-    }
+  const handleSign = async () => {
+    if (!user || !lease || !acceptedTerms) return;
 
-    setSendingOTP(true);
+    setSigning(true);
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-sms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
-        },
-        body: JSON.stringify({
-          phoneNumber: profile.phone,
-          message: `Votre code OTP pour signer le bail: ${Math.floor(100000 + Math.random() * 900000)}. Valide 5 minutes.`,
-          purpose: 'lease_signature'
+      const { error: updateError } = await supabase
+        .from('lease_contracts')
+        .update({
+          status: 'actif',
+          signed_at: new Date().toISOString()
         })
-      });
+        .eq('id', lease.id);
 
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'envoi de l\'OTP');
-      }
-
-      setOtpSent(true);
-      setShowOTPModal(true);
-      setSuccess('Code OTP envoyé par SMS');
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'envoi de l\'OTP');
-    } finally {
-      setSendingOTP(false);
-    }
-  };
-
-  const verifyOTPAndSign = async () => {
-    if (!otpCode || otpCode.length !== 6) {
-      setError('Veuillez saisir un code OTP valide à 6 chiffres');
-      return;
-    }
-
-    setVerifyingOTP(true);
-    setError('');
-
-    try {
-      const verifyResponse = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/cryptoneo-signature`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
-        },
-        body: JSON.stringify({
-          action: 'verify_otp',
-          userId: user?.id,
-          leaseId: leaseId,
-          otpCode: otpCode
-        })
-      });
-
-      if (!verifyResponse.ok) {
-        throw new Error('Code OTP invalide ou expiré');
-      }
-
-      setSigning(true);
-
-      const signResponse = await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/cryptoneo-signature`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
-        },
-        body: JSON.stringify({
-          action: 'sign_document',
-          userId: user?.id,
-          leaseId: leaseId,
-          documentUrl: lease?.pdf_document_url
-        })
-      });
-
-      if (!signResponse.ok) {
-        throw new Error('Erreur lors de la signature du document');
-      }
-
-      await signResponse.json();
+      if (updateError) throw updateError;
 
       setSuccess('✅ Bail signé avec succès!');
-      setShowOTPModal(false);
-
-      const isLandlord = lease?.landlord_id === user?.id;
-      const isTenant = lease?.tenant_id === user?.id;
-
-      if (isTenant && !lease?.landlord_signed_at) {
-        await sendNotificationToLandlord();
-      } else if (isLandlord && lease?.tenant_signed_at) {
-        await sendFinalConfirmationEmails();
-      }
 
       setTimeout(() => {
         window.location.href = `/contrat/${leaseId}`;
@@ -217,74 +129,7 @@ export default function SignLease() {
     } catch (err: any) {
       setError(err.message || 'Erreur lors de la signature');
     } finally {
-      setVerifyingOTP(false);
       setSigning(false);
-    }
-  };
-
-  const sendNotificationToLandlord = async () => {
-    try {
-      await fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-email`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
-        },
-        body: JSON.stringify({
-          to: landlordProfile?.email,
-          subject: 'Bail signé par le locataire - Action requise',
-          template: 'lease-tenant-signed',
-          data: {
-            landlordName: landlordProfile?.full_name,
-            tenantName: tenantProfile?.full_name,
-            propertyTitle: property?.title,
-            leaseLink: `${window.location.origin}/signer-bail/${leaseId}`
-          }
-        })
-      });
-    } catch (err) {
-      console.error('Error sending notification:', err);
-    }
-  };
-
-  const sendFinalConfirmationEmails = async () => {
-    try {
-      await Promise.all([
-        fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
-          },
-          body: JSON.stringify({
-            to: landlordProfile?.email,
-            subject: 'Bail entièrement signé',
-            template: 'lease-fully-signed',
-            data: {
-              recipientName: landlordProfile?.full_name,
-              propertyTitle: property?.title
-            }
-          })
-        }),
-        fetch(`${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`
-          },
-          body: JSON.stringify({
-            to: tenantProfile?.email,
-            subject: 'Bail entièrement signé',
-            template: 'lease-fully-signed',
-            data: {
-              recipientName: tenantProfile?.full_name,
-              propertyTitle: property?.title
-            }
-          })
-        })
-      ]);
-    } catch (err) {
-      console.error('Error sending confirmation emails:', err);
     }
   };
 
@@ -338,9 +183,8 @@ export default function SignLease() {
     );
   }
 
-  const isLandlord = lease.landlord_id === user.id;
-  const hasUserSigned = isLandlord ? lease.landlord_signed_at : lease.tenant_signed_at;
-  const otherPartySigned = isLandlord ? lease.tenant_signed_at : lease.landlord_signed_at;
+  // const isOwner = lease.owner_id === user.id;
+  const hasSigned = lease.signed_at !== null;
 
   return (
     <>
@@ -350,10 +194,10 @@ export default function SignLease() {
           <div className="mb-8">
             <div className="flex items-center space-x-3 mb-4">
               <FileText className="w-10 h-10 text-terracotta-600" />
-              <h1 className="text-4xl font-bold text-gradient">Signature Électronique du Bail</h1>
+              <h1 className="text-4xl font-bold text-gradient">Signature du Bail</h1>
             </div>
             <p className="text-gray-600 text-lg">
-              Signature sécurisée avec vérification Mon Toit et horodatage CryptoNeo
+              Contrat #{lease.contract_number}
             </p>
           </div>
 
@@ -376,15 +220,15 @@ export default function SignLease() {
               <div className="flex items-start space-x-4">
                 <Shield className="w-8 h-8 text-amber-600 flex-shrink-0" />
                 <div>
-                  <h3 className="font-bold text-amber-900 mb-2">Vérification Mon Toit requise</h3>
+                  <h3 className="font-bold text-amber-900 mb-2">Vérification recommandée</h3>
                   <p className="text-amber-800 mb-4">
-                    Vous devez être vérifié Mon Toit pour signer électroniquement un bail.
+                    La vérification de votre profil renforce la confiance entre les parties.
                   </p>
                   <a
-                    href="/certification-ansut"
-                    className="btn-primary inline-block"
+                    href="/verification"
+                    className="btn-secondary inline-block"
                   >
-                    Obtenir la certification
+                    Vérifier mon profil
                   </a>
                 </div>
               </div>
@@ -398,7 +242,7 @@ export default function SignLease() {
               <div>
                 <h3 className="font-bold text-gray-700 mb-2">Propriété</h3>
                 <p className="text-gray-900">{property.title}</p>
-                <p className="text-sm text-gray-600">{property.address}, {property.city}</p>
+                <p className="text-sm text-gray-600">{property.address || ''}, {property.city}</p>
               </div>
 
               <div>
@@ -412,21 +256,15 @@ export default function SignLease() {
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-700 mb-2 flex items-center space-x-2">
-                  <span>Bailleur</span>
-                  {landlordProfile?.identity_verified && <AnsutBadge certified={true} size="small" />}
-                </h3>
-                <p className="text-gray-900">{landlordProfile?.full_name}</p>
-                <p className="text-sm text-gray-600">{landlordProfile?.email}</p>
+                <h3 className="font-bold text-gray-700 mb-2">Propriétaire</h3>
+                <p className="text-gray-900">{ownerProfile?.full_name || 'Non renseigné'}</p>
+                <p className="text-sm text-gray-600">{ownerProfile?.email || ''}</p>
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-700 mb-2 flex items-center space-x-2">
-                  <span>Locataire</span>
-                  {tenantProfile?.identity_verified && <AnsutBadge certified={true} size="small" />}
-                </h3>
-                <p className="text-gray-900">{tenantProfile?.full_name}</p>
-                <p className="text-sm text-gray-600">{tenantProfile?.email}</p>
+                <h3 className="font-bold text-gray-700 mb-2">Locataire</h3>
+                <p className="text-gray-900">{tenantProfile?.full_name || 'Non renseigné'}</p>
+                <p className="text-sm text-gray-600">{tenantProfile?.email || ''}</p>
               </div>
             </div>
 
@@ -440,202 +278,91 @@ export default function SignLease() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Charges</p>
-                  <p className="text-xl font-bold text-terracotta-700">
-                    {lease.charges_amount.toLocaleString('fr-FR')} FCFA
-                  </p>
-                </div>
-                <div>
                   <p className="text-sm text-gray-600">Dépôt de garantie</p>
                   <p className="text-xl font-bold text-terracotta-700">
-                    {lease.deposit_amount.toLocaleString('fr-FR')} FCFA
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Date de paiement</p>
-                  <p className="text-xl font-bold text-terracotta-700">
-                    Le {lease.payment_day} du mois
+                    {(lease.deposit_amount || 0).toLocaleString('fr-FR')} FCFA
                   </p>
                 </div>
               </div>
             </div>
 
-            {lease.pdf_document_url && (
-              <div className="mb-6">
-                <a
-                  href={lease.pdf_document_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-secondary flex items-center justify-center space-x-2 w-full"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>Télécharger le PDF du bail</span>
-                </a>
-              </div>
-            )}
-
             <div className="border-t-2 border-gray-200 pt-6">
-              <h3 className="font-bold text-gray-900 mb-4">Statut des signatures</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <span className="font-medium text-gray-700">Locataire</span>
-                  {lease.tenant_signed_at ? (
-                    <div className="flex items-center space-x-2 text-green-600">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="font-bold">Signé le {new Date(lease.tenant_signed_at).toLocaleDateString('fr-FR')}</span>
-                    </div>
-                  ) : (
-                    <span className="text-amber-600 font-bold">En attente</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                  <span className="font-medium text-gray-700">Bailleur</span>
-                  {lease.landlord_signed_at ? (
-                    <div className="flex items-center space-x-2 text-green-600">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="font-bold">Signé le {new Date(lease.landlord_signed_at).toLocaleDateString('fr-FR')}</span>
-                    </div>
-                  ) : (
-                    <span className="text-amber-600 font-bold">En attente</span>
-                  )}
-                </div>
+              <h3 className="font-bold text-gray-900 mb-4">Statut</h3>
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <span className="font-medium text-gray-700">Contrat</span>
+                {hasSigned ? (
+                  <div className="flex items-center space-x-2 text-green-600">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="font-bold">Signé le {new Date(lease.signed_at!).toLocaleDateString('fr-FR')}</span>
+                  </div>
+                ) : (
+                  <span className="text-amber-600 font-bold">En attente de signature</span>
+                )}
               </div>
             </div>
           </div>
 
-          {!hasUserSigned && profile?.is_verified && (
+          {!hasSigned && (
             <div className="bg-white rounded-2xl shadow-lg p-8">
-              <div className="text-center">
-                <Shield className="w-16 h-16 text-terracotta-500 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                  Prêt à signer électroniquement?
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {isLandlord
-                    ? 'En signant ce bail, vous confirmez les termes et conditions énoncés.'
-                    : 'En signant ce bail, vous vous engagez à respecter toutes les clauses du contrat.'}
-                </p>
-                <button
-                  onClick={requestOTP}
-                  disabled={sendingOTP}
-                  className="btn-primary py-3 px-8 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 mx-auto"
-                >
-                  {sendingOTP ? (
-                    <>
-                      <Loader className="w-5 h-5 animate-spin" />
-                      <span>Envoi OTP...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Shield className="w-5 h-5" />
-                      <span>Signer le bail</span>
-                    </>
-                  )}
-                </button>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Signer le bail</h2>
+
+              <div className="mb-6">
+                <label className="flex items-start space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-1 h-5 w-5 text-terracotta-600 focus:ring-terracotta-500 border-gray-300 rounded"
+                  />
+                  <span className="text-gray-700">
+                    J'ai lu et j'accepte les termes et conditions du contrat de bail. 
+                    Je comprends que cette signature électronique a la même valeur juridique qu'une signature manuscrite.
+                  </span>
+                </label>
               </div>
+
+              <button
+                onClick={handleSign}
+                disabled={!acceptedTerms || signing}
+                className="w-full py-4 bg-terracotta-500 text-white font-bold rounded-xl hover:bg-terracotta-600 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                {signing ? (
+                  <>
+                    <Loader className="w-5 h-5 animate-spin" />
+                    <span>Signature en cours...</span>
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-5 h-5" />
+                    <span>Signer le bail</span>
+                  </>
+                )}
+              </button>
+
+              <p className="text-center text-sm text-gray-500 mt-4">
+                En signant, vous acceptez les conditions générales de Mon Toit
+              </p>
             </div>
           )}
 
-          {hasUserSigned && !otherPartySigned && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-6">
-              <div className="flex items-center space-x-4">
-                <CheckCircle className="w-12 h-12 text-green-600 flex-shrink-0" />
-                <div>
-                  <h3 className="font-bold text-green-900 mb-2">Vous avez signé ce bail</h3>
-                  <p className="text-green-700">
-                    En attente de la signature de {isLandlord ? 'le locataire' : 'le bailleur'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {lease.status === 'actif' && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-6">
-              <div className="flex items-center space-x-4">
-                <CheckCircle className="w-12 h-12 text-green-600 flex-shrink-0" />
-                <div>
-                  <h3 className="font-bold text-green-900 mb-2">Bail entièrement signé!</h3>
-                  <p className="text-green-700 mb-4">
-                    Le bail est maintenant actif et juridiquement contraignant.
-                  </p>
-                  {lease.signed_pdf_url && (
-                    <a
-                      href={lease.signed_pdf_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-primary inline-flex items-center space-x-2"
-                    >
-                      <Download className="w-5 h-5" />
-                      <span>Télécharger le bail signé</span>
-                    </a>
-                  )}
-                </div>
-              </div>
+          {hasSigned && (
+            <div className="bg-green-50 border-2 border-green-300 rounded-2xl p-8 text-center">
+              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-green-900 mb-2">Bail signé</h2>
+              <p className="text-green-800 mb-4">
+                Ce contrat a été signé le {new Date(lease.signed_at!).toLocaleDateString('fr-FR')}
+              </p>
+              <a
+                href={`/contrat/${lease.id}`}
+                className="btn-primary inline-flex items-center space-x-2"
+              >
+                <Download className="w-5 h-5" />
+                <span>Voir le contrat</span>
+              </a>
             </div>
           )}
         </div>
       </div>
-
-      {showOTPModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Vérification OTP</h3>
-            <p className="text-gray-600 mb-6">
-              Un code à 6 chiffres a été envoyé par SMS à votre numéro de téléphone.
-            </p>
-
-            <div className="mb-6">
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Code OTP
-              </label>
-              <input
-                type="text"
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                placeholder="123456"
-                maxLength={6}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-terracotta-200 focus:border-terracotta-500 text-center text-2xl tracking-widest"
-              />
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => {
-                  setShowOTPModal(false);
-                  setOtpCode('');
-                }}
-                className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 font-bold"
-                disabled={verifyingOTP || signing}
-              >
-                Annuler
-              </button>
-              <button
-                onClick={verifyOTPAndSign}
-                disabled={verifyingOTP || signing || otpCode.length !== 6}
-                className="flex-1 btn-primary py-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                {verifyingOTP || signing ? (
-                  <>
-                    <Loader className="w-5 h-5 animate-spin" />
-                    <span>Signature...</span>
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-5 h-5" />
-                    <span>Vérifier et signer</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <p className="text-xs text-gray-500 mt-4 text-center">
-              Le code OTP est valide pendant 5 minutes
-            </p>
-          </div>
-        </div>
-      )}
-
       <Footer />
     </>
   );

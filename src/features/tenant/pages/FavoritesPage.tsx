@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Heart, MapPin, Home, Bed, Bath, X, Edit2, Save } from 'lucide-react';
+import { Heart, MapPin, Bed, Bath, X, Home } from 'lucide-react';
 
 interface Favorite {
   id: string;
