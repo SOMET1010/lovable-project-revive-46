@@ -7,8 +7,25 @@ import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
 
+// Extended profile type with new columns
+interface ExtendedProfile {
+  id: string;
+  user_id: string | null;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  city: string | null;
+  address: string | null;
+  avatar_url: string | null;
+  user_type: string | null;
+  profile_setup_completed: boolean | null;
+  is_verified?: boolean;
+  bio?: string;
+}
+
 export default function ApplicationForm() {
-  const { user, profile } = useAuth();
+  const { user, profile: authProfile } = useAuth();
+  const profile = authProfile as ExtendedProfile | null;
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -43,19 +60,8 @@ export default function ApplicationForm() {
       }
 
       setProperty(data);
-
-      const { data: existingApp } = await supabase
-        .from('rental_applications')
-        .select('id')
-        .eq('property_id', id)
-        .eq('applicant_id', user!.id)
-        .maybeSingle();
-
-      if (existingApp) {
-        setError('Vous avez déjà postulé pour cette propriété');
-      }
-    } catch (error) {
-      console.error('Error loading property:', error);
+    } catch (err) {
+      console.error('Error loading property:', err);
       setError('Erreur lors du chargement de la propriété');
     } finally {
       setLoading(false);
@@ -72,26 +78,28 @@ export default function ApplicationForm() {
     try {
       const scoreBreakdown = await ScoringService.calculateApplicationScore(user.id);
 
+      // Insert application - types will be updated after migration sync
       const { error: insertError } = await supabase
-        .from('rental_applications')
+        .from('rental_applications' as any)
         .insert({
           property_id: property.id,
           applicant_id: user.id,
           cover_letter: coverLetter,
           application_score: scoreBreakdown.totalScore,
           status: 'en_attente',
-        });
+        } as any);
 
       if (insertError) throw insertError;
 
+      // Send notification message
       const notificationMessage = `Nouvelle candidature pour ${property.title} (Score: ${scoreBreakdown.totalScore}/100)`;
       await supabase
-        .from('messages')
+        .from('messages' as any)
         .insert({
           sender_id: user.id,
           receiver_id: property.owner_id,
           content: notificationMessage,
-        });
+        } as any);
 
       await ScoringService.checkAndAwardAchievements(user.id);
 
@@ -109,9 +117,7 @@ export default function ApplicationForm() {
   const calculateApplicationScore = () => {
     let score = 50;
 
-    // is_verified combine les vérifications ONECI/CNAM
     if (profile?.is_verified) score += 30;
-
     if (profile?.full_name) score += 4;
     if (profile?.phone) score += 4;
     if (profile?.city) score += 4;
@@ -150,6 +156,7 @@ export default function ApplicationForm() {
   }
 
   const applicationScore = calculateApplicationScore();
+  const isVerified = profile?.is_verified ?? false;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50 custom-cursor">
@@ -190,7 +197,7 @@ export default function ApplicationForm() {
             </div>
           )}
 
-          {!profile?.is_verified && (
+          {!isVerified && (
             <div className="mb-6 p-6 glass-card rounded-3xl bg-gradient-to-br from-red-100 to-orange-100 border-2 border-red-400 animate-slide-up">
               <div className="flex items-start space-x-4">
                 <div className="bg-gradient-to-br from-red-200 to-orange-200 p-3 rounded-2xl">
@@ -199,16 +206,8 @@ export default function ApplicationForm() {
                 <div className="flex-1">
                   <p className="font-bold text-red-900 text-lg mb-2">🚫 Vérification d'identité OBLIGATOIRE</p>
                   <p className="text-red-800 mb-3 font-semibold">
-                    Vous devez compléter la vérification de votre identité avant de postuler. Les candidatures non vérifiées ne sont pas acceptées par les propriétaires.
+                    Vous devez compléter la vérification de votre identité avant de postuler.
                   </p>
-                  <p className="text-red-700 text-sm mb-4">
-                    <strong>Étapes de vérification requises:</strong>
-                  </p>
-                  <ul className="text-red-700 text-sm space-y-1 mb-4 ml-4 list-disc">
-                    <li>✓ Vérification CNI via ONECI (obligatoire)</li>
-                    <li>✓ Reconnaissance faciale biométrique (obligatoire)</li>
-                    <li>✓ Validation de vos informations personnelles</li>
-                  </ul>
                   <a
                     href="/profil"
                     className="inline-block px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold shadow-lg"
@@ -270,26 +269,17 @@ export default function ApplicationForm() {
                 <span>Statut de vérification</span>
               </h2>
               <div className="bg-white rounded-xl p-5 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
                   <div className="flex-1">
                     <span className="text-gray-700 font-medium block">Vérification d'identité</span>
                     <span className="text-xs text-gray-500">Document CNI authentifié via ONECI/CNAM</span>
                   </div>
                   <span className={`font-bold px-4 py-2 rounded-full ${
-                    profile?.is_verified
+                    isVerified
                       ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border border-blue-300'
                       : 'bg-gray-100 text-gray-500 border border-gray-300'
                   }`}>
-                    {profile?.is_verified ? '✓ Vérifié' : '✗ Non vérifié'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                  <div className="flex-1">
-                    <span className="text-gray-700 font-medium block">Signature électronique sécurisée</span>
-                    <span className="text-xs text-gray-500">Contrats avec cachet électronique visible</span>
-                  </div>
-                  <span className="font-bold px-4 py-2 rounded-full bg-gradient-to-r from-olive-100 to-green-100 text-olive-800 border border-olive-300">
-                    ✓ Service officiel
+                    {isVerified ? '✓ Vérifié' : '✗ Non vérifié'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -315,18 +305,9 @@ export default function ApplicationForm() {
                 onChange={(e) => setCoverLetter(e.target.value)}
                 rows={10}
                 required
-                placeholder="Présentez-vous et expliquez pourquoi vous souhaitez louer cette propriété...
-
-Quelques points à mentionner:
-• Votre situation professionnelle
-• Pourquoi cette propriété vous intéresse
-• Votre sérieux et fiabilité en tant que locataire
-• Toute information pertinente pour le propriétaire"
+                placeholder="Présentez-vous et expliquez pourquoi vous souhaitez louer cette propriété..."
                 className="w-full px-4 py-3 border-2 border-terracotta-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
               />
-              <p className="text-sm text-gray-700 mt-3 font-medium">
-                💡 Une lettre de motivation détaillée et sincère augmente considérablement vos chances d'être retenu.
-              </p>
             </div>
 
             <div className="glass-card rounded-3xl p-6 bg-gradient-to-br from-amber-100 to-orange-100 border-2 border-amber-300">
@@ -343,9 +324,6 @@ Quelques points à mentionner:
                   style={{ width: `${applicationScore}%` }}
                 />
               </div>
-              <p className="text-sm text-gray-800">
-                Votre score est calculé en fonction de vos vérifications d'identité. Plus votre score est élevé, plus vous avez de chances d'être retenu.
-              </p>
             </div>
 
             <div className="border-t-2 border-gray-200 pt-6">
@@ -358,7 +336,7 @@ Quelques points à mentionner:
                 />
                 <label htmlFor="terms" className="text-sm text-gray-800">
                   Je confirme que toutes les informations fournies sont exactes et j'accepte les{' '}
-                  <a href="/conditions" className="text-terracotta-600 hover:text-terracotta-700 font-bold">
+                  <a href="/conditions-utilisation" className="text-terracotta-600 hover:text-terracotta-700 font-bold">
                     conditions d'utilisation
                   </a>
                   .
@@ -367,19 +345,19 @@ Quelques points à mentionner:
 
               <button
                 type="submit"
-                disabled={submitting || !!error || !profile?.is_verified}
+                disabled={submitting || !!error || !isVerified}
                 className="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 <FileText className="h-6 w-6" />
                 <span>
-                  {!profile?.is_verified
+                  {!isVerified
                     ? '🔒 Vérification requise pour postuler'
                     : submitting
                     ? 'Envoi en cours...'
                     : 'Envoyer ma candidature'}
                 </span>
               </button>
-              {!profile?.is_verified && (
+              {!isVerified && (
                 <p className="text-center text-red-600 font-semibold text-sm mt-2">
                   Complétez d'abord votre vérification d'identité pour activer le bouton
                 </p>

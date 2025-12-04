@@ -43,15 +43,17 @@ export default function TenantCalendar() {
 
       const calendarEvents: CalendarEvent[] = [];
 
+      // Load lease contracts instead of leases
       const { data: leaseData } = await supabase
-        .from('leases')
+        .from('lease_contracts' as any)
         .select('*')
         .eq('tenant_id', user.id)
         .eq('status', 'actif')
-        .single();
+        .maybeSingle();
 
       if (leaseData) {
-        const paymentDate = new Date(leaseData.start_date);
+        const lease = leaseData as any;
+        const paymentDate = new Date(lease.start_date);
         while (paymentDate <= endOfMonth) {
           if (paymentDate >= startOfMonth) {
             calendarEvents.push({
@@ -59,16 +61,16 @@ export default function TenantCalendar() {
               date: new Date(paymentDate),
               type: 'payment_due',
               title: 'Échéance de loyer',
-              amount: leaseData.monthly_rent,
+              amount: lease.monthly_rent,
             });
           }
           paymentDate.setMonth(paymentDate.getMonth() + 1);
         }
 
-        if (new Date(leaseData.end_date) >= startOfMonth && new Date(leaseData.end_date) <= endOfMonth) {
+        if (new Date(lease.end_date) >= startOfMonth && new Date(lease.end_date) <= endOfMonth) {
           calendarEvents.push({
-            id: `lease_end_${leaseData.id}`,
-            date: new Date(leaseData.end_date),
+            id: `lease_end_${lease.id}`,
+            date: new Date(lease.end_date),
             type: 'lease_end',
             title: 'Fin de bail',
             description: 'Votre bail se termine',
@@ -76,8 +78,9 @@ export default function TenantCalendar() {
         }
       }
 
+      // Load payments
       const { data: paymentsData } = await supabase
-        .from('payments')
+        .from('payments' as any)
         .select('*')
         .eq('payer_id', user.id)
         .gte('created_at', startOfMonth.toISOString())
@@ -85,7 +88,7 @@ export default function TenantCalendar() {
         .eq('status', 'complete');
 
       if (paymentsData) {
-        paymentsData.forEach((payment: { id: string; created_at: string; amount: number; status: string }) => {
+        (paymentsData as any[]).forEach((payment) => {
           calendarEvents.push({
             id: payment.id,
             date: new Date(payment.created_at),
@@ -97,8 +100,9 @@ export default function TenantCalendar() {
         });
       }
 
+      // Load visit requests
       const { data: visitsData } = await supabase
-        .from('visit_requests')
+        .from('visit_requests' as any)
         .select('*, properties(title)')
         .eq('tenant_id', user.id)
         .gte('visit_date', startOfMonth.toISOString().split('T')[0])
@@ -106,7 +110,7 @@ export default function TenantCalendar() {
         .eq('status', 'acceptee');
 
       if (visitsData) {
-        visitsData.forEach((visit: any) => {
+        (visitsData as any[]).forEach((visit) => {
           calendarEvents.push({
             id: visit.id,
             date: new Date(`${visit.visit_date}T${visit.visit_time}`),
@@ -117,8 +121,9 @@ export default function TenantCalendar() {
         });
       }
 
+      // Load maintenance requests
       const { data: maintenanceData } = await supabase
-        .from('maintenance_requests')
+        .from('maintenance_requests' as any)
         .select('*')
         .eq('tenant_id', user.id)
         .not('scheduled_date', 'is', null)
@@ -126,7 +131,7 @@ export default function TenantCalendar() {
         .lte('scheduled_date', endOfMonth.toISOString().split('T')[0]);
 
       if (maintenanceData) {
-        maintenanceData.forEach((maintenance: { id: string; scheduled_date: string | null; issue_type: string }) => {
+        (maintenanceData as any[]).forEach((maintenance) => {
           calendarEvents.push({
             id: maintenance.id,
             date: new Date(maintenance.scheduled_date!),

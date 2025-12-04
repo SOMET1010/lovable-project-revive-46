@@ -5,51 +5,43 @@ import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { ArrowLeft, FileText, Edit, CheckCircle, X } from 'lucide-react';
 
-interface Contract {
+interface LeaseContract {
   id: string;
   contract_number: string;
   property_id: string;
   owner_id: string;
   tenant_id: string;
-  contract_type: string;
-  status: string;
+  status: string | null;
   start_date: string;
-  end_date: string | null;
+  end_date: string;
   monthly_rent: number;
-  deposit_amount: number;
-  charges_amount: number;
-  payment_day: number;
-  contract_content: string | null;
-  custom_clauses: string | null;
-  owner_signed_at: string | null;
-  owner_signature: string | null;
-  tenant_signed_at: string | null;
-  tenant_signature: string | null;
-  created_at: string;
-  property: {
-    title: string;
-    address: string;
-    city: string;
-    property_type: string;
-    surface_area: number;
-    bedrooms: number;
-    bathrooms: number;
-  };
-  owner: {
-    full_name: string;
-    email: string;
-    phone: string;
-  };
-  tenant: {
-    full_name: string;
-    email: string;
-    phone: string;
-  };
+  deposit_amount: number | null;
+  signed_at: string | null;
+  created_at: string | null;
+}
+
+interface Property {
+  title: string;
+  address: string | null;
+  city: string;
+  property_type: string;
+  surface_area: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+}
+
+interface Profile {
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
 export default function ContractDetail() {
   const { user } = useAuth();
-  const [contract, setContract] = useState<Contract | null>(null);
+  const [contract, setContract] = useState<LeaseContract | null>(null);
+  const [property, setProperty] = useState<Property | null>(null);
+  const [owner, setOwner] = useState<Profile | null>(null);
+  const [tenant, setTenant] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSignature, setShowSignature] = useState(false);
   const [signing, setSigning] = useState(false);
@@ -67,33 +59,50 @@ export default function ContractDetail() {
   const loadContract = async () => {
     try {
       const { data, error } = await supabase
-        .from('lease_contracts')
-        .select(`
-          *,
-          properties!inner(title, address, city, property_type, surface_area, bedrooms, bathrooms),
-          owner:profiles!lease_contracts_owner_id_fkey(full_name, email, phone),
-          tenant:profiles!lease_contracts_tenant_id_fkey(full_name, email, phone)
-        `)
+        .from('lease_contracts' as any)
+        .select('*')
         .eq('id', contractId)
         .single();
 
       if (error) throw error;
+      
+      const contractData = data as LeaseContract;
 
-      if (!data || (data.owner_id !== user?.id && data.tenant_id !== user?.id)) {
+      if (!contractData || (contractData.owner_id !== user?.id && contractData.tenant_id !== user?.id)) {
         alert('Vous n\'avez pas accès à ce contrat');
         window.location.href = '/mes-contrats';
         return;
       }
 
-      const formattedContract = {
-        ...data,
-        property: data.properties,
-        owner: data.owner,
-        tenant: data.tenant
-      };
+      setContract(contractData);
 
-      setContract(formattedContract);
-      generateContractContent(formattedContract);
+      // Load property
+      const { data: propData } = await supabase
+        .from('properties')
+        .select('title, address, city, property_type, surface_area, bedrooms, bathrooms')
+        .eq('id', contractData.property_id)
+        .single();
+      
+      if (propData) setProperty(propData);
+
+      // Load owner profile
+      const { data: ownerData } = await supabase
+        .from('profiles')
+        .select('full_name, email, phone')
+        .eq('user_id', contractData.owner_id)
+        .single();
+      
+      if (ownerData) setOwner(ownerData);
+
+      // Load tenant profile
+      const { data: tenantData } = await supabase
+        .from('profiles')
+        .select('full_name, email, phone')
+        .eq('user_id', contractData.tenant_id)
+        .single();
+      
+      if (tenantData) setTenant(tenantData);
+
     } catch (error) {
       console.error('Error loading contract:', error);
     } finally {
@@ -101,71 +110,48 @@ export default function ContractDetail() {
     }
   };
 
-  const generateContractContent = (contract: Contract) => {
-    if (contract.contract_content) return;
+  const generateContractContent = () => {
+    if (!contract || !property || !owner || !tenant) return '';
 
-    const content = `
-# CONTRAT DE BAIL
+    return `
+CONTRAT DE BAIL
 
-**N° ${contract.contract_number}**
+N° ${contract.contract_number}
 
 Entre les soussignés :
 
-**LE BAILLEUR**
-${contract.owner.full_name}
-Email : ${contract.owner.email}
-Téléphone : ${contract.owner.phone}
+LE BAILLEUR
+${owner.full_name}
+Email : ${owner.email}
+Téléphone : ${owner.phone}
 
-**LE LOCATAIRE**
-${contract.tenant.full_name}
-Email : ${contract.tenant.email}
-Téléphone : ${contract.tenant.phone}
+LE LOCATAIRE
+${tenant.full_name}
+Email : ${tenant.email}
+Téléphone : ${tenant.phone}
 
-## OBJET DU CONTRAT
+OBJET DU CONTRAT
 
 Le bailleur loue au locataire le bien suivant :
 
-**Adresse :** ${contract.property.address}, ${contract.property.city}
-**Type :** ${contract.property.property_type}
-**Superficie :** ${contract.property.surface_area}m²
-**Chambres :** ${contract.property.bedrooms}
-**Salles de bain :** ${contract.property.bathrooms}
+Adresse : ${property.address}, ${property.city}
+Type : ${property.property_type}
+Superficie : ${property.surface_area}m²
+Chambres : ${property.bedrooms}
+Salles de bain : ${property.bathrooms}
 
-## DURÉE DU BAIL
+DURÉE DU BAIL
 
 Date de début : ${new Date(contract.start_date).toLocaleDateString('fr-FR')}
-${contract.end_date ? `Date de fin : ${new Date(contract.end_date).toLocaleDateString('fr-FR')}` : 'Durée indéterminée'}
+Date de fin : ${new Date(contract.end_date).toLocaleDateString('fr-FR')}
 
-## CONDITIONS FINANCIÈRES
+CONDITIONS FINANCIÈRES
 
 - Loyer mensuel : ${contract.monthly_rent.toLocaleString()} FCFA
-- Charges mensuelles : ${contract.charges_amount.toLocaleString()} FCFA
-- Dépôt de garantie : ${contract.deposit_amount.toLocaleString()} FCFA
-- Jour de paiement : Le ${contract.payment_day} de chaque mois
+- Dépôt de garantie : ${(contract.deposit_amount || 0).toLocaleString()} FCFA
 
-## OBLIGATIONS DU LOCATAIRE
-
-Le locataire s'engage à :
-- Payer le loyer aux dates convenues
-- Entretenir le logement en bon état
-- Ne pas sous-louer sans autorisation écrite du bailleur
-- Informer le bailleur de toute dégradation
-
-## OBLIGATIONS DU BAILLEUR
-
-Le bailleur s'engage à :
-- Délivrer un logement décent et en bon état
-- Assurer les réparations nécessaires
-- Garantir la jouissance paisible du bien
-
-${contract.custom_clauses ? `\n## CLAUSES PARTICULIÈRES\n\n${contract.custom_clauses}` : ''}
-
----
-
-Fait à ${contract.property.city}, le ${new Date(contract.created_at).toLocaleDateString('fr-FR')}
+Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateString('fr-FR')}
     `.trim();
-
-    setContract(prev => prev ? { ...prev, contract_content: content } : null);
   };
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -216,27 +202,16 @@ Fait à ${contract.property.city}, le ${new Date(contract.created_at).toLocaleDa
   };
 
   const signContract = async () => {
-    const canvas = canvasRef.current;
-    if (!canvas || !contract) return;
-
-    const signatureData = canvas.toDataURL('image/png');
+    if (!contract) return;
 
     setSigning(true);
     try {
-      const isOwner = contract.owner_id === user?.id;
-      const updateData = isOwner
-        ? {
-            owner_signed_at: new Date().toISOString(),
-            owner_signature: signatureData
-          }
-        : {
-            tenant_signed_at: new Date().toISOString(),
-            tenant_signature: signatureData
-          };
-
       const { error } = await supabase
-        .from('lease_contracts')
-        .update(updateData)
+        .from('lease_contracts' as any)
+        .update({ 
+          signed_at: new Date().toISOString(),
+          status: 'actif'
+        } as any)
         .eq('id', contract.id);
 
       if (error) throw error;
@@ -252,14 +227,9 @@ Fait à ${contract.property.city}, le ${new Date(contract.created_at).toLocaleDa
     }
   };
 
-  const isOwner = () => contract?.owner_id === user?.id;
   const canSign = () => {
     if (!contract) return false;
-    if (isOwner()) {
-      return !contract.owner_signed_at;
-    } else {
-      return !contract.tenant_signed_at;
-    }
+    return !contract.signed_at && (contract.owner_id === user?.id || contract.tenant_id === user?.id);
   };
 
   if (!user) {
@@ -323,7 +293,7 @@ Fait à ${contract.property.city}, le ${new Date(contract.created_at).toLocaleDa
                   <h1 className="text-2xl font-bold text-gray-900">
                     Contrat {contract.contract_number}
                   </h1>
-                  <p className="text-gray-600">{contract.property.title}</p>
+                  <p className="text-gray-600">{property?.title}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
@@ -341,70 +311,36 @@ Fait à ${contract.property.city}, le ${new Date(contract.created_at).toLocaleDa
 
             <div className="mt-6 grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center space-x-2">
-                {contract.owner_signed_at ? (
+                {contract.signed_at ? (
                   <>
                     <CheckCircle className="w-5 h-5 text-green-600" />
                     <span className="text-sm text-gray-700">
-                      Propriétaire signé le {new Date(contract.owner_signed_at).toLocaleDateString('fr-FR')}
+                      Signé le {new Date(contract.signed_at).toLocaleDateString('fr-FR')}
                     </span>
                   </>
                 ) : (
                   <>
                     <X className="w-5 h-5 text-red-600" />
-                    <span className="text-sm text-gray-700">Propriétaire non signé</span>
+                    <span className="text-sm text-gray-700">Non signé</span>
                   </>
                 )}
               </div>
               <div className="flex items-center space-x-2">
-                {contract.tenant_signed_at ? (
-                  <>
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-sm text-gray-700">
-                      Locataire signé le {new Date(contract.tenant_signed_at).toLocaleDateString('fr-FR')}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <X className="w-5 h-5 text-red-600" />
-                    <span className="text-sm text-gray-700">Locataire non signé</span>
-                  </>
-                )}
+                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  contract.status === 'actif' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {contract.status === 'actif' ? 'Actif' : contract.status}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg p-8">
-            <div
-              className="prose max-w-none"
-              dangerouslySetInnerHTML={{
-                __html: (contract.contract_content || '')
-                  .split('\n')
-                  .map(line => {
-                    if (line.startsWith('# ')) return `<h1 class="text-3xl font-bold mb-4">${line.slice(2)}</h1>`;
-                    if (line.startsWith('## ')) return `<h2 class="text-2xl font-bold mt-8 mb-4">${line.slice(3)}</h2>`;
-                    if (line.startsWith('**') && line.endsWith('**')) return `<p class="font-bold text-lg mb-2">${line.slice(2, -2)}</p>`;
-                    if (line.startsWith('- ')) return `<li class="ml-6">${line.slice(2)}</li>`;
-                    if (line.startsWith('---')) return '<hr class="my-8 border-gray-300" />';
-                    if (line.trim() === '') return '<br />';
-                    return `<p class="mb-2">${line}</p>`;
-                  })
-                  .join('')
-              }}
-            />
-
-            {contract.owner_signature && (
-              <div className="mt-8 border-t pt-6">
-                <p className="text-sm font-semibold text-gray-700 mb-2">Signature du propriétaire :</p>
-                <img src={contract.owner_signature} alt="Signature propriétaire" className="h-24 border border-gray-300 rounded" />
-              </div>
-            )}
-
-            {contract.tenant_signature && (
-              <div className="mt-8 border-t pt-6">
-                <p className="text-sm font-semibold text-gray-700 mb-2">Signature du locataire :</p>
-                <img src={contract.tenant_signature} alt="Signature locataire" className="h-24 border border-gray-300 rounded" />
-              </div>
-            )}
+            <pre className="whitespace-pre-wrap font-sans text-gray-800 leading-relaxed">
+              {generateContractContent()}
+            </pre>
           </div>
         </div>
       </div>

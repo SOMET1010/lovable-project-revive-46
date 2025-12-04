@@ -2,16 +2,31 @@ import { useState, useEffect } from 'react';
 import { Home, Coins, MessageSquare, Clock, Heart, Search, CheckCircle, FileText, Wrench } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import type { Database } from '@/shared/lib/database.types';
 
-type Lease = Database['public']['Tables']['leases']['Row'];
-type Property = Database['public']['Tables']['properties']['Row'];
-type Payment = Database['public']['Tables']['payments']['Row'];
+interface LeaseContract {
+  id: string;
+  property_id: string;
+  tenant_id: string;
+  owner_id: string;
+  contract_number: string;
+  start_date: string;
+  end_date: string;
+  monthly_rent: number;
+  deposit_amount: number;
+  status: string;
+}
+
+interface Payment {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+}
 
 export default function TenantDashboard() {
   const { user, profile } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [activeLease, setActiveLease] = useState<(Lease & { properties: Property }) | null>(null);
+  const [activeLease, setActiveLease] = useState<(LeaseContract & { property?: any }) | null>(null);
   const [nextPayment, setNextPayment] = useState<{
     amount: number;
     dueDate: string;
@@ -44,18 +59,28 @@ export default function TenantDashboard() {
     if (!user) return;
 
     try {
+      // Load active lease contract
       const { data: leaseData } = await supabase
-        .from('leases')
-        .select('*, properties(*)')
+        .from('lease_contracts' as any)
+        .select('*')
         .eq('tenant_id', user.id)
         .eq('status', 'actif')
-        .single();
+        .maybeSingle();
 
       if (leaseData) {
-        setActiveLease(leaseData as any);
+        const lease = leaseData as LeaseContract;
+        
+        // Load property data
+        const { data: propertyData } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', lease.property_id)
+          .single();
+
+        setActiveLease({ ...lease, property: propertyData });
 
         const today = new Date();
-        const nextPaymentDate = new Date(leaseData.start_date);
+        const nextPaymentDate = new Date(lease.start_date);
 
         while (nextPaymentDate < today) {
           nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
@@ -64,22 +89,22 @@ export default function TenantDashboard() {
         const daysRemaining = Math.ceil((nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
         setNextPayment({
-          amount: (leaseData.properties as any).monthly_rent,
+          amount: lease.monthly_rent,
           dueDate: nextPaymentDate.toISOString(),
           daysRemaining,
         });
 
+        // Load payments
         const { data: paymentsData } = await supabase
-          .from('payments')
+          .from('payments' as any)
           .select('*')
-          .eq('property_id', leaseData.property_id)
           .eq('payer_id', user.id)
           .order('created_at', { ascending: false })
           .limit(5);
 
-        setRecentPayments(paymentsData || []);
+        setRecentPayments((paymentsData || []) as Payment[]);
 
-        const lastPayment = paymentsData?.[0];
+        const lastPayment = (paymentsData as Payment[] | null)?.[0];
         const isLate = lastPayment && new Date(lastPayment.created_at) < new Date(nextPaymentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 
         setStats(prev => ({
@@ -88,31 +113,25 @@ export default function TenantDashboard() {
         }));
       }
 
-      const { data: conversationsData } = await supabase
-        .from('conversations')
+      // Load unread messages count
+      const { data: messagesData } = await supabase
+        .from('messages' as any)
         .select('id')
-        .eq('tenant_id', user.id);
+        .eq('receiver_id', user.id)
+        .eq('is_read', false);
 
-      if (conversationsData) {
-        const conversationIds = conversationsData.map((c: { id: string }) => c.id);
-        const { data: unreadData } = await supabase
-          .from('messages')
-          .select('id')
-          .in('conversation_id', conversationIds)
-          .neq('sender_id', user.id)
-          .eq('read', false);
+      setStats(prev => ({ ...prev, unreadMessages: messagesData?.length || 0 }));
 
-        setStats(prev => ({ ...prev, unreadMessages: unreadData?.length || 0 }));
-      }
-
+      // Load maintenance requests count
       const { data: maintenanceData } = await supabase
-        .from('maintenance_requests')
+        .from('maintenance_requests' as any)
         .select('id')
         .eq('tenant_id', user.id)
-        .in('status', ['en_attente', 'en_cours']);
+        .in('status', ['ouverte', 'en_cours']);
 
       setStats(prev => ({ ...prev, maintenanceRequests: maintenanceData?.length || 0 }));
 
+      // Load favorites
       const { data: favoritesData } = await supabase
         .from('favorites')
         .select('*, properties(*)')
@@ -122,14 +141,15 @@ export default function TenantDashboard() {
 
       setRecentFavorites(favoritesData || []);
 
+      // Load saved searches
       const { data: searchesData } = await supabase
-        .from('saved_searches')
+        .from('saved_searches' as any)
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(3);
 
-      setSavedSearches(searchesData || []);
+      setSavedSearches((searchesData || []) as any[]);
 
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -173,16 +193,16 @@ export default function TenantDashboard() {
                 </h2>
                 <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6">
                   <h3 className="text-xl font-bold text-neutral-900 mb-2">
-                    {(activeLease.properties as any)?.title}
+                    {activeLease.property?.title}
                   </h3>
                   <p className="text-neutral-600 mb-4">
-                    {(activeLease.properties as any)?.city} • {(activeLease.properties as any)?.neighborhood}
+                    {activeLease.property?.city} • {activeLease.property?.neighborhood}
                   </p>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-neutral-500">Loyer mensuel</p>
                       <p className="text-2xl font-bold text-primary-600">
-                        {(activeLease.properties as any)?.monthly_rent.toLocaleString()} FCFA
+                        {activeLease.monthly_rent.toLocaleString()} FCFA
                       </p>
                     </div>
                     <div>
@@ -340,13 +360,6 @@ export default function TenantDashboard() {
                       Payer mon loyer
                     </a>
                     <a 
-                      href="/messages" 
-                      className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
-                    >
-                      <MessageSquare className="h-5 w-5 mr-2" />
-                      Contacter le propriétaire
-                    </a>
-                    <a 
                       href="/maintenance/nouvelle" 
                       className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
@@ -370,24 +383,11 @@ export default function TenantDashboard() {
                   Mon Score Locataire
                 </a>
                 <a 
-                  href="/maintenance/locataire" 
-                  className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
-                >
-                  <Wrench className="h-5 w-5 mr-2" />
-                  Mes demandes de maintenance
-                </a>
-                <a 
                   href="/recherche" 
                   className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Search className="h-5 w-5 mr-2" />
                   Rechercher un logement
-                </a>
-                <a 
-                  href="/notifications/preferences" 
-                  className="border border-neutral-200 hover:border-primary-200 text-neutral-600 font-medium py-2 px-4 rounded-xl transition-colors w-full flex items-center justify-center text-sm"
-                >
-                  Préférences de notifications
                 </a>
               </div>
             </div>
@@ -400,72 +400,75 @@ export default function TenantDashboard() {
                   <MessageSquare className="h-5 w-5 text-amber-600" />
                   <div className="flex-1">
                     <p className="text-sm font-medium text-neutral-700">Messages non lus</p>
-                    <p className="text-2xl font-bold text-neutral-900">{stats.unreadMessages}</p>
+                    <p className="text-2xl font-bold text-amber-600">{stats.unreadMessages}</p>
                   </div>
                 </div>
-                {stats.maintenanceRequests > 0 && (
-                  <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
-                    <Wrench className="h-5 w-5 text-blue-600" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-neutral-700">Demandes en cours</p>
-                      <p className="text-2xl font-bold text-neutral-900">{stats.maintenanceRequests}</p>
-                    </div>
+                <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                  <Wrench className="h-5 w-5 text-blue-600" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-neutral-700">Demandes en cours</p>
+                    <p className="text-2xl font-bold text-blue-600">{stats.maintenanceRequests}</p>
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
-            {/* Recent Favorites */}
+            {/* Favorites Preview */}
             {recentFavorites.length > 0 && (
               <div className="bg-white rounded-2xl p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-                    <Heart className="h-5 w-5 text-primary-500" />
-                    <span>Favoris Récents</span>
-                  </h3>
+                  <h3 className="text-lg font-bold text-neutral-900">Mes Favoris</h3>
                   <a href="/favoris" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
                     Voir tout →
                   </a>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {recentFavorites.map((fav: any) => (
-                    <a
+                    <a 
                       key={fav.id}
                       href={`/propriete/${fav.property_id}`}
-                      className="block bg-neutral-50 border border-neutral-200 rounded-xl p-3 hover:border-primary-200 transition-colors"
+                      className="flex items-center gap-3 p-2 hover:bg-neutral-50 rounded-lg transition-colors"
                     >
-                      <p className="font-medium text-neutral-900 text-sm">{fav.properties?.title}</p>
-                      <p className="text-xs text-neutral-500">{fav.properties?.city}</p>
+                      <Heart className="h-5 w-5 text-red-500 fill-current" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-neutral-900 truncate">
+                          {fav.properties?.title}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          {fav.properties?.city}
+                        </p>
+                      </div>
                     </a>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Saved Searches */}
+            {/* Saved Searches Preview */}
             {savedSearches.length > 0 && (
               <div className="bg-white rounded-2xl p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
-                    <Search className="h-5 w-5 text-primary-500" />
-                    <span>Recherches Sauvegardées</span>
-                  </h3>
+                  <h3 className="text-lg font-bold text-neutral-900">Recherches Sauvegardées</h3>
                   <a href="/recherches-sauvegardees" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
                     Voir tout →
                   </a>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {savedSearches.map((search: any) => (
-                    <button
+                    <div 
                       key={search.id}
-                      onClick={() => window.location.href = `/recherche?saved=${search.id}`}
-                      className="w-full text-left bg-neutral-50 border border-neutral-200 rounded-xl p-3 hover:border-primary-200 transition-colors"
+                      className="flex items-center gap-3 p-2 hover:bg-neutral-50 rounded-lg transition-colors"
                     >
-                      <p className="font-medium text-neutral-900 text-sm">{search.name}</p>
-                      <p className="text-xs text-neutral-500">
-                        {search.city || 'Toutes les villes'}
-                      </p>
-                    </button>
+                      <Search className="h-5 w-5 text-primary-500" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-neutral-900 truncate">
+                          {search.name}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          {search.notifications_enabled ? 'Alertes activées' : 'Pas d\'alertes'}
+                        </p>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
