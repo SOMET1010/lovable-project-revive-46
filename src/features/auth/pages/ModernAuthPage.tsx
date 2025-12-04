@@ -6,8 +6,9 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Mail, Lock, User, Phone, Eye, EyeOff, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Building2, Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
+import { InputWithIcon } from '@/shared/ui';
 
 type Tab = 'email' | 'phone' | 'register';
 type PhoneStep = 'enter' | 'verify';
@@ -21,7 +22,6 @@ export default function ModernAuthPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
   // Email Login
   const [email, setEmail] = useState('');
@@ -258,45 +258,29 @@ export default function ModernAuthPage() {
           {/* EMAIL TAB */}
           {tab === 'email' && (
             <form onSubmit={handleEmailLogin} className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
-                    style={{ paddingLeft: '44px' }}
-                    required
-                    autoFocus
-                  />
-                </div>
-              </div>
+              <InputWithIcon
+                icon={Mail}
+                label="Email"
+                variant="modern"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="votre@email.com"
+                required
+                autoFocus
+              />
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Mot de passe</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
-                    style={{ paddingLeft: '44px' }}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-              </div>
+              <InputWithIcon
+                icon={Lock}
+                label="Mot de passe"
+                variant="modern"
+                isPassword
+                showPasswordToggle
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
 
               <div className="text-right">
                 <button
@@ -338,21 +322,16 @@ export default function ModernAuthPage() {
                     <p className="text-gray-600">Entrez votre numéro pour recevoir un code</p>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Numéro de téléphone</label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
-                      <input
-                        type="tel"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        placeholder="+225 07 XX XX XX XX"
-                        className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
-                        style={{ paddingLeft: '44px' }}
-                        autoFocus
-                      />
-                    </div>
-                  </div>
+                  <InputWithIcon
+                    icon={Phone}
+                    label="Numéro de téléphone"
+                    variant="modern"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+225 07 XX XX XX XX"
+                    autoFocus
+                  />
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-3">Recevoir le code par :</label>
@@ -480,94 +459,64 @@ export default function ModernAuthPage() {
           {/* REGISTER TAB */}
           {tab === 'register' && (
             <form onSubmit={handleRegister} className="space-y-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Nom complet</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
-                  <input
-                    type="text"
-                    value={regName}
-                    onChange={(e) => setRegName(e.target.value)}
-                    placeholder="Jean Kouassi"
-                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
-                    style={{ paddingLeft: '44px' }}
-                    required
-                    autoFocus
-                  />
-                </div>
-              </div>
+              <InputWithIcon
+                icon={User}
+                label="Nom complet"
+                variant="modern"
+                type="text"
+                value={regName}
+                onChange={(e) => setRegName(e.target.value)}
+                placeholder="Jean Kouassi"
+                required
+                autoFocus
+              />
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
-                  <input
-                    type="email"
-                    value={regEmail}
-                    onChange={(e) => setRegEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
-                    style={{ paddingLeft: '44px' }}
-                    required
-                  />
-                </div>
-              </div>
+              <InputWithIcon
+                icon={Mail}
+                label="Email"
+                variant="modern"
+                type="email"
+                value={regEmail}
+                onChange={(e) => setRegEmail(e.target.value)}
+                placeholder="votre@email.com"
+                required
+              />
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Téléphone</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
-                  <input
-                    type="tel"
-                    value={regPhone}
-                    onChange={(e) => setRegPhone(e.target.value)}
-                    placeholder="+225 07 XX XX XX XX"
-                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
-                    style={{ paddingLeft: '44px' }}
-                    required
-                  />
-                </div>
-              </div>
+              <InputWithIcon
+                icon={Phone}
+                label="Téléphone"
+                variant="modern"
+                type="tel"
+                value={regPhone}
+                onChange={(e) => setRegPhone(e.target.value)}
+                placeholder="+225 07 XX XX XX XX"
+                required
+              />
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Mot de passe</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={regPassword}
-                    onChange={(e) => setRegPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
-                    style={{ paddingLeft: '44px' }}
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
-                <p className="mt-1 text-xs text-gray-500">Minimum 6 caractères</p>
-              </div>
+              <InputWithIcon
+                icon={Lock}
+                label="Mot de passe"
+                variant="modern"
+                isPassword
+                showPasswordToggle
+                value={regPassword}
+                onChange={(e) => setRegPassword(e.target.value)}
+                placeholder="••••••••"
+                helperText="Minimum 6 caractères"
+                required
+              />
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Confirmer le mot de passe</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={regConfirm}
-                    onChange={(e) => setRegConfirm(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
-                    style={{ paddingLeft: '44px' }}
-                    required
-                  />
-                </div>
-              </div>
+              <InputWithIcon
+                icon={Lock}
+                label="Confirmer le mot de passe"
+                variant="modern"
+                isPassword
+                showPasswordToggle={false}
+                value={regConfirm}
+                onChange={(e) => setRegConfirm(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
 
               {/* Sélection du type d'utilisateur */}
               <div>
