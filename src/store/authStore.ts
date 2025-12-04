@@ -1,10 +1,9 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { User, Session, AuthError, AuthChangeEvent } from '@supabase/supabase-js';
-import { supabase } from '@/services/supabase/client';
-import type { Database } from '@/shared/lib/database.types';
+import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { testDatabaseConnection } from '@/shared/lib/helpers/supabaseHealthCheck';
-import { envConfig } from '@/shared/config/env.config';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -56,61 +55,6 @@ export const useAuthStore = create<AuthState>()(
 
         initialize: async () => {
           try {
-            // Mode démo : initialiser avec un utilisateur factice
-            if (envConfig.isDemoMode) {
-              console.log('🎭 Mode démo - Initialisation du store d\'authentification');
-              
-              setTimeout(() => {
-                const demoUser = {
-                  id: 'demo-user-123',
-                  email: 'demo@montoit.ci',
-                  aud: 'authenticated',
-                  created_at: new Date().toISOString(),
-                  app_metadata: {},
-                  user_metadata: { 
-                    full_name: 'Utilisateur Démo',
-                    user_type: 'locataire'
-                  }
-                } as User;
-                
-                const demoSession = {
-                  user: demoUser,
-                  access_token: 'demo-token',
-                  refresh_token: 'demo-refresh',
-                  expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24h
-                } as Session;
-                
-                set({ 
-                  user: demoUser, 
-                  session: demoSession,
-                  profile: {
-                    id: 'demo-user-123',
-                    email: 'demo@montoit.ci',
-                    full_name: 'Utilisateur Démo',
-                    user_type: 'locataire',
-                    active_role: 'locataire',
-                    available_roles: ['locataire'],
-                    phone: '+225 XX XX XX XX',
-                    avatar_url: null,
-                    bio: null,
-                    city: 'Abidjan',
-                    address: null,
-                    is_verified: false,
-                    profile_setup_completed: true,
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                  },
-                  initialized: true, 
-                  loading: false 
-                });
-                
-                console.log('✅ Store d\'authentification démo initialisé');
-              }, 500);
-              
-              return;
-            }
-
-            // Mode production normal
             const { data: { session } } = await supabase.auth.getSession();
 
             if (session?.user) {
@@ -140,11 +84,6 @@ export const useAuthStore = create<AuthState>()(
         loadProfile: async (userId: string, retryAttempt = 0) => {
           const MAX_RETRIES = 5;
           const BASE_RETRY_DELAY = 1500;
-
-          // Skip loading in demo mode
-          if (envConfig.isDemoMode) {
-            return;
-          }
 
           try {
             console.log(`[AuthStore] Loading profile (attempt ${retryAttempt + 1}/${MAX_RETRIES + 1})`);
@@ -262,25 +201,6 @@ export const useAuthStore = create<AuthState>()(
         signIn: async (email: string, password: string) => {
           set({ loading: true, error: null });
 
-          if (envConfig.isDemoMode) {
-            console.log('🎭 Mode démo - Connexion simulée');
-            setTimeout(() => {
-              set({ 
-                error: { 
-                  message: 'Mode démo : Connectez-vous en mode production pour une vraie authentification',
-                  status: 200
-                } as AuthError,
-                loading: false 
-              });
-            }, 1000);
-            return { 
-              error: { 
-                message: 'Mode démo : Connectez-vous en mode production pour une vraie authentification',
-                status: 200
-              } as AuthError 
-            };
-          }
-
           const { error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -299,25 +219,6 @@ export const useAuthStore = create<AuthState>()(
           userData: { full_name: string; user_type: string }
         ) => {
           set({ loading: true, error: null });
-
-          if (envConfig.isDemoMode) {
-            console.log('🎭 Mode démo - Inscription simulée');
-            setTimeout(() => {
-              set({ 
-                error: { 
-                  message: 'Mode démo : Inscrivez-vous en mode production pour créer un vrai compte',
-                  status: 200
-                } as AuthError,
-                loading: false 
-              });
-            }, 1000);
-            return { 
-              error: { 
-                message: 'Mode démo : Inscrivez-vous en mode production pour créer un vrai compte',
-                status: 200
-              } as AuthError 
-            };
-          }
 
           const { error } = await supabase.auth.signUp({
             email,
@@ -340,18 +241,6 @@ export const useAuthStore = create<AuthState>()(
         signOut: async () => {
           set({ loading: true });
 
-          if (envConfig.isDemoMode) {
-            console.log('🎭 Mode démo - Déconnexion simulée');
-            set({
-              user: null,
-              profile: null,
-              session: null,
-              loading: false,
-              error: null,
-            });
-            return;
-          }
-
           await supabase.auth.signOut();
           set({
             user: null,
@@ -367,15 +256,6 @@ export const useAuthStore = create<AuthState>()(
           if (!user) return;
 
           set({ loading: true, error: null });
-
-          if (envConfig.isDemoMode) {
-            console.log('🎭 Mode démo - Mise à jour du profil simulée');
-            const { profile } = get();
-            if (profile) {
-              set({ profile: { ...profile, ...updates }, loading: false });
-            }
-            return;
-          }
 
           try {
             const { error } = await supabase

@@ -6,7 +6,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/store/authStore';
-import { envConfig } from '@/shared/config/env.config';
 
 // Type des rôles disponibles (correspondant à l'enum app_role en DB)
 export type AppRole = 'admin' | 'moderator' | 'user' | 'trust_agent';
@@ -32,9 +31,6 @@ export interface UseUserRolesReturn {
   refreshRoles: () => Promise<void>;
 }
 
-// Rôles simulés pour le mode démo
-const DEMO_ROLES: AppRole[] = ['user'];
-
 export function useUserRoles(): UseUserRolesReturn {
   const { user } = useAuthStore();
   const [roles, setRoles] = useState<AppRole[]>([]);
@@ -43,14 +39,6 @@ export function useUserRoles(): UseUserRolesReturn {
 
   // Fonction de chargement des rôles
   const fetchRoles = useCallback(async () => {
-    // Mode démo : retourner des rôles simulés
-    if (envConfig.isDemoMode) {
-      setRoles(DEMO_ROLES);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
     // Pas d'utilisateur connecté
     if (!user?.id) {
       setRoles([]);

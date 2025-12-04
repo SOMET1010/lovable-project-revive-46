@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/services/supabase/client';
-import type { Database } from '@/shared/lib/database.types';
-import { envConfig } from '@/shared/config/env.config';
-import { demoPropertyService } from '@/shared/services/demoDataService';
+import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import SEOHead, { createOrganizationStructuredData, createWebsiteStructuredData } from '@/shared/components/SEOHead';
 
 // Premium Components
@@ -34,13 +32,6 @@ export default function Home() {
 
   const loadProperties = async () => {
     try {
-      if (envConfig.isDemoMode) {
-        const { data } = await demoPropertyService.getAll();
-        setProperties((data?.slice(0, 6) || []) as unknown as Property[]);
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase
         .from('properties')
         .select('*')
@@ -60,11 +51,6 @@ export default function Home() {
 
   const loadStats = async () => {
     try {
-      if (envConfig.isDemoMode) {
-        // Already initialized with demo values
-        return;
-      }
-
       const [propertiesResult, profilesResult, citiesResult] = await Promise.all([
         supabase.from('properties').select('id', { count: 'exact', head: true }).eq('status', 'disponible'),
         supabase.from('profiles').select('id', { count: 'exact', head: true }),

@@ -1,12 +1,4 @@
-import { supabaseService } from '../../../shared/services/supabaseService';
-
-// Client Supabase avec vérification de disponibilité
-const getSupabaseClient = () => {
-  if (!supabaseService.isReady()) {
-    throw new Error('Service Supabase non initialisé');
-  }
-  return supabaseService.getClient();
-};
+import { supabase } from '@/integrations/supabase/client';
 
 export interface PropertyData {
   // Informations générales
@@ -180,7 +172,7 @@ class PropertyService {
           throw new Error(`Le fichier ${image.name} n'est pas une image valide`);
         }
 
-        const { error } = await getSupabaseClient().storage
+        const { error } = await supabase.storage
           .from('property-images')
           .upload(filePath, image, {
             cacheControl: '3600',
@@ -192,7 +184,7 @@ class PropertyService {
         }
 
         // Générer l'URL publique
-        const { data: urlData } = getSupabaseClient().storage
+        const { data: urlData } = supabase.storage
           .from('property-images')
           .getPublicUrl(filePath);
 
@@ -221,31 +213,22 @@ class PropertyService {
         property_type: data.propertyType,
         bedrooms: data.bedrooms,
         bathrooms: data.bathrooms,
-        area: data.area,
-        price: data.price,
-        price_type: data.priceType,
+        surface_area: data.area,
+        monthly_rent: data.price,
         city: data.city,
-        district: data.district,
+        neighborhood: data.district,
         address: data.address,
-        coordinates: data.coordinates,
+        latitude: data.coordinates?.lat,
+        longitude: data.coordinates?.lng,
         images: imageUrls,
-        main_image_index: data.mainImageIndex || 0,
         amenities: data.amenities,
-        furnished: data.furnished,
-        parking: data.parking,
-        garden: data.garden,
-        terrace: data.terrace,
-        elevator: data.elevator,
-        security: data.security,
-        owner_name: data.ownerName,
-        owner_email: data.ownerEmail,
-        owner_phone: data.ownerPhone,
-        status: 'pending', // Propriété en attente de validation
+        is_furnished: data.furnished,
+        status: 'disponible',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
-      const { data: property, error } = await getSupabaseClient().from('properties')
+      const { data: property, error } = await supabase.from('properties')
         .insert([propertyData])
         .select()
         .single();
