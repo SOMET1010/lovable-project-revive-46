@@ -79,3 +79,6 @@ export type { ScoreBadgeProps } from './ScoreBadge';
 
 export { OwnerBadge } from './OwnerBadge';
 export type { OwnerBadgeProps } from './OwnerBadge';
+
+export { default as InputWithIcon } from './InputWithIcon';
+export type { InputWithIconProps } from './InputWithIcon';

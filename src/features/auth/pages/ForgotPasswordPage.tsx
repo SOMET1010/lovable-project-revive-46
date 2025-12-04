@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, ArrowLeft, CheckCircle, AlertCircle, KeyRound, Shield } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle, KeyRound, Shield } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { InputWithIcon } from '@/shared/ui';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -91,32 +92,19 @@ export default function ForgotPassword() {
 
           {!success ? (
             <>
-              {error && (
-                <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-2xl flex items-start space-x-3 animate-slide-down">
-                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-red-700 text-sm font-medium">{error}</p>
-                </div>
-              )}
-
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Adresse email
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-cyan-500 pointer-events-none z-10" />
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full pr-4 py-3 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-cyan-200 focus:border-cyan-500 transition-all bg-white/70"
-                      style={{ paddingLeft: '44px' }}
-                      placeholder="votre@email.com"
-                      disabled={loading}
-                    />
-                  </div>
-                </div>
+                <InputWithIcon
+                  icon={Mail}
+                  label="Adresse email"
+                  variant="cyan"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="votre@email.com"
+                  error={error}
+                  disabled={loading}
+                  required
+                />
 
                 <button
                   type="submit"
