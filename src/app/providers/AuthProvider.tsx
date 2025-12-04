@@ -194,19 +194,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const attemptProfileRecovery = async (_userId: string): Promise<boolean> => {
+  const attemptProfileRecovery = async (userId: string): Promise<boolean> => {
     try {
-      console.log('[AuthContext] Attempting to recover profile');
+      console.log('[AuthContext] Attempting to create profile for user:', userId);
 
-      const { data, error } = await supabase.rpc('ensure_my_profile_exists');
+      // Try to create the profile directly
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return false;
+
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          user_id: userId,
+          email: userData.user.email,
+          full_name: userData.user.user_metadata?.['full_name'] || '',
+          user_type: userData.user.user_metadata?.['user_type'] || 'locataire',
+          phone: userData.user.user_metadata?.['phone'] || '',
+        }, { onConflict: 'id' });
 
       if (error) {
-        console.error('[AuthContext] Profile recovery failed:', error);
+        console.error('[AuthContext] Profile creation failed:', error);
         return false;
       }
 
-      console.log('[AuthContext] Profile recovery result:', data);
-      return data === true;
+      console.log('[AuthContext] Profile created successfully');
+      return true;
     } catch (error) {
       console.error('[AuthContext] Profile recovery exception:', error);
       return false;

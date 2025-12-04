@@ -1,67 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/integrations/supabase/client';
 import { User, Building2, Briefcase, RefreshCw, CheckCircle, Info } from 'lucide-react';
 
-interface AvailableRolesResponse {
-  roles: string[];
-  active_role: string;
-  primary_role: string;
-}
-
 export default function RoleSwitcher() {
-  const { profile, user, refreshProfile } = useAuth();
-  const [availableRoles, setAvailableRoles] = useState<string[]>([]);
+  const { profile, user, updateProfile } = useAuth();
   const [switching, setSwitching] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
 
-  useEffect(() => {
-    if (!user || !profile) return;
-
-    const fetchAvailableRoles = async () => {
-      try {
-        const { data, error } = await supabase.rpc('get_available_roles');
-
-        if (error) throw error;
-
-        const response = data as AvailableRolesResponse;
-        setAvailableRoles(response.roles || [profile.user_type || 'locataire']);
-      } catch (err) {
-        console.error('Erreur chargement rôles:', err);
-        setAvailableRoles([profile.user_type || 'locataire']);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAvailableRoles();
-  }, [user, profile]);
+  // Simplified: only use user_type from profile
+  const activeRole = profile?.user_type || 'locataire';
+  
+  // For now, only show the current role (no multi-role support without DB tables)
+  const availableRoles = [activeRole];
 
   const switchRole = async (newRole: string) => {
+    if (newRole === activeRole) return;
+    
     setSwitching(true);
     try {
-      const { data, error } = await supabase.rpc('switch_active_role', {
-        new_role: newRole
-      });
+      await updateProfile({ user_type: newRole });
 
-      if (error) throw error;
-
-      if (data.success) {
-        await refreshProfile();
-
-        // Rediriger vers le dashboard approprié
-        if (newRole === 'locataire') {
-          window.location.href = '/';
-        } else if (newRole === 'proprietaire') {
-          window.location.href = '/dashboard/proprietaire';
-        } else if (newRole === 'agence') {
-          window.location.href = '/agence/dashboard';
-        }
-      } else {
-        alert(data.error || 'Erreur lors du changement de rôle');
+      // Redirect to appropriate dashboard
+      if (newRole === 'locataire') {
+        window.location.href = '/';
+      } else if (newRole === 'proprietaire') {
+        window.location.href = '/dashboard/proprietaire';
+      } else if (newRole === 'agence') {
+        window.location.href = '/agence/dashboard';
       }
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('Erreur changement de rôle:', err);
       alert('Erreur lors du changement de rôle');
     } finally {
@@ -110,16 +77,13 @@ export default function RoleSwitcher() {
     }
   };
 
-  if (loading || !profile) return null;
+  if (!profile || !user) return null;
 
-  // Ne rien afficher si un seul rôle
+  // Don't show if only one role
   if (availableRoles.length <= 1) return null;
-
-  const activeRole = profile.user_type || 'locataire';
 
   return (
     <div className="relative">
-      {/* Version compacte pour le header */}
       <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 p-3">
         <div className="flex items-center justify-between mb-2">
           <div className="text-xs text-gray-600 font-medium">
