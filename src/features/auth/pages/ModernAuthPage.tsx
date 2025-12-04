@@ -86,6 +86,13 @@ export default function ModernAuthPage() {
         throw new Error(invokeError.message || 'Erreur lors de l\'envoi du code');
       }
 
+      // Handle rate limiting (429 response)
+      if (data?.rateLimited && data?.retryAfter) {
+        setResendTimer(data.retryAfter);
+        setError(`Veuillez patienter ${data.retryAfter} secondes avant de renvoyer un code`);
+        return;
+      }
+
       if (data?.error) {
         throw new Error(data.error);
       }
