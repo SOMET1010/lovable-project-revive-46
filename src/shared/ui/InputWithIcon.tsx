@@ -13,7 +13,7 @@ export interface InputWithIconProps extends Omit<InputHTMLAttributes<HTMLInputEl
   /** Label text above input */
   label?: string;
   /** Style variant */
-  variant?: 'default' | 'modern' | 'cyan';
+  variant?: 'default' | 'modern' | 'cyan' | 'glass';
   /** Enable password mode with visibility toggle */
   isPassword?: boolean;
   /** Show/hide password toggle button */
@@ -51,6 +51,13 @@ const variantStyles = {
     icon: 'text-cyan-500',
     label: 'text-gray-700',
     bg: 'bg-white/70',
+  },
+  glass: {
+    border: 'border border-white/30',
+    focus: 'focus:ring-2 focus:ring-white/50 focus:border-white/50',
+    icon: 'text-white/80',
+    label: 'text-white',
+    bg: 'bg-white/20 backdrop-blur-xl',
   },
 };
 
@@ -116,6 +123,7 @@ const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(
               error && 'border-red-500 focus:ring-red-200 focus:border-red-500',
               success && 'border-green-500 focus:ring-green-200 focus:border-green-500',
               disabled && 'opacity-50 cursor-not-allowed bg-gray-100',
+              variant === 'glass' && 'placeholder:text-white/60 text-white',
               className
             )}
             style={{ paddingLeft: '44px' }}
@@ -127,7 +135,12 @@ const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              className={cn(
+                'absolute right-4 top-1/2 -translate-y-1/2 transition-colors',
+                variant === 'glass'
+                  ? 'text-white/70 hover:text-white'
+                  : 'text-gray-400 hover:text-gray-600'
+              )}
               tabIndex={-1}
             >
               {showPassword ? (
@@ -141,12 +154,20 @@ const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(
 
         {/* Helper Text */}
         {helperText && !error && (
-          <p className="mt-1 text-xs text-gray-500">{helperText}</p>
+          <p className={cn(
+            'mt-1 text-xs',
+            variant === 'glass' ? 'text-white/60' : 'text-gray-500'
+          )}>
+            {helperText}
+          </p>
         )}
 
         {/* Error Message */}
         {error && (
-          <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">
+          <p className={cn(
+            'mt-1.5 text-sm flex items-center gap-1',
+            variant === 'glass' ? 'text-red-300' : 'text-red-600'
+          )}>
             <AlertCircle className="h-4 w-4" />
             {error}
           </p>
