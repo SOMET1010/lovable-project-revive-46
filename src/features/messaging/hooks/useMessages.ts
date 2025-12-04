@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { messagingService, Message, Attachment } from '../services/messaging.service';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/integrations/supabase/client';
+import { useNotificationSound } from './useNotificationSound';
 
 export function useMessages(conversationId: string | null) {
   const { user } = useAuthStore();
+  const { playIncomingSound } = useNotificationSound();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
@@ -48,8 +50,9 @@ export function useMessages(conversationId: string | null) {
         return [...prev, newMessage];
       });
 
-      // Mark as read if we're the receiver
-      if (user?.id && newMessage.receiver_id === user.id) {
+      // Play sound and mark as read if we're the receiver
+      if (user?.id && newMessage.receiver_id === user.id && newMessage.sender_id !== user.id) {
+        playIncomingSound();
         messagingService.markAsRead(conversationId, user.id);
       }
     });
