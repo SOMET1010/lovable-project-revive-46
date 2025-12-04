@@ -12,7 +12,6 @@ const AddPropertyLanding = lazy(() => import('@/features/property/pages/AddPrope
 const ModernAuth = lazy(() => import('@/features/auth/pages/ModernAuthPage'));
 const AuthCallback = lazy(() => import('@/features/auth/pages/CallbackPage'));
 const ForgotPassword = lazy(() => import('@/features/auth/pages/ForgotPasswordPage'));
-const VerifyOTP = lazy(() => import('@/features/auth/pages/VerifyOTPPage'));
 const ProfileSelection = lazy(() => import('@/features/auth/pages/ProfileSelectionPage'));
 
 const SearchProperties = lazy(() => import('@/features/tenant/pages/SearchPropertiesPage'));
@@ -65,7 +64,6 @@ export const routes: RouteObject[] = [
       { path: 'auth', element: <ModernAuth /> },
       { path: 'auth/callback', element: <AuthCallback /> },
       { path: 'mot-de-passe-oublie', element: <ForgotPassword /> },
-      { path: 'verification-otp', element: <VerifyOTP /> },
       { path: 'a-propos', element: <AboutPage /> },
       { path: 'conditions-utilisation', element: <TermsOfServicePage /> },
       { path: 'politique-confidentialite', element: <PrivacyPolicyPage /> },
