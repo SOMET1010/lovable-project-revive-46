@@ -1,17 +1,79 @@
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { MessageSquare, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/shared/ui/Button';
+import { useAuthStore } from '@/store/authStore';
+import { useConversations } from '../hooks/useConversations';
+import { useMessages } from '../hooks/useMessages';
+import { ConversationList } from '../components/ConversationList';
+import { MessageThread } from '../components/MessageThread';
+import { EmptyConversation } from '../components/EmptyConversation';
+import { Conversation } from '../services/messaging.service';
 
 export default function MessagesPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const toUserId = searchParams.get('to');
-  const subject = searchParams.get('subject');
+  const { user } = useAuthStore();
+  
+  const { conversations, loading: loadingConversations, getOrCreateConversation } = useConversations();
+  
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [showMobileThread, setShowMobileThread] = useState(false);
+  
+  const { messages, loading: loadingMessages, sending, sendMessage } = useMessages(
+    selectedConversation?.id ?? null
+  );
+
+  // Handle URL parameters for creating new conversation
+  useEffect(() => {
+    const toUserId = searchParams.get('to');
+    const propertyId = searchParams.get('property');
+    const subject = searchParams.get('subject');
+
+    if (toUserId && user?.id) {
+      // Create or get conversation
+      getOrCreateConversation(toUserId, propertyId, subject).then((conv) => {
+        if (conv) {
+          setSelectedConversation(conv);
+          setShowMobileThread(true);
+          // Clear URL params
+          setSearchParams({});
+        }
+      });
+    }
+  }, [searchParams, user?.id, getOrCreateConversation, setSearchParams]);
+
+  // Update selected conversation when conversations list updates
+  useEffect(() => {
+    if (selectedConversation && conversations.length > 0) {
+      const updated = conversations.find((c) => c.id === selectedConversation.id);
+      if (updated) {
+        setSelectedConversation(updated);
+      }
+    }
+  }, [conversations, selectedConversation]);
+
+  const handleSelectConversation = (conv: Conversation) => {
+    setSelectedConversation(conv);
+    setShowMobileThread(true);
+  };
+
+  const handleBack = () => {
+    setShowMobileThread(false);
+  };
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <p className="text-neutral-500">Veuillez vous connecter pour accéder aux messages.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <Button
@@ -28,50 +90,45 @@ export default function MessagesPage() {
             Messages
           </h1>
         </div>
-        
-        {/* Interface de messagerie */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-neutral-100">
-          {toUserId ? (
-            <div className="space-y-4">
-              <div className="bg-primary-50 border border-primary-200 rounded-xl p-4">
-                <p className="text-sm text-primary-800 font-medium">
-                  Nouvelle conversation
-                </p>
-                {subject && (
-                  <p className="text-sm text-primary-700 mt-1">
-                    Sujet : {subject}
-                  </p>
-                )}
-              </div>
-              
-              {/* Zone de message */}
-              <div className="border border-neutral-200 rounded-xl p-4 min-h-[200px] bg-neutral-50">
-                <p className="text-neutral-500 text-sm">
-                  La fonctionnalité de messagerie est en cours de développement...
-                </p>
-              </div>
-              
-              {/* Zone de saisie */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Écrivez votre message..."
-                  className="flex-1 px-4 py-3 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  disabled
+
+        {/* Main content */}
+        <div className="bg-white rounded-2xl shadow-lg border border-neutral-100 overflow-hidden h-[calc(100vh-180px)]">
+          <div className="flex h-full">
+            {/* Conversation list - hidden on mobile when viewing thread */}
+            <div
+              className={`w-full lg:w-80 xl:w-96 flex-shrink-0 ${
+                showMobileThread ? 'hidden lg:block' : ''
+              }`}
+            >
+              <ConversationList
+                conversations={conversations}
+                selectedId={selectedConversation?.id ?? null}
+                onSelect={handleSelectConversation}
+                loading={loadingConversations}
+              />
+            </div>
+
+            {/* Message thread */}
+            <div
+              className={`flex-1 ${
+                !showMobileThread ? 'hidden lg:block' : ''
+              }`}
+            >
+              {selectedConversation ? (
+                <MessageThread
+                  conversation={selectedConversation}
+                  messages={messages}
+                  currentUserId={user.id}
+                  loading={loadingMessages}
+                  sending={sending}
+                  onSend={sendMessage}
+                  onBack={handleBack}
                 />
-                <Button variant="primary" disabled>
-                  Envoyer
-                </Button>
-              </div>
+              ) : (
+                <EmptyConversation />
+              )}
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <MessageSquare className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
-              <p className="text-neutral-600">
-                Sélectionnez une conversation ou démarrez-en une nouvelle.
-              </p>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
