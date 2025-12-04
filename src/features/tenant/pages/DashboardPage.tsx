@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Coins, MessageSquare, Clock, Heart, Search, CheckCircle, FileText, Wrench } from 'lucide-react';
+import { Home, Coins, MessageSquare, Clock, Heart, Search, CheckCircle, FileText, Wrench, Award } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -376,11 +376,11 @@ export default function TenantDashboard() {
                   </>
                 )}
                 <a 
-                  href="/score-locataire" 
+                  href="/mon-score" 
                   className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
-                  <FileText className="h-5 w-5 mr-2" />
-                  Mon Score Locataire
+                  <Award className="h-5 w-5 mr-2" />
+                  Mon Trust Score
                 </a>
                 <a 
                   href="/recherche" 
