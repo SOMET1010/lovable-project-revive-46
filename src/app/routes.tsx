@@ -50,13 +50,13 @@ const TenantCalendar = lazy(() => import('@/features/tenant/pages/CalendarPage')
 const TenantScore = lazy(() => import('@/features/tenant/pages/ScorePage'));
 const TenantMaintenance = lazy(() => import('@/features/tenant/pages/MaintenancePage'));
 
-const OwnerDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
+const OwnerDashboard = lazy(() => import('@/features/owner/pages/DashboardPage'));
 const AddProperty = lazy(() => import('@/features/owner/pages/AddPropertyPage'));
 const EditProperty = lazy(() => import('@/features/owner/pages/EditPropertyPage'));
-const PropertyStats = lazy(() => import('@/features/tenant/pages/DashboardPage'));
-const OwnerMaintenance = lazy(() => import('@/features/tenant/pages/MaintenancePage'));
+const PropertyStats = lazy(() => import('@/features/owner/pages/DashboardPage'));
+const OwnerMaintenance = lazy(() => import('@/features/owner/pages/MaintenancePage'));
 
-const AgencyDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
+const AgencyDashboard = lazy(() => import('@/features/agency/pages/DashboardPage'));
 const AgencyRegistration = lazy(() => import('@/features/agency/pages/RegistrationPage'));
 const AgencyTeam = lazy(() => import('@/features/agency/pages/TeamPage'));
 const AgencyProperties = lazy(() => import('@/features/agency/pages/PropertiesPage'));
@@ -64,7 +64,7 @@ const AgencyCommissions = lazy(() => import('@/features/agency/pages/Commissions
 
 const MaintenanceRequest = lazy(() => import('@/features/tenant/pages/MaintenanceRequestPage'));
 
-const AdminDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
+const AdminDashboard = lazy(() => import('@/features/admin/pages/DashboardPage'));
 const AdminUsers = lazy(() => import('@/features/admin/pages/UsersPage'));
 const AdminUserRoles = lazy(() => import('@/features/admin/pages/UserRolesPage'));
 const AdminApiKeys = lazy(() => import('@/features/admin/pages/ApiKeysPage'));
@@ -87,7 +87,7 @@ const HelpPage = lazy(() => import('@/features/auth/pages/HelpPage'));
 const FAQPage = lazy(() => import('@/features/auth/pages/FAQPage'));
 const HowItWorksPage = lazy(() => import('@/features/auth/pages/HowItWorksPage'));
 
-const UserDashboard = lazy(() => import('@/features/dashboard/pages/DashboardPage'));
+const UserDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
 
 export const routes: RouteObject[] = [
   {
