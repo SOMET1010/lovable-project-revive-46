@@ -9,6 +9,8 @@ interface OTPRequest {
   method: 'sms' | 'whatsapp';
 }
 
+const RATE_LIMIT_SECONDS = 60;
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -43,12 +45,49 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Générer un code OTP à 6 chiffres
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // Stocker l'OTP dans Supabase (expire après 10 minutes)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // ========== RATE LIMITING CHECK ==========
+    const rateLimitCutoff = new Date(Date.now() - RATE_LIMIT_SECONDS * 1000).toISOString();
+    
+    const rateLimitResponse = await fetch(
+      `${supabaseUrl}/rest/v1/verification_codes?phone=eq.${normalizedPhone}&created_at=gt.${rateLimitCutoff}&select=created_at&order=created_at.desc&limit=1`,
+      {
+        headers: {
+          'Authorization': `Bearer ${supabaseKey}`,
+          'apikey': supabaseKey,
+        },
+      }
+    );
+
+    if (rateLimitResponse.ok) {
+      const recentCodes = await rateLimitResponse.json();
+      
+      if (recentCodes && recentCodes.length > 0) {
+        const lastSentAt = new Date(recentCodes[0].created_at);
+        const elapsedSeconds = (Date.now() - lastSentAt.getTime()) / 1000;
+        const remainingSeconds = Math.ceil(RATE_LIMIT_SECONDS - elapsedSeconds);
+        
+        console.log(`⏳ Rate limit actif: ${remainingSeconds}s restantes pour ${normalizedPhone}`);
+        
+        return new Response(
+          JSON.stringify({
+            error: `Veuillez patienter ${remainingSeconds} secondes avant de renvoyer un code`,
+            retryAfter: remainingSeconds,
+            rateLimited: true,
+          }),
+          {
+            status: 429,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+    }
+    // ========================================
+
+    // Générer un code OTP à 6 chiffres
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
