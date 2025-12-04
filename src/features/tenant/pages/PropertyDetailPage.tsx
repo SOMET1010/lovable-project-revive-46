@@ -308,8 +308,12 @@ export default function PropertyDetailPage() {
 
       if (error) throw error;
       
-      // Cast to our extended Property type
-      setProperty(data as unknown as Property);
+      // Cast to our extended Property type with null -> undefined conversion
+      const propertyData = {
+        ...data,
+        status: data.status ?? undefined
+      } as unknown as Property;
+      setProperty(propertyData);
     } catch (error) {
       console.error('Error loading property:', error);
     } finally {

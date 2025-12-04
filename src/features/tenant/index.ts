@@ -18,7 +18,6 @@ export { default as PaymentHistoryPage } from './pages/PaymentHistoryPage';
 export { default as PropertyDetailPage } from './pages/PropertyDetailPage';
 export { default as SavedSearchesPage } from './pages/SavedSearchesPage';
 export { default as ScheduleVisitPage } from './pages/ScheduleVisitPage';
-export { default as ScorePage } from './pages/ScorePage';
 export { default as SearchPropertiesPage } from './pages/SearchPropertiesPage';
 export { default as SignLeasePage } from './pages/SignLeasePage';
 

@@ -57,6 +57,8 @@ export default function ContractDetail() {
   }, [user, contractId]);
 
   const loadContract = async () => {
+    if (!contractId) return;
+    
     try {
       const { data, error } = await supabase
         .from('lease_contracts')
