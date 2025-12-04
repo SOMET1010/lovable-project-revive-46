@@ -23,6 +23,8 @@ export interface PropertyWithOwner extends Property {
 export interface PropertyWithOwnerScore extends Property {
   owner_trust_score?: number | null;
   owner_full_name?: string | null;
+  owner_avatar_url?: string | null;
+  owner_is_verified?: boolean | null;
 }
 
 export interface PropertyFilters {
