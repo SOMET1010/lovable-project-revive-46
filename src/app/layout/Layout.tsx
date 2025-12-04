@@ -7,7 +7,7 @@ import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { ToastContainer } from '@/shared/hooks/useToast';
 import PageTransition from '@/shared/ui/PageTransition';
 
-const noLayoutRoutes = ['/connexion', '/inscription', '/messages', '/auth/callback'];
+const noLayoutRoutes = ['/messages', '/auth/callback'];
 const noHeaderFooterRoutes = [
   '/messages',
   '/admin',
