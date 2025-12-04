@@ -145,7 +145,7 @@ Deno.serve(async (req: Request) => {
           throw new Error('Brevo API key not configured');
         }
 
-        const response = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
+        const response = await fetch('https://api.brevo.com/v3/transactionalSMS/send', {
           method: 'POST',
           headers: {
             'api-key': apiKey,
