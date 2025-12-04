@@ -21,13 +21,18 @@ import type { Database } from '@/integrations/supabase/types';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapboxMap from '@/shared/ui/MapboxMap';
 import { CITY_NAMES, ABIDJAN_NEIGHBORHOODS } from '@/shared/data/cities';
+import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 
 type Property = Database['public']['Tables']['properties']['Row'];
+type PropertyWithScore = Property & {
+  owner_trust_score?: number | null;
+  owner_full_name?: string | null;
+};
 
 export default function SearchPropertiesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<PropertyWithScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -58,7 +63,13 @@ export default function SearchPropertiesPage() {
     try {
       let query = supabase
         .from('properties')
-        .select('*')
+        .select(`
+          *,
+          profiles:owner_id (
+            trust_score,
+            full_name
+          )
+        `)
         .eq('status', 'disponible');
 
       if (city && city.trim()) {
@@ -98,7 +109,14 @@ export default function SearchPropertiesPage() {
         throw new Error(queryError.message || 'Erreur lors de la recherche');
       }
 
-      setProperties(data || []);
+      const mappedData = (data || []).map((p: any) => ({
+        ...p,
+        owner_trust_score: p.profiles?.trust_score ?? null,
+        owner_full_name: p.profiles?.full_name ?? null,
+        profiles: undefined,
+      }));
+
+      setProperties(mappedData);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
       console.error('Error searching properties:', err);
@@ -550,7 +568,7 @@ export default function SearchPropertiesPage() {
                       </button>
 
                       {/* Price Badge */}
-                      <div className="absolute bottom-4 left-4 right-4">
+                      <div className="absolute bottom-4 left-4">
                         <div className="flex items-baseline gap-1">
                           <span className="text-2xl font-bold text-white drop-shadow-lg">
                             {formatPrice(property.monthly_rent)}
@@ -558,6 +576,17 @@ export default function SearchPropertiesPage() {
                           <span className="text-white/80 text-sm">FCFA/mois</span>
                         </div>
                       </div>
+
+                      {/* Trust Score Badge */}
+                      {property.owner_trust_score != null && (
+                        <div className="absolute bottom-4 right-4 z-10">
+                          <ScoreBadge 
+                            score={property.owner_trust_score} 
+                            variant="compact" 
+                            size="sm" 
+                          />
+                        </div>
+                      )}
                     </div>
 
                     {/* Content */}

@@ -1,14 +1,13 @@
 import { MapPin, ArrowRight, Bed, Bath, Maximize, Heart } from 'lucide-react';
-import type { Database } from '@/shared/lib/database.types';
-
-type Property = Database['public']['Tables']['properties']['Row'];
+import { ScoreBadge } from '@/shared/ui/ScoreBadge';
+import type { PropertyWithOwnerScore } from '../types';
 
 interface FeaturedPropertiesProps {
-  properties: Property[];
+  properties: PropertyWithOwnerScore[];
   loading: boolean;
 }
 
-function PropertyCard({ property }: { property: Property }) {
+function PropertyCard({ property }: { property: PropertyWithOwnerScore }) {
   return (
     <a
       href={`/proprietes/${property.id}`}
@@ -50,6 +49,17 @@ function PropertyCard({ property }: { property: Property }) {
             <span className="text-sm text-[var(--earth-700)] ml-1">FCFA/mois</span>
           </div>
         </div>
+
+        {/* Trust Score Badge */}
+        {property.owner_trust_score != null && (
+          <div className="absolute bottom-4 right-4">
+            <ScoreBadge 
+              score={property.owner_trust_score} 
+              variant="compact" 
+              size="sm" 
+            />
+          </div>
+        )}
       </div>
 
       {/* Content */}
