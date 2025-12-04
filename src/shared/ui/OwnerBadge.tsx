@@ -1,6 +1,9 @@
-import { CheckCircle, Shield } from 'lucide-react';
+import { CheckCircle, Shield, MessageSquare } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
 import { ScoreBadge } from './ScoreBadge';
+import { Button } from './Button';
+import { useAuthStore } from '@/store/authStore';
 
 export interface OwnerBadgeProps {
   name?: string | null;
@@ -15,6 +18,11 @@ export interface OwnerBadgeProps {
   showScore?: boolean;
   showName?: boolean;
   className?: string;
+  ownerId?: string | null;
+  propertyId?: string | null;
+  propertyTitle?: string | null;
+  onContact?: () => void;
+  showContactButton?: boolean;
 }
 
 const sizeConfig = {
@@ -59,8 +67,31 @@ export function OwnerBadge({
   showScore = true,
   showName = true,
   className,
+  ownerId,
+  propertyId,
+  propertyTitle,
+  onContact,
+  showContactButton = true,
 }: OwnerBadgeProps) {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const sizes = sizeConfig[size];
+
+  const isOwnProfile = user?.id === ownerId;
+
+  const handleContact = () => {
+    if (onContact) {
+      onContact();
+      return;
+    }
+    
+    const params = new URLSearchParams();
+    if (ownerId) params.set('to', ownerId);
+    if (propertyId) params.set('property', propertyId);
+    if (propertyTitle) params.set('subject', `Demande concernant: ${propertyTitle}`);
+    
+    navigate(`/messages?${params.toString()}`);
+  };
 
   if (variant === 'inline') {
     return (
@@ -175,6 +206,21 @@ export function OwnerBadge({
               <span className="text-xs text-neutral-400">Aucune vérification</span>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Bouton Contacter */}
+      {showContactButton && ownerId && !isOwnProfile && (
+        <div className="mt-4 pt-4 border-t border-neutral-100">
+          <Button
+            onClick={handleContact}
+            variant="primary"
+            fullWidth
+            className="gap-2"
+          >
+            <MessageSquare className="h-4 w-4" />
+            Contacter le propriétaire
+          </Button>
         </div>
       )}
     </div>
