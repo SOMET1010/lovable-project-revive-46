@@ -12,6 +12,8 @@ export { useErrorHandler } from './useErrorHandler';
 export { useFeatureFlag } from './useFeatureFlag';
 export { useLocalStorage } from './useLocalStorage';
 export { useToast } from './useToast';
+export { useUserRoles } from './useUserRoles';
+export type { AppRole, UseUserRolesReturn } from './useUserRoles';
 
 // Migrated hooks from src/hooks
 export { useContract } from './useContract';
