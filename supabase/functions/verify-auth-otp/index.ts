@@ -35,29 +35,52 @@ Deno.serve(async (req: Request) => {
 
     const normalizedPhone = phoneNumber.replace(/\D/g, '');
 
-    // Vérifier le code OTP
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Récupérer l'OTP valide
+    // Récupérer le code OTP valide depuis verification_codes
     const { data: otpRecord, error: otpError } = await supabaseAdmin
-      .from('otp_codes')
+      .from('verification_codes')
       .select('*')
       .eq('phone', normalizedPhone)
       .eq('code', code)
-      .eq('verified', false)
+      .eq('type', 'sms')
+      .is('verified_at', null)
       .gt('expires_at', new Date().toISOString())
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (otpError || !otpRecord) {
-      // Incrémenter les tentatives
-      await supabaseAdmin
-        .from('otp_codes')
-        .update({ attempts: supabaseAdmin.rpc('increment', { x: 1 }) })
+    if (otpError) {
+      console.error('Error fetching OTP:', otpError);
+      return new Response(
+        JSON.stringify({ error: 'Erreur lors de la vérification' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    if (!otpRecord) {
+      // Incrémenter les tentatives sur le dernier code non vérifié
+      const { data: lastCode } = await supabaseAdmin
+        .from('verification_codes')
+        .select('id, attempts')
         .eq('phone', normalizedPhone)
-        .eq('code', code);
+        .is('verified_at', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (lastCode) {
+        await supabaseAdmin
+          .from('verification_codes')
+          .update({ attempts: (lastCode.attempts || 0) + 1 })
+          .eq('id', lastCode.id);
+      }
 
       return new Response(
         JSON.stringify({ error: 'Code invalide ou expiré' }),
@@ -69,7 +92,8 @@ Deno.serve(async (req: Request) => {
     }
 
     // Vérifier le nombre de tentatives
-    if (otpRecord.attempts >= 5) {
+    const maxAttempts = otpRecord.max_attempts || 3;
+    if ((otpRecord.attempts || 0) >= maxAttempts) {
       return new Response(
         JSON.stringify({ error: 'Trop de tentatives. Demandez un nouveau code.' }),
         {
@@ -81,60 +105,66 @@ Deno.serve(async (req: Request) => {
 
     // Marquer comme vérifié
     await supabaseAdmin
-      .from('otp_codes')
-      .update({ verified: true })
+      .from('verification_codes')
+      .update({ verified_at: new Date().toISOString() })
       .eq('id', otpRecord.id);
 
-    // Chercher ou créer un utilisateur avec ce téléphone
+    console.log(`[VERIFY-OTP] Code verified for phone: ${normalizedPhone}`);
+
+    // Chercher un profil existant avec ce téléphone
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .select('*, auth_users:user_id(*)')
+      .select('user_id, full_name, email')
       .eq('phone', normalizedPhone)
-      .single();
+      .maybeSingle();
 
-    if (existingProfile && existingProfile.auth_users) {
-      // Utilisateur existant - créer une session
-      const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'magiclink',
-        email: existingProfile.auth_users.email,
-      });
+    if (existingProfile?.user_id) {
+      // Utilisateur existant - générer un magic link
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id);
+      
+      if (userData?.user?.email) {
+        const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
+          type: 'magiclink',
+          email: userData.user.email,
+        });
 
-      if (sessionError) {
-        console.error('Session error:', sessionError);
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          return new Response(
+            JSON.stringify({ error: 'Erreur de session' }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          );
+        }
+
         return new Response(
-          JSON.stringify({ error: 'Erreur de session' }),
+          JSON.stringify({
+            success: true,
+            userId: existingProfile.user_id,
+            action: 'login',
+            sessionUrl: sessionData.properties?.action_link,
+          }),
           {
-            status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
         );
       }
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          userId: existingProfile.user_id,
-          action: 'login',
-          sessionUrl: sessionData.properties.action_link,
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    } else {
-      // Nouvel utilisateur - nécessite inscription
-      return new Response(
-        JSON.stringify({
-          success: true,
-          action: 'register',
-          phoneVerified: true,
-          message: 'Téléphone vérifié. Complétez votre inscription.',
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
     }
+
+    // Nouvel utilisateur - nécessite inscription
+    return new Response(
+      JSON.stringify({
+        success: true,
+        action: 'register',
+        phoneVerified: true,
+        message: 'Téléphone vérifié. Complétez votre inscription.',
+      }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }
+    );
 
   } catch (error) {
     console.error('Error in verify-auth-otp:', error);

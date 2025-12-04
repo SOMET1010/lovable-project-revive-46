@@ -9,10 +9,8 @@ const corsHeaders = {
 interface WhatsAppBrevoRequest {
   phoneNumber: string;
   message: string;
-  userId?: string;
-  type?: string;
   templateId?: string;
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
 
 function validatePhoneNumber(phone: string): boolean {
@@ -53,8 +51,6 @@ Deno.serve(async (req: Request) => {
     const {
       phoneNumber,
       message,
-      userId,
-      type = "general",
       templateId,
       params,
     } = await req.json() as WhatsAppBrevoRequest;
@@ -93,18 +89,16 @@ Deno.serve(async (req: Request) => {
     }
 
     // Brevo WhatsApp API payload
-    const brevoPayload: any = {
+    const brevoPayload: Record<string, unknown> = {
       to: formattedPhone,
     };
 
     if (templateId) {
-      // Utiliser un template WhatsApp
       brevoPayload.template = {
         id: templateId,
         params: params || {},
       };
     } else {
-      // Message texte simple
       brevoPayload.text = message;
     }
 
@@ -126,38 +120,23 @@ Deno.serve(async (req: Request) => {
     console.log(`[WHATSAPP-BREVO] Response:`, JSON.stringify(brevoResult, null, 2));
 
     const isSuccess = brevoResponse.ok;
+    const messageContent = message || `Template: ${templateId}`;
 
-    // Logger dans la base de données
-    const { data: whatsappLog, error: logError } = await supabaseClient
+    // Logger dans whatsapp_logs avec les colonnes correctes
+    const { error: logError } = await supabaseClient
       .from("whatsapp_logs")
       .insert({
-        user_id: userId,
-        phone_number: phoneNumber,
-        message: message || `Template: ${templateId}`,
-        type: type,
+        phone: phoneNumber,
+        message: messageContent,
         provider: "brevo",
         status: isSuccess ? "sent" : "failed",
-        status_code: brevoResponse.status,
-        status_message: brevoResult.message || brevoResult.error,
-        raw_response: brevoResult,
-        sent_at: isSuccess ? new Date().toISOString() : null,
-      })
-      .select()
-      .single();
+        transaction_id: brevoResult.messageId || brevoResult.id || null,
+        error_message: isSuccess ? null : (brevoResult.message || brevoResult.error || null),
+      });
 
     if (logError) {
       console.error(`[WHATSAPP-BREVO] Error saving log:`, logError);
     }
-
-    // Logger l'utilisation de l'API
-    await supabaseClient.rpc('log_api_usage', {
-      p_service_name: 'brevo',
-      p_endpoint: 'whatsapp/sendMessage',
-      p_status: isSuccess ? 'success' : 'error',
-      p_request_data: brevoPayload,
-      p_response_data: brevoResult,
-      p_error_message: isSuccess ? null : (brevoResult.message || brevoResult.error),
-    });
 
     if (!isSuccess) {
       return new Response(
@@ -176,7 +155,6 @@ Deno.serve(async (req: Request) => {
         status: brevoResponse.status,
         message: "WhatsApp message sent successfully via Brevo",
         messageId: brevoResult.messageId || brevoResult.id,
-        whatsappLog: whatsappLog,
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
@@ -194,4 +172,3 @@ Deno.serve(async (req: Request) => {
     );
   }
 });
-

@@ -78,32 +78,24 @@ export default function ModernAuthPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/send-auth-otp`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            phoneNumber,
-            method: sendMethod,
-          }),
-        }
-      );
+      const { data, error: invokeError } = await supabase.functions.invoke('send-auth-otp', {
+        body: { phoneNumber, method: sendMethod },
+      });
 
-      const data = await response.json();
+      if (invokeError) {
+        throw new Error(invokeError.message || 'Erreur lors de l\'envoi du code');
+      }
 
-      if (!response.ok) {
-        throw new Error(data?.error || 'Erreur lors de l\'envoi du code');
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       setSuccess(`Code envoyé par ${sendMethod === 'sms' ? 'SMS' : 'WhatsApp'}`);
       setPhoneStep('verify');
       setResendTimer(60);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'envoi du code');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'envoi du code';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -115,25 +107,16 @@ export default function ModernAuthPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/verify-auth-otp`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env['VITE_SUPABASE_ANON_KEY']}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            phoneNumber,
-            code: otp,
-          }),
-        }
-      );
+      const { data, error: invokeError } = await supabase.functions.invoke('verify-auth-otp', {
+        body: { phoneNumber, code: otp },
+      });
 
-      const data = await response.json();
+      if (invokeError) {
+        throw new Error(invokeError.message || 'Code invalide');
+      }
 
-      if (!response.ok) {
-        throw new Error(data?.error || 'Code invalide');
+      if (data?.error) {
+        throw new Error(data.error);
       }
 
       if (data?.action === 'login') {
@@ -145,8 +128,9 @@ export default function ModernAuthPage() {
         setTab('register');
         setRegPhone(phoneNumber);
       }
-    } catch (err: any) {
-      setError(err.message || 'Code invalide ou expiré');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Code invalide ou expiré';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
