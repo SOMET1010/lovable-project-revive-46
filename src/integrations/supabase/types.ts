@@ -1112,6 +1112,48 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_codes: {
+        Row: {
+          attempts: number | null
+          code: string
+          created_at: string | null
+          email: string | null
+          expires_at: string
+          id: string
+          max_attempts: number | null
+          phone: string | null
+          type: string
+          user_id: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          code: string
+          created_at?: string | null
+          email?: string | null
+          expires_at: string
+          id?: string
+          max_attempts?: number | null
+          phone?: string | null
+          type: string
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          code?: string
+          created_at?: string | null
+          email?: string | null
+          expires_at?: string
+          id?: string
+          max_attempts?: number | null
+          phone?: string | null
+          type?: string
+          user_id?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       visit_requests: {
         Row: {
           cancellation_reason: string | null
@@ -1208,6 +1250,15 @@ export type Database = {
       upsert_suta_analytics: {
         Args: { p_category: string; p_is_positive?: boolean; p_topic: string }
         Returns: undefined
+      }
+      verify_otp_code: {
+        Args: {
+          p_code?: string
+          p_email?: string
+          p_phone?: string
+          p_type?: string
+        }
+        Returns: Json
       }
     }
     Enums: {
