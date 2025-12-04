@@ -1,17 +1,45 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  MapPin, Bed, Bath, Maximize, Heart, Share2, Calendar, MessageCircle, 
-  ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Car, Shield, 
-  Zap, Building, Home, Phone, Mail, FileText 
+  MapPin, Bed, Bath, Maximize, Heart, Share2, Calendar, 
+  ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Car, 
+  Zap, Building, Home, FileText 
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
-import type { Database } from '@/shared/lib/database.types';
 import MapWrapper from '@/shared/ui/MapWrapper';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { getCreateContractRoute } from '@/shared/config/routes.config';
 
-type Property = Database['public']['Tables']['properties']['Row'];
+// Extended property type with new columns
+interface Property {
+  id: string;
+  title: string;
+  description: string | null;
+  address: string | null;
+  city: string;
+  neighborhood: string | null;
+  property_type: string;
+  property_category: string | null;
+  status: string | null;
+  monthly_rent: number;
+  price: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  surface_area: number | null;
+  is_furnished: boolean | null;
+  has_parking: boolean | null;
+  has_garden: boolean | null;
+  has_ac: boolean | null;
+  amenities: string[] | null;
+  images: string[] | null;
+  main_image: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  view_count: number | null;
+  owner_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
 
 interface ImageGalleryProps {
   images: string[];
@@ -27,7 +55,6 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
 
   return (
     <div className="space-y-4">
-      {/* Main Image Display */}
       <div className="relative h-[400px] md:h-[500px] lg:h-[600px] bg-neutral-100 rounded-xl overflow-hidden">
         <img
           src={images[currentIndex]}
@@ -36,7 +63,6 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
           loading="eager"
         />
 
-        {/* Navigation Arrows */}
         {images.length > 1 && (
           <>
             <button
@@ -56,12 +82,10 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
           </>
         )}
 
-        {/* Image Counter */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/70 text-white rounded-full text-sm font-semibold">
           {currentIndex + 1} / {images.length}
         </div>
 
-        {/* Action Buttons */}
         <div className="absolute top-4 right-4 flex gap-2">
           <button
             className="w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200"
@@ -78,7 +102,6 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
         </div>
       </div>
 
-      {/* Thumbnails */}
       {images.length > 1 && (
         <div className="flex gap-3 overflow-x-auto pb-2">
           {images.map((image, index) => (
@@ -113,7 +136,6 @@ interface PropertyFeaturesProps {
 function PropertyFeatures({ property }: PropertyFeaturesProps) {
   const features = [];
 
-  // Ajouter les caractéristiques principales
   if (property.bedrooms) {
     features.push({
       icon: <Bed className="h-6 w-6" />,
@@ -171,7 +193,6 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
     });
   }
 
-  // Ajouter les équipements disponibles depuis les booléens
   const amenities = [
     { key: 'parking', available: property.has_parking, label: 'Parking', icon: <Car className="h-5 w-5" /> },
     { key: 'garden', available: property.has_garden, label: 'Jardin', icon: <CheckCircle className="h-5 w-5" /> },
@@ -207,7 +228,6 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
 
 interface StickyCTABarProps {
   propertyId: string;
-  monthlyRent: number;
   isOwnerOrAgency?: boolean;
 }
 
@@ -256,7 +276,6 @@ export default function PropertyDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
-  // Check if current user is the property owner or an agency/proprietaire
   const isOwnerOrAgency = user && property && (
     user.id === property.owner_id || 
     profile?.user_type === 'agence' ||
@@ -288,7 +307,9 @@ export default function PropertyDetailPage() {
         .single();
 
       if (error) throw error;
-      setProperty(data);
+      
+      // Cast to our extended Property type
+      setProperty(data as unknown as Property);
     } catch (error) {
       console.error('Error loading property:', error);
     } finally {
@@ -331,7 +352,6 @@ export default function PropertyDetailPage() {
 
   return (
     <div className="min-h-screen bg-background-page">
-      {/* Page Header */}
       <header className="bg-white border-b border-neutral-100">
         <div className="container max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center gap-4">
@@ -349,12 +369,9 @@ export default function PropertyDetailPage() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="container max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Left Column - Property Details */}
           <div className="lg:col-span-8 space-y-12">
-            {/* Image Gallery */}
             <section>
               <ImageGallery
                 images={images}
@@ -364,9 +381,7 @@ export default function PropertyDetailPage() {
               />
             </section>
 
-            {/* Property Info */}
             <section className="space-y-8">
-              {/* Title, Location & Price */}
               <div className="space-y-6">
                 <div className="flex items-start justify-between">
                   <div className="space-y-2">
@@ -376,10 +391,10 @@ export default function PropertyDetailPage() {
                         {property.city}, {property.neighborhood}
                       </span>
                     </div>
-                    {property.view_count > 0 && (
+                    {(property.view_count ?? 0) > 0 && (
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-neutral-500">
-                          {property.view_count} vue{property.view_count > 1 ? 's' : ''}
+                          {property.view_count} vue{(property.view_count ?? 0) > 1 ? 's' : ''}
                         </span>
                       </div>
                     )}
@@ -394,13 +409,11 @@ export default function PropertyDetailPage() {
                 </div>
               </div>
 
-              {/* Property Features */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-neutral-900">Caractéristiques</h2>
                 <PropertyFeatures property={property} />
               </div>
 
-              {/* Description */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-neutral-900">Description</h2>
                 <div className="prose prose-lg max-w-none">
@@ -410,7 +423,6 @@ export default function PropertyDetailPage() {
                 </div>
               </div>
 
-              {/* Amenities */}
               {(property.has_parking || property.has_garden || property.is_furnished || property.has_ac) && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold text-neutral-900">Équipements</h2>
@@ -443,7 +455,6 @@ export default function PropertyDetailPage() {
                 </div>
               )}
 
-              {/* Location Map */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-neutral-900">Localisation</h2>
                 <div className="bg-neutral-50 rounded-xl overflow-hidden border border-neutral-200">
@@ -456,115 +467,65 @@ export default function PropertyDetailPage() {
                         ...property, 
                         id: property.id, 
                         title: property.title, 
-                        monthly_rent: property.monthly_rent!,
-                        longitude: property.longitude,
                         latitude: property.latitude,
-                        neighborhood: property.neighborhood || undefined
-                      } as any]}
-                      singleMarker
+                        longitude: property.longitude,
+                        monthly_rent: property.monthly_rent
+                      }]}
                     />
                   ) : (
-                    <div className="h-96 flex items-center justify-center bg-gradient-to-br from-neutral-100 to-neutral-200">
+                    <div className="h-[400px] flex items-center justify-center">
                       <div className="text-center">
-                        <MapPin className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
-                        <p className="text-neutral-500 font-medium">Localisation non disponible</p>
+                        <MapPin className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
+                        <p className="text-neutral-500">Localisation non disponible</p>
+                        <p className="text-sm text-neutral-400 mt-2">
+                          {property.address}, {property.city}
+                        </p>
                       </div>
                     </div>
                   )}
-                </div>
-                <div className="flex items-center gap-2 text-sm text-neutral-500">
-                  <MapPin className="h-4 w-4" />
-                  <span>{property.address || `${property.city}, ${property.neighborhood}`}</span>
                 </div>
               </div>
             </section>
           </div>
 
-          {/* Right Column - Owner Card */}
           <div className="lg:col-span-4">
             <div className="sticky top-8 space-y-6">
-              {/* Owner Contact Card */}
-              <div className="card shadow-xl border-2 border-primary-100">
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Home className="h-10 w-10 text-white" />
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-neutral-100">
+                <div className="space-y-6">
+                  <div>
+                    <span className="text-3xl font-bold text-primary-500">
+                      {property.monthly_rent?.toLocaleString()}
+                    </span>
+                    <span className="text-neutral-500 ml-2">FCFA/mois</span>
                   </div>
-                  <h3 className="text-xl font-bold text-neutral-900 mb-2">Propriétaire</h3>
-                  <p className="text-neutral-500">Propriété gérée par Mon Toit</p>
-                </div>
 
-                <div className="space-y-4">
-                  <button
-                    onClick={() => navigate(`/postuler/${property.id}`)}
-                    className="w-full btn-primary text-lg py-4"
-                  >
-                    Postuler maintenant
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`/visites/planifier/${property.id}`)}
-                    className="w-full btn-secondary text-lg py-4 flex items-center justify-center gap-2"
-                  >
-                    <Calendar className="h-5 w-5" />
-                    <span>Planifier une visite</span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate(`/messages/nouveau?property=${property.id}`)}
-                    className="w-full px-6 py-4 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
-                  >
-                    <MessageCircle className="h-5 w-5" />
-                    <span>Envoyer un message</span>
-                  </button>
-
-                  {isOwnerOrAgency && (
-                    <button
-                      onClick={() => navigate(getCreateContractRoute(property.id))}
-                      className="w-full px-6 py-4 bg-semantic-success hover:opacity-90 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
-                    >
-                      <FileText className="h-5 w-5" />
-                      <span>Créer un contrat</span>
-                    </button>
-                  )}
-                </div>
-
-                <div className="mt-8 p-4 bg-primary-50 rounded-lg border border-primary-100">
-                  <div className="flex items-start gap-3">
-                    <Shield className="h-5 w-5 text-primary-500 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-semibold text-neutral-900 mb-1">Sécurisé par Mon Toit</p>
-                      <p className="text-neutral-600">
-                        Tous les paiements et échanges sont sécurisés. Réponse garantie sous 24h.
-                      </p>
-                    </div>
+                  <div className="space-y-3">
+                    {isOwnerOrAgency ? (
+                      <button
+                        onClick={() => navigate(getCreateContractRoute(property.id))}
+                        className="w-full py-3 bg-semantic-success text-white font-semibold rounded-xl hover:opacity-90 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <FileText className="h-5 w-5" />
+                        <span>Créer un contrat</span>
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => navigate(`/visites/planifier/${property.id}`)}
+                          className="w-full py-3 border-2 border-primary-500 text-primary-500 font-semibold rounded-xl hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Calendar className="h-5 w-5" />
+                          <span>Planifier une visite</span>
+                        </button>
+                        <button
+                          onClick={() => navigate(`/postuler/${property.id}`)}
+                          className="w-full py-3 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors"
+                        >
+                          Postuler maintenant
+                        </button>
+                      </>
+                    )}
                   </div>
-                </div>
-
-                <div className="mt-6 text-center text-sm text-neutral-500">
-                  <p>✅ Vérification d'identité</p>
-                  <p>✅ Transaction sécurisée</p>
-                  <p>✅ Support 7j/7</p>
-                </div>
-              </div>
-
-              {/* Quick Actions */}
-              <div className="card">
-                <h4 className="font-bold text-neutral-900 mb-4">Actions rapides</h4>
-                <div className="space-y-3">
-                  <button
-                    onClick={() => window.open(`tel:+22500000000`, '_self')}
-                    className="w-full flex items-center gap-3 p-3 text-left hover:bg-neutral-50 rounded-lg transition-colors"
-                  >
-                    <Phone className="h-5 w-5 text-primary-500" />
-                    <span className="text-neutral-700">Appeler directement</span>
-                  </button>
-                  <button
-                    onClick={() => window.open(`mailto:contact@montoit.ci`, '_self')}
-                    className="w-full flex items-center gap-3 p-3 text-left hover:bg-neutral-50 rounded-lg transition-colors"
-                  >
-                    <Mail className="h-5 w-5 text-primary-500" />
-                    <span className="text-neutral-700">Envoyer un email</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -572,17 +533,12 @@ export default function PropertyDetailPage() {
         </div>
       </main>
 
-      {/* Sticky CTA Bar for Mobile */}
       {showStickyBar && (
         <StickyCTABar 
           propertyId={property.id} 
-          monthlyRent={property.monthly_rent || 0}
-          isOwnerOrAgency={!!isOwnerOrAgency}
+          isOwnerOrAgency={isOwnerOrAgency ?? false}
         />
       )}
-
-      {/* Bottom padding for sticky bar on mobile */}
-      <div className="h-20 md:hidden"></div>
     </div>
   );
 }

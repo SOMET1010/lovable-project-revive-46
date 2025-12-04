@@ -8,25 +8,19 @@ import { Calendar, Clock, MapPin, Video, X, MessageCircle, Star } from 'lucide-r
 interface Visit {
   id: string;
   property_id: string;
-  visit_type: 'physique' | 'virtuelle';
+  visit_type: string;
   visit_date: string;
   visit_time: string;
-  status: 'en_attente' | 'confirmee' | 'annulee' | 'terminee';
-  visitor_notes: string | null;
-  owner_notes: string | null;
+  status: string;
+  notes: string | null;
   feedback: string | null;
   rating: number | null;
   property: {
     id: string;
     title: string;
-    address: string;
+    address: string | null;
     city: string;
-    main_image: string;
-  };
-  owner: {
-    id: string;
-    full_name: string;
-    phone: string;
+    main_image: string | null;
   };
 }
 
@@ -48,9 +42,11 @@ export default function MyVisits() {
   }, [user, filter]);
 
   const loadVisits = async () => {
+    if (!user) return;
+    
     try {
       let query = supabase
-        .from('property_visits')
+        .from('visit_requests')
         .select(`
           id,
           property_id,
@@ -58,20 +54,18 @@ export default function MyVisits() {
           visit_date,
           visit_time,
           status,
-          visitor_notes,
-          owner_notes,
+          notes,
           feedback,
           rating,
-          properties!inner(id, title, address, city, main_image, owner_id),
-          profiles!property_visits_owner_id_fkey(id, full_name, phone)
+          properties!inner(id, title, address, city, main_image)
         `)
-        .eq('visitor_id', user?.id)
+        .eq('tenant_id', user.id)
         .order('visit_date', { ascending: false })
         .order('visit_time', { ascending: false });
 
       if (filter === 'upcoming') {
         const today = new Date().toISOString().split('T')[0];
-        query = query.gte('visit_date', today).in('status', ['en_attente', 'confirmee']);
+        query = query.gte('visit_date', today ?? '').in('status', ['en_attente', 'confirmee']);
       } else if (filter === 'past') {
         const today = new Date().toISOString().split('T')[0];
         query = query.or(`visit_date.lt.${today},status.eq.terminee,status.eq.annulee`);
@@ -84,16 +78,14 @@ export default function MyVisits() {
       const formattedVisits = (data || []).map((visit: any) => ({
         id: visit.id,
         property_id: visit.property_id,
-        visit_type: visit.visit_type,
+        visit_type: visit.visit_type || 'physique',
         visit_date: visit.visit_date,
         visit_time: visit.visit_time,
         status: visit.status,
-        visitor_notes: visit.visitor_notes,
-        owner_notes: visit.owner_notes,
+        notes: visit.notes,
         feedback: visit.feedback,
         rating: visit.rating,
-        property: visit.properties,
-        owner: visit.profiles
+        property: visit.properties
       }));
 
       setVisits(formattedVisits);
@@ -109,11 +101,10 @@ export default function MyVisits() {
 
     try {
       const { error } = await supabase
-        .from('property_visits')
+        .from('visit_requests')
         .update({
           status: 'annulee',
           cancelled_at: new Date().toISOString(),
-          cancelled_by: user?.id,
           cancellation_reason: 'Annulée par le visiteur'
         })
         .eq('id', visitId);
@@ -139,7 +130,7 @@ export default function MyVisits() {
     setSubmittingFeedback(true);
     try {
       const { error } = await supabase
-        .from('property_visits')
+        .from('visit_requests')
         .update({
           feedback,
           rating,
@@ -160,14 +151,14 @@ export default function MyVisits() {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
+    const styles: Record<string, string> = {
       en_attente: 'bg-yellow-100 text-yellow-800',
       confirmee: 'bg-green-100 text-green-800',
       annulee: 'bg-red-100 text-red-800',
       terminee: 'bg-blue-100 text-blue-800'
     };
 
-    const labels = {
+    const labels: Record<string, string> = {
       en_attente: 'En attente',
       confirmee: 'Confirmée',
       annulee: 'Annulée',
@@ -175,8 +166,8 @@ export default function MyVisits() {
     };
 
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
+        {labels[status] || status}
       </span>
     );
   };
@@ -322,21 +313,14 @@ export default function MyVisits() {
                         </div>
                         <div className="flex items-center space-x-2 text-gray-700">
                           <MessageCircle className="w-5 h-5 text-orange-500" />
-                          <span>{visit.owner.full_name}</span>
+                          <span>Contact propriétaire</span>
                         </div>
                       </div>
 
-                      {visit.visitor_notes && (
+                      {visit.notes && (
                         <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                           <p className="text-sm font-semibold text-gray-700 mb-1">Mes notes :</p>
-                          <p className="text-sm text-gray-600">{visit.visitor_notes}</p>
-                        </div>
-                      )}
-
-                      {visit.owner_notes && (
-                        <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                          <p className="text-sm font-semibold text-blue-700 mb-1">Note du propriétaire :</p>
-                          <p className="text-sm text-blue-600">{visit.owner_notes}</p>
+                          <p className="text-sm text-gray-600">{visit.notes}</p>
                         </div>
                       )}
 
@@ -369,14 +353,14 @@ export default function MyVisits() {
                           Voir le bien
                         </a>
 
-                        {visit.status === 'en_attente' || visit.status === 'confirmee' ? (
+                        {(visit.status === 'en_attente' || visit.status === 'confirmee') && (
                           <button
                             onClick={() => cancelVisit(visit.id)}
                             className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
                           >
                             Annuler
                           </button>
-                        ) : null}
+                        )}
 
                         {visit.status === 'confirmee' && !visit.feedback && (
                           <button

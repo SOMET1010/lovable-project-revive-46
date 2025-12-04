@@ -6,25 +6,23 @@ import { Wrench, Plus, Clock, CheckCircle, XCircle, Calendar } from 'lucide-reac
 interface MaintenanceRequest {
   id: string;
   issue_type: string;
-  urgency: string;
-  description: string;
-  status: string;
+  priority: string | null;
+  description: string | null;
+  status: string | null;
   images: string[];
   scheduled_date: string | null;
   resolved_at: string | null;
   rejection_reason: string | null;
-  created_at: string;
-  properties: {
-    title: string;
-    address: string;
-  };
+  created_at: string | null;
+  property_title: string;
+  property_address: string;
 }
 
 export default function TenantMaintenance() {
   const { user } = useAuth();
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'en_attente' | 'en_cours' | 'resolue'>('all');
+  const [filter, setFilter] = useState<'all' | 'ouverte' | 'en_cours' | 'resolue'>('all');
 
   useEffect(() => {
     if (!user) {
@@ -40,7 +38,7 @@ export default function TenantMaintenance() {
     try {
       let query = supabase
         .from('maintenance_requests')
-        .select('*, properties(title, address)')
+        .select('*')
         .eq('tenant_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -51,7 +49,24 @@ export default function TenantMaintenance() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setRequests(data || []);
+      
+      // Format the data with default values for missing properties
+      const formattedRequests: MaintenanceRequest[] = (data || []).map((req: any) => ({
+        id: req.id,
+        issue_type: req.issue_type,
+        priority: req.priority,
+        description: req.description,
+        status: req.status,
+        images: req.images || [],
+        scheduled_date: req.scheduled_date,
+        resolved_at: req.resolved_at,
+        rejection_reason: req.rejection_reason || null,
+        created_at: req.created_at,
+        property_title: 'Propriété', // Default value since we don't have property join
+        property_address: ''
+      }));
+      
+      setRequests(formattedRequests);
     } catch (err) {
       console.error('Error loading requests:', err);
     } finally {
@@ -59,9 +74,10 @@ export default function TenantMaintenance() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const configs: Record<string, any> = {
-      en_attente: { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'En attente' },
+  const getStatusBadge = (status: string | null) => {
+    const defaultConfig = { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'En attente' };
+    const configs: Record<string, { color: string; icon: any; label: string }> = {
+      ouverte: defaultConfig,
       acceptee: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle, label: 'Acceptée' },
       en_cours: { color: 'bg-purple-100 text-purple-800', icon: Wrench, label: 'En cours' },
       planifiee: { color: 'bg-cyan-100 text-cyan-800', icon: Calendar, label: 'Planifiée' },
@@ -69,7 +85,7 @@ export default function TenantMaintenance() {
       refusee: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Refusée' }
     };
 
-    const config = configs[status] || configs['en_attente'];
+    const config = configs[status || 'ouverte'] ?? defaultConfig;
     const Icon = config.icon;
 
     return (
@@ -80,14 +96,14 @@ export default function TenantMaintenance() {
     );
   };
 
-  const getUrgencyColor = (urgency: string) => {
+  const getPriorityColor = (priority: string | null) => {
     const colors: Record<string, string> = {
-      low: 'text-gray-600',
-      medium: 'text-blue-600',
-      high: 'text-orange-600',
-      urgent: 'text-red-600'
+      basse: 'text-gray-600',
+      normale: 'text-blue-600',
+      haute: 'text-orange-600',
+      urgente: 'text-red-600'
     };
-    return colors[urgency] || colors['medium'];
+    return colors[priority || 'normale'] || colors['normale'];
   };
 
   const getIssueTypeLabel = (type: string) => {
@@ -137,9 +153,9 @@ export default function TenantMaintenance() {
             Toutes
           </button>
           <button
-            onClick={() => setFilter('en_attente')}
+            onClick={() => setFilter('ouverte')}
             className={`px-4 py-2 rounded-lg font-medium ${
-              filter === 'en_attente' ? 'bg-yellow-600 text-white' : 'bg-white text-gray-600'
+              filter === 'ouverte' ? 'bg-yellow-600 text-white' : 'bg-white text-gray-600'
             }`}
           >
             En attente
@@ -173,24 +189,24 @@ export default function TenantMaintenance() {
                     </h3>
                     {getStatusBadge(request.status)}
                   </div>
-                  <p className="text-gray-600 mb-2">{request.properties.title}</p>
-                  <p className="text-sm text-gray-500">{request.properties.address}</p>
+                  <p className="text-gray-600 mb-2">{request.property_title}</p>
+                  <p className="text-sm text-gray-500">{request.property_address}</p>
                 </div>
                 <div className="text-right">
-                  <p className={`text-sm font-bold ${getUrgencyColor(request.urgency)}`}>
-                    {request.urgency === 'urgent' ? '🔴 URGENT' :
-                     request.urgency === 'high' ? '🟠 Prioritaire' :
-                     request.urgency === 'medium' ? '🟡 Moyenne' : '🟢 Faible'}
+                  <p className={`text-sm font-bold ${getPriorityColor(request.priority)}`}>
+                    {request.priority === 'urgente' ? '🔴 URGENT' :
+                     request.priority === 'haute' ? '🟠 Prioritaire' :
+                     request.priority === 'normale' ? '🟡 Moyenne' : '🟢 Faible'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {new Date(request.created_at).toLocaleDateString('fr-FR')}
+                    {request.created_at ? new Date(request.created_at).toLocaleDateString('fr-FR') : ''}
                   </p>
                 </div>
               </div>
 
               <p className="text-gray-700 mb-4">{request.description}</p>
 
-              {request.images.length > 0 && (
+              {request.images && request.images.length > 0 && (
                 <div className="flex space-x-2 mb-4">
                   {request.images.map((img, idx) => (
                     <img

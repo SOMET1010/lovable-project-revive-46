@@ -7,7 +7,6 @@
 export { default as ApplicationFormPage } from './pages/ApplicationFormPage';
 export { default as CalendarPage } from './pages/CalendarPage';
 export { default as ContractDetailPage } from './pages/ContractDetailPage';
-export { default as ContractDetailPage } from './pages/ContractDetailPage';
 export { default as DashboardPage } from './pages/DashboardPage';
 export { default as FavoritesPage } from './pages/FavoritesPage';
 export { default as MaintenancePage } from './pages/MaintenancePage';

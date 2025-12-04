@@ -9,20 +9,14 @@ interface Payment {
   id: string;
   amount: number;
   payment_type: string;
-  payment_method: string;
-  status: string;
-  created_at: string;
-  payer: {
-    full_name: string;
-  };
-  receiver: {
-    full_name: string;
-  };
-  property: {
-    title: string;
-    address: string;
-    city: string;
-  };
+  payment_method: string | null;
+  status: string | null;
+  created_at: string | null;
+  payer_name: string;
+  receiver_name: string;
+  property_title: string;
+  property_address: string;
+  property_city: string;
 }
 
 export default function PaymentHistory() {
@@ -39,28 +33,20 @@ export default function PaymentHistory() {
   }, [user, filter, statusFilter]);
 
   const loadPayments = async () => {
+    if (!user) return;
+    
     try {
       let query = supabase
         .from('payments')
-        .select(`
-          id,
-          amount,
-          payment_type,
-          payment_method,
-          status,
-          created_at,
-          payer:profiles!payments_payer_id_fkey(full_name),
-          receiver:profiles!payments_receiver_id_fkey(full_name),
-          property:properties(title, address, city)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (filter === 'sent') {
-        query = query.eq('payer_id', user?.id);
+        query = query.eq('payer_id', user.id);
       } else if (filter === 'received') {
-        query = query.eq('receiver_id', user?.id);
+        query = query.eq('receiver_id', user.id);
       } else {
-        query = query.or(`payer_id.eq.${user?.id},receiver_id.eq.${user?.id}`);
+        query = query.or(`payer_id.eq.${user.id},receiver_id.eq.${user.id}`);
       }
 
       if (statusFilter !== 'all') {
@@ -71,16 +57,18 @@ export default function PaymentHistory() {
 
       if (error) throw error;
 
-      const formattedPayments = (data || []).map((payment: any) => ({
+      const formattedPayments: Payment[] = (data || []).map((payment: any) => ({
         id: payment.id,
         amount: payment.amount,
         payment_type: payment.payment_type,
         payment_method: payment.payment_method,
         status: payment.status,
         created_at: payment.created_at,
-        payer: payment.payer,
-        receiver: payment.receiver,
-        property: payment.property
+        payer_name: 'Payeur',
+        receiver_name: 'Destinataire',
+        property_title: 'Paiement',
+        property_address: '',
+        property_city: ''
       }));
 
       setPayments(formattedPayments);
@@ -91,7 +79,7 @@ export default function PaymentHistory() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string | null) => {
     switch (status) {
       case 'complete':
         return <CheckCircle className="w-5 h-5 text-green-600" />;
@@ -104,49 +92,53 @@ export default function PaymentHistory() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const styles = {
+  const getStatusBadge = (status: string | null) => {
+    const styles: Record<string, string> = {
       en_attente: 'bg-yellow-100 text-yellow-800 border-yellow-300',
       complete: 'bg-green-100 text-green-800 border-green-300',
       echoue: 'bg-red-100 text-red-800 border-red-300',
       annule: 'bg-gray-100 text-gray-800 border-gray-300'
     };
 
-    const labels = {
+    const labels: Record<string, string> = {
       en_attente: 'En attente',
       complete: 'Complété',
       echoue: 'Échoué',
       annule: 'Annulé'
     };
 
+    const statusKey = status || 'en_attente';
+
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-bold border ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
+      <span className={`px-3 py-1 rounded-full text-xs font-bold border ${styles[statusKey] || styles['en_attente']}`}>
+        {labels[statusKey] || statusKey}
       </span>
     );
   };
 
   const getPaymentTypeLabel = (type: string) => {
-    const labels = {
+    const labels: Record<string, string> = {
       loyer: 'Loyer',
       depot_garantie: 'Dépôt de garantie',
       charges: 'Charges',
       frais_agence: 'Frais d\'agence'
     };
-    return labels[type as keyof typeof labels] || type;
+    return labels[type] || type;
   };
 
-  const getPaymentMethodLabel = (method: string) => {
-    const labels = {
+  const getPaymentMethodLabel = (method: string | null) => {
+    if (!method) return 'Non spécifié';
+    const labels: Record<string, string> = {
       mobile_money: 'Mobile Money',
       carte_bancaire: 'Carte bancaire',
       virement: 'Virement',
       especes: 'Espèces'
     };
-    return labels[method as keyof typeof labels] || method;
+    return labels[method] || method;
   };
 
-  const formatDate = (date: string) => {
+  const formatDate = (date: string | null) => {
+    if (!date) return 'Date inconnue';
     return new Date(date).toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'long',
@@ -290,7 +282,7 @@ export default function PaymentHistory() {
                       <div className="flex items-center space-x-3 mb-3">
                         {getStatusIcon(payment.status)}
                         <h3 className="text-lg font-bold text-gray-900">
-                          {payment.property?.title || 'Paiement'}
+                          {payment.property_title || 'Paiement'}
                         </h3>
                         {getStatusBadge(payment.status)}
                       </div>
@@ -308,11 +300,6 @@ export default function PaymentHistory() {
                           <Calendar className="w-4 h-4" />
                           <span>{formatDate(payment.created_at)}</span>
                         </div>
-                        {payment.property && (
-                          <div className="text-gray-600">
-                            <span className="font-medium">Propriété:</span> {payment.property.address}, {payment.property.city}
-                          </div>
-                        )}
                       </div>
                     </div>
 
@@ -322,7 +309,7 @@ export default function PaymentHistory() {
                           {payment.amount.toLocaleString()} FCFA
                         </p>
                         <p className="text-xs text-gray-500">
-                          {filter === 'sent' || !filter ? 'À ' + payment.receiver.full_name : 'De ' + payment.payer.full_name}
+                          {filter === 'sent' || !filter ? 'À ' + payment.receiver_name : 'De ' + payment.payer_name}
                         </p>
                       </div>
 
