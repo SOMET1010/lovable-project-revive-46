@@ -13,22 +13,19 @@ interface Role {
   user_count: number;
   created_at: string;
   color: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
-interface User {
+interface FoundUser {
   id: string;
-  email: string;
-  full_name: string;
-  role: string;
-  status: string;
-  last_login: string;
-  created_at: string;
+  email: string | null;
+  full_name: string | null;
+  user_type: string | null;
 }
 
 export default function AdminUserRoles() {
   const [searchEmail, setSearchEmail] = useState('');
-  const [foundUser, setFoundUser] = useState<User | null>(null);
+  const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -111,7 +108,7 @@ export default function AdminUserRoles() {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, email, first_name, last_name, role, status, last_login, created_at')
+        .select('id, email, full_name, user_type')
         .eq('email', searchEmail.trim().toLowerCase())
         .maybeSingle();
 
@@ -124,17 +121,17 @@ export default function AdminUserRoles() {
 
       setFoundUser(data);
 
-      // Pré-remplir les rôles actuels
-      const currentRoles = data.role ? data.role.split(',') : [];
-      setSelectedRoles(currentRoles);
-      setSelectedUserType(currentRoles[0] || 'locataire');
-      setMakeAdmin(currentRoles.includes('admin'));
-      setMakeTrustAgent(currentRoles.includes('trust_agent'));
+      const currentUserType = data.user_type || 'locataire';
+      setSelectedUserType(currentUserType);
+      setSelectedRoles([currentUserType]);
+      setMakeAdmin(currentUserType === 'admin');
+      setMakeTrustAgent(currentUserType === 'trust_agent');
 
       setMessage({ type: 'success', text: 'Utilisateur trouvé !' });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erreur recherche utilisateur:', err);
-      setMessage({ type: 'error', text: err.message || 'Erreur lors de la recherche' });
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la recherche';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -155,62 +152,65 @@ export default function AdminUserRoles() {
     setMessage(null);
 
     try {
-      // Construire la liste des rôles
-      let rolesToSave = [...selectedRoles];
+      const finalUserType = makeAdmin ? 'admin' : selectedUserType;
 
-      if (makeAdmin && !rolesToSave.includes('admin')) {
-        rolesToSave.push('admin');
-      }
-      if (makeTrustAgent && !rolesToSave.includes('trust_agent')) {
-        rolesToSave.push('trust_agent');
-      }
-
-      const rolesString = rolesToSave.join(',');
-
-      // Mettre à jour le profil
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          role: rolesString,
-          user_type: makeAdmin ? 'admin' : selectedUserType,
-          active_role: makeAdmin ? 'admin' : (rolesToSave[0] || selectedUserType),
-          trust_verified: makeTrustAgent,
-          trust_score: makeTrustAgent ? 100 : 75,
-          is_verified: makeAdmin || makeTrustAgent ? true : true,
+          user_type: finalUserType,
         })
         .eq('id', foundUser.id);
 
       if (profileError) throw profileError;
+
+      // If making admin or trust_agent, also add to user_roles table
+      if (makeAdmin || makeTrustAgent) {
+        const rolesToAdd: Array<'admin' | 'trust_agent'> = [];
+        if (makeAdmin) rolesToAdd.push('admin');
+        if (makeTrustAgent) rolesToAdd.push('trust_agent');
+
+        for (const role of rolesToAdd) {
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .upsert({
+              user_id: foundUser.id,
+              role: role,
+            }, { onConflict: 'user_id,role' });
+
+          if (roleError) {
+            console.error('Error adding role:', roleError);
+          }
+        }
+      }
 
       setMessage({
         type: 'success',
         text: `Rôles mis à jour avec succès pour ${foundUser.email} !`
       });
 
-      // Rafraîchir les données
       await searchUser();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erreur sauvegarde rôles:', err);
-      setMessage({ type: 'error', text: err.message || 'Erreur lors de la sauvegarde' });
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la sauvegarde';
+      setMessage({ type: 'error', text: errorMessage });
     } finally {
       setSaving(false);
     }
   };
 
   const getRoleColor = (color: string) => {
-    const colors = {
+    const colors: Record<string, string> = {
       cyan: 'bg-cyan-50 text-cyan-700 border-cyan-200',
       orange: 'bg-orange-50 text-orange-700 border-orange-200',
       green: 'bg-green-50 text-green-700 border-green-200',
       purple: 'bg-purple-50 text-purple-700 border-purple-200',
       blue: 'bg-blue-50 text-blue-700 border-blue-200'
     };
-    return colors[color as keyof typeof colors] || colors.blue;
+    return colors[color] || colors['blue'];
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Configuration des Rôles</h1>
@@ -230,7 +230,6 @@ export default function AdminUserRoles() {
         </div>
       </div>
 
-      {/* Roles Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {availableRoles.map((role) => {
           const Icon = role.icon;
@@ -267,11 +266,9 @@ export default function AdminUserRoles() {
         })}
       </div>
 
-      {/* User Role Assignment */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Attribuer des Rôles</h2>
 
-        {/* Search Section */}
         <div className="mb-8">
           <div className="flex gap-4">
             <div className="flex-1">
@@ -311,7 +308,6 @@ export default function AdminUserRoles() {
           )}
         </div>
 
-        {/* User Found */}
         {foundUser && (
           <div className="border-t border-gray-200 pt-8">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">Utilisateur Trouvé</h3>
@@ -327,13 +323,12 @@ export default function AdminUserRoles() {
                   <p className="font-semibold text-gray-900">{foundUser.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Rôles Actuels</p>
-                  <p className="font-semibold text-gray-900">{foundUser.role || 'Aucun'}</p>
+                  <p className="text-sm text-gray-600">Type Actuel</p>
+                  <p className="font-semibold text-gray-900">{foundUser.user_type || 'locataire'}</p>
                 </div>
               </div>
             </div>
 
-            {/* User Type Selection */}
             <div className="mb-6">
               <h4 className="text-md font-semibold text-gray-900 mb-3">Type d'Utilisateur Principal</h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -353,7 +348,6 @@ export default function AdminUserRoles() {
               </div>
             </div>
 
-            {/* Role Selection */}
             <div className="mb-6">
               <h4 className="text-md font-semibold text-gray-900 mb-3">Rôles Additionnels</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -380,7 +374,7 @@ export default function AdminUserRoles() {
                         <p className="font-medium">{role.name}</p>
                         <p className="text-sm opacity-75">{role.description}</p>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 ${
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
                         isSelected ? 'bg-current border-current' : 'border-gray-300'
                       }`}>
                         {isSelected && (
@@ -393,7 +387,6 @@ export default function AdminUserRoles() {
               </div>
             </div>
 
-            {/* Special Permissions */}
             <div className="mb-6">
               <h4 className="text-md font-semibold text-gray-900 mb-3">Permissions Spéciales</h4>
               <div className="space-y-3">
@@ -431,7 +424,6 @@ export default function AdminUserRoles() {
               </div>
             </div>
 
-            {/* Save Button */}
             <div className="flex justify-end">
               <button
                 onClick={saveRoles}
