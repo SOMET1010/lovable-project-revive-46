@@ -178,7 +178,7 @@ export const authApi = {
   switchRole: async (userId: string, newRole: string) => {
     const { data, error } = await supabase
       .from('profiles')
-      .update({ active_role: newRole })
+      .update({ user_type: newRole })
       .eq('id', userId)
       .select()
       .single();

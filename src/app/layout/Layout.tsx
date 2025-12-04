@@ -2,23 +2,16 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Suspense } from 'react';
 import HeaderPremium from './HeaderPremium';
 import FooterPremium from './FooterPremium';
-import Chatbot from '@/features/messaging/components/Chatbot';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { ToastContainer } from '@/shared/hooks/useToast';
 import PageTransition from '@/shared/ui/PageTransition';
 
-const noLayoutRoutes = ['/messages', '/auth/callback'];
+const noLayoutRoutes = ['/auth/callback'];
 const noHeaderFooterRoutes = [
-  '/messages',
   '/admin',
   '/visiter',
   '/mes-visites',
-  '/creer-contrat',
-  '/contrat',
-  '/signer-bail',
-  '/bail/signer',
   '/verification',
-  '/certification-ansut',
   '/mes-certificats',
 ];
 
@@ -41,7 +34,6 @@ export default function Layout() {
           }
         >
           <Outlet />
-          <Chatbot />
         </Suspense>
       </ErrorBoundary>
     );
@@ -65,7 +57,6 @@ export default function Layout() {
         </main>
       </Suspense>
       {shouldShowHeaderFooter && <FooterPremium />}
-      <Chatbot />
     </ErrorBoundary>
   );
 }

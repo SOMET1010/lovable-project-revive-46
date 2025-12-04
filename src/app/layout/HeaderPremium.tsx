@@ -1,13 +1,11 @@
-import { Home, Search, PlusCircle, MessageCircle, User, Heart, Calendar, Bell, FileText, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Home, Search, PlusCircle, User, Heart, Calendar, Bell, FileText, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useMessageNotifications } from '@/features/messaging';
 import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
 import { useLocation } from 'react-router-dom';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();
-  const { unreadCount } = useMessageNotifications();
   const { isMobile } = useBreakpoint();
   const location = useLocation();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -33,7 +31,6 @@ export default function HeaderPremium() {
   const mainNavItems = [
     { label: 'Rechercher', href: '/recherche', icon: Search },
     ...(user && isOwner ? [{ label: 'Publier', href: '/ajouter-propriete', icon: PlusCircle }] : []),
-    ...(user ? [{ label: 'Messages', href: '/messages', icon: MessageCircle, badge: unreadCount }] : []),
   ];
 
   const userMenuItems = user ? [

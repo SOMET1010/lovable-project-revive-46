@@ -13,10 +13,8 @@ const Auth = lazy(() => import('@/features/auth/pages/AuthPage'));
 const ModernAuth = lazy(() => import('@/features/auth/pages/ModernAuthPage'));
 const AuthCallback = lazy(() => import('@/features/auth/pages/CallbackPage'));
 const ForgotPassword = lazy(() => import('@/features/auth/pages/ForgotPasswordPage'));
-const ResetPassword = lazy(() => import('@/features/auth/pages/ResetPasswordPage'));
 const VerifyOTP = lazy(() => import('@/features/auth/pages/VerifyOTPPage'));
 const ProfileSelection = lazy(() => import('@/features/auth/pages/ProfileSelectionPage'));
-const Profile = lazy(() => import('@/features/auth/pages/ProfilePage'));
 
 const SearchProperties = lazy(() => import('@/features/tenant/pages/SearchPropertiesPage'));
 const PropertyDetail = lazy(() => import('@/features/tenant/pages/PropertyDetailPage'));
@@ -28,20 +26,7 @@ const ApplicationDetail = lazy(() => import('@/features/tenant/pages/Application
 const ScheduleVisit = lazy(() => import('@/features/tenant/pages/ScheduleVisitPage'));
 const MyVisits = lazy(() => import('@/features/tenant/pages/MyVisitsPage'));
 
-const Messages = lazy(() => import('@/features/messaging/pages/MessagesPage'));
-
-const CreateContract = lazy(() => import('@/features/owner/pages/CreateContractPage'));
-const MyContracts = lazy(() => import('@/features/tenant/pages/MyContractsPage'));
-const ContractDetail = lazy(() => import('@/features/tenant/pages/ContractDetailPage'));
-const ContractDetailEnhanced = lazy(() => import('@/features/tenant/pages/ContractDetailEnhancedPage'));
-const SignLease = lazy(() => import('@/features/tenant/pages/SignLeasePage'));
-const ContractsList = lazy(() => import('@/features/owner/pages/ContractsListPage'));
-
-const MakePayment = lazy(() => import('@/features/tenant/pages/MakePaymentPage'));
-const PaymentHistory = lazy(() => import('@/features/tenant/pages/PaymentHistoryPage'));
-
 const VerificationRequest = lazy(() => import('@/features/verification/pages/RequestPage'));
-const IdentityVerification = lazy(() => import('@/features/auth/pages/IdentityVerificationPage'));
 const VerificationSettings = lazy(() => import('@/features/verification/pages/SettingsPage'));
 const MyCertificates = lazy(() => import('@/features/verification/pages/MyCertificatesPage'));
 
@@ -50,10 +35,7 @@ const TenantCalendar = lazy(() => import('@/features/tenant/pages/CalendarPage')
 const TenantScore = lazy(() => import('@/features/tenant/pages/ScorePage'));
 const TenantMaintenance = lazy(() => import('@/features/tenant/pages/MaintenancePage'));
 
-const OwnerDashboard = lazy(() => import('@/features/owner/pages/DashboardPage'));
 const AddProperty = lazy(() => import('@/features/owner/pages/AddPropertyPage'));
-const EditProperty = lazy(() => import('@/features/owner/pages/EditPropertyPage'));
-const OwnerMaintenance = lazy(() => import('@/features/owner/pages/MaintenancePage'));
 
 const MaintenanceRequest = lazy(() => import('@/features/tenant/pages/MaintenanceRequestPage'));
 
@@ -66,9 +48,6 @@ const AdminTrustAgents = lazy(() => import('@/features/admin/pages/TrustAgentsPa
 
 const TrustAgentDashboard = lazy(() => import('@/features/trust-agent/pages/DashboardPage'));
 const TrustAgentAnalytics = lazy(() => import('@/features/trust-agent/pages/AnalyticsPage'));
-
-const NotificationPreferences = lazy(() => import('@/features/messaging/pages/NotificationPreferencesPage'));
-const NotificationsPage = lazy(() => import('@/features/messaging/pages/NotificationsPage'));
 
 const AboutPage = lazy(() => import('@/features/auth/pages/AboutPage'));
 const TermsOfServicePage = lazy(() => import('@/features/auth/pages/TermsOfServicePage'));
@@ -92,7 +71,6 @@ export const routes: RouteObject[] = [
       { path: 'auth', element: <ModernAuth /> },
       { path: 'auth/callback', element: <AuthCallback /> },
       { path: 'mot-de-passe-oublie', element: <ForgotPassword /> },
-      { path: 'reinitialiser-mot-de-passe', element: <ResetPassword /> },
       { path: 'verification-otp', element: <VerifyOTP /> },
       { path: 'a-propos', element: <AboutPage /> },
       { path: 'conditions-utilisation', element: <TermsOfServicePage /> },
@@ -110,10 +88,6 @@ export const routes: RouteObject[] = [
         element: <ProtectedRoute><ProfileSelection /></ProtectedRoute>,
       },
       {
-        path: 'profil',
-        element: <ProtectedRoute><Profile /></ProtectedRoute>,
-      },
-      {
         path: 'dashboard',
         element: <ProtectedRoute><UserDashboard /></ProtectedRoute>,
       },
@@ -129,31 +103,15 @@ export const routes: RouteObject[] = [
       { path: 'candidature/:id', element: <ProtectedRoute><ApplicationForm /></ProtectedRoute> },
       { path: 'visiter/:id', element: <ProtectedRoute><ScheduleVisit /></ProtectedRoute> },
       { path: 'mes-visites', element: <ProtectedRoute><MyVisits /></ProtectedRoute> },
-      { path: 'messages', element: <ProtectedRoute><Messages /></ProtectedRoute> },
-      { path: 'creer-contrat/:propertyId', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><CreateContract /></ProtectedRoute> },
-      { path: 'mes-contrats', element: <ProtectedRoute><MyContracts /></ProtectedRoute> },
-      { path: 'tous-les-contrats', element: <ProtectedRoute><ContractsList /></ProtectedRoute> },
-      { path: 'contrat/:id', element: <ProtectedRoute><ContractDetail /></ProtectedRoute> },
-      { path: 'bail/:id/details', element: <ProtectedRoute><ContractDetailEnhanced /></ProtectedRoute> },
-      { path: 'signer-bail/:id', element: <ProtectedRoute><SignLease /></ProtectedRoute> },
-      { path: 'bail/signer/:id', element: <ProtectedRoute><SignLease /></ProtectedRoute> },
-      { path: 'effectuer-paiement', element: <ProtectedRoute><MakePayment /></ProtectedRoute> },
-      { path: 'mes-paiements', element: <ProtectedRoute><PaymentHistory /></ProtectedRoute> },
       { path: 'verification', element: <ProtectedRoute><VerificationRequest /></ProtectedRoute> },
-      { path: 'certification-ansut', element: <ProtectedRoute><IdentityVerification /></ProtectedRoute> },
-      { path: 'ansut-verification', element: <ProtectedRoute><IdentityVerification /></ProtectedRoute> },
       { path: 'verification/parametres', element: <ProtectedRoute><VerificationSettings /></ProtectedRoute> },
       { path: 'mes-certificats', element: <ProtectedRoute><MyCertificates /></ProtectedRoute> },
       { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantDashboard /></ProtectedRoute> },
       { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={['locataire']}><TenantCalendar /></ProtectedRoute> },
       { path: 'score-locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantScore /></ProtectedRoute> },
       { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantMaintenance /></ProtectedRoute> },
-      { path: 'dashboard/proprietaire', element: <ProtectedRoute allowedRoles={['proprietaire']}><OwnerDashboard /></ProtectedRoute> },
       { path: 'dashboard/ajouter-propriete', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
       { path: 'add-property', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><AddProperty /></ProtectedRoute> },
-      { path: 'dashboard/propriete/:id/stats', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><OwnerDashboard /></ProtectedRoute> },
-      { path: 'dashboard/propriete/:id/modifier', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><EditProperty /></ProtectedRoute> },
-      { path: 'maintenance/proprietaire', element: <ProtectedRoute allowedRoles={['proprietaire']}><OwnerMaintenance /></ProtectedRoute> },
       { path: 'dashboard/candidature/:id', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence']}><ApplicationDetail /></ProtectedRoute> },
       { path: 'maintenance/nouvelle', element: <ProtectedRoute><MaintenanceRequest /></ProtectedRoute> },
       {
@@ -171,8 +129,6 @@ export const routes: RouteObject[] = [
       },
       { path: 'trust-agent/dashboard', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentDashboard /></ProtectedRoute> },
       { path: 'trust-agent/analytics', element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentAnalytics /></ProtectedRoute> },
-      { path: 'notifications', element: <ProtectedRoute><NotificationsPage /></ProtectedRoute> },
-      { path: 'notifications/preferences', element: <ProtectedRoute><NotificationPreferences /></ProtectedRoute> },
       { path: '*', element: <NotFound /> },
     ],
   },
