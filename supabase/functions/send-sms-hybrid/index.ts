@@ -72,32 +72,33 @@ Deno.serve(async (req: Request) => {
     // Define handlers for each SMS provider
     const handlers = {
       intouch: async (config: ServiceConfig, params: { phoneNumber: string; message: string; sender: string }) => {
-        const baseUrl = Deno.env.get('INTOUCH_BASE_URL');
-        const partnerId = Deno.env.get('INTOUCH_PARTNER_ID');
-        const username = Deno.env.get('INTOUCH_USERNAME');
-        const password = Deno.env.get('INTOUCH_PASSWORD');
+        const agencyCode = Deno.env.get('INTOUCH_AGENCY_CODE');
+        const apiKey = Deno.env.get('INTOUCH_API_KEY');
 
-        if (!baseUrl || !partnerId || !username || !password) {
-          throw new Error('InTouch credentials not configured');
+        if (!agencyCode || !apiKey) {
+          throw new Error('InTouch credentials not configured (INTOUCH_AGENCY_CODE, INTOUCH_API_KEY)');
         }
 
-        // InTouch SMS API - format correct
-        const response = await fetch(`${baseUrl}/apidist/sec/${partnerId}/sms`, {
+        // InTouch SMS API - URL correcte
+        const intouchUrl = `https://apidist.gutouch.net/apidist/sec/${agencyCode}/sms`;
+        console.log('📤 InTouch SMS request to:', intouchUrl);
+
+        const response = await fetch(intouchUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Basic ${btoa(`${partnerId}:${username}`)}`,
+            'Authorization': `Basic ${btoa(`${agencyCode}:${apiKey}`)}`,
           },
           body: JSON.stringify({
             recipient_phone_number: params.phoneNumber.replace('+', ''),
             message: params.message,
-            sender: config.config?.sender || params.sender || 'MonToit',
+            sender_id: config.config?.sender || params.sender || 'MonToit',
           }),
         });
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('InTouch SMS error:', errorText);
+          console.error('❌ InTouch SMS error:', errorText);
           throw new Error(`InTouch SMS failed: ${response.status} - ${errorText}`);
         }
 
