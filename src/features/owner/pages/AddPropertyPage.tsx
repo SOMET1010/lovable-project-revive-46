@@ -190,28 +190,28 @@ export default function AddProperty() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-coral-50 flex items-center justify-center p-4">
-        <div className="glass-card rounded-3xl p-8 max-w-md text-center animate-scale-in">
-          <div className="w-20 h-20 bg-gradient-to-br from-olive-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-olive-200">
-            <Home className="h-10 w-10 text-olive-600" />
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl p-8 max-w-md text-center shadow-card">
+          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-200">
+            <Home className="h-10 w-10 text-green-600" />
           </div>
-          <h2 className="text-3xl font-bold text-gradient mb-3">Propriété ajoutée!</h2>
-          <p className="text-gray-700 mb-6 text-lg">
+          <h2 className="text-3xl font-bold text-neutral-900 mb-3">Propriété ajoutée!</h2>
+          <p className="text-neutral-600 mb-6 text-lg">
             Votre propriété a été publiée avec succès et est maintenant visible par les locataires.
           </p>
-          <p className="text-sm text-terracotta-600 font-medium animate-pulse">Redirection en cours...</p>
+          <p className="text-sm text-primary-500 font-medium">Redirection en cours...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50 custom-cursor">
-      <div className="glass-card border-b border-white/20">
+    <div className="min-h-screen bg-neutral-50">
+      <div className="bg-white border-b border-neutral-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center space-x-2 text-terracotta-600 hover:text-terracotta-700 transition-all duration-300 transform hover:scale-105 font-medium"
+            className="flex items-center gap-2 text-primary-500 hover:text-primary-600 transition-colors font-medium"
           >
             <ArrowLeft className="h-5 w-5" />
             <span>Retour</span>
@@ -220,25 +220,25 @@ export default function AddProperty() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="card-scrapbook p-8 animate-slide-down">
+        <div className="bg-white rounded-2xl p-8 shadow-card">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gradient mb-3 flex items-center space-x-3">
-              <Home className="h-10 w-10 text-terracotta-500" />
+            <h1 className="text-3xl font-bold text-neutral-900 mb-3 flex items-center gap-3">
+              <Home className="h-8 w-8 text-primary-500" />
               <span>Ajouter une propriété</span>
             </h1>
-            <p className="text-gray-700 text-lg">Remplissez les informations de votre propriété pour la publier sur Mon Toit</p>
+            <p className="text-neutral-600 text-lg">Remplissez les informations de votre propriété pour la publier sur Mon Toit</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-2xl text-red-700 animate-shake">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
               <strong>Erreur:</strong> {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl border border-amber-200">
-              <h2 className="text-2xl font-bold text-gradient mb-6 flex items-center space-x-2">
-                <ImageIcon className="h-6 w-6 text-terracotta-500" />
+            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
+              <h2 className="text-xl font-semibold text-neutral-900 mb-6 flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-primary-500" />
                 <span>Photos de la propriété</span>
               </h2>
 
@@ -254,32 +254,32 @@ export default function AddProperty() {
                   />
                   <label
                     htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center w-full h-40 border-3 border-dashed border-terracotta-300 rounded-2xl cursor-pointer bg-white hover:bg-amber-50 transition-all duration-300 transform hover:scale-[1.02]"
+                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-neutral-300 rounded-xl cursor-pointer bg-white hover:bg-neutral-50 transition-colors"
                   >
-                    <Upload className="h-12 w-12 text-terracotta-400 mb-3" />
-                    <span className="text-gray-700 font-medium">Cliquez pour ajouter des photos</span>
-                    <span className="text-sm text-gray-500 mt-1">Maximum 10 images (JPG, PNG)</span>
+                    <Upload className="h-12 w-12 text-neutral-400 mb-3" />
+                    <span className="text-neutral-700 font-medium">Cliquez pour ajouter des photos</span>
+                    <span className="text-sm text-neutral-500 mt-1">Maximum 10 images (JPG, PNG)</span>
                   </label>
                 </div>
 
                 {imagePreviews.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {imagePreviews.map((preview, index) => (
-                      <div key={index} className="relative group animate-scale-in">
+                      <div key={index} className="relative group">
                         <img
                           src={preview}
                           alt={`Preview ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-xl border-2 border-terracotta-200"
+                          className="w-full h-32 object-cover rounded-xl border border-neutral-200"
                         />
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
+                          className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
                         >
                           <X className="h-4 w-4" />
                         </button>
                         {index === 0 && (
-                          <div className="absolute bottom-2 left-2 bg-terracotta-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                          <div className="absolute bottom-2 left-2 bg-primary-500 text-white text-xs px-2 py-1 rounded-full font-medium">
                             Photo principale
                           </div>
                         )}
@@ -290,12 +290,12 @@ export default function AddProperty() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-6 rounded-2xl border border-cyan-200">
-              <h2 className="text-2xl font-bold text-gradient mb-6">Informations générales</h2>
+            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
+              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Informations générales</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-800 mb-2">
+                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
                     Titre de l'annonce <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -305,12 +305,12 @@ export default function AddProperty() {
                     onChange={handleChange}
                     required
                     placeholder="Ex: Bel appartement 3 pièces à Cocody"
-                    className="w-full px-4 py-3 border-2 border-cyan-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-800 mb-2">
+                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
                     Description
                   </label>
                   <textarea
@@ -319,22 +319,22 @@ export default function AddProperty() {
                     onChange={handleChange}
                     rows={5}
                     placeholder="Décrivez votre propriété en détail..."
-                    className="w-full px-4 py-3 border-2 border-cyan-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-800 mb-2">
+                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
                     Catégorie de bien <span className="text-red-500">*</span>
                   </label>
-                  <div className="flex space-x-3">
+                  <div className="flex gap-3">
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, property_category: 'residentiel' }))}
-                      className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all ${
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${
                         formData.property_category === 'residentiel'
-                          ? 'bg-terracotta-600 text-white shadow-lg border-2 border-terracotta-600'
-                          : 'bg-white text-gray-700 border-2 border-cyan-200 hover:border-terracotta-300'
+                          ? 'bg-primary-500 text-white shadow-md border border-primary-500'
+                          : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300'
                       }`}
                     >
                       <Home className="w-5 h-5" />
@@ -343,17 +343,17 @@ export default function AddProperty() {
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, property_category: 'commercial' }))}
-                      className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-xl font-medium transition-all ${
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${
                         formData.property_category === 'commercial'
-                          ? 'bg-olive-600 text-white shadow-lg border-2 border-olive-600'
-                          : 'bg-white text-gray-700 border-2 border-cyan-200 hover:border-olive-300'
+                          ? 'bg-primary-500 text-white shadow-md border border-primary-500'
+                          : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300'
                       }`}
                     >
                       <Building2 className="w-5 h-5" />
                       <span>Commercial</span>
                     </button>
                   </div>
-                  <p className="mt-2 text-xs text-gray-600">
+                  <p className="mt-2 text-xs text-neutral-600">
                     {formData.property_category === 'residentiel'
                       ? 'Pour les logements : appartements, maisons, villas...'
                       : 'Pour les locaux professionnels : bureaux, commerces...'}
@@ -362,7 +362,7 @@ export default function AddProperty() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Type de bien <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -370,7 +370,7 @@ export default function AddProperty() {
                       value={formData.property_type}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border-2 border-cyan-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     >
                       {getPropertyTypesForCategory().map(type => (
                         <option key={type.value} value={type.value}>
@@ -381,7 +381,7 @@ export default function AddProperty() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Surface (m²)
                     </label>
                     <input
@@ -392,14 +392,14 @@ export default function AddProperty() {
                       min="0"
                       step="0.01"
                       placeholder="Ex: 75"
-                      className="w-full px-4 py-3 border-2 border-cyan-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Chambres <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -409,12 +409,12 @@ export default function AddProperty() {
                       onChange={handleChange}
                       required
                       min="0"
-                      className="w-full px-4 py-3 border-2 border-cyan-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Salles de bain <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -424,19 +424,19 @@ export default function AddProperty() {
                       onChange={handleChange}
                       required
                       min="0"
-                      className="w-full px-4 py-3 border-2 border-cyan-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-olive-50 to-green-50 p-6 rounded-2xl border border-olive-200">
-              <h2 className="text-2xl font-bold text-gradient mb-6">Localisation</h2>
+            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
+              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Localisation</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-gray-800 mb-2">
+                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
                     Adresse complète <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -446,13 +446,13 @@ export default function AddProperty() {
                     onChange={handleChange}
                     required
                     placeholder="Ex: Rue 12, Lot 34"
-                    className="w-full px-4 py-3 border-2 border-olive-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Ville <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -462,12 +462,12 @@ export default function AddProperty() {
                       onChange={handleChange}
                       required
                       placeholder="Ex: Abidjan"
-                      className="w-full px-4 py-3 border-2 border-olive-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Quartier
                     </label>
                     <input
@@ -476,20 +476,20 @@ export default function AddProperty() {
                       value={formData.neighborhood}
                       onChange={handleChange}
                       placeholder="Ex: Cocody"
-                      className="w-full px-4 py-3 border-2 border-olive-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-amber-50 to-orange-50 p-6 rounded-2xl border border-amber-200">
-              <h2 className="text-2xl font-bold text-gradient mb-6">Informations financières</h2>
+            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
+              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Informations financières</h2>
 
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Loyer mensuel (FCFA) <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -501,12 +501,12 @@ export default function AddProperty() {
                       min="0"
                       step="1000"
                       placeholder="Ex: 150000"
-                      className="w-full px-4 py-3 border-2 border-amber-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Dépôt de garantie (FCFA)
                     </label>
                     <input
@@ -517,12 +517,12 @@ export default function AddProperty() {
                       min="0"
                       step="1000"
                       placeholder="Ex: 300000"
-                      className="w-full px-4 py-3 border-2 border-amber-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-800 mb-2">
+                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Charges mensuelles (FCFA)
                     </label>
                     <input
@@ -533,75 +533,75 @@ export default function AddProperty() {
                       min="0"
                       step="1000"
                       placeholder="Ex: 10000"
-                      className="w-full px-4 py-3 border-2 border-amber-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-terracotta-50 to-coral-50 p-6 rounded-2xl border border-terracotta-200">
-              <h2 className="text-2xl font-bold text-gradient mb-6">Équipements</h2>
+            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
+              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Équipements</h2>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <label className="flex items-center space-x-3 cursor-pointer bg-white px-4 py-3 rounded-xl border-2 border-terracotta-200 hover:border-terracotta-400 transition-all duration-300 transform hover:scale-105">
+                <label className="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors">
                   <input
                     type="checkbox"
                     name="is_furnished"
                     checked={formData.is_furnished}
                     onChange={handleChange}
-                    className="rounded border-gray-300 text-terracotta-600 focus:ring-terracotta-500 w-5 h-5"
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 w-5 h-5"
                   />
-                  <span className="text-sm font-medium text-gray-800">Meublé</span>
+                  <span className="text-sm font-medium text-neutral-800">Meublé</span>
                 </label>
 
-                <label className="flex items-center space-x-3 cursor-pointer bg-white px-4 py-3 rounded-xl border-2 border-terracotta-200 hover:border-terracotta-400 transition-all duration-300 transform hover:scale-105">
+                <label className="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors">
                   <input
                     type="checkbox"
                     name="has_parking"
                     checked={formData.has_parking}
                     onChange={handleChange}
-                    className="rounded border-gray-300 text-terracotta-600 focus:ring-terracotta-500 w-5 h-5"
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 w-5 h-5"
                   />
-                  <span className="text-sm font-medium text-gray-800">Parking</span>
+                  <span className="text-sm font-medium text-neutral-800">Parking</span>
                 </label>
 
-                <label className="flex items-center space-x-3 cursor-pointer bg-white px-4 py-3 rounded-xl border-2 border-terracotta-200 hover:border-terracotta-400 transition-all duration-300 transform hover:scale-105">
+                <label className="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors">
                   <input
                     type="checkbox"
                     name="has_ac"
                     checked={formData.has_ac}
                     onChange={handleChange}
-                    className="rounded border-gray-300 text-terracotta-600 focus:ring-terracotta-500 w-5 h-5"
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 w-5 h-5"
                   />
-                  <span className="text-sm font-medium text-gray-800">Climatisation</span>
+                  <span className="text-sm font-medium text-neutral-800">Climatisation</span>
                 </label>
 
-                <label className="flex items-center space-x-3 cursor-pointer bg-white px-4 py-3 rounded-xl border-2 border-terracotta-200 hover:border-terracotta-400 transition-all duration-300 transform hover:scale-105">
+                <label className="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors">
                   <input
                     type="checkbox"
                     name="has_garden"
                     checked={formData.has_garden}
                     onChange={handleChange}
-                    className="rounded border-gray-300 text-terracotta-600 focus:ring-terracotta-500 w-5 h-5"
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 w-5 h-5"
                   />
-                  <span className="text-sm font-medium text-gray-800">Jardin</span>
+                  <span className="text-sm font-medium text-neutral-800">Jardin</span>
                 </label>
               </div>
             </div>
 
-            <div className="flex justify-end space-x-4 pt-6">
+            <div className="flex justify-end gap-4 pt-6">
               <button
                 type="button"
                 onClick={() => window.history.back()}
-                className="btn-secondary px-8 py-3"
+                className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-8 rounded-xl transition-colors"
               >
                 Annuler
               </button>
               <button
                 type="submit"
                 disabled={loading || uploadingImages}
-                className="btn-primary px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-8 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 <Save className="h-5 w-5" />
                 <span>
