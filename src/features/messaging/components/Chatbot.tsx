@@ -19,7 +19,7 @@ import type { ChatMessage as ChatMessageType, ChatConversation } from '@/types/m
 import { useAuth } from '@/app/providers/AuthProvider';
 import ChatMessage from './ChatMessage';
 import sutaAvatar from '@/assets/suta-avatar.jpg';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/services/supabase/client';
 import { toast } from 'sonner';
 
 interface QuickAction {
