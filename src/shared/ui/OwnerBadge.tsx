@@ -1,4 +1,4 @@
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Shield } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { ScoreBadge } from './ScoreBadge';
 
@@ -7,6 +7,9 @@ export interface OwnerBadgeProps {
   avatarUrl?: string | null;
   trustScore?: number | null;
   isVerified?: boolean;
+  oneciVerified?: boolean;
+  cnamVerified?: boolean;
+  showVerificationBadges?: boolean;
   variant?: 'inline' | 'card';
   size?: 'sm' | 'md' | 'lg';
   showScore?: boolean;
@@ -48,6 +51,9 @@ export function OwnerBadge({
   avatarUrl,
   trustScore,
   isVerified = false,
+  oneciVerified = false,
+  cnamVerified = false,
+  showVerificationBadges = false,
   variant = 'inline',
   size = 'md',
   showScore = true,
@@ -101,7 +107,9 @@ export function OwnerBadge({
 
   // Variante card (pour sidebar, détails)
   return (
-    <div className={cn('bg-white rounded-2xl shadow-lg p-4 border border-neutral-100', className)}>
+    <div className={cn('bg-white rounded-2xl shadow-lg p-6 border border-neutral-100', className)}>
+      <h3 className="text-lg font-semibold text-neutral-900 mb-4">Propriétaire</h3>
+      
       <div className={cn('flex items-center', sizes.gap)}>
         {/* Avatar */}
         <div className="relative flex-shrink-0">
@@ -142,6 +150,33 @@ export function OwnerBadge({
           )}
         </div>
       </div>
+
+      {/* Badges de vérification */}
+      {showVerificationBadges && (
+        <div className="mt-4 pt-4 border-t border-neutral-100">
+          <div className="text-sm text-neutral-500 mb-2">Vérifications</div>
+          <div className="flex flex-wrap gap-2">
+            {isVerified && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
+                <CheckCircle className="h-3 w-3" /> Identité vérifiée
+              </span>
+            )}
+            {oneciVerified && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
+                <Shield className="h-3 w-3" /> ONECI
+              </span>
+            )}
+            {cnamVerified && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full">
+                <Shield className="h-3 w-3" /> CNAM
+              </span>
+            )}
+            {!isVerified && !oneciVerified && !cnamVerified && (
+              <span className="text-xs text-neutral-400">Aucune vérification</span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
