@@ -913,6 +913,105 @@ export type Database = {
         }
         Relationships: []
       }
+      service_configurations: {
+        Row: {
+          config: Json | null
+          created_at: string | null
+          id: string
+          is_enabled: boolean | null
+          priority: number | null
+          provider: string
+          service_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          priority?: number | null
+          provider: string
+          service_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          priority?: number | null
+          provider?: string
+          service_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      service_usage_logs: {
+        Row: {
+          error_message: string | null
+          id: string
+          phone: string | null
+          provider: string
+          response_time_ms: number | null
+          service_name: string
+          status: string
+          timestamp: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          phone?: string | null
+          provider: string
+          response_time_ms?: number | null
+          service_name: string
+          status: string
+          timestamp?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          phone?: string | null
+          provider?: string
+          response_time_ms?: number | null
+          service_name?: string
+          status?: string
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
+      sms_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          message: string
+          phone: string
+          provider: string
+          status: string
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message: string
+          phone: string
+          provider: string
+          status: string
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message?: string
+          phone?: string
+          provider?: string
+          status?: string
+          transaction_id?: string | null
+        }
+        Relationships: []
+      }
       suta_analytics: {
         Row: {
           avg_response_time_ms: number | null
@@ -1215,6 +1314,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      whatsapp_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          message: string
+          phone: string
+          provider: string
+          status: string
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message: string
+          phone: string
+          provider: string
+          status: string
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          message?: string
+          phone?: string
+          provider?: string
+          status?: string
+          transaction_id?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
