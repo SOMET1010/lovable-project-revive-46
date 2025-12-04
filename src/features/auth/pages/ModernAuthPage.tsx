@@ -261,13 +261,14 @@ export default function ModernAuthPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="votre@email.com"
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    style={{ paddingLeft: '44px' }}
                     required
                     autoFocus
                   />
@@ -277,13 +278,14 @@ export default function ModernAuthPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Mot de passe</label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    className="w-full pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    style={{ paddingLeft: '44px' }}
                     required
                   />
                   <button
@@ -339,13 +341,14 @@ export default function ModernAuthPage() {
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Numéro de téléphone</label>
                     <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                       <input
                         type="tel"
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value)}
                         placeholder="+225 07 XX XX XX XX"
-                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                        className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                        style={{ paddingLeft: '44px' }}
                         autoFocus
                       />
                     </div>
@@ -480,13 +483,14 @@ export default function ModernAuthPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Nom complet</label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                   <input
                     type="text"
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     placeholder="Jean Kouassi"
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    style={{ paddingLeft: '44px' }}
                     required
                     autoFocus
                   />
@@ -496,13 +500,14 @@ export default function ModernAuthPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                   <input
                     type="email"
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder="votre@email.com"
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    style={{ paddingLeft: '44px' }}
                     required
                   />
                 </div>
@@ -511,13 +516,14 @@ export default function ModernAuthPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Téléphone</label>
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                   <input
                     type="tel"
                     value={regPhone}
                     onChange={(e) => setRegPhone(e.target.value)}
                     placeholder="+225 07 XX XX XX XX"
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    style={{ paddingLeft: '44px' }}
                     required
                   />
                 </div>
@@ -526,13 +532,14 @@ export default function ModernAuthPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Mot de passe</label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    className="w-full pr-12 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    style={{ paddingLeft: '44px' }}
                     required
                   />
                   <button
@@ -549,13 +556,14 @@ export default function ModernAuthPage() {
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Confirmer le mot de passe</label>
                 <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10" />
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={regConfirm}
                     onChange={(e) => setRegConfirm(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    className="w-full pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all"
+                    style={{ paddingLeft: '44px' }}
                     required
                   />
                 </div>
