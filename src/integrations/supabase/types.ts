@@ -1179,6 +1179,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_otp: { Args: never; Returns: string }
       get_platform_stats: { Args: never; Returns: Json }
       get_user_roles: {
         Args: { _user_id?: string }
