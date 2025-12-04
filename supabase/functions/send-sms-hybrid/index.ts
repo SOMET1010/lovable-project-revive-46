@@ -146,7 +146,10 @@ Deno.serve(async (req: Request) => {
           throw new Error('Brevo API key not configured');
         }
 
-        const response = await fetch('https://api.brevo.com/v3/transactionalSMS/send', {
+        console.log('📤 Brevo SMS request to:', params.phoneNumber);
+        
+        // Correct Brevo SMS endpoint: /sms (not /send)
+        const response = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
           method: 'POST',
           headers: {
             'api-key': apiKey,
@@ -154,7 +157,7 @@ Deno.serve(async (req: Request) => {
             'Accept': 'application/json'
           },
           body: JSON.stringify({
-            sender: (config.config.sender || params.sender).substring(0, 11),
+            sender: (config.config?.sender || params.sender || 'ANSUT').substring(0, 11),
             recipient: params.phoneNumber,
             content: params.message,
             type: 'transactional'
@@ -162,11 +165,18 @@ Deno.serve(async (req: Request) => {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`Brevo SMS failed: ${errorData.message || response.statusText}`);
+          const errorText = await response.text();
+          console.error('❌ Brevo SMS error:', response.status, errorText);
+          try {
+            const errorData = JSON.parse(errorText);
+            throw new Error(`Brevo SMS failed: ${errorData.message || response.statusText}`);
+          } catch {
+            throw new Error(`Brevo SMS failed: ${response.status} - ${errorText}`);
+          }
         }
 
         const result = await response.json();
+        console.log('✅ Brevo SMS success:', result);
         return {
           success: true,
           messageId: result.messageId,
