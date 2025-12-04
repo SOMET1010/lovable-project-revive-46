@@ -6,7 +6,7 @@ import type {
   PaymentResponse,
   PaymentFilters,
   MobileMoneyTransaction,
-} from '../../types/payment.types';
+} from '@/shared/types/payment.types';
 
 interface PaymentRecord {
   amount?: number;

@@ -15,7 +15,7 @@ import {
   LogIn,
 } from 'lucide-react';
 import { chatbotService } from '@/services/chatbotService';
-import type { ChatMessage as ChatMessageType, ChatConversation } from '@/types/monToit.types';
+import type { ChatMessage as ChatMessageType, ChatConversation } from '@/shared/types/monToit.types';
 import { useAuth } from '@/app/providers/AuthProvider';
 import ChatMessage from './ChatMessage';
 import sutaAvatar from '@/assets/suta-avatar.jpg';

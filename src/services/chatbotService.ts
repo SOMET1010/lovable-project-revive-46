@@ -3,7 +3,7 @@
  * Placeholder temporaire pour le service chatbot
  */
 
-import type { ChatMessage, ChatConversation } from '@/types/monToit.types';
+import type { ChatMessage, ChatConversation } from '@/shared/types/monToit.types';
 import { supabase } from '@/services/supabase/client';
 
 /**
