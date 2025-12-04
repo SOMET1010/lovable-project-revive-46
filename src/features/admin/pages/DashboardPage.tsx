@@ -23,6 +23,9 @@ interface PlatformStats {
   monthly_growth: number;
   error_rate: number;
   uptime: number;
+  total_conversations?: number;
+  total_messages?: number;
+  total_feedbacks?: number;
 }
 
 interface MetricCard {
