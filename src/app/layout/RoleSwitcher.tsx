@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { User, Building2, Briefcase, RefreshCw, CheckCircle, Info } from 'lucide-react';
+import { toast } from '@/shared/hooks/useToast';
 
 export default function RoleSwitcher() {
   const { profile, user, updateProfile } = useAuth();
@@ -30,7 +31,7 @@ export default function RoleSwitcher() {
       }
     } catch (err) {
       console.error('Erreur changement de rôle:', err);
-      alert('Erreur lors du changement de rôle');
+      toast.error('Erreur lors du changement de rôle');
     } finally {
       setSwitching(false);
     }

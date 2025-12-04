@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Award } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { ScoringService } from '@/services/scoringService';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -19,6 +20,9 @@ interface ExtendedProfile {
   user_type: string | null;
   profile_setup_completed: boolean | null;
   is_verified?: boolean;
+  oneci_verified?: boolean;
+  cnam_verified?: boolean;
+  facial_verification_status?: string;
   bio?: string;
 }
 
@@ -112,17 +116,8 @@ export default function ApplicationForm() {
   };
 
   const calculateApplicationScore = () => {
-    let score = 50;
-
-    if (profile?.is_verified) score += 30;
-    if (profile?.full_name) score += 4;
-    if (profile?.phone) score += 4;
-    if (profile?.city) score += 4;
-    if (profile?.bio) score += 3;
-    if (profile?.avatar_url) score += 3;
-    if (profile?.address) score += 2;
-
-    return Math.min(score, 100);
+    // Utiliser le ScoringService centralisé
+    return ScoringService.calculateSimpleScore(profile);
   };
 
   if (loading) {
