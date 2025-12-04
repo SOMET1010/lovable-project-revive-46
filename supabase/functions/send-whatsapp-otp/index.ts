@@ -34,45 +34,48 @@ Deno.serve(async (req: Request) => {
       formattedPhone = '225' + formattedPhone;
     }
 
-    // SMS message (InTouch doesn't have native WhatsApp API, fallback to SMS)
-    const message = `Mon Toit: Votre code de verification est ${otp}. Valide 10 min. Ne partagez pas ce code.`;
+    const message = `Mon Toit: Votre code de verification est ${otp}. Valide 10 min.`;
 
     // Get InTouch credentials
     const intouchApiKey = Deno.env.get('INTOUCH_API_KEY');
-    const intouchAgencyCode = Deno.env.get('INTOUCH_AGENCY_CODE') || 'MONTOIT';
+    const intouchAgencyCode = Deno.env.get('INTOUCH_AGENCY_CODE');
 
-    if (!intouchApiKey) {
-      // Mode développement - simuler l'envoi
-      console.log('DEV MODE: InTouch API not configured, simulating SMS send');
-      console.log(`Would send to: ${formattedPhone}`);
+    // Validate credentials - agency code should be simple alphanumeric
+    const isValidConfig = intouchApiKey && 
+                          intouchAgencyCode && 
+                          /^[A-Za-z0-9_-]+$/.test(intouchAgencyCode) &&
+                          intouchAgencyCode.length < 50;
+
+    if (!isValidConfig) {
+      // MODE DÉVELOPPEMENT - Simuler l'envoi et retourner le code pour test
+      console.log('=== MODE DÉVELOPPEMENT ===');
+      console.log(`Destinataire: +${formattedPhone}`);
       console.log(`Message: ${message}`);
-      console.log(`OTP Code: ${otp}`);
+      console.log(`Code OTP: ${otp}`);
+      console.log('==========================');
       
       return new Response(
         JSON.stringify({
           success: true,
-          message: 'Code de vérification envoyé (mode développement)',
-          simulated: true,
-          otp: otp // Only in dev mode for testing
+          message: `Code de vérification: ${otp} (Mode test - InTouch non configuré)`,
+          devMode: true,
+          otp: otp
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // InTouch SMS API endpoint (correct URL)
+    // Production: InTouch SMS API
     const intouchUrl = `https://apidist.gutouch.net/apidist/sec/${intouchAgencyCode}/sms`;
-    
-    // Basic auth encoding
     const authString = btoa(`${intouchAgencyCode}:${intouchApiKey}`);
 
-    console.log(`Sending SMS to ${formattedPhone} via InTouch...`);
+    console.log(`Envoi SMS vers +${formattedPhone}...`);
 
     const response = await fetch(intouchUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${authString}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
       },
       body: JSON.stringify({
         recipient_phone_number: formattedPhone,
@@ -81,17 +84,15 @@ Deno.serve(async (req: Request) => {
       }),
     });
 
-    const responseText = await response.text();
-    console.log('InTouch API response:', response.status, responseText);
-
     if (!response.ok) {
-      console.error('InTouch SMS API error:', responseText);
+      const errorText = await response.text();
+      console.error('InTouch error:', errorText);
       
-      // Fallback to dev mode if API fails
+      // Fallback en mode dev si l'API échoue
       return new Response(
         JSON.stringify({
           success: true,
-          message: 'Code généré (envoi SMS en erreur, utilisez le code ci-dessous pour tester)',
+          message: `Code: ${otp} (Erreur InTouch - mode fallback)`,
           fallback: true,
           otp: otp
         }),
@@ -99,33 +100,23 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    let result;
-    try {
-      result = JSON.parse(responseText);
-    } catch {
-      result = { raw: responseText };
-    }
-    
-    console.log('SMS sent successfully via InTouch:', result);
+    const result = await response.json();
+    console.log('SMS envoyé:', result);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Code de vérification envoyé par SMS',
-        messageId: result.transaction_id || result.id
+        message: 'Code envoyé par SMS'
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Error sending OTP:', errorMessage);
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    console.error('Erreur:', errorMessage);
 
     return new Response(
-      JSON.stringify({ 
-        error: errorMessage || 'Failed to send OTP',
-        details: String(error)
-      }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
