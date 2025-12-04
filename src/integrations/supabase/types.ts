@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       chatbot_conversations: {
         Row: {
           archived_at: string | null
@@ -257,6 +293,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_platform_stats: { Args: never; Returns: Json }
       get_user_roles: {
         Args: { _user_id?: string }
         Returns: Database["public"]["Enums"]["app_role"][]
@@ -267,6 +304,15 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_admin_action: {
+        Args: {
+          p_action: string
+          p_details?: Json
+          p_entity_id?: string
+          p_entity_type: string
+        }
+        Returns: string
       }
       upsert_suta_analytics: {
         Args: { p_category: string; p_is_positive?: boolean; p_topic: string }
