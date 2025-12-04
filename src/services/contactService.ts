@@ -5,12 +5,12 @@ export interface ContactSubmission {
   id?: string;
   name: string;
   email: string;
-  phone?: string;
-  subject: string;
+  phone?: string | null;
+  subject?: string | null;
   message: string;
-  status?: 'nouveau' | 'en_cours' | 'resolu' | 'ferme';
-  submitted_at?: string;
-  resolved_at?: string;
+  status?: 'nouveau' | 'en_cours' | 'resolu' | 'ferme' | null;
+  submitted_at?: string | null;
+  resolved_at?: string | null;
 }
 
 export interface ContactServiceResponse<T> {
@@ -27,7 +27,7 @@ class ContactService {
           name: data.name,
           email: data.email,
           phone: data.phone || null,
-          subject: data.subject,
+          subject: data.subject || null,
           message: data.message,
           status: data.status || 'nouveau',
           submitted_at: new Date().toISOString(),
@@ -39,7 +39,7 @@ class ContactService {
 
       logger.info('Contact submission created successfully', { id: submission?.id });
 
-      return { data: submission, error: null };
+      return { data: submission as ContactSubmission, error: null };
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error occurred');
       logger.error('Error submitting contact form', error);
@@ -69,7 +69,7 @@ class ContactService {
 
       if (error) throw error;
 
-      return { data: data || [], error: null };
+      return { data: (data || []) as ContactSubmission[], error: null };
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error occurred');
       logger.error('Error fetching contact submissions', error);
@@ -82,10 +82,10 @@ class ContactService {
     status: 'nouveau' | 'en_cours' | 'resolu' | 'ferme'
   ): Promise<ContactServiceResponse<ContactSubmission>> {
     try {
-      const updateData: any = { status };
+      const updateData: Record<string, unknown> = { status };
 
       if (status === 'resolu' || status === 'ferme') {
-        updateData.resolved_at = new Date().toISOString();
+        updateData['resolved_at'] = new Date().toISOString();
       }
 
     const { data: updatedSubmission, error } = await supabase
@@ -99,7 +99,7 @@ class ContactService {
 
       logger.info('Contact submission status updated', { id, status });
 
-      return { data: updatedSubmission, error: null };
+      return { data: updatedSubmission as ContactSubmission, error: null };
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Unknown error occurred');
       logger.error('Error updating contact submission status', error);

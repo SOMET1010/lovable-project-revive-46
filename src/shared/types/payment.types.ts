@@ -10,8 +10,18 @@ export type Payment = Database['public']['Tables']['payments']['Row'];
 export type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
 export type PaymentUpdate = Database['public']['Tables']['payments']['Update'];
 
-export type MobileMoneyTransaction =
-  Database['public']['Tables']['mobile_money_transactions']['Row'];
+// Mobile Money Transaction - define locally since table doesn't exist
+export interface MobileMoneyTransaction {
+  id: string;
+  payment_id: string;
+  provider: MobileMoneyProvider;
+  phone_number: string;
+  amount: number;
+  status: PaymentStatus;
+  external_transaction_id?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 // Payment status
 export type PaymentStatus =
@@ -103,87 +113,6 @@ export interface WebhookPayload {
   metadata?: Record<string, unknown>;
 }
 
-// Provider-specific interfaces
-
-export interface OrangeMoneyRequest {
-  merchant_key: string;
-  currency: string;
-  order_id: string;
-  amount: number;
-  return_url: string;
-  cancel_url: string;
-  notif_url: string;
-  lang: string;
-  reference: string;
-}
-
-export interface OrangeMoneyResponse {
-  status: number;
-  message: string;
-  pay_token: string;
-  payment_url: string;
-  notif_token: string;
-}
-
-export interface MTNMoneyRequest {
-  amount: string;
-  currency: string;
-  externalId: string;
-  payer: {
-    partyIdType: string;
-    partyId: string;
-  };
-  payerMessage: string;
-  payeeNote: string;
-}
-
-export interface MTNMoneyResponse {
-  status: string;
-  financialTransactionId?: string;
-  externalId: string;
-  amount: string;
-  currency: string;
-  payer: {
-    partyIdType: string;
-    partyId: string;
-  };
-  payerMessage: string;
-  payeeNote: string;
-}
-
-export interface MoovMoneyRequest {
-  amount: number;
-  currency: string;
-  reference: string;
-  phone_number: string;
-  description: string;
-  callback_url: string;
-}
-
-export interface MoovMoneyResponse {
-  success: boolean;
-  transaction_id: string;
-  status: string;
-  message: string;
-}
-
-export interface WaveRequest {
-  amount: number;
-  currency: string;
-  error_url: string;
-  success_url: string;
-  client_reference: string;
-}
-
-export interface WaveResponse {
-  id: string;
-  wave_launch_url: string;
-  business_name: string;
-  currency: string;
-  amount: number;
-  payment_status: string;
-}
-
 // Payment calculation result
 export interface PaymentCalculation {
   baseAmount: number;
@@ -231,53 +160,6 @@ export interface PaymentReceipt {
   };
 }
 
-// Landlord transfer
-export interface LandlordTransfer {
-  id: string;
-  paymentId: string;
-  landlordId: string;
-  amount: number;
-  fees: number;
-  netAmount: number;
-  provider: MobileMoneyProvider;
-  phoneNumber: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  transferredAt?: Date;
-  createdAt: Date;
-}
-
-// Payment reminder
-export interface PaymentReminder {
-  leaseId: string;
-  tenantId: string;
-  amount: number;
-  dueDate: Date;
-  daysUntilDue: number;
-  lastReminderSent?: Date;
-  reminderType: 'email' | 'sms' | 'push' | 'all';
-}
-
-// Payment statistics
-export interface PaymentStatistics {
-  totalPayments: number;
-  totalAmount: number;
-  successfulPayments: number;
-  failedPayments: number;
-  pendingPayments: number;
-  averageAmount: number;
-  byProvider: Record<MobileMoneyProvider, number>;
-  byStatus: Record<PaymentStatus, number>;
-}
-
-// Provider detection result
-export interface ProviderDetectionResult {
-  provider: MobileMoneyProvider | null;
-  isValid: boolean;
-  phoneNumber: string;
-  formattedNumber: string;
-  error?: string;
-}
-
 // Payment error types
 export enum PaymentErrorCode {
   INVALID_PHONE = 'INVALID_PHONE',
@@ -300,90 +182,12 @@ export interface PaymentError {
   retryable: boolean;
 }
 
-export interface InTouchCashinRequest {
-  service_id: string;
-  recipient_phone_number: string;
-  amount: number;
-  partner_id: string;
-  partner_transaction_id: string;
-  login_api: string;
-  password_api: string;
-  call_back_url: string;
-}
-
-export interface InTouchPayoutRequest {
-  idFromClient: string;
-  additionnalInfos: {
-    recipientEmail: string;
-    recipientFirstName: string;
-    recipientLastName: string;
-    destinataire: string;
-  };
-  amount: number;
-  callback: string;
-  recipientNumber: string;
-  serviceCode: string;
-}
-
-export interface InTouchResponse {
-  status: string;
-  message: string;
-  transaction_id?: string;
-  data?: unknown;
-  code?: string;
-}
-
-export interface InTouchWebhook {
-  transaction_id: string;
-  partner_transaction_id: string;
-  status: string;
-  amount: number;
-  phone_number: string;
-  timestamp: string;
-  service_id?: string;
-  error_message?: string;
-}
-
-export interface InTouchTransactionStatus {
-  transaction_id: string;
-  partner_transaction_id: string;
-  status: InTouchStatus;
-  amount: number;
-  phone_number: string;
-  service_id: string;
-  created_at: string;
-  updated_at: string;
-  error_message?: string;
-}
-
-export interface InTouchBalanceResponse {
-  status: string;
-  balance: number;
-  currency: string;
-  timestamp: string;
-}
-
 export type InTouchStatus =
   | 'PENDING'
   | 'SUCCESS'
   | 'FAILED'
   | 'PROCESSING'
   | 'CANCELLED';
-
-export const INTOUCH_SERVICE_IDS = {
-  cashin: {
-    orange_money: 'CASHINOMCIPART2',
-    mtn_money: 'CASHINMTNPART2',
-    moov_money: 'CASHINMOOVPART2',
-    wave: 'CI_CASHIN_WAVE_PART',
-  },
-  payout: {
-    orange_money: 'PAIEMENTMARCHANDOMPAYCIDIRECT',
-    mtn_money: 'PAIEMENTMARCHAND_MTN_CI',
-    moov_money: 'PAIEMENTMARCHAND_MOOV_CI',
-    wave: 'CI_PAIEMENTWAVE_TP',
-  },
-} as const;
 
 export const INTOUCH_STATUS_MAPPING: Record<InTouchStatus, PaymentStatus> = {
   PENDING: 'processing',

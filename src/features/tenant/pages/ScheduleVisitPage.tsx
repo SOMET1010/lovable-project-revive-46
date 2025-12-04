@@ -118,11 +118,11 @@ export default function ScheduleVisit() {
           property_id: property.id,
           tenant_id: user.id,
           visit_type: visitType,
-          visit_date: selectedDate.toISOString().split('T')[0],
+          visit_date: selectedDate.toISOString().split('T')[0] ?? '',
           visit_time: selectedTime,
           visitor_notes: notes || null,
           status: 'en_attente'
-        });
+        } as never);
 
       if (error) throw error;
 

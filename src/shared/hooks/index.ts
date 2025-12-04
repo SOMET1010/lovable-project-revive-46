@@ -7,7 +7,6 @@ export { useParallax } from './useParallax';
 export type { default as UseParallaxReturn } from './useParallax';
 
 export { useBreakpoint } from './useBreakpoint';
-export { useDemoMode } from './useDemoMode';
 export { useErrorHandler } from './useErrorHandler';
 export { useFeatureFlag } from './useFeatureFlag';
 export { useLocalStorage } from './useLocalStorage';
@@ -16,7 +15,6 @@ export { useUserRoles } from './useUserRoles';
 export type { AppRole, UseUserRolesReturn } from './useUserRoles';
 
 // Migrated hooks from src/hooks
-export { useContract } from './useContract';
 export { 
   useDebounce, 
   useDebouncedCallback, 
@@ -25,7 +23,6 @@ export {
   useDebouncedAutoSave, 
   DEBOUNCE_DELAYS 
 } from './useDebounce';
-export { useVerification } from './useVerification';
 
 // Debouncing utilities
 export * from './debouncing';
