@@ -26,12 +26,31 @@ function createSafeClient(): SupabaseClient<Database> {
           };
         }
         if (prop === 'from') {
-          return () => ({
-            select: () => ({ data: null, error: { message: 'Supabase not configured' } }),
+          const chainable = {
+            select: () => chainable,
+            eq: () => chainable,
+            neq: () => chainable,
+            in: () => chainable,
+            is: () => chainable,
+            gt: () => chainable,
+            gte: () => chainable,
+            lt: () => chainable,
+            lte: () => chainable,
+            like: () => chainable,
+            ilike: () => chainable,
+            order: () => chainable,
+            limit: () => chainable,
+            range: () => chainable,
+            single: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
+            maybeSingle: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
             insert: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
-            update: () => ({ eq: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }) }),
-            delete: () => ({ eq: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }) }),
-          });
+            update: () => chainable,
+            delete: () => chainable,
+            upsert: () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } }),
+            then: (resolve: (value: { data: null; error: { message: string } }) => void) => 
+              resolve({ data: null, error: { message: 'Supabase not configured' } }),
+          };
+          return () => chainable;
         }
         if (prop === 'functions') {
           return {
