@@ -571,6 +571,10 @@ export default function PropertyDetailPage() {
                 showVerificationBadges={true}
                 variant="card"
                 size="lg"
+                ownerId={property.owner_id}
+                propertyId={property.id}
+                propertyTitle={property.title}
+                showContactButton={!isOwnerOrAgency}
               />
             </div>
           </div>

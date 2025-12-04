@@ -52,6 +52,7 @@ const FAQPage = lazy(() => import('@/features/auth/pages/FAQPage'));
 const HowItWorksPage = lazy(() => import('@/features/auth/pages/HowItWorksPage'));
 
 const UserDashboard = lazy(() => import('@/features/tenant/pages/DashboardPage'));
+const MessagesPage = lazy(() => import('@/features/messaging/pages/MessagesPage'));
 
 export const routes: RouteObject[] = [
   {
@@ -93,6 +94,7 @@ export const routes: RouteObject[] = [
       { path: 'properties/:id', element: <PropertyDetail /> },
       { path: 'proprietes/:id', element: <PropertyDetail /> },
       { path: 'favoris', element: <ProtectedRoute><Favorites /></ProtectedRoute> },
+      { path: 'messages', element: <ProtectedRoute><MessagesPage /></ProtectedRoute> },
       { path: 'recherches-sauvegardees', element: <ProtectedRoute><SavedSearches /></ProtectedRoute> },
       { path: 'candidature/:id', element: <ProtectedRoute><ApplicationForm /></ProtectedRoute> },
       { path: 'visiter/:id', element: <ProtectedRoute><ScheduleVisit /></ProtectedRoute> },
