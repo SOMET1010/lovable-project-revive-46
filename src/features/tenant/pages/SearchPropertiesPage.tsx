@@ -16,7 +16,7 @@ import {
   Sparkles,
   ChevronRight
 } from 'lucide-react';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapboxMap from '@/shared/ui/MapboxMap';
