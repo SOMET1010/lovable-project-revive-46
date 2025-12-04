@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { MessageSquare, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/shared/ui/Button';
 import { useAuthStore } from '@/store/authStore';
 import { useConversations } from '../hooks/useConversations';
 import { useMessages } from '../hooks/useMessages';
@@ -13,7 +10,6 @@ import { Conversation } from '../services/messaging.service';
 
 export default function MessagesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { user } = useAuthStore();
   
   const { conversations, loading: loadingConversations, getOrCreateConversation } = useConversations();
@@ -32,12 +28,10 @@ export default function MessagesPage() {
     const subject = searchParams.get('subject');
 
     if (toUserId && user?.id) {
-      // Create or get conversation
       getOrCreateConversation(toUserId, propertyId, subject).then((conv) => {
         if (conv) {
           setSelectedConversation(conv);
           setShowMobileThread(true);
-          // Clear URL params
           setSearchParams({});
         }
       });
@@ -65,70 +59,49 @@ export default function MessagesPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <p className="text-neutral-500">Veuillez vous connecter pour accéder aux messages.</p>
+      <div className="min-h-screen bg-[#111B21] flex items-center justify-center">
+        <p className="text-[#8696A0]">Veuillez vous connecter pour accéder aux messages.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <Button
-            variant="secondary"
-            size="small"
-            onClick={() => navigate(-1)}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Retour
-          </Button>
-          <h1 className="text-2xl font-bold text-neutral-900 flex items-center gap-2">
-            <MessageSquare className="h-6 w-6 text-primary-500" />
-            Messages
-          </h1>
+    <div className="h-screen bg-[#111B21] flex flex-col overflow-hidden">
+      {/* Main content - Full height */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Conversation list - hidden on mobile when viewing thread */}
+        <div
+          className={`w-full lg:w-[420px] flex-shrink-0 border-r border-[#222D34] ${
+            showMobileThread ? 'hidden lg:block' : ''
+          }`}
+        >
+          <ConversationList
+            conversations={conversations}
+            selectedId={selectedConversation?.id ?? null}
+            onSelect={handleSelectConversation}
+            loading={loadingConversations}
+          />
         </div>
 
-        {/* Main content */}
-        <div className="bg-white rounded-2xl shadow-lg border border-neutral-100 overflow-hidden h-[calc(100vh-180px)]">
-          <div className="flex h-full">
-            {/* Conversation list - hidden on mobile when viewing thread */}
-            <div
-              className={`w-full lg:w-80 xl:w-96 flex-shrink-0 ${
-                showMobileThread ? 'hidden lg:block' : ''
-              }`}
-            >
-              <ConversationList
-                conversations={conversations}
-                selectedId={selectedConversation?.id ?? null}
-                onSelect={handleSelectConversation}
-                loading={loadingConversations}
-              />
-            </div>
-
-            {/* Message thread */}
-            <div
-              className={`flex-1 ${
-                !showMobileThread ? 'hidden lg:block' : ''
-              }`}
-            >
-              {selectedConversation ? (
-                <MessageThread
-                  conversation={selectedConversation}
-                  messages={messages}
-                  currentUserId={user.id}
-                  loading={loadingMessages}
-                  sending={sending}
-                  onSend={sendMessage}
-                  onBack={handleBack}
-                />
-              ) : (
-                <EmptyConversation />
-              )}
-            </div>
-          </div>
+        {/* Message thread */}
+        <div
+          className={`flex-1 ${
+            !showMobileThread ? 'hidden lg:block' : ''
+          }`}
+        >
+          {selectedConversation ? (
+            <MessageThread
+              conversation={selectedConversation}
+              messages={messages}
+              currentUserId={user.id}
+              loading={loadingMessages}
+              sending={sending}
+              onSend={sendMessage}
+              onBack={handleBack}
+            />
+          ) : (
+            <EmptyConversation />
+          )}
         </div>
       </div>
     </div>

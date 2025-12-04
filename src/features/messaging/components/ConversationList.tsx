@@ -1,4 +1,4 @@
-import { Search, MessageSquare } from 'lucide-react';
+import { Search, MessageSquare, MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import { Conversation } from '../services/messaging.service';
 import { ConversationItem } from './ConversationItem';
@@ -24,20 +24,27 @@ export function ConversationList({ conversations, selectedId, onSelect, loading 
   });
 
   return (
-    <div className="flex flex-col h-full bg-white border-r border-neutral-200">
-      {/* Header */}
-      <div className="p-4 border-b border-neutral-200">
-        <h2 className="text-lg font-semibold text-neutral-900 mb-3">Conversations</h2>
-        
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+    <div className="flex flex-col h-full bg-[#111B21]">
+      {/* WhatsApp Header */}
+      <div className="bg-[#202C33] px-4 py-3 flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-[#E9EDEF]">Mon Toit</h2>
+        <div className="flex items-center gap-4">
+          <button className="p-2 hover:bg-[#374248] rounded-full transition-colors">
+            <MoreVertical className="h-5 w-5 text-[#AEBAC1]" />
+          </button>
+        </div>
+      </div>
+
+      {/* Search Bar - WhatsApp Style */}
+      <div className="px-3 py-2 bg-[#111B21]">
+        <div className="relative bg-[#202C33] rounded-lg flex items-center">
+          <Search className="absolute left-3 h-4 w-4 text-[#8696A0]" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher..."
-            className="w-full pl-10 pr-4 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder="Rechercher ou démarrer une discussion"
+            className="w-full pl-10 pr-4 py-2 bg-transparent text-sm text-[#E9EDEF] placeholder-[#8696A0] focus:outline-none"
           />
         </div>
       </div>
@@ -47,19 +54,19 @@ export function ConversationList({ conversations, selectedId, onSelect, loading 
         {loading ? (
           <div className="p-4 space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center gap-3 animate-pulse">
-                <div className="w-12 h-12 bg-neutral-200 rounded-full" />
+              <div key={i} className="flex items-center gap-3 animate-pulse px-3">
+                <div className="w-12 h-12 bg-[#202C33] rounded-full" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-neutral-200 rounded w-3/4" />
-                  <div className="h-3 bg-neutral-200 rounded w-1/2" />
+                  <div className="h-4 bg-[#202C33] rounded w-3/4" />
+                  <div className="h-3 bg-[#202C33] rounded w-1/2" />
                 </div>
               </div>
             ))}
           </div>
         ) : filteredConversations.length === 0 ? (
           <div className="p-8 text-center">
-            <MessageSquare className="h-12 w-12 text-neutral-300 mx-auto mb-3" />
-            <p className="text-neutral-500 text-sm">
+            <MessageSquare className="h-12 w-12 text-[#3B4A54] mx-auto mb-3" />
+            <p className="text-[#8696A0] text-sm">
               {search ? 'Aucune conversation trouvée' : 'Aucune conversation'}
             </p>
           </div>

@@ -1,8 +1,9 @@
-import { Home, Search, PlusCircle, User, Heart, Calendar, Bell, FileText, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Home, Search, PlusCircle, User, Heart, Calendar, Bell, FileText, Settings, LogOut, Menu, X, MessageCircle } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
 import { useLocation } from 'react-router-dom';
+import { useUnreadCount } from '@/features/messaging/hooks/useUnreadCount';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();
@@ -11,6 +12,8 @@ export default function HeaderPremium() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  
+  const { count: unreadCount } = useUnreadCount();
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
@@ -35,6 +38,7 @@ export default function HeaderPremium() {
 
   const userMenuItems = user ? [
     { label: 'Mon Profil', href: '/profil', icon: User },
+    { label: 'Messages', href: '/messages', icon: MessageCircle, badge: unreadCount },
     { label: 'Mes Favoris', href: '/favoris', icon: Heart },
     { label: 'Mes Visites', href: '/mes-visites', icon: Calendar },
     { label: 'Mes Alertes', href: '/recherches-sauvegardees', icon: Bell },
@@ -102,6 +106,24 @@ export default function HeaderPremium() {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex items-center space-x-3">
+              {/* Message Badge - WhatsApp Style */}
+              {user && (
+                <a
+                  href="/messages"
+                  className={`relative p-2 rounded-lg transition-all duration-200 hover:bg-neutral-100 ${
+                    isActive('/messages') ? 'bg-neutral-100' : ''
+                  }`}
+                  aria-label={`Messages${unreadCount > 0 ? `, ${unreadCount} non lus` : ''}`}
+                >
+                  <MessageCircle className={`h-6 w-6 ${isActive('/messages') ? 'text-primary-500' : 'text-neutral-600'}`} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-[#25D366] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md whatsapp-badge-pulse">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </a>
+              )}
+
               {user ? (
                 <div className="relative">
                   <button
@@ -126,10 +148,17 @@ export default function HeaderPremium() {
                         <a
                           key={item.label}
                           href={item.href}
-                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors duration-150"
+                          className="flex items-center justify-between px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors duration-150"
                         >
-                          <item.icon className="h-4 w-4" />
-                          <span>{item.label}</span>
+                          <div className="flex items-center space-x-3">
+                            <item.icon className="h-4 w-4" />
+                            <span>{item.label}</span>
+                          </div>
+                          {item.badge && item.badge > 0 && (
+                            <span className="bg-[#25D366] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                              {item.badge > 9 ? '9+' : item.badge}
+                            </span>
+                          )}
                         </a>
                       ))}
 
@@ -245,14 +274,21 @@ export default function HeaderPremium() {
                 key={item.label}
                 href={item.href}
                 onClick={() => setShowMobileMenu(false)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-r-lg transition-colors ${
+                className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
                   isActive(item.href) 
                     ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-500' 
                     : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-500'
                 }`}
               >
-                <item.icon className="h-5 w-5" />
-                <span className="font-medium">{item.label}</span>
+                <div className="flex items-center space-x-3">
+                  <item.icon className="h-5 w-5" />
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                {item.badge && item.badge > 0 && (
+                  <span className="bg-[#25D366] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {item.badge > 9 ? '9+' : item.badge}
+                  </span>
+                )}
               </a>
             ))}
           </nav>
