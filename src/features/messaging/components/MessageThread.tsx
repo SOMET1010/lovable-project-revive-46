@@ -3,6 +3,7 @@ import { Home, ArrowLeft, MoreVertical, Phone, Video } from 'lucide-react';
 import { Message, Conversation, Attachment } from '../services/messaging.service';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
+import { SoundToggle } from './SoundToggle';
 
 interface MessageThreadProps {
   conversation: Conversation;
@@ -75,7 +76,8 @@ export function MessageThread({
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <SoundToggle />
           <button className="p-2 hover:bg-[#374248] rounded-full transition-colors">
             <Video className="h-5 w-5 text-[#AEBAC1]" />
           </button>
