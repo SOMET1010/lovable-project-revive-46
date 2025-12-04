@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
 import SEOHead, { createOrganizationStructuredData, createWebsiteStructuredData } from '@/shared/components/SEOHead';
 
 // Premium Components
@@ -11,10 +9,12 @@ import HowItWorksSection from '../components/HowItWorksSection';
 import TrustSection from '../components/TrustSection';
 import CTASection from '../components/CTASection';
 
-type Property = Database['public']['Tables']['properties']['Row'];
+import { propertyApi } from '../services/property.api';
+import type { PropertyWithOwnerScore } from '../types';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Home() {
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<PropertyWithOwnerScore[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Initialize with visible values immediately - NEVER show 0
@@ -32,13 +32,7 @@ export default function Home() {
 
   const loadProperties = async () => {
     try {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('status', 'disponible')
-        .order('created_at', { ascending: false })
-        .limit(6);
-
+      const { data, error } = await propertyApi.getFeatured();
       if (error) throw error;
       setProperties(data || []);
     } catch (error) {
