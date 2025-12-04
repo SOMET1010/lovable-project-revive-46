@@ -1,5 +1,5 @@
-import { memo } from 'react';
-import { User, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import { memo, useState } from 'react';
+import { User, CheckCircle, AlertCircle, ExternalLink, ThumbsUp, ThumbsDown } from 'lucide-react';
 import sutaAvatar from '@/assets/suta-avatar.jpg';
 
 interface ChatMessageProps {
@@ -7,6 +7,9 @@ interface ChatMessageProps {
   content: string;
   timestamp: string;
   isNew?: boolean;
+  messageId?: string;
+  previousUserMessage?: string;
+  onFeedback?: (rating: 'positive' | 'negative', messageId: string, question: string, response: string) => void;
 }
 
 function formatMessage(text: string): JSX.Element[] {
@@ -136,7 +139,16 @@ function formatInlineText(text: string): (string | JSX.Element)[] {
   return elements.length > 0 ? elements : [text];
 }
 
-function ChatMessage({ role, content, timestamp, isNew = false }: ChatMessageProps) {
+function ChatMessage({ 
+  role, 
+  content, 
+  timestamp, 
+  isNew = false,
+  messageId,
+  previousUserMessage,
+  onFeedback 
+}: ChatMessageProps) {
+  const [feedbackGiven, setFeedbackGiven] = useState<'positive' | 'negative' | null>(null);
   const isUser = role === 'user';
   const isAssistant = role === 'assistant';
   
@@ -146,9 +158,23 @@ function ChatMessage({ role, content, timestamp, isNew = false }: ChatMessagePro
   const hasAlert = safeContent.includes('🚨') || safeContent.includes('ALERTE') || safeContent.includes('ARNAQUE');
   const hasSuccess = safeContent.includes('✅') || safeContent.includes('PROTÉGÉ');
 
+  // Don't show feedback for welcome/system messages
+  const showFeedbackButtons = isAssistant && 
+    messageId && 
+    !messageId.includes('welcome') && 
+    onFeedback &&
+    previousUserMessage;
+
+  const handleFeedback = (rating: 'positive' | 'negative') => {
+    if (feedbackGiven || !messageId || !previousUserMessage) return;
+    
+    setFeedbackGiven(rating);
+    onFeedback?.(rating, messageId, previousUserMessage, safeContent);
+  };
+
   return (
     <div
-      className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${isNew ? 'animate-slide-in' : ''}`}
+      className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'} ${isNew ? 'animate-slide-in' : ''} group`}
     >
       {/* Avatar */}
       <div className="flex-shrink-0">
@@ -195,6 +221,43 @@ function ChatMessage({ role, content, timestamp, isNew = false }: ChatMessagePro
             {formatMessage(safeContent)}
           </div>
         </div>
+
+        {/* Feedback buttons for assistant messages */}
+        {showFeedbackButtons && (
+          <div className={`flex items-center gap-2 mt-1.5 ${feedbackGiven ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+            <button
+              onClick={() => handleFeedback('positive')}
+              disabled={!!feedbackGiven}
+              className={`p-1.5 rounded-full transition-all ${
+                feedbackGiven === 'positive' 
+                  ? 'bg-green-100 text-green-600 scale-110' 
+                  : feedbackGiven 
+                  ? 'opacity-40 cursor-not-allowed text-gray-300'
+                  : 'hover:bg-green-50 text-gray-400 hover:text-green-500'
+              }`}
+              title="Réponse utile"
+            >
+              <ThumbsUp className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => handleFeedback('negative')}
+              disabled={!!feedbackGiven}
+              className={`p-1.5 rounded-full transition-all ${
+                feedbackGiven === 'negative' 
+                  ? 'bg-red-100 text-red-600 scale-110' 
+                  : feedbackGiven 
+                  ? 'opacity-40 cursor-not-allowed text-gray-300'
+                  : 'hover:bg-red-50 text-gray-400 hover:text-red-500'
+              }`}
+              title="Réponse à améliorer"
+            >
+              <ThumbsDown className="h-3.5 w-3.5" />
+            </button>
+            {feedbackGiven && (
+              <span className="text-xs text-gray-400 ml-1">Merci ! 🙏</span>
+            )}
+          </div>
+        )}
 
         <span className={`text-xs mt-1 px-2 ${isUser ? 'text-gray-500' : 'text-gray-400'}`}>
           {new Date(timestamp).toLocaleTimeString('fr-FR', {
