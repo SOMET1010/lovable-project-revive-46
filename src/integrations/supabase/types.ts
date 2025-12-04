@@ -133,6 +133,123 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+          user_id: string | null
+          user_type: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          user_type?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          user_type?: string | null
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          bathrooms: number | null
+          bedrooms: number | null
+          city: string
+          created_at: string | null
+          description: string | null
+          id: string
+          images: string[] | null
+          is_furnished: boolean | null
+          latitude: number | null
+          longitude: number | null
+          main_image: string | null
+          monthly_rent: number
+          neighborhood: string | null
+          owner_id: string | null
+          price: number | null
+          property_category: string | null
+          property_type: string
+          status: string | null
+          surface_area: number | null
+          title: string
+          updated_at: string | null
+          views: number | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_furnished?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          main_image?: string | null
+          monthly_rent: number
+          neighborhood?: string | null
+          owner_id?: string | null
+          price?: number | null
+          property_category?: string | null
+          property_type: string
+          status?: string | null
+          surface_area?: number | null
+          title: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          is_furnished?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          main_image?: string | null
+          monthly_rent?: number
+          neighborhood?: string | null
+          owner_id?: string | null
+          price?: number | null
+          property_category?: string | null
+          property_type?: string
+          status?: string | null
+          surface_area?: number | null
+          title?: string
+          updated_at?: string | null
+          views?: number | null
+        }
+        Relationships: []
+      }
       suta_analytics: {
         Row: {
           avg_response_time_ms: number | null
@@ -304,6 +421,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_property_views: {
+        Args: { property_id: string }
+        Returns: undefined
       }
       log_admin_action: {
         Args: {
