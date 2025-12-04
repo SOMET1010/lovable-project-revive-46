@@ -140,62 +140,70 @@ export default function TenantDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-coral-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-terracotta-500"></div>
+      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50 custom-cursor">
-      <div className="glass-card border-b border-white/20">
+    <div className="min-h-screen bg-neutral-50">
+      {/* Header */}
+      <div className="bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="animate-slide-down">
-            <h1 className="text-4xl font-bold text-gradient flex items-center space-x-3">
-              <Home className="h-10 w-10 text-terracotta-500" />
-              <span>Mon Tableau de Bord</span>
-            </h1>
-            <p className="text-gray-700 mt-2 text-lg">Bienvenue, {profile?.full_name || 'Locataire'}</p>
-          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 flex items-center gap-3">
+            <Home className="h-8 w-8 text-primary-500" />
+            <span>Mon Tableau de Bord</span>
+          </h1>
+          <p className="text-neutral-600 mt-2 text-lg">Bienvenue, {profile?.full_name || 'Locataire'}</p>
         </div>
       </div>
 
+      {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Column */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Active Lease Card */}
             {activeLease ? (
-              <div className="card-scrapbook p-6 animate-slide-up">
-                <h2 className="text-2xl font-bold text-gradient mb-4 flex items-center space-x-2">
-                  <Home className="h-7 w-7 text-terracotta-500" />
+              <div className="bg-white rounded-2xl p-6 shadow-card">
+                <h2 className="text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                  <Home className="h-6 w-6 text-primary-500" />
                   <span>Mon Logement Actuel</span>
                 </h2>
-                <div className="bg-gradient-to-br from-white to-amber-50 border-2 border-terracotta-200 rounded-2xl p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
+                <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-6">
+                  <h3 className="text-xl font-bold text-neutral-900 mb-2">
                     {(activeLease.properties as any)?.title}
                   </h3>
-                  <p className="text-gray-700 mb-4">
+                  <p className="text-neutral-600 mb-4">
                     {(activeLease.properties as any)?.city} • {(activeLease.properties as any)?.neighborhood}
                   </p>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm text-gray-600">Loyer mensuel</p>
-                      <p className="text-2xl font-bold text-terracotta-600">
+                      <p className="text-sm text-neutral-500">Loyer mensuel</p>
+                      <p className="text-2xl font-bold text-primary-600">
                         {(activeLease.properties as any)?.monthly_rent.toLocaleString()} FCFA
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-600">Durée du bail</p>
-                      <p className="text-2xl font-bold text-gradient">
+                      <p className="text-sm text-neutral-500">Durée du bail</p>
+                      <p className="text-2xl font-bold text-neutral-900">
                         {Math.ceil((new Date(activeLease.end_date).getTime() - new Date(activeLease.start_date).getTime()) / (1000 * 60 * 60 * 24 * 30))} mois
                       </p>
                     </div>
                   </div>
                   <div className="mt-6 flex flex-wrap gap-3">
-                    <a href={`/contrat/${activeLease.id}`} className="btn-secondary text-sm">
+                    <a 
+                      href={`/contrat/${activeLease.id}`} 
+                      className="inline-flex items-center border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-2 px-4 rounded-xl transition-colors"
+                    >
                       <FileText className="h-4 w-4 mr-2" />
                       Voir le bail
                     </a>
-                    <a href={`/propriete/${activeLease.property_id}`} className="btn-secondary text-sm">
+                    <a 
+                      href={`/propriete/${activeLease.property_id}`} 
+                      className="inline-flex items-center border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-2 px-4 rounded-xl transition-colors"
+                    >
                       <Home className="h-4 w-4 mr-2" />
                       Détails du logement
                     </a>
@@ -203,42 +211,46 @@ export default function TenantDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="card-scrapbook p-8 text-center animate-slide-up">
-                <div className="bg-gradient-to-br from-terracotta-100 to-coral-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Home className="h-12 w-12 text-terracotta-600" />
+              <div className="bg-white rounded-2xl p-8 shadow-card text-center">
+                <div className="bg-primary-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Home className="h-12 w-12 text-primary-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-gradient mb-3">Aucun logement actif</h3>
-                <p className="text-gray-700 mb-6">
+                <h3 className="text-2xl font-bold text-neutral-900 mb-3">Aucun logement actif</h3>
+                <p className="text-neutral-600 mb-6">
                   Vous n'avez pas encore de bail actif. Commencez votre recherche dès maintenant!
                 </p>
-                <a href="/recherche" className="btn-primary inline-flex items-center">
+                <a 
+                  href="/recherche" 
+                  className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
+                >
                   <Search className="h-5 w-5 mr-2" />
                   Rechercher un logement
                 </a>
               </div>
             )}
 
+            {/* Next Payment Card */}
             {nextPayment && (
-              <div className="card-scrapbook p-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                <h2 className="text-2xl font-bold text-gradient mb-4 flex items-center space-x-2">
-                  <Coins className="h-7 w-7 text-terracotta-500" />
+              <div className="bg-white rounded-2xl p-6 shadow-card">
+                <h2 className="text-xl font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                  <Coins className="h-6 w-6 text-primary-500" />
                   <span>Prochain Paiement</span>
                 </h2>
-                <div className={`rounded-2xl p-6 border-2 ${
+                <div className={`rounded-xl p-6 border ${
                   stats.paymentStatus === 'late'
-                    ? 'bg-gradient-to-br from-red-50 to-pink-50 border-red-300'
-                    : 'bg-gradient-to-br from-olive-50 to-green-50 border-olive-300'
+                    ? 'bg-red-50 border-red-200'
+                    : 'bg-green-50 border-green-200'
                 }`}>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-sm text-gray-700 mb-1">Montant dû</p>
-                      <p className="text-3xl font-bold text-gradient">
+                      <p className="text-sm text-neutral-600 mb-1">Montant dû</p>
+                      <p className="text-3xl font-bold text-primary-600">
                         {nextPayment.amount.toLocaleString()} FCFA
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-700 mb-1">Date limite</p>
-                      <p className="text-xl font-bold text-gray-900">
+                      <p className="text-sm text-neutral-600 mb-1">Date limite</p>
+                      <p className="text-xl font-bold text-neutral-900">
                         {new Date(nextPayment.dueDate).toLocaleDateString('fr-FR', {
                           day: 'numeric',
                           month: 'long',
@@ -247,16 +259,19 @@ export default function TenantDashboard() {
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Clock className={`h-5 w-5 ${stats.paymentStatus === 'late' ? 'text-red-600' : 'text-olive-600'}`} />
-                      <span className={`font-bold ${stats.paymentStatus === 'late' ? 'text-red-800' : 'text-olive-800'}`}>
+                    <div className="flex items-center gap-2">
+                      <Clock className={`h-5 w-5 ${stats.paymentStatus === 'late' ? 'text-red-600' : 'text-green-600'}`} />
+                      <span className={`font-semibold ${stats.paymentStatus === 'late' ? 'text-red-700' : 'text-green-700'}`}>
                         {nextPayment.daysRemaining > 0
                           ? `${nextPayment.daysRemaining} jours restants`
                           : 'Paiement en retard'
                         }
                       </span>
                     </div>
-                    <a href="/effectuer-paiement" className="btn-primary">
+                    <a 
+                      href="/effectuer-paiement" 
+                      className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-xl transition-colors"
+                    >
                       Payer maintenant
                     </a>
                   </div>
@@ -264,28 +279,29 @@ export default function TenantDashboard() {
               </div>
             )}
 
+            {/* Payment History */}
             {recentPayments.length > 0 && (
-              <div className="card-scrapbook p-6 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <div className="bg-white rounded-2xl p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gradient">Historique des Paiements</h2>
-                  <a href="/mes-paiements" className="text-terracotta-600 hover:text-terracotta-700 text-sm font-bold">
+                  <h2 className="text-xl font-bold text-neutral-900">Historique des Paiements</h2>
+                  <a href="/mes-paiements" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
                     Voir tout →
                   </a>
                 </div>
                 <div className="space-y-3">
                   {recentPayments.map((payment) => (
-                    <div key={payment.id} className="bg-gradient-to-br from-white to-amber-50 border border-gray-200 rounded-lg p-4 flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
+                    <div key={payment.id} className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
                         {payment.status === 'complete' ? (
                           <CheckCircle className="h-6 w-6 text-green-600" />
                         ) : (
-                          <Clock className="h-6 w-6 text-yellow-600" />
+                          <Clock className="h-6 w-6 text-amber-600" />
                         )}
                         <div>
-                          <p className="font-bold text-gray-900">
+                          <p className="font-semibold text-neutral-900">
                             {payment.amount.toLocaleString()} FCFA
                           </p>
-                          <p className="text-xs text-gray-600">
+                          <p className="text-xs text-neutral-500">
                             {new Date(payment.created_at).toLocaleDateString('fr-FR', {
                               day: 'numeric',
                               month: 'long',
@@ -294,10 +310,10 @@ export default function TenantDashboard() {
                           </p>
                         </div>
                       </div>
-                      <span className={`text-xs px-3 py-1 rounded-full font-bold ${
+                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                         payment.status === 'complete'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-amber-100 text-amber-700'
                       }`}>
                         {payment.status === 'complete' ? 'Payé' : 'En attente'}
                       </span>
@@ -308,78 +324,106 @@ export default function TenantDashboard() {
             )}
           </div>
 
+          {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="card-scrapbook p-6 animate-scale-in">
-              <h3 className="text-xl font-bold text-gradient mb-4">Actions Rapides</h3>
+            {/* Quick Actions */}
+            <div className="bg-white rounded-2xl p-6 shadow-card">
+              <h3 className="text-lg font-bold text-neutral-900 mb-4">Actions Rapides</h3>
               <div className="space-y-3">
                 {activeLease && (
                   <>
-                    <a href="/effectuer-paiement" className="btn-primary w-full flex items-center justify-center">
+                    <a 
+                      href="/effectuer-paiement" 
+                      className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                    >
                       <Coins className="h-5 w-5 mr-2" />
                       Payer mon loyer
                     </a>
-                    <a href="/messages" className="btn-secondary w-full flex items-center justify-center">
+                    <a 
+                      href="/messages" 
+                      className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                    >
                       <MessageSquare className="h-5 w-5 mr-2" />
                       Contacter le propriétaire
                     </a>
-                    <a href="/maintenance/nouvelle" className="btn-secondary w-full flex items-center justify-center">
+                    <a 
+                      href="/maintenance/nouvelle" 
+                      className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                    >
                       <Wrench className="h-5 w-5 mr-2" />
                       Demander une réparation
                     </a>
-                    <a href={`/contrat/${activeLease.id}`} className="btn-secondary w-full flex items-center justify-center">
+                    <a 
+                      href={`/contrat/${activeLease.id}`} 
+                      className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                    >
                       <FileText className="h-5 w-5 mr-2" />
                       Voir mon bail
                     </a>
                   </>
                 )}
-                <a href="/score-locataire" className="btn-secondary w-full flex items-center justify-center">
+                <a 
+                  href="/score-locataire" 
+                  className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
                   <FileText className="h-5 w-5 mr-2" />
                   Mon Score Locataire
                 </a>
-                <a href="/maintenance/locataire" className="btn-secondary w-full flex items-center justify-center">
+                <a 
+                  href="/maintenance/locataire" 
+                  className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
                   <Wrench className="h-5 w-5 mr-2" />
                   Mes demandes de maintenance
                 </a>
-                <a href="/recherche" className="btn-secondary w-full flex items-center justify-center">
+                <a 
+                  href="/recherche" 
+                  className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
                   <Search className="h-5 w-5 mr-2" />
                   Rechercher un logement
                 </a>
-                <a href="/notifications/preferences" className="btn-secondary w-full flex items-center justify-center text-sm">
+                <a 
+                  href="/notifications/preferences" 
+                  className="border border-neutral-200 hover:border-primary-200 text-neutral-600 font-medium py-2 px-4 rounded-xl transition-colors w-full flex items-center justify-center text-sm"
+                >
                   Préférences de notifications
                 </a>
               </div>
             </div>
 
-            <div className="card-scrapbook p-6 animate-scale-in" style={{ animationDelay: '0.1s' }}>
-              <h3 className="text-xl font-bold text-gradient mb-4">Notifications</h3>
+            {/* Notifications */}
+            <div className="bg-white rounded-2xl p-6 shadow-card">
+              <h3 className="text-lg font-bold text-neutral-900 mb-4">Notifications</h3>
               <div className="space-y-3">
-                <div className="flex items-center space-x-3 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3">
+                <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
                   <MessageSquare className="h-5 w-5 text-amber-600" />
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-gray-900">Messages non lus</p>
-                    <p className="text-2xl font-bold text-gradient">{stats.unreadMessages}</p>
+                    <p className="text-sm font-medium text-neutral-700">Messages non lus</p>
+                    <p className="text-2xl font-bold text-neutral-900">{stats.unreadMessages}</p>
                   </div>
                 </div>
                 {stats.maintenanceRequests > 0 && (
-                  <div className="flex items-center space-x-3 bg-gradient-to-br from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg p-3">
-                    <Wrench className="h-5 w-5 text-cyan-600" />
+                  <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                    <Wrench className="h-5 w-5 text-blue-600" />
                     <div className="flex-1">
-                      <p className="text-sm font-bold text-gray-900">Demandes en cours</p>
-                      <p className="text-2xl font-bold text-gradient">{stats.maintenanceRequests}</p>
+                      <p className="text-sm font-medium text-neutral-700">Demandes en cours</p>
+                      <p className="text-2xl font-bold text-neutral-900">{stats.maintenanceRequests}</p>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
+            {/* Recent Favorites */}
             {recentFavorites.length > 0 && (
-              <div className="card-scrapbook p-6 animate-scale-in" style={{ animationDelay: '0.2s' }}>
+              <div className="bg-white rounded-2xl p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gradient flex items-center space-x-2">
-                    <Heart className="h-5 w-5 text-terracotta-500" />
+                  <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                    <Heart className="h-5 w-5 text-primary-500" />
                     <span>Favoris Récents</span>
                   </h3>
-                  <a href="/favoris" className="text-terracotta-600 hover:text-terracotta-700 text-sm font-bold">
+                  <a href="/favoris" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
                     Voir tout →
                   </a>
                 </div>
@@ -388,24 +432,25 @@ export default function TenantDashboard() {
                     <a
                       key={fav.id}
                       href={`/propriete/${fav.property_id}`}
-                      className="block bg-gradient-to-br from-white to-red-50 border border-red-200 rounded-lg p-3 hover:border-red-400 transition-all"
+                      className="block bg-neutral-50 border border-neutral-200 rounded-xl p-3 hover:border-primary-200 transition-colors"
                     >
-                      <p className="font-bold text-gray-900 text-sm">{fav.properties?.title}</p>
-                      <p className="text-xs text-gray-600">{fav.properties?.city}</p>
+                      <p className="font-medium text-neutral-900 text-sm">{fav.properties?.title}</p>
+                      <p className="text-xs text-neutral-500">{fav.properties?.city}</p>
                     </a>
                   ))}
                 </div>
               </div>
             )}
 
+            {/* Saved Searches */}
             {savedSearches.length > 0 && (
-              <div className="card-scrapbook p-6 animate-scale-in" style={{ animationDelay: '0.3s' }}>
+              <div className="bg-white rounded-2xl p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-bold text-gradient flex items-center space-x-2">
-                    <Search className="h-5 w-5 text-terracotta-500" />
+                  <h3 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                    <Search className="h-5 w-5 text-primary-500" />
                     <span>Recherches Sauvegardées</span>
                   </h3>
-                  <a href="/recherches-sauvegardees" className="text-terracotta-600 hover:text-terracotta-700 text-sm font-bold">
+                  <a href="/recherches-sauvegardees" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
                     Voir tout →
                   </a>
                 </div>
@@ -414,10 +459,10 @@ export default function TenantDashboard() {
                     <button
                       key={search.id}
                       onClick={() => window.location.href = `/recherche?saved=${search.id}`}
-                      className="w-full text-left bg-gradient-to-br from-white to-cyan-50 border border-cyan-200 rounded-lg p-3 hover:border-cyan-400 transition-all"
+                      className="w-full text-left bg-neutral-50 border border-neutral-200 rounded-xl p-3 hover:border-primary-200 transition-colors"
                     >
-                      <p className="font-bold text-gray-900 text-sm">{search.name}</p>
-                      <p className="text-xs text-gray-600">
+                      <p className="font-medium text-neutral-900 text-sm">{search.name}</p>
+                      <p className="text-xs text-neutral-500">
                         {search.city || 'Toutes les villes'}
                       </p>
                     </button>
