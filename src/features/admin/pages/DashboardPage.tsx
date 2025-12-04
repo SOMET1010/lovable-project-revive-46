@@ -72,16 +72,16 @@ export default function AdminDashboard() {
 
   const checkAdminAccess = async () => {
     try {
-      const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('user_id', user?.id)
-        .eq('is_active', true)
-        .maybeSingle();
+      // Use the secure has_role function to check admin access
+      const { data: hasAdminRole, error } = await supabase
+        .rpc('has_role', { 
+          _user_id: user?.id, 
+          _role: 'admin' 
+        });
 
       if (error) throw error;
 
-      if (!data) {
+      if (!hasAdminRole) {
         window.location.href = '/';
         return;
       }
