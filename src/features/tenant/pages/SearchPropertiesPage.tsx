@@ -17,7 +17,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
-import type { Database } from '@/shared/lib/database.types';
+import type { Database } from '@/integrations/supabase/types';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapboxMap from '@/shared/ui/MapboxMap';
 import { CITY_NAMES, ABIDJAN_NEIGHBORHOODS } from '@/shared/data/cities';
