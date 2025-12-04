@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { User, Building2, Briefcase, RefreshCw, CheckCircle, Info } from 'lucide-react';
 
 interface AvailableRolesResponse {
@@ -26,10 +26,10 @@ export default function RoleSwitcher() {
         if (error) throw error;
 
         const response = data as AvailableRolesResponse;
-        setAvailableRoles(response.roles || [profile.user_type]);
+        setAvailableRoles(response.roles || [profile.user_type || 'locataire']);
       } catch (err) {
         console.error('Erreur chargement rôles:', err);
-        setAvailableRoles([profile.user_type]);
+        setAvailableRoles([profile.user_type || 'locataire']);
       } finally {
         setLoading(false);
       }
@@ -61,7 +61,7 @@ export default function RoleSwitcher() {
       } else {
         alert(data.error || 'Erreur lors du changement de rôle');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erreur changement de rôle:', err);
       alert('Erreur lors du changement de rôle');
     } finally {
@@ -115,7 +115,7 @@ export default function RoleSwitcher() {
   // Ne rien afficher si un seul rôle
   if (availableRoles.length <= 1) return null;
 
-  const activeRole = profile.active_role || profile.user_type;
+  const activeRole = profile.user_type || 'locataire';
 
   return (
     <div className="relative">

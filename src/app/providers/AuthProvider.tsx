@@ -1,10 +1,9 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session, AuthError, Provider } from '@supabase/supabase-js';
-import { supabase } from '@/services/supabase/client';
-import type { Database } from '@/shared/lib/database.types';
+import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { testDatabaseConnection } from '@/shared/lib/helpers/supabaseHealthCheck';
 import { logger } from '@/shared/lib/logger';
-import { envConfig } from '@/shared/config/env.config';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -40,64 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profileError, setProfileError] = useState<ProfileError | null>(null);
 
   useEffect(() => {
-    if (envConfig.isDemoMode) {
-      // Mode démo : simuler un utilisateur
-      console.log('🎭 Mode démo activé - Simulation d\'utilisateur');
-      setLoading(true);
-      
-      setTimeout(() => {
-        const demoUser = {
-          id: 'demo-user-123',
-          email: 'demo@montoit.ci',
-          app_metadata: {},
-          aud: 'authenticated',
-          created_at: new Date().toISOString(),
-          user_metadata: { 
-            full_name: 'Utilisateur Démo',
-            user_type: 'locataire'
-          }
-        } as User;
-        
-        const demoSession = {
-          user: demoUser,
-          access_token: 'demo-token',
-          refresh_token: 'demo-refresh',
-          expires_at: Date.now() + (24 * 60 * 60 * 1000) // 24h
-        } as Session;
-        
-        setUser(demoUser);
-        setSession(demoSession);
-        setLoading(false);
-        
-        // Charger un profil démo
-        setProfile({
-          id: 'demo-user-123',
-          email: 'demo@montoit.ci',
-          full_name: 'Utilisateur Démo',
-          user_type: 'locataire',
-          active_role: 'locataire',
-          available_roles: ['locataire'],
-          phone: '+225 XX XX XX XX',
-          avatar_url: null,
-          bio: null,
-          address: null,
-          city: null,
-          oneci_verified: false,
-          cnam_verified: false,
-          identity_verified: false,
-          is_verified: false,
-          profile_setup_completed: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } as Profile);
-        
-        console.log('✅ Utilisateur démo initialisé');
-      }, 1500);
-      
-      return;
-    }
-
-    // Mode production normal
     supabase.auth.getSession().then(({ data: { session } }: { data: { session: Session | null } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -127,11 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadProfile = async (userId: string, retryCount = 0) => {
     const MAX_RETRIES = 5;
     const RETRY_DELAY = 1500;
-
-    // Skip loading in demo mode - profile is already set
-    if (envConfig.isDemoMode) {
-      return;
-    }
 
     try {
       logger.debug('Loading user profile', { userId, attempt: retryCount + 1, maxRetries: MAX_RETRIES + 1 });
@@ -237,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log('[AuthContext] Profile loaded successfully:', data.email);
       setProfile(data);
       setProfileError(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[AuthContext] Error loading profile:', error);
 
       if (retryCount < MAX_RETRIES) {
@@ -250,7 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfileError({
           type: 'unknown',
           message: 'Erreur inconnue',
-          details: error.message || 'Une erreur inattendue s\'est produite.'
+          details: error instanceof Error ? error.message : 'Une erreur inattendue s\'est produite.'
         });
       }
     } finally {
@@ -258,9 +194,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const attemptProfileRecovery = async (userId: string): Promise<boolean> => {
+  const attemptProfileRecovery = async (_userId: string): Promise<boolean> => {
     try {
-      console.log('[AuthContext] Attempting to recover profile for user:', userId);
+      console.log('[AuthContext] Attempting to recover profile');
 
       const { data, error } = await supabase.rpc('ensure_my_profile_exists');
 
@@ -278,17 +214,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    if (envConfig.isDemoMode) {
-      // Mode démo : toujours réussir avec un message
-      console.log('🎭 Mode démo - Connexion simulée');
-      return { 
-        error: { 
-          message: 'Mode démo : Connectez-vous en mode production pour une vraie authentification',
-          status: 200
-        } as AuthError 
-      };
-    }
-    
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -297,16 +222,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, userData: { full_name: string; user_type?: string; phone?: string }) => {
-    if (envConfig.isDemoMode) {
-      console.log('🎭 Mode démo - Inscription simulée');
-      return { 
-        error: { 
-          message: 'Mode démo : Inscrivez-vous en mode production pour créer un vrai compte',
-          status: 200
-        } as AuthError 
-      };
-    }
-    
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -328,22 +243,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { error: null };
-    } catch (err: any) {
-      return { error: err };
+    } catch (err: unknown) {
+      return { error: err as AuthError };
     }
   };
 
   const signInWithProvider = async (provider: Provider) => {
-    if (envConfig.isDemoMode) {
-      console.log('🎭 Mode démo - OAuth simulé');
-      return { 
-        error: { 
-          message: 'Mode démo : Utilisez l\'authentification en mode production',
-          status: 200
-        } as AuthError 
-      };
-    }
-    
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
@@ -356,20 +261,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       });
       return { error };
-    } catch (err: any) {
-      return { error: err };
+    } catch (err: unknown) {
+      return { error: err as AuthError };
     }
   };
 
   const signOut = async () => {
-    if (envConfig.isDemoMode) {
-      console.log('🎭 Mode démo - Déconnexion simulée');
-      setUser(null);
-      setProfile(null);
-      setSession(null);
-      return;
-    }
-    
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
@@ -378,15 +275,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return;
-
-    if (envConfig.isDemoMode) {
-      console.log('🎭 Mode démo - Mise à jour du profil simulée');
-      // Simuler une mise à jour réussie
-      if (profile) {
-        setProfile({ ...profile, ...updates });
-      }
-      return;
-    }
 
     const { error } = await supabase
       .from('profiles')
@@ -398,17 +286,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const resetPassword = async (email: string) => {
-    if (envConfig.isDemoMode) {
-      console.log('🎭 Mode démo - Réinitialisation mot de passe simulée');
-      return {
-        error: {
-          message: 'Mode démo : Utilisez la réinitialisation en mode production',
-          status: 200,
-          name: 'AuthError'
-        } as AuthError
-      };
-    }
-    
     try {
       const { data, error: functionError } = await supabase.functions.invoke('send-password-reset', {
         body: { email }
@@ -446,7 +323,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       return { error: null };
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[AuthContext] Password reset exception:', err);
       return {
         error: {
