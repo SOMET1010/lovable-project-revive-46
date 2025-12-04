@@ -40,18 +40,22 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Récupérer le code OTP valide depuis verification_codes
+    console.log(`[VERIFY-OTP] Looking for code for phone: ${normalizedPhone}`);
+
+    // Récupérer le code OTP valide depuis verification_codes (sans filtre type pour accepter SMS et WhatsApp)
     const { data: otpRecord, error: otpError } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
       .eq('phone', normalizedPhone)
       .eq('code', code)
-      .eq('type', 'sms')
+      .in('type', ['sms', 'whatsapp'])
       .is('verified_at', null)
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+
+    console.log(`[VERIFY-OTP] OTP record found:`, otpRecord ? 'Yes' : 'No', otpError ? `Error: ${otpError.message}` : '');
 
     if (otpError) {
       console.error('Error fetching OTP:', otpError);
