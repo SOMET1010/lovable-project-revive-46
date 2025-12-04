@@ -17,12 +17,14 @@ type PropertyUpdate = Database['public']['Tables']['properties']['Update'];
 const CACHE_TTL_MINUTES = 15;
 const CACHE_PREFIX = 'properties_';
 
-// Select avec jointure profiles pour récupérer le trust_score
+// Select avec jointure profiles pour récupérer le trust_score et infos propriétaire
 const SELECT_WITH_OWNER = `
   *,
   profiles:owner_id (
     trust_score,
-    full_name
+    full_name,
+    avatar_url,
+    is_verified
   )
 `;
 
@@ -42,12 +44,19 @@ export interface PropertyFilters {
  * Mappe les données brutes de Supabase vers PropertyWithOwnerScore
  */
 const mapPropertyWithScore = (property: Record<string, unknown>): PropertyWithOwnerScore => {
-  const profiles = property['profiles'] as { trust_score?: number; full_name?: string } | null;
+  const profiles = property['profiles'] as {
+    trust_score?: number;
+    full_name?: string;
+    avatar_url?: string;
+    is_verified?: boolean;
+  } | null;
   const { profiles: _profiles, ...rest } = property;
   return {
     ...rest,
     owner_trust_score: profiles?.trust_score ?? null,
     owner_full_name: profiles?.full_name ?? null,
+    owner_avatar_url: profiles?.avatar_url ?? null,
+    owner_is_verified: profiles?.is_verified ?? null,
   } as PropertyWithOwnerScore;
 };
 

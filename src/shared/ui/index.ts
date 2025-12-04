@@ -76,3 +76,6 @@ export type { BadgeProps as BadgeCustomProps } from './BadgeCustom';
 
 export { ScoreBadge } from './ScoreBadge';
 export type { ScoreBadgeProps } from './ScoreBadge';
+
+export { OwnerBadge } from './OwnerBadge';
+export type { OwnerBadgeProps } from './OwnerBadge';

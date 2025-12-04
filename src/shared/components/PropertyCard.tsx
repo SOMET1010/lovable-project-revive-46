@@ -1,6 +1,6 @@
 import { Home as HomeIcon } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
-import { ScoreBadge } from '@/shared/ui';
+import { OwnerBadge } from '@/shared/ui';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -10,9 +10,20 @@ interface PropertyCardProps {
   showBadge?: boolean;
   badgeText?: string;
   ownerTrustScore?: number | null;
+  ownerName?: string | null;
+  ownerAvatarUrl?: string | null;
+  ownerIsVerified?: boolean;
 }
 
-export default function PropertyCard({ property, showBadge, badgeText, ownerTrustScore }: PropertyCardProps) {
+export default function PropertyCard({
+  property,
+  showBadge,
+  badgeText,
+  ownerTrustScore,
+  ownerName,
+  ownerAvatarUrl,
+  ownerIsVerified,
+}: PropertyCardProps) {
   return (
     <a
       href={`/propriete/${property.id}`}
@@ -37,7 +48,7 @@ export default function PropertyCard({ property, showBadge, badgeText, ownerTrus
             <HomeIcon className="h-16 w-16 text-gray-300" />
           </div>
         )}
-        
+
         {/* Price Badge */}
         <div className="absolute top-3 right-3 px-3 py-1 glass rounded-lg text-sm font-semibold text-gray-900 shadow-premium">
           {FormatService.formatCurrency(property.monthly_rent)}
@@ -50,10 +61,18 @@ export default function PropertyCard({ property, showBadge, badgeText, ownerTrus
           </div>
         )}
 
-        {/* Owner Trust Score Badge */}
-        {ownerTrustScore !== undefined && ownerTrustScore !== null && (
+        {/* Owner Badge with Trust Score */}
+        {ownerTrustScore != null && (
           <div className="absolute bottom-3 left-3">
-            <ScoreBadge score={ownerTrustScore} variant="compact" size="sm" />
+            <OwnerBadge
+              name={ownerName}
+              avatarUrl={ownerAvatarUrl}
+              trustScore={ownerTrustScore}
+              isVerified={ownerIsVerified}
+              variant="inline"
+              size="sm"
+              showName={true}
+            />
           </div>
         )}
       </div>
@@ -66,39 +85,37 @@ export default function PropertyCard({ property, showBadge, badgeText, ownerTrus
           </h3>
         </div>
 
-        <p className="text-gray-700 text-xs sm:text-sm truncate mb-1">
-          {property.title}
-        </p>
+        <p className="text-gray-700 text-xs sm:text-sm truncate mb-1">{property.title}</p>
 
         <div className="text-neutral-600 text-xs sm:text-sm flex items-center gap-3">
           {/* Chambres - TOUJOURS afficher */}
           <span className="flex items-center gap-1">
             <span className="text-primary-500">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M3 9.5C3 8.12 4.12 7 5.5 7h13c1.38 0 2.5 1.12 2.5 2.5v7.5c0 .83-.67 1.5-1.5 1.5H17v-5H7v5H4.5A1.5 1.5 0 0 1 3 17z"/>
-                <path d="M7 17V7h10v10"/>
+                <path d="M3 9.5C3 8.12 4.12 7 5.5 7h13c1.38 0 2.5 1.12 2.5 2.5v7.5c0 .83-.67 1.5-1.5 1.5H17v-5H7v5H4.5A1.5 1.5 0 0 1 3 17z" />
+                <path d="M7 17V7h10v10" />
               </svg>
             </span>
             <span className="font-medium">{property.bedrooms ? `${property.bedrooms} ch.` : '-'}</span>
           </span>
-          
+
           {/* Salles de bain - TOUJOURS afficher */}
           <span className="flex items-center gap-1">
             <span className="text-primary-500">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M9 6h6l1 9h3a3 3 0 0 1 0 6h-1a2 2 0 0 1-2-2"/>
-                <path d="M5 6v9c0 1.66 1.34 3 3 3h8"/>
+                <path d="M9 6h6l1 9h3a3 3 0 0 1 0 6h-1a2 2 0 0 1-2-2" />
+                <path d="M5 6v9c0 1.66 1.34 3 3 3h8" />
               </svg>
             </span>
             <span className="font-medium">{property.bathrooms ? `${property.bathrooms} sdb.` : '-'}</span>
           </span>
-          
+
           {/* Superficie - TOUJOURS afficher en m² */}
           <span className="flex items-center gap-1">
             <span className="text-primary-500">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <path d="M9 9h6v6H9z"/>
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M9 9h6v6H9z" />
               </svg>
             </span>
             <span className="font-medium">{property.surface_area ? `${property.surface_area} m²` : '-'}</span>
