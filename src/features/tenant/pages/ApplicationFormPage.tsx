@@ -75,7 +75,7 @@ export default function ApplicationForm() {
     setError('');
 
     try {
-      const scoreBreakdown = await ScoringService.calculateApplicationScore(user.id);
+      const applicationScore = calculateApplicationScore();
 
       // Insert application - types will be updated after migration sync
       const { error: insertError } = await supabase
@@ -84,14 +84,14 @@ export default function ApplicationForm() {
           property_id: property.id,
           applicant_id: user.id,
           cover_letter: coverLetter,
-          application_score: scoreBreakdown.totalScore,
+          application_score: applicationScore,
           status: 'en_attente',
         } as any);
 
       if (insertError) throw insertError;
 
       // Send notification message
-      const notificationMessage = `Nouvelle candidature pour ${property.title} (Score: ${scoreBreakdown.totalScore}/100)`;
+      const notificationMessage = `Nouvelle candidature pour ${property.title} (Score: ${applicationScore}/100)`;
       await supabase
         .from('messages' as any)
         .insert({
@@ -99,8 +99,6 @@ export default function ApplicationForm() {
           receiver_id: property.owner_id,
           content: notificationMessage,
         } as any);
-
-      await ScoringService.checkAndAwardAchievements(user.id);
 
       setSuccess(true);
       setTimeout(() => {
