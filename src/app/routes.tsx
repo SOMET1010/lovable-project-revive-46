@@ -9,7 +9,6 @@ import SearchErrorBoundary from '@/features/tenant/components/SearchErrorBoundar
 const Home = lazy(() => import('@/features/property/pages/HomePage'));
 const NotFound = lazy(() => import('@/features/property/pages/NotFoundPage'));
 const AddPropertyLanding = lazy(() => import('@/features/property/pages/AddPropertyLandingPage'));
-const Auth = lazy(() => import('@/features/auth/pages/AuthPage'));
 const ModernAuth = lazy(() => import('@/features/auth/pages/ModernAuthPage'));
 const AuthCallback = lazy(() => import('@/features/auth/pages/CallbackPage'));
 const ForgotPassword = lazy(() => import('@/features/auth/pages/ForgotPasswordPage'));
@@ -61,8 +60,8 @@ export const routes: RouteObject[] = [
     errorElement: <ErrorBoundary />,
     children: [
       { index: true, element: <Home /> },
-      { path: 'connexion', element: <Auth /> },
-      { path: 'inscription', element: <Auth /> },
+      { path: 'connexion', element: <ModernAuth /> },
+      { path: 'inscription', element: <ModernAuth /> },
       { path: 'auth', element: <ModernAuth /> },
       { path: 'auth/callback', element: <AuthCallback /> },
       { path: 'mot-de-passe-oublie', element: <ForgotPassword /> },
