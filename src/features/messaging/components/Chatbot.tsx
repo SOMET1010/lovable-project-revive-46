@@ -19,6 +19,8 @@ import type { ChatMessage as ChatMessageType, ChatConversation } from '@/types/m
 import { useAuth } from '@/app/providers/AuthProvider';
 import ChatMessage from './ChatMessage';
 import sutaAvatar from '@/assets/suta-avatar.jpg';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface QuickAction {
   icon: typeof Shield;
@@ -343,6 +345,57 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
     setShowQuickActions(false);
   };
 
+  // Handle feedback submission
+  const handleFeedback = async (
+    rating: 'positive' | 'negative',
+    messageId: string,
+    question: string,
+    response: string
+  ) => {
+    try {
+      const { error } = await supabase.from('suta_feedback').insert({
+        message_id: messageId,
+        conversation_id: conversation?.id || null,
+        user_id: user?.id || null,
+        session_id: !user ? guestSessionId : null,
+        rating,
+        question,
+        response
+      });
+
+      if (error) {
+        console.error('Feedback error:', error);
+        return;
+      }
+
+      toast.success(rating === 'positive' 
+        ? 'Merci pour votre retour positif ! 👍' 
+        : 'Merci, nous allons améliorer nos réponses ! 🙏'
+      );
+
+      // Update analytics
+      await supabase.rpc('upsert_suta_analytics', {
+        p_category: 'feedback',
+        p_topic: rating,
+        p_is_positive: rating === 'positive'
+      });
+
+    } catch (err) {
+      console.error('Error saving feedback:', err);
+    }
+  };
+
+  // Get the previous user message for a given assistant message index
+  const getPreviousUserMessage = (index: number): string | undefined => {
+    for (let i = index - 1; i >= 0; i--) {
+      const msg = currentMessages[i];
+      if (msg?.role === 'user') {
+        return msg.content;
+      }
+    }
+    return undefined;
+  };
+
   return (
     <>
       {/* Bouton flottant avec avatar SUTA */}
@@ -481,6 +534,9 @@ Comment puis-je vous aider aujourd'hui ? 😊`,
                 content={message.content}
                 timestamp={message.timestamp instanceof Date ? message.timestamp.toISOString() : String(message.timestamp)}
                 isNew={index === currentMessages.length - 1}
+                messageId={message.id}
+                previousUserMessage={getPreviousUserMessage(index)}
+                onFeedback={handleFeedback}
               />
             ))}
 

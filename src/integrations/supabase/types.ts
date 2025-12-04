@@ -97,12 +97,146 @@ export type Database = {
           },
         ]
       }
+      suta_analytics: {
+        Row: {
+          avg_response_time_ms: number | null
+          category: string | null
+          created_at: string | null
+          date: string | null
+          id: string
+          negative_feedback: number | null
+          positive_feedback: number | null
+          question_count: number | null
+          topic: string | null
+        }
+        Insert: {
+          avg_response_time_ms?: number | null
+          category?: string | null
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          negative_feedback?: number | null
+          positive_feedback?: number | null
+          question_count?: number | null
+          topic?: string | null
+        }
+        Update: {
+          avg_response_time_ms?: number | null
+          category?: string | null
+          created_at?: string | null
+          date?: string | null
+          id?: string
+          negative_feedback?: number | null
+          positive_feedback?: number | null
+          question_count?: number | null
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      suta_feedback: {
+        Row: {
+          conversation_id: string | null
+          created_at: string | null
+          feedback_text: string | null
+          id: string
+          message_id: string
+          question: string
+          rating: string
+          response: string
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string | null
+          feedback_text?: string | null
+          id?: string
+          message_id: string
+          question: string
+          rating: string
+          response: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string | null
+          feedback_text?: string | null
+          id?: string
+          message_id?: string
+          question?: string
+          rating?: string
+          response?: string
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suta_feedback_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "chatbot_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suta_knowledge_base: {
+        Row: {
+          answer: string
+          category: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          keywords: string[] | null
+          negative_feedback_count: number | null
+          positive_feedback_count: number | null
+          priority: number | null
+          question: string
+          updated_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          answer: string
+          category: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          negative_feedback_count?: number | null
+          positive_feedback_count?: number | null
+          priority?: number | null
+          question: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          answer?: string
+          category?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          negative_feedback_count?: number | null
+          positive_feedback_count?: number | null
+          priority?: number | null
+          question?: string
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      upsert_suta_analytics: {
+        Args: { p_category: string; p_is_positive?: boolean; p_topic: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
