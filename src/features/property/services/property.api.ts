@@ -3,6 +3,9 @@
  *
  * Ce service centralise tous les appels API liés aux propriétés immobilières
  * et utilise le CacheService pour optimiser les performances.
+ * 
+ * SÉCURITÉ: Utilise get_public_profile() pour récupérer les données propriétaire
+ * au lieu de jointures directes sur profiles (RLS sécurisé)
  */
 
 import { supabase } from '@/integrations/supabase/client';
@@ -17,16 +20,17 @@ type PropertyUpdate = Database['public']['Tables']['properties']['Update'];
 const CACHE_TTL_MINUTES = 15;
 const CACHE_PREFIX = 'properties_';
 
-// Select avec jointure profiles pour récupérer le trust_score et infos propriétaire
-const SELECT_WITH_OWNER = `
-  *,
-  profiles:owner_id (
-    trust_score,
-    full_name,
-    avatar_url,
-    is_verified
-  )
-`;
+// Type pour les données publiques du propriétaire retournées par get_public_profile
+interface PublicProfile {
+  user_id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  trust_score: number | null;
+  is_verified: boolean | null;
+  city: string | null;
+  oneci_verified: boolean | null;
+  cnam_verified: boolean | null;
+}
 
 export interface PropertyFilters {
   city?: string;
@@ -41,22 +45,87 @@ export interface PropertyFilters {
 }
 
 /**
- * Mappe les données brutes de Supabase vers PropertyWithOwnerScore
+ * Récupère les profils publics des propriétaires via RPC sécurisé
  */
-const mapPropertyWithScore = (property: Record<string, unknown>): PropertyWithOwnerScore => {
-  const profiles = property['profiles'] as {
-    trust_score?: number;
-    full_name?: string;
-    avatar_url?: string;
-    is_verified?: boolean;
-  } | null;
-  const { profiles: _profiles, ...rest } = property;
+const fetchOwnerProfiles = async (ownerIds: string[]): Promise<Map<string, PublicProfile>> => {
+  const uniqueIds = [...new Set(ownerIds.filter(Boolean))];
+  if (uniqueIds.length === 0) return new Map();
+
+  const { data, error } = await supabase.rpc('get_public_profiles', {
+    profile_user_ids: uniqueIds
+  });
+
+  if (error) {
+    console.error('Error fetching owner profiles:', error);
+    return new Map();
+  }
+
+  const profileMap = new Map<string, PublicProfile>();
+  (data || []).forEach((profile: PublicProfile) => {
+    profileMap.set(profile.user_id, profile);
+  });
+
+  return profileMap;
+};
+
+/**
+ * Enrichit les propriétés avec les données publiques des propriétaires
+ */
+const enrichPropertiesWithOwners = async (
+  properties: Database['public']['Tables']['properties']['Row'][]
+): Promise<PropertyWithOwnerScore[]> => {
+  const ownerIds = properties.map(p => p.owner_id).filter((id): id is string => id !== null);
+  const ownerProfiles = await fetchOwnerProfiles(ownerIds);
+
+  return properties.map(property => {
+    const owner = property.owner_id ? ownerProfiles.get(property.owner_id) : null;
+    return {
+      ...property,
+      owner_trust_score: owner?.trust_score ?? null,
+      owner_full_name: owner?.full_name ?? null,
+      owner_avatar_url: owner?.avatar_url ?? null,
+      owner_is_verified: owner?.is_verified ?? null,
+    } as PropertyWithOwnerScore;
+  });
+};
+
+/**
+ * Enrichit une seule propriété avec les données publiques du propriétaire
+ */
+const enrichPropertyWithOwner = async (
+  property: Database['public']['Tables']['properties']['Row']
+): Promise<PropertyWithOwnerScore> => {
+  if (!property.owner_id) {
+    return {
+      ...property,
+      owner_trust_score: null,
+      owner_full_name: null,
+      owner_avatar_url: null,
+      owner_is_verified: null,
+    } as PropertyWithOwnerScore;
+  }
+
+  const { data, error } = await supabase.rpc('get_public_profile', {
+    profile_user_id: property.owner_id
+  });
+
+  if (error || !data || data.length === 0) {
+    return {
+      ...property,
+      owner_trust_score: null,
+      owner_full_name: null,
+      owner_avatar_url: null,
+      owner_is_verified: null,
+    } as PropertyWithOwnerScore;
+  }
+
+  const owner = data[0] as PublicProfile;
   return {
-    ...rest,
-    owner_trust_score: profiles?.trust_score ?? null,
-    owner_full_name: profiles?.full_name ?? null,
-    owner_avatar_url: profiles?.avatar_url ?? null,
-    owner_is_verified: profiles?.is_verified ?? null,
+    ...property,
+    owner_trust_score: owner.trust_score ?? null,
+    owner_full_name: owner.full_name ?? null,
+    owner_avatar_url: owner.avatar_url ?? null,
+    owner_is_verified: owner.is_verified ?? null,
   } as PropertyWithOwnerScore;
 };
 
@@ -77,7 +146,7 @@ export const propertyApi = {
 
     let query = supabase
       .from('properties')
-      .select(SELECT_WITH_OWNER)
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (filters?.city) {
@@ -121,9 +190,9 @@ export const propertyApi = {
     if (error) throw error;
 
     if (data) {
-      const mappedData = data.map(mapPropertyWithScore);
-      cacheService.set(cacheKey, mappedData, CACHE_TTL_MINUTES);
-      return { data: mappedData, error: null };
+      const enrichedData = await enrichPropertiesWithOwners(data);
+      cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
+      return { data: enrichedData, error: null };
     }
 
     return { data: [], error: null };
@@ -142,16 +211,16 @@ export const propertyApi = {
 
     const { data, error } = await supabase
       .from('properties')
-      .select(SELECT_WITH_OWNER)
+      .select('*')
       .eq('id', id)
       .single();
 
     if (error) throw error;
 
     if (data) {
-      const mappedData = mapPropertyWithScore(data);
-      cacheService.set(cacheKey, mappedData, CACHE_TTL_MINUTES);
-      return { data: mappedData, error: null };
+      const enrichedData = await enrichPropertyWithOwner(data);
+      cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
+      return { data: enrichedData, error: null };
     }
 
     return { data: null, error: null };
@@ -170,16 +239,16 @@ export const propertyApi = {
 
     const { data, error } = await supabase
       .from('properties')
-      .select(SELECT_WITH_OWNER)
+      .select('*')
       .eq('owner_id', ownerId)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
 
     if (data) {
-      const mappedData = data.map(mapPropertyWithScore);
-      cacheService.set(cacheKey, mappedData, CACHE_TTL_MINUTES);
-      return { data: mappedData, error: null };
+      const enrichedData = await enrichPropertiesWithOwners(data);
+      cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
+      return { data: enrichedData, error: null };
     }
 
     return { data: [], error: null };
@@ -198,7 +267,7 @@ export const propertyApi = {
 
     const { data, error } = await supabase
       .from('properties')
-      .select(SELECT_WITH_OWNER)
+      .select('*')
       .eq('status', 'disponible')
       .order('created_at', { ascending: false })
       .limit(6);
@@ -206,9 +275,9 @@ export const propertyApi = {
     if (error) throw error;
 
     if (data) {
-      const mappedData = data.map(mapPropertyWithScore);
-      cacheService.set(cacheKey, mappedData, CACHE_TTL_MINUTES);
-      return { data: mappedData, error: null };
+      const enrichedData = await enrichPropertiesWithOwners(data);
+      cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
+      return { data: enrichedData, error: null };
     }
 
     return { data: [], error: null };
@@ -280,7 +349,7 @@ export const propertyApi = {
 
     const { data, error } = await supabase
       .from('properties')
-      .select(SELECT_WITH_OWNER)
+      .select('*')
       .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
       .eq('status', 'disponible')
       .order('created_at', { ascending: false });
@@ -288,9 +357,9 @@ export const propertyApi = {
     if (error) throw error;
 
     if (data) {
-      const mappedData = data.map(mapPropertyWithScore);
-      cacheService.set(cacheKey, mappedData, CACHE_TTL_MINUTES);
-      return { data: mappedData, error: null };
+      const enrichedData = await enrichPropertiesWithOwners(data);
+      cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
+      return { data: enrichedData, error: null };
     }
 
     return { data: [], error: null };

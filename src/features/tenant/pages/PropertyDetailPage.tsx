@@ -308,35 +308,60 @@ export default function PropertyDetailPage() {
 
   const loadProperty = async (propertyId: string) => {
     try {
+      // Étape 1: Récupérer la propriété (sans jointure directe sur profiles)
       const { data, error } = await supabase
         .from('properties')
-        .select(`
-          *,
-          profiles:owner_id (
-            full_name,
-            avatar_url,
-            trust_score,
-            is_verified,
-            oneci_verified,
-            cnam_verified
-          )
-        `)
+        .select('*')
         .eq('id', propertyId)
         .single();
 
       if (error) throw error;
       
-      // Cast to our extended Property type with owner profile data
-      const profileData = (data as any).profiles;
+      // Étape 2: Récupérer le profil public du propriétaire via RPC sécurisé
+      let ownerProfile: {
+        full_name: string | null;
+        avatar_url: string | null;
+        trust_score: number | null;
+        is_verified: boolean | null;
+        oneci_verified: boolean | null;
+        cnam_verified: boolean | null;
+      } | null = null;
+
+      if (data.owner_id) {
+        const { data: profileData } = await supabase.rpc('get_public_profile', {
+          profile_user_id: data.owner_id
+        });
+        
+        if (profileData && Array.isArray(profileData) && profileData.length > 0) {
+          const profile = profileData[0] as {
+            full_name: string | null;
+            avatar_url: string | null;
+            trust_score: number | null;
+            is_verified: boolean | null;
+            oneci_verified: boolean | null;
+            cnam_verified: boolean | null;
+          };
+          ownerProfile = {
+            full_name: profile.full_name ?? null,
+            avatar_url: profile.avatar_url ?? null,
+            trust_score: profile.trust_score ?? null,
+            is_verified: profile.is_verified ?? null,
+            oneci_verified: profile.oneci_verified ?? null,
+            cnam_verified: profile.cnam_verified ?? null,
+          };
+        }
+      }
+
+      // Étape 3: Construire l'objet Property enrichi
       const propertyData = {
         ...data,
         status: data.status ?? undefined,
-        owner_trust_score: profileData?.trust_score ?? null,
-        owner_full_name: profileData?.full_name ?? null,
-        owner_avatar_url: profileData?.avatar_url ?? null,
-        owner_is_verified: profileData?.is_verified ?? null,
-        owner_oneci_verified: profileData?.oneci_verified ?? null,
-        owner_cnam_verified: profileData?.cnam_verified ?? null,
+        owner_trust_score: ownerProfile?.trust_score ?? null,
+        owner_full_name: ownerProfile?.full_name ?? null,
+        owner_avatar_url: ownerProfile?.avatar_url ?? null,
+        owner_is_verified: ownerProfile?.is_verified ?? null,
+        owner_oneci_verified: ownerProfile?.oneci_verified ?? null,
+        owner_cnam_verified: ownerProfile?.cnam_verified ?? null,
       } as unknown as Property;
       setProperty(propertyData);
     } catch (error) {
