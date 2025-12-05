@@ -158,16 +158,16 @@ Deno.serve(async (req: Request) => {
     const sendResult = await sendResponse.json();
 
     if (!sendResponse.ok) {
-      console.warn('⚠️ Échec envoi OTP, mode dev activé:', sendResult);
+      console.error('❌ Échec envoi OTP:', sendResult);
+      // Ne JAMAIS exposer le code OTP dans la réponse API
       return new Response(
         JSON.stringify({
-          success: true,
-          message: `Code généré (envoi ${method} échoué)`,
-          fallback: true,
-          otp: otp, // Mode dev
-          expiresIn: 600,
+          success: false,
+          error: `Impossible d'envoyer le code par ${method === 'sms' ? 'SMS' : 'WhatsApp'}. Veuillez réessayer.`,
+          retryAllowed: true,
         }),
         {
+          status: 503,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
