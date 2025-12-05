@@ -3,7 +3,7 @@
  * Design terracotta cohérent avec l'application
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, User, MapPin, FileText, Loader2, Check } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -24,14 +24,30 @@ const IVORIAN_CITIES = [
 
 export default function ProfileCompletionPage() {
   const navigate = useNavigate();
-  const { user, updateProfile } = useAuth();
+  const { user, profile, loading: authLoading, updateProfile } = useAuth();
 
   const [fullName, setFullName] = useState('');
   const [userType, setUserType] = useState<'locataire' | 'proprietaire' | 'agence'>('locataire');
   const [city, setCity] = useState('');
   const [bio, setBio] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Pré-remplir avec les données du profil existant
+  useEffect(() => {
+    if (profile?.full_name) {
+      setFullName(profile.full_name);
+    }
+    if (profile?.user_type) {
+      setUserType(profile.user_type as 'locataire' | 'proprietaire' | 'agence');
+    }
+    if (profile?.city) {
+      setCity(profile.city);
+    }
+    if (profile?.bio) {
+      setBio(profile.bio);
+    }
+  }, [profile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +58,7 @@ export default function ProfileCompletionPage() {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
 
     try {
       await updateProfile({
@@ -65,10 +81,23 @@ export default function ProfileCompletionPage() {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour du profil';
       setError(errorMessage);
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
+  // Afficher un loader pendant le chargement de l'auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-terracotta-50 to-coral-50 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-terracotta-600 mx-auto" />
+          <p className="text-gray-600">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Rediriger seulement après le chargement si pas d'utilisateur
   if (!user) {
     navigate('/connexion');
     return null;
@@ -182,10 +211,10 @@ export default function ProfileCompletionPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={loading || !fullName.trim()}
+              disabled={submitting || !fullName.trim()}
               className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
             >
-              {loading ? (
+              {submitting ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
                   <span>Enregistrement...</span>
