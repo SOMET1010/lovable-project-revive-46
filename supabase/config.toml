@@ -9,6 +9,9 @@ verify_jwt = false
 [functions.send-auth-otp]
 verify_jwt = false
 
+[functions.verify-auth-otp]
+verify_jwt = false
+
 [functions.send-sms-hybrid]
 verify_jwt = false
 
