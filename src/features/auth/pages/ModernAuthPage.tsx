@@ -72,9 +72,13 @@ export default function ModernAuthPage() {
     }
   };
 
+  // State for dev mode OTP display
+  const [devOtp, setDevOtp] = useState<string | null>(null);
+
   // Send OTP
   const handleSendOTP = async () => {
     setError('');
+    setDevOtp(null);
     setLoading(true);
 
     try {
@@ -97,7 +101,14 @@ export default function ModernAuthPage() {
         throw new Error(data.error);
       }
 
-      setSuccess(`Code envoyé par ${sendMethod === 'sms' ? 'SMS' : 'WhatsApp'}`);
+      // Dev mode: display OTP if returned by backend (fallback mode)
+      if (data?.otp) {
+        setDevOtp(data.otp);
+        setSuccess(`🧪 Mode dev - Code OTP: ${data.otp}`);
+      } else {
+        setSuccess(`Code envoyé par ${sendMethod === 'sms' ? 'SMS' : 'WhatsApp'}`);
+      }
+      
       setPhoneStep('verify');
       setResendTimer(60);
     } catch (err: unknown) {
@@ -380,6 +391,21 @@ export default function ModernAuthPage() {
                       <span className="font-bold text-gray-900">{phoneNumber}</span>
                     </p>
                   </div>
+
+                  {/* Dev Mode OTP Display */}
+                  {devOtp && (
+                    <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl animate-pulse">
+                      <p className="text-center text-sm text-amber-800 font-medium mb-1">🧪 Mode développement</p>
+                      <p className="text-center text-3xl font-mono font-bold text-amber-900 tracking-widest">{devOtp}</p>
+                      <button
+                        type="button"
+                        onClick={() => setOtp(devOtp)}
+                        className="w-full mt-2 py-2 text-sm font-semibold text-amber-700 hover:text-amber-900 underline"
+                      >
+                        Remplir automatiquement
+                      </button>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2 text-center">
