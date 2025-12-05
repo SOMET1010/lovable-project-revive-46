@@ -1,11 +1,51 @@
-import { useState } from 'react';
-import { Search, MapPin, Home, ChevronDown, Sparkles } from 'lucide-react';
-import { useParallax } from '@/shared/hooks';
+import { useState, useEffect, useCallback } from 'react';
+import { Search, MapPin, Home, ChevronDown, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { cn } from '@/shared/lib/utils';
 
 interface HeroPremiumProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
   stats?: { propertiesCount: number };
 }
+
+interface HeroSlide {
+  image: string;
+  title: string;
+  highlight: string;
+  description: string;
+}
+
+const heroSlides: HeroSlide[] = [
+  {
+    image: '/images/hero-users/hero_users_1_young_couple.png',
+    title: 'Leur premier nid,',
+    highlight: 'trouvé en confiance',
+    description: 'Pour les jeunes couples qui construisent leur avenir'
+  },
+  {
+    image: '/images/hero-users/hero_users_2_family_moving.png',
+    title: "Plus d'espace pour",
+    highlight: 'voir grandir la famille',
+    description: 'La sécurité et le confort pour ceux que vous aimez'
+  },
+  {
+    image: '/images/hero-users/hero_users_3_young_professional.png',
+    title: "L'indépendance a une",
+    highlight: 'nouvelle adresse',
+    description: 'Pour les professionnels qui visent les sommets'
+  },
+  {
+    image: '/images/hero-users/hero_users_4_students_roommates.png',
+    title: 'La colocation parfaite,',
+    highlight: 'sans les tracas',
+    description: 'Pour les étudiants qui veulent vivre leur meilleure vie'
+  },
+  {
+    image: '/images/hero-users/hero_users_5_agent_showing.png',
+    title: 'Un service humain,',
+    highlight: 'une expertise locale',
+    description: 'Nos agents vous accompagnent à chaque étape'
+  }
+];
 
 const cities = [
   'Abidjan',
@@ -36,19 +76,44 @@ const budgets = [
 ];
 
 /**
- * HeroPremium - Modern Minimalism Premium Design
+ * HeroPremium - Human-Centered Slideshow Design
  * 
  * Features:
- * - Full-width hero image with 50% black overlay
- * - 64px bold white title with -0.02em letter spacing
- * - Premium search form: 56px fields, orange button, shadows
- * - Subtle animations and hover effects
+ * - 5-image slideshow featuring real users (couples, families, professionals, students, agents)
+ * - Emotional storytelling with each slide
+ * - Auto-play every 6 seconds with pause on hover
+ * - Premium search form with city, type, budget selects
+ * - Trust indicators and quick neighborhood links
  */
 export default function HeroPremium({ onSearch, stats }: HeroPremiumProps) {
   const [city, setCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
-  const { offset, isEnabled } = useParallax({ factor: 0.25 });
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  const goToSlide = useCallback((index: number) => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentSlide(index);
+    setTimeout(() => setIsTransitioning(false), 700);
+  }, [isTransitioning]);
+
+  const nextSlide = useCallback(() => {
+    goToSlide((currentSlide + 1) % heroSlides.length);
+  }, [currentSlide, goToSlide]);
+
+  const prevSlide = useCallback(() => {
+    goToSlide((currentSlide - 1 + heroSlides.length) % heroSlides.length);
+  }, [currentSlide, goToSlide]);
+
+  // Auto-play every 6 seconds
+  useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(nextSlide, 6000);
+    return () => clearInterval(interval);
+  }, [isPaused, nextSlide]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,25 +121,53 @@ export default function HeroPremium({ onSearch, stats }: HeroPremiumProps) {
   };
 
   return (
-    <section className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
-      {/* Background Image - Premium Quality with Parallax */}
-      <div className="absolute inset-0 overflow-hidden">
-        <img
-          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1920&q=80"
-          alt="Villa moderne de luxe"
-          className="w-full h-full object-cover motion-reduce:transform-none"
-          style={{
-            transform: isEnabled ? `translateY(${offset}px) scale(1.15)` : 'scale(1)',
-            willChange: isEnabled ? 'transform' : 'auto',
-          }}
-          loading="eager"
-        />
-        {/* Premium Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+    <section 
+      className="relative min-h-[700px] lg:min-h-[85vh] flex items-center justify-center overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Slideshow Background */}
+      <div className="absolute inset-0">
+        {heroSlides.map((slide, index) => (
+          <div
+            key={index}
+            className={cn(
+              "absolute inset-0 transition-opacity duration-700 ease-in-out",
+              index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
+            )}
+          >
+            <img
+              src={slide.image}
+              alt={slide.title}
+              className="w-full h-full object-cover scale-105"
+              loading={index === 0 ? "eager" : "lazy"}
+            />
+          </div>
+        ))}
+        
+        {/* Premium Gradient Overlays for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/40 z-20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 z-20" />
       </div>
 
+      {/* Navigation Arrows - Desktop only */}
+      <button
+        onClick={prevSlide}
+        className="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white opacity-60 hover:opacity-100 transition-all hover:bg-white/20 hidden md:flex items-center justify-center"
+        aria-label="Slide précédent"
+      >
+        <ChevronLeft className="w-6 h-6" />
+      </button>
+      <button
+        onClick={nextSlide}
+        className="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white opacity-60 hover:opacity-100 transition-all hover:bg-white/20 hidden md:flex items-center justify-center"
+        aria-label="Slide suivant"
+      >
+        <ChevronRight className="w-6 h-6" />
+      </button>
+
       {/* Content */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-20">
+      <div className="relative z-30 w-full max-w-5xl mx-auto px-6 py-16 lg:py-20">
         {/* Badge */}
         <div className="flex justify-center mb-6">
           <span 
@@ -91,31 +184,59 @@ export default function HeroPremium({ onSearch, stats }: HeroPremiumProps) {
           </span>
         </div>
 
-        {/* Main Title - 64px Bold */}
-        <h1 
-          className="text-center text-white font-bold mb-6"
-          style={{ 
-            fontSize: 'clamp(40px, 7vw, 64px)',
-            lineHeight: '1.1',
-            letterSpacing: '-0.02em',
-            textShadow: '0 4px 20px rgba(0,0,0,0.3)'
-          }}
-        >
-          Trouvez votre logement
-          <br />
-          <span style={{ color: '#FF6C2F' }}>en toute confiance</span>
-        </h1>
-        
-        {/* Subtitle */}
-        <p 
-          className="text-center text-white/90 max-w-2xl mx-auto mb-10"
-          style={{ 
-            fontSize: 'clamp(16px, 2vw, 20px)',
-            lineHeight: '1.6'
-          }}
-        >
-          Identité certifiée • Paiement sécurisé • Plus de <strong>{(stats?.propertiesCount || 150).toLocaleString('fr-FR')} logements</strong> vérifiés
-        </p>
+        {/* Dynamic Title based on current slide */}
+        <div className="text-center mb-6 min-h-[140px] lg:min-h-[180px] flex flex-col justify-center">
+          <h1 
+            className="text-white font-bold transition-all duration-500"
+            style={{ 
+              fontSize: 'clamp(32px, 6vw, 56px)',
+              lineHeight: '1.1',
+              letterSpacing: '-0.02em',
+              textShadow: '0 4px 20px rgba(0,0,0,0.5)'
+            }}
+          >
+            {heroSlides[currentSlide]?.title ?? ''}
+            <br />
+            <span style={{ color: '#FF6C2F' }}>{heroSlides[currentSlide]?.highlight ?? ''}</span>
+          </h1>
+          <p 
+            className="text-white/90 max-w-2xl mx-auto mt-4 transition-all duration-500"
+            style={{ 
+              fontSize: 'clamp(14px, 2vw, 18px)',
+              lineHeight: '1.6',
+              textShadow: '0 2px 10px rgba(0,0,0,0.4)'
+            }}
+          >
+            {heroSlides[currentSlide]?.description ?? ''}
+          </p>
+        </div>
+
+        {/* Slide Indicators */}
+        <div className="flex justify-center gap-2 mb-8">
+          {heroSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={cn(
+                "relative h-1.5 rounded-full transition-all duration-300 overflow-hidden",
+                index === currentSlide 
+                  ? "w-10 bg-primary" 
+                  : "w-3 bg-white/40 hover:bg-white/60"
+              )}
+              aria-label={`Aller au slide ${index + 1}`}
+            >
+              {index === currentSlide && !isPaused && (
+                <span 
+                  className="absolute inset-0 bg-white/40 rounded-full"
+                  style={{
+                    animation: 'progress 6s linear forwards',
+                    transformOrigin: 'left'
+                  }}
+                />
+              )}
+            </button>
+          ))}
+        </div>
 
         {/* Premium Search Form */}
         <form 
@@ -186,7 +307,7 @@ export default function HeroPremium({ onSearch, stats }: HeroPremiumProps) {
               <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
             </div>
 
-            {/* Search Button - PROMINENT ORANGE */}
+            {/* Search Button */}
             <div className="p-3">
               <button
                 type="submit"
@@ -249,7 +370,7 @@ export default function HeroPremium({ onSearch, stats }: HeroPremiumProps) {
         </div>
 
         {/* Trust Indicators */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-8 text-white/70 text-sm">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-8 text-white/70 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-400" />
             <span>Certifié ANSUT</span>
@@ -260,10 +381,18 @@ export default function HeroPremium({ onSearch, stats }: HeroPremiumProps) {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-400" />
-            <span>Support 24/7</span>
+            <span>{(stats?.propertiesCount || 150).toLocaleString('fr-FR')}+ logements</span>
           </div>
         </div>
       </div>
+
+      {/* CSS for progress animation */}
+      <style>{`
+        @keyframes progress {
+          from { transform: scaleX(0); }
+          to { transform: scaleX(1); }
+        }
+      `}</style>
     </section>
   );
 }
