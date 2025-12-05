@@ -10,9 +10,9 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { InputWithIcon } from '@/shared/ui';
 
 const USER_TYPES = [
-  { value: 'locataire', label: 'Locataire', description: 'Je cherche un logement' },
-  { value: 'proprietaire', label: 'Propriétaire', description: 'Je loue mes biens' },
-  { value: 'agence', label: 'Agence', description: 'Je gère des biens immobiliers' },
+  { value: 'tenant', label: 'Locataire', description: 'Je cherche un logement' },
+  { value: 'owner', label: 'Propriétaire', description: 'Je loue mes biens' },
+  { value: 'agent', label: 'Agence', description: 'Je gère des biens immobiliers' },
 ] as const;
 
 const IVORIAN_CITIES = [
@@ -27,7 +27,7 @@ export default function ProfileCompletionPage() {
   const { user, profile, loading: authLoading, updateProfile } = useAuth();
 
   const [fullName, setFullName] = useState('');
-  const [userType, setUserType] = useState<'locataire' | 'proprietaire' | 'agence'>('locataire');
+  const [userType, setUserType] = useState<'tenant' | 'owner' | 'agent'>('tenant');
   const [city, setCity] = useState('');
   const [bio, setBio] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -39,7 +39,7 @@ export default function ProfileCompletionPage() {
       setFullName(profile.full_name);
     }
     if (profile?.user_type) {
-      setUserType(profile.user_type as 'locataire' | 'proprietaire' | 'agence');
+      setUserType(profile.user_type as 'tenant' | 'owner' | 'agent');
     }
     if (profile?.city) {
       setCity(profile.city);
@@ -70,9 +70,9 @@ export default function ProfileCompletionPage() {
       });
 
       // Redirection selon le type d'utilisateur
-      const redirectPath = userType === 'locataire' 
+      const redirectPath = userType === 'tenant' 
         ? '/recherche' 
-        : userType === 'proprietaire' 
+        : userType === 'owner' 
           ? '/dashboard/ajouter-propriete'
           : '/dashboard';
 
