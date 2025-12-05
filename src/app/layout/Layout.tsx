@@ -7,6 +7,7 @@ import { ToastContainer } from '@/shared/hooks/useToast';
 import PageTransition from '@/shared/ui/PageTransition';
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { GlobalLoadingSkeleton } from '@/shared/ui/GlobalLoadingSkeleton';
+import { FloatingCallButton } from '@/shared/ui/FloatingCallButton';
 
 const noLayoutRoutes = ['/auth/callback'];
 const noHeaderFooterRoutes = [
@@ -50,6 +51,7 @@ export default function Layout() {
       {shouldShowHeaderFooter && <HeaderPremium />}
       {shouldShowHeaderFooter && <Breadcrumb />}
       <ToastContainer />
+      {shouldShowHeaderFooter && <FloatingCallButton />}
       <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>
         <main className={shouldShowHeaderFooter ? 'min-h-screen' : ''}>
           <PageTransition key={location.pathname}>

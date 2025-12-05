@@ -84,3 +84,6 @@ export { default as InputWithIcon } from './InputWithIcon';
 export type { InputWithIconProps } from './InputWithIcon';
 
 export { Breadcrumb } from './Breadcrumb';
+
+export { FloatingCallButton } from './FloatingCallButton';
+export type { FloatingCallButtonProps } from './FloatingCallButton';
