@@ -60,7 +60,14 @@
     <title>Mon Toit - Plateforme de Location Immobilière en Côte d'Ivoire</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;height:100vh;background:#fff;">
+        <div style="text-align:center;">
+          <img src="/logo-montoit.png" alt="Mon Toit" style="width:80px;height:80px;margin-bottom:16px;" />
+          <div style="color:#ea580c;font-family:Inter,sans-serif;font-size:16px;">Chargement...</div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
