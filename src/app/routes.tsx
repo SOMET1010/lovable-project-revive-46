@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { RouteObject } from 'react-router-dom';
+import { RouteObject, Navigate } from 'react-router-dom';
 import Layout from '@/app/layout/Layout';
 import AdminLayout from '@/app/layout/AdminLayout';
 import ErrorBoundary from '@/shared/ui/ErrorBoundary';
@@ -62,6 +62,7 @@ export const routes: RouteObject[] = [
       { index: true, element: <Home /> },
       { path: 'connexion', element: <ModernAuth /> },
       { path: 'inscription', element: <ModernAuth /> },
+      { path: 'login', element: <Navigate to="/connexion" replace /> },
       { path: 'auth', element: <ModernAuth /> },
       { path: 'auth/callback', element: <AuthCallback /> },
       { path: 'mot-de-passe-oublie', element: <ForgotPassword /> },
