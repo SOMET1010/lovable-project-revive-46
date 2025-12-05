@@ -1,27 +1,98 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { verifyHmacSignature, extractSignature, logWebhookAttempt, type WebhookLogEntry } from "../_shared/hmac.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-webhook-signature, x-intouch-signature',
 };
+
+function getClientIP(req: Request): string | null {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+         req.headers.get('x-real-ip') || 
+         null;
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const webhookData = await req.json();
-    console.log('Webhook Mobile Money reçu:', webhookData);
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+  const clientIP = getClientIP(req);
+  let rawBody = "";
+  let webhookData: Record<string, unknown> = {};
+
+  try {
+    // 1. Lire le corps brut pour la vérification HMAC
+    rawBody = await req.text();
+    
+    // 2. Vérifier la signature HMAC
+    const signature = extractSignature(req);
+    const webhookSecret = Deno.env.get('WEBHOOK_HMAC_SECRET');
+
+    // Si le secret est configuré, la vérification est obligatoire
+    if (webhookSecret) {
+      if (!signature) {
+        console.error('Mobile Money Webhook rejected: Missing signature');
+        await logWebhookAttempt(supabase, {
+          webhook_type: 'mobile_money',
+          source_ip: clientIP,
+          signature_provided: null,
+          signature_valid: false,
+          payload: {},
+          processing_result: 'rejected',
+          error_message: 'Missing signature header'
+        });
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Missing signature' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      const isValid = await verifyHmacSignature(rawBody, signature, webhookSecret);
+      
+      if (!isValid) {
+        console.error('Mobile Money Webhook rejected: Invalid signature');
+        await logWebhookAttempt(supabase, {
+          webhook_type: 'mobile_money',
+          source_ip: clientIP,
+          signature_provided: signature,
+          signature_valid: false,
+          payload: {},
+          processing_result: 'rejected',
+          error_message: 'Invalid HMAC signature'
+        });
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Invalid signature' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      console.log('Mobile Money Webhook signature verified successfully');
+    } else {
+      console.warn('WEBHOOK_HMAC_SECRET not configured - signature verification skipped');
+    }
+
+    // 3. Parser le JSON
+    webhookData = JSON.parse(rawBody);
+    console.log('Webhook Mobile Money reçu:', webhookData);
 
     const { transactionRef, status, provider, amount } = webhookData;
 
     if (!transactionRef) {
+      await logWebhookAttempt(supabase, {
+        webhook_type: 'mobile_money',
+        source_ip: clientIP,
+        signature_provided: signature,
+        signature_valid: !!webhookSecret,
+        payload: webhookData,
+        processing_result: 'failed',
+        error_message: 'Missing transactionRef'
+      });
       return new Response(
         JSON.stringify({ error: 'transactionRef requis' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -37,6 +108,15 @@ serve(async (req) => {
 
     if (findError || !mmTransaction) {
       console.error('Transaction non trouvée:', transactionRef);
+      await logWebhookAttempt(supabase, {
+        webhook_type: 'mobile_money',
+        source_ip: clientIP,
+        signature_provided: signature,
+        signature_valid: true,
+        payload: webhookData,
+        processing_result: 'failed',
+        error_message: 'Transaction not found'
+      });
       return new Response(
         JSON.stringify({ error: 'Transaction non trouvée' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -88,7 +168,7 @@ serve(async (req) => {
               user_id: payment.payer_id,
               type: 'payment_confirmed',
               title: 'Paiement confirmé',
-              message: `Votre paiement de ${amount?.toLocaleString()} FCFA a été confirmé`,
+              message: `Votre paiement de ${(amount as number)?.toLocaleString()} FCFA a été confirmé`,
               metadata: { transactionRef, provider }
             });
         }
@@ -97,6 +177,17 @@ serve(async (req) => {
 
     console.log(`Webhook traité: ${transactionRef} - ${status}`);
 
+    // Log succès
+    await logWebhookAttempt(supabase, {
+      webhook_type: 'mobile_money',
+      source_ip: clientIP,
+      signature_provided: signature,
+      signature_valid: true,
+      payload: webhookData,
+      processing_result: 'success',
+      error_message: null
+    });
+
     return new Response(
       JSON.stringify({ success: true, message: 'Webhook traité' }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -104,6 +195,18 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Erreur webhook:', error);
+    
+    // Log erreur
+    await logWebhookAttempt(supabase, {
+      webhook_type: 'mobile_money',
+      source_ip: clientIP,
+      signature_provided: extractSignature(req),
+      signature_valid: false,
+      payload: webhookData,
+      processing_result: 'failed',
+      error_message: error instanceof Error ? error.message : 'Unknown error'
+    });
+
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

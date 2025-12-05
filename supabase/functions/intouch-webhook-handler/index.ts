@@ -1,9 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { verifyHmacSignature, extractSignature, logWebhookAttempt, type WebhookLogEntry } from "../_shared/hmac.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-Webhook-Signature, X-InTouch-Signature",
 };
 
 interface InTouchWebhook {
@@ -41,6 +42,12 @@ function validateWebhookData(data: unknown): data is InTouchWebhook {
   );
 }
 
+function getClientIP(req: Request): string | null {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
+         req.headers.get('x-real-ip') || 
+         null;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -49,15 +56,79 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+  const supabaseClient = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+  );
 
-    const webhookData = await req.json();
+  const clientIP = getClientIP(req);
+  let rawBody = "";
+  let webhookData: unknown = null;
+
+  try {
+    // 1. Lire le corps brut pour la vérification HMAC
+    rawBody = await req.text();
+    
+    // 2. Vérifier la signature HMAC
+    const signature = extractSignature(req);
+    const webhookSecret = Deno.env.get('WEBHOOK_HMAC_SECRET');
+
+    // Si le secret est configuré, la vérification est obligatoire
+    if (webhookSecret) {
+      if (!signature) {
+        console.error('Webhook rejected: Missing signature');
+        await logWebhookAttempt(supabaseClient, {
+          webhook_type: 'intouch',
+          source_ip: clientIP,
+          signature_provided: null,
+          signature_valid: false,
+          payload: {},
+          processing_result: 'rejected',
+          error_message: 'Missing signature header'
+        });
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Missing signature' }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const isValid = await verifyHmacSignature(rawBody, signature, webhookSecret);
+      
+      if (!isValid) {
+        console.error('Webhook rejected: Invalid signature');
+        await logWebhookAttempt(supabaseClient, {
+          webhook_type: 'intouch',
+          source_ip: clientIP,
+          signature_provided: signature,
+          signature_valid: false,
+          payload: {},
+          processing_result: 'rejected',
+          error_message: 'Invalid HMAC signature'
+        });
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Invalid signature' }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      console.log('Webhook signature verified successfully');
+    } else {
+      console.warn('WEBHOOK_HMAC_SECRET not configured - signature verification skipped');
+    }
+
+    // 3. Parser le JSON
+    webhookData = JSON.parse(rawBody);
 
     if (!validateWebhookData(webhookData)) {
+      await logWebhookAttempt(supabaseClient, {
+        webhook_type: 'intouch',
+        source_ip: clientIP,
+        signature_provided: signature,
+        signature_valid: !!webhookSecret,
+        payload: webhookData as Record<string, unknown>,
+        processing_result: 'failed',
+        error_message: 'Invalid webhook data structure'
+      });
       return new Response(
         JSON.stringify({ error: "Invalid webhook data" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -69,8 +140,8 @@ Deno.serve(async (req: Request) => {
       partner_transaction_id,
       status,
       amount,
-      phone_number,
-      timestamp,
+      phone_number: _phone_number,
+      timestamp: _timestamp,
       error_message,
     } = webhookData;
 
@@ -94,6 +165,15 @@ Deno.serve(async (req: Request) => {
 
     if (!existingPayment) {
       console.error(`Payment not found: ${partner_transaction_id}`);
+      await logWebhookAttempt(supabaseClient, {
+        webhook_type: 'intouch',
+        source_ip: clientIP,
+        signature_provided: signature,
+        signature_valid: true,
+        payload: webhookData as Record<string, unknown>,
+        processing_result: 'failed',
+        error_message: 'Payment not found'
+      });
       return new Response(
         JSON.stringify({ error: "Payment not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -102,6 +182,15 @@ Deno.serve(async (req: Request) => {
 
     if (existingPayment.status === "completed" || existingPayment.status === "failed") {
       console.log(`Payment already finalized: ${partner_transaction_id}`);
+      await logWebhookAttempt(supabaseClient, {
+        webhook_type: 'intouch',
+        source_ip: clientIP,
+        signature_provided: signature,
+        signature_valid: true,
+        payload: webhookData as Record<string, unknown>,
+        processing_result: 'success',
+        error_message: 'Payment already processed (idempotent)'
+      });
       return new Response(
         JSON.stringify({ message: "Payment already processed" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -230,6 +319,17 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    // Log succès final
+    await logWebhookAttempt(supabaseClient, {
+      webhook_type: 'intouch',
+      source_ip: clientIP,
+      signature_provided: signature,
+      signature_valid: true,
+      payload: webhookData as Record<string, unknown>,
+      processing_result: 'success',
+      error_message: null
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -242,6 +342,17 @@ Deno.serve(async (req: Request) => {
     console.error("Webhook processing error:", error);
 
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+
+    // Log erreur
+    await logWebhookAttempt(supabaseClient, {
+      webhook_type: 'intouch',
+      source_ip: clientIP,
+      signature_provided: extractSignature(req),
+      signature_valid: false,
+      payload: (webhookData as Record<string, unknown>) || {},
+      processing_result: 'failed',
+      error_message: errorMessage
+    });
 
     return new Response(
       JSON.stringify({ error: errorMessage }),
