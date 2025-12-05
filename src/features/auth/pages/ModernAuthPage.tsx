@@ -140,6 +140,12 @@ export default function ModernAuthPage() {
       if (data?.sessionUrl) {
         // Connexion automatique via magic link
         setSuccess(data.isNewUser ? 'Compte créé ! Connexion en cours...' : 'Connexion en cours...');
+        
+        // Stocker si c'est un nouvel utilisateur pour redirection après callback
+        if (data.needsProfileCompletion) {
+          sessionStorage.setItem('needsProfileCompletion', 'true');
+        }
+        
         window.location.href = data.sessionUrl;
       } else {
         throw new Error('Erreur de connexion - réessayez');

@@ -13,6 +13,7 @@ const ModernAuth = lazy(() => import('@/features/auth/pages/ModernAuthPage'));
 const AuthCallback = lazy(() => import('@/features/auth/pages/CallbackPage'));
 const ForgotPassword = lazy(() => import('@/features/auth/pages/ForgotPasswordPage'));
 const ProfileSelection = lazy(() => import('@/features/auth/pages/ProfileSelectionPage'));
+const ProfileCompletion = lazy(() => import('@/features/auth/pages/ProfileCompletionPage'));
 
 const SearchProperties = lazy(() => import('@/features/tenant/pages/SearchPropertiesPage'));
 const PropertyDetail = lazy(() => import('@/features/tenant/pages/PropertyDetailPage'));
@@ -78,6 +79,10 @@ export const routes: RouteObject[] = [
       {
         path: 'choix-profil',
         element: <ProtectedRoute><ProfileSelection /></ProtectedRoute>,
+      },
+      {
+        path: 'completer-profil',
+        element: <ProtectedRoute><ProfileCompletion /></ProtectedRoute>,
       },
       {
         path: 'dashboard',
