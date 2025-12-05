@@ -3,4 +3,11 @@
  * Exports publics de la feature trust-agent
  */
 
-// Components (placeholder - no pages available)
+// Pages
+export * from './pages';
+
+// Layout
+export { default as TrustAgentLayout } from './layouts/TrustAgentLayout';
+
+// Components
+export * from './components';
