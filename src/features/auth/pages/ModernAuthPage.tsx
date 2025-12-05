@@ -37,12 +37,23 @@ export default function ModernAuthPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
 
-  // Phone fields
-  const [phoneNumber, setPhoneNumber] = useState('');
+  // Phone fields - restore from location.state if available
+  const savedPhone = (location.state as { phoneNumber?: string; fullName?: string })?.phoneNumber || '';
+  const savedName = (location.state as { phoneNumber?: string; fullName?: string })?.fullName || '';
+  
+  const [phoneNumber, setPhoneNumber] = useState(savedPhone);
   const [otp, setOtp] = useState('');
-  const [sendMethod, setSendMethod] = useState<'sms' | 'whatsapp'>('whatsapp'); // WhatsApp default for CI
+  const [sendMethod, setSendMethod] = useState<'sms' | 'whatsapp'>('whatsapp');
   const [resendTimer, setResendTimer] = useState(0);
   const [devOtp, setDevOtp] = useState<string | null>(null);
+  
+  // Initialize fullName from saved state (only once)
+  useEffect(() => {
+    if (savedName && !fullName) {
+      setFullName(savedName);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Timer countdown
   useEffect(() => {
@@ -53,7 +64,7 @@ export default function ModernAuthPage() {
     return undefined;
   }, [resendTimer]);
 
-  // Sync URL → Tab
+  // Sync URL → Tab (but preserve phone data)
   useEffect(() => {
     const expectedTab: MainTab = location.pathname === '/inscription' ? 'register' : 'login';
     if (mainTab !== expectedTab) {
@@ -63,6 +74,7 @@ export default function ModernAuthPage() {
       setSuccess('');
       setOtp('');
       setDevOtp(null);
+      // Phone number preserved via location.state - don't reset it
     }
   }, [location.pathname]);
 
@@ -157,15 +169,14 @@ export default function ModernAuthPage() {
         },
       });
 
-      // Handle account not found
+      // Handle account not found - preserve phone number
       if (data?.accountNotFound) {
         setSuccess('');
-        navigate('/inscription', { replace: true });
-        setTimeout(() => {
-          setAuthMethod('phone');
-          setPhoneStep('enter');
-          setError('Aucun compte trouvé. Créez un compte avec ce numéro.');
-        }, 0);
+        navigate('/inscription', { 
+          replace: true, 
+          state: { phoneNumber, fullName } 
+        });
+        setError('Aucun compte trouvé. Créez un compte avec ce numéro.');
         setLoading(false);
         return;
       }
