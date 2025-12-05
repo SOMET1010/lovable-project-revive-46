@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { verifyHmacSignature, extractSignature, logWebhookAttempt, type WebhookLogEntry } from "../_shared/hmac.ts";
+import { verifyHmacSignature, extractSignature, logWebhookAttempt } from "../_shared/hmac.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -170,7 +170,7 @@ Deno.serve(async (req: Request) => {
         source_ip: clientIP,
         signature_provided: signature,
         signature_valid: true,
-        payload: webhookData as Record<string, unknown>,
+      payload: webhookData as unknown as Record<string, unknown>,
         processing_result: 'failed',
         error_message: 'Payment not found'
       });
@@ -187,7 +187,7 @@ Deno.serve(async (req: Request) => {
         source_ip: clientIP,
         signature_provided: signature,
         signature_valid: true,
-        payload: webhookData as Record<string, unknown>,
+      payload: webhookData as unknown as Record<string, unknown>,
         processing_result: 'success',
         error_message: 'Payment already processed (idempotent)'
       });
@@ -325,7 +325,7 @@ Deno.serve(async (req: Request) => {
       source_ip: clientIP,
       signature_provided: signature,
       signature_valid: true,
-      payload: webhookData as Record<string, unknown>,
+      payload: webhookData as unknown as Record<string, unknown>,
       processing_result: 'success',
       error_message: null
     });
