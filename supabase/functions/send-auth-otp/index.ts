@@ -41,16 +41,16 @@ Deno.serve(async (req: Request) => {
     }
 
     // Normaliser le numéro (Côte d'Ivoire)
+    // Format attendu: 2250XXXXXXXXX (13 chiffres)
     let normalizedPhone = phoneNumber.replace(/\D/g, '');
     
+    // Ajouter le préfixe 225 si absent (GARDER le 0 initial)
     if (!normalizedPhone.startsWith('225')) {
-      if (normalizedPhone.startsWith('0')) {
-        normalizedPhone = normalizedPhone.substring(1);
-      }
       normalizedPhone = '225' + normalizedPhone;
     }
     
-    if (normalizedPhone.length < 12) {
+    // Validation: numéro ivoirien = 225 + 10 chiffres = 13 chiffres
+    if (normalizedPhone.length < 13) {
       return new Response(
         JSON.stringify({ error: 'Numéro de téléphone invalide' }),
         {

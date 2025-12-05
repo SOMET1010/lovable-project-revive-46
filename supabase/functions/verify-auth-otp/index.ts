@@ -40,13 +40,12 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Normaliser le numéro
+    // Normaliser le numéro (Côte d'Ivoire)
+    // Format attendu: 2250XXXXXXXXX (13 chiffres)
     let normalizedPhone = phoneNumber.replace(/\D/g, '');
     
+    // Ajouter le préfixe 225 si absent (GARDER le 0 initial)
     if (!normalizedPhone.startsWith('225')) {
-      if (normalizedPhone.startsWith('0')) {
-        normalizedPhone = normalizedPhone.substring(1);
-      }
       normalizedPhone = '225' + normalizedPhone;
     }
     
