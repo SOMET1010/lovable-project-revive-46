@@ -1,24 +1,23 @@
 /**
- * ModernAuthPage - Authentification Premium 2025
- * 2 onglets principaux: Connexion / Inscription
- * Sous-options: Email ou Téléphone
+ * ModernAuthPage - Authentification simplifiée pour la Côte d'Ivoire
+ * Téléphone = méthode principale (pas d'email requis)
+ * Email = option secondaire
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Building2, Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Building2, Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft, Smartphone } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { InputWithIcon } from '@/shared/ui';
 
 type MainTab = 'login' | 'register';
-type AuthMethod = 'email' | 'phone';
+type AuthMethod = 'phone' | 'email'; // Phone first!
 type PhoneStep = 'enter' | 'verify';
 
 export default function ModernAuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Determine initial tab based on route
   const getInitialTab = (): MainTab => {
     if (location.pathname === '/inscription') return 'register';
     return 'login';
@@ -26,7 +25,7 @@ export default function ModernAuthPage() {
 
   // State
   const [mainTab, setMainTab] = useState<MainTab>(getInitialTab);
-  const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('phone'); // Default to phone!
   const [phoneStep, setPhoneStep] = useState<PhoneStep>('enter');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,7 +40,7 @@ export default function ModernAuthPage() {
   // Phone fields
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
-  const [sendMethod, setSendMethod] = useState<'sms' | 'whatsapp'>('sms');
+  const [sendMethod, setSendMethod] = useState<'sms' | 'whatsapp'>('whatsapp'); // WhatsApp default for CI
   const [resendTimer, setResendTimer] = useState(0);
   const [devOtp, setDevOtp] = useState<string | null>(null);
 
@@ -54,12 +53,11 @@ export default function ModernAuthPage() {
     return undefined;
   }, [resendTimer]);
 
-  // Sync URL → Tab when location changes (browser back/forward)
+  // Sync URL → Tab
   useEffect(() => {
     const expectedTab: MainTab = location.pathname === '/inscription' ? 'register' : 'login';
     if (mainTab !== expectedTab) {
       setMainTab(expectedTab);
-      setAuthMethod('email');
       setPhoneStep('enter');
       setError('');
       setSuccess('');
@@ -68,11 +66,9 @@ export default function ModernAuthPage() {
     }
   }, [location.pathname]);
 
-  // Tab → URL: Update URL when changing tabs
   const handleMainTabChange = (tab: MainTab) => {
     const targetPath = tab === 'register' ? '/inscription' : '/connexion';
     navigate(targetPath, { replace: true });
-    // State will be updated by the useEffect above
   };
 
   const handleMethodChange = (method: AuthMethod) => {
@@ -127,19 +123,14 @@ export default function ModernAuthPage() {
         email,
         password,
         options: {
-          data: {
-            full_name: fullName,
-          },
+          data: { full_name: fullName },
         },
       });
 
       if (signUpError) throw signUpError;
 
       setSuccess('Compte créé ! Vous pouvez maintenant vous connecter.');
-      setTimeout(() => {
-        setMainTab('login');
-        setAuthMethod('email');
-      }, 2000);
+      setTimeout(() => handleMainTabChange('login'), 2000);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
       setError(errorMessage);
@@ -166,15 +157,14 @@ export default function ModernAuthPage() {
         },
       });
 
-      // Handle account not found FIRST (before throwing on invokeError)
-      // Edge function returns 404 but data still contains accountNotFound flag
+      // Handle account not found
       if (data?.accountNotFound) {
         setSuccess('');
         navigate('/inscription', { replace: true });
         setTimeout(() => {
           setAuthMethod('phone');
           setPhoneStep('enter');
-          setError('Aucun compte trouvé avec ce numéro. Créez un compte pour continuer.');
+          setError('Aucun compte trouvé. Créez un compte avec ce numéro.');
         }, 0);
         setLoading(false);
         return;
@@ -183,11 +173,10 @@ export default function ModernAuthPage() {
       // Handle rate limiting
       if (data?.rateLimited && data?.retryAfter) {
         setResendTimer(data.retryAfter);
-        setError(`Veuillez patienter ${data.retryAfter} secondes`);
+        setError(`Patientez ${data.retryAfter} secondes`);
         return;
       }
 
-      // Now check for other errors
       if (invokeError) {
         throw new Error(invokeError.message || 'Erreur lors de l\'envoi du code');
       }
@@ -201,7 +190,7 @@ export default function ModernAuthPage() {
         setDevOtp(data.otp);
         setSuccess(`🧪 Mode dev - Code: ${data.otp}`);
       } else {
-        setSuccess(`Code envoyé par ${sendMethod === 'sms' ? 'SMS' : 'WhatsApp'}`);
+        setSuccess(`Code envoyé par ${sendMethod === 'sms' ? 'SMS' : 'WhatsApp'} !`);
       }
       
       setPhoneStep('verify');
@@ -270,7 +259,7 @@ export default function ModernAuthPage() {
               Mon Toit
             </span>
           </div>
-          <p className="text-gray-600">Trouvez votre logement idéal en Côte d'Ivoire</p>
+          <p className="text-gray-600">Trouvez votre logement en Côte d'Ivoire</p>
         </div>
 
         {/* Auth Card */}
@@ -300,29 +289,30 @@ export default function ModernAuthPage() {
             </button>
           </div>
 
-          {/* Sub-method: Email / Téléphone */}
+          {/* Method selector - Phone is PRIMARY */}
           <div className="flex gap-2 mb-6">
             <button
-              onClick={() => handleMethodChange('email')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-center gap-2 ${
-                authMethod === 'email'
-                  ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
-              }`}
-            >
-              <Mail className="h-4 w-4" />
-              Email
-            </button>
-            <button
               onClick={() => handleMethodChange('phone')}
-              className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-medium border-2 transition-all flex items-center justify-center gap-2 ${
+              className={`flex-1 py-3 px-4 rounded-xl font-medium border-2 transition-all flex items-center justify-center gap-2 ${
                 authMethod === 'phone'
                   ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
                   : 'border-gray-200 text-gray-600 hover:border-gray-300'
               }`}
             >
-              <Phone className="h-4 w-4" />
-              Téléphone
+              <Smartphone className="h-5 w-5" />
+              <span>Téléphone</span>
+              <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full">Recommandé</span>
+            </button>
+            <button
+              onClick={() => handleMethodChange('email')}
+              className={`flex-1 py-3 px-4 rounded-xl font-medium border-2 transition-all flex items-center justify-center gap-2 ${
+                authMethod === 'email'
+                  ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
+                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
+              }`}
+            >
+              <Mail className="h-5 w-5" />
+              <span>Email</span>
             </button>
           </div>
 
@@ -338,12 +328,136 @@ export default function ModernAuthPage() {
             </div>
           )}
 
-          {/* ==================== CONNEXION + EMAIL ==================== */}
+          {/* ==================== PHONE AUTH (Both Login & Register) ==================== */}
+          {authMethod === 'phone' && (
+            <div className="space-y-5">
+              {phoneStep === 'enter' ? (
+                <>
+                  <div className="text-center mb-4">
+                    <h2 className="text-xl font-bold text-gray-900">
+                      {mainTab === 'login' ? 'Connectez-vous' : 'Créez votre compte'}
+                    </h2>
+                    <p className="text-gray-500 text-sm">
+                      {mainTab === 'login' 
+                        ? 'Avec votre numéro de téléphone' 
+                        : 'Inscription rapide sans email'}
+                    </p>
+                  </div>
+
+                  {/* Name field only for registration */}
+                  {mainTab === 'register' && (
+                    <InputWithIcon
+                      icon={User}
+                      label="Votre nom"
+                      variant="modern"
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Ex: Jean Kouassi"
+                      required
+                      autoFocus
+                    />
+                  )}
+
+                  <InputWithIcon
+                    icon={Phone}
+                    label="Numéro de téléphone"
+                    variant="modern"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="07 XX XX XX XX"
+                    autoFocus={mainTab === 'login'}
+                  />
+
+                  {/* Send method selector */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Recevoir le code par :
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setSendMethod('whatsapp')}
+                        className={`py-3 px-4 rounded-xl border-2 font-medium transition-all flex items-center justify-center gap-2 ${
+                          sendMethod === 'whatsapp'
+                            ? 'border-green-500 bg-green-50 text-green-700'
+                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        💬 WhatsApp
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSendMethod('sms')}
+                        className={`py-3 px-4 rounded-xl border-2 font-medium transition-all flex items-center justify-center gap-2 ${
+                          sendMethod === 'sms'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        📱 SMS
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Info box */}
+                  {mainTab === 'login' && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                      <p className="text-sm text-blue-800">
+                        Vous recevrez un code à 6 chiffres pour vous connecter.
+                      </p>
+                    </div>
+                  )}
+
+                  {mainTab === 'register' && (
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-xl">
+                      <p className="text-sm text-green-800">
+                        ✓ Inscription simple et rapide<br />
+                        ✓ Pas besoin d'adresse email
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleSendOTP}
+                    disabled={
+                      loading || 
+                      phoneNumber.replace(/\D/g, '').length < 10 || 
+                      (mainTab === 'register' && !fullName.trim())
+                    }
+                    className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <><Loader2 className="h-5 w-5 animate-spin" /><span>Envoi en cours...</span></>
+                    ) : (
+                      <><span>Recevoir mon code</span><ArrowRight className="h-5 w-5" /></>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <OTPVerifyStep
+                  phoneNumber={phoneNumber}
+                  sendMethod={sendMethod}
+                  otp={otp}
+                  setOtp={setOtp}
+                  devOtp={devOtp}
+                  resendTimer={resendTimer}
+                  loading={loading}
+                  onVerify={handleVerifyOTP}
+                  onResend={handleSendOTP}
+                  onBack={() => setPhoneStep('enter')}
+                />
+              )}
+            </div>
+          )}
+
+          {/* ==================== EMAIL LOGIN ==================== */}
           {mainTab === 'login' && authMethod === 'email' && (
             <form onSubmit={handleEmailLogin} className="space-y-5">
               <div className="text-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Connectez-vous</h2>
-                <p className="text-gray-500 text-sm">Avec votre email et mot de passe</p>
+                <h2 className="text-xl font-bold text-gray-900">Connexion par email</h2>
+                <p className="text-gray-500 text-sm">Entrez vos identifiants</p>
               </div>
 
               <InputWithIcon
@@ -394,96 +508,12 @@ export default function ModernAuthPage() {
             </form>
           )}
 
-          {/* ==================== CONNEXION + PHONE ==================== */}
-          {mainTab === 'login' && authMethod === 'phone' && (
-            <div className="space-y-5">
-              {phoneStep === 'enter' ? (
-                <>
-                  <div className="text-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Connectez-vous</h2>
-                    <p className="text-gray-500 text-sm">Recevez un code sur votre téléphone</p>
-                  </div>
-
-                  <InputWithIcon
-                    icon={Phone}
-                    label="Numéro de téléphone"
-                    variant="modern"
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+225 07 XX XX XX XX"
-                    autoFocus
-                  />
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">Recevoir par :</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setSendMethod('sms')}
-                        className={`py-3 px-4 rounded-xl border-2 font-semibold transition-all ${
-                          sendMethod === 'sms'
-                            ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        📱 SMS
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSendMethod('whatsapp')}
-                        className={`py-3 px-4 rounded-xl border-2 font-semibold transition-all ${
-                          sendMethod === 'whatsapp'
-                            ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        💬 WhatsApp
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                    <p className="text-sm text-amber-800">
-                      ⚠️ Vous devez avoir un compte existant. <button onClick={() => handleMainTabChange('register')} className="font-bold underline">Créer un compte</button>
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={handleSendOTP}
-                    disabled={loading || phoneNumber.replace(/\D/g, '').length < 10}
-                    className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <><Loader2 className="h-5 w-5 animate-spin" /><span>Envoi...</span></>
-                    ) : (
-                      <><span>Recevoir le code</span><ArrowRight className="h-5 w-5" /></>
-                    )}
-                  </button>
-                </>
-              ) : (
-                <OTPVerifyStep
-                  phoneNumber={phoneNumber}
-                  sendMethod={sendMethod}
-                  otp={otp}
-                  setOtp={setOtp}
-                  devOtp={devOtp}
-                  resendTimer={resendTimer}
-                  loading={loading}
-                  onVerify={handleVerifyOTP}
-                  onResend={handleSendOTP}
-                  onBack={() => setPhoneStep('enter')}
-                />
-              )}
-            </div>
-          )}
-
-          {/* ==================== INSCRIPTION + EMAIL ==================== */}
+          {/* ==================== EMAIL REGISTER ==================== */}
           {mainTab === 'register' && authMethod === 'email' && (
             <form onSubmit={handleEmailRegister} className="space-y-5">
               <div className="text-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900">Créez votre compte</h2>
-                <p className="text-gray-500 text-sm">Inscription avec email et mot de passe</p>
+                <h2 className="text-xl font-bold text-gray-900">Inscription par email</h2>
+                <p className="text-gray-500 text-sm">Créez votre compte avec email</p>
               </div>
 
               <InputWithIcon
@@ -547,108 +577,13 @@ export default function ModernAuthPage() {
             </form>
           )}
 
-          {/* ==================== INSCRIPTION + PHONE ==================== */}
-          {mainTab === 'register' && authMethod === 'phone' && (
-            <div className="space-y-5">
-              {phoneStep === 'enter' ? (
-                <>
-                  <div className="text-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Créez votre compte</h2>
-                    <p className="text-gray-500 text-sm">Inscription rapide par téléphone</p>
-                  </div>
-
-                  <InputWithIcon
-                    icon={User}
-                    label="Nom complet"
-                    variant="modern"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Jean Kouassi"
-                    required
-                    autoFocus
-                  />
-
-                  <InputWithIcon
-                    icon={Phone}
-                    label="Numéro de téléphone"
-                    variant="modern"
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="+225 07 XX XX XX XX"
-                  />
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">Recevoir par :</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setSendMethod('sms')}
-                        className={`py-3 px-4 rounded-xl border-2 font-semibold transition-all ${
-                          sendMethod === 'sms'
-                            ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        📱 SMS
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSendMethod('whatsapp')}
-                        className={`py-3 px-4 rounded-xl border-2 font-semibold transition-all ${
-                          sendMethod === 'whatsapp'
-                            ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        💬 WhatsApp
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
-                    <p className="text-sm text-blue-800">
-                      ℹ️ Après vérification, vous compléterez votre profil pour accéder à toutes les fonctionnalités.
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={handleSendOTP}
-                    disabled={loading || phoneNumber.replace(/\D/g, '').length < 10 || !fullName.trim()}
-                    className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <><Loader2 className="h-5 w-5 animate-spin" /><span>Envoi...</span></>
-                    ) : (
-                      <><span>Recevoir le code</span><ArrowRight className="h-5 w-5" /></>
-                    )}
-                  </button>
-                </>
-              ) : (
-                <OTPVerifyStep
-                  phoneNumber={phoneNumber}
-                  sendMethod={sendMethod}
-                  otp={otp}
-                  setOtp={setOtp}
-                  devOtp={devOtp}
-                  resendTimer={resendTimer}
-                  loading={loading}
-                  onVerify={handleVerifyOTP}
-                  onResend={handleSendOTP}
-                  onBack={() => setPhoneStep('enter')}
-                />
-              )}
-            </div>
-          )}
-
           {/* Footer link */}
           <div className="mt-6 text-center">
             <p className="text-gray-600 text-sm">
               {mainTab === 'login' ? (
-                <>Pas encore de compte ? <button onClick={() => handleMainTabChange('register')} className="text-terracotta-600 font-semibold hover:underline">Inscrivez-vous</button></>
+                <>Pas de compte ? <button onClick={() => handleMainTabChange('register')} className="text-terracotta-600 font-semibold hover:underline">Inscrivez-vous</button></>
               ) : (
-                <>Déjà un compte ? <button onClick={() => handleMainTabChange('login')} className="text-terracotta-600 font-semibold hover:underline">Connectez-vous</button></>
+                <>Déjà inscrit ? <button onClick={() => handleMainTabChange('login')} className="text-terracotta-600 font-semibold hover:underline">Connectez-vous</button></>
               )}
             </p>
           </div>
@@ -696,7 +631,7 @@ function OTPVerifyStep({
       </button>
 
       <div className="text-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Entrez le code</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Entrez votre code</h2>
         <p className="text-gray-600 text-sm">
           Code envoyé par {sendMethod === 'sms' ? 'SMS' : 'WhatsApp'} au
           <br />
@@ -707,7 +642,7 @@ function OTPVerifyStep({
       {/* Dev Mode OTP */}
       {devOtp && (
         <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl animate-pulse">
-          <p className="text-center text-sm text-amber-800 font-medium mb-1">🧪 Mode dev</p>
+          <p className="text-center text-sm text-amber-800 font-medium mb-1">🧪 Mode développement</p>
           <p className="text-center text-3xl font-mono font-bold text-amber-900 tracking-widest">{devOtp}</p>
           <button
             type="button"
@@ -721,7 +656,7 @@ function OTPVerifyStep({
 
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-2 text-center">
-          Code de vérification
+          Code à 6 chiffres
         </label>
         <input
           type="text"
@@ -734,7 +669,7 @@ function OTPVerifyStep({
         />
       </div>
 
-      <div className="text-center">
+      <div className="text-center mt-4">
         {resendTimer > 0 ? (
           <p className="text-sm text-gray-500 font-medium">
             Renvoyer dans <span className="text-terracotta-600 font-bold">{resendTimer}s</span>
@@ -753,12 +688,12 @@ function OTPVerifyStep({
       <button
         onClick={onVerify}
         disabled={loading || otp.length !== 6}
-        className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+        className="w-full mt-4 py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
       >
         {loading ? (
           <><Loader2 className="h-5 w-5 animate-spin" /><span>Vérification...</span></>
         ) : (
-          <><span>Vérifier</span><ArrowRight className="h-5 w-5" /></>
+          <><span>Valider</span><ArrowRight className="h-5 w-5" /></>
         )}
       </button>
     </>
