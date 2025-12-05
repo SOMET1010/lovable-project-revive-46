@@ -86,6 +86,71 @@ export type Database = {
         }
         Relationships: []
       }
+      cev_missions: {
+        Row: {
+          assigned_agent_id: string
+          completed_at: string | null
+          created_at: string | null
+          created_by: string | null
+          documents: Json | null
+          etat_lieux_report: Json | null
+          id: string
+          mission_type: string
+          notes: string | null
+          photos: Json | null
+          property_id: string | null
+          scheduled_date: string | null
+          status: string
+          updated_at: string | null
+          urgency: string
+          verification_checklist: Json | null
+        }
+        Insert: {
+          assigned_agent_id: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          documents?: Json | null
+          etat_lieux_report?: Json | null
+          id?: string
+          mission_type?: string
+          notes?: string | null
+          photos?: Json | null
+          property_id?: string | null
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string | null
+          urgency?: string
+          verification_checklist?: Json | null
+        }
+        Update: {
+          assigned_agent_id?: string
+          completed_at?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          documents?: Json | null
+          etat_lieux_report?: Json | null
+          id?: string
+          mission_type?: string
+          notes?: string | null
+          photos?: Json | null
+          property_id?: string | null
+          scheduled_date?: string | null
+          status?: string
+          updated_at?: string | null
+          urgency?: string
+          verification_checklist?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cev_missions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chatbot_conversations: {
         Row: {
           archived_at: string | null
