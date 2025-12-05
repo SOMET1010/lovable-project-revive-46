@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import Header from '@/app/layout/Header';
@@ -35,6 +36,7 @@ interface UserProfile {
 
 export default function SignLease() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [lease, setLease] = useState<LeaseContract | null>(null);
   const [property, setProperty] = useState<Property | null>(null);
   const [ownerProfile, setOwnerProfile] = useState<UserProfile | null>(null);
@@ -123,7 +125,7 @@ export default function SignLease() {
       setSuccess('✅ Bail signé avec succès!');
 
       setTimeout(() => {
-        window.location.href = `/contrat/${leaseId}`;
+        navigate(`/contrat/${leaseId}`);
       }, 2000);
 
     } catch (err: any) {
@@ -224,12 +226,12 @@ export default function SignLease() {
                   <p className="text-amber-800 mb-4">
                     La vérification de votre profil renforce la confiance entre les parties.
                   </p>
-                  <a
-                    href="/verification"
+                  <Link
+                    to="/verification"
                     className="btn-secondary inline-block"
                   >
                     Vérifier mon profil
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -352,13 +354,13 @@ export default function SignLease() {
               <p className="text-green-800 mb-4">
                 Ce contrat a été signé le {new Date(lease.signed_at!).toLocaleDateString('fr-FR')}
               </p>
-              <a
-                href={`/contrat/${lease.id}`}
+              <Link
+                to={`/contrat/${lease.id}`}
                 className="btn-primary inline-flex items-center space-x-2"
               >
                 <Download className="w-5 h-5" />
                 <span>Voir le contrat</span>
-              </a>
+              </Link>
             </div>
           )}
         </div>

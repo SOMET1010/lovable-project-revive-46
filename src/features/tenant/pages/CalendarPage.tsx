@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Download, ArrowLeft, Coins, Home as HomeIcon, Eye, Wrench } from 'lucide-react';
@@ -15,6 +16,7 @@ interface CalendarEvent {
 
 export default function TenantCalendar() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -22,17 +24,17 @@ export default function TenantCalendar() {
 
   useEffect(() => {
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
 
     if (profile && profile.user_type !== 'locataire') {
-      window.location.href = '/';
+      navigate('/');
       return;
     }
 
     loadCalendarEvents();
-  }, [user, profile, currentDate]);
+  }, [user, profile, currentDate, navigate]);
 
   const loadCalendarEvents = async () => {
     if (!user) return;
@@ -272,13 +274,13 @@ export default function TenantCalendar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <a
-                href="/dashboard/locataire"
+              <Link
+                to="/dashboard/locataire"
                 className="flex items-center space-x-2 text-terracotta-600 hover:text-terracotta-700 font-bold"
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span>Retour</span>
-              </a>
+              </Link>
               <div>
                 <h1 className="text-3xl font-bold text-gradient flex items-center space-x-2">
                   <CalendarIcon className="h-8 w-8 text-terracotta-500" />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
@@ -59,6 +60,7 @@ interface RecentActivity {
 
 export default function AdminDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [activities, setActivities] = useState<RecentActivity[]>([]);
   const [alerts, setAlerts] = useState<SystemAlert[]>([]);
@@ -84,7 +86,7 @@ export default function AdminDashboard() {
       if (error) throw error;
 
       if (!hasAdminRole) {
-        window.location.href = '/';
+        navigate('/');
         return;
       }
 
@@ -92,7 +94,7 @@ export default function AdminDashboard() {
       loadDashboardData();
     } catch (err) {
       console.error('Error checking admin access:', err);
-      window.location.href = '/';
+      navigate('/');
     }
   };
 
@@ -425,14 +427,14 @@ export default function AdminDashboard() {
                 { name: 'Voir Propriétés', icon: Home, href: '/recherche', color: 'bg-green-50 text-green-700' },
                 { name: 'Gestion CEV', icon: CheckCircle, href: '/admin/cev-management', color: 'bg-purple-50 text-purple-700' },
               ].map((action, index) => (
-                <a
+                <Link
                   key={index}
-                  href={action.href}
+                  to={action.href}
                   className={`flex items-center space-x-3 p-3 rounded-lg ${action.color} hover:opacity-80 transition-opacity`}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="font-medium">{action.name}</span>
-                </a>
+                </Link>
               ))}
             </div>
           </div>

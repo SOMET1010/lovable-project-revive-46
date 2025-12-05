@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import PageLayout from '../../../shared/components/PageLayout';
 import Breadcrumb from '../../../shared/components/Breadcrumb';
 import PropertyForm from '../components/PropertyForm';
@@ -148,9 +149,9 @@ const AddPropertyPage: React.FC = () => {
             <Home className="w-5 h-5 mr-2" />
             <span className="text-sm">
               Besoin d'aide ? 
-              <a href="/help" className="ml-1 underline hover:no-underline">
+              <Link to="/help" className="ml-1 underline hover:no-underline">
                 Consultez notre guide
-              </a>
+              </Link>
             </span>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import Header from '@/app/layout/Header';
@@ -21,6 +22,7 @@ interface Payment {
 
 export default function PaymentHistory() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'sent' | 'received'>('all');
@@ -246,13 +248,13 @@ export default function PaymentHistory() {
                 </select>
               </div>
 
-              <a
-                href="/effectuer-paiement"
+              <Link
+                to="/effectuer-paiement"
                 className="btn-primary px-6 py-2 flex items-center space-x-2"
               >
                 <Coins className="w-5 h-5" />
                 <span>Nouveau paiement</span>
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -269,9 +271,9 @@ export default function PaymentHistory() {
               <p className="text-gray-600 mb-6">
                 Vous n'avez pas encore effectué de paiement
               </p>
-              <a href="/effectuer-paiement" className="btn-primary">
+              <Link to="/effectuer-paiement" className="btn-primary">
                 Effectuer un paiement
-              </a>
+              </Link>
             </div>
           ) : (
             <div className="space-y-4">
@@ -315,7 +317,7 @@ export default function PaymentHistory() {
 
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => window.location.href = `/paiement/${payment.id}`}
+                          onClick={() => navigate(`/paiement/${payment.id}`)}
                           className="p-2 text-terracotta-600 hover:bg-terracotta-50 rounded-lg transition"
                           title="Voir les détails"
                         >

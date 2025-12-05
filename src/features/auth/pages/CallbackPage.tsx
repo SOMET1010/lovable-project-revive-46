@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Loader } from 'lucide-react';
 
 export default function AuthCallback() {
   const { user, profile, loading } = useAuth();
+  const navigate = useNavigate();
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -15,7 +17,7 @@ export default function AuthCallback() {
       if (errorParam) {
         setError(errorDescription || 'Erreur lors de l\'authentification');
         setTimeout(() => {
-          window.location.href = '/connexion';
+          navigate('/connexion');
         }, 3000);
         return;
       }
@@ -26,18 +28,18 @@ export default function AuthCallback() {
         
         if (needsProfileCompletion === 'true') {
           sessionStorage.removeItem('needsProfileCompletion');
-          window.location.href = '/completer-profil';
+          navigate('/completer-profil');
           return;
         }
 
         // Vérifier si le profil est complet
         if (profile?.profile_setup_completed === false) {
-          window.location.href = '/completer-profil';
+          navigate('/completer-profil');
           return;
         }
 
         // Profil complet, rediriger vers l'accueil
-        window.location.href = '/';
+        navigate('/');
       }
     };
 
@@ -49,7 +51,7 @@ export default function AuthCallback() {
       return () => clearTimeout(timer);
     }
     return undefined;
-  }, [user, profile, loading]);
+  }, [user, profile, loading, navigate]);
 
   return (
     <div className="min-h-screen bg-warm-50 flex items-center justify-center">

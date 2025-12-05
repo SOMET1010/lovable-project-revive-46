@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Wrench, Plus, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
@@ -20,17 +21,18 @@ interface MaintenanceRequest {
 
 export default function TenantMaintenance() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'ouverte' | 'en_cours' | 'resolue'>('all');
 
   useEffect(() => {
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
     loadRequests();
-  }, [user, filter]);
+  }, [user, filter, navigate]);
 
   const loadRequests = async () => {
     if (!user) return;
@@ -137,10 +139,10 @@ export default function TenantMaintenance() {
             </h1>
             <p className="text-xl text-gray-600">Suivez l'état de vos demandes</p>
           </div>
-          <a href="/maintenance/nouvelle" className="btn-primary flex items-center space-x-2">
+          <Link to="/maintenance/nouvelle" className="btn-primary flex items-center space-x-2">
             <Plus className="w-4 h-4" />
             <span>Nouvelle demande</span>
-          </a>
+          </Link>
         </div>
 
         <div className="flex space-x-2 mb-6">
@@ -255,10 +257,10 @@ export default function TenantMaintenance() {
               <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-xl text-gray-600 mb-2">Aucune demande de maintenance</p>
               <p className="text-gray-500 mb-4">Commencez par créer votre première demande</p>
-              <a href="/maintenance/nouvelle" className="btn-primary inline-flex items-center space-x-2">
+              <Link to="/maintenance/nouvelle" className="btn-primary inline-flex items-center space-x-2">
                 <Plus className="w-4 h-4" />
                 <span>Nouvelle demande</span>
-              </a>
+              </Link>
             </div>
           )}
         </div>
