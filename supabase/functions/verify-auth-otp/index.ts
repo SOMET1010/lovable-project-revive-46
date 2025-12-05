@@ -268,7 +268,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[VERIFY-OTP] User created: ${newUser.user.id}`);
 
-    // Créer le profil
+    // Créer le profil (user_type sera défini lors de la complétion du profil)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
@@ -276,7 +276,7 @@ Deno.serve(async (req: Request) => {
         phone: normalizedPhone,
         email: generatedEmail,
         full_name: fullName,
-        user_type: 'locataire',
+        user_type: null, // User will select during profile completion
         profile_setup_completed: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
