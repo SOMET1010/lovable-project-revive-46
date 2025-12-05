@@ -9,10 +9,15 @@ const corsHeaders = {
 interface VerifyOTPRequest {
   phoneNumber: string;
   code: string;
-  mode: 'login' | 'register';
-  fullName?: string;
+  fullName?: string; // Only provided if needsName was returned previously
 }
 
+/**
+ * SIMPLIFIED verify-auth-otp
+ * - Auto-detects if user exists → login
+ * - If no user exists and no fullName → returns needsName
+ * - If no user exists and fullName provided → creates account
+ */
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -22,7 +27,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { phoneNumber, code, mode = 'login', fullName }: VerifyOTPRequest = await req.json();
+    const { phoneNumber, code, fullName }: VerifyOTPRequest = await req.json();
 
     // Validation
     if (!phoneNumber || !code) {
@@ -52,7 +57,7 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    console.log(`[VERIFY-OTP] Mode: ${mode}, Phone: ${normalizedPhone}`);
+    console.log(`[VERIFY-OTP] Phone: ${normalizedPhone}, hasName: ${!!fullName}`);
 
     // ========== VÉRIFIER LE CODE OTP ==========
     const { data: otpRecord, error: otpError } = await supabaseAdmin
@@ -123,27 +128,18 @@ Deno.serve(async (req: Request) => {
       .update({ verified_at: new Date().toISOString() })
       .eq('id', otpRecord.id);
 
-    console.log(`[VERIFY-OTP] Code verified for: ${normalizedPhone}`);
+    console.log(`[VERIFY-OTP] ✅ Code verified for: ${normalizedPhone}`);
 
-    // ========== MODE LOGIN: CHERCHER L'UTILISATEUR EXISTANT ==========
-    if (mode === 'login') {
-      const { data: existingProfile } = await supabaseAdmin
-        .from('profiles')
-        .select('user_id, full_name, email')
-        .eq('phone', normalizedPhone)
-        .maybeSingle();
+    // ========== AUTO-DETECT: CHECK IF PROFILE EXISTS ==========
+    const { data: existingProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('user_id, full_name, email')
+      .eq('phone', normalizedPhone)
+      .maybeSingle();
 
-      if (!existingProfile?.user_id) {
-        return new Response(
-          JSON.stringify({ error: 'Aucun compte trouvé. Veuillez vous inscrire.' }),
-          {
-            status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
-      }
-
-      console.log(`[VERIFY-OTP] Login: user found ${existingProfile.user_id}`);
+    // ========== CASE 1: EXISTING USER → LOGIN ==========
+    if (existingProfile?.user_id) {
+      console.log(`[VERIFY-OTP] 👤 Existing user found: ${existingProfile.user_id}`);
       
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id);
       
@@ -167,10 +163,11 @@ Deno.serve(async (req: Request) => {
         return new Response(
           JSON.stringify({
             success: true,
-            userId: existingProfile.user_id,
             action: 'login',
+            userId: existingProfile.user_id,
             sessionUrl: sessionData.properties?.action_link,
             isNewUser: false,
+            message: `Bienvenue ${existingProfile.full_name || ''} !`,
           }),
           {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -187,26 +184,26 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // ========== MODE REGISTER: CRÉER UN NOUVEL UTILISATEUR ==========
-    console.log(`[VERIFY-OTP] Register: creating new user for ${normalizedPhone}`);
-    
-    // Vérifier que le compte n'existe pas déjà
-    const { data: existingCheck } = await supabaseAdmin
-      .from('profiles')
-      .select('user_id')
-      .eq('phone', normalizedPhone)
-      .maybeSingle();
-
-    if (existingCheck) {
+    // ========== CASE 2: NEW USER, NO NAME PROVIDED → REQUEST NAME ==========
+    if (!fullName?.trim()) {
+      console.log(`[VERIFY-OTP] 🆕 New user, requesting name for: ${normalizedPhone}`);
+      
       return new Response(
-        JSON.stringify({ error: 'Ce numéro est déjà associé à un compte.' }),
+        JSON.stringify({
+          success: true,
+          action: 'needsName',
+          message: 'Code vérifié ! Entrez votre nom pour créer votre compte.',
+          phoneVerified: true,
+        }),
         {
-          status: 409,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
 
+    // ========== CASE 3: NEW USER WITH NAME → CREATE ACCOUNT ==========
+    console.log(`[VERIFY-OTP] 🆕 Creating new user: ${normalizedPhone} - ${fullName}`);
+    
     // Générer un email fictif basé sur le téléphone
     const generatedEmail = `${normalizedPhone}@phone.montoit.ci`;
     const generatedPassword = crypto.randomUUID();
@@ -221,7 +218,7 @@ Deno.serve(async (req: Request) => {
       phone_confirm: true,
       user_metadata: {
         phone: e164Phone,
-        full_name: fullName || '',
+        full_name: fullName,
         auth_method: 'phone',
       },
     });
@@ -231,7 +228,6 @@ Deno.serve(async (req: Request) => {
       if (createError.code === 'email_exists' || createError.message?.includes('already been registered')) {
         console.log(`[VERIFY-OTP] User exists in auth, fetching by email: ${generatedEmail}`);
         
-        // Find existing user by email
         const { data: users } = await supabaseAdmin.auth.admin.listUsers();
         const existingUser = users?.users?.find(u => u.email === generatedEmail);
         
@@ -271,7 +267,7 @@ Deno.serve(async (req: Request) => {
         user_id: newUser.user.id,
         phone: normalizedPhone,
         email: generatedEmail,
-        full_name: fullName || '',
+        full_name: fullName,
         user_type: 'locataire',
         profile_setup_completed: false,
         created_at: new Date().toISOString(),
@@ -301,17 +297,17 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log(`[VERIFY-OTP] New user registered and logged in: ${newUser.user.id}`);
+    console.log(`[VERIFY-OTP] ✅ New user registered: ${newUser.user.id}`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        userId: newUser.user.id,
         action: 'register',
+        userId: newUser.user.id,
         sessionUrl: sessionData.properties?.action_link,
         isNewUser: true,
         needsProfileCompletion: true,
-        message: 'Compte créé avec succès !',
+        message: 'Compte créé avec succès ! Bienvenue sur Mon Toit.',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

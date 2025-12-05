@@ -9,12 +9,15 @@ const corsHeaders = {
 interface OTPRequest {
   phoneNumber: string;
   method: 'sms' | 'whatsapp';
-  mode: 'login' | 'register';
-  fullName?: string;
 }
 
 const RATE_LIMIT_SECONDS = 60;
 
+/**
+ * SIMPLIFIED send-auth-otp
+ * - No mode (login/register) - we just send the OTP
+ * - Account detection is done in verify-auth-otp after OTP validation
+ */
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -24,7 +27,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { phoneNumber, method = 'sms', mode = 'login', fullName }: OTPRequest = await req.json();
+    const { phoneNumber, method = 'whatsapp' }: OTPRequest = await req.json();
 
     // Validation
     if (!phoneNumber) {
@@ -37,7 +40,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Normaliser le numéro
+    // Normaliser le numéro (Côte d'Ivoire)
     let normalizedPhone = phoneNumber.replace(/\D/g, '');
     
     if (!normalizedPhone.startsWith('225')) {
@@ -59,68 +62,6 @@ Deno.serve(async (req: Request) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    
-    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
-
-    // ========== MODE LOGIN: VÉRIFIER QUE LE COMPTE EXISTE ==========
-    if (mode === 'login') {
-      const { data: existingProfile } = await supabaseAdmin
-        .from('profiles')
-        .select('user_id')
-        .eq('phone', normalizedPhone)
-        .maybeSingle();
-
-      if (!existingProfile) {
-        console.log(`[SEND-OTP] Mode login: aucun compte trouvé pour ${normalizedPhone}`);
-        // Return HTTP 200 with accountNotFound flag (business logic, not error)
-        return new Response(
-          JSON.stringify({ 
-            success: false,
-            accountNotFound: true,
-            message: 'Aucun compte associé à ce numéro. Veuillez vous inscrire.',
-          }),
-          {
-            status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
-      }
-      console.log(`[SEND-OTP] Mode login: compte trouvé pour ${normalizedPhone}`);
-    }
-
-    // ========== MODE REGISTER: VÉRIFIER QUE LE COMPTE N'EXISTE PAS ==========
-    if (mode === 'register') {
-      if (!fullName?.trim()) {
-        return new Response(
-          JSON.stringify({ error: 'Nom complet requis pour l\'inscription' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
-      }
-
-      const { data: existingProfile } = await supabaseAdmin
-        .from('profiles')
-        .select('user_id')
-        .eq('phone', normalizedPhone)
-        .maybeSingle();
-
-      if (existingProfile) {
-        console.log(`[SEND-OTP] Mode register: compte existant pour ${normalizedPhone}`);
-        return new Response(
-          JSON.stringify({ 
-            error: 'Ce numéro est déjà associé à un compte. Connectez-vous.',
-            accountExists: true,
-          }),
-          {
-            status: 409,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
-      }
-      console.log(`[SEND-OTP] Mode register: nouveau numéro ${normalizedPhone}`);
-    }
 
     // ========== RATE LIMITING CHECK ==========
     const rateLimitCutoff = new Date(Date.now() - RATE_LIMIT_SECONDS * 1000).toISOString();
@@ -200,7 +141,7 @@ Deno.serve(async (req: Request) => {
 
     const message = `Votre code Mon Toit est : ${otp}\n\nCe code expire dans 10 minutes. Ne le partagez avec personne.`;
 
-    console.log(`📤 Envoi OTP ${mode} via ${method} à ${normalizedPhone}...`);
+    console.log(`📤 Envoi OTP via ${method} à ${normalizedPhone}...`);
 
     const sendResponse = await fetch(functionUrl, {
       method: 'POST',
@@ -217,7 +158,7 @@ Deno.serve(async (req: Request) => {
     const sendResult = await sendResponse.json();
 
     if (!sendResponse.ok) {
-      console.warn('⚠️ Échec envoi OTP, mais code stocké:', sendResult);
+      console.warn('⚠️ Échec envoi OTP, mode dev activé:', sendResult);
       return new Response(
         JSON.stringify({
           success: true,
@@ -232,7 +173,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log(`✅ OTP ${mode} envoyé à ${normalizedPhone} via ${method}`);
+    console.log(`✅ OTP envoyé à ${normalizedPhone} via ${method}`);
 
     return new Response(
       JSON.stringify({
