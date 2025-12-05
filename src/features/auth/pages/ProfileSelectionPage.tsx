@@ -3,7 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Building2, Home, UserCircle, Briefcase, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { normalizeUserType, type UserTypeEn } from '@/shared/lib/userTypeMapping';
+
+// Inline types and normalize function
+type UserTypeEn = 'tenant' | 'owner' | 'agent';
+const normalizeUserType = (userType: string | undefined | null): UserTypeEn => {
+  if (!userType) return 'tenant';
+  const mapping: Record<string, UserTypeEn> = {
+    locataire: 'tenant', proprietaire: 'owner', agence: 'agent',
+    tenant: 'tenant', owner: 'owner', agent: 'agent'
+  };
+  return mapping[userType] || 'tenant';
+};
 
 export default function ProfileSelection() {
   const { user, profile } = useAuth();
