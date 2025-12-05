@@ -1,19 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import edgeLogger from '../_shared/logger.ts';
+import type { ONECIRequest, ONECIVerificationResult } from '../_shared/types/verification.types.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
-
-interface ONECIRequest {
-  verificationId: string;
-  cniNumber: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth?: string;
-  userId: string;
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -44,6 +37,8 @@ Deno.serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    edgeLogger.info('ONECI verification started', { verificationId, userId });
 
     await supabaseClient
       .from('identity_verifications')
@@ -96,7 +91,7 @@ Deno.serve(async (req: Request) => {
       throw new Error(error.message || 'ONECI verification failed');
     }
 
-    const result = await response.json();
+    const result = await response.json() as ONECIVerificationResult;
     const verificationScore = result.confidence || result.score || 100;
     const isVerified = result.verified === true || verificationScore >= 90;
 
@@ -140,6 +135,13 @@ Deno.serve(async (req: Request) => {
       p_user_id: userId
     });
 
+    edgeLogger.info('ONECI verification completed', { 
+      verificationId, 
+      userId, 
+      isVerified, 
+      verificationScore 
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -158,8 +160,9 @@ Deno.serve(async (req: Request) => {
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
-    console.error('ONECI verification error:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    edgeLogger.error('ONECI verification error', error instanceof Error ? error : undefined, { errorMessage });
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -170,11 +173,11 @@ Deno.serve(async (req: Request) => {
       p_service_name: 'oneci',
       p_action: 'verify_cni',
       p_status: 'error',
-      p_error_message: error.message
+      p_error_message: errorMessage
     });
 
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

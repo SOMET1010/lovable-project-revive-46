@@ -1,30 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import edgeLogger from '../_shared/logger.ts';
+import type { 
+  FaceVerificationRequest, 
+  AzureFaceDetectResponse, 
+  AzureFaceVerifyResponse,
+  FaceVerificationUpdateData 
+} from '../_shared/types/verification.types.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-interface FaceVerificationRequest {
-  cniImageBase64: string;
-  selfieBase64: string;
-}
-
-interface AzureFaceDetectResponse {
-  faceId: string;
-  faceRectangle: {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  };
-}
-
-interface AzureFaceVerifyResponse {
-  isIdentical: boolean;
-  confidence: number;
-}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -34,7 +21,7 @@ serve(async (req) => {
   try {
     const { cniImageBase64, selfieBase64 }: FaceVerificationRequest = await req.json();
 
-    console.log('Face Verification Request received');
+    edgeLogger.info('Face verification request received');
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -80,7 +67,7 @@ serve(async (req) => {
     const cniImageBinary = Uint8Array.from(atob(cniImageBase64.split(',')[1]), c => c.charCodeAt(0));
     const selfieBinary = Uint8Array.from(atob(selfieBase64.split(',')[1]), c => c.charCodeAt(0));
 
-    console.log('Detecting face in CNI image...');
+    edgeLogger.info('Detecting face in CNI image', { userId: user.id });
     
     // Step 1: Detect face in CNI image
     const cniDetectResponse = await fetch(
@@ -96,8 +83,8 @@ serve(async (req) => {
     );
 
     if (!cniDetectResponse.ok) {
-      const error = await cniDetectResponse.text();
-      console.error('CNI detection error:', error);
+      const errorText = await cniDetectResponse.text();
+      edgeLogger.error('CNI face detection failed', new Error(errorText), { step: 'cni_detect', userId: user.id });
       throw new Error('Impossible de détecter un visage dans la photo de CNI');
     }
 
@@ -113,7 +100,7 @@ serve(async (req) => {
 
     const cniFaceId = cniDetectResult[0].faceId;
 
-    console.log('Detecting face in selfie...');
+    edgeLogger.info('Detecting face in selfie', { userId: user.id });
 
     // Step 2: Detect face in selfie
     const selfieDetectResponse = await fetch(
@@ -129,8 +116,8 @@ serve(async (req) => {
     );
 
     if (!selfieDetectResponse.ok) {
-      const error = await selfieDetectResponse.text();
-      console.error('Selfie detection error:', error);
+      const errorText = await selfieDetectResponse.text();
+      edgeLogger.error('Selfie face detection failed', new Error(errorText), { step: 'selfie_detect', userId: user.id });
       throw new Error('Impossible de détecter un visage dans le selfie');
     }
 
@@ -146,7 +133,7 @@ serve(async (req) => {
 
     const selfieFaceId = selfieDetectResult[0].faceId;
 
-    console.log('Verifying faces match...');
+    edgeLogger.info('Verifying faces match', { userId: user.id });
 
     // Step 3: Verify if faces match
     const verifyResponse = await fetch(
@@ -165,8 +152,8 @@ serve(async (req) => {
     );
 
     if (!verifyResponse.ok) {
-      const error = await verifyResponse.text();
-      console.error('Verification error:', error);
+      const errorText = await verifyResponse.text();
+      edgeLogger.error('Face verification API failed', new Error(errorText), { step: 'verify', userId: user.id });
       throw new Error('Erreur lors de la vérification des visages');
     }
 
@@ -175,14 +162,18 @@ serve(async (req) => {
     const similarityScore = verifyResult.confidence * 100;
     const isVerified = verifyResult.isIdentical && similarityScore >= 70;
 
-    console.log('Verification result:', { isVerified, similarityScore });
+    edgeLogger.info('Face verification completed', { 
+      userId: user.id, 
+      isVerified, 
+      similarityScore: similarityScore.toFixed(1) 
+    });
 
     // Update user verification record
     const newAttempts = lastAttempt === today 
       ? (verification?.face_verification_attempts || 0) + 1 
       : 1;
 
-    const updateData: any = {
+    const updateData: FaceVerificationUpdateData = {
       face_verification_attempts: newAttempts,
       face_similarity_score: similarityScore,
     };
@@ -200,7 +191,7 @@ serve(async (req) => {
       .eq('user_id', user.id);
 
     if (updateError) {
-      console.error('Error updating verification:', updateError);
+      edgeLogger.warn('Failed to update verification record', { userId: user.id, error: updateError.message });
     }
 
     // Send success email if verified
@@ -228,11 +219,13 @@ serve(async (req) => {
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error) {
-    console.error('Error in face-verification:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+    edgeLogger.error('Face verification error', error instanceof Error ? error : undefined, { errorMessage });
+    
     return new Response(
       JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Erreur inconnue',
+        error: errorMessage,
         verified: false 
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
