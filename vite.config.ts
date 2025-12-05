@@ -27,13 +27,15 @@ export default defineConfig(({ mode }) => ({
       '@stores': path.resolve(__dirname, './src/stores'),
     },
   },
-  optimizeDeps: {
-    exclude: ['lucide-react'],
-    include: ['mapbox-gl'],
-  },
   build: {
+    outDir: 'dist',
+    sourcemap: false,
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+  },
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+    include: ['mapbox-gl'],
   },
 }));
