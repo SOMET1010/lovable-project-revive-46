@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Building2, Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { InputWithIcon } from '@/shared/ui';
@@ -16,9 +16,16 @@ type PhoneStep = 'enter' | 'verify';
 
 export default function ModernAuthPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine initial tab based on route
+  const getInitialTab = (): MainTab => {
+    if (location.pathname === '/inscription') return 'register';
+    return 'login';
+  };
 
   // State
-  const [mainTab, setMainTab] = useState<MainTab>('login');
+  const [mainTab, setMainTab] = useState<MainTab>(getInitialTab);
   const [authMethod, setAuthMethod] = useState<AuthMethod>('email');
   const [phoneStep, setPhoneStep] = useState<PhoneStep>('enter');
   const [loading, setLoading] = useState(false);
