@@ -72,13 +72,15 @@ Deno.serve(async (req: Request) => {
 
       if (!existingProfile) {
         console.log(`[SEND-OTP] Mode login: aucun compte trouvé pour ${normalizedPhone}`);
+        // Return HTTP 200 with accountNotFound flag (business logic, not error)
         return new Response(
           JSON.stringify({ 
-            error: 'Aucun compte associé à ce numéro. Veuillez vous inscrire.',
+            success: false,
             accountNotFound: true,
+            message: 'Aucun compte associé à ce numéro. Veuillez vous inscrire.',
           }),
           {
-            status: 404,
+            status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
         );
