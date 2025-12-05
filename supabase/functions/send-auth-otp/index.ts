@@ -33,9 +33,19 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Normaliser le numéro
-    const normalizedPhone = phoneNumber.replace(/\D/g, '');
-    if (normalizedPhone.length < 10) {
+    // Normaliser le numéro et ajouter le code pays si nécessaire
+    let normalizedPhone = phoneNumber.replace(/\D/g, '');
+    
+    // Ajouter le code pays Côte d'Ivoire si pas présent
+    if (!normalizedPhone.startsWith('225')) {
+      // Enlever le 0 initial si présent (format local ivoirien)
+      if (normalizedPhone.startsWith('0')) {
+        normalizedPhone = normalizedPhone.substring(1);
+      }
+      normalizedPhone = '225' + normalizedPhone;
+    }
+    
+    if (normalizedPhone.length < 12) {
       return new Response(
         JSON.stringify({ error: 'Numéro de téléphone invalide' }),
         {
