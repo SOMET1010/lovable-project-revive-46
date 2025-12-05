@@ -9,7 +9,7 @@ import {
   AlertCircle,
   FileText
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
+import { Card, CardContent } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/badge';
 import { Textarea } from '@/shared/ui/textarea';
@@ -156,7 +156,7 @@ export default function DocumentValidationPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate(`/trust-agent/mission/${missionId}`)}>
+              <Button variant="ghost" size="small" className="p-2 h-auto w-auto" onClick={() => navigate(`/trust-agent/mission/${missionId}`)}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -257,7 +257,7 @@ export default function DocumentValidationPage() {
                     {doc.status === 'pending' ? (
                       <>
                         <Button 
-                          size="sm" 
+                          size="small" 
                           variant="outline"
                           onClick={() => handleApprove(doc)}
                         >
@@ -265,8 +265,8 @@ export default function DocumentValidationPage() {
                           Approuver
                         </Button>
                         <Button 
-                          size="sm" 
-                          variant="destructive"
+                          size="small" 
+                          variant="danger"
                           onClick={() => handleRejectClick(doc)}
                         >
                           <X className="h-4 w-4 mr-1" />
@@ -308,7 +308,7 @@ export default function DocumentValidationPage() {
               Annuler
             </Button>
             <Button 
-              variant="destructive" 
+              variant="danger" 
               onClick={handleRejectConfirm}
               disabled={!rejectionReason.trim()}
             >

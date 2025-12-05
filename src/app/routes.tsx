@@ -81,6 +81,14 @@ const AdminApiKeys = lazyWithRetry(() => import('@/features/admin/pages/ApiKeysP
 const AdminCEVManagement = lazyWithRetry(() => import('@/features/admin/pages/CEVManagementPage'));
 const AdminTrustAgents = lazyWithRetry(() => import('@/features/admin/pages/TrustAgentsPage'));
 
+// Trust Agent pages
+const TrustAgentLayout = lazyWithRetry(() => import('@/features/trust-agent/layouts/TrustAgentLayout'));
+const TrustAgentDashboard = lazyWithRetry(() => import('@/features/trust-agent/pages/DashboardPage'));
+const MissionDetail = lazyWithRetry(() => import('@/features/trust-agent/pages/MissionDetailPage'));
+const PhotoVerification = lazyWithRetry(() => import('@/features/trust-agent/pages/PhotoVerificationPage'));
+const DocumentValidation = lazyWithRetry(() => import('@/features/trust-agent/pages/DocumentValidationPage'));
+const EtatDesLieux = lazyWithRetry(() => import('@/features/trust-agent/pages/EtatDesLieuxPage'));
+
 // Static pages
 const AboutPage = lazyWithRetry(() => import('@/features/auth/pages/AboutPage'));
 const TermsOfServicePage = lazyWithRetry(() => import('@/features/auth/pages/TermsOfServicePage'));
@@ -179,6 +187,20 @@ export const routes: RouteObject[] = [
 
       // Agency routes
       { path: 'dashboard/agence', element: <ProtectedRoute allowedRoles={['agence', 'agent']}><AgencyDashboard /></ProtectedRoute> },
+
+      // Trust Agent routes
+      {
+        path: 'trust-agent',
+        element: <ProtectedRoute allowedRoles={['trust_agent']}><TrustAgentLayout /></ProtectedRoute>,
+        children: [
+          { index: true, element: <Navigate to="/trust-agent/dashboard" replace /> },
+          { path: 'dashboard', element: <TrustAgentDashboard /> },
+          { path: 'mission/:id', element: <MissionDetail /> },
+          { path: 'photos/:id', element: <PhotoVerification /> },
+          { path: 'documents/:id', element: <DocumentValidation /> },
+          { path: 'etat-des-lieux/:id', element: <EtatDesLieux /> },
+        ]
+      },
 
       // Admin routes
       {
