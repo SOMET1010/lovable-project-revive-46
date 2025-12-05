@@ -64,15 +64,19 @@ export default defineConfig({
       },
     },
     chunkSizeWarningLimit: 1000,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
   },
   optimizeDeps: {
+    exclude: ['lucide-react'],
     include: [
       'react',
       'react-dom',
       'react-router-dom',
       '@tanstack/react-query',
       '@supabase/supabase-js',
-      'lucide-react',
+      'mapbox-gl',
     ],
   },
 });
