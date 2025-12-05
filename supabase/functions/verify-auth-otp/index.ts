@@ -9,14 +9,23 @@ const corsHeaders = {
 interface VerifyOTPRequest {
   phoneNumber: string;
   code: string;
-  fullName?: string; // Only provided if needsName was returned previously
+  fullName?: string;
 }
 
 /**
- * SIMPLIFIED verify-auth-otp
- * - Auto-detects if user exists → login
- * - If no user exists and no fullName → returns needsName
- * - If no user exists and fullName provided → creates account
+ * Helper: Génère l'ancien format 12 chiffres à partir du nouveau format 13 chiffres
+ * 2250709753232 (13) → 225709753232 (12)
+ */
+function getOldPhoneFormat(normalizedPhone: string): string | null {
+  if (normalizedPhone.length === 13 && normalizedPhone.startsWith('2250')) {
+    return '225' + normalizedPhone.substring(4);
+  }
+  return null;
+}
+
+/**
+ * SIMPLIFIED verify-auth-otp with flexible phone format lookup
+ * Supports both 12-digit (old) and 13-digit (new) phone formats
  */
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -29,7 +38,6 @@ Deno.serve(async (req: Request) => {
   try {
     const { phoneNumber, code, fullName }: VerifyOTPRequest = await req.json();
 
-    // Validation
     if (!phoneNumber || !code) {
       return new Response(
         JSON.stringify({ error: 'Numéro et code requis' }),
@@ -40,15 +48,13 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Normaliser le numéro (Côte d'Ivoire)
-    // Format attendu: 2250XXXXXXXXX (13 chiffres)
+    // Normaliser le numéro (format 13 chiffres: 2250XXXXXXXXX)
     let normalizedPhone = phoneNumber.replace(/\D/g, '');
-    
-    // Ajouter le préfixe 225 si absent (GARDER le 0 initial)
     if (!normalizedPhone.startsWith('225')) {
       normalizedPhone = '225' + normalizedPhone;
     }
     
+    const oldFormatPhone = getOldPhoneFormat(normalizedPhone);
     const e164Phone = '+' + normalizedPhone;
 
     const supabaseAdmin = createClient(
@@ -56,10 +62,15 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    console.log(`[VERIFY-OTP] Phone: ${normalizedPhone}, hasName: ${!!fullName}`);
+    console.log(`[VERIFY-OTP] Phone: ${normalizedPhone}, oldFormat: ${oldFormatPhone}, hasName: ${!!fullName}`);
 
-    // ========== VÉRIFIER LE CODE OTP ==========
-    const { data: otpRecord, error: otpError } = await supabaseAdmin
+    // ========== RECHERCHE FLEXIBLE DU CODE OTP ==========
+    // Essayer d'abord le nouveau format, puis l'ancien
+    let otpRecord = null;
+    let otpError = null;
+
+    // 1. Recherche avec nouveau format (13 chiffres)
+    const { data: otpNew, error: errNew } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
       .eq('phone', normalizedPhone)
@@ -70,6 +81,41 @@ Deno.serve(async (req: Request) => {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+
+    if (errNew) {
+      otpError = errNew;
+    } else if (otpNew) {
+      otpRecord = otpNew;
+      console.log(`[VERIFY-OTP] ✅ OTP trouvé avec nouveau format: ${normalizedPhone}`);
+    }
+
+    // 2. Si non trouvé, essayer l'ancien format (12 chiffres)
+    if (!otpRecord && oldFormatPhone) {
+      const { data: otpOld, error: errOld } = await supabaseAdmin
+        .from('verification_codes')
+        .select('*')
+        .eq('phone', oldFormatPhone)
+        .eq('code', code)
+        .in('type', ['sms', 'whatsapp'])
+        .is('verified_at', null)
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (errOld && !otpError) {
+        otpError = errOld;
+      } else if (otpOld) {
+        otpRecord = otpOld;
+        console.log(`[VERIFY-OTP] ✅ OTP trouvé avec ancien format: ${oldFormatPhone}`);
+        
+        // Migrer vers le nouveau format
+        await supabaseAdmin
+          .from('verification_codes')
+          .update({ phone: normalizedPhone })
+          .eq('id', otpOld.id);
+      }
+    }
 
     if (otpError) {
       console.error('Error fetching OTP:', otpError);
@@ -83,11 +129,11 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!otpRecord) {
-      // Incrémenter les tentatives
+      // Incrémenter les tentatives sur le dernier code
       const { data: lastCode } = await supabaseAdmin
         .from('verification_codes')
         .select('id, attempts')
-        .eq('phone', normalizedPhone)
+        .or(`phone.eq.${normalizedPhone}${oldFormatPhone ? `,phone.eq.${oldFormatPhone}` : ''}`)
         .is('verified_at', null)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -123,16 +169,43 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[VERIFY-OTP] ✅ Code valid for: ${normalizedPhone}`);
 
-    // ========== AUTO-DETECT: CHECK IF PROFILE EXISTS ==========
-    const { data: existingProfile } = await supabaseAdmin
+    // ========== RECHERCHE FLEXIBLE DU PROFIL ==========
+    let existingProfile = null;
+
+    // 1. Recherche avec nouveau format (13 chiffres)
+    const { data: profileNew } = await supabaseAdmin
       .from('profiles')
-      .select('user_id, full_name, email')
+      .select('user_id, full_name, email, phone')
       .eq('phone', normalizedPhone)
       .maybeSingle();
 
+    if (profileNew) {
+      existingProfile = profileNew;
+      console.log(`[VERIFY-OTP] 👤 Profil trouvé avec nouveau format: ${normalizedPhone}`);
+    }
+
+    // 2. Si non trouvé, essayer l'ancien format (12 chiffres)
+    if (!existingProfile && oldFormatPhone) {
+      const { data: profileOld } = await supabaseAdmin
+        .from('profiles')
+        .select('user_id, full_name, email, phone')
+        .eq('phone', oldFormatPhone)
+        .maybeSingle();
+
+      if (profileOld) {
+        existingProfile = profileOld;
+        console.log(`[VERIFY-OTP] 👤 Profil trouvé avec ancien format: ${oldFormatPhone}, migration vers ${normalizedPhone}`);
+        
+        // Migrer le profil vers le nouveau format
+        await supabaseAdmin
+          .from('profiles')
+          .update({ phone: normalizedPhone, updated_at: new Date().toISOString() })
+          .eq('user_id', profileOld.user_id);
+      }
+    }
+
     // ========== CASE 1: EXISTING USER → LOGIN ==========
     if (existingProfile?.user_id) {
-      // Mark OTP as verified NOW (login complete)
       await supabaseAdmin
         .from('verification_codes')
         .update({ verified_at: new Date().toISOString() })
@@ -184,7 +257,6 @@ Deno.serve(async (req: Request) => {
     }
 
     // ========== CASE 2: NEW USER, NO NAME PROVIDED → REQUEST NAME ==========
-    // DON'T mark OTP as verified yet - wait for name submission
     if (!fullName?.trim()) {
       console.log(`[VERIFY-OTP] 🆕 New user, requesting name for: ${normalizedPhone}`);
       
@@ -194,7 +266,6 @@ Deno.serve(async (req: Request) => {
           action: 'needsName',
           message: 'Code vérifié ! Entrez votre nom pour créer votre compte.',
           phoneVerified: true,
-          // Pass the OTP ID to mark it verified later (optional, code still valid)
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -203,7 +274,6 @@ Deno.serve(async (req: Request) => {
     }
 
     // ========== CASE 3: NEW USER WITH NAME → CREATE ACCOUNT ==========
-    // Mark OTP as verified NOW (registration will complete)
     await supabaseAdmin
       .from('verification_codes')
       .update({ verified_at: new Date().toISOString() })
@@ -211,11 +281,9 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[VERIFY-OTP] 🆕 Creating new user: ${normalizedPhone} - ${fullName}`);
     
-    // Générer un email fictif basé sur le téléphone
     const generatedEmail = `${normalizedPhone}@phone.montoit.ci`;
     const generatedPassword = crypto.randomUUID();
     
-    // Créer l'utilisateur dans Supabase Auth
     let newUser;
     const { data: createdUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: generatedEmail,
@@ -231,7 +299,6 @@ Deno.serve(async (req: Request) => {
     });
 
     if (createError) {
-      // Handle case where user exists in auth.users but not in profiles
       if (createError.code === 'email_exists' || createError.message?.includes('already been registered')) {
         console.log(`[VERIFY-OTP] User exists in auth, fetching by email: ${generatedEmail}`);
         
@@ -267,16 +334,15 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[VERIFY-OTP] User created: ${newUser.user.id}`);
 
-    // Créer le profil (id = user_id pour compatibilité AuthProvider)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
-        id: newUser.user.id, // IMPORTANT: AuthProvider looks up by 'id'
+        id: newUser.user.id,
         user_id: newUser.user.id,
-        phone: normalizedPhone,
+        phone: normalizedPhone, // Toujours utiliser le nouveau format
         email: generatedEmail,
         full_name: fullName,
-        user_type: null, // User will select during profile completion
+        user_type: null,
         profile_setup_completed: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -288,7 +354,6 @@ Deno.serve(async (req: Request) => {
       console.error('Error creating profile:', profileError);
     }
 
-    // Générer un magic link
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: generatedEmail,
