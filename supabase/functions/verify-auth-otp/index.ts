@@ -268,10 +268,11 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[VERIFY-OTP] User created: ${newUser.user.id}`);
 
-    // Créer le profil (user_type sera défini lors de la complétion du profil)
+    // Créer le profil (id = user_id pour compatibilité AuthProvider)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
+        id: newUser.user.id, // IMPORTANT: AuthProvider looks up by 'id'
         user_id: newUser.user.id,
         phone: normalizedPhone,
         email: generatedEmail,
@@ -281,7 +282,7 @@ Deno.serve(async (req: Request) => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, {
-        onConflict: 'user_id',
+        onConflict: 'id',
       });
 
     if (profileError) {
