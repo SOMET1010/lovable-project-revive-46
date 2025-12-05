@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (error.code === 'PGRST116') {
-          console.log('[AuthContext] Profile not found, attempting recovery...');
+          logger.info('Profile not found, attempting recovery', { userId });
           const recovered = await attemptProfileRecovery(userId);
           if (recovered) {
             return loadProfile(userId, retryCount + 1);
@@ -120,10 +120,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             details: 'Votre profil n\'a pas été créé correctement. Tentative de récupération échouée.'
           });
         } else if (error.message.includes('permission') || error.message.includes('denied')) {
-          console.warn('[AuthContext] Permission error detected');
+          logger.warn('Permission error detected', { userId });
 
           if (retryCount < MAX_RETRIES) {
-            console.log('[AuthContext] Retrying after permission error...');
+            logger.debug('Retrying after permission error', { attempt: retryCount + 1 });
             await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
             return loadProfile(userId, retryCount + 1);
           }
@@ -145,10 +145,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (!data) {
-        console.warn('[AuthContext] No profile found for user:', userId);
+        logger.warn('No profile found for user', { userId });
 
         if (retryCount === 0) {
-          console.log('[AuthContext] Attempting profile recovery...');
+          logger.info('Attempting profile recovery', { userId });
           const recovered = await attemptProfileRecovery(userId);
           if (recovered) {
             return loadProfile(userId, 1);
@@ -156,12 +156,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (retryCount < MAX_RETRIES) {
-          console.log(`[AuthContext] Retrying in ${RETRY_DELAY}ms...`);
+          logger.debug('Retrying profile load', { delay: RETRY_DELAY * (retryCount + 1) });
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
           return loadProfile(userId, retryCount + 1);
         }
 
-        console.error('[AuthContext] Profile not found after all retries');
+        logger.error('Profile not found after all retries', undefined, { userId });
         setProfileError({
           type: 'not_found',
           message: 'Profil introuvable',
@@ -171,14 +171,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      console.log('[AuthContext] Profile loaded successfully:', data.email);
+      logger.info('Profile loaded successfully', { userId, email: data.email });
       setProfile(data);
       setProfileError(null);
     } catch (error: unknown) {
-      console.error('[AuthContext] Error loading profile:', error);
+      logger.error('Error loading profile', error instanceof Error ? error : undefined, { userId });
 
       if (retryCount < MAX_RETRIES) {
-        console.log(`[AuthContext] Retrying after error in ${RETRY_DELAY * (retryCount + 1)}ms...`);
+        logger.debug('Retrying after error', { delay: RETRY_DELAY * (retryCount + 1) });
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * (retryCount + 1)));
         return loadProfile(userId, retryCount + 1);
       }
@@ -197,9 +197,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const attemptProfileRecovery = async (userId: string): Promise<boolean> => {
     try {
-      console.log('[AuthContext] Attempting to create profile for user:', userId);
+      logger.info('Attempting to create profile for user', { userId });
 
-      // Try to create the profile directly
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return false;
 
@@ -215,14 +214,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }, { onConflict: 'id' });
 
       if (error) {
-        console.error('[AuthContext] Profile creation failed:', error);
+        logger.error('Profile creation failed', error as Error, { userId });
         return false;
       }
 
-      console.log('[AuthContext] Profile created successfully');
+      logger.info('Profile created successfully', { userId });
       return true;
     } catch (error) {
-      console.error('[AuthContext] Profile recovery exception:', error);
+      logger.error('Profile recovery exception', error instanceof Error ? error : undefined, { userId });
       return false;
     }
   };
@@ -306,7 +305,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (functionError) {
-        console.error('[AuthContext] Error calling send-password-reset:', functionError);
+        logger.error('Error calling send-password-reset', functionError as Error);
         return {
           error: {
             message: functionError.message || 'Erreur lors de l\'envoi de l\'email de réinitialisation',
@@ -338,7 +337,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       return { error: null };
     } catch (err: unknown) {
-      console.error('[AuthContext] Password reset exception:', err);
+      logger.error('Password reset exception', err instanceof Error ? err : undefined);
       return {
         error: {
           message: 'Erreur lors de l\'envoi de l\'email de réinitialisation. Veuillez réessayer.',

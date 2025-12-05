@@ -1,15 +1,11 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { edgeLogger } from "../_shared/logger.ts";
+import type { OTPRequest } from "../_shared/types/sms.types.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
-
-interface OTPRequest {
-  phoneNumber: string;
-  method: 'sms' | 'whatsapp';
-}
 
 const RATE_LIMIT_SECONDS = 60;
 
@@ -77,14 +73,14 @@ Deno.serve(async (req: Request) => {
     );
 
     if (rateLimitResponse.ok) {
-      const recentCodes = await rateLimitResponse.json();
+      const recentCodes = await rateLimitResponse.json() as Array<{ created_at: string }>;
       
       if (recentCodes && recentCodes.length > 0) {
         const lastSentAt = new Date(recentCodes[0].created_at);
         const elapsedSeconds = (Date.now() - lastSentAt.getTime()) / 1000;
         const remainingSeconds = Math.ceil(RATE_LIMIT_SECONDS - elapsedSeconds);
         
-        console.log(`⏳ Rate limit actif: ${remainingSeconds}s pour ${normalizedPhone}`);
+        edgeLogger.info('Rate limit active', { remainingSeconds, phone: normalizedPhone });
         
         return new Response(
           JSON.stringify({
@@ -124,7 +120,7 @@ Deno.serve(async (req: Request) => {
 
     if (!storeResponse.ok) {
       const errorText = await storeResponse.text();
-      console.error('Failed to store OTP:', errorText);
+      edgeLogger.error('Failed to store OTP', undefined, { error: errorText });
       return new Response(
         JSON.stringify({ error: 'Erreur lors de la génération du code' }),
         {
@@ -141,7 +137,7 @@ Deno.serve(async (req: Request) => {
 
     const message = `Votre code Mon Toit est : ${otp}\n\nCe code expire dans 10 minutes. Ne le partagez avec personne.`;
 
-    console.log(`📤 Envoi OTP via ${method} à ${normalizedPhone}...`);
+    edgeLogger.info('Sending OTP', { method, phone: normalizedPhone });
 
     const sendResponse = await fetch(functionUrl, {
       method: 'POST',
@@ -155,15 +151,13 @@ Deno.serve(async (req: Request) => {
       }),
     });
 
-    const sendResult = await sendResponse.json();
+    const sendResult = await sendResponse.json() as { provider?: string; error?: string };
 
     if (!sendResponse.ok) {
-      console.error('❌ Échec envoi OTP:', sendResult);
+      edgeLogger.warn('OTP send failed, dev mode activated', { error: sendResult.error, phone: normalizedPhone });
       
       // MODE DÉVELOPPEMENT: Retourner le code OTP pour tests
       // En production, cette fonctionnalité sera désactivée
-      console.log(`🧪 Mode dev activé - OTP: ${otp} pour ${normalizedPhone}`);
-      
       return new Response(
         JSON.stringify({
           success: true, // Success car le code est généré et stocké
@@ -179,7 +173,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log(`✅ OTP envoyé à ${normalizedPhone} via ${method}`);
+    edgeLogger.info('OTP sent successfully', { method, phone: normalizedPhone, provider: sendResult.provider });
 
     return new Response(
       JSON.stringify({
@@ -194,7 +188,7 @@ Deno.serve(async (req: Request) => {
     );
 
   } catch (error) {
-    console.error('❌ Error in send-auth-otp:', error);
+    edgeLogger.error('Error in send-auth-otp', error instanceof Error ? error : undefined);
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : 'Erreur inconnue'

@@ -1,4 +1,6 @@
 import { ServiceManager, ServiceConfig } from '../_shared/serviceManager.ts';
+import { edgeLogger } from '../_shared/logger.ts';
+import type { SMSRequest, SMSHandlerParams, SMSSuccessResponse } from '../_shared/types/sms.types.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,10 +8,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-interface SMSRequest {
-  phoneNumber: string;
-  message: string;
-  sender?: string;
+interface InTouchSMSResponse {
+  message_id?: string;
+  id?: string;
+  transaction_id?: string;
+}
+
+interface BrevoSMSResponse {
+  messageId: string;
+  reference?: string;
+}
+
+interface AzureSMSResult {
+  successful: boolean;
+  messageId?: string;
+  errorMessage?: string;
 }
 
 function formatPhoneNumber(phone: string): string {
@@ -70,8 +83,8 @@ Deno.serve(async (req: Request) => {
     const serviceManager = new ServiceManager();
 
     // Define handlers for each SMS provider
-    const handlers = {
-      intouch: async (config: ServiceConfig, params: { phoneNumber: string; message: string; sender: string }) => {
+    const handlers: Record<string, (config: ServiceConfig, params: SMSHandlerParams) => Promise<SMSSuccessResponse>> = {
+      intouch: async (config: ServiceConfig, params: SMSHandlerParams): Promise<SMSSuccessResponse> => {
         const agencyCode = Deno.env.get('INTOUCH_AGENCY_CODE');
         const apiKey = Deno.env.get('INTOUCH_API_KEY');
 
@@ -81,7 +94,7 @@ Deno.serve(async (req: Request) => {
 
         // InTouch SMS API - URL correcte
         const intouchUrl = `https://apidist.gutouch.net/apidist/sec/${agencyCode}/sms`;
-        console.log('📤 InTouch SMS request to:', intouchUrl);
+        edgeLogger.info('InTouch SMS request', { url: intouchUrl, phone: params.phoneNumber });
 
         const response = await fetch(intouchUrl, {
           method: 'POST',
@@ -98,12 +111,12 @@ Deno.serve(async (req: Request) => {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('❌ InTouch SMS error:', errorText);
+          edgeLogger.error('InTouch SMS error', undefined, { status: response.status, error: errorText });
           throw new Error(`InTouch SMS failed: ${response.status} - ${errorText}`);
         }
 
-        const data = await response.json();
-        console.log('✅ InTouch SMS success:', data);
+        const data = await response.json() as InTouchSMSResponse;
+        edgeLogger.info('InTouch SMS success', { messageId: data.message_id || data.id });
 
         return {
           success: true,
@@ -112,7 +125,7 @@ Deno.serve(async (req: Request) => {
         };
       },
 
-      azure: async (config: ServiceConfig, params: any) => {
+      azure: async (config: ServiceConfig, params: SMSHandlerParams): Promise<SMSSuccessResponse> => {
         const { SmsClient } = await import('https://esm.sh/@azure/communication-sms');
         const connectionString = Deno.env.get('AZURE_COMMUNICATION_CONNECTION_STRING');
 
@@ -121,15 +134,16 @@ Deno.serve(async (req: Request) => {
         }
 
         const client = new SmsClient(connectionString);
+        const configWithFrom = config.config as { from?: string } | undefined;
 
         const sendResults = await client.send({
-          from: config.config.from || '+1234567890',
+          from: configWithFrom?.from || '+1234567890',
           to: [params.phoneNumber],
           message: params.message,
-        });
+        }) as AzureSMSResult[];
 
-        if (!sendResults[0].successful) {
-          throw new Error(`Azure SMS failed: ${sendResults[0].errorMessage}`);
+        if (!sendResults[0]?.successful) {
+          throw new Error(`Azure SMS failed: ${sendResults[0]?.errorMessage}`);
         }
 
         return {
@@ -139,14 +153,16 @@ Deno.serve(async (req: Request) => {
         };
       },
 
-      brevo: async (config: ServiceConfig, params: any) => {
+      brevo: async (config: ServiceConfig, params: SMSHandlerParams): Promise<SMSSuccessResponse> => {
         const apiKey = Deno.env.get('BREVO_API_KEY');
 
         if (!apiKey) {
           throw new Error('Brevo API key not configured');
         }
 
-        console.log('📤 Brevo SMS request to:', params.phoneNumber);
+        edgeLogger.info('Brevo SMS request', { phone: params.phoneNumber });
+        
+        const configWithSender = config.config as { sender?: string } | undefined;
         
         // Correct Brevo SMS endpoint: /sms (not /send)
         const response = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
@@ -157,7 +173,7 @@ Deno.serve(async (req: Request) => {
             'Accept': 'application/json'
           },
           body: JSON.stringify({
-            sender: (config.config?.sender || params.sender || 'ANSUT').substring(0, 11),
+            sender: (configWithSender?.sender || params.sender || 'ANSUT').substring(0, 11),
             recipient: params.phoneNumber,
             content: params.message,
             type: 'transactional'
@@ -166,17 +182,17 @@ Deno.serve(async (req: Request) => {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error('❌ Brevo SMS error:', response.status, errorText);
+          edgeLogger.error('Brevo SMS error', undefined, { status: response.status, error: errorText });
           try {
-            const errorData = JSON.parse(errorText);
+            const errorData = JSON.parse(errorText) as { message?: string };
             throw new Error(`Brevo SMS failed: ${errorData.message || response.statusText}`);
           } catch {
             throw new Error(`Brevo SMS failed: ${response.status} - ${errorText}`);
           }
         }
 
-        const result = await response.json();
-        console.log('✅ Brevo SMS success:', result);
+        const result = await response.json() as BrevoSMSResponse;
+        edgeLogger.info('Brevo SMS success', { messageId: result.messageId });
         return {
           success: true,
           messageId: result.messageId,
@@ -197,12 +213,13 @@ Deno.serve(async (req: Request) => {
       JSON.stringify(result),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
-    console.error('Error sending SMS with hybrid system:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    edgeLogger.error('Error sending SMS with hybrid system', error instanceof Error ? error : undefined);
 
     return new Response(
       JSON.stringify({
-        error: error.message,
+        error: errorMessage,
         details: 'All SMS providers failed. Please check service configuration.'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

@@ -1,4 +1,18 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { edgeLogger } from "../_shared/logger.ts";
+import type {
+  PaymentRequest,
+  MobileMoneyProvider,
+  OrangeMoneyApiKeys,
+  MTNApiKeys,
+  MoovApiKeys,
+  WaveApiKeys,
+  OrangeMoneyResponse,
+  MTNPaymentResponse,
+  MoovPaymentResponse,
+  WavePaymentResponse,
+  PROVIDER_FEE_RATES,
+} from "../_shared/types/payment.types.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,15 +20,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-interface PaymentRequest {
-  provider: 'orange_money' | 'mtn_money' | 'moov_money' | 'wave';
-  phoneNumber: string;
-  amount: number;
-  reference: string;
-  description?: string;
-}
-
-function validatePhoneForProvider(phone: string, provider: string): boolean {
+function validatePhoneForProvider(phone: string, provider: MobileMoneyProvider): boolean {
   const cleaned = phone.replace(/\D/g, '');
 
   switch (provider) {
@@ -31,8 +37,8 @@ function validatePhoneForProvider(phone: string, provider: string): boolean {
   }
 }
 
-function calculateFees(amount: number, provider: string): number {
-  const feeRates: Record<string, number> = {
+function calculateFees(amount: number, provider: MobileMoneyProvider): number {
+  const feeRates: Record<MobileMoneyProvider, number> = {
     orange_money: 0.015,
     mtn_money: 0.015,
     moov_money: 0.012,
@@ -43,12 +49,12 @@ function calculateFees(amount: number, provider: string): number {
 }
 
 async function processOrangeMoneyPayment(
-  apiKeys: any,
+  apiKeys: OrangeMoneyApiKeys,
   phoneNumber: string,
   amount: number,
   reference: string,
   description: string
-): Promise<any> {
+): Promise<OrangeMoneyResponse> {
   const response = await fetch('https://api.orange.com/orange-money-webpay/ci/v1/webpayment', {
     method: 'POST',
     headers: {
@@ -70,20 +76,20 @@ async function processOrangeMoneyPayment(
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { message?: string };
     throw new Error(error.message || 'Orange Money payment failed');
   }
 
-  return await response.json();
+  return await response.json() as OrangeMoneyResponse;
 }
 
 async function processMTNPayment(
-  apiKeys: any,
+  apiKeys: MTNApiKeys,
   phoneNumber: string,
   amount: number,
   reference: string,
   description: string
-): Promise<any> {
+): Promise<MTNPaymentResponse> {
   const authResponse = await fetch('https://sandbox.momodeveloper.mtn.com/collection/token/', {
     method: 'POST',
     headers: {
@@ -96,7 +102,7 @@ async function processMTNPayment(
     throw new Error('MTN authentication failed');
   }
 
-  const authData = await authResponse.json();
+  const authData = await authResponse.json() as { access_token: string };
 
   const response = await fetch('https://sandbox.momodeveloper.mtn.com/collection/v1_0/requesttopay', {
     method: 'POST',
@@ -121,7 +127,7 @@ async function processMTNPayment(
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { message?: string };
     throw new Error(error.message || 'MTN payment failed');
   }
 
@@ -129,12 +135,12 @@ async function processMTNPayment(
 }
 
 async function processMoovPayment(
-  apiKeys: any,
+  apiKeys: MoovApiKeys,
   phoneNumber: string,
   amount: number,
   reference: string,
   description: string
-): Promise<any> {
+): Promise<MoovPaymentResponse> {
   const response = await fetch('https://api.moov-africa.ci/v1/payments/init', {
     method: 'POST',
     headers: {
@@ -154,20 +160,20 @@ async function processMoovPayment(
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { message?: string };
     throw new Error(error.message || 'Moov payment failed');
   }
 
-  return await response.json();
+  return await response.json() as MoovPaymentResponse;
 }
 
 async function processWavePayment(
-  apiKeys: any,
-  phoneNumber: string,
+  apiKeys: WaveApiKeys,
+  _phoneNumber: string,
   amount: number,
   reference: string,
-  description: string
-): Promise<any> {
+  _description: string
+): Promise<WavePaymentResponse> {
   const response = await fetch('https://api.wave.com/v1/checkout/sessions', {
     method: 'POST',
     headers: {
@@ -188,11 +194,11 @@ async function processWavePayment(
   });
 
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json() as { message?: string };
     throw new Error(error.message || 'Wave payment failed');
   }
 
-  return await response.json();
+  return await response.json() as WavePaymentResponse;
 }
 
 Deno.serve(async (req: Request) => {
@@ -247,19 +253,21 @@ Deno.serve(async (req: Request) => {
     const fees = calculateFees(amount, provider);
     const totalAmount = amount + fees;
 
-    let result;
+    edgeLogger.info('Processing payment', { provider, phoneNumber, amount, reference });
+
+    let result: OrangeMoneyResponse | MTNPaymentResponse | MoovPaymentResponse | WavePaymentResponse;
     switch (provider) {
       case 'orange_money':
-        result = await processOrangeMoneyPayment(apiKeys.data, phoneNumber, totalAmount, reference, description);
+        result = await processOrangeMoneyPayment(apiKeys.data as OrangeMoneyApiKeys, phoneNumber, totalAmount, reference, description);
         break;
       case 'mtn_money':
-        result = await processMTNPayment(apiKeys.data, phoneNumber, totalAmount, reference, description);
+        result = await processMTNPayment(apiKeys.data as MTNApiKeys, phoneNumber, totalAmount, reference, description);
         break;
       case 'moov_money':
-        result = await processMoovPayment(apiKeys.data, phoneNumber, totalAmount, reference, description);
+        result = await processMoovPayment(apiKeys.data as MoovApiKeys, phoneNumber, totalAmount, reference, description);
         break;
       case 'wave':
-        result = await processWavePayment(apiKeys.data, phoneNumber, totalAmount, reference, description);
+        result = await processWavePayment(apiKeys.data as WaveApiKeys, phoneNumber, totalAmount, reference, description);
         break;
       default:
         throw new Error('Invalid provider');
@@ -273,21 +281,36 @@ Deno.serve(async (req: Request) => {
       p_response_data: result
     });
 
+    edgeLogger.info('Payment processed successfully', { provider, reference });
+
+    // Extract transaction ID based on provider response type
+    const transactionId = 
+      ('transactionId' in result ? result.transactionId : null) ||
+      ('payment_token' in result ? result.payment_token : null) ||
+      ('transaction_id' in result ? result.transaction_id : null) ||
+      ('id' in result ? result.id : null) ||
+      reference;
+
+    const paymentUrl = 
+      ('payment_url' in result ? result.payment_url : null) ||
+      ('wave_launch_url' in result ? result.wave_launch_url : null);
+
     return new Response(
       JSON.stringify({
         success: true,
-        transactionId: result.transactionId || result.payment_token || result.id,
+        transactionId,
         amount: amount,
         fees: fees,
         totalAmount: totalAmount,
         provider: provider,
         status: result.status || 'PENDING',
-        paymentUrl: result.payment_url || result.wave_launch_url
+        paymentUrl
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
-    console.error('Payment error:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    edgeLogger.error('Payment error', error instanceof Error ? error : undefined, { errorMessage });
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -298,11 +321,11 @@ Deno.serve(async (req: Request) => {
       p_service_name: 'mobile_money',
       p_action: 'process_payment',
       p_status: 'error',
-      p_error_message: error.message
+      p_error_message: errorMessage
     });
 
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
