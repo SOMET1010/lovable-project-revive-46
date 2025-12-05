@@ -1,6 +1,7 @@
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Send } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CONTACT } from '@/shared/constants/contact';
 
 export default function FooterPremium() {
   const [email, setEmail] = useState('');
@@ -156,15 +157,25 @@ export default function FooterPremium() {
             <div className="mt-6 space-y-3">
               <div className="flex items-center space-x-3 text-sm">
                 <Phone className="h-4 w-4 text-primary-500 flex-shrink-0" />
-                <span className="text-neutral-400">+225 XX XX XX XX XX</span>
+                <a 
+                  href={`tel:${CONTACT.PHONE}`}
+                  className="text-neutral-400 hover:text-primary-500 transition-colors"
+                >
+                  {CONTACT.PHONE_DISPLAY}
+                </a>
               </div>
               <div className="flex items-center space-x-3 text-sm">
                 <Mail className="h-4 w-4 text-primary-500 flex-shrink-0" />
-                <span className="text-neutral-400">contact@montoit.ci</span>
+                <a 
+                  href={`mailto:${CONTACT.EMAIL}`}
+                  className="text-neutral-400 hover:text-primary-500 transition-colors"
+                >
+                  {CONTACT.EMAIL}
+                </a>
               </div>
               <div className="flex items-center space-x-3 text-sm">
                 <MapPin className="h-4 w-4 text-primary-500 flex-shrink-0" />
-                <span className="text-neutral-400">Abidjan, Côte d'Ivoire</span>
+                <span className="text-neutral-400">{CONTACT.ADDRESS}</span>
               </div>
             </div>
           </div>
