@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const navigate = useNavigate();
-  const { user, loading, profile } = useAuthStore();
+  const { user, loading, profile } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
