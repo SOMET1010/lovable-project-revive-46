@@ -31,7 +31,8 @@ export default function TrustAgentLayout() {
           <div className="flex items-center gap-3">
             <Button 
               variant="ghost" 
-              size="icon"
+              size="small"
+              className="p-2 h-auto w-auto"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -41,7 +42,7 @@ export default function TrustAgentLayout() {
               <span className="font-semibold">Trust Agent</span>
             </div>
           </div>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="small" className="p-2 h-auto w-auto">
             <Bell className="h-5 w-5" />
           </Button>
         </div>
@@ -121,7 +122,8 @@ export default function TrustAgentLayout() {
             </div>
             <Button 
               variant="ghost" 
-              size="icon"
+              size="small"
+              className="p-2 h-auto w-auto"
               onClick={() => setSidebarOpen(false)}
             >
               <X className="h-5 w-5" />

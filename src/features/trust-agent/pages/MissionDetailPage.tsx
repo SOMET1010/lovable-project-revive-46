@@ -187,7 +187,7 @@ export default function MissionDetailPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate('/trust-agent/dashboard')}>
+              <Button variant="ghost" size="small" className="p-2 h-auto w-auto" onClick={() => navigate('/trust-agent/dashboard')}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>

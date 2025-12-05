@@ -64,7 +64,7 @@ export default function EtatDesLieuxPage() {
   
   const [etatDesLieux, setEtatDesLieux] = useState<EtatDesLieuxData>({
     type: 'entree',
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toISOString().split('T')?.[0] ?? '',
     rooms: defaultRooms,
     generalNotes: '',
     signature: false
@@ -154,7 +154,7 @@ export default function EtatDesLieuxPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate(`/trust-agent/mission/${missionId}`)}>
+              <Button variant="ghost" size="small" className="p-2 h-auto w-auto" onClick={() => navigate(`/trust-agent/mission/${missionId}`)}>
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -163,7 +163,7 @@ export default function EtatDesLieuxPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="small">
                 <Download className="h-4 w-4 mr-2" />
                 PDF
               </Button>
