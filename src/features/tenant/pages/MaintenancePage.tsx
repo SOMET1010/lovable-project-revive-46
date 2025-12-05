@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Wrench, Plus, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
+import TenantDashboardLayout from '../components/TenantDashboardLayout';
 
 interface MaintenanceRequest {
   id: string;
@@ -122,15 +123,17 @@ export default function TenantMaintenance() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-olive-50 to-amber-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-olive-600"></div>
-      </div>
+      <TenantDashboardLayout title="Maintenance">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        </div>
+      </TenantDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-olive-50 to-amber-50 py-8">
-      <div className="max-w-7xl mx-auto px-4">
+    <TenantDashboardLayout title="Maintenance">
+      <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center space-x-3">
@@ -265,6 +268,6 @@ export default function TenantMaintenance() {
           )}
         </div>
       </div>
-    </div>
+    </TenantDashboardLayout>
   );
 }

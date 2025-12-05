@@ -3,6 +3,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Heart, MapPin, Bed, Bath, X, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import TenantDashboardLayout from '../components/TenantDashboardLayout';
 
 interface Favorite {
   id: string;
@@ -122,8 +123,8 @@ export default function Favorites() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <TenantDashboardLayout title="Mes Favoris">
+      <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <Heart className="w-8 h-8 text-red-500 fill-current" />
@@ -229,6 +230,6 @@ export default function Favorites() {
           </div>
         )}
       </div>
-    </div>
+    </TenantDashboardLayout>
   );
 }

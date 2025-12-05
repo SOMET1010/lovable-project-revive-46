@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 import { Coins, Download, Eye, Filter, Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
+import TenantDashboardLayout from '../components/TenantDashboardLayout';
 
 interface Payment {
   id: string;
@@ -158,29 +157,25 @@ export default function PaymentHistory() {
 
   if (!user) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <TenantDashboardLayout title="Mes Paiements">
+        <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <Coins className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <Coins className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-neutral-900 mb-2">
               Connexion requise
             </h2>
-            <p className="text-gray-600">
+            <p className="text-neutral-600">
               Veuillez vous connecter pour voir votre historique de paiements
             </p>
           </div>
         </div>
-        <Footer />
-      </>
+      </TenantDashboardLayout>
     );
   }
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50 pt-20 pb-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <TenantDashboardLayout title="Mes Paiements">
+      <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gradient mb-2">Historique des paiements</h1>
             <p className="text-gray-600 text-lg">Gérez et consultez tous vos paiements</p>
@@ -337,8 +332,6 @@ export default function PaymentHistory() {
             </div>
           )}
         </div>
-      </div>
-      <Footer />
-    </>
+    </TenantDashboardLayout>
   );
 }

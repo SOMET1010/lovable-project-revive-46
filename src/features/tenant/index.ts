@@ -21,5 +21,8 @@ export { default as ScheduleVisitPage } from './pages/ScheduleVisitPage';
 export { default as SearchPropertiesPage } from './pages/SearchPropertiesPage';
 export { default as SignLeasePage } from './pages/SignLeasePage';
 export { default as ScorePage } from './pages/ScorePage';
+export { default as ProfilePage } from './pages/ProfilePage';
 
 // Components
+export { default as TenantSidebar } from './components/TenantSidebar';
+export { default as TenantDashboardLayout } from './components/TenantDashboardLayout';
