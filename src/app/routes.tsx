@@ -1,10 +1,29 @@
-import { lazy } from 'react';
+import { lazy, ComponentType } from 'react';
 import { RouteObject, Navigate } from 'react-router-dom';
 import Layout from '@/app/layout/Layout';
 import AdminLayout from '@/app/layout/AdminLayout';
 import ErrorBoundary from '@/shared/ui/ErrorBoundary';
 import ProtectedRoute from '@/shared/ui/ProtectedRoute';
 import SearchErrorBoundary from '@/features/tenant/components/SearchErrorBoundary';
+
+// Lazy loading with retry for chunk loading errors
+const lazyWithRetry = <T extends ComponentType<unknown>>(
+  componentImport: () => Promise<{ default: T }>,
+  retries = 3,
+  delay = 1000
+) => {
+  return lazy(async () => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        return await componentImport();
+      } catch (error) {
+        if (i === retries - 1) throw error;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    return componentImport();
+  });
+};
 
 // Auth pages
 const Home = lazy(() => import('@/features/property/pages/HomePage'));
@@ -34,8 +53,8 @@ const TenantMaintenance = lazy(() => import('@/features/tenant/pages/Maintenance
 const TenantScorePage = lazy(() => import('@/features/tenant/pages/ScorePage'));
 const MaintenanceRequest = lazy(() => import('@/features/tenant/pages/MaintenanceRequestPage'));
 
-// Profile page
-const ProfilePage = lazy(() => import('@/features/tenant/pages/ProfilePage'));
+// Profile page - using retry for stability
+const ProfilePage = lazyWithRetry(() => import('@/features/tenant/pages/ProfilePage'));
 
 // Contract pages
 const ContractDetail = lazy(() => import('@/features/tenant/pages/ContractDetailPage'));

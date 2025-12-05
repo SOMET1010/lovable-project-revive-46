@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import HeaderPremium from './HeaderPremium';
 import FooterPremium from './FooterPremium';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
+import { ChunkLoadErrorBoundary } from '@/shared/ui/ChunkLoadErrorBoundary';
 import { ToastContainer } from '@/shared/hooks/useToast';
 import PageTransition from '@/shared/ui/PageTransition';
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
@@ -52,13 +53,15 @@ export default function Layout() {
       {shouldShowHeaderFooter && <Breadcrumb />}
       <ToastContainer />
       {shouldShowHeaderFooter && <FloatingCallButton />}
-      <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>
-        <main className={shouldShowHeaderFooter ? 'min-h-screen' : ''}>
-          <PageTransition key={location.pathname}>
-            <Outlet />
-          </PageTransition>
-        </main>
-      </Suspense>
+      <ChunkLoadErrorBoundary>
+        <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>
+          <main className={shouldShowHeaderFooter ? 'min-h-screen' : ''}>
+            <PageTransition key={location.pathname}>
+              <Outlet />
+            </PageTransition>
+          </main>
+        </Suspense>
+      </ChunkLoadErrorBoundary>
       {shouldShowHeaderFooter && <FooterPremium />}
     </ErrorBoundary>
   );
