@@ -232,12 +232,29 @@ Deno.serve(async (req: Request) => {
           );
         }
 
+        const sessionUrl = sessionData?.properties?.action_link;
+        if (!sessionUrl) {
+          console.error('[VERIFY-OTP] ❌ Magic link generation failed - no action_link', { 
+            sessionData: JSON.stringify(sessionData),
+            email: userData.user.email 
+          });
+          return new Response(
+            JSON.stringify({ error: 'Erreur de génération du lien de connexion. Vérifiez la configuration Site URL.' }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          );
+        }
+
+        console.log(`[VERIFY-OTP] ✅ Login sessionUrl generated for: ${existingProfile.user_id}`);
+
         return new Response(
           JSON.stringify({
             success: true,
             action: 'login',
             userId: existingProfile.user_id,
-            sessionUrl: sessionData.properties?.action_link,
+            sessionUrl,
             isNewUser: false,
             message: `Bienvenue ${existingProfile.full_name || ''} !`,
           }),
@@ -370,14 +387,29 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log(`[VERIFY-OTP] ✅ New user registered: ${newUser.user.id}`);
+    const sessionUrl = sessionData?.properties?.action_link;
+    if (!sessionUrl) {
+      console.error('[VERIFY-OTP] ❌ Magic link generation failed for new user - no action_link', { 
+        sessionData: JSON.stringify(sessionData),
+        email: generatedEmail 
+      });
+      return new Response(
+        JSON.stringify({ error: 'Compte créé mais erreur de génération du lien. Vérifiez la configuration Site URL.' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    console.log(`[VERIFY-OTP] ✅ New user registered: ${newUser.user.id}, sessionUrl generated`);
 
     return new Response(
       JSON.stringify({
         success: true,
         action: 'register',
         userId: newUser.user.id,
-        sessionUrl: sessionData.properties?.action_link,
+        sessionUrl,
         isNewUser: true,
         needsProfileCompletion: true,
         message: 'Compte créé avec succès ! Bienvenue sur Mon Toit.',

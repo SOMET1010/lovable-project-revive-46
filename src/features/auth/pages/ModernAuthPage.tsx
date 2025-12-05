@@ -233,8 +233,11 @@ export default function ModernAuthPage() {
         }
         
         window.location.href = data.sessionUrl;
+      } else if (data?.success && !data?.sessionUrl) {
+        // Backend succeeded but no sessionUrl - likely config issue
+        throw new Error('Erreur de génération du lien. Veuillez réessayer ou contacter le support.');
       } else {
-        throw new Error('Erreur de connexion');
+        throw new Error(data?.error || 'Erreur de connexion inattendue');
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Code invalide ou expiré';
