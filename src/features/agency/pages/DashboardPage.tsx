@@ -1,0 +1,368 @@
+import { useState, useEffect } from 'react';
+import { Building2, Users, Coins, FileText, Home, MessageSquare, TrendingUp, Plus, Eye, BarChart3 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Link, useNavigate } from 'react-router-dom';
+
+interface Property {
+  id: string;
+  title: string;
+  city: string;
+  neighborhood: string | null;
+  monthly_rent: number;
+  status: string;
+  view_count: number;
+  main_image: string | null;
+}
+
+interface Stats {
+  totalProperties: number;
+  activeLeases: number;
+  pendingApplications: number;
+  unreadMessages: number;
+  monthlyRevenue: number;
+  totalCommissions: number;
+}
+
+export default function AgencyDashboardPage() {
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    totalProperties: 0,
+    activeLeases: 0,
+    pendingApplications: 0,
+    unreadMessages: 0,
+    monthlyRevenue: 0,
+    totalCommissions: 0,
+  });
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/connexion');
+      return;
+    }
+
+    if (profile && profile.user_type !== 'agent' && profile.user_type !== 'agence') {
+      navigate('/dashboard');
+      return;
+    }
+
+    loadDashboardData();
+  }, [user, profile, navigate]);
+
+  const loadDashboardData = async () => {
+    if (!user) return;
+
+    try {
+      // Load agency's properties
+      const { data: propertiesData } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+
+      const props = (propertiesData || []) as unknown as Property[];
+      setProperties(props);
+
+      // Load active leases count
+      const { data: leasesData } = await supabase
+        .from('lease_contracts')
+        .select('id, monthly_rent')
+        .eq('owner_id', user.id)
+        .eq('status', 'actif');
+
+      const activeLeases = leasesData || [];
+      const monthlyRevenue = activeLeases.reduce((sum, lease) => sum + (lease.monthly_rent || 0), 0);
+
+      // Load pending applications
+      const propertyIds = props.map(p => p.id);
+      let pendingApplications = 0;
+      if (propertyIds.length > 0) {
+        const { data: applicationsData } = await supabase
+          .from('rental_applications')
+          .select('id')
+          .in('property_id', propertyIds)
+          .eq('status', 'en_attente');
+        pendingApplications = applicationsData?.length || 0;
+      }
+
+      // Load unread messages
+      const { data: messagesData } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('receiver_id', user.id)
+        .eq('is_read', false);
+
+      // Calculate commissions (5% of monthly revenue)
+      const totalCommissions = Math.round(monthlyRevenue * 0.05);
+
+      setStats({
+        totalProperties: props.length,
+        activeLeases: activeLeases.length,
+        pendingApplications,
+        unreadMessages: messagesData?.length || 0,
+        monthlyRevenue,
+        totalCommissions,
+      });
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-neutral-50">
+      {/* Header */}
+      <div className="bg-white border-b border-neutral-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 flex items-center gap-3">
+                <Building2 className="h-8 w-8 text-primary-500" />
+                <span>Espace Agence</span>
+              </h1>
+              <p className="text-neutral-600 mt-2 text-lg">Bienvenue, {profile?.full_name || 'Agence'}</p>
+            </div>
+            <Link
+              to="/dashboard/ajouter-propriete"
+              className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
+            >
+              <Plus className="h-5 w-5" />
+              <span className="hidden sm:inline">Ajouter un bien</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-2xl p-6 shadow-card">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-primary-100 p-2 rounded-xl">
+                <Home className="h-5 w-5 text-primary-600" />
+              </div>
+              <span className="text-sm text-neutral-600">Biens gérés</span>
+            </div>
+            <p className="text-3xl font-bold text-neutral-900">{stats.totalProperties}</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-card">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-green-100 p-2 rounded-xl">
+                <FileText className="h-5 w-5 text-green-600" />
+              </div>
+              <span className="text-sm text-neutral-600">Baux actifs</span>
+            </div>
+            <p className="text-3xl font-bold text-neutral-900">{stats.activeLeases}</p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-card">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-blue-100 p-2 rounded-xl">
+                <TrendingUp className="h-5 w-5 text-blue-600" />
+              </div>
+              <span className="text-sm text-neutral-600">Revenus/mois</span>
+            </div>
+            <p className="text-2xl font-bold text-neutral-900">{stats.monthlyRevenue.toLocaleString()} <span className="text-sm">FCFA</span></p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-6 shadow-card">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-amber-100 p-2 rounded-xl">
+                <Coins className="h-5 w-5 text-amber-600" />
+              </div>
+              <span className="text-sm text-neutral-600">Commissions</span>
+            </div>
+            <p className="text-2xl font-bold text-neutral-900">{stats.totalCommissions.toLocaleString()} <span className="text-sm">FCFA</span></p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Column - Properties */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Properties List */}
+            <div className="bg-white rounded-2xl p-6 shadow-card">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                  <Home className="h-6 w-6 text-primary-500" />
+                  <span>Biens en Gestion</span>
+                </h2>
+                <Link to="/dashboard/ajouter-propriete" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
+                  + Ajouter
+                </Link>
+              </div>
+
+              {properties.length > 0 ? (
+                <div className="space-y-4">
+                  {properties.slice(0, 5).map((property) => (
+                    <div key={property.id} className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 flex items-center gap-4">
+                      <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-neutral-200">
+                        {property.main_image ? (
+                          <img src={property.main_image} alt={property.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Home className="h-8 w-8 text-neutral-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-neutral-900 truncate">{property.title}</h3>
+                        <p className="text-sm text-neutral-600">{property.city} {property.neighborhood && `• ${property.neighborhood}`}</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <span className="text-primary-600 font-bold">{property.monthly_rent.toLocaleString()} FCFA</span>
+                          <span className="flex items-center gap-1 text-xs text-neutral-500">
+                            <Eye className="h-3 w-3" /> {property.view_count || 0} vues
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <span className={`text-xs px-3 py-1 rounded-full font-medium ${
+                          property.status === 'disponible' ? 'bg-green-100 text-green-700' :
+                          property.status === 'loue' ? 'bg-blue-100 text-blue-700' :
+                          'bg-neutral-100 text-neutral-700'
+                        }`}>
+                          {property.status === 'disponible' ? 'Disponible' : property.status === 'loue' ? 'Loué' : property.status}
+                        </span>
+                        <Link 
+                          to={`/propriete/${property.id}`}
+                          className="text-xs text-primary-500 hover:text-primary-600 font-medium"
+                        >
+                          Voir →
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="bg-primary-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Building2 className="h-10 w-10 text-primary-500" />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-2">Aucun bien en gestion</h3>
+                  <p className="text-neutral-600 mb-4">Commencez à gérer des biens pour vos clients</p>
+                  <Link 
+                    to="/dashboard/ajouter-propriete"
+                    className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
+                  >
+                    <Plus className="h-5 w-5 mr-2" />
+                    Ajouter un bien
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Performance Overview */}
+            <div className="bg-white rounded-2xl p-6 shadow-card">
+              <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2 mb-6">
+                <BarChart3 className="h-6 w-6 text-primary-500" />
+                <span>Aperçu Performance</span>
+              </h2>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-center">
+                  <p className="text-sm text-neutral-600 mb-1">Taux occupation</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.totalProperties > 0 
+                      ? Math.round((stats.activeLeases / stats.totalProperties) * 100) 
+                      : 0}%
+                  </p>
+                </div>
+                <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-center">
+                  <p className="text-sm text-neutral-600 mb-1">Candidatures</p>
+                  <p className="text-2xl font-bold text-amber-600">{stats.pendingApplications}</p>
+                </div>
+                <div className="bg-neutral-50 border border-neutral-200 rounded-xl p-4 text-center">
+                  <p className="text-sm text-neutral-600 mb-1">Messages</p>
+                  <p className="text-2xl font-bold text-blue-600">{stats.unreadMessages}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Quick Actions */}
+            <div className="bg-white rounded-2xl p-6 shadow-card">
+              <h3 className="text-lg font-bold text-neutral-900 mb-4">Actions Rapides</h3>
+              <div className="space-y-3">
+                <Link 
+                  to="/dashboard/ajouter-propriete"
+                  className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Ajouter un bien
+                </Link>
+                <Link 
+                  to="/mes-contrats"
+                  className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <FileText className="h-5 w-5 mr-2" />
+                  Contrats
+                </Link>
+                <Link 
+                  to="/messages"
+                  className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <MessageSquare className="h-5 w-5 mr-2" />
+                  Messages
+                </Link>
+              </div>
+            </div>
+
+            {/* Notifications */}
+            <div className="bg-white rounded-2xl p-6 shadow-card">
+              <h3 className="text-lg font-bold text-neutral-900 mb-4">Alertes</h3>
+              <div className="space-y-3">
+                {stats.pendingApplications > 0 && (
+                  <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                    <Users className="h-5 w-5 text-amber-600" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-neutral-700">Candidatures</p>
+                      <p className="text-2xl font-bold text-amber-600">{stats.pendingApplications}</p>
+                    </div>
+                  </div>
+                )}
+                {stats.unreadMessages > 0 && (
+                  <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-3">
+                    <MessageSquare className="h-5 w-5 text-green-600" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-neutral-700">Messages non lus</p>
+                      <p className="text-2xl font-bold text-green-600">{stats.unreadMessages}</p>
+                    </div>
+                  </div>
+                )}
+                {stats.pendingApplications === 0 && stats.unreadMessages === 0 && (
+                  <p className="text-sm text-neutral-500 text-center py-4">Aucune alerte</p>
+                )}
+              </div>
+            </div>
+
+            {/* Commission Summary */}
+            <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl p-6 text-white">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                <Coins className="h-5 w-5" />
+                <span>Commissions du mois</span>
+              </h3>
+              <p className="text-4xl font-bold mb-2">{stats.totalCommissions.toLocaleString()} <span className="text-lg">FCFA</span></p>
+              <p className="text-sm opacity-80">5% sur {stats.monthlyRevenue.toLocaleString()} FCFA de loyers</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
