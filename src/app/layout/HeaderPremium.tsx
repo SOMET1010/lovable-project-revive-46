@@ -2,13 +2,14 @@ import { Home, Search, PlusCircle, User, Heart, Calendar, Bell, FileText, Settin
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useUnreadCount } from '@/features/messaging/hooks/useUnreadCount';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();
   const { isMobile } = useBreakpoint();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -46,6 +47,11 @@ export default function HeaderPremium() {
     { label: 'Paramètres', href: '/profil', icon: Settings },
   ] : [];
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <>
       <header 
@@ -58,7 +64,7 @@ export default function HeaderPremium() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
             {/* Logo */}
-            <a href="/" className="flex items-center space-x-3 group">
+            <Link to="/" className="flex items-center space-x-3 group">
               <img
                 src="/logo-montoit.png"
                 alt="Mon Toit"
@@ -70,12 +76,12 @@ export default function HeaderPremium() {
                   <span className="text-xs text-neutral-500 font-medium">Plateforme Immobilière</span>
                 )}
               </div>
-            </a>
+            </Link>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a
-                href="/"
+              <Link
+                to="/"
                 className={`font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none ${
                   isActive('/') ? 'text-primary-500' : 'text-neutral-700 hover:text-primary-500'
                 }`}
@@ -84,12 +90,12 @@ export default function HeaderPremium() {
                 <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform origin-left transition-transform duration-300 ease-out motion-reduce:transition-none ${
                   isActive('/') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                 }`} />
-              </a>
+              </Link>
 
               {mainNavItems.map((item) => (
-                <a
+                <Link
                   key={item.label}
-                  href={item.href}
+                  to={item.href}
                   className={`font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none ${
                     isActive(item.href) ? 'text-primary-500' : 'text-neutral-700 hover:text-primary-500'
                   }`}
@@ -100,7 +106,7 @@ export default function HeaderPremium() {
                   <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform origin-left transition-transform duration-300 ease-out motion-reduce:transition-none ${
                     isActive(item.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                   }`} />
-                </a>
+                </Link>
               ))}
             </nav>
 
@@ -108,8 +114,8 @@ export default function HeaderPremium() {
             <div className="hidden md:flex items-center space-x-3">
               {/* Message Badge - WhatsApp Style */}
               {user && (
-                <a
-                  href="/messages"
+                <Link
+                  to="/messages"
                   className={`relative p-2 rounded-lg transition-all duration-200 hover:bg-neutral-100 ${
                     isActive('/messages') ? 'bg-neutral-100' : ''
                   }`}
@@ -121,7 +127,7 @@ export default function HeaderPremium() {
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   )}
-                </a>
+                </Link>
               )}
 
               {user ? (
@@ -145,9 +151,9 @@ export default function HeaderPremium() {
                       </div>
 
                       {userMenuItems.map((item) => (
-                        <a
+                        <Link
                           key={item.label}
-                          href={item.href}
+                          to={item.href}
                           className="flex items-center justify-between px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors duration-150"
                         >
                           <div className="flex items-center space-x-3">
@@ -159,12 +165,12 @@ export default function HeaderPremium() {
                               {item.badge > 9 ? '9+' : item.badge}
                             </span>
                           )}
-                        </a>
+                        </Link>
                       ))}
 
                       <div className="border-t border-neutral-100 mt-2 pt-2">
                         <button
-                          onClick={signOut}
+                          onClick={handleSignOut}
                           className="flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 w-full"
                         >
                           <LogOut className="h-4 w-4" />
@@ -176,18 +182,18 @@ export default function HeaderPremium() {
                 </div>
               ) : (
               <>
-                  <a 
-                    href="/connexion" 
+                  <Link 
+                    to="/connexion" 
                     className="px-4 py-2 rounded-lg border border-neutral-300 text-neutral-700 font-medium hover:border-neutral-400 hover:bg-neutral-50 hover:-translate-y-0.5 transition-all duration-200 motion-reduce:transform-none"
                   >
                     Connexion
-                  </a>
-                  <a 
-                    href="/inscription" 
+                  </Link>
+                  <Link 
+                    to="/inscription" 
                     className="px-5 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 transition-all duration-200 motion-reduce:transform-none"
                   >
                     Inscription
-                  </a>
+                  </Link>
                 </>
               )}
             </div>
@@ -240,8 +246,8 @@ export default function HeaderPremium() {
           )}
 
           <nav className="space-y-1">
-            <a
-              href="/"
+            <Link
+              to="/"
               onClick={() => setShowMobileMenu(false)}
               className={`flex items-center space-x-3 px-4 py-3 rounded-r-lg transition-colors ${
                 isActive('/') 
@@ -251,12 +257,12 @@ export default function HeaderPremium() {
             >
               <Home className="h-5 w-5" />
               <span className="font-medium">Accueil</span>
-            </a>
+            </Link>
 
             {mainNavItems.map((item) => (
-              <a
+              <Link
                 key={item.label}
-                href={item.href}
+                to={item.href}
                 onClick={() => setShowMobileMenu(false)}
                 className={`flex items-center space-x-3 px-4 py-3 rounded-r-lg transition-colors ${
                   isActive(item.href) 
@@ -266,13 +272,13 @@ export default function HeaderPremium() {
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
-              </a>
+              </Link>
             ))}
 
             {user && userMenuItems.map((item) => (
-              <a
+              <Link
                 key={item.label}
-                href={item.href}
+                to={item.href}
                 onClick={() => setShowMobileMenu(false)}
                 className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
                   isActive(item.href) 
@@ -289,7 +295,7 @@ export default function HeaderPremium() {
                     {item.badge > 9 ? '9+' : item.badge}
                   </span>
                 )}
-              </a>
+              </Link>
             ))}
           </nav>
 
@@ -297,7 +303,7 @@ export default function HeaderPremium() {
             {user ? (
               <button
                 onClick={() => {
-                  signOut();
+                  handleSignOut();
                   setShowMobileMenu(false);
                 }}
                 className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg text-red-600 border border-red-200 hover:bg-red-50 transition-colors font-medium"
@@ -307,20 +313,20 @@ export default function HeaderPremium() {
               </button>
             ) : (
               <>
-                <a
-                  href="/connexion"
+                <Link
+                  to="/connexion"
                   onClick={() => setShowMobileMenu(false)}
                   className="flex items-center justify-center w-full px-4 py-3 rounded-lg text-neutral-700 border border-neutral-300 hover:bg-neutral-50 transition-colors font-medium"
                 >
                   Connexion
-                </a>
-                <a
-                  href="/inscription"
+                </Link>
+                <Link
+                  to="/inscription"
                   onClick={() => setShowMobileMenu(false)}
                   className="flex items-center justify-center w-full px-4 py-3 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors font-medium"
                 >
                   Inscription
-                </a>
+                </Link>
               </>
             )}
           </div>

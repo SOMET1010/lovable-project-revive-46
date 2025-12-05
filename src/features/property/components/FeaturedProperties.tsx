@@ -1,4 +1,5 @@
 import { MapPin, ArrowRight, Bed, Bath, Maximize, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 import type { PropertyWithOwnerScore } from '../types';
 
@@ -9,8 +10,8 @@ interface FeaturedPropertiesProps {
 
 function PropertyCard({ property }: { property: PropertyWithOwnerScore }) {
   return (
-    <a
-      href={`/proprietes/${property.id}`}
+    <Link
+      to={`/proprietes/${property.id}`}
       className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
     >
       {/* Image Container */}
@@ -99,7 +100,7 @@ function PropertyCard({ property }: { property: PropertyWithOwnerScore }) {
           )}
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
@@ -136,13 +137,13 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
             </p>
           </div>
           
-          <a
-            href="/recherche"
+          <Link
+            to="/recherche"
             className="group inline-flex items-center gap-2 text-[var(--terracotta-600)] font-semibold hover:text-[var(--terracotta-700)] transition-colors"
           >
             <span>Voir toutes les propriétés</span>
             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-          </a>
+          </Link>
         </div>
 
         {/* Properties Grid */}
@@ -170,13 +171,13 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
 
         {/* CTA Button Mobile */}
         <div className="mt-12 text-center md:hidden">
-          <a
-            href="/recherche"
+          <Link
+            to="/recherche"
             className="btn-primary inline-flex items-center gap-2"
           >
             <span>Toutes les propriétés</span>
             <ArrowRight className="h-5 w-5" />
-          </a>
+          </Link>
         </div>
       </div>
     </section>

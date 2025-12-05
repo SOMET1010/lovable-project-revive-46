@@ -1,5 +1,6 @@
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Send } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function FooterPremium() {
   const [email, setEmail] = useState('');
@@ -33,28 +34,36 @@ export default function FooterPremium() {
             {/* Social Icons Simple */}
             <div className="flex items-center space-x-3">
               <a 
-                href="#" 
+                href="https://facebook.com" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
                 aria-label="Facebook"
               >
                 <Facebook className="h-5 w-5" />
               </a>
               <a 
-                href="#" 
+                href="https://twitter.com" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
                 aria-label="Twitter"
               >
                 <Twitter className="h-5 w-5" />
               </a>
               <a 
-                href="#" 
+                href="https://instagram.com" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
                 aria-label="Instagram"
               >
                 <Instagram className="h-5 w-5" />
               </a>
               <a 
-                href="#" 
+                href="https://linkedin.com" 
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
                 aria-label="LinkedIn"
               >
@@ -77,12 +86,12 @@ export default function FooterPremium() {
                 { label: 'Contact', href: '/contact' },
               ].map((link) => (
                 <li key={link.label}>
-                  <a 
-                    href={link.href} 
+                  <Link 
+                    to={link.href} 
                     className="text-sm text-neutral-400 hover:text-primary-500 transition-colors duration-200"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -101,12 +110,12 @@ export default function FooterPremium() {
                 { label: 'CGV', href: '/cgv' },
               ].map((link) => (
                 <li key={link.label}>
-                  <a 
-                    href={link.href} 
+                  <Link 
+                    to={link.href} 
                     className="text-sm text-neutral-400 hover:text-primary-500 transition-colors duration-200"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -174,13 +183,13 @@ export default function FooterPremium() {
                 { label: 'FAQ', href: '/faq' },
                 { label: 'Blog', href: '/blog' },
               ].map((link) => (
-                <a 
+                <Link 
                   key={link.label}
-                  href={link.href} 
+                  to={link.href} 
                   className="text-sm text-neutral-500 hover:text-primary-500 transition-colors duration-200"
                 >
                   {link.label}
-                </a>
+                </Link>
               ))}
             </div>
           </div>

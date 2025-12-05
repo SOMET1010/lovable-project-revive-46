@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Bookmark, Bell, BellOff, Search, Trash2, Calendar } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface SearchFilters {
   city?: string;
@@ -35,17 +36,18 @@ interface PropertyAlert {
 
 export default function SavedSearches() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [searches, setSearches] = useState<SavedSearch[]>([]);
   const [alerts, setAlerts] = useState<PropertyAlert[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
     loadData();
-  }, [user]);
+  }, [user, navigate]);
 
   const loadData = async () => {
     if (!user) return;
@@ -143,7 +145,7 @@ export default function SavedSearches() {
     if (filters.min_bedrooms) params.set('bedrooms', filters.min_bedrooms.toString());
     if (filters.is_furnished !== undefined) params.set('furnished', filters.is_furnished.toString());
 
-    window.location.href = `/recherche?${params.toString()}`;
+    navigate(`/recherche?${params.toString()}`);
   };
 
   const getSearchSummary = (search: SavedSearch) => {
@@ -252,10 +254,10 @@ export default function SavedSearches() {
 
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Mes recherches ({searches.length})</h2>
-          <a href="/recherche" className="btn-secondary flex items-center space-x-2">
+          <Link to="/recherche" className="btn-secondary flex items-center space-x-2">
             <Search className="w-4 h-4" />
             <span>Nouvelle recherche</span>
-          </a>
+          </Link>
         </div>
 
         <div className="space-y-4">
@@ -328,10 +330,10 @@ export default function SavedSearches() {
               <p className="text-gray-500 mb-6">
                 Sauvegardez vos recherches pour les retrouver facilement
               </p>
-              <a href="/recherche" className="btn-primary inline-flex items-center space-x-2">
+              <Link to="/recherche" className="btn-primary inline-flex items-center space-x-2">
                 <Search className="w-4 h-4" />
                 <span>Commencer une recherche</span>
-              </a>
+              </Link>
             </div>
           )}
         </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Heart, MapPin, Bed, Bath, X, Home } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Favorite {
   id: string;
@@ -146,12 +147,12 @@ export default function Favorites() {
             <p className="text-neutral-600 mb-6">
               Explorez nos propriétés et ajoutez vos préférées à vos favoris
             </p>
-            <a
-              href="/recherche"
+            <Link
+              to="/recherche"
               className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
             >
               Rechercher des propriétés
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -215,12 +216,12 @@ export default function Favorites() {
                   </div>
 
                   <div className="border-t pt-3 mt-3">
-                    <a
-                      href={`/propriete/${favorite.property?.id}`}
+                    <Link
+                      to={`/propriete/${favorite.property?.id}`}
                       className="block w-full py-2 bg-primary-500 text-white text-center rounded-lg hover:bg-primary-600 transition font-semibold"
                     >
                       Voir les détails
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
