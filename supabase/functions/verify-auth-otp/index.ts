@@ -212,7 +212,8 @@ Deno.serve(async (req: Request) => {
     const generatedPassword = crypto.randomUUID();
     
     // Créer l'utilisateur dans Supabase Auth
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    let newUser;
+    const { data: createdUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: generatedEmail,
       password: generatedPassword,
       email_confirm: true,
@@ -226,14 +227,39 @@ Deno.serve(async (req: Request) => {
     });
 
     if (createError) {
-      console.error('Error creating user:', createError);
-      return new Response(
-        JSON.stringify({ error: 'Erreur lors de la création du compte' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      // Handle case where user exists in auth.users but not in profiles
+      if (createError.code === 'email_exists' || createError.message?.includes('already been registered')) {
+        console.log(`[VERIFY-OTP] User exists in auth, fetching by email: ${generatedEmail}`);
+        
+        // Find existing user by email
+        const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+        const existingUser = users?.users?.find(u => u.email === generatedEmail);
+        
+        if (existingUser) {
+          newUser = { user: existingUser };
+          console.log(`[VERIFY-OTP] Found existing auth user: ${existingUser.id}`);
+        } else {
+          console.error('Error: email exists but user not found');
+          return new Response(
+            JSON.stringify({ error: 'Erreur de récupération du compte existant' }),
+            {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            }
+          );
         }
-      );
+      } else {
+        console.error('Error creating user:', createError);
+        return new Response(
+          JSON.stringify({ error: 'Erreur lors de la création du compte' }),
+          {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+    } else {
+      newUser = createdUser;
     }
 
     console.log(`[VERIFY-OTP] User created: ${newUser.user.id}`);
