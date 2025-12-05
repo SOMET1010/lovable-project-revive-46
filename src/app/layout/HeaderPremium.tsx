@@ -4,17 +4,7 @@ import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useUnreadCount } from '@/features/messaging/hooks/useUnreadCount';
-
-// Inline user type check function
-const isUserType = (userType: string | undefined | null, ...types: string[]): boolean => {
-  if (!userType) return false;
-  const mapping: Record<string, string> = {
-    locataire: 'tenant', proprietaire: 'owner', agence: 'agent',
-    tenant: 'tenant', owner: 'owner', agent: 'agent'
-  };
-  const normalized = mapping[userType] || 'tenant';
-  return types.some(t => (mapping[t] || t) === normalized);
-};
+import { isUserType } from '@/shared/lib/utils';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();
