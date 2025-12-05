@@ -6,6 +6,8 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { logger } from '@/shared/lib/logger';
+import type { TableRowData, JsPDFWithAutoTable } from '@/types/export.types';
 
 // =====================================================
 // Export PDF
@@ -19,7 +21,7 @@ export interface PDFReportData {
   tables?: Array<{
     title: string;
     headers: string[];
-    rows: any[][];
+    rows: TableRowData[];
   }>;
   charts?: Array<{
     title: string;
@@ -123,7 +125,7 @@ export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf
         margin: { left: 20, right: 20 },
       });
 
-      yPosition = (doc as any).lastAutoTable.finalY + 15;
+      yPosition = (doc as JsPDFWithAutoTable).lastAutoTable.finalY + 15;
     });
   }
 
@@ -144,7 +146,10 @@ export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf
         doc.addImage(chart.imageData, 'PNG', 20, yPosition, 170, 100);
         yPosition += 110;
       } catch (error) {
-        console.error('Error adding chart image:', error);
+        logger.warn('Failed to add chart image to PDF', { 
+          chartTitle: chart.title,
+          error: error instanceof Error ? error.message : String(error)
+        });
       }
     });
   }
@@ -176,7 +181,7 @@ export interface ExcelReportData {
   filename?: string;
   sheets: Array<{
     name: string;
-    data: any[][];
+    data: TableRowData[];
     headers?: string[];
   }>;
 }
@@ -213,7 +218,7 @@ export function exportToExcel(data: ExcelReportData): void {
 // =====================================================
 
 export function exportToCSV(
-  data: any[][],
+  data: TableRowData[],
   headers: string[],
   filename: string = 'export.csv'
 ): void {
@@ -278,7 +283,9 @@ export async function captureElementAsImage(element: HTMLElement): Promise<strin
   }
 
   // Fallback: utiliser html2canvas si disponible
-  // (nécessite d'installer html2canvas séparément)
-  console.warn('No canvas found in element, image capture may not work');
+  logger.warn('No canvas found in element, image capture may not work', {
+    elementId: element.id,
+    elementClass: element.className
+  });
   return '';
 }

@@ -2,6 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import Button from '@/shared/ui/Button';
 import { toast } from '@/shared/hooks/useToast';
+import { logger } from '@/shared/lib/logger';
+import type {
+  SpeechRecognitionInstance,
+  SpeechRecognitionEvent,
+  SpeechRecognitionErrorEvent,
+  ParsedVoiceQuery
+} from '@/types/speech-recognition.types';
 
 interface VoiceSearchProps {
   onTranscript: (transcript: string) => void;
@@ -12,15 +19,15 @@ export default function VoiceSearch({ onTranscript, onError }: VoiceSearchProps)
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [isSupported, setIsSupported] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
 
   useEffect(() => {
     // Check if speech recognition is supported
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (SpeechRecognition) {
+    if (SpeechRecognitionAPI) {
       setIsSupported(true);
-      const recognition = new SpeechRecognition();
+      const recognition = new SpeechRecognitionAPI();
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.lang = 'fr-FR';
@@ -29,8 +36,10 @@ export default function VoiceSearch({ onTranscript, onError }: VoiceSearchProps)
         setIsListening(true);
       };
 
-      recognition.onresult = (event: any) => {
-        const text = event.results[0][0].transcript;
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
+        const result = event.results[0];
+        const alternative = result?.[0];
+        const text = alternative?.transcript || '';
         setTranscript(text);
         onTranscript(text);
         toast.success('Recherche vocale réussie', {
@@ -38,8 +47,11 @@ export default function VoiceSearch({ onTranscript, onError }: VoiceSearchProps)
         });
       };
 
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+        logger.error('Speech recognition error', undefined, { 
+          errorCode: event.error,
+          errorMessage: event.message 
+        });
         let errorMessage = 'Erreur lors de la reconnaissance vocale';
 
         switch (event.error) {
@@ -87,7 +99,7 @@ export default function VoiceSearch({ onTranscript, onError }: VoiceSearchProps)
         toast.info('Parlez maintenant...', {
           description: 'Dites par exemple "Appartement 2 chambres à Cocody"',
         });
-      } catch (error) {
+      } catch (_error) {
         toast.error('Impossible de démarrer la recherche vocale');
       }
     }
@@ -141,14 +153,8 @@ export default function VoiceSearch({ onTranscript, onError }: VoiceSearchProps)
 }
 
 // Helper function to parse voice queries
-export function parseVoiceQuery(transcript: string): {
-  city?: string;
-  propertyType?: string;
-  bedrooms?: number;
-  minPrice?: number;
-  maxPrice?: number;
-} {
-  const result: any = {};
+export function parseVoiceQuery(transcript: string): ParsedVoiceQuery {
+  const result: ParsedVoiceQuery = {};
   const lowerTranscript = transcript.toLowerCase();
 
   // Parse city

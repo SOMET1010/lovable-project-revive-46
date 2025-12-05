@@ -1,4 +1,15 @@
+/**
+ * Service d'export pour les dashboards
+ * Gère l'export CSV et PDF des données propriétaires
+ */
+
 import jsPDF from 'jspdf';
+import type {
+  PropertyExportData,
+  ApplicationExportData,
+  PaymentExportData,
+  OwnerReportData
+} from '@/types/export.types';
 
 interface DashboardData {
   title: string;
@@ -114,7 +125,7 @@ export const dashboardExportService = {
     doc.save(filename);
   },
 
-  exportPropertiesReport(properties: any[]) {
+  exportPropertiesReport(properties: PropertyExportData[]) {
     const headers = ['Titre', 'Ville', 'Prix', 'Statut', 'Vues', 'Favoris', 'Date'];
     const rows = properties.map(p => [
       p.title || '',
@@ -129,7 +140,7 @@ export const dashboardExportService = {
     this.exportToCSV({ headers, rows }, 'proprietes.csv');
   },
 
-  exportApplicationsReport(applications: any[]) {
+  exportApplicationsReport(applications: ApplicationExportData[]) {
     const headers = ['Locataire', 'Propriété', 'Score', 'Statut', 'Date'];
     const rows = applications.map(app => [
       app.tenant_name || 'N/A',
@@ -142,7 +153,7 @@ export const dashboardExportService = {
     this.exportToCSV({ headers, rows }, 'candidatures.csv');
   },
 
-  exportPaymentsReport(payments: any[]) {
+  exportPaymentsReport(payments: PaymentExportData[]) {
     const headers = ['Date', 'Montant', 'Méthode', 'Statut', 'Référence'];
     const rows = payments.map(p => [
       new Date(p.created_at).toLocaleDateString('fr-FR'),
@@ -155,11 +166,7 @@ export const dashboardExportService = {
     this.exportToCSV({ headers, rows }, 'paiements.csv');
   },
 
-  generateOwnerReport(data: {
-    properties: any[];
-    applications: any[];
-    stats: any;
-  }) {
+  generateOwnerReport(data: OwnerReportData) {
     const reportData: DashboardData = {
       title: 'Rapport Propriétaire - Mon Toit',
       generatedAt: new Date().toLocaleDateString('fr-FR', {
