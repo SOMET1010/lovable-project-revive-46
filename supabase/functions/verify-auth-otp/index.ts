@@ -9,6 +9,8 @@ const corsHeaders = {
 interface VerifyOTPRequest {
   phoneNumber: string;
   code: string;
+  mode: 'login' | 'register';
+  fullName?: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -20,7 +22,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { phoneNumber, code }: VerifyOTPRequest = await req.json();
+    const { phoneNumber, code, mode = 'login', fullName }: VerifyOTPRequest = await req.json();
 
     // Validation
     if (!phoneNumber || !code) {
@@ -33,19 +35,16 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Normaliser le numéro et ajouter le code pays si nécessaire
+    // Normaliser le numéro
     let normalizedPhone = phoneNumber.replace(/\D/g, '');
     
-    // Ajouter le code pays Côte d'Ivoire si pas présent
     if (!normalizedPhone.startsWith('225')) {
-      // Enlever le 0 initial si présent (format local ivoirien)
       if (normalizedPhone.startsWith('0')) {
         normalizedPhone = normalizedPhone.substring(1);
       }
       normalizedPhone = '225' + normalizedPhone;
     }
     
-    // Format E.164 pour Supabase Auth
     const e164Phone = '+' + normalizedPhone;
 
     const supabaseAdmin = createClient(
@@ -53,9 +52,9 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    console.log(`[VERIFY-OTP] Looking for code for phone: ${normalizedPhone}`);
+    console.log(`[VERIFY-OTP] Mode: ${mode}, Phone: ${normalizedPhone}`);
 
-    // Récupérer le code OTP valide depuis verification_codes
+    // ========== VÉRIFIER LE CODE OTP ==========
     const { data: otpRecord, error: otpError } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
@@ -67,8 +66,6 @@ Deno.serve(async (req: Request) => {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
-
-    console.log(`[VERIFY-OTP] OTP record found:`, otpRecord ? 'Yes' : 'No', otpError ? `Error: ${otpError.message}` : '');
 
     if (otpError) {
       console.error('Error fetching OTP:', otpError);
@@ -82,7 +79,7 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!otpRecord) {
-      // Incrémenter les tentatives sur le dernier code non vérifié
+      // Incrémenter les tentatives
       const { data: lastCode } = await supabaseAdmin
         .from('verification_codes')
         .select('id, attempts')
@@ -126,18 +123,27 @@ Deno.serve(async (req: Request) => {
       .update({ verified_at: new Date().toISOString() })
       .eq('id', otpRecord.id);
 
-    console.log(`[VERIFY-OTP] Code verified for phone: ${normalizedPhone}`);
+    console.log(`[VERIFY-OTP] Code verified for: ${normalizedPhone}`);
 
-    // Chercher un profil existant avec ce téléphone
-    const { data: existingProfile } = await supabaseAdmin
-      .from('profiles')
-      .select('user_id, full_name, email')
-      .eq('phone', normalizedPhone)
-      .maybeSingle();
+    // ========== MODE LOGIN: CHERCHER L'UTILISATEUR EXISTANT ==========
+    if (mode === 'login') {
+      const { data: existingProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('user_id, full_name, email')
+        .eq('phone', normalizedPhone)
+        .maybeSingle();
 
-    if (existingProfile?.user_id) {
-      // Utilisateur existant - générer un magic link
-      console.log(`[VERIFY-OTP] Existing user found: ${existingProfile.user_id}`);
+      if (!existingProfile?.user_id) {
+        return new Response(
+          JSON.stringify({ error: 'Aucun compte trouvé. Veuillez vous inscrire.' }),
+          {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      console.log(`[VERIFY-OTP] Login: user found ${existingProfile.user_id}`);
       
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id);
       
@@ -150,7 +156,7 @@ Deno.serve(async (req: Request) => {
         if (sessionError) {
           console.error('Session error:', sessionError);
           return new Response(
-            JSON.stringify({ error: 'Erreur de session' }),
+            JSON.stringify({ error: 'Erreur de connexion' }),
             {
               status: 500,
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -164,30 +170,57 @@ Deno.serve(async (req: Request) => {
             userId: existingProfile.user_id,
             action: 'login',
             sessionUrl: sessionData.properties?.action_link,
+            isNewUser: false,
           }),
           {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           }
         );
       }
+
+      return new Response(
+        JSON.stringify({ error: 'Erreur de récupération du compte' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     }
 
-    // ============ NOUVEL UTILISATEUR - CRÉATION AUTOMATIQUE ============
-    console.log(`[VERIFY-OTP] Creating new user for phone: ${normalizedPhone}`);
+    // ========== MODE REGISTER: CRÉER UN NOUVEL UTILISATEUR ==========
+    console.log(`[VERIFY-OTP] Register: creating new user for ${normalizedPhone}`);
     
+    // Vérifier que le compte n'existe pas déjà
+    const { data: existingCheck } = await supabaseAdmin
+      .from('profiles')
+      .select('user_id')
+      .eq('phone', normalizedPhone)
+      .maybeSingle();
+
+    if (existingCheck) {
+      return new Response(
+        JSON.stringify({ error: 'Ce numéro est déjà associé à un compte.' }),
+        {
+          status: 409,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
     // Générer un email fictif basé sur le téléphone
     const generatedEmail = `${normalizedPhone}@phone.montoit.ci`;
-    const generatedPassword = crypto.randomUUID(); // Mot de passe aléatoire (non utilisé)
+    const generatedPassword = crypto.randomUUID();
     
     // Créer l'utilisateur dans Supabase Auth
     const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: generatedEmail,
       password: generatedPassword,
-      email_confirm: true, // Auto-confirmer l'email
+      email_confirm: true,
       phone: e164Phone,
-      phone_confirm: true, // Téléphone vérifié par OTP
+      phone_confirm: true,
       user_metadata: {
         phone: e164Phone,
+        full_name: fullName || '',
         auth_method: 'phone',
       },
     });
@@ -205,15 +238,16 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[VERIFY-OTP] User created: ${newUser.user.id}`);
 
-    // Créer le profil avec profile_setup_completed = false
+    // Créer le profil
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
         user_id: newUser.user.id,
         phone: normalizedPhone,
         email: generatedEmail,
-        user_type: 'locataire', // Type par défaut
-        profile_setup_completed: false, // Marquer comme incomplet
+        full_name: fullName || '',
+        user_type: 'locataire',
+        profile_setup_completed: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, {
@@ -222,10 +256,9 @@ Deno.serve(async (req: Request) => {
 
     if (profileError) {
       console.error('Error creating profile:', profileError);
-      // Continue quand même, le profil peut être créé plus tard
     }
 
-    // Générer un magic link pour connecter automatiquement
+    // Générer un magic link
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: generatedEmail,
@@ -242,17 +275,17 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log(`[VERIFY-OTP] New user logged in successfully: ${newUser.user.id}`);
+    console.log(`[VERIFY-OTP] New user registered and logged in: ${newUser.user.id}`);
 
     return new Response(
       JSON.stringify({
         success: true,
         userId: newUser.user.id,
-        action: 'login', // Même action que pour utilisateur existant
+        action: 'register',
         sessionUrl: sessionData.properties?.action_link,
         isNewUser: true,
-        needsProfileCompletion: true, // Indiquer que le profil doit être complété
-        message: 'Compte créé et connecté avec succès !',
+        needsProfileCompletion: true,
+        message: 'Compte créé avec succès !',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
