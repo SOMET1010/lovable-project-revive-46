@@ -54,15 +54,25 @@ export default function ModernAuthPage() {
     return undefined;
   }, [resendTimer]);
 
-  // Reset state when changing tabs
+  // Sync URL → Tab when location changes (browser back/forward)
+  useEffect(() => {
+    const expectedTab: MainTab = location.pathname === '/inscription' ? 'register' : 'login';
+    if (mainTab !== expectedTab) {
+      setMainTab(expectedTab);
+      setAuthMethod('email');
+      setPhoneStep('enter');
+      setError('');
+      setSuccess('');
+      setOtp('');
+      setDevOtp(null);
+    }
+  }, [location.pathname]);
+
+  // Tab → URL: Update URL when changing tabs
   const handleMainTabChange = (tab: MainTab) => {
-    setMainTab(tab);
-    setAuthMethod('email');
-    setPhoneStep('enter');
-    setError('');
-    setSuccess('');
-    setOtp('');
-    setDevOtp(null);
+    const targetPath = tab === 'register' ? '/inscription' : '/connexion';
+    navigate(targetPath, { replace: true });
+    // State will be updated by the useEffect above
   };
 
   const handleMethodChange = (method: AuthMethod) => {
