@@ -6,6 +6,7 @@ import { User, Phone, MapPin, Shield, Camera, Save, CheckCircle, AlertCircle } f
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
 import { toast } from 'sonner';
+import TenantDashboardLayout from '../components/TenantDashboardLayout';
 
 interface Profile {
   id: string;
@@ -116,9 +117,11 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
+      <TenantDashboardLayout title="Mon Profil">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
+      </TenantDashboardLayout>
     );
   }
 
@@ -128,8 +131,8 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background py-8">
-      <div className="max-w-4xl mx-auto px-4">
+    <TenantDashboardLayout title="Mon Profil">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-card rounded-2xl shadow-card p-6 mb-6">
           <div className="flex items-center gap-6">
@@ -288,7 +291,7 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
-    </div>
+    </TenantDashboardLayout>
   );
 }
 

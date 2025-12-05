@@ -3,6 +3,7 @@ import { Home, Coins, MessageSquare, Clock, Heart, Search, CheckCircle, FileText
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
+import TenantDashboardLayout from '../components/TenantDashboardLayout';
 
 interface LeaseContract {
   id: string;
@@ -162,15 +163,18 @@ export default function TenantDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-      </div>
+      <TenantDashboardLayout title="Tableau de bord">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+        </div>
+      </TenantDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      {/* Header */}
+    <TenantDashboardLayout title="Tableau de bord">
+      <div>
+        {/* Header */}
       <div className="bg-white border-b border-neutral-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <h1 className="text-3xl sm:text-4xl font-bold text-neutral-900 flex items-center gap-3">
@@ -479,5 +483,6 @@ export default function TenantDashboard() {
         </div>
       </div>
     </div>
+    </TenantDashboardLayout>
   );
 }

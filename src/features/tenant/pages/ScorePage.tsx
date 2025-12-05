@@ -19,6 +19,7 @@ import { Badge } from '@/shared/ui/badge';
 import Button from '@/shared/ui/Button';
 import { Skeleton } from '@/shared/ui/Skeleton';
 import TrustScoreCard from '@/shared/ui/TrustScoreCard';
+import TenantDashboardLayout from '../components/TenantDashboardLayout';
 
 const ScorePage: React.FC = () => {
   const navigate = useNavigate();
@@ -89,19 +90,20 @@ const ScorePage: React.FC = () => {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      {/* En-tête */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Shield className="h-6 w-6 text-primary" />
-          Mon Trust Score
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Votre score de confiance détermine vos chances d'obtenir une location
-        </p>
-      </div>
+    <TenantDashboardLayout title="Mon Score">
+      <div className="max-w-4xl mx-auto">
+        {/* En-tête */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Shield className="h-6 w-6 text-primary" />
+            Mon Trust Score
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Votre score de confiance détermine vos chances d'obtenir une location
+          </p>
+        </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2">
         {/* Carte du score principal */}
         <TrustScoreCard scoreBreakdown={scoreBreakdown} showDetails={true} />
 
@@ -314,7 +316,8 @@ const ScorePage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </TenantDashboardLayout>
   );
 };
 
