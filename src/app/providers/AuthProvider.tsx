@@ -4,16 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { testDatabaseConnection } from '@/shared/lib/helpers/supabaseHealthCheck';
 import { logger } from '@/shared/lib/logger';
-
-// Inline normalize function
-const normalizeUserType = (userType: string | undefined | null): 'tenant' | 'owner' | 'agent' => {
-  if (!userType) return 'tenant';
-  const mapping: Record<string, 'tenant' | 'owner' | 'agent'> = {
-    locataire: 'tenant', proprietaire: 'owner', agence: 'agent',
-    tenant: 'tenant', owner: 'owner', agent: 'agent'
-  };
-  return mapping[userType] || 'tenant';
-};
+import { normalizeUserType } from '@/shared/lib/utils';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
