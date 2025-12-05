@@ -42,7 +42,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[VERIFY-OTP] Looking for code for phone: ${normalizedPhone}`);
 
-    // Récupérer le code OTP valide depuis verification_codes (sans filtre type pour accepter SMS et WhatsApp)
+    // Récupérer le code OTP valide depuis verification_codes
     const { data: otpRecord, error: otpError } = await supabaseAdmin
       .from('verification_codes')
       .select('*')
@@ -124,6 +124,8 @@ Deno.serve(async (req: Request) => {
 
     if (existingProfile?.user_id) {
       // Utilisateur existant - générer un magic link
+      console.log(`[VERIFY-OTP] Existing user found: ${existingProfile.user_id}`);
+      
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id);
       
       if (userData?.user?.email) {
@@ -157,13 +159,85 @@ Deno.serve(async (req: Request) => {
       }
     }
 
-    // Nouvel utilisateur - nécessite inscription
+    // ============ NOUVEL UTILISATEUR - CRÉATION AUTOMATIQUE ============
+    console.log(`[VERIFY-OTP] Creating new user for phone: ${normalizedPhone}`);
+    
+    // Générer un email fictif basé sur le téléphone
+    const generatedEmail = `${normalizedPhone}@phone.montoit.ci`;
+    const generatedPassword = crypto.randomUUID(); // Mot de passe aléatoire (non utilisé)
+    
+    // Créer l'utilisateur dans Supabase Auth
+    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+      email: generatedEmail,
+      password: generatedPassword,
+      email_confirm: true, // Auto-confirmer l'email
+      phone: `+${normalizedPhone}`,
+      phone_confirm: true, // Téléphone vérifié par OTP
+      user_metadata: {
+        phone: normalizedPhone,
+        auth_method: 'phone',
+      },
+    });
+
+    if (createError) {
+      console.error('Error creating user:', createError);
+      return new Response(
+        JSON.stringify({ error: 'Erreur lors de la création du compte' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    console.log(`[VERIFY-OTP] User created: ${newUser.user.id}`);
+
+    // Créer le profil
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .upsert({
+        user_id: newUser.user.id,
+        phone: normalizedPhone,
+        email: generatedEmail,
+        user_type: 'locataire', // Type par défaut
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'user_id',
+      });
+
+    if (profileError) {
+      console.error('Error creating profile:', profileError);
+      // Continue quand même, le profil peut être créé plus tard
+    }
+
+    // Générer un magic link pour connecter automatiquement
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'magiclink',
+      email: generatedEmail,
+    });
+
+    if (sessionError) {
+      console.error('Session error for new user:', sessionError);
+      return new Response(
+        JSON.stringify({ error: 'Compte créé mais erreur de connexion' }),
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    console.log(`[VERIFY-OTP] New user logged in successfully: ${newUser.user.id}`);
+
     return new Response(
       JSON.stringify({
         success: true,
-        action: 'register',
-        phoneVerified: true,
-        message: 'Téléphone vérifié. Complétez votre inscription.',
+        userId: newUser.user.id,
+        action: 'login', // Même action que pour utilisateur existant
+        sessionUrl: sessionData.properties?.action_link,
+        isNewUser: true,
+        message: 'Compte créé et connecté avec succès !',
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
