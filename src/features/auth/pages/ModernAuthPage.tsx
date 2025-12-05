@@ -179,13 +179,15 @@ export default function ModernAuthPage() {
 
       // Handle account not found - offer to switch to registration
       if (data?.accountNotFound) {
-        setError('');
         setSuccess('');
-        // Show friendly message and switch to register tab
-        setMainTab('register');
-        setAuthMethod('phone');
-        setPhoneStep('enter');
-        setError('Aucun compte trouvé avec ce numéro. Créez un compte pour continuer.');
+        // Navigate to register tab (URL sync will update state)
+        navigate('/inscription', { replace: true });
+        // Set phone method and show message after navigation
+        setTimeout(() => {
+          setAuthMethod('phone');
+          setPhoneStep('enter');
+          setError('Aucun compte trouvé avec ce numéro. Créez un compte pour continuer.');
+        }, 0);
         return;
       }
 
