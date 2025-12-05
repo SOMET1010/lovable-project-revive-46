@@ -122,13 +122,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Marquer comme vérifié
-    await supabaseAdmin
-      .from('verification_codes')
-      .update({ verified_at: new Date().toISOString() })
-      .eq('id', otpRecord.id);
-
-    console.log(`[VERIFY-OTP] ✅ Code verified for: ${normalizedPhone}`);
+    console.log(`[VERIFY-OTP] ✅ Code valid for: ${normalizedPhone}`);
 
     // ========== AUTO-DETECT: CHECK IF PROFILE EXISTS ==========
     const { data: existingProfile } = await supabaseAdmin
@@ -139,6 +133,12 @@ Deno.serve(async (req: Request) => {
 
     // ========== CASE 1: EXISTING USER → LOGIN ==========
     if (existingProfile?.user_id) {
+      // Mark OTP as verified NOW (login complete)
+      await supabaseAdmin
+        .from('verification_codes')
+        .update({ verified_at: new Date().toISOString() })
+        .eq('id', otpRecord.id);
+
       console.log(`[VERIFY-OTP] 👤 Existing user found: ${existingProfile.user_id}`);
       
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id);
@@ -185,6 +185,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // ========== CASE 2: NEW USER, NO NAME PROVIDED → REQUEST NAME ==========
+    // DON'T mark OTP as verified yet - wait for name submission
     if (!fullName?.trim()) {
       console.log(`[VERIFY-OTP] 🆕 New user, requesting name for: ${normalizedPhone}`);
       
@@ -194,6 +195,7 @@ Deno.serve(async (req: Request) => {
           action: 'needsName',
           message: 'Code vérifié ! Entrez votre nom pour créer votre compte.',
           phoneVerified: true,
+          // Pass the OTP ID to mark it verified later (optional, code still valid)
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -202,6 +204,12 @@ Deno.serve(async (req: Request) => {
     }
 
     // ========== CASE 3: NEW USER WITH NAME → CREATE ACCOUNT ==========
+    // Mark OTP as verified NOW (registration will complete)
+    await supabaseAdmin
+      .from('verification_codes')
+      .update({ verified_at: new Date().toISOString() })
+      .eq('id', otpRecord.id);
+
     console.log(`[VERIFY-OTP] 🆕 Creating new user: ${normalizedPhone} - ${fullName}`);
     
     // Générer un email fictif basé sur le téléphone
