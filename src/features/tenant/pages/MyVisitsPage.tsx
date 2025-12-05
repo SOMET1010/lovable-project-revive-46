@@ -4,6 +4,7 @@ import { supabase } from '@/services/supabase/client';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { Calendar, Clock, MapPin, Video, X, MessageCircle, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface Visit {
   id: string;
@@ -260,9 +261,9 @@ export default function MyVisits() {
               <p className="text-gray-600 mb-6">
                 Vous n'avez pas encore planifié de visite
               </p>
-              <a href="/recherche" className="btn-primary inline-block">
+              <Link to="/recherche" className="btn-primary inline-block">
                 Rechercher des biens
-              </a>
+              </Link>
             </div>
           ) : (
             <div className="space-y-6">
@@ -346,12 +347,12 @@ export default function MyVisits() {
                       )}
 
                       <div className="flex flex-wrap gap-3">
-                        <a
-                          href={`/propriete/${visit.property_id}`}
+                        <Link
+                          to={`/propriete/${visit.property_id}`}
                           className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
                         >
                           Voir le bien
-                        </a>
+                        </Link>
 
                         {(visit.status === 'en_attente' || visit.status === 'confirmee') && (
                           <button

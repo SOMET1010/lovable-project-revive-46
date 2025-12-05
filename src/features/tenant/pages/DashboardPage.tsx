@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Home, Coins, MessageSquare, Clock, Heart, Search, CheckCircle, FileText, Wrench, Award } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface LeaseContract {
   id: string;
@@ -25,6 +26,7 @@ interface Payment {
 
 export default function TenantDashboard() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeLease, setActiveLease] = useState<(LeaseContract & { property?: any }) | null>(null);
   const [nextPayment, setNextPayment] = useState<{
@@ -43,17 +45,17 @@ export default function TenantDashboard() {
 
   useEffect(() => {
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
 
     if (profile && profile.user_type !== 'locataire') {
-      window.location.href = '/';
+      navigate('/');
       return;
     }
 
     loadDashboardData();
-  }, [user, profile]);
+  }, [user, profile, navigate]);
 
   const loadDashboardData = async () => {
     if (!user) return;
@@ -213,20 +215,20 @@ export default function TenantDashboard() {
                     </div>
                   </div>
                   <div className="mt-6 flex flex-wrap gap-3">
-                    <a 
-                      href={`/contrat/${activeLease.id}`} 
+                    <Link 
+                      to={`/contrat/${activeLease.id}`} 
                       className="inline-flex items-center border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-2 px-4 rounded-xl transition-colors"
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       Voir le bail
-                    </a>
-                    <a 
-                      href={`/propriete/${activeLease.property_id}`} 
+                    </Link>
+                    <Link 
+                      to={`/propriete/${activeLease.property_id}`} 
                       className="inline-flex items-center border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-2 px-4 rounded-xl transition-colors"
                     >
                       <Home className="h-4 w-4 mr-2" />
                       Détails du logement
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -239,13 +241,13 @@ export default function TenantDashboard() {
                 <p className="text-neutral-600 mb-6">
                   Vous n'avez pas encore de bail actif. Commencez votre recherche dès maintenant!
                 </p>
-                <a 
-                  href="/recherche" 
+                <Link 
+                  to="/recherche" 
                   className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
                 >
                   <Search className="h-5 w-5 mr-2" />
                   Rechercher un logement
-                </a>
+                </Link>
               </div>
             )}
 
@@ -288,12 +290,12 @@ export default function TenantDashboard() {
                         }
                       </span>
                     </div>
-                    <a 
-                      href="/effectuer-paiement" 
+                    <Link 
+                      to="/effectuer-paiement" 
                       className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 px-4 rounded-xl transition-colors"
                     >
                       Payer maintenant
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -304,9 +306,9 @@ export default function TenantDashboard() {
               <div className="bg-white rounded-2xl p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-neutral-900">Historique des Paiements</h2>
-                  <a href="/mes-paiements" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
+                  <Link to="/mes-paiements" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
                     Voir tout →
-                  </a>
+                  </Link>
                 </div>
                 <div className="space-y-3">
                   {recentPayments.map((payment) => (
@@ -352,43 +354,43 @@ export default function TenantDashboard() {
               <div className="space-y-3">
                 {activeLease && (
                   <>
-                    <a 
-                      href="/effectuer-paiement" 
+                    <Link 
+                      to="/effectuer-paiement" 
                       className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <Coins className="h-5 w-5 mr-2" />
                       Payer mon loyer
-                    </a>
-                    <a 
-                      href="/maintenance/nouvelle" 
+                    </Link>
+                    <Link 
+                      to="/maintenance/nouvelle" 
                       className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <Wrench className="h-5 w-5 mr-2" />
                       Demander une réparation
-                    </a>
-                    <a 
-                      href={`/contrat/${activeLease.id}`} 
+                    </Link>
+                    <Link 
+                      to={`/contrat/${activeLease.id}`} 
                       className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <FileText className="h-5 w-5 mr-2" />
                       Voir mon bail
-                    </a>
+                    </Link>
                   </>
                 )}
-                <a 
-                  href="/mon-score" 
+                <Link 
+                  to="/mon-score" 
                   className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Award className="h-5 w-5 mr-2" />
                   Mon Trust Score
-                </a>
-                <a 
-                  href="/recherche" 
+                </Link>
+                <Link 
+                  to="/recherche" 
                   className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Search className="h-5 w-5 mr-2" />
                   Rechercher un logement
-                </a>
+                </Link>
               </div>
             </div>
 
@@ -418,15 +420,15 @@ export default function TenantDashboard() {
               <div className="bg-white rounded-2xl p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-neutral-900">Mes Favoris</h3>
-                  <a href="/favoris" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
+                  <Link to="/favoris" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
                     Voir tout →
-                  </a>
+                  </Link>
                 </div>
                 <div className="space-y-3">
                   {recentFavorites.map((fav: any) => (
-                    <a 
+                    <Link 
                       key={fav.id}
-                      href={`/propriete/${fav.property_id}`}
+                      to={`/propriete/${fav.property_id}`}
                       className="flex items-center gap-3 p-2 hover:bg-neutral-50 rounded-lg transition-colors"
                     >
                       <Heart className="h-5 w-5 text-red-500 fill-current" />
@@ -438,7 +440,7 @@ export default function TenantDashboard() {
                           {fav.properties?.city}
                         </p>
                       </div>
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -449,9 +451,9 @@ export default function TenantDashboard() {
               <div className="bg-white rounded-2xl p-6 shadow-card">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-neutral-900">Recherches Sauvegardées</h3>
-                  <a href="/recherches-sauvegardees" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
+                  <Link to="/recherches-sauvegardees" className="text-primary-500 hover:text-primary-600 text-sm font-medium">
                     Voir tout →
-                  </a>
+                  </Link>
                 </div>
                 <div className="space-y-3">
                   {savedSearches.map((search: any) => (
