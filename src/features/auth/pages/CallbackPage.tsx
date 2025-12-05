@@ -21,15 +21,23 @@ export default function AuthCallback() {
       }
 
       if (user && !loading) {
-        // Check if profile setup is completed using user_type
-        // If user_type is still default 'tenant' and no full_name, redirect to profile selection
-        const needsSetup = !profile?.user_type || profile?.user_type === 'tenant';
+        // Vérifier si c'est un nouvel utilisateur nécessitant la complétion du profil
+        const needsProfileCompletion = sessionStorage.getItem('needsProfileCompletion');
         
-        if (needsSetup && !profile?.full_name) {
-          window.location.href = '/choix-profil';
-        } else {
-          window.location.href = '/';
+        if (needsProfileCompletion === 'true') {
+          sessionStorage.removeItem('needsProfileCompletion');
+          window.location.href = '/completer-profil';
+          return;
         }
+
+        // Vérifier si le profil est complet
+        if (profile?.profile_setup_completed === false) {
+          window.location.href = '/completer-profil';
+          return;
+        }
+
+        // Profil complet, rediriger vers l'accueil
+        window.location.href = '/';
       }
     };
 

@@ -11,6 +11,7 @@ export { default as ContactPage } from './pages/ContactPage';
 export { default as ForgotPasswordPage } from './pages/ForgotPasswordPage';
 export { default as ModernAuthPage } from './pages/ModernAuthPage';
 export { default as PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
+export { default as ProfileCompletionPage } from './pages/ProfileCompletionPage';
 export { default as ProfileSelectionPage } from './pages/ProfileSelectionPage';
 export { default as TermsOfServicePage } from './pages/TermsOfServicePage';
 

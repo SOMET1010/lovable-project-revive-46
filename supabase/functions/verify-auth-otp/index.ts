@@ -205,7 +205,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`[VERIFY-OTP] User created: ${newUser.user.id}`);
 
-    // Créer le profil
+    // Créer le profil avec profile_setup_completed = false
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
@@ -213,6 +213,7 @@ Deno.serve(async (req: Request) => {
         phone: normalizedPhone,
         email: generatedEmail,
         user_type: 'locataire', // Type par défaut
+        profile_setup_completed: false, // Marquer comme incomplet
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }, {
@@ -250,6 +251,7 @@ Deno.serve(async (req: Request) => {
         action: 'login', // Même action que pour utilisateur existant
         sessionUrl: sessionData.properties?.action_link,
         isNewUser: true,
+        needsProfileCompletion: true, // Indiquer que le profil doit être complété
         message: 'Compte créé et connecté avec succès !',
       }),
       {
