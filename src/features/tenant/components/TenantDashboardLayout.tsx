@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Menu } from 'lucide-react';
 import TenantSidebar from './TenantSidebar';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 interface TenantDashboardLayoutProps {
