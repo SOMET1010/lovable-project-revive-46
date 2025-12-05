@@ -6,6 +6,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Constantes selon la spécification
+const WEIGHTS = { 
+  profile: 0.20, 
+  verification: 0.40, 
+  history: 0.40 
+};
+
+const PROFILE_POINTS = { 
+  fullName: 15, 
+  phone: 15, 
+  city: 15, 
+  bio: 15, 
+  avatar: 20, 
+  address: 20 
+};
+
+const VERIFICATION_POINTS = { 
+  oneci: 30, 
+  cnam: 25, 
+  facial: 25, 
+  ansut: 20 
+};
+
+const THRESHOLDS = { 
+  approved: 70, 
+  conditional: 50 
+};
+
+const DEFAULT_HISTORY_SCORE = 50;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -13,134 +43,240 @@ serve(async (req) => {
 
   try {
     const { applicantId, propertyId, monthlyRent } = await req.json();
-
     console.log('Tenant Scoring Request:', { applicantId, propertyId, monthlyRent });
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Récupérer les données du candidat
-    const { data: profile } = await supabase
+    // 1. Récupérer le profil (CORRECTION: user_id au lieu de id)
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', applicantId)
-      .single();
-
-    const { data: verification } = await supabase
-      .from('user_verifications')
-      .select('*')
       .eq('user_id', applicantId)
-      .single();
+      .maybeSingle();
 
-    const { data: payments } = await supabase
-      .from('payments')
-      .select('*')
-      .eq('payer_id', applicantId)
-      .eq('status', 'completed');
-
-    let score = 0;
-    const criteria: any = {};
-
-    // 1. Vérification ONECI (25 points)
-    if (verification?.oneci_status === 'verified') {
-      score += 25;
-      criteria.oneci_verified = true;
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      throw new Error('Failed to fetch profile');
     }
 
-    // 2. Statut emploi CNAM (20 points)
-    if (verification?.cnam_status === 'verified') {
-      score += 20;
-      criteria.cnam_verified = true;
-
-      // Ratio revenus/loyer (15 points)
-      const estimatedSalary = verification.cnam_data?.employment?.estimatedMonthlySalary || 0;
-      const rentToIncomeRatio = monthlyRent / estimatedSalary;
-      
-      if (rentToIncomeRatio <= 0.33) {
-        score += 15;
-        criteria.rent_to_income_ratio = 'excellent';
-      } else if (rentToIncomeRatio <= 0.40) {
-        score += 10;
-        criteria.rent_to_income_ratio = 'good';
-      } else if (rentToIncomeRatio <= 0.50) {
-        score += 5;
-        criteria.rent_to_income_ratio = 'acceptable';
-      } else {
-        criteria.rent_to_income_ratio = 'high_risk';
-      }
+    if (!profile) {
+      console.log('Profile not found for applicantId:', applicantId);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Profile not found',
+          score: 0,
+          globalScore: 0,
+          recommendation: 'rejected'
+        }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    // 3. Historique paiements (20 points)
-    if (payments && payments.length > 0) {
-      const onTimePayments = payments.filter((p: any) => p.status === 'completed').length;
-      const paymentRate = onTimePayments / payments.length;
-      
-      if (paymentRate >= 0.95) {
-        score += 20;
-        criteria.payment_history = 'excellent';
-      } else if (paymentRate >= 0.80) {
-        score += 15;
-        criteria.payment_history = 'good';
-      } else if (paymentRate >= 0.60) {
-        score += 10;
-        criteria.payment_history = 'average';
-      }
-    }
-
-    // 4. Documents fournis (10 points)
-    // Simulé - à implémenter selon les documents uploadés
-    score += 8;
-    criteria.documents_complete = true;
-
-    // 5. Profil complet (10 points)
-    if (profile?.phone && profile?.city && profile?.bio) {
-      score += 10;
-      criteria.profile_complete = true;
-    }
-
-    // Recommandation
-    let recommendation = 'rejected';
-    if (score >= 75) {
-      recommendation = 'approved';
-    } else if (score >= 60) {
-      recommendation = 'conditional';
-    }
-
-    const breakdown = {
-      identity_verification: verification?.oneci_status === 'verified' ? 25 : 0,
-      employment_verification: verification?.cnam_status === 'verified' ? 20 : 0,
-      payment_history: criteria.payment_history === 'excellent' ? 20 : (criteria.payment_history === 'good' ? 15 : 10),
-      income_ratio: score >= 90 ? 15 : (score >= 75 ? 10 : 5),
-      documents: 8,
-      profile_completeness: criteria.profile_complete ? 10 : 0
+    // 2. Calculer le Score de Profil (20% du total, max 100 pts)
+    let profileScore = 0;
+    const profileDetails = {
+      fullName: !!profile.full_name,
+      phone: !!profile.phone,
+      city: !!profile.city,
+      bio: !!profile.bio,
+      avatar: !!profile.avatar_url,
+      address: !!profile.address,
     };
 
-    // Stocker le score dans user_verifications
-    await supabase
-      .from('user_verifications')
-      .update({
-        tenant_score: score,
-        score_updated_at: new Date().toISOString()
+    if (profileDetails.fullName) profileScore += PROFILE_POINTS.fullName;
+    if (profileDetails.phone) profileScore += PROFILE_POINTS.phone;
+    if (profileDetails.city) profileScore += PROFILE_POINTS.city;
+    if (profileDetails.bio) profileScore += PROFILE_POINTS.bio;
+    if (profileDetails.avatar) profileScore += PROFILE_POINTS.avatar;
+    if (profileDetails.address) profileScore += PROFILE_POINTS.address;
+
+    console.log('Profile Score:', profileScore, profileDetails);
+
+    // 3. Calculer le Score de Vérification (40% du total, max 100 pts)
+    let verificationScore = 0;
+    const verificationDetails = {
+      oneci: !!profile.oneci_verified,
+      cnam: !!profile.cnam_verified,
+      facial: profile.facial_verification_status === 'verified',
+      ansut: !!profile.is_verified,
+    };
+
+    if (verificationDetails.oneci) verificationScore += VERIFICATION_POINTS.oneci;
+    if (verificationDetails.cnam) verificationScore += VERIFICATION_POINTS.cnam;
+    if (verificationDetails.facial) verificationScore += VERIFICATION_POINTS.facial;
+    if (verificationDetails.ansut) verificationScore += VERIFICATION_POINTS.ansut;
+
+    console.log('Verification Score:', verificationScore, verificationDetails);
+
+    // 4. Calculer le Score d'Historique (40% du total, max 100 pts)
+    let historyScore = DEFAULT_HISTORY_SCORE;
+    const historyDetails = {
+      paymentReliability: DEFAULT_HISTORY_SCORE,
+      landlordRating: DEFAULT_HISTORY_SCORE,
+      totalPayments: 0,
+      onTimePayments: 0,
+      totalReviews: 0,
+      averageRating: 0,
+      hasHistory: false,
+    };
+
+    // 4.1 Récupérer et analyser les paiements
+    const { data: payments, error: paymentsError } = await supabase
+      .from('payments')
+      .select('status, due_date, paid_date')
+      .eq('payer_id', applicantId);
+
+    if (paymentsError) {
+      console.error('Error fetching payments:', paymentsError);
+    }
+
+    if (payments && payments.length > 0) {
+      historyDetails.hasHistory = true;
+      historyDetails.totalPayments = payments.length;
+
+      // Compter les paiements à temps
+      const onTimePayments = payments.filter(p => {
+        // Si le paiement est complété
+        if (p.status === 'completed') {
+          // Si on a les dates, vérifier si payé avant échéance
+          if (p.paid_date && p.due_date) {
+            return new Date(p.paid_date) <= new Date(p.due_date);
+          }
+          // Si pas de dates, considérer comme à temps
+          return true;
+        }
+        return false;
+      }).length;
+
+      historyDetails.onTimePayments = onTimePayments;
+      const paymentRate = payments.length > 0 ? onTimePayments / payments.length : 0;
+      historyDetails.paymentReliability = Math.round(paymentRate * 100);
+    }
+
+    console.log('Payment History:', historyDetails.totalPayments, 'payments,', historyDetails.onTimePayments, 'on time');
+
+    // 4.2 Récupérer les évaluations des propriétaires
+    const { data: reviews, error: reviewsError } = await supabase
+      .from('reviews')
+      .select('rating')
+      .eq('reviewee_id', applicantId)
+      .eq('review_type', 'tenant');
+
+    if (reviewsError) {
+      console.error('Error fetching reviews:', reviewsError);
+    }
+
+    if (reviews && reviews.length > 0) {
+      historyDetails.hasHistory = true;
+      historyDetails.totalReviews = reviews.length;
+
+      const validRatings = reviews.filter(r => r.rating !== null && r.rating !== undefined);
+      if (validRatings.length > 0) {
+        const avgRating = validRatings.reduce((sum, r) => sum + (r.rating || 0), 0) / validRatings.length;
+        historyDetails.averageRating = Math.round(avgRating * 10) / 10;
+        // Convertir la note /5 en pourcentage
+        historyDetails.landlordRating = Math.round((avgRating / 5) * 100);
+      }
+    }
+
+    console.log('Reviews:', historyDetails.totalReviews, 'reviews, avg rating:', historyDetails.averageRating);
+
+    // Calculer le score d'historique final (pondération 60% paiements, 40% évaluations)
+    if (historyDetails.hasHistory) {
+      historyScore = Math.round(
+        (historyDetails.paymentReliability * 0.6) + 
+        (historyDetails.landlordRating * 0.4)
+      );
+    }
+
+    console.log('History Score:', historyScore);
+
+    // 5. Calculer le Score Global avec pondération selon la spec
+    const globalScore = Math.round(
+      (profileScore * WEIGHTS.profile) +
+      (verificationScore * WEIGHTS.verification) +
+      (historyScore * WEIGHTS.history)
+    );
+
+    console.log('Global Score Calculation:', {
+      profileContribution: Math.round(profileScore * WEIGHTS.profile),
+      verificationContribution: Math.round(verificationScore * WEIGHTS.verification),
+      historyContribution: Math.round(historyScore * WEIGHTS.history),
+      globalScore
+    });
+
+    // 6. Déterminer la recommandation selon les seuils corrects (70/50)
+    let recommendation: 'approved' | 'conditional' | 'rejected';
+    if (globalScore >= THRESHOLDS.approved) {
+      recommendation = 'approved';
+    } else if (globalScore >= THRESHOLDS.conditional) {
+      recommendation = 'conditional';
+    } else {
+      recommendation = 'rejected';
+    }
+
+    // 7. Persister le score dans profiles.trust_score et reliability_score
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ 
+        trust_score: globalScore,
+        reliability_score: historyScore,
+        updated_at: new Date().toISOString()
       })
       .eq('user_id', applicantId);
 
-    console.log('Score updated for user:', applicantId, 'Score:', score);
+    if (updateError) {
+      console.error('Error updating trust_score:', updateError);
+    } else {
+      console.log('Trust score persisted:', globalScore, 'for user:', applicantId);
+    }
+
+    // 8. Retourner la réponse complète
+    const response = {
+      score: historyScore, // Pour compatibilité avec ScoringService frontend
+      globalScore,
+      maxScore: 100,
+      recommendation,
+      breakdown: {
+        profile: { 
+          score: profileScore, 
+          weight: WEIGHTS.profile,
+          contribution: Math.round(profileScore * WEIGHTS.profile),
+          details: profileDetails 
+        },
+        verification: { 
+          score: verificationScore, 
+          weight: WEIGHTS.verification,
+          contribution: Math.round(verificationScore * WEIGHTS.verification),
+          details: verificationDetails 
+        },
+        history: { 
+          score: historyScore, 
+          weight: WEIGHTS.history,
+          contribution: Math.round(historyScore * WEIGHTS.history),
+          details: historyDetails 
+        },
+      },
+    };
+
+    console.log('Tenant Scoring Response:', { applicantId, globalScore, recommendation });
 
     return new Response(
-      JSON.stringify({
-        score,
-        maxScore: 100,
-        recommendation,
-        criteria,
-        breakdown
-      }),
+      JSON.stringify(response),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+
   } catch (error) {
     console.error('Error in tenant-scoring:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        score: 0,
+        globalScore: 0,
+        recommendation: 'rejected'
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
