@@ -2,6 +2,8 @@
  * Configuration centralisée des clés API
  * Ce fichier regroupe toutes les clés API et configurations de services externes
  * utilisées dans l'application Mon Toit.
+ * 
+ * IMPORTANT: Ne JAMAIS inclure serviceRoleKey côté client !
  */
 
 interface ApiConfig {
@@ -13,7 +15,7 @@ interface ApiConfig {
 interface SupabaseConfig {
   url: string;
   anonKey: string;
-  serviceRoleKey?: string;
+  // SÉCURITÉ: serviceRoleKey ne doit JAMAIS être exposé côté client
 }
 
 interface AzureOpenAIConfig extends ApiConfig {
@@ -63,7 +65,7 @@ class ApiKeysConfig {
   readonly supabase: SupabaseConfig = {
     url: import.meta.env['VITE_SUPABASE_URL'] || '',
     anonKey: import.meta.env['VITE_SUPABASE_ANON_KEY'] || '',
-    serviceRoleKey: import.meta.env['SUPABASE_SERVICE_ROLE_KEY'],
+    // SÉCURITÉ: Pas de serviceRoleKey ici - n'utiliser que dans les edge functions
   };
 
   readonly azure = {
