@@ -33,7 +33,20 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const normalizedPhone = phoneNumber.replace(/\D/g, '');
+    // Normaliser le numéro et ajouter le code pays si nécessaire
+    let normalizedPhone = phoneNumber.replace(/\D/g, '');
+    
+    // Ajouter le code pays Côte d'Ivoire si pas présent
+    if (!normalizedPhone.startsWith('225')) {
+      // Enlever le 0 initial si présent (format local ivoirien)
+      if (normalizedPhone.startsWith('0')) {
+        normalizedPhone = normalizedPhone.substring(1);
+      }
+      normalizedPhone = '225' + normalizedPhone;
+    }
+    
+    // Format E.164 pour Supabase Auth
+    const e164Phone = '+' + normalizedPhone;
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
@@ -171,10 +184,10 @@ Deno.serve(async (req: Request) => {
       email: generatedEmail,
       password: generatedPassword,
       email_confirm: true, // Auto-confirmer l'email
-      phone: `+${normalizedPhone}`,
+      phone: e164Phone,
       phone_confirm: true, // Téléphone vérifié par OTP
       user_metadata: {
-        phone: normalizedPhone,
+        phone: e164Phone,
         auth_method: 'phone',
       },
     });
