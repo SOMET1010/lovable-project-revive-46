@@ -1353,6 +1353,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_verification_codes: { Args: never; Returns: number }
       generate_otp: { Args: never; Returns: string }
       get_platform_stats: { Args: never; Returns: Json }
       get_public_profile: {
