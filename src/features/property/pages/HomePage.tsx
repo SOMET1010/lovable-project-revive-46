@@ -93,7 +93,7 @@ export default function Home() {
         structuredData={structuredData}
       />
 
-      <HeroPremium onSearch={handleSearch} />
+      <HeroPremium onSearch={handleSearch} stats={stats} />
       <StatsPremium stats={stats} />
       <FeaturedProperties properties={properties} loading={loading} />
       <HowItWorksSection />

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   Search, 
@@ -14,33 +14,25 @@ import {
   Maximize,
   Heart,
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapboxMap from '@/shared/ui/MapboxMap';
 import { CITY_NAMES, ABIDJAN_NEIGHBORHOODS } from '@/shared/data/cities';
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
-
-type Property = Database['public']['Tables']['properties']['Row'];
-type PropertyWithScore = Property & {
-  owner_trust_score?: number | null;
-  owner_full_name?: string | null;
-};
+import InfiniteScroll from '@/shared/components/InfiniteScroll';
+import { useInfiniteProperties } from '../hooks/useInfiniteProperties';
 
 export default function SearchPropertiesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [properties, setProperties] = useState<PropertyWithScore[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   
   // State for new design
   const [activeView, setActiveView] = useState<'list' | 'map'>('list');
   const [activeFilterTab, setActiveFilterTab] = useState<'location' | 'property' | 'price'>('location');
 
-  // Search filters
+  // Search filters from URL
   const [city, setCity] = useState(searchParams.get('city') || '');
   const [neighborhood, setNeighborhood] = useState(searchParams.get('neighborhood') || '');
   const [propertyType, setPropertyType] = useState(searchParams.get('type') || '');
@@ -48,104 +40,38 @@ export default function SearchPropertiesPage() {
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
   const [bedrooms, setBedrooms] = useState(searchParams.get('bedrooms') || '');
 
+  // Applied filters (only update when form is submitted)
+  const [appliedFilters, setAppliedFilters] = useState({
+    city: searchParams.get('city') || '',
+    propertyType: searchParams.get('type') || '',
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
+    bedrooms: searchParams.get('bedrooms') || '',
+  });
+
+  // Infinite scroll hook
+  const {
+    properties,
+    loading,
+    loadingMore,
+    error: queryError,
+    hasMore,
+    loadMore,
+    totalCount,
+  } = useInfiniteProperties(appliedFilters);
+
+  const [error, setError] = useState<string | null>(null);
+
+  // Sync URL params to applied filters on mount and URL change
   useEffect(() => {
-    const timer = setTimeout(() => {
-      searchProperties();
-    }, 300);
-
-    return () => clearTimeout(timer);
+    setAppliedFilters({
+      city: searchParams.get('city') || '',
+      propertyType: searchParams.get('type') || '',
+      minPrice: searchParams.get('minPrice') || '',
+      maxPrice: searchParams.get('maxPrice') || '',
+      bedrooms: searchParams.get('bedrooms') || '',
+    });
   }, [searchParams]);
-
-  const searchProperties = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // Étape 1: Récupérer les propriétés (sans jointure directe sur profiles)
-      let query = supabase
-        .from('properties')
-        .select('*')
-        .eq('status', 'disponible');
-
-      if (city && city.trim()) {
-        query = query.ilike('city', `%${city.trim()}%`);
-      }
-
-      if (propertyType && propertyType.trim()) {
-        query = query.eq('property_type', propertyType.trim());
-      }
-
-      if (minPrice && minPrice.trim()) {
-        const minPriceNum = parseInt(minPrice, 10);
-        if (!isNaN(minPriceNum) && minPriceNum >= 0) {
-          query = query.gte('monthly_rent', minPriceNum);
-        }
-      }
-
-      if (maxPrice && maxPrice.trim()) {
-        const maxPriceNum = parseInt(maxPrice, 10);
-        if (!isNaN(maxPriceNum) && maxPriceNum >= 0) {
-          query = query.lte('monthly_rent', maxPriceNum);
-        }
-      }
-
-      if (bedrooms && bedrooms.trim()) {
-        const bedroomsNum = parseInt(bedrooms, 10);
-        if (!isNaN(bedroomsNum) && bedroomsNum > 0) {
-          query = query.eq('bedrooms', bedroomsNum);
-        }
-      }
-
-      const { data, error: queryError } = await query
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (queryError) {
-        throw new Error(queryError.message || 'Erreur lors de la recherche');
-      }
-
-      // Étape 2: Récupérer les profils publics des propriétaires via RPC sécurisé
-      const ownerIds = (data || [])
-        .map(p => p.owner_id)
-        .filter((id): id is string => id !== null);
-      
-      const uniqueOwnerIds = [...new Set(ownerIds)];
-      
-      let ownerProfiles = new Map<string, { trust_score: number | null; full_name: string | null }>();
-      
-      if (uniqueOwnerIds.length > 0) {
-        const { data: profilesData } = await supabase.rpc('get_public_profiles', {
-          profile_user_ids: uniqueOwnerIds
-        });
-        
-        (profilesData || []).forEach((profile: { user_id: string; trust_score: number | null; full_name: string | null }) => {
-          ownerProfiles.set(profile.user_id, {
-            trust_score: profile.trust_score,
-            full_name: profile.full_name
-          });
-        });
-      }
-
-      // Étape 3: Enrichir les propriétés avec les données publiques des propriétaires
-      const mappedData = (data || []).map((p) => {
-        const owner = p.owner_id ? ownerProfiles.get(p.owner_id) : null;
-        return {
-          ...p,
-          owner_trust_score: owner?.trust_score ?? null,
-          owner_full_name: owner?.full_name ?? null,
-        };
-      });
-
-      setProperties(mappedData);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      console.error('Error searching properties:', err);
-      setError(errorMessage);
-      setProperties([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [city, propertyType, minPrice, maxPrice, bedrooms]);
 
   const validateFilters = (): string | null => {
     if (minPrice && maxPrice) {
@@ -167,12 +93,13 @@ export default function SearchPropertiesPage() {
       return;
     }
 
+    setError(null);
     const params = new URLSearchParams();
-    if (city && city.trim()) params.set('city', city.trim());
-    if (propertyType && propertyType.trim()) params.set('type', propertyType.trim());
-    if (minPrice && minPrice.trim()) params.set('minPrice', minPrice.trim());
-    if (maxPrice && maxPrice.trim()) params.set('maxPrice', maxPrice.trim());
-    if (bedrooms && bedrooms.trim()) params.set('bedrooms', bedrooms.trim());
+    if (city?.trim()) params.set('city', city.trim());
+    if (propertyType?.trim()) params.set('type', propertyType.trim());
+    if (minPrice?.trim()) params.set('minPrice', minPrice.trim());
+    if (maxPrice?.trim()) params.set('maxPrice', maxPrice.trim());
+    if (bedrooms?.trim()) params.set('bedrooms', bedrooms.trim());
     setSearchParams(params);
   };
 
@@ -183,6 +110,7 @@ export default function SearchPropertiesPage() {
     setMinPrice('');
     setMaxPrice('');
     setBedrooms('');
+    setError(null);
     setSearchParams(new URLSearchParams());
   };
 
@@ -191,7 +119,15 @@ export default function SearchPropertiesPage() {
     return new Intl.NumberFormat('fr-FR').format(price);
   };
 
-  const activeFiltersCount = [city, propertyType, minPrice, maxPrice, bedrooms].filter(Boolean).length;
+  const activeFiltersCount = [
+    appliedFilters.city, 
+    appliedFilters.propertyType, 
+    appliedFilters.minPrice, 
+    appliedFilters.maxPrice, 
+    appliedFilters.bedrooms
+  ].filter(Boolean).length;
+
+  const displayError = error || queryError;
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -236,9 +172,9 @@ export default function SearchPropertiesPage() {
             {!loading && (
               <div className="flex items-center gap-3">
                 <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-5 py-3">
-                  <span className="text-3xl font-bold text-white">{properties.length}</span>
+                  <span className="text-3xl font-bold text-white">{totalCount}</span>
                   <span className="text-white/70 ml-2">
-                    bien{properties.length > 1 ? 's' : ''} disponible{properties.length > 1 ? 's' : ''}
+                    bien{totalCount > 1 ? 's' : ''} disponible{totalCount > 1 ? 's' : ''}
                   </span>
                 </div>
               </div>
@@ -478,14 +414,14 @@ export default function SearchPropertiesPage() {
       {/* Résultats */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Error Message */}
-        {error && (
+        {displayError && (
           <div className="mb-8 p-5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-4">
             <div className="p-2 bg-red-100 rounded-lg">
               <AlertCircle className="h-5 w-5 text-red-600" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-neutral-900 mb-1">Erreur</h3>
-              <p className="text-neutral-700">{error}</p>
+              <p className="text-neutral-700">{displayError}</p>
             </div>
             <button
               onClick={() => setError(null)}
@@ -499,7 +435,25 @@ export default function SearchPropertiesPage() {
 
         {/* Content based on active view */}
         {activeView === 'list' ? (
-          <div>
+          <InfiniteScroll
+            onLoadMore={loadMore}
+            hasMore={hasMore}
+            loading={loadingMore}
+            threshold={300}
+            loader={
+              <div className="flex justify-center items-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
+                <span className="ml-3 text-neutral-600">Chargement...</span>
+              </div>
+            }
+            endMessage={
+              properties.length > 0 ? (
+                <div className="flex justify-center items-center py-8 text-neutral-500">
+                  <span>Vous avez vu toutes les propriétés disponibles</span>
+                </div>
+              ) : null
+            }
+          >
             {loading ? (
               /* Loading skeleton Premium */
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -656,14 +610,14 @@ export default function SearchPropertiesPage() {
                 ))}
               </div>
             )}
-          </div>
+          </InfiniteScroll>
         ) : (
           /* Vue Carte */
           <div className="space-y-6">
             {!loading && properties.length > 0 && (
               <div className="flex items-center justify-between">
                 <p className="text-neutral-600">
-                  <span className="font-semibold text-neutral-900">{properties.length}</span> propriété{properties.length > 1 ? 's' : ''} sur la carte
+                  <span className="font-semibold text-neutral-900">{properties.filter(p => p.longitude !== null && p.latitude !== null).length}</span> propriété{properties.length > 1 ? 's' : ''} sur la carte
                 </p>
                 <div className="flex items-center gap-2 text-sm text-neutral-500">
                   <span className="w-2.5 h-2.5 bg-primary-500 rounded-full animate-pulse" />

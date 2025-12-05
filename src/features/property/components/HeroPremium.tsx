@@ -4,6 +4,7 @@ import { useParallax } from '@/shared/hooks';
 
 interface HeroPremiumProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
+  stats?: { propertiesCount: number };
 }
 
 const cities = [
@@ -43,7 +44,7 @@ const budgets = [
  * - Premium search form: 56px fields, orange button, shadows
  * - Subtle animations and hover effects
  */
-export default function HeroPremium({ onSearch }: HeroPremiumProps) {
+export default function HeroPremium({ onSearch, stats }: HeroPremiumProps) {
   const [city, setCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
@@ -113,7 +114,7 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
             lineHeight: '1.6'
           }}
         >
-          Identité certifiée • Paiement sécurisé • Plus de <strong>1 500 logements</strong> vérifiés
+          Identité certifiée • Paiement sécurisé • Plus de <strong>{(stats?.propertiesCount || 150).toLocaleString('fr-FR')} logements</strong> vérifiés
         </p>
 
         {/* Premium Search Form */}
@@ -134,10 +135,10 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 aria-label="Sélectionner une ville"
-                className="w-full pl-20 pr-12 bg-transparent text-gray-900 font-medium appearance-none cursor-pointer transition-colors focus:outline-none hover:bg-gray-50 focus:bg-gray-50"
-                style={{ height: '72px', fontSize: '16px' }}
+                className="w-full pl-16 pr-12 bg-transparent text-gray-900 font-medium appearance-none cursor-pointer transition-colors focus:outline-none hover:bg-gray-50 focus:bg-gray-50"
+                style={{ height: '64px', fontSize: '15px' }}
               >
-                <option value="">Où souhaitez-vous habiter ?</option>
+                <option value="">Ville</option>
                 {cities.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -154,10 +155,10 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
                 aria-label="Sélectionner un type de bien"
-                className="w-full pl-20 pr-12 bg-transparent text-gray-900 font-medium appearance-none cursor-pointer transition-colors focus:outline-none hover:bg-gray-50 focus:bg-gray-50"
-                style={{ height: '72px', fontSize: '16px' }}
+                className="w-full pl-16 pr-12 bg-transparent text-gray-900 font-medium appearance-none cursor-pointer transition-colors focus:outline-none hover:bg-gray-50 focus:bg-gray-50"
+                style={{ height: '64px', fontSize: '15px' }}
               >
-                <option value="">Quel type de bien ?</option>
+                <option value="">Type de bien</option>
                 {propertyTypes.map((type) => (
                   <option key={type.value} value={type.value}>{type.label}</option>
                 ))}
@@ -174,10 +175,10 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
                 value={maxBudget}
                 onChange={(e) => setMaxBudget(e.target.value)}
                 aria-label="Sélectionner un budget maximum"
-                className="w-full pl-20 pr-12 bg-transparent text-gray-900 font-medium appearance-none cursor-pointer transition-colors focus:outline-none hover:bg-gray-50 focus:bg-gray-50"
-                style={{ height: '72px', fontSize: '16px' }}
+                className="w-full pl-16 pr-12 bg-transparent text-gray-900 font-medium appearance-none cursor-pointer transition-colors focus:outline-none hover:bg-gray-50 focus:bg-gray-50"
+                style={{ height: '64px', fontSize: '15px' }}
               >
-                <option value="">Votre budget max ?</option>
+                <option value="">Budget max</option>
                 {budgets.map((b) => (
                   <option key={b.value} value={b.value}>{b.label}</option>
                 ))}
