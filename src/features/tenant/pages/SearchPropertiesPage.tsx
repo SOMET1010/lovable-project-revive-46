@@ -61,15 +61,10 @@ export default function SearchPropertiesPage() {
     setError(null);
 
     try {
+      // Étape 1: Récupérer les propriétés (sans jointure directe sur profiles)
       let query = supabase
         .from('properties')
-        .select(`
-          *,
-          profiles:owner_id (
-            trust_score,
-            full_name
-          )
-        `)
+        .select('*')
         .eq('status', 'disponible');
 
       if (city && city.trim()) {
@@ -109,12 +104,37 @@ export default function SearchPropertiesPage() {
         throw new Error(queryError.message || 'Erreur lors de la recherche');
       }
 
-      const mappedData = (data || []).map((p: any) => ({
-        ...p,
-        owner_trust_score: p.profiles?.trust_score ?? null,
-        owner_full_name: p.profiles?.full_name ?? null,
-        profiles: undefined,
-      }));
+      // Étape 2: Récupérer les profils publics des propriétaires via RPC sécurisé
+      const ownerIds = (data || [])
+        .map(p => p.owner_id)
+        .filter((id): id is string => id !== null);
+      
+      const uniqueOwnerIds = [...new Set(ownerIds)];
+      
+      let ownerProfiles = new Map<string, { trust_score: number | null; full_name: string | null }>();
+      
+      if (uniqueOwnerIds.length > 0) {
+        const { data: profilesData } = await supabase.rpc('get_public_profiles', {
+          profile_user_ids: uniqueOwnerIds
+        });
+        
+        (profilesData || []).forEach((profile: { user_id: string; trust_score: number | null; full_name: string | null }) => {
+          ownerProfiles.set(profile.user_id, {
+            trust_score: profile.trust_score,
+            full_name: profile.full_name
+          });
+        });
+      }
+
+      // Étape 3: Enrichir les propriétés avec les données publiques des propriétaires
+      const mappedData = (data || []).map((p) => {
+        const owner = p.owner_id ? ownerProfiles.get(p.owner_id) : null;
+        return {
+          ...p,
+          owner_trust_score: owner?.trust_score ?? null,
+          owner_full_name: owner?.full_name ?? null,
+        };
+      });
 
       setProperties(mappedData);
     } catch (err) {

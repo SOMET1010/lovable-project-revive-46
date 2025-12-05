@@ -1355,6 +1355,32 @@ export type Database = {
     Functions: {
       generate_otp: { Args: never; Returns: string }
       get_platform_stats: { Args: never; Returns: Json }
+      get_public_profile: {
+        Args: { profile_user_id: string }
+        Returns: {
+          avatar_url: string
+          city: string
+          cnam_verified: boolean
+          full_name: string
+          is_verified: boolean
+          oneci_verified: boolean
+          trust_score: number
+          user_id: string
+        }[]
+      }
+      get_public_profiles: {
+        Args: { profile_user_ids: string[] }
+        Returns: {
+          avatar_url: string
+          city: string
+          cnam_verified: boolean
+          full_name: string
+          is_verified: boolean
+          oneci_verified: boolean
+          trust_score: number
+          user_id: string
+        }[]
+      }
       get_user_roles: {
         Args: { _user_id?: string }
         Returns: Database["public"]["Enums"]["app_role"][]
