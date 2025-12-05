@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
+import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Clock, MapPin, Video, X, MessageCircle, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -188,28 +186,23 @@ export default function MyVisits() {
 
   if (!user) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Connexion requise
-            </h2>
-            <p className="text-gray-600">
-              Veuillez vous connecter pour voir vos visites
-            </p>
-          </div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-foreground mb-2">
+            Connexion requise
+          </h2>
+          <p className="text-muted-foreground">
+            Veuillez vous connecter pour voir vos visites
+          </p>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   return (
     <>
-      <Header />
-      <div className="min-h-screen bg-gray-50 pt-20 pb-12">
+      <div className="min-h-screen bg-background py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">Mes visites</h1>
@@ -450,7 +443,6 @@ export default function MyVisits() {
         </div>
       )}
 
-      <Footer />
     </>
   );
 }
