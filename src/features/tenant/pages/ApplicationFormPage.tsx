@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Award } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -28,6 +29,7 @@ interface ExtendedProfile {
 
 export default function ApplicationForm() {
   const { user, profile: authProfile } = useAuth();
+  const navigate = useNavigate();
   const profile = authProfile as ExtendedProfile | null;
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,7 +40,7 @@ export default function ApplicationForm() {
 
   useEffect(() => {
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
 
@@ -46,7 +48,7 @@ export default function ApplicationForm() {
     if (propertyId) {
       loadProperty(propertyId);
     }
-  }, [user]);
+  }, [user, navigate]);
 
   const loadProperty = async (id: string) => {
     try {
@@ -58,7 +60,7 @@ export default function ApplicationForm() {
 
       if (error) throw error;
       if (!data) {
-        window.location.href = '/recherche';
+        navigate('/recherche');
         return;
       }
 
@@ -106,7 +108,7 @@ export default function ApplicationForm() {
 
       setSuccess(true);
       setTimeout(() => {
-        window.location.href = '/';
+        navigate('/');
       }, 2000);
     } catch (err: any) {
       setError(err.message || 'Erreur lors de la soumission de la candidature');
@@ -196,16 +198,16 @@ export default function ApplicationForm() {
                   <Shield className="h-8 w-8 text-red-700" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-bold text-red-900 text-lg mb-2">🚫 Vérification d'identité OBLIGATOIRE</p>
+                  <p className="font-bold text-red-900 text-lg mb-2">Vérification d'identité OBLIGATOIRE</p>
                   <p className="text-red-800 mb-3 font-semibold">
                     Vous devez compléter la vérification de votre identité avant de postuler.
                   </p>
-                  <a
-                    href="/profil"
+                  <Link
+                    to="/profil"
                     className="inline-block px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold shadow-lg"
                   >
                     Compléter ma vérification maintenant →
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -247,12 +249,12 @@ export default function ApplicationForm() {
                   <span className="font-bold text-gray-900">{profile?.city || 'Non renseignée'}</span>
                 </div>
               </div>
-              <a
-                href="/profil"
+              <Link
+                to="/profil"
                 className="text-terracotta-600 hover:text-terracotta-700 text-sm font-bold mt-3 inline-block transition-all duration-300 transform hover:scale-105"
               >
                 Modifier mes informations →
-              </a>
+              </Link>
             </div>
 
             <div className="bg-gradient-to-br from-olive-50 to-green-50 p-6 rounded-2xl border border-olive-200">
@@ -328,9 +330,9 @@ export default function ApplicationForm() {
                 />
                 <label htmlFor="terms" className="text-sm text-gray-800">
                   Je confirme que toutes les informations fournies sont exactes et j'accepte les{' '}
-                  <a href="/conditions-utilisation" className="text-terracotta-600 hover:text-terracotta-700 font-bold">
+                  <Link to="/conditions-utilisation" className="text-terracotta-600 hover:text-terracotta-700 font-bold">
                     conditions d'utilisation
-                  </a>
+                  </Link>
                   .
                 </label>
               </div>

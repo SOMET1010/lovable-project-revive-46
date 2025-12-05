@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home, Save, Upload, X, Image as ImageIcon, Building2 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -9,6 +10,7 @@ type PropertyType = Database['public']['Tables']['properties']['Row']['property_
 
 export default function AddProperty() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -124,7 +126,7 @@ export default function AddProperty() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
 
@@ -178,7 +180,7 @@ export default function AddProperty() {
 
       setSuccess(true);
       setTimeout(() => {
-        window.location.href = '/dashboard/proprietaire';
+        navigate('/dashboard/proprietaire');
       }, 2000);
     } catch (err: any) {
       setError(err.message || 'Erreur lors de l\'ajout de la propriété');
@@ -437,15 +439,14 @@ export default function AddProperty() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                    Adresse complète <span className="text-red-500">*</span>
+                    Adresse complète
                   </label>
                   <input
                     type="text"
                     name="address"
                     value={formData.address}
                     onChange={handleChange}
-                    required
-                    placeholder="Ex: Rue 12, Lot 34"
+                    placeholder="Ex: Rue des Jardins, Résidence Les Palmiers"
                     className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                   />
                 </div>
@@ -484,58 +485,53 @@ export default function AddProperty() {
             </div>
 
             <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Informations financières</h2>
+              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Tarification</h2>
 
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Loyer mensuel (FCFA) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="monthly_rent"
-                      value={formData.monthly_rent}
-                      onChange={handleChange}
-                      required
-                      min="0"
-                      step="1000"
-                      placeholder="Ex: 150000"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                    />
-                  </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
+                    Loyer mensuel (FCFA) <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="monthly_rent"
+                    value={formData.monthly_rent}
+                    onChange={handleChange}
+                    required
+                    min="0"
+                    placeholder="Ex: 150000"
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                  />
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Dépôt de garantie (FCFA)
-                    </label>
-                    <input
-                      type="number"
-                      name="deposit_amount"
-                      value={formData.deposit_amount}
-                      onChange={handleChange}
-                      min="0"
-                      step="1000"
-                      placeholder="Ex: 300000"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
+                    Dépôt de garantie (FCFA)
+                  </label>
+                  <input
+                    type="number"
+                    name="deposit_amount"
+                    value={formData.deposit_amount}
+                    onChange={handleChange}
+                    min="0"
+                    placeholder="Ex: 300000"
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                  />
+                </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Charges mensuelles (FCFA)
-                    </label>
-                    <input
-                      type="number"
-                      name="charges_amount"
-                      value={formData.charges_amount}
-                      onChange={handleChange}
-                      min="0"
-                      step="1000"
-                      placeholder="Ex: 10000"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
+                    Charges mensuelles (FCFA)
+                  </label>
+                  <input
+                    type="number"
+                    name="charges_amount"
+                    value={formData.charges_amount}
+                    onChange={handleChange}
+                    min="0"
+                    placeholder="Ex: 25000"
+                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                  />
                 </div>
               </div>
             </div>
@@ -544,71 +540,69 @@ export default function AddProperty() {
               <h2 className="text-xl font-semibold text-neutral-900 mb-6">Équipements</h2>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <label className="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors">
+                <label className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-primary-300 transition-colors">
                   <input
                     type="checkbox"
                     name="is_furnished"
                     checked={formData.is_furnished}
                     onChange={handleChange}
-                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 w-5 h-5"
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-medium text-neutral-800">Meublé</span>
+                  <span className="font-medium text-neutral-700">Meublé</span>
                 </label>
 
-                <label className="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors">
+                <label className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-primary-300 transition-colors">
                   <input
                     type="checkbox"
                     name="has_parking"
                     checked={formData.has_parking}
                     onChange={handleChange}
-                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 w-5 h-5"
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-medium text-neutral-800">Parking</span>
+                  <span className="font-medium text-neutral-700">Parking</span>
                 </label>
 
-                <label className="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors">
-                  <input
-                    type="checkbox"
-                    name="has_ac"
-                    checked={formData.has_ac}
-                    onChange={handleChange}
-                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 w-5 h-5"
-                  />
-                  <span className="text-sm font-medium text-neutral-800">Climatisation</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer bg-white px-4 py-3 rounded-xl border border-neutral-200 hover:border-primary-300 transition-colors">
+                <label className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-primary-300 transition-colors">
                   <input
                     type="checkbox"
                     name="has_garden"
                     checked={formData.has_garden}
                     onChange={handleChange}
-                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500 w-5 h-5"
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-medium text-neutral-800">Jardin</span>
+                  <span className="font-medium text-neutral-700">Jardin</span>
+                </label>
+
+                <label className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-primary-300 transition-colors">
+                  <input
+                    type="checkbox"
+                    name="has_ac"
+                    checked={formData.has_ac}
+                    onChange={handleChange}
+                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
+                  />
+                  <span className="font-medium text-neutral-700">Climatisation</span>
                 </label>
               </div>
             </div>
 
-            <div className="flex justify-end gap-4 pt-6">
-              <button
-                type="button"
-                onClick={() => window.history.back()}
-                className="border border-neutral-200 hover:border-primary-200 text-neutral-700 font-medium py-3 px-8 rounded-xl transition-colors"
-              >
-                Annuler
-              </button>
+            <div className="flex justify-end">
               <button
                 type="submit"
                 disabled={loading || uploadingImages}
-                className="bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-8 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="flex items-center gap-2 px-8 py-4 bg-primary-500 text-white font-bold rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
-                <Save className="h-5 w-5" />
-                <span>
-                  {loading && !uploadingImages && 'Création...'}
-                  {uploadingImages && 'Upload des images...'}
-                  {!loading && !uploadingImages && 'Publier la propriété'}
-                </span>
+                {loading || uploadingImages ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>{uploadingImages ? 'Upload des images...' : 'Publication...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-5 w-5" />
+                    <span>Publier la propriété</span>
+                  </>
+                )}
               </button>
             </div>
           </form>

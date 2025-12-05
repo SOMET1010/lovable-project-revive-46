@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Home, CheckCircle, Shield, Camera, FileText, TrendingUp, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useNavigate } from 'react-router-dom';
 
 export default function AddPropertyLandingPage() {
   const { user } = useAuth();
@@ -73,19 +73,19 @@ export default function AddPropertyLandingPage() {
             Rejoignez des centaines de propriétaires qui font confiance à <span className="font-bold text-orange-600">Mon Toit</span> pour louer leurs biens en Côte d'Ivoire
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/inscription?type=proprietaire&redirect=/dashboard/ajouter-propriete"
+            <Link
+              to="/inscription?type=proprietaire&redirect=/dashboard/ajouter-propriete"
               className="px-8 py-4 bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold rounded-xl hover:from-orange-700 hover:to-orange-600 transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
             >
               <span>Commencer gratuitement</span>
               <ArrowRight className="h-5 w-5" />
-            </a>
-            <a
-              href="/connexion?redirect=/dashboard/ajouter-propriete"
+            </Link>
+            <Link
+              to="/connexion?redirect=/dashboard/ajouter-propriete"
               className="px-8 py-4 bg-white text-orange-600 font-bold rounded-xl border-2 border-orange-600 hover:bg-orange-50 transition-all duration-300 flex items-center justify-center gap-2"
             >
               <span>J'ai déjà un compte</span>
-            </a>
+            </Link>
           </div>
         </div>
 
@@ -134,29 +134,29 @@ export default function AddPropertyLandingPage() {
           <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">
             Aucun frais d'inscription. Aucun engagement. Commencez dès maintenant et trouvez le locataire idéal.
           </p>
-          <a
-            href="/inscription?type=proprietaire&redirect=/dashboard/ajouter-propriete"
+          <Link
+            to="/inscription?type=proprietaire&redirect=/dashboard/ajouter-propriete"
             className="inline-flex items-center gap-2 px-8 py-4 bg-white text-orange-600 font-bold rounded-xl hover:bg-orange-50 transition-all shadow-lg hover:shadow-xl"
           >
             <span>Créer mon compte propriétaire</span>
             <ArrowRight className="h-5 w-5" />
-          </a>
+          </Link>
         </div>
 
         <div className="mt-16 text-center">
           <p className="text-gray-600 mb-4">Besoin d'aide ?</p>
           <div className="flex flex-wrap justify-center gap-4">
-            <a href="/aide" className="text-orange-600 hover:text-orange-700 font-semibold">
+            <Link to="/aide" className="text-orange-600 hover:text-orange-700 font-semibold">
               Centre d'aide
-            </a>
+            </Link>
             <span className="text-gray-400">•</span>
-            <a href="/contact" className="text-orange-600 hover:text-orange-700 font-semibold">
+            <Link to="/contact" className="text-orange-600 hover:text-orange-700 font-semibold">
               Nous contacter
-            </a>
+            </Link>
             <span className="text-gray-400">•</span>
-            <a href="/a-propos" className="text-orange-600 hover:text-orange-700 font-semibold">
+            <Link to="/a-propos" className="text-orange-600 hover:text-orange-700 font-semibold">
               À propos
-            </a>
+            </Link>
           </div>
         </div>
       </div>

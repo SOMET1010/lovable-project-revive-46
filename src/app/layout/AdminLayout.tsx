@@ -140,7 +140,7 @@ export default function AdminLayout() {
 
   const handleLogout = () => {
     // Logique de déconnexion
-    window.location.href = '/';
+    navigate('/');
   };
 
   return (

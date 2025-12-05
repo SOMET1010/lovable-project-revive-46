@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Building2, Home, UserCircle, Briefcase, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function ProfileSelection() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [selectedType, setSelectedType] = useState<'locataire' | 'proprietaire' | 'agence' | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -84,11 +86,11 @@ export default function ProfileSelection() {
       if (updateError) throw updateError;
 
       if (selectedType === 'locataire') {
-        window.location.href = '/';
+        navigate('/');
       } else if (selectedType === 'proprietaire') {
-        window.location.href = '/dashboard/proprietaire';
+        navigate('/dashboard/proprietaire');
       } else if (selectedType === 'agence') {
-        window.location.href = '/agence/inscription';
+        navigate('/agence/inscription');
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour du profil';
@@ -98,13 +100,13 @@ export default function ProfileSelection() {
   };
 
   if (!user) {
-    window.location.href = '/connexion';
+    navigate('/connexion');
     return null;
   }
 
   // If user already has a type set (not default), redirect to home
   if (profile?.user_type && profile.user_type !== 'tenant') {
-    window.location.href = '/';
+    navigate('/');
     return null;
   }
 

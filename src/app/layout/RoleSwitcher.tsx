@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { User, Building2, Briefcase, RefreshCw, CheckCircle, Info } from 'lucide-react';
 import { toast } from '@/shared/hooks/useToast';
 
 export default function RoleSwitcher() {
   const { profile, user, updateProfile } = useAuth();
+  const navigate = useNavigate();
   const [switching, setSwitching] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
@@ -23,11 +25,11 @@ export default function RoleSwitcher() {
 
       // Redirect to appropriate dashboard
       if (newRole === 'locataire') {
-        window.location.href = '/';
+        navigate('/');
       } else if (newRole === 'proprietaire') {
-        window.location.href = '/dashboard/proprietaire';
+        navigate('/dashboard/proprietaire');
       } else if (newRole === 'agence') {
-        window.location.href = '/agence/dashboard';
+        navigate('/agence/dashboard');
       }
     } catch (err) {
       console.error('Erreur changement de rôle:', err);
