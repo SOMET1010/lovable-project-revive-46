@@ -48,6 +48,11 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    // Extract origin for dynamic redirect URL
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/$/, '') || 'https://silkjqepcbhlflbdtvgg.lovable.app';
+    const redirectTo = `${origin}/auth/callback`;
+    console.log(`[VERIFY-OTP] Using redirectTo: ${redirectTo}`);
+
     // Normaliser le numéro (format 13 chiffres: 2250XXXXXXXXX)
     let normalizedPhone = phoneNumber.replace(/\D/g, '');
     if (!normalizedPhone.startsWith('225')) {
@@ -219,6 +224,9 @@ Deno.serve(async (req: Request) => {
         const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
           type: 'magiclink',
           email: userData.user.email,
+          options: {
+            redirectTo,
+          },
         });
 
         if (sessionError) {
@@ -374,6 +382,9 @@ Deno.serve(async (req: Request) => {
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: generatedEmail,
+      options: {
+        redirectTo,
+      },
     });
 
     if (sessionError) {
