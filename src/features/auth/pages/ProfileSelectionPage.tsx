@@ -3,17 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Building2, Home, UserCircle, Briefcase, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeUserType, type UserTypeEn } from '@/shared/lib/userTypeMapping';
 
 export default function ProfileSelection() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [selectedType, setSelectedType] = useState<'locataire' | 'proprietaire' | 'agence' | null>(null);
+  const [selectedType, setSelectedType] = useState<UserTypeEn | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const profileTypes = [
     {
-      type: 'locataire' as const,
+      type: 'tenant' as UserTypeEn,
       icon: Home,
       title: 'Locataire',
       subtitle: 'Je cherche un logement',
@@ -31,7 +32,7 @@ export default function ProfileSelection() {
       hoverColor: 'hover:border-cyan-500'
     },
     {
-      type: 'proprietaire' as const,
+      type: 'owner' as UserTypeEn,
       icon: Building2,
       title: 'Propriétaire',
       subtitle: 'Je mets mon bien en location',
@@ -49,7 +50,7 @@ export default function ProfileSelection() {
       hoverColor: 'hover:border-terracotta-500'
     },
     {
-      type: 'agence' as const,
+      type: 'agent' as UserTypeEn,
       icon: Briefcase,
       title: 'Agence Immobilière',
       subtitle: 'Je suis une agence professionnelle',
@@ -78,18 +79,18 @@ export default function ProfileSelection() {
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          user_type: selectedType,
+          user_type: normalizeUserType(selectedType),
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
 
       if (updateError) throw updateError;
 
-      if (selectedType === 'locataire') {
+      if (selectedType === 'tenant') {
         navigate('/');
-      } else if (selectedType === 'proprietaire') {
+      } else if (selectedType === 'owner') {
         navigate('/dashboard/proprietaire');
-      } else if (selectedType === 'agence') {
+      } else if (selectedType === 'agent') {
         navigate('/agence/inscription');
       }
     } catch (err: unknown) {

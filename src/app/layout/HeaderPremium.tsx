@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useUnreadCount } from '@/features/messaging/hooks/useUnreadCount';
+import { isUserType } from '@/shared/lib/userTypeMapping';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();
@@ -21,8 +22,8 @@ export default function HeaderPremium() {
     return location.pathname.startsWith(href);
   };
 
-  // Simplified: only use user_type
-  const isOwner = profile?.user_type === 'proprietaire';
+  // Support both French and English user_type values
+  const isOwner = isUserType(profile?.user_type, 'owner', 'proprietaire');
 
   useEffect(() => {
     const handleScroll = () => {

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { testDatabaseConnection } from '@/shared/lib/helpers/supabaseHealthCheck';
 import { logger } from '@/shared/lib/logger';
+import { normalizeUserType } from '@/shared/lib/userTypeMapping';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -209,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           user_id: userId,
           email: userData.user.email,
           full_name: userData.user.user_metadata?.['full_name'] || '',
-          user_type: userData.user.user_metadata?.['user_type'] || 'locataire',
+          user_type: normalizeUserType(userData.user.user_metadata?.['user_type']),
           phone: userData.user.user_metadata?.['phone'] || '',
         }, { onConflict: 'id' });
 
@@ -242,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: {
           data: {
             full_name: userData.full_name,
-            user_type: userData.user_type || 'locataire',
+            user_type: normalizeUserType(userData.user_type),
             phone: userData.phone || '',
           },
           emailRedirectTo: `${window.location.origin}/auth/callback`,
