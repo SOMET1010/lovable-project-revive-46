@@ -5,6 +5,7 @@ import FooterPremium from './FooterPremium';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { ToastContainer } from '@/shared/hooks/useToast';
 import PageTransition from '@/shared/ui/PageTransition';
+import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 
 const noLayoutRoutes = ['/auth/callback'];
 const noHeaderFooterRoutes = [
@@ -42,6 +43,7 @@ export default function Layout() {
   return (
     <ErrorBoundary>
       {shouldShowHeaderFooter && <HeaderPremium />}
+      {shouldShowHeaderFooter && <Breadcrumb />}
       <ToastContainer />
       <Suspense
         fallback={
