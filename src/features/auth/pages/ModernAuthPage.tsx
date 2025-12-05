@@ -166,8 +166,18 @@ export default function ModernAuthPage() {
         },
       });
 
-      if (invokeError) {
-        throw new Error(invokeError.message || 'Erreur lors de l\'envoi du code');
+      // Handle account not found FIRST (before throwing on invokeError)
+      // Edge function returns 404 but data still contains accountNotFound flag
+      if (data?.accountNotFound) {
+        setSuccess('');
+        navigate('/inscription', { replace: true });
+        setTimeout(() => {
+          setAuthMethod('phone');
+          setPhoneStep('enter');
+          setError('Aucun compte trouvé avec ce numéro. Créez un compte pour continuer.');
+        }, 0);
+        setLoading(false);
+        return;
       }
 
       // Handle rate limiting
@@ -177,18 +187,9 @@ export default function ModernAuthPage() {
         return;
       }
 
-      // Handle account not found - offer to switch to registration
-      if (data?.accountNotFound) {
-        setSuccess('');
-        // Navigate to register tab (URL sync will update state)
-        navigate('/inscription', { replace: true });
-        // Set phone method and show message after navigation
-        setTimeout(() => {
-          setAuthMethod('phone');
-          setPhoneStep('enter');
-          setError('Aucun compte trouvé avec ce numéro. Créez un compte pour continuer.');
-        }, 0);
-        return;
+      // Now check for other errors
+      if (invokeError) {
+        throw new Error(invokeError.message || 'Erreur lors de l\'envoi du code');
       }
 
       if (data?.error) {
