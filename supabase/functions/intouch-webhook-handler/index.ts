@@ -1,22 +1,13 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { verifyHmacSignature, extractSignature, logWebhookAttempt } from "../_shared/hmac.ts";
+import { edgeLogger } from "../_shared/logger.ts";
+import type { InTouchWebhookPayload } from "../_shared/types/payment.types.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, X-Webhook-Signature, X-InTouch-Signature",
 };
-
-interface InTouchWebhook {
-  transaction_id: string;
-  partner_transaction_id: string;
-  status: string;
-  amount: number;
-  phone_number: string;
-  timestamp: string;
-  service_id?: string;
-  error_message?: string;
-}
 
 const STATUS_MAPPING: Record<string, string> = {
   PENDING: "processing",
@@ -26,7 +17,7 @@ const STATUS_MAPPING: Record<string, string> = {
   CANCELLED: "cancelled",
 };
 
-function validateWebhookData(data: unknown): data is InTouchWebhook {
+function validateWebhookData(data: unknown): data is InTouchWebhookPayload {
   if (!data || typeof data !== "object") {
     return false;
   }
@@ -64,19 +55,20 @@ Deno.serve(async (req: Request) => {
   const clientIP = getClientIP(req);
   let rawBody = "";
   let webhookData: unknown = null;
+  let signature: string | null = null;
 
   try {
     // 1. Lire le corps brut pour la vérification HMAC
     rawBody = await req.text();
+    signature = extractSignature(req);
     
     // 2. Vérifier la signature HMAC
-    const signature = extractSignature(req);
     const webhookSecret = Deno.env.get('WEBHOOK_HMAC_SECRET');
 
     // Si le secret est configuré, la vérification est obligatoire
     if (webhookSecret) {
       if (!signature) {
-        console.error('Webhook rejected: Missing signature');
+        edgeLogger.error('Webhook rejected: Missing signature');
         await logWebhookAttempt(supabaseClient, {
           webhook_type: 'intouch',
           source_ip: clientIP,
@@ -95,7 +87,7 @@ Deno.serve(async (req: Request) => {
       const isValid = await verifyHmacSignature(rawBody, signature, webhookSecret);
       
       if (!isValid) {
-        console.error('Webhook rejected: Invalid signature');
+        edgeLogger.error('Webhook rejected: Invalid signature');
         await logWebhookAttempt(supabaseClient, {
           webhook_type: 'intouch',
           source_ip: clientIP,
@@ -111,9 +103,9 @@ Deno.serve(async (req: Request) => {
         );
       }
       
-      console.log('Webhook signature verified successfully');
+      edgeLogger.info('Webhook signature verified successfully');
     } else {
-      console.warn('WEBHOOK_HMAC_SECRET not configured - signature verification skipped');
+      edgeLogger.warn('WEBHOOK_HMAC_SECRET not configured - signature verification skipped');
     }
 
     // 3. Parser le JSON
@@ -145,8 +137,9 @@ Deno.serve(async (req: Request) => {
       error_message,
     } = webhookData;
 
-    console.log(`Processing webhook for transaction ${partner_transaction_id}:`, {
+    edgeLogger.info('Processing webhook', {
       transaction_id,
+      partner_transaction_id,
       status,
       amount,
     });
@@ -164,13 +157,13 @@ Deno.serve(async (req: Request) => {
     }
 
     if (!existingPayment) {
-      console.error(`Payment not found: ${partner_transaction_id}`);
+      edgeLogger.error('Payment not found', undefined, { partner_transaction_id });
       await logWebhookAttempt(supabaseClient, {
         webhook_type: 'intouch',
         source_ip: clientIP,
         signature_provided: signature,
         signature_valid: true,
-      payload: webhookData as unknown as Record<string, unknown>,
+        payload: webhookData as unknown as Record<string, unknown>,
         processing_result: 'failed',
         error_message: 'Payment not found'
       });
@@ -181,13 +174,13 @@ Deno.serve(async (req: Request) => {
     }
 
     if (existingPayment.status === "completed" || existingPayment.status === "failed") {
-      console.log(`Payment already finalized: ${partner_transaction_id}`);
+      edgeLogger.info('Payment already finalized', { partner_transaction_id });
       await logWebhookAttempt(supabaseClient, {
         webhook_type: 'intouch',
         source_ip: clientIP,
         signature_provided: signature,
         signature_valid: true,
-      payload: webhookData as unknown as Record<string, unknown>,
+        payload: webhookData as unknown as Record<string, unknown>,
         processing_result: 'success',
         error_message: 'Payment already processed (idempotent)'
       });
@@ -226,7 +219,7 @@ Deno.serve(async (req: Request) => {
     }).eq("payment_id", partner_transaction_id);
 
     if (mappedStatus === "completed") {
-      console.log(`Payment completed successfully: ${partner_transaction_id}`);
+      edgeLogger.info('Payment completed successfully', { partner_transaction_id });
 
       const { data: user } = await supabaseClient
         .from("profiles")
@@ -299,7 +292,7 @@ Deno.serve(async (req: Request) => {
         }
       }
     } else if (mappedStatus === "failed") {
-      console.error(`Payment failed: ${partner_transaction_id}`, error_message);
+      edgeLogger.error('Payment failed', undefined, { partner_transaction_id, error_message });
 
       const { data: user } = await supabaseClient
         .from("profiles")
@@ -339,15 +332,14 @@ Deno.serve(async (req: Request) => {
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
-    console.error("Webhook processing error:", error);
-
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    edgeLogger.error("Webhook processing error", error instanceof Error ? error : undefined);
 
     // Log erreur
     await logWebhookAttempt(supabaseClient, {
       webhook_type: 'intouch',
       source_ip: clientIP,
-      signature_provided: extractSignature(req),
+      signature_provided: signature,
       signature_valid: false,
       payload: (webhookData as Record<string, unknown>) || {},
       processing_result: 'failed',

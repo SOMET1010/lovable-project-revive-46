@@ -4,6 +4,7 @@ import { User, Session, AuthError, AuthChangeEvent } from '@supabase/supabase-js
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { testDatabaseConnection } from '@/shared/lib/helpers/supabaseHealthCheck';
+import { logger } from '@/shared/lib/logger';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -76,7 +77,7 @@ export const useAuthStore = create<AuthState>()(
               })();
             });
           } catch (error) {
-            console.error('Error initializing auth:', error);
+            logger.error('Error initializing auth', error instanceof Error ? error : undefined);
             set({ initialized: true, loading: false });
           }
         },
@@ -86,13 +87,13 @@ export const useAuthStore = create<AuthState>()(
           const BASE_RETRY_DELAY = 1500;
 
           try {
-            console.log(`[AuthStore] Loading profile (attempt ${retryAttempt + 1}/${MAX_RETRIES + 1})`);
+            logger.debug('Loading profile', { userId, attempt: retryAttempt + 1, maxRetries: MAX_RETRIES + 1 });
             set({ retryCount: retryAttempt });
 
             if (retryAttempt === 0) {
               const healthCheck = await testDatabaseConnection();
               if (!healthCheck.success) {
-                console.error('[AuthStore] Database connection failed:', healthCheck.message);
+                logger.error('Database connection failed', undefined, { message: healthCheck.message });
                 set({
                   profileError: {
                     type: 'network',
@@ -113,7 +114,7 @@ export const useAuthStore = create<AuthState>()(
               .maybeSingle();
 
             if (error) {
-              console.error('[AuthStore] Supabase error:', error);
+              logger.error('Supabase error loading profile', error as Error, { userId, code: error.code });
 
               let errorType: ProfileLoadError['type'] = 'database';
               let errorMessage = 'Erreur lors du chargement du profil';
@@ -135,7 +136,7 @@ export const useAuthStore = create<AuthState>()(
 
               if (retryAttempt < MAX_RETRIES) {
                 const delay = BASE_RETRY_DELAY * Math.pow(1.5, retryAttempt);
-                console.log(`[AuthStore] Retrying in ${delay}ms...`);
+                logger.debug('Retrying profile load', { delay, attempt: retryAttempt + 1 });
                 await new Promise(resolve => setTimeout(resolve, delay));
                 return get().loadProfile(userId, retryAttempt + 1);
               }
@@ -153,11 +154,11 @@ export const useAuthStore = create<AuthState>()(
             }
 
             if (!data) {
-              console.warn('[AuthStore] No profile data returned');
+              logger.warn('No profile data returned', { userId });
 
               if (retryAttempt < MAX_RETRIES) {
                 const delay = BASE_RETRY_DELAY * Math.pow(1.5, retryAttempt);
-                console.log(`[AuthStore] Profile not found, retrying in ${delay}ms...`);
+                logger.debug('Profile not found, retrying', { delay, attempt: retryAttempt + 1 });
                 await new Promise(resolve => setTimeout(resolve, delay));
                 return get().loadProfile(userId, retryAttempt + 1);
               }
@@ -174,14 +175,14 @@ export const useAuthStore = create<AuthState>()(
               return;
             }
 
-            console.log('[AuthStore] Profile loaded successfully');
+            logger.info('Profile loaded successfully', { userId });
             set({ profile: data, loading: false, profileError: null, retryCount: 0 });
           } catch (error: unknown) {
-            console.error('[AuthStore] Unexpected error loading profile:', error);
+            logger.error('Unexpected error loading profile', error instanceof Error ? error : undefined, { userId });
 
             if (retryAttempt < MAX_RETRIES) {
               const delay = BASE_RETRY_DELAY * Math.pow(1.5, retryAttempt);
-              console.log(`[AuthStore] Retrying after error in ${delay}ms...`);
+              logger.debug('Retrying after error', { delay, attempt: retryAttempt + 1 });
               await new Promise(resolve => setTimeout(resolve, delay));
               return get().loadProfile(userId, retryAttempt + 1);
             }
@@ -266,7 +267,7 @@ export const useAuthStore = create<AuthState>()(
             if (error) throw error;
             await get().loadProfile(user.id);
           } catch (error) {
-            console.error('Error updating profile:', error);
+            logger.error('Error updating profile', error instanceof Error ? error : undefined);
             set({ loading: false });
           }
         },
