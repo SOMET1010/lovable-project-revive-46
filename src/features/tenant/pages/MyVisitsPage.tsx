@@ -4,31 +4,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { Calendar, Clock, MapPin, Video, X, MessageCircle, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import TenantDashboardLayout from '../components/TenantDashboardLayout';
+import { logger } from '@/shared/lib/logger';
+import type { Visit, VisitFilter } from '@/types/visit.types';
 
-interface Visit {
-  id: string;
-  property_id: string;
-  visit_type: string;
-  visit_date: string;
-  visit_time: string;
-  status: string;
-  notes: string | null;
-  feedback: string | null;
-  rating: number | null;
-  property: {
-    id: string;
-    title: string;
-    address: string | null;
-    city: string;
-    main_image: string | null;
-  };
-}
+const statusStyles: Record<string, string> = {
+  en_attente: 'bg-yellow-100 text-yellow-800',
+  confirmee: 'bg-green-100 text-green-800',
+  annulee: 'bg-red-100 text-red-800',
+  terminee: 'bg-blue-100 text-blue-800'
+};
+
+const statusLabels: Record<string, string> = {
+  en_attente: 'En attente',
+  confirmee: 'Confirmée',
+  annulee: 'Annulée',
+  terminee: 'Terminée'
+};
 
 export default function MyVisits() {
   const { user } = useAuth();
   const [visits, setVisits] = useState<Visit[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past'>('upcoming');
+  const [filter, setFilter] = useState<VisitFilter>('upcoming');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
   const [feedback, setFeedback] = useState('');
@@ -75,13 +72,13 @@ export default function MyVisits() {
 
       if (error) throw error;
 
-      const formattedVisits = (data || []).map((visit: any) => ({
+      const formattedVisits: Visit[] = (data || []).map((visit) => ({
         id: visit.id,
         property_id: visit.property_id,
         visit_type: visit.visit_type || 'physique',
         visit_date: visit.visit_date,
         visit_time: visit.visit_time,
-        status: visit.status,
+        status: visit.status || 'en_attente',
         notes: visit.notes,
         feedback: visit.feedback,
         rating: visit.rating,
@@ -90,7 +87,10 @@ export default function MyVisits() {
 
       setVisits(formattedVisits);
     } catch (error) {
-      console.error('Error loading visits:', error);
+      logger.error('Failed to load visits', error instanceof Error ? error : undefined, {
+        userId: user.id,
+        filter
+      });
     } finally {
       setLoading(false);
     }
@@ -112,7 +112,9 @@ export default function MyVisits() {
       if (error) throw error;
       loadVisits();
     } catch (error) {
-      console.error('Error cancelling visit:', error);
+      logger.error('Failed to cancel visit', error instanceof Error ? error : undefined, {
+        visitId
+      });
       alert('Erreur lors de l\'annulation de la visite');
     }
   };
@@ -143,7 +145,10 @@ export default function MyVisits() {
       setShowFeedbackModal(false);
       loadVisits();
     } catch (error) {
-      console.error('Error submitting feedback:', error);
+      logger.error('Failed to submit feedback', error instanceof Error ? error : undefined, {
+        visitId: selectedVisit.id,
+        rating
+      });
       alert('Erreur lors de l\'envoi du feedback');
     } finally {
       setSubmittingFeedback(false);
@@ -151,23 +156,9 @@ export default function MyVisits() {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles: Record<string, string> = {
-      en_attente: 'bg-yellow-100 text-yellow-800',
-      confirmee: 'bg-green-100 text-green-800',
-      annulee: 'bg-red-100 text-red-800',
-      terminee: 'bg-blue-100 text-blue-800'
-    };
-
-    const labels: Record<string, string> = {
-      en_attente: 'En attente',
-      confirmee: 'Confirmée',
-      annulee: 'Annulée',
-      terminee: 'Terminée'
-    };
-
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${styles[status] || 'bg-gray-100 text-gray-800'}`}>
-        {labels[status] || status}
+      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+        {statusLabels[status] || status}
       </span>
     );
   };
