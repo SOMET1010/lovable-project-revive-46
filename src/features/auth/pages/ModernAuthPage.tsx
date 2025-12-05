@@ -137,14 +137,12 @@ export default function ModernAuthPage() {
         throw new Error(data.error);
       }
 
-      if (data?.action === 'login') {
-        // Existing user - use magic link
+      if (data?.sessionUrl) {
+        // Connexion automatique via magic link
+        setSuccess(data.isNewUser ? 'Compte créé ! Connexion en cours...' : 'Connexion en cours...');
         window.location.href = data.sessionUrl;
       } else {
-        // New user - show registration form
-        setSuccess('Téléphone vérifié ! Complétez votre inscription.');
-        setTab('register');
-        setRegPhone(phoneNumber);
+        throw new Error('Erreur de connexion - réessayez');
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Code invalide ou expiré';
