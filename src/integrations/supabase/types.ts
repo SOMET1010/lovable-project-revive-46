@@ -1380,6 +1380,42 @@ export type Database = {
           },
         ]
       }
+      webhook_logs: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          id: string
+          payload: Json | null
+          processing_result: string
+          signature_provided: string | null
+          signature_valid: boolean | null
+          source_ip: string | null
+          webhook_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          processing_result: string
+          signature_provided?: string | null
+          signature_valid?: boolean | null
+          source_ip?: string | null
+          webhook_type: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          payload?: Json | null
+          processing_result?: string
+          signature_provided?: string | null
+          signature_valid?: boolean | null
+          source_ip?: string | null
+          webhook_type?: string
+        }
+        Relationships: []
+      }
       whatsapp_logs: {
         Row: {
           created_at: string | null
@@ -1419,6 +1455,7 @@ export type Database = {
     }
     Functions: {
       cleanup_expired_verification_codes: { Args: never; Returns: number }
+      cleanup_old_webhook_logs: { Args: never; Returns: number }
       generate_otp: { Args: never; Returns: string }
       get_platform_stats: { Args: never; Returns: Json }
       get_public_profile: {
@@ -1461,6 +1498,15 @@ export type Database = {
       increment_property_views: {
         Args: { property_id: string }
         Returns: undefined
+      }
+      insert_audit_log: {
+        Args: {
+          p_action: string
+          p_details?: Json
+          p_entity_id?: string
+          p_entity_type: string
+        }
+        Returns: string
       }
       log_admin_action: {
         Args: {

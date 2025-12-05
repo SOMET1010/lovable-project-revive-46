@@ -111,9 +111,11 @@ export interface WebhookLogEntry {
 
 /**
  * Enregistre une tentative de webhook dans les logs
+ * Utilise any pour le client Supabase car les edge functions n'ont pas de types stricts
  */
+// deno-lint-ignore no-explicit-any
 export async function logWebhookAttempt(
-  supabase: { from: (table: string) => { insert: (data: WebhookLogEntry) => Promise<{ error: Error | null }> } },
+  supabase: any,
   entry: WebhookLogEntry
 ): Promise<void> {
   try {
