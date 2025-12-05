@@ -1,21 +1,17 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import edgeLogger from '../_shared/logger.ts';
+import type { 
+  SignatureRequest, 
+  LeaseSignatureUpdate,
+  CryptoNeoSignResult,
+  CryptoNeoCertificateResult
+} from '../_shared/types/verification.types.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
-
-interface SignatureRequest {
-  action: 'request_certificate' | 'verify_otp' | 'sign_document' | 'get_certificate';
-  userId: string;
-  leaseId?: string;
-  documentUrl?: string;
-  otpCode?: string;
-  phoneNumber?: string;
-  email?: string;
-  fullName?: string;
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -41,14 +37,16 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    edgeLogger.info('CryptoNeo signature request', { action, userId });
+
     const apiKeys = await supabaseClient.rpc('get_api_keys', { service: 'cryptoneo' });
 
     if (!apiKeys.data || !apiKeys.data.api_key || !apiKeys.data.api_url) {
       throw new Error('CryptoNeo API not configured');
     }
 
-    const cryptoneoApiUrl = apiKeys.data.api_url;
-    const cryptoneoApiKey = apiKeys.data.api_key;
+    const cryptoneoApiUrl = apiKeys.data.api_url as string;
+    const cryptoneoApiKey = apiKeys.data.api_key as string;
 
     switch (action) {
       case 'request_certificate': {
@@ -82,7 +80,7 @@ Deno.serve(async (req: Request) => {
           throw new Error(error.message || 'Certificate request failed');
         }
 
-        const result = await response.json();
+        const result = await response.json() as CryptoNeoCertificateResult;
 
         await supabaseClient
           .from('digital_certificates')
@@ -100,6 +98,8 @@ Deno.serve(async (req: Request) => {
           p_status: 'success',
           p_user_id: userId
         });
+
+        edgeLogger.info('Certificate requested successfully', { userId, certificateId: result.certificate_id });
 
         return new Response(
           JSON.stringify({
@@ -139,7 +139,7 @@ Deno.serve(async (req: Request) => {
           throw new Error(error.message || 'OTP verification failed');
         }
 
-        const result = await response.json();
+        const result = await response.json() as { verified: boolean };
 
         const { data: lease } = await supabaseClient
           .from('leases')
@@ -166,6 +166,8 @@ Deno.serve(async (req: Request) => {
               metadata: { verified_at: new Date().toISOString() }
             });
         }
+
+        edgeLogger.info('OTP verified successfully', { userId, leaseId });
 
         return new Response(
           JSON.stringify({
@@ -224,7 +226,7 @@ Deno.serve(async (req: Request) => {
           throw new Error(error.message || 'Document signing failed');
         }
 
-        const result = await response.json();
+        const result = await response.json() as CryptoNeoSignResult;
 
         const { data: lease } = await supabaseClient
           .from('leases')
@@ -236,7 +238,7 @@ Deno.serve(async (req: Request) => {
           const isLandlord = lease.landlord_id === userId;
           const isTenant = lease.tenant_id === userId;
 
-          const updates: any = {
+          const updates: LeaseSignatureUpdate = {
             signature_timestamp: result.timestamp,
             signed_pdf_url: result.signed_document_url
           };
@@ -280,6 +282,8 @@ Deno.serve(async (req: Request) => {
           p_user_id: userId
         });
 
+        edgeLogger.info('Document signed successfully', { userId, leaseId, signatureId: result.signature_id });
+
         return new Response(
           JSON.stringify({
             success: true,
@@ -314,8 +318,9 @@ Deno.serve(async (req: Request) => {
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
     }
-  } catch (error: any) {
-    console.error('CryptoNeo signature error:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    edgeLogger.error('CryptoNeo signature error', error instanceof Error ? error : undefined, { errorMessage });
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -326,11 +331,11 @@ Deno.serve(async (req: Request) => {
       p_service_name: 'cryptoneo',
       p_action: 'error',
       p_status: 'error',
-      p_error_message: error.message
+      p_error_message: errorMessage
     });
 
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

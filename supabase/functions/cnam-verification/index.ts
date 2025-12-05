@@ -1,18 +1,12 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import edgeLogger from '../_shared/logger.ts';
+import type { CNAMRequest, CNAMVerificationResult } from '../_shared/types/verification.types.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
-
-interface CNAMRequest {
-  verificationId: string;
-  cnamNumber: string;
-  firstName: string;
-  lastName: string;
-  userId: string;
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -42,6 +36,8 @@ Deno.serve(async (req: Request) => {
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    edgeLogger.info('CNAM verification started', { verificationId, userId });
 
     const apiKeys = await supabaseClient.rpc('get_api_keys', { service: 'cnam' });
 
@@ -91,7 +87,7 @@ Deno.serve(async (req: Request) => {
       throw new Error(error.message || 'CNAM verification failed');
     }
 
-    const result = await response.json();
+    const result = await response.json() as CNAMVerificationResult;
     const isVerified = result.verified === true || result.status === 'active';
 
     await supabaseClient
@@ -114,6 +110,12 @@ Deno.serve(async (req: Request) => {
       p_user_id: userId
     });
 
+    edgeLogger.info('CNAM verification completed', { 
+      verificationId, 
+      userId, 
+      isVerified 
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -129,8 +131,9 @@ Deno.serve(async (req: Request) => {
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
-  } catch (error: any) {
-    console.error('CNAM verification error:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    edgeLogger.error('CNAM verification error', error instanceof Error ? error : undefined, { errorMessage });
 
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -141,11 +144,11 @@ Deno.serve(async (req: Request) => {
       p_service_name: 'cnam',
       p_action: 'verify_cnam',
       p_status: 'error',
-      p_error_message: error.message
+      p_error_message: errorMessage
     });
 
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
