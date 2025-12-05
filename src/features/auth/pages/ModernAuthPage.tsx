@@ -160,6 +160,18 @@ export default function ModernAuthPage() {
         return;
       }
 
+      // Handle account not found - offer to switch to registration
+      if (data?.accountNotFound) {
+        setError('');
+        setSuccess('');
+        // Show friendly message and switch to register tab
+        setMainTab('register');
+        setAuthMethod('phone');
+        setPhoneStep('enter');
+        setError('Aucun compte trouvé avec ce numéro. Créez un compte pour continuer.');
+        return;
+      }
+
       if (data?.error) {
         throw new Error(data.error);
       }
