@@ -532,15 +532,17 @@ export default function HomePage() {
         <div className="absolute top-0 right-0 w-full h-full opacity-30 bg-[url('/images/pattern-topo.svg')] bg-cover" />
         
         <div className="container mx-auto px-4 relative z-10">
-          <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-[0_40px_80px_-20px_rgba(44,24,16,0.15)] max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-[0_40px_80px_-20px_rgba(44,24,16,0.15)] max-w-4xl mx-auto">
             
-            {/* Texte & Form */}
-            <div className={`transition-all duration-700 ${ctaVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'}`}>
-              <span className="text-[#F16522] font-bold tracking-widest text-xs uppercase mb-2 block">Accompagnement VIP</span>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#2C1810] mb-6">Vous cherchez ? <br/>On trouve pour vous.</h2>
-              <p className="text-[#6B5A4E] mb-8 text-lg">Confiez votre recherche à nos chasseurs immobiliers. Service 100% gratuit pour les locataires.</p>
+            {/* Texte & Form - Centré */}
+            <div className={`transition-all duration-700 ${ctaVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+              <div className="text-center mb-8">
+                <span className="text-[#F16522] font-bold tracking-widest text-xs uppercase mb-2 block">Accompagnement VIP</span>
+                <h2 className="text-3xl md:text-4xl font-bold text-[#2C1810] mb-4">Vous cherchez ? On trouve pour vous.</h2>
+                <p className="text-[#6B5A4E] text-lg max-w-xl mx-auto">Confiez votre recherche à nos chasseurs immobiliers. Service 100% gratuit pour les locataires.</p>
+              </div>
               
-              <div className="flex gap-4 mb-8">
+              <div className="flex justify-center gap-4 mb-8">
                  <button onClick={() => setActiveCtaTab('chat')} className={`px-6 py-3 rounded-full font-bold text-sm transition-all ${activeCtaTab === 'chat' ? 'bg-[#2C1810] text-white shadow-lg' : 'bg-[#FAF7F4] text-[#A69B95] hover:bg-[#EFEBE9]'}`}>
                    Chat Direct
                  </button>
@@ -549,14 +551,14 @@ export default function HomePage() {
                  </button>
               </div>
 
-              <div className="bg-[#FAF7F4] rounded-[20px] p-1 border border-[#EFEBE9] h-[400px]">
+              <div className="bg-[#FAF7F4] rounded-[20px] p-1 border border-[#EFEBE9] h-[450px] max-w-2xl mx-auto">
                  {activeCtaTab === 'chat' ? (
                    <SUTAChatWidget className="h-full w-full rounded-[16px]" />
                  ) : (
-                   <div className="h-full flex flex-col justify-center p-6">
+                   <div className="h-full flex flex-col justify-center p-8">
                      {isFormSubmitted ? (
                        <div className="text-center animate-in zoom-in">
-                         <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle className="w-8 h-8" /></div>
+                         <div className="w-16 h-16 bg-[#F16522]/10 text-[#F16522] rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle className="w-8 h-8" /></div>
                          <h3 className="font-bold text-xl text-[#2C1810]">Reçu 5/5 !</h3>
                          <p className="text-[#6B5A4E]">Un expert vous appelle très vite.</p>
                        </div>
@@ -574,7 +576,7 @@ export default function HomePage() {
                            <MessageSquare className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95]" />
                            <textarea placeholder="Votre projet en quelques mots..." rows={3} className="w-full pl-12 pr-4 py-3 rounded-xl border border-[#EFEBE9] focus:border-[#F16522] focus:ring-[#F16522] bg-white resize-none text-[#2C1810]" value={formData.project} onChange={e => setFormData({...formData, project: e.target.value})} />
                          </div>
-                         <Button type="submit" disabled={isFormSubmitting} className="w-full bg-[#2C1810] hover:bg-[#3A2D25] text-white py-4 rounded-xl font-bold shadow-md flex items-center justify-center gap-2">
+                         <Button type="submit" disabled={isFormSubmitting} className="w-full bg-[#F16522] hover:bg-[#d95a1d] text-white py-4 rounded-xl font-bold shadow-lg shadow-[#F16522]/20 flex items-center justify-center gap-2">
                            {isFormSubmitting ? 'Envoi en cours...' : <><Send className="w-5 h-5" /> Envoyer ma demande</>}
                          </Button>
                        </form>
@@ -582,23 +584,19 @@ export default function HomePage() {
                    </div>
                  )}
               </div>
-            </div>
 
-            {/* Image */}
-            <div className={`hidden lg:block relative h-full min-h-[500px] transition-all duration-700 ease-out delay-200 ${ctaVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'}`}>
-               <div className="absolute inset-0 bg-[#2C1810] rounded-[32px] transform rotate-3 opacity-10"></div>
-               <img src="/images/hero-controle-acces.jpg" alt="Agent Mon Toit" className="w-full h-full object-cover rounded-[32px] shadow-[0_32px_64px_rgba(44,24,16,0.2)] relative z-10" loading="lazy" />
-               
-               {/* Badge Flottant */}
-               <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-2xl shadow-[0_16px_32px_rgba(44,24,16,0.15)] flex items-center gap-4 z-20 animate-bounce-slow">
-                 <div className="w-12 h-12 rounded-full bg-[#F16522]/10 flex items-center justify-center">
-                   <Award className="w-6 h-6 text-[#F16522]" />
-                 </div>
-                 <div>
-                   <p className="font-bold text-[#2C1810]">Agents Certifiés</p>
-                   <p className="text-xs text-[#6B5A4E]">Formation continue</p>
-                 </div>
-               </div>
+              {/* Badge en dessous */}
+              <div className="flex justify-center mt-8">
+                <div className="inline-flex items-center gap-3 px-6 py-3 bg-[#FAF7F4] rounded-full border border-[#EFEBE9]">
+                  <div className="w-10 h-10 rounded-full bg-[#F16522]/10 flex items-center justify-center">
+                    <Award className="w-5 h-5 text-[#F16522]" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#2C1810] text-sm">Agents Certifiés</p>
+                    <p className="text-xs text-[#6B5A4E]">Service 100% gratuit</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>
