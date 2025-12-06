@@ -291,6 +291,16 @@ export default function OwnerDashboardPage() {
                   Ajouter un bien
                 </Link>
                 <Link 
+                  to="/dashboard/candidatures"
+                  className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <Users className="h-5 w-5 mr-2" />
+                  Candidatures
+                  {stats.pendingApplications > 0 && (
+                    <span className="ml-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">{stats.pendingApplications}</span>
+                  )}
+                </Link>
+                <Link 
                   to="/dashboard/mes-contrats"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
@@ -312,13 +322,16 @@ export default function OwnerDashboardPage() {
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Alertes</h3>
               <div className="space-y-3">
                 {stats.pendingApplications > 0 && (
-                  <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                  <Link 
+                    to="/dashboard/candidatures"
+                    className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3 hover:border-amber-400 transition-colors"
+                  >
                     <Users className="h-5 w-5 text-amber-600" />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-[#2C1810]">Candidatures en attente</p>
                       <p className="text-2xl font-bold text-amber-600">{stats.pendingApplications}</p>
                     </div>
-                  </div>
+                  </Link>
                 )}
                 {stats.maintenanceRequests > 0 && (
                   <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
