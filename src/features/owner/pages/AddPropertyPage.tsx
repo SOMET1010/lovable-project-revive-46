@@ -70,7 +70,8 @@ const STEPS = [
 export default function AddProperty() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
+const [step, setStep] = useState(1);
+  const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -354,9 +355,10 @@ export default function AddProperty() {
     }
   };
 
-  // Navigation between steps
+  // Navigation between steps with directional animation
   const goToStep = (targetStep: number) => {
     if (targetStep >= 1 && targetStep <= 3) {
+      setSlideDirection(targetStep > step ? 'forward' : 'backward');
       setStep(targetStep);
     }
   };
@@ -513,7 +515,7 @@ export default function AddProperty() {
           
           {/* STEP 1: Photos & Infos générales */}
           {step === 1 && (
-            <div className="space-y-6 animate-fade-in">
+          <div key={`step-1-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
               {/* Photos Section */}
               <div className="bg-white p-6 rounded-2xl border shadow-sm" style={{ borderColor: 'var(--color-border)' }}>
                 <div className="flex items-center gap-2 mb-4">
@@ -725,7 +727,7 @@ export default function AddProperty() {
 
           {/* STEP 2: Localisation */}
           {step === 2 && (
-            <div className="space-y-6 animate-fade-in">
+          <div key={`step-2-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
               <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
@@ -824,7 +826,7 @@ export default function AddProperty() {
 
           {/* STEP 3: Tarification & Équipements */}
           {step === 3 && (
-            <div className="space-y-6 animate-fade-in">
+            <div key={`step-3-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
               {/* Pricing */}
               <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
                 <div className="flex items-center gap-2 mb-2">
