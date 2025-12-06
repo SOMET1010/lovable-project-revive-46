@@ -14,6 +14,7 @@ interface UseInfinitePropertiesOptions {
   minPrice?: string;
   maxPrice?: string;
   bedrooms?: string;
+  sortBy?: 'recent' | 'price_asc' | 'price_desc';
   pageSize?: number;
 }
 
@@ -31,7 +32,7 @@ interface UseInfinitePropertiesResult {
 const DEFAULT_PAGE_SIZE = 20;
 
 export function useInfiniteProperties(options: UseInfinitePropertiesOptions): UseInfinitePropertiesResult {
-  const { city, propertyType, minPrice, maxPrice, bedrooms, pageSize = DEFAULT_PAGE_SIZE } = options;
+  const { city, propertyType, minPrice, maxPrice, bedrooms, sortBy = 'recent', pageSize = DEFAULT_PAGE_SIZE } = options;
   
   const [properties, setProperties] = useState<PropertyWithScore[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,7 +42,7 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
   const [totalCount, setTotalCount] = useState(0);
   
   const pageRef = useRef(0);
-  const filtersRef = useRef({ city, propertyType, minPrice, maxPrice, bedrooms });
+  const filtersRef = useRef({ city, propertyType, minPrice, maxPrice, bedrooms, sortBy });
 
   const buildQuery = useCallback(() => {
     let query = supabase
@@ -120,8 +121,10 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
 
     try {
       const query = buildQuery();
+      const orderColumn = sortBy === 'price_asc' || sortBy === 'price_desc' ? 'monthly_rent' : 'created_at';
+      const ascending = sortBy === 'price_asc';
       const { data, error: queryError, count } = await query
-        .order('created_at', { ascending: false })
+        .order(orderColumn, { ascending })
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
       if (queryError) throw new Error(queryError.message);
@@ -147,7 +150,7 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [buildQuery, enrichWithOwnerData, pageSize]);
+  }, [buildQuery, enrichWithOwnerData, pageSize, sortBy]);
 
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
@@ -160,22 +163,23 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
     await fetchProperties(0, false);
   }, [fetchProperties]);
 
-  // Reset and refetch when filters change
+  // Reset and refetch when filters or sort change
   useEffect(() => {
     const filtersChanged = 
       filtersRef.current.city !== city ||
       filtersRef.current.propertyType !== propertyType ||
       filtersRef.current.minPrice !== minPrice ||
       filtersRef.current.maxPrice !== maxPrice ||
-      filtersRef.current.bedrooms !== bedrooms;
+      filtersRef.current.bedrooms !== bedrooms ||
+      filtersRef.current.sortBy !== sortBy;
 
     if (filtersChanged) {
-      filtersRef.current = { city, propertyType, minPrice, maxPrice, bedrooms };
+      filtersRef.current = { city, propertyType, minPrice, maxPrice, bedrooms, sortBy };
       pageRef.current = 0;
       setHasMore(true);
       fetchProperties(0, false);
     }
-  }, [city, propertyType, minPrice, maxPrice, bedrooms, fetchProperties]);
+  }, [city, propertyType, minPrice, maxPrice, bedrooms, sortBy, fetchProperties]);
 
   // Initial load
   useEffect(() => {
