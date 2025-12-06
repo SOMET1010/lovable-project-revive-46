@@ -443,19 +443,31 @@ export default function HomePage() {
                   />
                 ))}
 
-                {/* Indicateurs carousel */}
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+                {/* Indicateurs Stories avec animation de progression */}
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20 bg-black/20 backdrop-blur-sm rounded-full px-4 py-2.5">
                   {HERO_IMAGES.map((_, index) => (
                     <button
-                      key={index}
-                      onClick={() => setHeroImageIndex(index)}
-                      className={`transition-all duration-300 rounded-full ${
-                        index === heroImageIndex 
-                          ? 'w-8 h-2 bg-[#F16522]' 
-                          : 'w-2 h-2 bg-white/50 hover:bg-white/80'
-                      }`}
-                      aria-label={`Image ${index + 1}`}
-                    />
+                      key={`indicator-${index}-${heroImageIndex === index ? 'active' : 'inactive'}`}
+                      onClick={() => {
+                        setPrevHeroImageIndex(heroImageIndex);
+                        setHeroImageIndex(index);
+                      }}
+                      className="relative w-12 h-1.5 bg-white/30 rounded-full overflow-hidden group cursor-pointer"
+                      aria-label={`Voir image ${index + 1}`}
+                    >
+                      {/* Barre de progression animée */}
+                      <div 
+                        className={`absolute inset-y-0 left-0 bg-[#F16522] rounded-full ${
+                          index === heroImageIndex 
+                            ? 'animate-fill-progress' 
+                            : index < heroImageIndex 
+                              ? 'w-full' 
+                              : 'w-0'
+                        }`}
+                      />
+                      {/* Effet hover */}
+                      <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity rounded-full" />
+                    </button>
                   ))}
                 </div>
 
