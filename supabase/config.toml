@@ -29,3 +29,12 @@ verify_jwt = false
 
 [functions.intouch-sms]
 verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false
+
+[functions.send-lease-notifications]
+verify_jwt = false
+
+[functions.check-lease-expirations]
+verify_jwt = false
