@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Loader, CheckCircle, AlertCircle, Send, RefreshCw } from 'lucide-react';
 import OTPInput from '@/shared/components/modern/OTPInput';
+import { useConfetti } from '@/shared/hooks/useConfetti';
 
 interface CryptoNeoSignatureProps {
   leaseId: string;
@@ -25,6 +26,7 @@ export default function CryptoNeoSignature({
   const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [expiresIn, setExpiresIn] = useState(300);
+  const { triggerCertifiedSignatureConfetti } = useConfetti();
 
   // Countdown timer for resend
   useEffect(() => {
@@ -91,6 +93,7 @@ export default function CryptoNeoSignature({
 
       if (data.success) {
         setStep('success');
+        triggerCertifiedSignatureConfetti();
         onSuccess(data.signedDocumentUrl || '');
       } else {
         throw new Error(data.error || 'Échec de la signature');
@@ -213,12 +216,16 @@ export default function CryptoNeoSignature({
 
       {/* Step: Success */}
       {step === 'success' && (
-        <div className="text-center py-8">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="w-10 h-10 text-green-600" />
+        <div className="text-center py-8 animate-fade-in">
+          <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg animate-scale-in">
+            <CheckCircle className="w-12 h-12 text-green-600" />
           </div>
-          <h4 className="text-xl font-bold text-green-700 mb-2">Signature réussie!</h4>
-          <p className="text-green-600">Votre document a été signé et certifié avec succès.</p>
+          <h4 className="text-2xl font-bold text-green-700 mb-2">🎉 Signature réussie!</h4>
+          <p className="text-green-600 mb-4">Votre document a été signé et certifié avec succès.</p>
+          <div className="inline-flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full border border-green-200">
+            <Shield className="w-5 h-5 text-green-600" />
+            <span className="text-green-700 font-medium">Certifié CryptoNeo</span>
+          </div>
         </div>
       )}
 
