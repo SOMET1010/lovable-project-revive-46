@@ -16,7 +16,8 @@ import {
   ArrowUpDown,
   Banknote,
   Loader2,
-  Filter
+  Filter,
+  Bookmark
 } from 'lucide-react';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapboxMap from '@/shared/ui/MapboxMap';
@@ -24,6 +25,9 @@ import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 import InfiniteScroll from '@/shared/components/InfiniteScroll';
 import { useInfiniteProperties } from '../hooks/useInfiniteProperties';
 import { useAvailableCities } from '../hooks/useAvailableCities';
+import { useSaveSearch } from '../hooks/useSaveSearch';
+import { useAuth } from '@/app/providers/AuthProvider';
+import SaveSearchDialog from '../components/SaveSearchDialog';
 
 // Premium Ivorian Color Palette
 const COLORS = {
@@ -43,6 +47,7 @@ export default function SearchPropertiesPage() {
   // State for view mode
   const [activeView, setActiveView] = useState<'list' | 'map'>('list');
   const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   // Search filters from URL
   const [city, setCity] = useState(searchParams.get('city') || '');
@@ -63,6 +68,10 @@ export default function SearchPropertiesPage() {
 
   // Available cities and types with counts
   const { cities: availableCities, propertyTypes: availableTypes } = useAvailableCities();
+
+  // Save search hook
+  const { saveSearch, isAuthenticated } = useSaveSearch();
+  const { user: _user } = useAuth();
 
   // Infinite scroll hook with sorting
   const {
@@ -132,6 +141,25 @@ export default function SearchPropertiesPage() {
   const formatPrice = (price: number | null) => {
     if (!price) return 'Prix sur demande';
     return new Intl.NumberFormat('fr-FR').format(price);
+  };
+
+  const handleSaveSearch = () => {
+    if (!isAuthenticated) {
+      navigate('/connexion?redirect=/recherche');
+      return;
+    }
+    setShowSaveDialog(true);
+  };
+
+  const handleSaveSearchSubmit = async (name: string, enableNotifications: boolean) => {
+    const filters = {
+      city: appliedFilters.city || undefined,
+      property_type: appliedFilters.propertyType || undefined,
+      min_price: appliedFilters.minPrice ? parseInt(appliedFilters.minPrice) : undefined,
+      max_price: appliedFilters.maxPrice ? parseInt(appliedFilters.maxPrice) : undefined,
+      min_bedrooms: appliedFilters.bedrooms ? parseInt(appliedFilters.bedrooms) : undefined,
+    };
+    await saveSearch(name, filters, enableNotifications);
   };
 
   const activeFiltersCount = [
@@ -302,11 +330,21 @@ export default function SearchPropertiesPage() {
                 </button>
               ))}
 
+              {/* Bouton Sauvegarder */}
+              <button
+                type="button"
+                onClick={handleSaveSearch}
+                className="flex items-center gap-2 border border-white/10 rounded-full h-9 px-4 text-xs hover:bg-white/10 transition-colors ml-auto"
+                style={{ color: COLORS.sable }}
+              >
+                <Bookmark className="w-3 h-3" /> Sauvegarder
+              </button>
+
               {activeFiltersCount > 0 && (
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="flex items-center gap-1.5 text-xs font-medium hover:text-white transition-colors ml-auto"
+                  className="flex items-center gap-1.5 text-xs font-medium hover:text-white transition-colors"
                   style={{ color: COLORS.orange }}
                 >
                   <X className="w-3 h-3" />
@@ -773,6 +811,14 @@ export default function SearchPropertiesPage() {
           </div>
         )}
       </main>
+
+      {/* Save Search Dialog */}
+      <SaveSearchDialog
+        isOpen={showSaveDialog}
+        onClose={() => setShowSaveDialog(false)}
+        onSave={handleSaveSearchSubmit}
+        currentFilters={appliedFilters}
+      />
     </div>
   );
 }
