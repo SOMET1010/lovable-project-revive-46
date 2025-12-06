@@ -35,6 +35,20 @@ interface MapboxMapProps {
   singleMarker?: boolean;
 }
 
+// Coordonnées par défaut des villes ivoiriennes pour fallback
+const CITY_CENTER_COORDS: Record<string, [number, number]> = {
+  'Abidjan': [-4.0083, 5.3600],
+  'Cocody': [-3.9878, 5.3545],
+  'Plateau': [-4.0213, 5.3235],
+  'Marcory': [-3.9989, 5.3010],
+  'Riviera': [-3.9700, 5.3600],
+  'Yopougon': [-4.0856, 5.3194],
+  'Bouaké': [-5.0306, 7.6936],
+  'Yamoussoukro': [-5.2767, 6.8277],
+  'Grand-Bassam': [-3.7400, 5.2100],
+  'Bingerville': [-3.8883, 5.3536],
+};
+
 export default function MapboxMap({
   center = [-4.0083, 5.3600],
   zoom = 12,
@@ -52,6 +66,26 @@ export default function MapboxMap({
   onMarkerDrag,
   singleMarker = false,
 }: MapboxMapProps) {
+  
+  // Filtrer les propriétés avec coordonnées valides et ajouter fallback
+  const validProperties = properties.map(p => {
+    // Si la propriété a des coordonnées valides, les utiliser
+    if (p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0) {
+      return p;
+    }
+    // Sinon, essayer de récupérer les coordonnées de la ville
+    const cityCoords = p.city ? CITY_CENTER_COORDS[p.city] : null;
+    if (cityCoords) {
+      // Ajouter un léger décalage aléatoire pour éviter les superpositions
+      const jitter = () => (Math.random() - 0.5) * 0.01;
+      return {
+        ...p,
+        longitude: cityCoords[0] + jitter(),
+        latitude: cityCoords[1] + jitter(),
+      };
+    }
+    return p;
+  }).filter(p => p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
@@ -128,10 +162,10 @@ export default function MapboxMap({
     Object.values(markers.current).forEach((marker) => marker.remove());
     markers.current = {};
 
-    if (properties.length === 0) return;
+    if (validProperties.length === 0) return;
 
-    if (singleMarker && properties.length > 0) {
-      const property = properties[0];
+    if (singleMarker && validProperties.length > 0) {
+      const property = validProperties[0];
       if (!property) return;
       
       const color = getMarkerColor(property);
@@ -154,7 +188,7 @@ export default function MapboxMap({
       markers.current[property.id] = marker;
       map.current?.setCenter([property.longitude, property.latitude]);
     } else {
-      properties.forEach((property) => {
+      validProperties.forEach((property) => {
         const color = getMarkerColor(property);
 
         const el = document.createElement('div');
@@ -231,9 +265,9 @@ export default function MapboxMap({
         markers.current[property.id] = marker;
       });
 
-      if (fitBounds && properties.length > 0) {
+      if (fitBounds && validProperties.length > 0) {
         const bounds = new mapboxgl.LngLatBounds();
-        properties.forEach((property) => {
+        validProperties.forEach((property) => {
           bounds.extend([property.longitude, property.latitude]);
         });
         map.current?.fitBounds(bounds, {
@@ -243,8 +277,8 @@ export default function MapboxMap({
       }
     }
 
-    if (showRadius && properties.length > 0 && map.current) {
-      const property = properties[0];
+    if (showRadius && validProperties.length > 0 && map.current) {
+      const property = validProperties[0];
       if (!property) return;
       
       const radiusInMeters = radiusKm * 1000;

@@ -178,39 +178,41 @@ export default function SearchPropertiesPage() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: COLORS.creme }}>
       
-      {/* ==================== HEADER CHOCOLAT ==================== */}
+      {/* ==================== HEADER AVEC DÉGRADÉ ALLÉGÉ ==================== */}
       <header 
-        className="relative overflow-hidden pb-12 pt-24 md:pt-28 px-4"
-        style={{ backgroundColor: COLORS.chocolat }}
+        className="relative overflow-hidden pb-8 pt-20 md:pt-24 px-4"
+        style={{ 
+          background: `linear-gradient(to bottom, ${COLORS.chocolat} 0%, #3D2518 100%)` 
+        }}
       >
-        {/* Texture de fond subtile */}
+        {/* Texture de fond subtile plus légère */}
         <div 
-          className="absolute inset-0 opacity-5 pointer-events-none"
+          className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}
         />
         
+        {/* Lueur d'ambiance orange */}
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#F16522]/5 rounded-full blur-[100px] pointer-events-none" />
+        
         <div className="relative z-10 max-w-7xl mx-auto">
           {/* Breadcrumb */}
-          <div className="mb-6">
+          <div className="mb-4">
             <Breadcrumb 
               items={[{ label: 'Recherche' }]} 
               className="text-white/60"
             />
           </div>
 
-          {/* Header Content */}
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
+          {/* Header Content - Plus compact */}
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
             <div>
-              <div className="flex items-center gap-2 mb-2" style={{ color: COLORS.orange }}>
+              <div className="flex items-center gap-2 mb-1" style={{ color: COLORS.orange }}>
                 <Search className="w-4 h-4" />
                 <span className="text-xs font-bold uppercase tracking-widest">Moteur de recherche</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Trouver un bien</h1>
-              <p className="mt-1" style={{ color: `${COLORS.sable}CC` }}>
-                Explorez notre sélection certifiée en Côte d'Ivoire
-              </p>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">Trouver un bien</h1>
             </div>
             
             {!loading && (
@@ -307,28 +309,31 @@ export default function SearchPropertiesPage() {
               </div>
             </div>
 
-            {/* Filtres Avancés & Tags Rapides */}
-            <div className="flex flex-wrap gap-4 mt-6 items-center">
+            {/* Filtres Avancés & Tags Rapides - Conteneur unifié */}
+            <div className="flex flex-wrap gap-3 mt-4 items-center">
               <button
                 type="button"
-                className="flex items-center gap-2 border border-white/10 rounded-full h-9 px-4 text-xs hover:bg-white/10 transition-colors"
+                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full h-8 px-4 text-xs font-medium hover:bg-white/20 transition-all"
                 style={{ color: COLORS.sable }}
               >
                 <SlidersHorizontal className="w-3 h-3" /> Plus de filtres
               </button>
               
-              <div className="h-4 w-px bg-white/10 hidden md:block" />
+              <div className="h-4 w-px bg-white/20 hidden md:block" />
 
-              {quickFilters.map(tag => (
-                <button 
-                  key={tag} 
-                  type="button"
-                  className="text-xs border border-white/10 rounded-full px-3 py-1.5 bg-white/5 hover:text-white transition-colors"
-                  style={{ color: `${COLORS.sable}B3` }}
-                >
-                  {tag}
-                </button>
-              ))}
+              {/* Tags dans un conteneur unifié */}
+              <div className="flex flex-wrap gap-2 bg-white/5 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/10">
+                {quickFilters.map(tag => (
+                  <button 
+                    key={tag} 
+                    type="button"
+                    className="text-xs rounded-full px-3 py-1 hover:bg-white/20 hover:text-white transition-all font-medium"
+                    style={{ color: COLORS.sable }}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
 
               {/* Bouton Sauvegarder */}
               <button
@@ -357,10 +362,10 @@ export default function SearchPropertiesPage() {
       </header>
 
       {/* ==================== CONTENU PRINCIPAL ==================== */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-6">
         
-        {/* Barre d'outils (Tri & Vue) */}
-        <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+        {/* Barre d'outils (Tri & Vue) - Espacement réduit */}
+        <div className="flex flex-wrap justify-between items-center gap-4 mb-5">
           <div className="flex items-center gap-2 text-sm" style={{ color: COLORS.grisTexte }}>
             <span className="font-bold" style={{ color: COLORS.chocolat }}>{totalCount}</span> résultats trouvés
           </div>
@@ -381,15 +386,15 @@ export default function SearchPropertiesPage() {
               <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: COLORS.grisNeutre }} />
             </div>
 
-            {/* Toggle Vue */}
+            {/* Toggle Vue - Amélioré avec labels */}
             <div 
-              className="bg-white border rounded-full p-1 flex items-center"
+              className="bg-white border rounded-full p-1.5 flex items-center gap-1"
               style={{ borderColor: COLORS.border }}
             >
               <button 
                 type="button"
                 onClick={() => setActiveView('list')}
-                className={`p-2 rounded-full transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full transition-all text-sm font-medium ${
                   activeView === 'list' 
                     ? 'text-white shadow-md' 
                     : 'hover:bg-gray-50'
@@ -400,11 +405,12 @@ export default function SearchPropertiesPage() {
                 }}
               >
                 <List className="w-4 h-4" />
+                <span className="hidden sm:inline">Liste</span>
               </button>
               <button 
                 type="button"
                 onClick={() => setActiveView('map')}
-                className={`p-2 rounded-full transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full transition-all text-sm font-medium ${
                   activeView === 'map' 
                     ? 'text-white shadow-md' 
                     : 'hover:bg-gray-50'
@@ -415,6 +421,7 @@ export default function SearchPropertiesPage() {
                 }}
               >
                 <MapIcon className="w-4 h-4" />
+                <span className="hidden sm:inline">Carte</span>
               </button>
             </div>
           </div>
