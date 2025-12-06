@@ -4,7 +4,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
   Users, Home, FileText, AlertTriangle, CheckCircle,
-  Activity, BarChart3,
+  Activity, BarChart3, Shield,
   ArrowUpRight, ArrowDownRight,
   AlertCircle, Info, DollarSign, UserPlus,
   RefreshCw, Download
@@ -160,10 +160,10 @@ export default function AdminDashboard() {
 
   if (!isAdmin || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-xl text-gray-600">Vérification des accès...</p>
+          <div className="w-16 h-16 border-4 border-[#F16522] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-xl text-[#6B5A4E]">Vérification des accès...</p>
         </div>
       </div>
     );
@@ -176,8 +176,8 @@ export default function AdminDashboard() {
       change: 12.5,
       changeType: 'increase',
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
+      color: 'text-[#F16522]',
+      bgColor: 'bg-[#FFF5F0]'
     },
     {
       title: 'Propriétés Totales',
@@ -194,8 +194,8 @@ export default function AdminDashboard() {
       change: -2.1,
       changeType: 'decrease',
       icon: FileText,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
+      color: 'text-[#2C1810]',
+      bgColor: 'bg-[#E8D4C5]/30'
     },
     {
       title: 'Revenus Mensuels',
@@ -203,8 +203,8 @@ export default function AdminDashboard() {
       change: 15.7,
       changeType: 'increase',
       icon: DollarSign,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50',
+      color: 'text-[#F16522]',
+      bgColor: 'bg-[#FFF5F0]',
       isFormatted: true
     },
     {
@@ -222,8 +222,8 @@ export default function AdminDashboard() {
       change: 0.1,
       changeType: 'increase',
       icon: Activity,
-      color: 'text-teal-600',
-      bgColor: 'bg-teal-50'
+      color: 'text-green-600',
+      bgColor: 'bg-green-50'
     },
     {
       title: 'Vérifications En Attente',
@@ -231,8 +231,8 @@ export default function AdminDashboard() {
       change: 5.8,
       changeType: 'increase',
       icon: CheckCircle,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50'
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-50'
     },
     {
       title: 'Nouveaux Comptes (24h)',
@@ -240,8 +240,8 @@ export default function AdminDashboard() {
       change: 23.1,
       changeType: 'increase',
       icon: UserPlus,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50'
+      color: 'text-[#F16522]',
+      bgColor: 'bg-[#FFF5F0]'
     }
   ];
 
@@ -257,185 +257,200 @@ export default function AdminDashboard() {
   const getAlertColor = (type: string) => {
     switch (type) {
       case 'error': return 'text-red-600 bg-red-50 border-red-200';
-      case 'warning': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      case 'warning': return 'text-amber-600 bg-amber-50 border-amber-200';
       case 'info': return 'text-blue-600 bg-blue-50 border-blue-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
+      default: return 'text-[#6B5A4E] bg-[#FAF7F4] border-[#EFEBE9]';
     }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Administrateur</h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Vue d'ensemble en temps réel de votre plateforme immobilière
-          </p>
-        </div>
-        <div className="flex items-center space-x-3">
-          <select
-            value={selectedTimeRange}
-            onChange={(e) => setSelectedTimeRange(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-          >
-            <option value="1h">Dernière heure</option>
-            <option value="24h">24 heures</option>
-            <option value="7d">7 jours</option>
-            <option value="30d">30 jours</option>
-          </select>
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-            <span>Actualiser</span>
-          </button>
-          <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-            <Download className="w-4 h-4" />
-            <span>Exporter</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {metricCards.map((card, index) => {
-          const Icon = card.icon;
-          const isPositive = card.changeType === 'increase';
-          const isNegative = card.changeType === 'decrease';
-          
-          return (
-            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-lg ${card.bgColor}`}>
-                  <Icon className={`w-6 h-6 ${card.color}`} />
-                </div>
-                <div className={`flex items-center space-x-1 text-sm font-medium ${
-                  isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-gray-600'
-                }`}>
-                  {isPositive ? (
-                    <ArrowUpRight className="w-4 h-4" />
-                  ) : isNegative ? (
-                    <ArrowDownRight className="w-4 h-4" />
-                  ) : null}
-                  <span>{Math.abs(card.change)}%</span>
-                </div>
+    <div className="min-h-screen bg-[#FAF7F4]">
+      {/* Header */}
+      <div className="bg-[#2C1810]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center">
+                <Shield className="h-7 w-7 text-white" />
               </div>
               <div>
-                <p className="text-sm text-gray-600 mb-1">{card.title}</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {card.isFormatted ? card.value : typeof card.value === 'number' ? card.value.toLocaleString('fr-FR') : card.value}
-                </p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Administration</h1>
+                <p className="text-[#E8D4C5] mt-1">Vue d'ensemble de la plateforme</p>
               </div>
             </div>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Performance Système</h2>
-              <div className="flex items-center space-x-4 text-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-gray-600">CPU</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-600">Mémoire</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
-                  <span className="text-gray-600">Réseau</span>
-                </div>
-              </div>
-            </div>
-            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-              <div className="text-center">
-                <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                <p className="text-gray-500">Graphique de performance en temps réel</p>
-                <p className="text-sm text-gray-400">CPU: 23% | Mémoire: 67% | Réseau: 145 Mbps</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Activité en Temps Réel</h2>
-              <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">
-                Voir tout
+            <div className="flex items-center gap-3">
+              <select
+                value={selectedTimeRange}
+                onChange={(e) => setSelectedTimeRange(e.target.value)}
+                className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-[#F16522]"
+              >
+                <option value="1h" className="text-[#2C1810]">Dernière heure</option>
+                <option value="24h" className="text-[#2C1810]">24 heures</option>
+                <option value="7d" className="text-[#2C1810]">7 jours</option>
+                <option value="30d" className="text-[#2C1810]">30 jours</option>
+              </select>
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="flex items-center gap-2 px-4 py-2 bg-[#F16522] text-white rounded-xl hover:bg-[#d9571d] transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Actualiser</span>
               </button>
-            </div>
-            <div className="space-y-4 max-h-80 overflow-y-auto">
-              {activities.length > 0 ? activities.map(activity => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                    <p className="text-xs text-gray-600">{activity.entity_type} • {activity.user_email || 'Système'}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {activity.created_at ? FormatService.formatRelativeTime(activity.created_at) : 'Récemment'}
-                    </p>
-                  </div>
-                </div>
-              )) : (
-                <div className="text-center py-8">
-                  <Activity className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500">Aucune activité récente</p>
-                </div>
-              )}
+              <button className="flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl hover:bg-white/20 transition-colors">
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Exporter</span>
+              </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Alertes Système</h2>
-              <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
-                {alerts.filter(a => !a.resolved).length} actifs
-              </span>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {metricCards.map((card, index) => {
+            const Icon = card.icon;
+            const isPositive = card.changeType === 'increase';
+            const isNegative = card.changeType === 'decrease';
+            
+            return (
+              <div key={index} className="bg-white rounded-[20px] border border-[#EFEBE9] p-6 hover:border-[#F16522] transition-colors">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-xl ${card.bgColor}`}>
+                    <Icon className={`w-6 h-6 ${card.color}`} />
+                  </div>
+                  <div className={`flex items-center gap-1 text-sm font-medium ${
+                    isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-[#6B5A4E]'
+                  }`}>
+                    {isPositive ? (
+                      <ArrowUpRight className="w-4 h-4" />
+                    ) : isNegative ? (
+                      <ArrowDownRight className="w-4 h-4" />
+                    ) : null}
+                    <span>{Math.abs(card.change)}%</span>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm text-[#6B5A4E] mb-1">{card.title}</p>
+                  <p className="text-2xl font-bold text-[#2C1810]">
+                    {card.isFormatted ? card.value : typeof card.value === 'number' ? card.value.toLocaleString('fr-FR') : card.value}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            {/* Performance Chart */}
+            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-[#2C1810]">Performance Système</h2>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-[#F16522] rounded-full"></div>
+                    <span className="text-[#6B5A4E]">CPU</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-[#6B5A4E]">Mémoire</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-[#2C1810] rounded-full"></div>
+                    <span className="text-[#6B5A4E]">Réseau</span>
+                  </div>
+                </div>
+              </div>
+              <div className="h-64 bg-[#FAF7F4] rounded-xl flex items-center justify-center">
+                <div className="text-center">
+                  <BarChart3 className="w-12 h-12 text-[#6B5A4E] mx-auto mb-2" />
+                  <p className="text-[#6B5A4E]">Graphique de performance en temps réel</p>
+                  <p className="text-sm text-[#6B5A4E]/70">CPU: 23% | Mémoire: 67% | Réseau: 145 Mbps</p>
+                </div>
+              </div>
             </div>
-            <div className="space-y-4">
-              {alerts.map(alert => {
-                const AlertIcon = getAlertIcon(alert.type);
-                return (
-                  <div key={alert.id} className={`p-4 rounded-lg border ${getAlertColor(alert.type)} ${alert.resolved ? 'opacity-60' : ''}`}>
-                    <div className="flex items-start space-x-3">
-                      <AlertIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{alert.title}</p>
-                        <p className="text-xs mt-1 opacity-80">{alert.message}</p>
-                        <p className="text-xs mt-2 opacity-60">
-                          {FormatService.formatRelativeTime(alert.timestamp)}
-                        </p>
-                      </div>
+
+            {/* Recent Activity */}
+            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-[#2C1810]">Activité en Temps Réel</h2>
+                <button className="text-[#F16522] hover:underline text-sm font-medium">
+                  Voir tout
+                </button>
+              </div>
+              <div className="space-y-4 max-h-80 overflow-y-auto">
+                {activities.length > 0 ? activities.map(activity => (
+                  <div key={activity.id} className="flex items-start gap-3 p-3 bg-[#FAF7F4] rounded-xl">
+                    <div className="w-2 h-2 bg-[#F16522] rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[#2C1810]">{activity.action}</p>
+                      <p className="text-xs text-[#6B5A4E]">{activity.entity_type} • {activity.user_email || 'Système'}</p>
+                      <p className="text-xs text-[#6B5A4E]/70 mt-1">
+                        {activity.created_at ? FormatService.formatRelativeTime(activity.created_at) : 'Récemment'}
+                      </p>
                     </div>
                   </div>
-                );
-              })}
+                )) : (
+                  <div className="text-center py-8">
+                    <Activity className="w-8 h-8 text-[#6B5A4E] mx-auto mb-2" />
+                    <p className="text-[#6B5A4E]">Aucune activité récente</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6">Actions Rapides</h2>
-            <div className="space-y-3">
-              {[
-                { name: 'Gérer Utilisateurs', icon: Users, href: '/admin/utilisateurs', color: 'bg-blue-50 text-blue-700' },
-                { name: 'Voir Propriétés', icon: Home, href: '/recherche', color: 'bg-green-50 text-green-700' },
-                { name: 'Gestion CEV', icon: CheckCircle, href: '/admin/cev-management', color: 'bg-purple-50 text-purple-700' },
-              ].map((action, index) => (
-                <Link
-                  key={index}
-                  to={action.href}
-                  className={`flex items-center space-x-3 p-3 rounded-lg ${action.color} hover:opacity-80 transition-opacity`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="font-medium">{action.name}</span>
-                </Link>
-              ))}
+          <div className="space-y-6">
+            {/* System Alerts */}
+            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-[#2C1810]">Alertes Système</h2>
+                <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
+                  {alerts.filter(a => !a.resolved).length} actifs
+                </span>
+              </div>
+              <div className="space-y-4">
+                {alerts.map(alert => {
+                  const AlertIcon = getAlertIcon(alert.type);
+                  return (
+                    <div key={alert.id} className={`p-4 rounded-xl border ${getAlertColor(alert.type)} ${alert.resolved ? 'opacity-60' : ''}`}>
+                      <div className="flex items-start gap-3">
+                        <AlertIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{alert.title}</p>
+                          <p className="text-xs mt-1 opacity-80">{alert.message}</p>
+                          <p className="text-xs mt-2 opacity-60">
+                            {FormatService.formatRelativeTime(alert.timestamp)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6">
+              <h2 className="text-lg font-bold text-[#2C1810] mb-6">Actions Rapides</h2>
+              <div className="space-y-3">
+                {[
+                  { name: 'Gérer Utilisateurs', icon: Users, href: '/admin/utilisateurs', color: 'bg-[#FFF5F0] text-[#F16522]' },
+                  { name: 'Voir Propriétés', icon: Home, href: '/recherche', color: 'bg-green-50 text-green-700' },
+                  { name: 'Gestion CEV', icon: CheckCircle, href: '/admin/cev-management', color: 'bg-[#E8D4C5]/30 text-[#2C1810]' },
+                ].map((action, index) => (
+                  <Link
+                    key={index}
+                    to={action.href}
+                    className={`flex items-center gap-3 p-3 rounded-xl ${action.color} hover:opacity-80 transition-opacity`}
+                  >
+                    <action.icon className="w-5 h-5" />
+                    <span className="font-medium">{action.name}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
           </div>
         </div>
