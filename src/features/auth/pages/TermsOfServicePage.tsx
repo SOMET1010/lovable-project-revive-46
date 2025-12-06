@@ -1,4 +1,4 @@
-import { FileText, Mail } from 'lucide-react';
+import { Mail, UserPlus, Search } from 'lucide-react';
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
 
@@ -128,8 +128,8 @@ export default function TermsOfServicePage() {
         title="Prêt à commencer ?"
         subtitle="Rejoignez des milliers d'utilisateurs qui font confiance à Mon Toit"
         buttons={[
-          { label: 'Créer un compte', href: '/inscription', icon: 'user-plus', variant: 'primary' },
-          { label: 'Voir les propriétés', href: '/recherche', icon: 'search', variant: 'secondary' }
+          { label: 'Créer un compte', href: '/inscription', icon: UserPlus, variant: 'primary' },
+          { label: 'Voir les propriétés', href: '/recherche', icon: Search, variant: 'secondary' }
         ]}
       />
     </div>
