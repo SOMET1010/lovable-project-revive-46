@@ -70,6 +70,7 @@ const PaymentHistory = lazyWithRetry(() => import('@/features/tenant/pages/Payme
 const AddProperty = lazyWithRetry(() => import('@/features/owner/pages/AddPropertyPage'));
 const OwnerDashboard = lazyWithRetry(() => import('@/features/owner/pages/DashboardPage'));
 const CreateContract = lazyWithRetry(() => import('@/features/owner/pages/CreateContractPage'));
+const OwnerContracts = lazyWithRetry(() => import('@/features/owner/pages/OwnerContractsPage'));
 
 // Agency pages
 const AgencyDashboard = lazyWithRetry(() => import('@/features/agency/pages/DashboardPage'));
@@ -186,6 +187,7 @@ export const routes: RouteObject[] = [
       { path: 'dashboard/ajouter-propriete', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence', 'owner', 'agent']}><AddProperty /></ProtectedRoute> },
       { path: 'add-property', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence', 'owner', 'agent']}><AddProperty /></ProtectedRoute> },
       { path: 'dashboard/creer-contrat', element: <ProtectedRoute allowedRoles={['proprietaire', 'owner']}><CreateContract /></ProtectedRoute> },
+      { path: 'dashboard/mes-contrats', element: <ProtectedRoute allowedRoles={['proprietaire', 'owner']}><OwnerContracts /></ProtectedRoute> },
 
       // Agency routes
       { path: 'dashboard/agence', element: <ProtectedRoute allowedRoles={['agence', 'agent']}><AgencyDashboard /></ProtectedRoute> },

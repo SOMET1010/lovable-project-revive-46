@@ -291,7 +291,7 @@ export default function OwnerDashboardPage() {
                   Ajouter un bien
                 </Link>
                 <Link 
-                  to="/mes-contrats"
+                  to="/dashboard/mes-contrats"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <FileText className="h-5 w-5 mr-2" />

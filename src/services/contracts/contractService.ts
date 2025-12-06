@@ -181,3 +181,79 @@ export async function downloadContract(documentUrl: string, filename: string): P
   
   URL.revokeObjectURL(url);
 }
+
+/**
+ * Supprime un contrat brouillon
+ */
+export async function deleteContract(leaseId: string): Promise<void> {
+  // Vérifier que le contrat est un brouillon
+  const { data: contract, error: fetchError } = await supabase
+    .from('lease_contracts')
+    .select('status, contract_number')
+    .eq('id', leaseId)
+    .single();
+
+  if (fetchError || !contract) {
+    throw new Error('Contrat introuvable');
+  }
+
+  if (contract.status !== 'brouillon') {
+    throw new Error('Seuls les brouillons peuvent être supprimés');
+  }
+
+  // Supprimer les fichiers du storage
+  const fileName = `contrat-${contract.contract_number.replace(/[^a-zA-Z0-9-]/g, '')}.pdf`;
+  const filePath = `${leaseId}/${fileName}`;
+  
+  await supabase.storage
+    .from('lease-documents')
+    .remove([filePath]);
+
+  // Supprimer le contrat
+  const { error: deleteError } = await supabase
+    .from('lease_contracts')
+    .delete()
+    .eq('id', leaseId);
+
+  if (deleteError) {
+    throw new Error(`Erreur lors de la suppression: ${deleteError.message}`);
+  }
+}
+
+/**
+ * Envoie un rappel de signature au locataire
+ */
+export async function sendSignatureReminder(leaseId: string, tenantId: string): Promise<void> {
+  // Créer une notification pour le locataire
+  const { error } = await supabase
+    .from('notifications')
+    .insert({
+      user_id: tenantId,
+      title: 'Rappel de signature',
+      message: 'Vous avez un contrat de bail en attente de votre signature.',
+      type: 'info',
+      action_url: `/signer-bail/${leaseId}`,
+      channel: 'in_app'
+    });
+
+  if (error) {
+    throw new Error(`Erreur lors de l'envoi du rappel: ${error.message}`);
+  }
+}
+
+/**
+ * Résilie un contrat actif
+ */
+export async function terminateContract(leaseId: string, _reason: string): Promise<void> {
+  const { error } = await supabase
+    .from('lease_contracts')
+    .update({ 
+      status: 'resilie',
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', leaseId);
+
+  if (error) {
+    throw new Error(`Erreur lors de la résiliation: ${error.message}`);
+  }
+}
