@@ -63,13 +63,13 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
 
   const uploadDocument = async (): Promise<VerificationResponse> => {
     const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
-    const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
+    const supabaseKey = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'];
 
     const response = await fetch(`${supabaseUrl}/functions/v1/neoface-verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Authorization': `Bearer ${supabaseKey}`,
       },
       body: JSON.stringify({
         action: 'upload_document',
@@ -91,13 +91,13 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     verifyId: string
   ): Promise<StatusResponse> => {
     const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
-    const supabaseAnonKey = import.meta.env['VITE_SUPABASE_ANON_KEY'];
+    const supabaseKey = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'];
 
     const response = await fetch(`${supabaseUrl}/functions/v1/neoface-verify`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseAnonKey}`,
+        'Authorization': `Bearer ${supabaseKey}`,
       },
       body: JSON.stringify({
         action: 'check_status',
@@ -245,35 +245,35 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Camera className="h-5 w-5 text-blue-600" />
-          Vérification Faciale NeoFace V2
+    <Card className="border-2 border-[#3C2A1E]/10 shadow-lg overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-[#3C2A1E] to-[#5D4037] text-white">
+        <CardTitle className="flex items-center gap-2 text-white">
+          <Camera className="h-5 w-5" />
+          Vérification Faciale NeoFace
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-white/80">
           Vérification biométrique gratuite avec détection de vivacité
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 p-6 bg-[#FDF6E3]">
         {cniPhotoUrl && status === 'idle' && (
           <div className="flex justify-center">
             <img
               src={cniPhotoUrl}
               alt="Photo CNI"
-              className="max-w-xs rounded-lg border-2 border-gray-200 shadow-sm"
+              className="max-w-xs rounded-xl border-2 border-[#3C2A1E]/20 shadow-md"
             />
           </div>
         )}
 
         {status !== 'idle' && status !== 'success' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-[#F16522]/10 border border-[#F16522]/30 rounded-xl p-4">
             <div className="flex items-center gap-3">
-              <Loader2 className="h-5 w-5 text-blue-600 animate-spin flex-shrink-0" />
+              <Loader2 className="h-5 w-5 text-[#F16522] animate-spin flex-shrink-0" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-blue-900">{progress}</p>
+                <p className="text-sm font-medium text-[#3C2A1E]">{progress}</p>
                 {attempts > 0 && (
-                  <p className="text-xs text-blue-600 mt-1">
+                  <p className="text-xs text-[#F16522] mt-1">
                     Tentative {attempts}
                   </p>
                 )}
@@ -283,7 +283,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         )}
 
         {status === 'waiting' && selfieUrl && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <div className="flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
@@ -295,7 +295,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
                   onClick={handleReopenWindow}
                   variant="outline"
                   size="small"
-                  className="mt-2"
+                  className="mt-2 border-[#F16522] text-[#F16522] hover:bg-[#F16522]/10"
                 >
                   Rouvrir la fenêtre
                 </Button>
@@ -305,13 +305,13 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         )}
 
         {status === 'success' && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4">
             <div className="flex items-start gap-2">
               <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-green-900">Identité Vérifiée !</p>
                 <p className="text-sm text-green-700 mt-1">
-                  Votre identité a été vérifiée avec succès via NeoFace V2.
+                  Votre identité a été vérifiée avec succès via NeoFace.
                 </p>
                 {matchingScore !== null && (
                   <p className="text-sm text-green-600 mt-2 font-medium">
@@ -324,7 +324,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         )}
 
         {status === 'error' && error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4">
             <div className="flex items-start gap-2">
               <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
@@ -339,7 +339,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           <Button
             onClick={handleVerification}
             disabled={isVerifying}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="w-full bg-[#F16522] hover:bg-[#D95318] text-white font-semibold py-3 rounded-xl shadow-md transition-all duration-200"
           >
             {isVerifying ? (
               <>
@@ -349,7 +349,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
             ) : (
               <>
                 <Camera className="mr-2 h-4 w-4" />
-                Commencer la Vérification NeoFace V2
+                Commencer la Vérification
               </>
             )}
           </Button>
@@ -359,18 +359,18 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           <Button
             onClick={handleRetry}
             variant="outline"
-            className="w-full"
+            className="w-full border-[#3C2A1E] text-[#3C2A1E] hover:bg-[#3C2A1E]/5"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             Réessayer
           </Button>
         )}
 
-        <div className="border-t pt-4 space-y-2">
-          <p className="text-xs text-gray-600 font-medium">
+        <div className="border-t border-[#3C2A1E]/10 pt-4 space-y-2">
+          <p className="text-xs text-[#3C2A1E] font-semibold uppercase tracking-wide">
             🔒 Vérification Sécurisée
           </p>
-          <ul className="text-xs text-gray-500 space-y-1">
+          <ul className="text-xs text-[#5D4037] space-y-1">
             <li>✓ Détection de vivacité (clignement des yeux)</li>
             <li>✓ Reconnaissance faciale par IA</li>
             <li>✓ Service 100% gratuit (0 FCFA)</li>
