@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Home, Banknote } from 'lucide-react';
+import { Search, MapPin, Home, Banknote, FileCheck } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
 
@@ -21,6 +21,13 @@ export const HeroPremium = () => {
   const handleQuickSearch = (term: string) => {
     navigate(`/recherche?q=${encodeURIComponent(term)}`);
   };
+
+  // Badges de confiance
+  const trustBadges = [
+    { icon: Home, text: 'Logements vérifiés', color: '#2E4B3E' },
+    { icon: FileCheck, text: 'Contrats sécurisés', color: '#F16522' },
+    { icon: MapPin, text: 'Quartiers populaires', color: '#A67C52' }
+  ];
 
   return (
     <section className="relative w-full min-h-[650px] lg:min-h-[650px] overflow-hidden flex items-center" style={{ backgroundColor: '#F5E6D3' }}>
@@ -65,17 +72,21 @@ export const HeroPremium = () => {
                       Trouvez votre <br/>
                       <span style={{ color: '#F16522' }}>nouveau chez-vous</span>
                   </h1>
-                  <p className="text-base lg:text-lg max-w-lg" style={{ color: '#6B5A4E' }}>
+                  {/* Amélioration 2: Contraste sous-titre - couleur cacao foncé + font-medium */}
+                  <p className="text-base lg:text-lg max-w-lg font-medium" style={{ color: '#4A3628' }}>
                       Appartements, villas et terrains vérifiés. Une expérience simple, humaine et sécurisée en Côte d'Ivoire.
                   </p>
               </div>
 
-              {/* Barre de recherche capsule */}
-              <div className="bg-white p-2 rounded-[1.5rem] lg:rounded-[2rem] shadow-xl max-w-2xl animate-in fade-in zoom-in duration-700 delay-200" style={{ boxShadow: '0 20px 40px rgba(82, 54, 40, 0.1)' }}>
-                  <div className="flex flex-col md:flex-row items-stretch divide-y md:divide-y-0 md:divide-x" style={{ borderColor: 'rgba(82, 54, 40, 0.1)' }}>
+              {/* Amélioration 3: Barre de recherche style Airbnb - plus arrondie, shadow premium */}
+              <div 
+                className="bg-white p-3 lg:p-4 rounded-[2rem] lg:rounded-[2.5rem] max-w-2xl animate-in fade-in zoom-in duration-700 delay-200"
+                style={{ boxShadow: '0 20px 50px rgba(82, 54, 40, 0.12), 0 8px 16px rgba(0,0,0,0.04)' }}
+              >
+                  <div className="flex flex-col md:flex-row items-stretch gap-2 lg:gap-4 divide-y md:divide-y-0 md:divide-x" style={{ borderColor: 'rgba(82, 54, 40, 0.08)' }}>
                       
                       {/* Type */}
-                      <div className="flex-1 px-4 py-3 md:py-2">
+                      <div className="flex-1 px-5 lg:px-6 py-4 md:py-3">
                           <div className="flex items-center gap-2 mb-1 text-xs font-bold uppercase" style={{ color: '#A67C52' }}>
                               <Home className="w-3 h-3" /> Type
                           </div>
@@ -93,7 +104,7 @@ export const HeroPremium = () => {
                       </div>
 
                       {/* Localisation */}
-                      <div className="flex-1 px-4 py-3 md:py-2">
+                      <div className="flex-1 px-5 lg:px-6 py-4 md:py-3">
                           <div className="flex items-center gap-2 mb-1 text-xs font-bold uppercase" style={{ color: '#A67C52' }}>
                               <MapPin className="w-3 h-3" /> Lieu
                           </div>
@@ -112,7 +123,7 @@ export const HeroPremium = () => {
                       </div>
 
                       {/* Budget */}
-                      <div className="flex-1 px-4 py-3 md:py-2">
+                      <div className="flex-1 px-5 lg:px-6 py-4 md:py-3">
                           <div className="flex items-center gap-2 mb-1 text-xs font-bold uppercase" style={{ color: '#A67C52' }}>
                               <Banknote className="w-3 h-3" /> Budget
                           </div>
@@ -157,10 +168,41 @@ export const HeroPremium = () => {
                     </button>
                   ))}
               </div>
+
+              {/* Amélioration 4: Badges de confiance animés */}
+              <div className="flex flex-wrap items-center gap-4 lg:gap-6 pt-2 animate-in fade-in duration-700 delay-500">
+                {trustBadges.map((item, index) => (
+                  <div 
+                    key={item.text}
+                    className="flex items-center gap-2 group animate-in fade-in slide-in-from-bottom-2"
+                    style={{ animationDelay: `${600 + index * 100}ms`, animationFillMode: 'backwards' }}
+                  >
+                    <div 
+                      className="w-8 h-8 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                      style={{ backgroundColor: `${item.color}15` }}
+                    >
+                      <item.icon className="w-4 h-4" style={{ color: item.color }} />
+                    </div>
+                    <span className="text-sm font-medium" style={{ color: '#523628' }}>
+                      {item.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
           </div>
 
           {/* Colonne droite : Image Desktop */}
           <div className="hidden lg:block lg:col-span-5 relative h-[650px]">
+              {/* Amélioration 1: Overlay de profondeur avec dégradé radial + blur */}
+              <div 
+                className="absolute right-[-60px] top-8 w-[125%] h-[92%] rounded-l-[3rem] -z-10"
+                style={{ 
+                  background: 'radial-gradient(circle at 70% 40%, #f5d9c0 0%, #f3e7db 45%, #f0e4d9 100%)',
+                  filter: 'blur(12px)',
+                  opacity: 0.6
+                }}
+              />
+              
               <div className="absolute right-[-50px] top-10 w-[120%] h-[90%]">
                   <img 
                       src="/images/hero/hero-famille-cocody.webp" 
