@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Home, Upload, X, Image as ImageIcon, Building2, Save } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES } from '@/shared/lib/constants/app.constants';
+import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES } from '@/shared/lib/constants/app.constants';
 import { ValidationService } from '@/services/validation';
 import { useFormValidation } from '@/shared/hooks/useFormValidation';
 import { ValidatedInput } from '@/shared/ui/ValidatedInput';
@@ -19,7 +19,7 @@ interface PropertyFormData {
   city: string;
   neighborhood: string;
   property_type: PropertyType;
-  property_category: 'residentiel' | 'commercial';
+  property_category: 'residential' | 'commercial';
   bedrooms: number;
   bathrooms: number;
   surface_area: string;
@@ -31,6 +31,15 @@ interface PropertyFormData {
   is_furnished: boolean;
   has_ac: boolean;
 }
+
+// Character limits
+const TITLE_MIN = 10;
+const TITLE_MAX = 100;
+const DESC_MIN = 50;
+const DESC_MAX = 1000;
+
+// Combined locations for autocomplete
+const ALL_LOCATIONS = [...CITIES, ...ABIDJAN_COMMUNES];
 
 export default function AddProperty() {
   const { user } = useAuth();
@@ -52,7 +61,7 @@ export default function AddProperty() {
     city: '',
     neighborhood: '',
     property_type: 'appartement' as PropertyType,
-    property_category: 'residentiel',
+    property_category: 'residential',
     bedrooms: 1,
     bathrooms: 1,
     surface_area: '',
@@ -121,6 +130,19 @@ export default function AddProperty() {
     return formData.property_category === 'commercial'
       ? COMMERCIAL_PROPERTY_TYPES
       : RESIDENTIAL_PROPERTY_TYPES;
+  };
+
+  // Character count helpers
+  const getTitleCharClass = () => {
+    if (formData.title.length < TITLE_MIN) return 'text-amber-500';
+    if (formData.title.length > TITLE_MAX) return 'text-destructive';
+    return 'text-muted-foreground';
+  };
+
+  const getDescCharClass = () => {
+    if (formData.description.length > 0 && formData.description.length < DESC_MIN) return 'text-amber-500';
+    if (formData.description.length > DESC_MAX) return 'text-destructive';
+    return 'text-muted-foreground';
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -234,8 +256,9 @@ export default function AddProperty() {
       setTimeout(() => {
         navigate('/dashboard/proprietaire');
       }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'ajout de la propriété');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur lors de l\'ajout de la propriété';
+      setError(message);
     } finally {
       setLoading(false);
       setUploadingImages(false);
@@ -261,6 +284,18 @@ export default function AddProperty() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      {/* Datalists for autocomplete */}
+      <datalist id="cities-list">
+        {ALL_LOCATIONS.map(loc => (
+          <option key={loc} value={loc} />
+        ))}
+      </datalist>
+      <datalist id="neighborhoods-list">
+        {ABIDJAN_COMMUNES.map(commune => (
+          <option key={commune} value={commune} />
+        ))}
+      </datalist>
+
       <div className="bg-white border-b border-neutral-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
@@ -348,28 +383,43 @@ export default function AddProperty() {
               <h2 className="text-xl font-semibold text-neutral-900 mb-6">Informations générales</h2>
 
               <div className="space-y-4">
-                <ValidatedInput
-                  label="Titre de l'annonce"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  onBlur={() => handleBlur('title')}
-                  required
-                  placeholder="Ex: Bel appartement 3 pièces à Cocody"
-                  error={getFieldState('title').error}
-                  touched={getFieldState('title').isInvalid || getFieldState('title').isValid}
-                  isValid={getFieldState('title').isValid}
-                  helperText="Minimum 10 caractères"
-                />
+                <div>
+                  <ValidatedInput
+                    label="Titre de l'annonce"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    onBlur={() => handleBlur('title')}
+                    required
+                    placeholder="Ex: Bel appartement 3 pièces à Cocody"
+                    error={getFieldState('title').error}
+                    touched={getFieldState('title').isInvalid || getFieldState('title').isValid}
+                    isValid={getFieldState('title').isValid}
+                    helperText={`Minimum ${TITLE_MIN} caractères`}
+                    maxLength={TITLE_MAX}
+                  />
+                  <div className={`text-xs mt-1 text-right ${getTitleCharClass()}`}>
+                    {formData.title.length}/{TITLE_MAX} caractères
+                  </div>
+                </div>
 
-                <ValidatedTextarea
-                  label="Description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={5}
-                  placeholder="Décrivez votre propriété en détail..."
-                />
+                <div>
+                  <ValidatedTextarea
+                    label="Description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={5}
+                    placeholder="Décrivez votre propriété en détail..."
+                    maxLength={DESC_MAX}
+                  />
+                  <div className={`text-xs mt-1 text-right ${getDescCharClass()}`}>
+                    {formData.description.length}/{DESC_MAX} caractères
+                    {formData.description.length > 0 && formData.description.length < DESC_MIN && (
+                      <span className="ml-2">(min. recommandé: {DESC_MIN})</span>
+                    )}
+                  </div>
+                </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-neutral-800 mb-2">
@@ -378,9 +428,9 @@ export default function AddProperty() {
                   <div className="flex gap-3">
                     <button
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, property_category: 'residentiel' }))}
+                      onClick={() => setFormData(prev => ({ ...prev, property_category: 'residential' }))}
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${
-                        formData.property_category === 'residentiel'
+                        formData.property_category === 'residential'
                           ? 'bg-primary-500 text-white shadow-md border border-primary-500'
                           : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300'
                       }`}
@@ -402,7 +452,7 @@ export default function AddProperty() {
                     </button>
                   </div>
                   <p className="mt-2 text-xs text-neutral-600">
-                    {formData.property_category === 'residentiel'
+                    {formData.property_category === 'residential'
                       ? 'Pour les logements : appartements, maisons, villas...'
                       : 'Pour les locaux professionnels : bureaux, commerces...'}
                   </p>
@@ -507,7 +557,9 @@ export default function AddProperty() {
                       name="city"
                       value={formData.city}
                       onChange={handleChange}
+                      onBlur={() => handleBlur('city')}
                       required
+                      list="cities-list"
                       placeholder="Ex: Abidjan"
                       className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
@@ -522,6 +574,7 @@ export default function AddProperty() {
                       name="neighborhood"
                       value={formData.neighborhood}
                       onChange={handleChange}
+                      list="neighborhoods-list"
                       placeholder="Ex: Cocody"
                       className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
                     />
@@ -543,6 +596,7 @@ export default function AddProperty() {
                     name="monthly_rent"
                     value={formData.monthly_rent}
                     onChange={handleChange}
+                    onBlur={() => handleBlur('monthly_rent')}
                     required
                     min="0"
                     placeholder="Ex: 150000"
