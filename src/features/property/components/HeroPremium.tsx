@@ -22,9 +22,10 @@ interface HeroSlide {
   testimonial: Testimonial;
 }
 
+// Hero slides with existing images from public/images/
 const heroSlides: HeroSlide[] = [
   {
-    image: '/images/hero-users/hero_users_1_young_couple.png',
+    image: '/images/hero-maison-moderne.jpg',
     title: 'Leur premier nid,',
     highlight: 'trouvé en confiance',
     description: 'Pour les jeunes couples qui construisent leur avenir',
@@ -36,7 +37,7 @@ const heroSlides: HeroSlide[] = [
     }
   },
   {
-    image: '/images/hero-users/hero_users_2_family_moving.png',
+    image: '/images/hero-villa-cocody.jpg',
     title: "Plus d'espace pour",
     highlight: 'voir grandir la famille',
     description: 'La sécurité et le confort pour ceux que vous aimez',
@@ -48,7 +49,7 @@ const heroSlides: HeroSlide[] = [
     }
   },
   {
-    image: '/images/hero-users/hero_users_3_young_professional.png',
+    image: '/images/hero-residence-moderne.jpg',
     title: "L'indépendance a une",
     highlight: 'nouvelle adresse',
     description: 'Pour les professionnels qui visent les sommets',
@@ -60,7 +61,7 @@ const heroSlides: HeroSlide[] = [
     }
   },
   {
-    image: '/images/hero-users/hero_users_4_students_roommates.png',
+    image: '/images/hero-residence-securisee.jpg',
     title: 'La colocation parfaite,',
     highlight: 'sans les tracas',
     description: 'Pour les étudiants qui veulent vivre leur meilleure vie',
@@ -72,7 +73,7 @@ const heroSlides: HeroSlide[] = [
     }
   },
   {
-    image: '/images/hero-users/hero_users_5_agent_showing.png',
+    image: '/images/hero-immeuble-moderne.png',
     title: 'Un service humain,',
     highlight: 'une expertise locale',
     description: 'Nos agents vous accompagnent à chaque étape',
