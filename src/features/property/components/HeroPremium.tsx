@@ -113,7 +113,6 @@ function OptimizedHeroImage({ src, alt, position, isActive, priority }: Optimize
           isActive ? 'scale-110' : 'scale-100'
         }`}
         loading={priority ? 'eager' : 'lazy'}
-        fetchPriority={priority ? 'high' : undefined}
         decoding="async"
       />
     </div>
