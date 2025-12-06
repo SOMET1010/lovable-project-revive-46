@@ -56,17 +56,17 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
 
   return (
     <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-      {/* Static Background Image */}
+      {/* Static Background Image - Premium Quality */}
       <div className="absolute inset-0">
         <img
-          src="/images/hero-maison-moderne.jpg"
-          alt="Trouvez votre logement idéal en Côte d'Ivoire"
+          src="/images/hero/hero-famille-cocody.webp"
+          alt="Famille ivoirienne devant leur nouvelle maison à Cocody"
           className="w-full h-full object-cover"
           loading="eager"
         />
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/50 to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+        {/* Lighter Gradient Overlays for bright image */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
       </div>
 
       {/* Content */}
