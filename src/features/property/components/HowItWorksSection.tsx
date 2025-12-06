@@ -81,18 +81,16 @@ export default function HowItWorksSection() {
     <section 
       ref={sectionRef}
       className="relative py-20 md:py-28 overflow-hidden"
-      style={{ 
-        background: 'linear-gradient(180deg, #F8E8D8 0%, #FFFFFF 50%, #F8E8D8 100%)'
-      }}
+      style={{ backgroundColor: '#FFFFFF' }}
     >
-      {/* Decorative Elements */}
+      {/* Decorative Elements - Subtils */}
       <div 
-        className="absolute top-0 right-0 w-96 h-96 opacity-30 blur-3xl"
+        className="absolute top-0 right-0 w-96 h-96 opacity-10 blur-3xl"
         style={{ backgroundColor: '#F16522' }}
       />
       <div 
-        className="absolute bottom-0 left-0 w-72 h-72 opacity-20 blur-3xl"
-        style={{ backgroundColor: '#2E4B3E' }}
+        className="absolute bottom-0 left-0 w-72 h-72 opacity-10 blur-3xl"
+        style={{ backgroundColor: '#E6D0B3' }}
       />
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">

@@ -131,7 +131,7 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
   const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
   
   return (
-    <section ref={sectionRef} className="py-16 md:py-20 bg-muted/30">
+    <section ref={sectionRef} className="py-16 md:py-20" style={{ backgroundColor: '#FAF7F4' }}>
       <div className="container">
         {/* Section Header - Animation fadeUp */}
         <div 

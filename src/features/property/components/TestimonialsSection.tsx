@@ -75,7 +75,7 @@ export default function TestimonialsSection() {
     <section 
       ref={sectionRef}
       className="py-20 md:py-28 overflow-hidden"
-      style={{ backgroundColor: '#FAFAFA' }}
+      style={{ backgroundColor: '#FFFFFF' }}
     >
       <div className="container mx-auto px-4 md:px-6">
         {/* Header - Animation fadeUp */}
