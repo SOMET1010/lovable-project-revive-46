@@ -14,7 +14,11 @@ export type LeaseNotificationType =
   | 'lease_expiring_soon'
   | 'lease_expired'
   | 'lease_terminated'
-  | 'lease_signature_reminder';
+  | 'lease_signature_reminder'
+  | 'application_received'
+  | 'application_accepted'
+  | 'application_rejected'
+  | 'visit_scheduled';
 
 interface NotificationPayload {
   leaseId: string;
