@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { generateAndUploadContract } from '@/services/contracts/contractService';
+import { notifyLeaseCreated } from '@/services/notifications/leaseNotificationService';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { 
@@ -199,14 +200,12 @@ export default function CreateContractPage() {
         .update({ status: 'reserve' })
         .eq('id', selectedProperty);
 
-      // Create notification for tenant
-      await supabase.from('notifications').insert({
-        user_id: selectedTenant,
-        type: 'contract_created',
-        title: 'Nouveau contrat de bail',
-        message: `Un contrat de bail a été créé pour vous. Numéro: ${contractNumber}`,
-        action_url: `/signer-bail/${data.id}`
-      });
+      // Send lease creation notification (in-app + email)
+      try {
+        await notifyLeaseCreated(data.id);
+      } catch (notifError) {
+        console.error('Error sending notification:', notifError);
+      }
 
       setSuccess('Contrat créé et PDF généré avec succès!');
       

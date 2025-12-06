@@ -245,6 +245,13 @@ export async function sendSignatureReminder(leaseId: string, tenantId: string): 
  * Résilie un contrat actif
  */
 export async function terminateContract(leaseId: string, _reason: string): Promise<void> {
+  // Get lease details first
+  const { data: lease } = await supabase
+    .from('lease_contracts')
+    .select('property_id')
+    .eq('id', leaseId)
+    .single();
+
   const { error } = await supabase
     .from('lease_contracts')
     .update({ 
@@ -255,5 +262,21 @@ export async function terminateContract(leaseId: string, _reason: string): Promi
 
   if (error) {
     throw new Error(`Erreur lors de la résiliation: ${error.message}`);
+  }
+
+  // Update property status back to available
+  if (lease?.property_id) {
+    await supabase
+      .from('properties')
+      .update({ status: 'disponible' })
+      .eq('id', lease.property_id);
+  }
+
+  // Send termination notification
+  try {
+    const { notifyLeaseTerminated } = await import('@/services/notifications/leaseNotificationService');
+    await notifyLeaseTerminated(leaseId);
+  } catch (notifError) {
+    console.error('Error sending termination notification:', notifError);
   }
 }

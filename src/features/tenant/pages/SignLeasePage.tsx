@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
+import { notifyLeaseSigned, notifyLeaseActive } from '@/services/notifications/leaseNotificationService';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { 
@@ -154,15 +155,17 @@ export default function SignLeasePage() {
 
       if (updateError) throw updateError;
 
-      // Create notification for other party
-      const otherPartyId = isOwner ? lease.tenant_id : lease.owner_id;
-      await supabase.from('notifications').insert({
-        user_id: otherPartyId,
-        type: 'lease_signed',
-        title: 'Signature du bail',
-        message: `${profile?.full_name || 'L\'autre partie'} a signé le bail ${lease.contract_number}`,
-        action_url: `/signer-bail/${lease.id}`
-      });
+      // Send signature notification
+      try {
+        await notifyLeaseSigned(lease.id, profile?.full_name || 'Utilisateur', isOwner);
+        
+        // If both parties have now signed, notify lease activation
+        if (otherSigned) {
+          await notifyLeaseActive(lease.id);
+        }
+      } catch (notifError) {
+        console.error('Error sending notification:', notifError);
+      }
 
       setSuccess('✅ Signature simple enregistrée!');
       loadLeaseData();
