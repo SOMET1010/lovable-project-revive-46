@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Send, User, Phone, MessageSquare, CheckCircle, Shield, Clock, Award } from 'lucide-react';
+import { Send, User, Phone, MessageSquare, CheckCircle, Shield, Clock, Award, Bot, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
+import SUTAChatWidget from '@/shared/components/SUTAChatWidget';
 
 interface ContactFormData {
   name: string;
@@ -9,11 +10,14 @@ interface ContactFormData {
   project: string;
 }
 
+type TabType = 'chat' | 'form';
+
 /**
- * CTASection - Design organique avec vraie photo d'agent
- * Formulaire flottant avec coins arrondis 22px et palette Sable/Cacao/Orange
+ * CTASection - Design organique avec onglets Chat SUTA / Formulaire
+ * Fusion de l'accompagnement personnalisé et du chatbot IA
  */
 export default function CTASection() {
+  const [activeTab, setActiveTab] = useState<TabType>('chat');
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     phone: '',
@@ -73,7 +77,7 @@ export default function CTASection() {
       />
       
       <div className="container mx-auto px-4 md:px-6 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-stretch max-w-6xl mx-auto">
           {/* Left Side - Agent Photo - Animation slideLeft */}
           <div 
             className={`relative order-2 lg:order-1 transition-all duration-700 ease-out ${
@@ -81,18 +85,18 @@ export default function CTASection() {
             }`}
           >
             {/* Agent Photo Container */}
-            <div className="relative max-w-lg mx-auto lg:mx-0">
+            <div className="relative max-w-lg mx-auto lg:mx-0 h-full">
               <div 
-                className="relative overflow-hidden"
+                className="relative overflow-hidden h-full min-h-[400px] lg:min-h-[500px]"
                 style={{ 
                   borderRadius: '28px',
                   boxShadow: '0 32px 64px rgba(82, 54, 40, 0.2)'
                 }}
               >
                 <img
-                  src="/images/cta/agent-real.png"
+                  src="/images/hero-controle-acces.jpg"
                   alt="Expert immobilier Mon Toit"
-                  className="w-full h-auto object-cover"
+                  className="w-full h-full object-cover"
                   loading="lazy"
                 />
                 
@@ -103,6 +107,12 @@ export default function CTASection() {
                     background: 'linear-gradient(to top, rgba(82, 54, 40, 0.8), transparent)'
                   }}
                 />
+
+                {/* Info Overlay */}
+                <div className="absolute bottom-6 left-6 right-6">
+                  <p className="text-white font-bold text-lg">Nos agents sur le terrain</p>
+                  <p className="text-white/80 text-sm">Vérification physique de chaque bien</p>
+                </div>
               </div>
               
               {/* Floating Badge - Animation delay */}
@@ -165,14 +175,14 @@ export default function CTASection() {
             </div>
           </div>
 
-          {/* Right Side - Form - Animation slideRight */}
+          {/* Right Side - Tabs (Chat/Form) - Animation slideRight */}
           <div 
             className={`order-1 lg:order-2 transition-all duration-700 ease-out delay-100 ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
             }`}
           >
             {/* Header */}
-            <div className="mb-10">
+            <div className="mb-6">
               <span 
                 className={`inline-block px-6 py-2.5 text-sm font-semibold mb-6 transition-all duration-500 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
@@ -187,39 +197,26 @@ export default function CTASection() {
                 Accompagnement personnalisé
               </span>
               <h2 
-                className={`font-bold mb-5 transition-all duration-700 ${
+                className={`font-bold mb-4 transition-all duration-700 ${
                   isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                 }`}
                 style={{ 
-                  fontSize: 'clamp(28px, 4vw, 44px)',
+                  fontSize: 'clamp(24px, 4vw, 36px)',
                   color: '#523628',
                   letterSpacing: '-0.02em',
                   lineHeight: 1.2,
                   transitionDelay: isVisible ? '250ms' : '0ms'
                 }}
               >
-                Votre Projet Mérite un Accompagnement d'Exception
+                Besoin d'aide ? Choisissez votre mode de contact
               </h2>
-              <p 
-                className={`transition-all duration-700 ${
-                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                }`}
-                style={{ 
-                  fontSize: '18px',
-                  lineHeight: '1.7',
-                  color: '#737373',
-                  transitionDelay: isVisible ? '300ms' : '0ms'
-                }}
-              >
-                Laissez nos experts vous trouver la perle rare. C'est gratuit, rapide et sans engagement.
-              </p>
             </div>
 
             {/* Trust Points - Desktop only - Animation stagger */}
-            <div className="hidden lg:flex gap-6 mb-10">
+            <div className="hidden lg:flex gap-6 mb-6">
               {[
                 { icon: Shield, label: 'Service 100% gratuit' },
-                { icon: Clock, label: 'Réponse sous 24h' },
+                { icon: Clock, label: 'Réponse instantanée' },
                 { icon: CheckCircle, label: 'Sans engagement' }
               ].map((item, index) => (
                 <div 
@@ -230,177 +227,220 @@ export default function CTASection() {
                   style={{ transitionDelay: isVisible ? `${350 + index * 100}ms` : '0ms' }}
                 >
                   <div 
-                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                    className="w-9 h-9 rounded-full flex items-center justify-center"
                     style={{ backgroundColor: 'rgba(46, 75, 62, 0.1)' }}
                   >
-                    <item.icon className="w-5 h-5" style={{ color: '#2E4B3E' }} />
+                    <item.icon className="w-4 h-4" style={{ color: '#2E4B3E' }} />
                   </div>
-                  <span style={{ color: '#737373', fontSize: '14px' }}>
+                  <span style={{ color: '#737373', fontSize: '13px' }}>
                     {item.label}
                   </span>
                 </div>
               ))}
             </div>
 
-            {/* Form Card - Animation scaleIn */}
+            {/* Tabs */}
             <div 
-              className={`p-8 md:p-10 transition-all duration-700 ease-out delay-500 ${
+              className={`transition-all duration-700 ease-out delay-500 ${
                 isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
               }`}
               style={{ 
                 backgroundColor: '#FFFFFF',
                 borderRadius: '22px',
                 boxShadow: '0 20px 60px rgba(82, 54, 40, 0.1)',
-                border: '1px solid rgba(82, 54, 40, 0.08)'
+                border: '1px solid rgba(82, 54, 40, 0.08)',
+                overflow: 'hidden'
               }}
             >
-              {isSubmitted ? (
-                <div className="text-center py-8">
-                  <div 
-                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
-                    style={{ backgroundColor: 'rgba(46, 75, 62, 0.1)' }}
-                  >
-                    <CheckCircle className="w-10 h-10" style={{ color: '#2E4B3E' }} />
-                  </div>
-                  <h3 
-                    className="font-bold mb-3"
-                    style={{ color: '#2E4B3E', fontSize: '22px' }}
-                  >
-                    Demande envoyée avec succès !
-                  </h3>
-                  <p style={{ color: '#737373' }}>
-                    Un expert vous contactera dans les prochaines 24 heures.
-                  </p>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {/* Name Input */}
-                  <div className="relative">
-                    <div 
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center"
-                      style={{ 
-                        backgroundColor: 'rgba(241, 101, 34, 0.1)',
-                        borderRadius: '12px'
-                      }}
-                    >
-                      <User className="w-5 h-5" style={{ color: '#F16522' }} />
-                    </div>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      placeholder="Votre nom complet *"
-                      required
-                      className="w-full h-14 pl-20 pr-5 bg-transparent transition-all focus:outline-none"
-                      style={{ 
-                        border: '2px solid #E5E5E5',
-                        borderRadius: '16px',
-                        color: '#523628',
-                        fontSize: '16px'
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#F16522'}
-                      onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
-                    />
-                  </div>
+              {/* Tab Headers */}
+              <div 
+                className="flex border-b"
+                style={{ borderColor: 'rgba(82, 54, 40, 0.1)' }}
+              >
+                <button
+                  onClick={() => setActiveTab('chat')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-4 font-semibold transition-all duration-300 ${
+                    activeTab === 'chat' ? 'text-white' : ''
+                  }`}
+                  style={{
+                    backgroundColor: activeTab === 'chat' ? '#075E54' : 'transparent',
+                    color: activeTab === 'chat' ? '#FFFFFF' : '#737373'
+                  }}
+                >
+                  <Bot className="w-5 h-5" />
+                  <span>Chat avec SUTA</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('form')}
+                  className={`flex-1 flex items-center justify-center gap-2 py-4 font-semibold transition-all duration-300 ${
+                    activeTab === 'form' ? 'text-white' : ''
+                  }`}
+                  style={{
+                    backgroundColor: activeTab === 'form' ? '#F16522' : 'transparent',
+                    color: activeTab === 'form' ? '#FFFFFF' : '#737373'
+                  }}
+                >
+                  <FileText className="w-5 h-5" />
+                  <span>Formulaire</span>
+                </button>
+              </div>
 
-                  {/* Phone Input */}
-                  <div className="relative">
-                    <div 
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 flex items-center justify-center"
-                      style={{ 
-                        backgroundColor: 'rgba(241, 101, 34, 0.1)',
-                        borderRadius: '12px'
-                      }}
-                    >
-                      <Phone className="w-5 h-5" style={{ color: '#F16522' }} />
-                    </div>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Votre téléphone *"
-                      required
-                      className="w-full h-14 pl-20 pr-5 bg-transparent transition-all focus:outline-none"
-                      style={{ 
-                        border: '2px solid #E5E5E5',
-                        borderRadius: '16px',
-                        color: '#523628',
-                        fontSize: '16px'
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#F16522'}
-                      onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
-                    />
-                  </div>
-
-                  {/* Project Textarea */}
-                  <div className="relative">
-                    <div 
-                      className="absolute left-4 top-5 w-11 h-11 flex items-center justify-center"
-                      style={{ 
-                        backgroundColor: 'rgba(241, 101, 34, 0.1)',
-                        borderRadius: '12px'
-                      }}
-                    >
-                      <MessageSquare className="w-5 h-5" style={{ color: '#F16522' }} />
-                    </div>
-                    <textarea
-                      name="project"
-                      value={formData.project}
-                      onChange={handleChange}
-                      placeholder="Décrivez votre projet en quelques mots (quartier, budget, type de bien...)"
-                      rows={4}
-                      className="w-full pt-5 pb-5 pl-20 pr-5 bg-transparent transition-all focus:outline-none resize-none"
-                      style={{ 
-                        border: '2px solid #E5E5E5',
-                        borderRadius: '16px',
-                        color: '#523628',
-                        fontSize: '16px'
-                      }}
-                      onFocus={(e) => e.target.style.borderColor = '#F16522'}
-                      onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
-                    />
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full h-14 flex items-center justify-center gap-3 font-semibold transition-all duration-300 hover:scale-[1.02] focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
-                    style={{ 
-                      backgroundColor: '#F16522',
-                      color: '#FFFFFF',
-                      borderRadius: '16px',
-                      boxShadow: '0 8px 24px rgba(241, 101, 34, 0.35)',
-                      fontSize: '16px'
-                    }}
-                  >
-                    {isSubmitting ? (
-                      <>
+              {/* Tab Content */}
+              <div style={{ height: '420px' }}>
+                {activeTab === 'chat' ? (
+                  <SUTAChatWidget className="h-full" />
+                ) : (
+                  <div className="p-6 h-full overflow-y-auto">
+                    {isSubmitted ? (
+                      <div className="text-center py-8">
                         <div 
-                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" 
-                        />
-                        <span>Envoi en cours...</span>
-                      </>
+                          className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                          style={{ backgroundColor: 'rgba(46, 75, 62, 0.1)' }}
+                        >
+                          <CheckCircle className="w-10 h-10" style={{ color: '#2E4B3E' }} />
+                        </div>
+                        <h3 
+                          className="font-bold mb-3"
+                          style={{ color: '#2E4B3E', fontSize: '22px' }}
+                        >
+                          Demande envoyée !
+                        </h3>
+                        <p style={{ color: '#737373' }}>
+                          Un expert vous contactera dans les 24h.
+                        </p>
+                      </div>
                     ) : (
-                      <>
-                        <Send className="w-5 h-5" />
-                        <span>Contacter mon expert dédié</span>
-                      </>
-                    )}
-                  </button>
+                      <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Name Input */}
+                        <div className="relative">
+                          <div 
+                            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center"
+                            style={{ 
+                              backgroundColor: 'rgba(241, 101, 34, 0.1)',
+                              borderRadius: '10px'
+                            }}
+                          >
+                            <User className="w-5 h-5" style={{ color: '#F16522' }} />
+                          </div>
+                          <input
+                            type="text"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleChange}
+                            placeholder="Votre nom complet *"
+                            required
+                            className="w-full h-14 pl-18 pr-5 bg-transparent transition-all focus:outline-none"
+                            style={{ 
+                              paddingLeft: '60px',
+                              border: '2px solid #E5E5E5',
+                              borderRadius: '14px',
+                              color: '#523628',
+                              fontSize: '15px'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#F16522'}
+                            onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
+                          />
+                        </div>
 
-                  {/* Privacy Note */}
-                  <p 
-                    className="text-center"
-                    style={{ color: '#A3A3A3', fontSize: '12px' }}
-                  >
-                    En soumettant ce formulaire, vous acceptez d'être contacté par nos experts. 
-                    Vos données sont protégées conformément à notre politique de confidentialité.
-                  </p>
-                </form>
-              )}
+                        {/* Phone Input */}
+                        <div className="relative">
+                          <div 
+                            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center"
+                            style={{ 
+                              backgroundColor: 'rgba(241, 101, 34, 0.1)',
+                              borderRadius: '10px'
+                            }}
+                          >
+                            <Phone className="w-5 h-5" style={{ color: '#F16522' }} />
+                          </div>
+                          <input
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleChange}
+                            placeholder="Votre téléphone *"
+                            required
+                            className="w-full h-14 pl-18 pr-5 bg-transparent transition-all focus:outline-none"
+                            style={{ 
+                              paddingLeft: '60px',
+                              border: '2px solid #E5E5E5',
+                              borderRadius: '14px',
+                              color: '#523628',
+                              fontSize: '15px'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#F16522'}
+                            onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
+                          />
+                        </div>
+
+                        {/* Project Textarea */}
+                        <div className="relative">
+                          <div 
+                            className="absolute left-4 top-4 w-10 h-10 flex items-center justify-center"
+                            style={{ 
+                              backgroundColor: 'rgba(241, 101, 34, 0.1)',
+                              borderRadius: '10px'
+                            }}
+                          >
+                            <MessageSquare className="w-5 h-5" style={{ color: '#F16522' }} />
+                          </div>
+                          <textarea
+                            name="project"
+                            value={formData.project}
+                            onChange={handleChange}
+                            placeholder="Décrivez votre projet..."
+                            rows={3}
+                            className="w-full pt-4 pb-4 pl-18 pr-5 bg-transparent transition-all focus:outline-none resize-none"
+                            style={{ 
+                              paddingLeft: '60px',
+                              border: '2px solid #E5E5E5',
+                              borderRadius: '14px',
+                              color: '#523628',
+                              fontSize: '15px'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#F16522'}
+                            onBlur={(e) => e.target.style.borderColor = '#E5E5E5'}
+                          />
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="w-full h-14 flex items-center justify-center gap-3 font-semibold transition-all duration-300 hover:scale-[1.02] focus:outline-none disabled:opacity-70"
+                          style={{ 
+                            backgroundColor: '#F16522',
+                            color: '#FFFFFF',
+                            borderRadius: '14px',
+                            boxShadow: '0 8px 24px rgba(241, 101, 34, 0.35)',
+                            fontSize: '15px'
+                          }}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              <span>Envoi en cours...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-5 h-5" />
+                              <span>Contacter un expert</span>
+                            </>
+                          )}
+                        </button>
+
+                        {/* Privacy Note */}
+                        <p 
+                          className="text-center"
+                          style={{ color: '#A3A3A3', fontSize: '11px' }}
+                        >
+                          Vos données sont protégées conformément à notre politique de confidentialité.
+                        </p>
+                      </form>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

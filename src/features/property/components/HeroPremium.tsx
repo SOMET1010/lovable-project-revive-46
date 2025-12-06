@@ -16,37 +16,38 @@ interface HeroSlide {
 /**
  * HeroPremium - Refonte Complète avec Identité Ivoirienne
  * Design organique, coins arrondis 22px, palette Sable/Cacao/Orange
+ * Images corrigées avec chemins réels
  */
 const HERO_SLIDES: HeroSlide[] = [
   {
-    src: '/images/hero/family-moving.png',
-    alt: 'Famille ivoirienne heureuse emménageant dans leur nouvelle maison',
+    src: '/images/hero-villa-cocody.jpg',
+    alt: 'Villa moderne à Cocody',
     title: 'Votre Histoire Commence Ici',
     subtitle: 'Plus qu\'un logement. Un nouveau départ. Certifié par Mon Toit.'
   },
   {
-    src: '/images/hero/young-couple.png',
-    alt: 'Jeune couple recherchant leur appartement idéal',
-    title: 'Trouvez Votre Chez-Vous Ensemble',
+    src: '/images/hero-residence-moderne.jpg',
+    alt: 'Résidence moderne à Abidjan',
+    title: 'Trouvez Votre Chez-Vous',
     subtitle: '100% des annonces vérifiées. 0 mauvaise surprise.'
   },
   {
-    src: '/images/hero/riviera-luxury.png',
-    alt: 'Villa luxueuse avec piscine à Riviera',
+    src: '/images/hero-maison-moderne.jpg',
+    alt: 'Maison moderne avec jardin',
     title: 'Le Luxe Accessible',
     subtitle: 'Des villas d\'exception à Riviera et Cocody.'
   },
   {
-    src: '/images/hero/young-professional.png',
-    alt: 'Jeune professionnelle épanouie dans son appartement',
-    title: 'Vivez Votre Réussite',
-    subtitle: 'Votre appartement à la hauteur de vos ambitions.'
+    src: '/images/hero-residence-securisee.jpg',
+    alt: 'Résidence sécurisée',
+    title: 'Vivez en Sécurité',
+    subtitle: 'Des résidences surveillées 24h/24 pour votre tranquillité.'
   },
   {
-    src: '/images/hero/students.png',
-    alt: 'Étudiants colocataires heureux',
-    title: 'La Coloc Parfaite Existe',
-    subtitle: 'Trouvez vos colocataires et votre nid étudiant.'
+    src: '/images/hero-immeuble-moderne.png',
+    alt: 'Immeuble moderne au Plateau',
+    title: 'Appartements Premium',
+    subtitle: 'Des espaces de vie pensés pour votre confort.'
   }
 ];
 
