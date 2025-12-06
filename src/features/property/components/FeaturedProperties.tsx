@@ -1,6 +1,7 @@
 import { MapPin, ArrowRight, Bed, Bath, Maximize, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 import type { PropertyWithOwnerScore } from '../types';
 
 interface FeaturedPropertiesProps {
@@ -8,11 +9,14 @@ interface FeaturedPropertiesProps {
   loading: boolean;
 }
 
-function PropertyCard({ property }: { property: PropertyWithOwnerScore }) {
+function PropertyCard({ property, index, isVisible }: { property: PropertyWithOwnerScore; index: number; isVisible: boolean }) {
   return (
     <Link
       to={`/proprietes/${property.id}`}
-      className="group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+      className={`group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-2 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
+      }`}
+      style={{ transitionDelay: isVisible ? `${index * 150}ms` : '0ms' }}
     >
       {/* Image Container */}
       <div className="relative h-64 overflow-hidden">
@@ -123,11 +127,18 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
   // Limit to 4 properties for cleaner homepage
   const displayProperties = properties.slice(0, 4);
   
+  // Scroll animation
+  const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
+  
   return (
-    <section className="py-16 md:py-20 bg-muted/30">
+    <section ref={sectionRef} className="py-16 md:py-20 bg-muted/30">
       <div className="container">
-        {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+        {/* Section Header - Animation fadeUp */}
+        <div 
+          className={`flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 transition-all duration-700 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <div>
             <span className="inline-block px-4 py-2 rounded-full bg-[var(--terracotta-100)] text-[var(--terracotta-600)] text-sm font-semibold mb-4">
               Nouvelles Annonces
@@ -142,14 +153,16 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
           
           <Link
             to="/recherche"
-            className="group inline-flex items-center gap-2 text-[var(--terracotta-600)] font-semibold hover:text-[var(--terracotta-700)] transition-colors"
+            className={`group inline-flex items-center gap-2 text-[var(--terracotta-600)] font-semibold hover:text-[var(--terracotta-700)] transition-all duration-700 delay-200 ${
+              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+            }`}
           >
             <span>Voir toutes les propriétés</span>
             <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
-        {/* Properties Grid - Limited to 4 */}
+        {/* Properties Grid - Limited to 4 with stagger animation */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[...Array(4)].map((_, i) => (
@@ -166,14 +179,23 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayProperties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
+            {displayProperties.map((property, index) => (
+              <PropertyCard 
+                key={property.id} 
+                property={property} 
+                index={index}
+                isVisible={isVisible}
+              />
             ))}
           </div>
         )}
 
-        {/* CTA Button Mobile */}
-        <div className="mt-12 text-center md:hidden">
+        {/* CTA Button Mobile - Animation fadeUp */}
+        <div 
+          className={`mt-12 text-center md:hidden transition-all duration-700 ease-out delay-500 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <Link
             to="/recherche"
             className="btn-primary inline-flex items-center gap-2"
