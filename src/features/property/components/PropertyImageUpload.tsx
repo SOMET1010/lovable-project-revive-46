@@ -1,5 +1,6 @@
 import React, { useCallback, useState, useRef, useEffect } from 'react';
-import { Upload, X, Star, Move, Camera, AlertCircle } from 'lucide-react';
+import { Upload, Camera, AlertCircle } from 'lucide-react';
+import DraggableImageGrid from './DraggableImageGrid';
 
 interface PropertyImageUploadProps {
   images: File[];
@@ -26,16 +27,24 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Nettoyage des URLs de prévisualisation pour éviter les memory leaks
+  // Générer les URLs de prévisualisation quand les images changent
   useEffect(() => {
+    // Nettoyer les anciennes URLs
+    previewUrls.forEach(url => {
+      if (url.startsWith('blob:')) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    // Générer les nouvelles URLs
+    const newUrls = images.map(file => URL.createObjectURL(file));
+    setPreviewUrls(newUrls);
+
+    // Cleanup au démontage
     return () => {
-      previewUrls.forEach(url => {
-        if (url.startsWith('blob:')) {
-          URL.revokeObjectURL(url);
-        }
-      });
+      newUrls.forEach(url => URL.revokeObjectURL(url));
     };
-  }, [previewUrls]);
+  }, [images]);
 
   // Gestion du drag & drop pour la zone d'upload principale
   const handleMainDragOver = useCallback((e: React.DragEvent) => {
@@ -84,10 +93,6 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
     }
 
     onImagesAdd(validFiles);
-
-    // Générer les URLs de prévisualisation
-    const newPreviewUrls = validFiles.map(file => URL.createObjectURL(file));
-    setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
   }, [images.length, maxImages, onImagesAdd]);
 
   const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,53 +111,15 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
     }
   }, [disabled]);
 
-  // Suppression d'une image et de son URL de prévisualisation
-  const handleRemoveImage = useCallback((index: number) => {
-    onImageRemove(index);
-    
-    // Libérer l'URL de prévisualisation
-    if (previewUrls[index]) {
-      URL.revokeObjectURL(previewUrls[index]);
-      const newPreviewUrls = previewUrls.filter((_, i) => i !== index);
-      setPreviewUrls(newPreviewUrls);
-    }
-  }, [onImageRemove, previewUrls]);
-
-  // Définir l'image principale
-  const handleSetMainImage = useCallback((index: number) => {
-    onMainImageSet(index);
-  }, [onMainImageSet]);
-
-  // Reorder par drag & drop
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-
-  const handleDragStart = useCallback((index: number) => {
-    if (!disabled) {
-      setDraggedIndex(index);
-    }
-  }, [disabled]);
-
-  const handleImageDragOver = useCallback((e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    if (draggedIndex !== null && draggedIndex !== index) {
-      onImagesReorder(draggedIndex, index);
-      setDraggedIndex(index);
-    }
-  }, [draggedIndex, onImagesReorder]);
-
-  const handleDragEnd = useCallback(() => {
-    setDraggedIndex(null);
-  }, []);
-
   return (
     <div className="space-y-6">
       {/* Zone d'upload */}
       <div
         className={`
-          relative border-2 border-dashed rounded-lg p-8 text-center transition-all duration-200
+          relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300
           ${dragOver && !disabled
-            ? 'border-blue-500 bg-blue-50' 
-            : 'border-gray-300 hover:border-gray-400'
+            ? 'border-primary bg-primary/5 scale-[1.01]' 
+            : 'border-border hover:border-primary/50 hover:bg-muted/30'
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
@@ -172,22 +139,22 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
         />
 
         <div className="space-y-4">
-          <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-            <Camera className="w-6 h-6 text-gray-600" />
+          <div className="mx-auto w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center">
+            <Camera className="w-7 h-7 text-primary" />
           </div>
           
           <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-foreground mb-2">
               Ajoutez des photos de votre propriété
             </h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               Glissez-déposez vos images ici ou cliquez pour sélectionner
             </p>
-            <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
-              <span>Formats acceptés: JPG, PNG, WebP</span>
-              <span>•</span>
-              <span>Taille max: 5MB par image</span>
-              <span>•</span>
+            <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
+              <span>Formats: JPG, PNG, WebP</span>
+              <span className="hidden sm:inline">•</span>
+              <span>Max: 5MB/image</span>
+              <span className="hidden sm:inline">•</span>
               <span>Maximum {maxImages} images</span>
             </div>
           </div>
@@ -195,7 +162,7 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
           <button
             type="button"
             disabled={disabled}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-5 py-2.5 text-sm font-medium rounded-full text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
           >
             <Upload className="w-4 h-4 mr-2" />
             Sélectionner des images
@@ -203,8 +170,9 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
         </div>
 
         {dragOver && (
-          <div className="absolute inset-0 bg-blue-50 bg-opacity-90 rounded-lg flex items-center justify-center">
-            <div className="text-blue-600 font-medium">
+          <div className="absolute inset-0 bg-primary/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-primary border-dashed">
+            <div className="text-primary font-semibold text-lg flex items-center gap-2">
+              <Upload className="w-6 h-6 animate-bounce" />
               Relâchez pour ajouter les images
             </div>
           </div>
@@ -213,116 +181,51 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
 
       {/* Avertissement */}
       {images.length === 0 && (
-        <div className="flex items-start space-x-3 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
+          <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-sm font-medium text-yellow-800">
+            <h4 className="text-sm font-medium text-amber-800 dark:text-amber-200">
               Photos importantes
             </h4>
-            <p className="text-sm text-yellow-700 mt-1">
-              Les propriétés avec des photos obtienen 5x plus de vues. Ajoutez au minimum 3 photos de qualité.
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              Les propriétés avec des photos obtiennent 5x plus de vues. Ajoutez au minimum 3 photos de qualité.
             </p>
           </div>
         </div>
       )}
 
-      {/* Galerie d'images */}
+      {/* Galerie d'images avec drag-and-drop */}
       {images.length > 0 && (
         <div>
-          <h4 className="text-lg font-medium text-gray-900 mb-4">
-            Photos de votre propriété ({images.length}/{maxImages})
-          </h4>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {images.map((file, index) => (
-              <div
-                key={index}
-                className={`
-                  relative group rounded-lg overflow-hidden bg-gray-100 border-2 transition-all duration-200
-                  ${index === mainImageIndex ? 'border-yellow-400 ring-2 ring-yellow-200' : 'border-gray-200'}
-                  ${draggedIndex === index ? 'opacity-50' : ''}
-                `}
-                draggable={!disabled}
-                onDragStart={() => handleDragStart(index)}
-                onDragOver={(e) => handleImageDragOver(e, index)}
-                onDragEnd={handleDragEnd}
-              >
-                {/* Image */}
-                <div className="aspect-square relative">
-                  <img
-                    src={previewUrls[index] || URL.createObjectURL(file)}
-                    alt={`Photo ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                  
-                  {/* Indicateur image principale */}
-                  {index === mainImageIndex && (
-                    <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
-                      <Star className="w-3 h-3 mr-1 fill-current" />
-                      Principale
-                    </div>
-                  )}
-
-                  {/* Boutons d'action */}
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="flex space-x-2">
-                      {/* Définir comme principale */}
-                      {index !== mainImageIndex && (
-                        <button
-                          type="button"
-                          onClick={() => handleSetMainImage(index)}
-                          disabled={disabled}
-                          className="bg-yellow-500 text-white p-2 rounded-full hover:bg-yellow-600 disabled:opacity-50"
-                          title="Définir comme image principale"
-                        >
-                          <Star className="w-4 h-4" />
-                        </button>
-                      )}
-
-                      {/* Déplacer */}
-                      {!disabled && (
-                        <button
-                          type="button"
-                          className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600"
-                          title="Glisser pour réorganiser"
-                        >
-                          <Move className="w-4 h-4" />
-                        </button>
-                      )}
-
-                      {/* Supprimer */}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(index)}
-                        disabled={disabled}
-                        className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 disabled:opacity-50"
-                        title="Supprimer cette image"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Informations */}
-                <div className="p-2 bg-white">
-                  <div className="text-xs text-gray-600 truncate">
-                    {file.name}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {(file.size / 1024 / 1024).toFixed(1)} MB
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-4">
+            <h4 className="text-lg font-semibold text-foreground">
+              Photos de votre propriété
+            </h4>
+            <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
+              {images.length}/{maxImages}
+            </span>
           </div>
 
+          <p className="text-sm text-muted-foreground mb-4">
+            ✨ Glissez les images pour les réorganiser. Cliquez sur l'étoile pour définir l'image principale.
+          </p>
+          
+          <DraggableImageGrid
+            images={images}
+            previewUrls={previewUrls}
+            mainImageIndex={mainImageIndex}
+            onImagesReorder={onImagesReorder}
+            onImageRemove={onImageRemove}
+            onMainImageSet={onMainImageSet}
+            disabled={disabled}
+          />
+
           {/* Conseils */}
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <h5 className="text-sm font-medium text-green-800 mb-2">
+          <div className="mt-6 p-4 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-xl">
+            <h5 className="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-2">
               💡 Conseils pour de belles photos
             </h5>
-            <ul className="text-sm text-green-700 space-y-1">
+            <ul className="text-sm text-emerald-700 dark:text-emerald-300 space-y-1">
               <li>• Utilisez un éclairage naturel</li>
               <li>• Prenez des photos de chaque pièce</li>
               <li>• Mettez en valeur les points forts (vue, jardin, etc.)</li>
