@@ -19,7 +19,7 @@ export const ABIDJAN_NEIGHBORHOODS = [
   'Treichville',
   'Port-Bouët',
   'Attécoubé',
-  'Bingerville',
+  // Note: Bingerville est une commune autonome, pas un quartier d'Abidjan
   'Songon',
   'Anyama',
   'Riviera',

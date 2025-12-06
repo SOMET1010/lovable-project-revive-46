@@ -15,14 +15,15 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   Banknote,
-  Loader2
+  Loader2,
+  Filter
 } from 'lucide-react';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapboxMap from '@/shared/ui/MapboxMap';
-import { CITY_NAMES } from '@/shared/data/cities';
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 import InfiniteScroll from '@/shared/components/InfiniteScroll';
 import { useInfiniteProperties } from '../hooks/useInfiniteProperties';
+import { useAvailableCities } from '../hooks/useAvailableCities';
 
 // Premium Ivorian Color Palette
 const COLORS = {
@@ -59,6 +60,9 @@ export default function SearchPropertiesPage() {
     maxPrice: searchParams.get('maxPrice') || '',
     bedrooms: searchParams.get('bedrooms') || '',
   });
+
+  // Available cities and types with counts
+  const { cities: availableCities, propertyTypes: availableTypes } = useAvailableCities();
 
   // Infinite scroll hook with sorting
   const {
@@ -212,8 +216,10 @@ export default function SearchPropertiesPage() {
                   style={{ color: COLORS.chocolat }}
                 >
                   <option value="">Toutes les villes</option>
-                  {CITY_NAMES.map((cityName) => (
-                    <option key={cityName} value={cityName}>{cityName}</option>
+                  {availableCities.map(({ city: cityName, count }) => (
+                    <option key={cityName} value={cityName}>
+                      {cityName} ({count})
+                    </option>
                   ))}
                 </select>
               </div>
@@ -231,11 +237,11 @@ export default function SearchPropertiesPage() {
                   style={{ color: COLORS.chocolat }}
                 >
                   <option value="">Tous les types</option>
-                  <option value="appartement">Appartement</option>
-                  <option value="maison">Maison</option>
-                  <option value="villa">Villa</option>
-                  <option value="studio">Studio</option>
-                  <option value="duplex">Duplex</option>
+                  {availableTypes.map(({ type, count }) => (
+                    <option key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)} ({count})
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -432,7 +438,7 @@ export default function SearchPropertiesPage() {
                   ))}
                 </div>
               ) : properties.length === 0 ? (
-                /* Empty state Premium */
+                /* Empty state Premium avec détail des filtres */
                 <div className="text-center py-16 md:py-24">
                   <div className="relative inline-block mb-8">
                     <div 
@@ -443,23 +449,76 @@ export default function SearchPropertiesPage() {
                       className="relative rounded-full w-28 h-28 flex items-center justify-center border"
                       style={{ backgroundColor: COLORS.creme, borderColor: COLORS.border }}
                     >
-                      <HomeIcon className="h-12 w-12" style={{ color: COLORS.grisNeutre }} />
+                      <Filter className="h-12 w-12" style={{ color: COLORS.grisNeutre }} />
                     </div>
                   </div>
                   <h3 className="text-2xl font-bold mb-3" style={{ color: COLORS.chocolat }}>
                     Aucune propriété trouvée
                   </h3>
+                  
+                  {/* Afficher les filtres actifs */}
+                  {activeFiltersCount > 0 && (
+                    <div className="mb-6 max-w-md mx-auto">
+                      <p className="text-sm mb-3" style={{ color: COLORS.grisTexte }}>
+                        Filtres appliqués :
+                      </p>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {appliedFilters.city && (
+                          <span 
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+                            style={{ backgroundColor: `${COLORS.orange}15`, color: COLORS.orange }}
+                          >
+                            <MapPin className="w-3 h-3" />
+                            {appliedFilters.city}
+                          </span>
+                        )}
+                        {appliedFilters.propertyType && (
+                          <span 
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+                            style={{ backgroundColor: `${COLORS.orange}15`, color: COLORS.orange }}
+                          >
+                            <HomeIcon className="w-3 h-3" />
+                            {appliedFilters.propertyType}
+                          </span>
+                        )}
+                        {appliedFilters.maxPrice && (
+                          <span 
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+                            style={{ backgroundColor: `${COLORS.orange}15`, color: COLORS.orange }}
+                          >
+                            <Banknote className="w-3 h-3" />
+                            Max {parseInt(appliedFilters.maxPrice).toLocaleString('fr-FR')} FCFA
+                          </span>
+                        )}
+                        {appliedFilters.bedrooms && (
+                          <span 
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+                            style={{ backgroundColor: `${COLORS.orange}15`, color: COLORS.orange }}
+                          >
+                            <Bed className="w-3 h-3" />
+                            {appliedFilters.bedrooms}+ ch.
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   <p className="mb-8 max-w-md mx-auto" style={{ color: COLORS.grisTexte }}>
-                    Essayez de modifier vos critères de recherche ou explorez d'autres zones.
+                    {activeFiltersCount > 0 
+                      ? "Aucun bien ne correspond à ces critères. Essayez d'élargir votre recherche."
+                      : "Aucun bien disponible pour le moment. Revenez bientôt !"}
                   </p>
-                  <button
-                    onClick={clearFilters}
-                    className="inline-flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all hover:opacity-90"
-                    style={{ backgroundColor: COLORS.orange }}
-                  >
-                    <X className="h-5 w-5" />
-                    Réinitialiser les filtres
-                  </button>
+                  
+                  {activeFiltersCount > 0 && (
+                    <button
+                      onClick={clearFilters}
+                      className="inline-flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-xl shadow-lg transition-all hover:opacity-90"
+                      style={{ backgroundColor: COLORS.orange }}
+                    >
+                      <X className="h-5 w-5" />
+                      Réinitialiser les filtres
+                    </button>
+                  )}
                 </div>
               ) : (
                 /* Properties Grid Premium Ivorian */
