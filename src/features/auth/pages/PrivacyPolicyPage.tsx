@@ -1,4 +1,4 @@
-import { Shield, Eye, Lock, UserCheck, Mail } from 'lucide-react';
+import { Eye, Lock, UserCheck, Mail, Home } from 'lucide-react';
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
 
@@ -170,8 +170,8 @@ export default function PrivacyPolicyPage() {
         title="Des questions sur vos données ?"
         subtitle="Notre équipe est disponible pour répondre à toutes vos interrogations"
         buttons={[
-          { label: 'Contacter le DPO', href: 'mailto:privacy@mon-toit.ci', icon: 'mail', variant: 'primary' },
-          { label: 'Retour à l\'accueil', href: '/', icon: 'home', variant: 'secondary' }
+          { label: 'Contacter le DPO', href: 'mailto:privacy@mon-toit.ci', icon: Mail, variant: 'primary' },
+          { label: 'Retour à l\'accueil', href: '/', icon: Home, variant: 'secondary' }
         ]}
       />
     </div>
