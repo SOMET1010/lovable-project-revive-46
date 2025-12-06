@@ -120,8 +120,11 @@ function PropertySkeleton() {
 }
 
 export default function FeaturedProperties({ properties, loading }: FeaturedPropertiesProps) {
+  // Limit to 4 properties for cleaner homepage
+  const displayProperties = properties.slice(0, 4);
+  
   return (
-    <section className="py-20 md:py-28 bg-[var(--sand-100)]">
+    <section className="py-16 md:py-20 bg-muted/30">
       <div className="container">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
@@ -146,24 +149,24 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
           </Link>
         </div>
 
-        {/* Properties Grid */}
+        {/* Properties Grid - Limited to 4 */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
               <PropertySkeleton key={i} />
             ))}
           </div>
-        ) : properties.length === 0 ? (
+        ) : displayProperties.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-2xl">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--sand-200)] flex items-center justify-center">
-              <MapPin className="h-10 w-10 text-[var(--sand-400)]" />
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
+              <MapPin className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h3 className="text-h3 text-[var(--earth-900)] mb-2">Aucune propriété disponible</h3>
-            <p className="text-[var(--earth-700)]">De nouvelles annonces arrivent bientôt</p>
+            <h3 className="text-xl font-semibold text-foreground mb-2">Aucune propriété disponible</h3>
+            <p className="text-muted-foreground">De nouvelles annonces arrivent bientôt</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {properties.map((property) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {displayProperties.map((property) => (
               <PropertyCard key={property.id} property={property} />
             ))}
           </div>
