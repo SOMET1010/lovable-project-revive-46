@@ -127,21 +127,45 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
         .order(orderColumn, { ascending })
         .range(page * pageSize, (page + 1) * pageSize - 1);
 
-      if (queryError) throw new Error(queryError.message);
-
-      const enrichedData = await enrichWithOwnerData(data || []);
-      
-      if (isLoadMore) {
-        setProperties(prev => [...prev, ...enrichedData]);
-      } else {
-        setProperties(enrichedData);
-        setTotalCount(count || 0);
+      if (queryError) {
+        // Handle 416 Range Not Satisfiable as end of data, not an error
+        if (queryError.code === 'PGRST103' || queryError.message?.includes('416')) {
+          setHasMore(false);
+          setLoadingMore(false);
+          setLoading(false);
+          return;
+        }
+        
+        // Clean error message for user display
+        const cleanMessage = typeof queryError.message === 'string' && queryError.message.trim().length > 5
+          ? queryError.message
+          : 'Erreur lors du chargement des propriétés';
+        throw new Error(cleanMessage);
       }
 
-      setHasMore((data?.length || 0) === pageSize);
+      const enrichedData = await enrichWithOwnerData(data || []);
+      const currentTotal = count || 0;
+      
+      if (isLoadMore) {
+        setProperties(prev => {
+          const newTotal = prev.length + enrichedData.length;
+          // Update hasMore based on actual fetched count vs total
+          setHasMore(newTotal < currentTotal && enrichedData.length === pageSize);
+          return [...prev, ...enrichedData];
+        });
+      } else {
+        setProperties(enrichedData);
+        setTotalCount(currentTotal);
+        setHasMore(enrichedData.length < currentTotal && enrichedData.length === pageSize);
+      }
+
       pageRef.current = page;
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Erreur lors du chargement';
+      // Validate error message before displaying
+      let message = 'Erreur lors du chargement';
+      if (err instanceof Error && err.message && err.message.length > 2 && !err.message.startsWith('{')) {
+        message = err.message;
+      }
       setError(message);
       if (!isLoadMore) {
         setProperties([]);
