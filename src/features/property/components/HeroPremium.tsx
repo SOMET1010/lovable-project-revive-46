@@ -18,43 +18,23 @@ interface HeroSlide {
  */
 const HERO_SLIDES: HeroSlide[] = [
   {
-    src: '/images/hero/hero1.jpg',
-    alt: 'Vue panoramique d\'Abidjan',
+    src: '/images/hero/hero-villa-piscine.jpg',
+    alt: 'Villa moderne avec piscine à Abidjan',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero2.jpg',
+    src: '/images/hero/hero-famille-cles.jpg',
+    alt: 'Famille ivoirienne recevant les clés de leur nouvelle maison',
+    position: 'object-center'
+  },
+  {
+    src: '/images/hero/hero-residence-cocody.jpg',
     alt: 'Résidence moderne à Cocody',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero3.jpg',
-    alt: 'Quartier résidentiel sécurisé',
-    position: 'object-center'
-  },
-  {
-    src: '/images/hero/hero4.jpg',
-    alt: 'Appartement avec vue sur la ville',
-    position: 'object-center'
-  },
-  {
-    src: '/images/hero-villa-cocody.jpg',
-    alt: 'Villa moderne à Cocody',
-    position: 'object-center'
-  },
-  {
-    src: '/images/hero-residence-moderne.jpg',
-    alt: 'Résidence moderne avec espaces verts',
-    position: 'object-center'
-  },
-  {
-    src: '/images/hero-maison-moderne.jpg',
-    alt: 'Maison moderne avec architecture contemporaine',
-    position: 'object-center'
-  },
-  {
-    src: '/images/hero-residence-securisee.jpg',
-    alt: 'Résidence sécurisée avec parking',
+    src: '/images/hero/hero-couple-recherche.jpg',
+    alt: 'Couple recherchant leur logement sur Mon Toit',
     position: 'object-center'
   },
 ];
