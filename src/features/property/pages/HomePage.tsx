@@ -115,10 +115,10 @@ const STATS = [
 ];
 
 const HERO_IMAGES = [
-  { src: '/images/hero/hero-family-cocody.webp', alt: 'Famille devant leur nouvelle villa à Cocody' },
-  { src: '/images/hero/hero-couple-tablet.png', alt: 'Couple découvrant Mon Toit sur tablette' },
-  { src: '/images/hero/hero-roommates.png', alt: 'Colocataires heureux dans leur appartement' },
-  { src: '/images/hero/hero-agent.png', alt: 'Agent Mon Toit accompagnant des clients' },
+  { src: '/images/hero/hero1.jpg', alt: 'Belle résidence moderne à Abidjan' },
+  { src: '/images/hero/hero2.jpg', alt: 'Appartement de standing à Cocody' },
+  { src: '/images/hero/hero3.jpg', alt: 'Villa avec piscine en Côte d\'Ivoire' },
+  { src: '/images/hero/hero4.jpg', alt: 'Intérieur moderne d\'un logement Mon Toit' },
 ];
 
 // ==================== HOOKS ====================
