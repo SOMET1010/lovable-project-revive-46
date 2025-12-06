@@ -53,18 +53,18 @@ export const ROUTES = {
 
 // Property Categories
 export const PROPERTY_CATEGORIES = {
-  RESIDENTIAL: 'residentiel',
+  RESIDENTIAL: 'residential',
   COMMERCIAL: 'commercial',
 } as const;
 
 // Residential Property Types (Main focus of Mon Toit platform)
 export const RESIDENTIAL_PROPERTY_TYPES = [
-  { value: 'appartement', label: 'Appartement', category: 'residentiel', icon: '🏢' },
-  { value: 'maison', label: 'Maison individuelle', category: 'residentiel', icon: '🏠' },
-  { value: 'studio', label: 'Studio', category: 'residentiel', icon: '🚪' },
-  { value: 'villa', label: 'Villa', category: 'residentiel', icon: '🏡' },
-  { value: 'duplex', label: 'Duplex', category: 'residentiel', icon: '🏘️' },
-  { value: 'chambre', label: 'Chambre individuelle', category: 'residentiel', icon: '🛏️' },
+  { value: 'appartement', label: 'Appartement', category: 'residential', icon: '🏢' },
+  { value: 'maison', label: 'Maison individuelle', category: 'residential', icon: '🏠' },
+  { value: 'studio', label: 'Studio', category: 'residential', icon: '🚪' },
+  { value: 'villa', label: 'Villa', category: 'residential', icon: '🏡' },
+  { value: 'duplex', label: 'Duplex', category: 'residential', icon: '🏘️' },
+  { value: 'chambre', label: 'Chambre individuelle', category: 'residential', icon: '🛏️' },
 ] as const;
 
 // Commercial Property Types (For future "Mon Commerce" or "Mon Foncier" module)
