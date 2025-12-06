@@ -71,10 +71,10 @@ export default function TenantApplicationCard({
   const canCancel = application.status === 'en_attente';
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="premium-card card-hover-premium overflow-hidden">
       <div className="flex flex-col sm:flex-row">
         {/* Property Image */}
-        <div className="sm:w-48 h-40 sm:h-auto flex-shrink-0 relative">
+        <div className="sm:w-52 h-44 sm:h-auto flex-shrink-0 relative">
           {application.property?.main_image ? (
             <img
               src={application.property.main_image}
@@ -82,31 +82,31 @@ export default function TenantApplicationCard({
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
-              <Home className="h-12 w-12 text-neutral-300" />
+            <div className="w-full h-full bg-[var(--color-sable-light)] flex items-center justify-center">
+              <Home className="h-12 w-12 text-[var(--color-gris-neutre)]" />
             </div>
           )}
           
           {/* Status Badge on Image */}
-          <div className={`absolute top-2 left-2 px-2.5 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${statusConfig.bgColor} ${statusConfig.color}`}>
+          <div className={`absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 ${statusConfig.bgColor} ${statusConfig.color}`}>
             <StatusIcon className="h-3.5 w-3.5" />
             {statusConfig.label}
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 p-4">
+        <div className="flex-1 p-5">
           <div className="flex flex-col h-full">
             {/* Top Section */}
             <div className="flex-1">
               {/* Property Title */}
-              <h3 className="text-lg font-bold text-neutral-900 line-clamp-1 mb-1">
+              <h3 className="text-lg font-bold text-[var(--color-chocolat)] line-clamp-1 mb-1">
                 {application.property?.title || 'Propriété supprimée'}
               </h3>
 
               {/* Location */}
-              <div className="flex items-center text-neutral-500 text-sm mb-3">
-                <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+              <div className="flex items-center text-[var(--color-gris-texte)] text-sm mb-3">
+                <MapPin className="h-4 w-4 mr-1.5 text-[var(--color-orange)] flex-shrink-0" />
                 <span className="line-clamp-1">
                   {application.property?.city}
                   {application.property?.neighborhood && `, ${application.property.neighborhood}`}
@@ -115,24 +115,24 @@ export default function TenantApplicationCard({
 
               {/* Details Row */}
               <div className="flex flex-wrap items-center gap-4 text-sm mb-3">
-                {/* Rent */}
+                {/* Rent - Premium Orange */}
                 {application.property?.monthly_rent && (
-                  <span className="font-bold text-primary-600">
+                  <span className="font-bold text-[var(--color-orange)]">
                     {application.property.monthly_rent.toLocaleString()} FCFA/mois
                   </span>
                 )}
 
                 {/* Application Date */}
-                <span className="flex items-center text-neutral-500">
-                  <Calendar className="h-4 w-4 mr-1" />
+                <span className="flex items-center text-[var(--color-gris-texte)]">
+                  <Calendar className="h-4 w-4 mr-1.5" />
                   {formattedDate}
                 </span>
               </div>
 
               {/* Owner Info */}
               {application.owner && (
-                <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <div className="w-6 h-6 rounded-full bg-neutral-200 overflow-hidden">
+                <div className="flex items-center gap-2 text-sm text-[var(--color-gris-texte)]">
+                  <div className="w-7 h-7 rounded-full bg-[var(--color-sable-light)] overflow-hidden border border-[var(--color-border)]">
                     {application.owner.avatar_url ? (
                       <img 
                         src={application.owner.avatar_url} 
@@ -141,18 +141,18 @@ export default function TenantApplicationCard({
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <User className="h-3 w-3 text-neutral-400" />
+                        <User className="h-3.5 w-3.5 text-[var(--color-gris-neutre)]" />
                       </div>
                     )}
                   </div>
-                  <span>
+                  <span className="font-medium">
                     {application.owner.full_name || 'Propriétaire'}
                     {application.owner.is_verified && (
                       <CheckCircle className="h-3.5 w-3.5 text-green-500 inline ml-1" />
                     )}
                   </span>
                   {application.owner.trust_score !== null && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    <span className="badge-premium badge-premium-orange text-xs">
                       Score: {application.owner.trust_score}
                     </span>
                   )}
@@ -161,11 +161,11 @@ export default function TenantApplicationCard({
             </div>
 
             {/* Actions */}
-            <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-neutral-100">
+            <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-[var(--color-border)]">
               {/* View Property */}
               <Link
                 to={`/propriete/${application.property_id}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-neutral-700 bg-neutral-50 hover:bg-neutral-100 rounded-lg transition-colors"
+                className="btn-premium-secondary text-sm py-2 px-3"
               >
                 <Eye className="h-4 w-4" />
                 Voir la propriété
@@ -175,7 +175,7 @@ export default function TenantApplicationCard({
               {application.owner && application.property && (
                 <Link
                   to={`/messages?to=${application.owner.user_id}&property=${application.property_id}&subject=Candidature: ${application.property.title}`}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-colors"
+                  className="btn-premium-primary text-sm py-2 px-3"
                 >
                   <MessageSquare className="h-4 w-4" />
                   Contacter
@@ -187,7 +187,7 @@ export default function TenantApplicationCard({
                 <button
                   onClick={() => onCancel(application.id)}
                   disabled={isCanceling}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-red-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors disabled:opacity-50"
                 >
                   {isCanceling ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-700" />

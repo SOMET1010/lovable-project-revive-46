@@ -1,4 +1,4 @@
-import { MapPin, Bed, Bath, Home, Heart } from 'lucide-react';
+import { MapPin, Bed, Bath, Maximize, Home, Heart } from 'lucide-react';
 import { PropertyCardSkeleton } from '@/shared/ui/Skeleton';
 import type { Database } from '@/shared/lib/database.types';
 
@@ -23,10 +23,10 @@ export default function SearchResults({ properties, loading, onPropertyClick }: 
 
   if (properties.length === 0) {
     return (
-      <div className="text-center py-12 bg-white rounded-xl shadow-md">
-        <Home className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-        <h3 className="text-xl font-bold text-gray-900 mb-2">Aucun bien trouvé</h3>
-        <p className="text-gray-600 mb-6">
+      <div className="text-center py-12 premium-card">
+        <Home className="h-16 w-16 text-[var(--color-gris-neutre)] mx-auto mb-4" />
+        <h3 className="text-xl font-bold text-[var(--color-chocolat)] mb-2">Aucun bien trouvé</h3>
+        <p className="text-[var(--color-gris-texte)] mb-6">
           Essayez de modifier vos critères de recherche pour voir plus de résultats.
         </p>
       </div>
@@ -35,8 +35,8 @@ export default function SearchResults({ properties, loading, onPropertyClick }: 
 
   return (
     <div>
-      <div className="mb-4 text-sm text-gray-600">
-        <span className="font-semibold">{properties.length}</span> bien{properties.length > 1 ? 's' : ''} trouvé{properties.length > 1 ? 's' : ''}
+      <div className="mb-4 text-sm text-[var(--color-gris-texte)]">
+        <span className="font-bold text-[var(--color-chocolat)]">{properties.length}</span> bien{properties.length > 1 ? 's' : ''} trouvé{properties.length > 1 ? 's' : ''}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -64,87 +64,89 @@ function PropertyCard({ property, onClick }: PropertyCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1"
+      className="group premium-card card-hover-premium overflow-hidden cursor-pointer"
     >
-      {/* Image */}
-      <div className="relative h-48 overflow-hidden">
+      {/* Image - 60%+ de la carte */}
+      <div className="relative h-56 sm:h-64 overflow-hidden">
         <img
           src={mainImage}
           alt={property.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
+        
+        {/* Prix en Overlay - Bottom Left */}
+        <div className="absolute bottom-3 left-3 px-4 py-2 bg-[var(--color-chocolat)]/90 backdrop-blur-sm rounded-xl text-white shadow-lg">
+          <span className="text-lg font-bold">
+            {property.monthly_rent?.toLocaleString('fr-FR')} FCFA
+          </span>
+          <span className="text-xs opacity-80 ml-1">/mois</span>
+        </div>
+
+        {/* Badge Type - Top Left */}
         {property.property_category === 'commercial' && (
-          <div className="absolute top-2 left-2 bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-semibold">
+          <div className="absolute top-3 left-3 bg-[var(--color-orange)] text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg">
             Commercial
           </div>
         )}
+
+        {/* Favorite Button - Top Right */}
         <button
           onClick={(e) => {
             e.stopPropagation();
           }}
-          className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-lg hover:bg-red-50 transition-colors"
+          className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-red-50 transition-colors"
           aria-label="Ajouter aux favoris"
         >
-          <Heart className="h-5 w-5 text-gray-600 hover:text-red-500" />
+          <Heart className="h-5 w-5 text-[var(--color-gris-texte)] hover:text-red-500" />
         </button>
       </div>
 
-      {/* Content */}
+      {/* Content - Premium Ivorian Colors */}
       <div className="p-4 space-y-3">
-        {/* Type */}
+        {/* Type Badge */}
         <div className="flex items-center justify-between">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+          <span className="badge-premium badge-premium-orange">
             {property.property_type}
           </span>
           {property.is_furnished && (
-            <span className="text-xs text-gray-600">Meublé</span>
+            <span className="text-xs text-[var(--color-gris-texte)] font-medium">Meublé</span>
           )}
         </div>
 
         {/* Title */}
-        <h3 className="text-lg font-bold text-gray-900 line-clamp-2 min-h-[3.5rem]">
+        <h3 className="text-lg font-bold text-[var(--color-chocolat)] line-clamp-2 min-h-[3rem]">
           {property.title}
         </h3>
 
         {/* Location */}
-        <div className="flex items-center text-gray-600 text-sm">
-          <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+        <div className="flex items-center text-[var(--color-gris-texte)] text-sm">
+          <MapPin className="h-4 w-4 mr-1.5 text-[var(--color-orange)] flex-shrink-0" />
           <span className="truncate">
-            {property.neighborhood}, {property.city}
+            {property.neighborhood && `${property.neighborhood}, `}{property.city}
           </span>
         </div>
 
         {/* Features */}
-        <div className="flex items-center space-x-4 text-sm text-gray-600">
+        <div className="flex items-center gap-4 text-sm text-[var(--color-gris-texte)] pt-3 border-t border-[var(--color-border)]">
           {property.bedrooms && (
-            <div className="flex items-center">
-              <Bed className="h-4 w-4 mr-1" />
-              <span>{property.bedrooms}</span>
+            <div className="flex items-center gap-1.5">
+              <Bed className="h-4 w-4 text-[var(--color-orange)]" />
+              <span className="font-medium">{property.bedrooms} ch.</span>
             </div>
           )}
           {property.bathrooms && (
-            <div className="flex items-center">
-              <Bath className="h-4 w-4 mr-1" />
-              <span>{property.bathrooms}</span>
+            <div className="flex items-center gap-1.5">
+              <Bath className="h-4 w-4 text-[var(--color-orange)]" />
+              <span className="font-medium">{property.bathrooms} sdb.</span>
             </div>
           )}
           {property.surface_area && (
-            <div className="flex items-center">
-              <Home className="h-4 w-4 mr-1" />
-              <span>{property.surface_area}m²</span>
+            <div className="flex items-center gap-1.5">
+              <Maximize className="h-4 w-4 text-[var(--color-orange)]" />
+              <span className="font-medium">{property.surface_area} m²</span>
             </div>
           )}
-        </div>
-
-        {/* Price */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-          <div>
-            <p className="text-2xl font-bold text-blue-600">
-              {property.monthly_rent?.toLocaleString('fr-FR')} <span className="text-base">FCFA</span>
-            </p>
-            <p className="text-xs text-gray-500">par mois</p>
-          </div>
         </div>
       </div>
     </div>
