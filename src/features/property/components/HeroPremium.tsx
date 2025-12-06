@@ -23,29 +23,29 @@ const HERO_SLIDES: HeroSlide[] = [
     src: '/images/hero/hero_family_keys.jpg',
     alt: 'Famille ivoirienne heureuse recevant les clés de leur nouvelle maison',
     position: 'object-center',
-    title: 'Trouvez le logement de vos rêves',
-    subtitle: 'Villas, appartements et terrains vérifiés à Abidjan.'
+    title: 'Votre Histoire Commence Ici',
+    subtitle: 'Plus qu\'un logement. Un nouveau départ. Certifié par Mon Toit.'
   },
   {
     src: '/images/hero/hero_couple_search.jpg',
     alt: 'Jeune couple recherchant leur futur appartement sur Mon Toit',
     position: 'object-center',
-    title: 'Louez ou achetez en toute simplicité',
-    subtitle: 'Une expérience digitale fluide et sécurisée.'
+    title: 'Trouvez Votre Chez-Vous en Toute Confiance',
+    subtitle: '100% des annonces vérifiées. 0 mauvaise surprise.'
   },
   {
     src: '/images/hero/hero_agent_showing.jpg',
     alt: 'Agent immobilier Mon Toit faisant visiter un bien',
     position: 'object-center',
-    title: 'Des experts à votre service',
-    subtitle: 'Faites-vous accompagner par nos agents certifiés.'
+    title: 'Un Accompagnement d\'Exception',
+    subtitle: 'Nos experts vous guident de la visite à la remise des clés.'
   },
   {
     src: '/images/hero/hero_woman_balcony.jpg',
     alt: 'Jeune femme active profitant de la vue depuis son balcon',
     position: 'object-top',
-    title: 'Vivez là où vous vous sentez bien',
-    subtitle: 'Des quartiers prisés : Cocody, Riviera, Zone 4.'
+    title: 'Vivez Là Où Vous Vous Sentez Bien',
+    subtitle: 'Cocody, Riviera, Plateau... Votre quartier idéal vous attend.'
   }
 ];
 
@@ -168,13 +168,15 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-16">
-        {/* Badge */}
+        {/* Badge Certifié ANSUT */}
         <div className="flex justify-center mb-6">
           <span 
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-primary/20 text-primary border border-primary/30 backdrop-blur-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-white/20 text-white border border-white/30 backdrop-blur-md shadow-lg"
           >
-            <Sparkles className="w-4 h-4" />
-            150+ logements vérifiés
+            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
+            </div>
+            Plateforme Certifiée ANSUT
           </span>
         </div>
 
