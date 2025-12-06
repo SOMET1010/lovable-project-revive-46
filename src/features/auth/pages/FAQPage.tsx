@@ -83,12 +83,12 @@ const faqData: FAQItem[] = [
 ];
 
 const categories = [
-  { name: 'Général', icon: HelpCircle, color: 'blue' },
-  { name: 'Locataires', icon: Home, color: 'green' },
-  { name: 'Propriétaires', icon: User, color: 'orange' },
-  { name: 'Paiements', icon: CreditCard, color: 'purple' },
-  { name: 'Vérification', icon: Shield, color: 'cyan' },
-  { name: 'Sécurité', icon: Shield, color: 'red' }
+  { name: 'Général', icon: HelpCircle },
+  { name: 'Locataires', icon: Home },
+  { name: 'Propriétaires', icon: User },
+  { name: 'Paiements', icon: CreditCard },
+  { name: 'Vérification', icon: Shield },
+  { name: 'Sécurité', icon: Shield }
 ];
 
 export default function FAQPage() {
@@ -117,7 +117,7 @@ export default function FAQPage() {
   });
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#FAF7F4]">
       <PageHeader
         title="Questions Fréquentes (FAQ)"
         subtitle="Trouvez rapidement des réponses à toutes vos questions sur Mon Toit"
@@ -127,17 +127,17 @@ export default function FAQPage() {
         ]}
       />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
 
         <div className="mb-12 animate-fade-in">
           <div className="relative max-w-2xl mx-auto">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#A69B95]" />
             <input
               type="text"
               placeholder="Rechercher une question..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-lg"
+              className="w-full pl-12 pr-4 py-4 border border-[#EFEBE9] rounded-xl focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] transition-all text-lg bg-white"
             />
           </div>
         </div>
@@ -145,10 +145,10 @@ export default function FAQPage() {
         <div className="flex flex-wrap justify-center gap-3 mb-16 animate-fade-in stagger-1">
           <button
             onClick={() => setSelectedCategory('Tous')}
-            className={`px-6 py-3 rounded-xl font-semibold transition-all ${
+            className={`px-6 py-3 rounded-full font-semibold transition-all ${
               selectedCategory === 'Tous'
-                ? 'bg-orange-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
+                ? 'bg-[#F16522] text-white shadow-lg'
+                : 'bg-white text-[#6B5A4E] hover:border-[#F16522] border border-[#EFEBE9]'
             }`}
           >
             Tous
@@ -159,10 +159,10 @@ export default function FAQPage() {
               <button
                 key={cat.name}
                 onClick={() => setSelectedCategory(cat.name)}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+                className={`px-6 py-3 rounded-full font-semibold transition-all flex items-center gap-2 ${
                   selectedCategory === cat.name
-                    ? 'bg-orange-600 text-white shadow-lg'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 shadow-md'
+                    ? 'bg-[#F16522] text-white shadow-lg'
+                    : 'bg-white text-[#6B5A4E] hover:border-[#F16522] border border-[#EFEBE9]'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -172,39 +172,39 @@ export default function FAQPage() {
           })}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-16 animate-slide-up stagger-2">
+        <div className="bg-white rounded-[20px] overflow-hidden mb-16 animate-slide-up border border-[#EFEBE9]">
           {filteredFAQ.length === 0 ? (
             <div className="p-12 text-center">
-              <HelpCircle className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-600 text-lg">
+              <HelpCircle className="h-16 w-16 text-[#A69B95] mx-auto mb-4" />
+              <p className="text-[#6B5A4E] text-lg">
                 Aucune question trouvée. Essayez un autre terme de recherche.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-[#EFEBE9]">
               {filteredFAQ.map((item, index) => (
-                <div key={index} className="border-b border-gray-100 last:border-b-0">
+                <div key={index}>
                   <button
                     onClick={() => toggleItem(index)}
-                    className="w-full px-6 py-5 flex items-center justify-between hover:bg-gray-50 transition-colors text-left"
+                    className="w-full px-6 py-5 flex items-center justify-between hover:bg-[#FAF7F4] transition-colors text-left"
                   >
                     <div className="flex-1">
-                      <span className="inline-block px-3 py-1 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full mb-2">
+                      <span className="inline-block px-3 py-1 bg-[#F16522]/10 text-[#F16522] text-xs font-semibold rounded-full mb-2">
                         {item.category}
                       </span>
-                      <h3 className="text-lg font-bold text-gray-900">
+                      <h3 className="text-lg font-bold text-[#2C1810]">
                         {item.question}
                       </h3>
                     </div>
                     <ChevronDown
-                      className={`h-5 w-5 text-gray-500 transition-transform flex-shrink-0 ml-4 ${
+                      className={`h-5 w-5 text-[#A69B95] transition-transform flex-shrink-0 ml-4 ${
                         openItems.has(index) ? 'transform rotate-180' : ''
                       }`}
                     />
                   </button>
                   {openItems.has(index) && (
-                    <div className="px-6 pb-5 pt-2">
-                      <p className="text-gray-700 leading-relaxed">
+                    <div className="px-6 pb-5 pt-2 bg-[#FAF7F4]">
+                      <p className="text-[#6B5A4E] leading-relaxed">
                         {item.answer}
                       </p>
                     </div>

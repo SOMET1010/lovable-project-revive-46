@@ -5,6 +5,9 @@
 /* Design System - Variables CSS centralisées */
 @import './styles/design-system.css';
 
+/* Premium Ivorian Design System */
+@import './styles/premium-ivorian.css';
+
 /* Animations consolidées (inclut premium-effects) */
 @import './styles/animations.css';
 
