@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
+import { downloadContract, regenerateContract } from '@/services/contracts/contractService';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
-import { ArrowLeft, FileText, Edit, CheckCircle, X } from 'lucide-react';
+import { ArrowLeft, FileText, Edit, CheckCircle, X, Download, RefreshCw, Loader, ExternalLink } from 'lucide-react';
 
 interface LeaseContract {
   id: string;
@@ -16,8 +17,11 @@ interface LeaseContract {
   end_date: string;
   monthly_rent: number;
   deposit_amount: number | null;
+  charges_amount: number | null;
   signed_at: string | null;
   created_at: string | null;
+  document_url: string | null;
+  signed_document_url: string | null;
 }
 
 interface Property {
@@ -45,6 +49,8 @@ export default function ContractDetail() {
   const [loading, setLoading] = useState(true);
   const [showSignature, setShowSignature] = useState(false);
   const [signing, setSigning] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
 
@@ -234,6 +240,31 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
     return !contract.signed_at && (contract.owner_id === user?.id || contract.tenant_id === user?.id);
   };
 
+  const handleDownloadPdf = async () => {
+    if (!contract?.document_url) return;
+    setDownloading(true);
+    try {
+      await downloadContract(contract.document_url, `contrat-${contract.contract_number}.pdf`);
+    } catch (err) {
+      console.error('Error downloading:', err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleRegeneratePdf = async () => {
+    if (!contract) return;
+    setRegenerating(true);
+    try {
+      await regenerateContract(contract.id);
+      loadContract();
+    } catch (err) {
+      console.error('Error regenerating:', err);
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   if (!user) {
     return (
       <>
@@ -298,7 +329,38 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
                   <p className="text-gray-600">{property?.title}</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                {contract.document_url && (
+                  <>
+                    <button
+                      onClick={handleDownloadPdf}
+                      disabled={downloading}
+                      className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition flex items-center space-x-2 disabled:opacity-50"
+                    >
+                      {downloading ? <Loader className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                      <span>PDF</span>
+                    </button>
+                    <a
+                      href={contract.document_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition flex items-center space-x-2"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      <span>Voir</span>
+                    </a>
+                  </>
+                )}
+                {contract.owner_id === user?.id && (
+                  <button
+                    onClick={handleRegeneratePdf}
+                    disabled={regenerating}
+                    className="px-3 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition flex items-center space-x-2 disabled:opacity-50"
+                  >
+                    {regenerating ? <Loader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    <span>Regénérer</span>
+                  </button>
+                )}
                 {canSign() && (
                   <button
                     onClick={() => setShowSignature(true)}
