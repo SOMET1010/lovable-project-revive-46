@@ -65,11 +65,13 @@ export default function HeaderPremium() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
             
-            {/* Logo Premium */}
+            {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#F16522] to-[#D95318] rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
-                <Home className="w-6 h-6 fill-current" />
-              </div>
+              <img
+                src="/logo-montoit.png"
+                alt="Mon Toit"
+                className="h-10 w-10 object-contain transition-transform duration-300 ease-out group-hover:scale-110 group-hover:rotate-3"
+              />
               <div className="flex flex-col">
                 <span className="text-xl font-extrabold text-[#2C1810] leading-none tracking-tight group-hover:text-[#F16522] transition-colors">
                   Mon Toit
