@@ -8,23 +8,23 @@ interface HeroPremiumProps {
 // Configuration des 4 slides premium
 const HERO_SLIDES = [
   {
-    src: '/images/hero/hero1.jpg',
-    alt: 'Famille ivoirienne heureuse devant leur maison à Cocody',
+    src: '/images/hero/hero-famille-cles.png',
+    alt: 'Famille ivoirienne recevant les clés de leur nouvelle maison',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero2.jpg',
-    alt: 'Jeune couple utilisant l\'application Mon Toit',
+    src: '/images/hero/hero-couple-digital.png',
+    alt: 'Jeune couple recherchant leur logement sur Mon Toit',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero3.jpg',
-    alt: 'Jeune professionnelle détendue sur son balcon',
+    src: '/images/hero/hero-professionnelle-balcon.png',
+    alt: 'Jeune professionnelle profitant de son balcon avec vue sur Abidjan',
     position: 'object-top'
   },
   {
-    src: '/images/hero/hero4.jpg',
-    alt: 'Villa de luxe moderne avec piscine à la Riviera',
+    src: '/images/hero/hero-famille-cocody.webp',
+    alt: 'Famille heureuse devant leur villa à Cocody',
     position: 'object-center'
   },
 ];
