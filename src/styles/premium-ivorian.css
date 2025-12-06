@@ -281,3 +281,83 @@
   background: radial-gradient(ellipse at 50% 0%, rgba(241, 101, 34, 0.15) 0%, transparent 60%);
   pointer-events: none;
 }
+
+/* === ANIMATIONS CARDS DASHBOARD === */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Animation d'entrée Premium */
+.card-animate-in {
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+/* Stagger pour grilles de cards */
+.card-stagger-1 { animation-delay: 0.05s; }
+.card-stagger-2 { animation-delay: 0.1s; }
+.card-stagger-3 { animation-delay: 0.15s; }
+.card-stagger-4 { animation-delay: 0.2s; }
+.card-stagger-5 { animation-delay: 0.25s; }
+.card-stagger-6 { animation-delay: 0.3s; }
+
+/* Hover Premium avec lift + glow orange */
+.card-hover-premium {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover-premium:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-orange) !important;
+  box-shadow: 0 12px 32px rgba(241, 101, 34, 0.15);
+}
+
+/* Header Dashboard avec animation slide */
+.dashboard-header-animate {
+  animation: slideDown 0.4s ease-out;
+}
+
+/* Icône avec pulse subtile */
+.icon-pulse-premium {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Respect des préférences utilisateur */
+@media (prefers-reduced-motion: reduce) {
+  .card-animate-in,
+  .dashboard-header-animate,
+  .icon-pulse-premium {
+    animation: none !important;
+  }
+  
+  .card-hover-premium:hover {
+    transform: none;
+  }
+}

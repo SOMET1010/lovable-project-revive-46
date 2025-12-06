@@ -126,11 +126,11 @@ export default function AgencyDashboardPage() {
   return (
     <div className="min-h-screen bg-[#FAF7F4]">
       {/* Header */}
-      <div className="bg-[#2C1810]">
+      <div className="bg-[#2C1810] dashboard-header-animate">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center">
+              <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center icon-pulse-premium">
                 <Building2 className="h-7 w-7 text-white" />
               </div>
               <div>
@@ -153,7 +153,7 @@ export default function AgencyDashboardPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-1">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-[#FFF5F0] p-2 rounded-xl">
                 <Home className="h-5 w-5 text-[#F16522]" />
@@ -163,7 +163,7 @@ export default function AgencyDashboardPage() {
             <p className="text-3xl font-bold text-[#2C1810]">{stats.totalProperties}</p>
           </div>
 
-          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-2">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-green-100 p-2 rounded-xl">
                 <FileText className="h-5 w-5 text-green-600" />
@@ -173,7 +173,7 @@ export default function AgencyDashboardPage() {
             <p className="text-3xl font-bold text-[#2C1810]">{stats.activeLeases}</p>
           </div>
 
-          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-3">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-[#FFF5F0] p-2 rounded-xl">
                 <TrendingUp className="h-5 w-5 text-[#F16522]" />
@@ -183,7 +183,7 @@ export default function AgencyDashboardPage() {
             <p className="text-2xl font-bold text-[#F16522]">{stats.monthlyRevenue.toLocaleString()} <span className="text-sm">FCFA</span></p>
           </div>
 
-          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="bg-amber-100 p-2 rounded-xl">
                 <Coins className="h-5 w-5 text-amber-600" />
@@ -198,7 +198,7 @@ export default function AgencyDashboardPage() {
           {/* Main Column - Properties */}
           <div className="lg:col-span-2 space-y-6">
             {/* Properties List */}
-            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-5">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-[#2C1810] flex items-center gap-2">
                   <Home className="h-6 w-6 text-[#F16522]" />
@@ -269,7 +269,7 @@ export default function AgencyDashboardPage() {
             </div>
 
             {/* Performance Overview */}
-            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-stagger-6">
               <h2 className="text-xl font-bold text-[#2C1810] flex items-center gap-2 mb-6">
                 <BarChart3 className="h-6 w-6 text-[#F16522]" />
                 <span>Aperçu Performance</span>
@@ -298,7 +298,7 @@ export default function AgencyDashboardPage() {
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Quick Actions */}
-            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-5">
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Actions Rapides</h3>
               <div className="space-y-3">
                 <Link 
@@ -326,7 +326,7 @@ export default function AgencyDashboardPage() {
             </div>
 
             {/* Notifications */}
-            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-stagger-6">
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Alertes</h3>
               <div className="space-y-3">
                 {stats.pendingApplications > 0 && (
@@ -354,7 +354,7 @@ export default function AgencyDashboardPage() {
             </div>
 
             {/* Commission Summary */}
-            <div className="bg-[#2C1810] rounded-[20px] p-6 text-white">
+            <div className="bg-[#2C1810] rounded-[20px] p-6 text-white card-animate-in card-stagger-6">
               <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                 <Coins className="h-5 w-5 text-[#F16522]" />
                 <span>Commissions du mois</span>
