@@ -156,6 +156,12 @@ export default {
         'scale-in': 'scaleIn 0.3s ease-out',
         'bounce-subtle': 'bounceSubtle 2s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
+        // Animations Carousel Premium
+        'carousel-in': 'carouselIn 1200ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+        'carousel-out': 'carouselOut 800ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards',
+        'gradient': 'gradient 3s ease infinite',
+        'pulse-slow': 'pulseSlow 4s ease-in-out infinite',
+        'bounce-slow': 'bounceSlow 3s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -185,6 +191,27 @@ export default {
         shimmer: {
           '0%': { backgroundPosition: '-1000px 0' },
           '100%': { backgroundPosition: '1000px 0' },
+        },
+        // Keyframes Carousel Premium
+        carouselIn: {
+          '0%': { opacity: '0', transform: 'scale(1.05)', filter: 'grayscale(100%)' },
+          '100%': { opacity: '1', transform: 'scale(1)', filter: 'grayscale(0%)' },
+        },
+        carouselOut: {
+          '0%': { opacity: '1', transform: 'scale(1)', filter: 'grayscale(0%)' },
+          '100%': { opacity: '0', transform: 'scale(0.98)', filter: 'grayscale(100%)' },
+        },
+        gradient: {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+        pulseSlow: {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.6' },
+        },
+        bounceSlow: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
       },
       borderRadius: {

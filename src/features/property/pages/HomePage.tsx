@@ -154,35 +154,39 @@ function PropertyCard({ property, index, isVisible }: { property: PropertyWithOw
   return (
     <Link
       to={`/proprietes/${property.id}`}
-      className={`group block bg-white rounded-[20px] overflow-hidden shadow-sm hover:shadow-[0_20px_40px_rgba(44,24,16,0.08)] border border-[#EFEBE9] transition-all duration-500 ease-out hover:-translate-y-1 ${
+      className={`group block bg-white rounded-[24px] overflow-hidden border border-transparent hover:border-[#EFEBE9] shadow-sm hover:shadow-[0_20px_40px_rgba(44,24,16,0.08)] transition-all duration-500 ease-out hover:-translate-y-2 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
       }`}
       style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
     >
-      <div className="relative h-64 overflow-hidden">
+      {/* Image Container - Ratio 4:3 pour plus de présence */}
+      <div className="relative aspect-[4/3] overflow-hidden">
         <img
           src={property.images?.[0] || '/images/placeholder-property.jpg'}
           alt={property.title || 'Propriété Mon Toit'}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#2C1810]/60 via-transparent to-transparent opacity-80" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
         
-        <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-          <span className="px-3 py-1.5 bg-white/95 backdrop-blur-md text-[#2C1810] text-xs font-bold rounded-full uppercase tracking-wide shadow-sm">
+        {/* Badges Flottants */}
+        <div className="absolute top-4 left-4 flex gap-2">
+          <span className="px-3 py-1.5 bg-white/95 backdrop-blur-md text-[#2C1810] text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm">
             {property.property_type || 'Bien'}
           </span>
-          <button className="p-2 bg-white/20 backdrop-blur-md rounded-full hover:bg-[#F16522] text-white transition-colors">
-            <Heart className="h-4 w-4" />
-          </button>
         </div>
+
+        <button className="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-[#F16522] transition-all transform hover:scale-110 active:scale-95">
+          <Heart className="h-5 w-5 fill-transparent hover:fill-current transition-colors" />
+        </button>
         
-        <div className="absolute bottom-4 left-4 text-white">
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold">
+        {/* Prix en Overlay (Style Premium) */}
+        <div className="absolute bottom-4 left-4">
+          <div className="flex items-baseline gap-1 bg-[#2C1810]/90 backdrop-blur-sm px-4 py-2 rounded-xl text-white shadow-lg">
+            <span className="text-lg font-bold tracking-tight">
               {property.monthly_rent?.toLocaleString('fr-FR') || 'N/A'}
             </span>
-            <span className="text-xs font-medium opacity-90">FCFA/mois</span>
+            <span className="text-[10px] font-medium opacity-80">FCFA/mois</span>
           </div>
         </div>
 
@@ -193,16 +197,20 @@ function PropertyCard({ property, index, isVisible }: { property: PropertyWithOw
         )}
       </div>
 
+      {/* Contenu */}
       <div className="p-5">
-        <h3 className="text-lg font-bold text-[#2C1810] mb-2 group-hover:text-[#F16522] transition-colors line-clamp-1">
-          {property.title || 'Appartement de standing'}
-        </h3>
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-bold text-[#2C1810] leading-tight group-hover:text-[#F16522] transition-colors line-clamp-1">
+            {property.title || 'Appartement de standing'}
+          </h3>
+        </div>
+
         <div className="flex items-center gap-2 text-[#6B5A4E] mb-4 text-sm">
-          <MapPin className="h-3.5 w-3.5 text-[#F16522]" />
+          <MapPin className="h-4 w-4 text-[#F16522] flex-shrink-0" />
           <span className="line-clamp-1">{property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city || 'Abidjan'}</span>
         </div>
         
-        <div className="flex items-center justify-between text-xs font-medium text-[#A69B95] pt-4 border-t border-[#EFEBE9]">
+        <div className="flex items-center justify-between text-xs font-semibold text-[#A69B95] pt-4 border-t border-[#EFEBE9]">
           <div className="flex items-center gap-1.5"><Bed className="h-4 w-4" /><span>{property.bedrooms || '-'} ch.</span></div>
           <div className="flex items-center gap-1.5"><Bath className="h-4 w-4" /><span>{property.bathrooms || '-'} sdb</span></div>
           <div className="flex items-center gap-1.5"><Maximize className="h-4 w-4" /><span>{property.surface_area || '-'} m²</span></div>
@@ -230,6 +238,7 @@ export default function HomePage() {
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [heroImageIndex, setHeroImageIndex] = useState(0);
+  const [prevHeroImageIndex, setPrevHeroImageIndex] = useState<number | null>(null);
 
   // Animations
   const { ref: howItWorksRef, isVisible: howItWorksVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.2 });
@@ -260,13 +269,14 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [howItWorksVisible]);
 
-  // Auto-rotation carousel Hero
+  // Auto-rotation carousel Hero avec tracking de l'image précédente
   useEffect(() => {
     const timer = setInterval(() => {
+      setPrevHeroImageIndex(heroImageIndex);
       setHeroImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [heroImageIndex]);
 
   // Handlers
   const handleSearch = () => {
@@ -307,11 +317,15 @@ export default function HomePage() {
         structuredData={structuredData}
       />
 
-      {/* ==================== HERO SECTION ==================== */}
-      <section className="relative w-full min-h-[700px] overflow-hidden flex items-center bg-[#2C1810]">
+      {/* ==================== HERO SECTION (PREMIUM CHOCOLAT) ==================== */}
+      <section className="relative w-full min-h-[750px] lg:min-h-[850px] overflow-hidden flex items-center bg-[#2C1810]">
         
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#F16522]/20 rounded-full blur-[120px] pointer-events-none animate-pulse-slow" />
-        <div className="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-[#F5E6D3]/10 rounded-full blur-[100px] pointer-events-none" />
+        {/* Texture de fond subtile (Pattern CSS local) */}
+        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_1px_1px,_white_1px,_transparent_1px)] bg-[length:24px_24px] mix-blend-overlay pointer-events-none" />
+        
+        {/* Glow Effects */}
+        <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-[#F16522]/10 rounded-full blur-[150px] animate-pulse-slow" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-[#E8D4C5]/10 rounded-full blur-[120px]" />
 
         <div className="container mx-auto px-4 py-12 lg:py-0 relative z-10">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
@@ -395,25 +409,30 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Image Hero Desktop - Carousel */}
-            <div className="lg:col-span-5 relative h-[650px] hidden lg:block animate-in fade-in duration-1000 delay-300">
-              <div className="absolute top-[10%] right-[5%] w-[450px] h-[450px] bg-[#3D261C] rounded-full -z-10 blur-sm" />
+            {/* Image Hero Desktop - Carousel Premium */}
+            <div className="lg:col-span-5 relative h-[700px] hidden lg:block animate-in fade-in duration-1000 delay-300">
+              {/* Cercle Déco Arrière */}
+              <div className="absolute top-[10%] right-[5%] w-[500px] h-[500px] bg-[#3D261C] rounded-full -z-10" />
               
               <div className="relative w-full h-full group">
-                {/* Carousel d'images */}
+                {/* Carousel d'images avec transition crossfade + grayscale */}
                 {HERO_IMAGES.map((image, index) => (
                   <img 
                     key={image.src}
                     src={image.src} 
                     alt={image.alt}
-                    className={`absolute inset-0 w-full h-full object-cover rounded-[3rem] shadow-2xl ring-1 ring-[#F16522]/20 transition-all duration-700 ease-in-out ${
+                    className={`absolute inset-0 w-full h-full object-cover rounded-[40px] shadow-2xl ring-1 ring-white/10 transition-all duration-[1200ms] ease-out ${
                       index === heroImageIndex 
-                        ? 'opacity-100 scale-100' 
-                        : 'opacity-0 scale-[1.02]'
+                        ? 'opacity-100 scale-100 grayscale-0 z-10' 
+                        : index === prevHeroImageIndex 
+                          ? 'opacity-0 scale-[0.98] grayscale z-0'
+                          : 'opacity-0 grayscale'
                     }`}
                     loading={index === 0 ? "eager" : "lazy"}
                     fetchPriority={index === 0 ? "high" : "auto"}
-                    style={{ maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}
+                    style={{ 
+                      maskImage: 'linear-gradient(to bottom, black 80%, transparent 100%)',
+                    }}
                   />
                 ))}
 
@@ -576,9 +595,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================== CTA SECTION ==================== */}
-      <section ref={ctaRef} className="py-20 md:py-28 bg-[#F5E6D3] relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-full h-full opacity-30 bg-[url('/images/pattern-topo.svg')] bg-cover" />
+      {/* ==================== CTA SECTION (Design Organique) ==================== */}
+      <section ref={ctaRef} className="py-20 md:py-28 bg-white relative overflow-hidden">
+        {/* Cercles de fond décoratifs */}
+        <div className="absolute left-[-10%] top-[20%] w-[500px] h-[500px] bg-[#FAF7F4] rounded-full mix-blend-multiply filter blur-3xl opacity-70" />
+        <div className="absolute right-[-10%] bottom-[20%] w-[500px] h-[500px] bg-[#FFF0E5] rounded-full mix-blend-multiply filter blur-3xl opacity-70" />
         
         <div className="container mx-auto px-4 relative z-10">
           <div className="bg-white rounded-[32px] p-8 md:p-12 shadow-[0_40px_80px_-20px_rgba(44,24,16,0.15)] max-w-4xl mx-auto">
