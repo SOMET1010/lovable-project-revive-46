@@ -87,3 +87,7 @@ export { Breadcrumb } from './Breadcrumb';
 
 export { FloatingCallButton } from './FloatingCallButton';
 export type { FloatingCallButtonProps } from './FloatingCallButton';
+
+// Validation components
+export { ValidatedInput } from './ValidatedInput';
+export { ValidatedTextarea } from './ValidatedTextarea';
