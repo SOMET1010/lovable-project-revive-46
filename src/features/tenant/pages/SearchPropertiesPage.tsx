@@ -41,7 +41,7 @@ export default function SearchPropertiesPage() {
   
   // State for view mode
   const [activeView, setActiveView] = useState<'list' | 'map'>('list');
-  const [sortBy, setSortBy] = useState('recent');
+  const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
 
   // Search filters from URL
   const [city, setCity] = useState(searchParams.get('city') || '');
@@ -60,7 +60,7 @@ export default function SearchPropertiesPage() {
     bedrooms: searchParams.get('bedrooms') || '',
   });
 
-  // Infinite scroll hook
+  // Infinite scroll hook with sorting
   const {
     properties,
     loading,
@@ -69,7 +69,7 @@ export default function SearchPropertiesPage() {
     hasMore,
     loadMore,
     totalCount,
-  } = useInfiniteProperties(appliedFilters);
+  } = useInfiniteProperties({ ...appliedFilters, sortBy });
 
   const [error, setError] = useState<string | null>(null);
 
@@ -326,7 +326,7 @@ export default function SearchPropertiesPage() {
             <div className="relative">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={(e) => setSortBy(e.target.value as 'recent' | 'price_asc' | 'price_desc')}
                 className="appearance-none pl-9 pr-8 py-2.5 rounded-full text-sm bg-white border cursor-pointer focus:outline-none focus:ring-2 focus:ring-orange-500/20"
                 style={{ borderColor: COLORS.border, color: COLORS.grisTexte }}
               >
