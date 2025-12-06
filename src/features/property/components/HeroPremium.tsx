@@ -9,34 +9,44 @@ interface HeroSlide {
   src: string;
   alt: string;
   position: string;
+  title: string;
+  subtitle: string;
 }
 
 /**
- * HeroPremium - Fade Slideshow Hero
- * 8 images avec transition fade, auto-play 6s (cycle complet 48s), pause au hover
- * Optimisé avec loading="lazy" et fetchPriority pour les performances
+ * HeroPremium - Human-Centric Hero Section
+ * 4 images avec humains pour créer de l'émotion et de la confiance
+ * Texte dynamique synchronisé avec chaque slide
  */
 const HERO_SLIDES: HeroSlide[] = [
   {
-    src: '/images/hero/hero-villa-piscine.jpg',
-    alt: 'Villa moderne avec piscine à Abidjan',
-    position: 'object-center'
+    src: '/images/hero/hero_family_keys.jpg',
+    alt: 'Famille ivoirienne heureuse recevant les clés de leur nouvelle maison',
+    position: 'object-center',
+    title: 'Trouvez le logement de vos rêves',
+    subtitle: 'Villas, appartements et terrains vérifiés à Abidjan.'
   },
   {
-    src: '/images/hero/hero-famille-cles.jpg',
-    alt: 'Famille ivoirienne recevant les clés de leur nouvelle maison',
-    position: 'object-center'
+    src: '/images/hero/hero_couple_search.jpg',
+    alt: 'Jeune couple recherchant leur futur appartement sur Mon Toit',
+    position: 'object-center',
+    title: 'Louez ou achetez en toute simplicité',
+    subtitle: 'Une expérience digitale fluide et sécurisée.'
   },
   {
-    src: '/images/hero/hero-residence-cocody.jpg',
-    alt: 'Résidence moderne à Cocody',
-    position: 'object-center'
+    src: '/images/hero/hero_agent_showing.jpg',
+    alt: 'Agent immobilier Mon Toit faisant visiter un bien',
+    position: 'object-center',
+    title: 'Des experts à votre service',
+    subtitle: 'Faites-vous accompagner par nos agents certifiés.'
   },
   {
-    src: '/images/hero/hero-couple-recherche.jpg',
-    alt: 'Couple recherchant leur logement sur Mon Toit',
-    position: 'object-center'
-  },
+    src: '/images/hero/hero_woman_balcony.jpg',
+    alt: 'Jeune femme active profitant de la vue depuis son balcon',
+    position: 'object-top',
+    title: 'Vivez là où vous vous sentez bien',
+    subtitle: 'Des quartiers prisés : Cocody, Riviera, Zone 4.'
+  }
 ];
 
 const cities = [
@@ -81,7 +91,7 @@ interface OptimizedHeroImageProps {
 function OptimizedHeroImage({ src, alt, position, isActive, priority }: OptimizedHeroImageProps) {
   return (
     <div
-      className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+      className={`absolute inset-0 w-full h-full transition-opacity duration-[1500ms] ease-in-out ${
         isActive ? 'opacity-100' : 'opacity-0'
       }`}
     >
@@ -90,7 +100,7 @@ function OptimizedHeroImage({ src, alt, position, isActive, priority }: Optimize
         alt={alt}
         sizes="100vw"
         className={`w-full h-full object-cover ${position} transition-transform duration-[6000ms] ease-out ${
-          isActive ? 'scale-110' : 'scale-100'
+          isActive ? 'scale-105' : 'scale-100'
         }`}
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
@@ -130,9 +140,11 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
     setCurrentSlide(index);
   }, []);
 
+  const currentSlideData = HERO_SLIDES[currentSlide];
+
   return (
     <section 
-      className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-neutral-900"
+      className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-neutral-900"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -149,9 +161,9 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
           />
         ))}
         
-        {/* Gradient Overlays for readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+        {/* Gradient Overlays améliorés pour lisibilité */}
+        <div className="absolute inset-0 bg-black/40 md:bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
       </div>
 
       {/* Content */}
@@ -166,22 +178,20 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
           </span>
         </div>
 
-        {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
-            Trouvez votre{' '}
-            <span className="text-primary">logement idéal</span>
+        {/* Dynamic Title - synchronized with current slide */}
+        <div className="text-center mb-8 transition-all duration-700">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
+            {currentSlideData?.title}
           </h1>
-          <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">
-            La première plateforme immobilière certifiée en Côte d'Ivoire. 
-            Propriétés vérifiées, paiements sécurisés.
+          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto drop-shadow-md">
+            {currentSlideData?.subtitle}
           </p>
         </div>
 
-        {/* Search Form */}
+        {/* Search Form - Glassmorphism amélioré */}
         <form 
           onSubmit={handleSearch}
-          className="bg-white rounded-2xl overflow-hidden shadow-2xl"
+          className="bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl border border-white/20"
         >
           <div className="flex flex-col lg:flex-row">
             {/* City Select */}
@@ -270,17 +280,17 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
         </div>
       </div>
 
-      {/* Slide Indicators (Dots) */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+      {/* Slide Indicators - Dots élégants */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
         {HERO_SLIDES.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
             aria-label={`Voir l'image ${index + 1}`}
-            className={`h-2 rounded-full transition-all duration-500 ease-out shadow-sm ${
+            className={`rounded-full transition-all duration-500 ease-out shadow-lg border border-white/10 ${
               index === currentSlide 
-                ? 'w-8 bg-white' 
-                : 'w-2 bg-white/50 hover:bg-white/80'
+                ? 'w-10 h-2 bg-primary' 
+                : 'w-2 h-2 bg-white/60 hover:bg-white'
             }`}
           />
         ))}
