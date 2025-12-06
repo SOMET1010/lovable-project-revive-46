@@ -162,6 +162,8 @@ export default {
         'gradient': 'gradient 3s ease infinite',
         'pulse-slow': 'pulseSlow 4s ease-in-out infinite',
         'bounce-slow': 'bounceSlow 3s ease-in-out infinite',
+        // Stories-style fill progress
+        'fill-progress': 'fillProgress 5s linear forwards',
       },
       keyframes: {
         float: {
@@ -212,6 +214,11 @@ export default {
         bounceSlow: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' },
+        },
+        // Stories-style fill progress animation
+        fillProgress: {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
         },
       },
       borderRadius: {
