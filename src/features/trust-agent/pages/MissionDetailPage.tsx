@@ -17,7 +17,7 @@ import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/badge';
 import { Textarea } from '@/shared/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { toast } from '@/shared/hooks/useSafeToast';
 import type { Json } from '@/integrations/supabase/types';
 
 interface ChecklistItem {
