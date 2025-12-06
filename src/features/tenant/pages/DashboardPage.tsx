@@ -175,9 +175,9 @@ export default function TenantDashboard() {
     <TenantDashboardLayout title="Tableau de bord">
       <div>
         {/* Header */}
-        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8">
+        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8 dashboard-header-animate">
           <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center icon-pulse-premium">
               <Home className="h-6 w-6 text-white" />
             </div>
             <span>Mon Tableau de Bord</span>
@@ -191,7 +191,7 @@ export default function TenantDashboard() {
           <div className="lg:col-span-2 space-y-6">
             {/* Active Lease Card */}
             {activeLease ? (
-              <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+              <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-1">
                 <h2 className="text-xl font-bold text-[#2C1810] mb-4 flex items-center gap-2">
                   <Home className="h-6 w-6 text-[#F16522]" />
                   <span>Mon Logement Actuel</span>
@@ -236,7 +236,7 @@ export default function TenantDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="bg-white rounded-[20px] p-8 border border-[#EFEBE9] text-center">
+              <div className="bg-white rounded-[20px] p-8 border border-[#EFEBE9] text-center card-animate-in card-hover-premium card-stagger-1">
                 <div className="bg-[#FFF5F0] w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Home className="h-12 w-12 text-[#F16522]" />
                 </div>
@@ -256,7 +256,7 @@ export default function TenantDashboard() {
 
             {/* Next Payment Card */}
             {nextPayment && (
-              <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+              <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-2">
                 <h2 className="text-xl font-bold text-[#2C1810] mb-4 flex items-center gap-2">
                   <Coins className="h-6 w-6 text-[#F16522]" />
                   <span>Prochain Paiement</span>
@@ -306,7 +306,7 @@ export default function TenantDashboard() {
 
             {/* Payment History */}
             {recentPayments.length > 0 && (
-              <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+              <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-3">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-[#2C1810]">Historique des Paiements</h2>
                   <Link to="/mes-paiements" className="text-[#F16522] hover:underline text-sm font-medium">
@@ -352,7 +352,7 @@ export default function TenantDashboard() {
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
             {/* Quick Actions */}
-            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-4">
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Actions Rapides</h3>
               <div className="space-y-3">
                 {activeLease && (
@@ -398,7 +398,7 @@ export default function TenantDashboard() {
             </div>
 
             {/* Notifications */}
-            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-5">
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Notifications</h3>
               <div className="space-y-3">
                 <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3">

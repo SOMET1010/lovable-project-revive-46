@@ -266,11 +266,11 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#FAF7F4]">
       {/* Header */}
-      <div className="bg-[#2C1810]">
+      <div className="bg-[#2C1810] dashboard-header-animate">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center">
+              <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center icon-pulse-premium">
                 <Shield className="h-7 w-7 text-white" />
               </div>
               <div>
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
             const isNegative = card.changeType === 'decrease';
             
             return (
-              <div key={index} className="bg-white rounded-[20px] border border-[#EFEBE9] p-6 hover:border-[#F16522] transition-colors">
+              <div key={index} className={`bg-white rounded-[20px] border border-[#EFEBE9] p-6 card-animate-in card-hover-premium card-stagger-${Math.min(index + 1, 6)}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div className={`p-3 rounded-xl ${card.bgColor}`}>
                     <Icon className={`w-6 h-6 ${card.color}`} />
@@ -345,7 +345,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {/* Performance Chart */}
-            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6">
+            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6 card-animate-in card-stagger-5">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-[#2C1810]">Performance Système</h2>
                 <div className="flex items-center gap-4 text-sm">
@@ -373,7 +373,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6">
+            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6 card-animate-in card-hover-premium card-stagger-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-[#2C1810]">Activité en Temps Réel</h2>
                 <button className="text-[#F16522] hover:underline text-sm font-medium">
@@ -404,7 +404,7 @@ export default function AdminDashboard() {
 
           <div className="space-y-6">
             {/* System Alerts */}
-            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6">
+            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6 card-animate-in card-stagger-5">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-[#2C1810]">Alertes Système</h2>
                 <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -433,7 +433,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6">
+            <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-6 card-animate-in card-hover-premium card-stagger-6">
               <h2 className="text-lg font-bold text-[#2C1810] mb-6">Actions Rapides</h2>
               <div className="space-y-3">
                 {[
