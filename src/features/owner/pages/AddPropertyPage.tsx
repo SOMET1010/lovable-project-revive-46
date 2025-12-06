@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Upload, X, Image as ImageIcon, Building2, Save, Check, RefreshCw, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Home, Upload, X, Image as ImageIcon, Building2, Check, RefreshCw, FileText, MapPin, DollarSign, Settings } from 'lucide-react';
 import Modal from '@/shared/ui/Modal';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -60,9 +60,17 @@ const INITIAL_FORM_DATA: PropertyFormData = {
   has_ac: false,
 };
 
+// Step configuration
+const STEPS = [
+  { id: 1, label: 'Photos & Infos', icon: ImageIcon },
+  { id: 2, label: 'Localisation', icon: MapPin },
+  { id: 3, label: 'Tarification', icon: DollarSign },
+];
+
 export default function AddProperty() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -130,6 +138,7 @@ export default function AddProperty() {
     setHasDraft(false);
     setImageFiles([]);
     setImagePreviews([]);
+    setStep(1);
   }, []);
 
   // Handler for "Continue draft"
@@ -211,15 +220,15 @@ export default function AddProperty() {
 
   // Character count helpers
   const getTitleCharClass = () => {
-    if (formData.title.length < TITLE_MIN) return 'text-amber-500';
-    if (formData.title.length > TITLE_MAX) return 'text-destructive';
-    return 'text-muted-foreground';
+    if (formData.title.length < TITLE_MIN) return 'text-[var(--color-orange)]';
+    if (formData.title.length > TITLE_MAX) return 'text-red-500';
+    return 'text-[var(--color-gris-neutre)]';
   };
 
   const getDescCharClass = () => {
-    if (formData.description.length > 0 && formData.description.length < DESC_MIN) return 'text-amber-500';
-    if (formData.description.length > DESC_MAX) return 'text-destructive';
-    return 'text-muted-foreground';
+    if (formData.description.length > 0 && formData.description.length < DESC_MIN) return 'text-[var(--color-orange)]';
+    if (formData.description.length > DESC_MAX) return 'text-red-500';
+    return 'text-[var(--color-gris-neutre)]';
   };
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -345,12 +354,27 @@ export default function AddProperty() {
     }
   };
 
+  // Navigation between steps
+  const goToStep = (targetStep: number) => {
+    if (targetStep >= 1 && targetStep <= 3) {
+      setStep(targetStep);
+    }
+  };
+
+  const canProceedToStep2 = () => {
+    return formData.title.length >= TITLE_MIN && formData.property_category;
+  };
+
+  const canProceedToStep3 = () => {
+    return formData.city !== '';
+  };
+
+  // Confetti colors with Premium Ivorian palette
+  const confettiColors = ['var(--color-orange)', 'var(--color-chocolat)', 'hsl(38 92% 50%)', 'hsl(142 76% 36%)'];
+
   if (success) {
-    // Generate random confetti positions
-    const confettiColors = ['hsl(var(--primary))', 'hsl(142 76% 36%)', 'hsl(38 92% 50%)', 'hsl(217 91% 60%)'];
-    
     return (
-      <div className="fixed inset-0 bg-gradient-to-br from-green-50 to-neutral-50 flex items-center justify-center p-4 z-50">
+      <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ background: 'linear-gradient(to bottom right, var(--color-orange-50), var(--color-creme))' }}>
         {/* Confetti effect */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(25)].map((_, i) => (
@@ -374,27 +398,27 @@ export default function AddProperty() {
           ))}
         </div>
 
-        <div className="relative bg-white rounded-3xl p-10 max-w-md text-center shadow-xl animate-fade-in">
+        <div className="relative bg-white rounded-3xl p-10 max-w-md text-center shadow-xl animate-fade-in border" style={{ borderColor: 'var(--color-border)' }}>
           {/* Animated success icon */}
-          <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce">
+          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce" style={{ background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))' }}>
             <Check className="h-12 w-12 text-white" />
           </div>
           
-          <h2 className="text-3xl font-bold text-neutral-900 mb-3">
+          <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--color-chocolat)' }}>
             🎉 Félicitations !
           </h2>
-          <p className="text-xl text-neutral-700 mb-2">
+          <p className="text-xl mb-2" style={{ color: 'var(--color-gris-texte)' }}>
             Propriété publiée avec succès
           </p>
-          <p className="text-neutral-500 mb-6">
+          <p className="mb-6" style={{ color: 'var(--color-gris-neutre)' }}>
             Votre annonce est maintenant visible par tous les locataires sur Mon Toit.
           </p>
           
           {/* Animated redirect indicator */}
-          <div className="flex items-center justify-center gap-2 text-primary-500">
-            <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="flex items-center justify-center gap-2" style={{ color: 'var(--color-orange)' }}>
+            <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--color-orange)', animationDelay: '0ms' }} />
+            <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--color-orange)', animationDelay: '150ms' }} />
+            <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--color-orange)', animationDelay: '300ms' }} />
             <span className="ml-2 font-medium">Redirection vers votre dashboard...</span>
           </div>
         </div>
@@ -403,122 +427,180 @@ export default function AddProperty() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="bg-white border-b border-neutral-100">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen pb-20" style={{ backgroundColor: 'var(--color-creme)' }}>
+      {/* Header Sticky Premium Ivorian */}
+      <div className="bg-white border-b sticky top-0 z-30 shadow-sm" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <button
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2 text-primary-500 hover:text-primary-600 transition-colors font-medium"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 font-medium transition-colors hover:opacity-80"
+            style={{ color: 'var(--color-gris-texte)' }}
           >
             <ArrowLeft className="h-5 w-5" />
             <span>Retour</span>
           </button>
+          
+          {/* Progress Dots */}
+          <div className="flex items-center gap-3">
+            {STEPS.map((s, idx) => (
+              <button
+                key={s.id}
+                onClick={() => goToStep(s.id)}
+                className={`flex items-center gap-2 transition-all ${step === s.id ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
+              >
+                <div 
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                    step >= s.id 
+                      ? 'text-white shadow-lg' 
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
+                  style={{ 
+                    backgroundColor: step >= s.id ? 'var(--color-orange)' : undefined,
+                    boxShadow: step >= s.id ? '0 4px 12px rgba(241, 101, 34, 0.3)' : undefined
+                  }}
+                >
+                  {s.id}
+                </div>
+                <span className={`hidden md:block text-sm font-medium ${step === s.id ? '' : 'text-gray-400'}`} style={{ color: step === s.id ? 'var(--color-chocolat)' : undefined }}>
+                  {s.label}
+                </span>
+                {idx < STEPS.length - 1 && (
+                  <div className="w-8 h-0.5 hidden md:block" style={{ backgroundColor: step > s.id ? 'var(--color-orange)' : 'var(--color-border)' }} />
+                )}
+              </button>
+            ))}
+          </div>
+          
+          {/* Draft saved indicator */}
+          {draftSaved && (
+            <span className="flex items-center gap-1 text-xs font-medium text-green-600">
+              <Check className="h-3 w-3" />
+              Sauvegardé
+            </span>
+          )}
+          {!draftSaved && hasDraft && (
+            <button onClick={clearDraft} className="flex items-center gap-1 text-xs hover:text-red-500 transition-colors" style={{ color: 'var(--color-gris-neutre)' }}>
+              <RefreshCw className="h-3 w-3" />
+              Effacer
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-2xl p-8 shadow-card">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-neutral-900 mb-3 flex items-center gap-3">
-              <Home className="h-8 w-8 text-primary-500" />
-              <span>Ajouter une propriété</span>
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        {/* Page Title */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 rounded-xl" style={{ backgroundColor: 'var(--color-orange-100)' }}>
+              <Home className="w-6 h-6" style={{ color: 'var(--color-orange)' }} />
+            </div>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--color-chocolat)' }}>
+              Ajouter une propriété
             </h1>
-            <p className="text-neutral-600 text-lg">Remplissez les informations de votre propriété pour la publier sur Mon Toit</p>
-            
-            {/* Draft indicator */}
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-2 text-sm">
-                {draftSaved && (
-                  <span className="flex items-center gap-1 text-green-600">
-                    <Check className="h-4 w-4" />
-                    Brouillon sauvegardé
-                  </span>
-                )}
-                {hasDraft && !draftSaved && (
-                  <span className="text-neutral-500">Brouillon restauré</span>
-                )}
-              </div>
-              {(hasDraft || formData.title) && (
-                <button
-                  type="button"
-                  onClick={clearDraft}
-                  className="flex items-center gap-1 text-sm text-neutral-500 hover:text-red-500 transition-colors"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  Recommencer
-                </button>
-              )}
-            </div>
           </div>
+          <p style={{ color: 'var(--color-gris-texte)' }}>
+            Remplissez les informations de votre propriété pour la publier sur Mon Toit
+          </p>
+        </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-              <strong>Erreur:</strong> {error}
-            </div>
-          )}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
+            <strong>Erreur:</strong> {error}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-6 flex items-center gap-2">
-                <ImageIcon className="h-5 w-5 text-primary-500" />
-                <span>Photos de la propriété</span>
-              </h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* STEP 1: Photos & Infos générales */}
+          {step === 1 && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Photos Section */}
+              <div className="bg-white p-6 rounded-2xl border shadow-sm" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <ImageIcon className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
+                  <h2 className="font-bold" style={{ color: 'var(--color-chocolat)' }}>Photos de la propriété</h2>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  {imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200">
+                      <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                      {index === 0 && (
+                        <div className="absolute bottom-2 left-2 text-white text-xs px-2 py-1 rounded-full font-medium" style={{ backgroundColor: 'var(--color-orange)' }}>
+                          Photo principale
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {imageFiles.length < 10 && (
+                    <label className="aspect-square border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all group hover:bg-[var(--color-orange-50)]" style={{ borderColor: 'var(--color-border)' }}>
+                      <Upload className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" style={{ color: 'var(--color-gris-neutre)' }} />
+                      <span className="text-xs font-medium text-center px-2" style={{ color: 'var(--color-gris-neutre)' }}>
+                        Cliquez pour ajouter<br/>(Max 10)
+                      </span>
+                      <input type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
+                    </label>
+                  )}
+                </div>
+              </div>
 
-              <div className="space-y-4">
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageSelect}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label
-                    htmlFor="image-upload"
-                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-neutral-300 rounded-xl cursor-pointer bg-white hover:bg-neutral-50 transition-colors"
-                  >
-                    <Upload className="h-12 w-12 text-neutral-400 mb-3" />
-                    <span className="text-neutral-700 font-medium">Cliquez pour ajouter des photos</span>
-                    <span className="text-sm text-neutral-500 mt-1">Maximum 10 images (JPG, PNG)</span>
+              {/* General Info Section */}
+              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+                <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Informations générales</h2>
+                
+                {/* Category Toggle */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--color-gris-neutre)' }}>
+                    Catégorie de bien *
                   </label>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, property_category: 'residential' }))}
+                      className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                        formData.property_category === 'residential'
+                          ? 'text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }`}
+                      style={{ 
+                        backgroundColor: formData.property_category === 'residential' ? 'var(--color-orange)' : undefined,
+                        boxShadow: formData.property_category === 'residential' ? '0 8px 20px rgba(241, 101, 34, 0.25)' : undefined
+                      }}
+                    >
+                      <Home className="w-4 h-4" /> Résidentiel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, property_category: 'commercial' }))}
+                      className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
+                        formData.property_category === 'commercial'
+                          ? 'text-white shadow-lg'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }`}
+                      style={{ 
+                        backgroundColor: formData.property_category === 'commercial' ? 'var(--color-orange)' : undefined,
+                        boxShadow: formData.property_category === 'commercial' ? '0 8px 20px rgba(241, 101, 34, 0.25)' : undefined
+                      }}
+                    >
+                      <Building2 className="w-4 h-4" /> Commercial
+                    </button>
+                  </div>
                 </div>
 
-                {imagePreviews.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {imagePreviews.map((preview, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-xl border border-neutral-200"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                        >
-                          <X className="h-4 w-4" />
-                        </button>
-                        {index === 0 && (
-                          <div className="absolute bottom-2 left-2 bg-primary-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-                            Photo principale
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Informations générales</h2>
-
-              <div className="space-y-4">
+                {/* Title */}
                 <div>
+                  <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    Titre de l'annonce *
+                  </label>
                   <ValidatedInput
-                    label="Titre de l'annonce"
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
@@ -528,7 +610,6 @@ export default function AddProperty() {
                     error={getFieldState('title').error}
                     touched={getFieldState('title').isInvalid || getFieldState('title').isValid}
                     isValid={getFieldState('title').isValid}
-                    helperText={`Minimum ${TITLE_MIN} caractères`}
                     maxLength={TITLE_MAX}
                   />
                   <div className={`text-xs mt-1 text-right ${getTitleCharClass()}`}>
@@ -536,13 +617,16 @@ export default function AddProperty() {
                   </div>
                 </div>
 
+                {/* Description */}
                 <div>
+                  <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    Description
+                  </label>
                   <ValidatedTextarea
-                    label="Description"
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
-                    rows={5}
+                    rows={4}
                     placeholder="Décrivez votre propriété en détail..."
                     maxLength={DESC_MAX}
                   />
@@ -554,54 +638,18 @@ export default function AddProperty() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                    Catégorie de bien <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, property_category: 'residential' }))}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${
-                        formData.property_category === 'residential'
-                          ? 'bg-primary-500 text-white shadow-md border border-primary-500'
-                          : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300'
-                      }`}
-                    >
-                      <Home className="w-5 h-5" />
-                      <span>Résidentiel</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, property_category: 'commercial' }))}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-colors ${
-                        formData.property_category === 'commercial'
-                          ? 'bg-primary-500 text-white shadow-md border border-primary-500'
-                          : 'bg-white text-neutral-700 border border-neutral-200 hover:border-primary-300'
-                      }`}
-                    >
-                      <Building2 className="w-5 h-5" />
-                      <span>Commercial</span>
-                    </button>
-                  </div>
-                  <p className="mt-2 text-xs text-neutral-600">
-                    {formData.property_category === 'residential'
-                      ? 'Pour les logements : appartements, maisons, villas...'
-                      : 'Pour les locaux professionnels : bureaux, commerces...'}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Property Type & Surface */}
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Type de bien <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Type de bien *
                     </label>
                     <select
                       name="property_type"
                       value={formData.property_type}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                      className="input-premium w-full"
                     >
                       {getPropertyTypesForCategory().map(type => (
                         <option key={type.value} value={type.value}>
@@ -612,7 +660,7 @@ export default function AddProperty() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
                       Surface (m²)
                     </label>
                     <input
@@ -621,17 +669,17 @@ export default function AddProperty() {
                       value={formData.surface_area}
                       onChange={handleChange}
                       min="0"
-                      step="0.01"
                       placeholder="Ex: 75"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                      className="input-premium w-full"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Bedrooms & Bathrooms */}
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Chambres <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Chambres *
                     </label>
                     <input
                       type="number"
@@ -640,13 +688,13 @@ export default function AddProperty() {
                       onChange={handleChange}
                       required
                       min="0"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                      className="input-premium w-full"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Salles de bain <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Salles de bain *
                     </label>
                     <input
                       type="number"
@@ -655,19 +703,37 @@ export default function AddProperty() {
                       onChange={handleChange}
                       required
                       min="0"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                      className="input-premium w-full"
                     />
                   </div>
                 </div>
               </div>
+
+              {/* Step 1 Navigation */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => goToStep(2)}
+                  disabled={!canProceedToStep2()}
+                  className="btn-premium-chocolat disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
+          )}
 
-            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Localisation</h2>
+          {/* STEP 2: Localisation */}
+          {step === 2 && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
+                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Localisation</h2>
+                </div>
 
-              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
                     Adresse complète
                   </label>
                   <input
@@ -676,28 +742,27 @@ export default function AddProperty() {
                     value={formData.address}
                     onChange={handleChange}
                     placeholder="Ex: Rue des Jardins, Résidence Les Palmiers"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                    className="input-premium w-full"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Ville <span className="text-red-500">*</span>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Ville *
                     </label>
                     <select
                       name="city"
                       value={formData.city}
                       onChange={(e) => {
                         handleChange(e);
-                        // Reset neighborhood when city changes
                         if (e.target.value !== 'Abidjan') {
                           setFormData(prev => ({ ...prev, neighborhood: '' }));
                         }
                       }}
                       onBlur={() => handleBlur('city')}
                       required
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                      className="input-premium w-full"
                     >
                       <option value="">Sélectionnez une ville</option>
                       {CITIES.map(city => (
@@ -707,15 +772,15 @@ export default function AddProperty() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Quartier {formData.city === 'Abidjan' && <span className="text-neutral-500">(commune)</span>}
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Quartier {formData.city === 'Abidjan' && <span className="font-normal">(commune)</span>}
                     </label>
                     {formData.city === 'Abidjan' ? (
                       <select
                         name="neighborhood"
                         value={formData.neighborhood}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                        className="input-premium w-full"
                       >
                         <option value="">Sélectionnez une commune</option>
                         {ABIDJAN_COMMUNES.map(commune => (
@@ -729,138 +794,163 @@ export default function AddProperty() {
                         value={formData.neighborhood}
                         onChange={handleChange}
                         placeholder="Ex: Centre-ville"
-                        className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                        className="input-premium w-full"
                       />
                     )}
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Tarification</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                    Loyer mensuel (FCFA) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="monthly_rent"
-                    value={formData.monthly_rent}
-                    onChange={handleChange}
-                    onBlur={() => handleBlur('monthly_rent')}
-                    required
-                    min="0"
-                    placeholder="Ex: 150000"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                    Dépôt de garantie (FCFA)
-                  </label>
-                  <input
-                    type="number"
-                    name="deposit_amount"
-                    value={formData.deposit_amount}
-                    onChange={handleChange}
-                    min="0"
-                    placeholder="Ex: 300000"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                    Charges mensuelles (FCFA)
-                  </label>
-                  <input
-                    type="number"
-                    name="charges_amount"
-                    value={formData.charges_amount}
-                    onChange={handleChange}
-                    min="0"
-                    placeholder="Ex: 25000"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                  />
-                </div>
+              {/* Step 2 Navigation */}
+              <div className="flex justify-between">
+                <button
+                  type="button"
+                  onClick={() => goToStep(1)}
+                  className="btn-premium-secondary"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Retour
+                </button>
+                <button
+                  type="button"
+                  onClick={() => goToStep(3)}
+                  disabled={!canProceedToStep3()}
+                  className="btn-premium-chocolat disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
             </div>
+          )}
 
-            <div className="bg-neutral-50 p-6 rounded-xl border border-neutral-200">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-6">Équipements</h2>
+          {/* STEP 3: Tarification & Équipements */}
+          {step === 3 && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Pricing */}
+              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
+                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Tarification</h2>
+                </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <label className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-primary-300 transition-colors">
-                  <input
-                    type="checkbox"
-                    name="is_furnished"
-                    checked={formData.is_furnished}
-                    onChange={handleChange}
-                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
-                  />
-                  <span className="font-medium text-neutral-700">Meublé</span>
-                </label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-orange)' }}>
+                      Loyer mensuel (FCFA) *
+                    </label>
+                    <input
+                      type="number"
+                      name="monthly_rent"
+                      value={formData.monthly_rent}
+                      onChange={handleChange}
+                      onBlur={() => handleBlur('monthly_rent')}
+                      required
+                      min="0"
+                      placeholder="Ex: 150000"
+                      className="input-premium w-full font-bold text-lg"
+                      style={{ borderColor: 'var(--color-orange-100)', color: 'var(--color-chocolat)' }}
+                    />
+                  </div>
 
-                <label className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-primary-300 transition-colors">
-                  <input
-                    type="checkbox"
-                    name="has_parking"
-                    checked={formData.has_parking}
-                    onChange={handleChange}
-                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
-                  />
-                  <span className="font-medium text-neutral-700">Parking</span>
-                </label>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Dépôt de garantie (FCFA)
+                    </label>
+                    <input
+                      type="number"
+                      name="deposit_amount"
+                      value={formData.deposit_amount}
+                      onChange={handleChange}
+                      min="0"
+                      placeholder="Ex: 300000"
+                      className="input-premium w-full"
+                    />
+                  </div>
 
-                <label className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-primary-300 transition-colors">
-                  <input
-                    type="checkbox"
-                    name="has_garden"
-                    checked={formData.has_garden}
-                    onChange={handleChange}
-                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
-                  />
-                  <span className="font-medium text-neutral-700">Jardin</span>
-                </label>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Charges (FCFA)
+                    </label>
+                    <input
+                      type="number"
+                      name="charges_amount"
+                      value={formData.charges_amount}
+                      onChange={handleChange}
+                      min="0"
+                      placeholder="0"
+                      className="input-premium w-full"
+                    />
+                  </div>
+                </div>
+              </div>
 
-                <label className="flex items-center space-x-3 p-4 bg-white rounded-xl border border-neutral-200 cursor-pointer hover:border-primary-300 transition-colors">
-                  <input
-                    type="checkbox"
-                    name="has_ac"
-                    checked={formData.has_ac}
-                    onChange={handleChange}
-                    className="rounded border-neutral-300 text-primary-500 focus:ring-primary-500"
-                  />
-                  <span className="font-medium text-neutral-700">Climatisation</span>
-                </label>
+              {/* Equipment */}
+              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Settings className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
+                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Équipements</h2>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { name: 'is_furnished', label: 'Meublé', checked: formData.is_furnished },
+                    { name: 'has_parking', label: 'Parking', checked: formData.has_parking },
+                    { name: 'has_garden', label: 'Jardin', checked: formData.has_garden },
+                    { name: 'has_ac', label: 'Climatisation', checked: formData.has_ac },
+                  ].map((item) => (
+                    <label
+                      key={item.name}
+                      className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-all border ${
+                        item.checked 
+                          ? 'border-[var(--color-orange)] bg-[var(--color-orange-50)]' 
+                          : 'border-[var(--color-border)] bg-white hover:border-[var(--color-orange)]'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        name={item.name}
+                        checked={item.checked}
+                        onChange={handleChange}
+                        className="w-5 h-5 rounded text-[var(--color-orange)] focus:ring-[var(--color-orange)]"
+                        style={{ accentColor: 'var(--color-orange)' }}
+                      />
+                      <span className="font-medium" style={{ color: item.checked ? 'var(--color-chocolat)' : 'var(--color-gris-texte)' }}>
+                        {item.label}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Step 3 Navigation & Submit */}
+              <div className="flex justify-between items-center pt-4">
+                <button
+                  type="button"
+                  onClick={() => goToStep(2)}
+                  className="btn-premium-secondary"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Retour
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading || uploadingImages}
+                  className="btn-premium-primary transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed px-10 py-4 text-lg"
+                  style={{ boxShadow: '0 8px 24px rgba(241, 101, 34, 0.3)' }}
+                >
+                  {loading || uploadingImages ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>{uploadingImages ? 'Upload des images...' : 'Publication...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-5 h-5" /> Publier l'annonce
+                    </>
+                  )}
+                </button>
               </div>
             </div>
-
-            <div className="flex justify-end">
-              <button
-                type="submit"
-                disabled={loading || uploadingImages}
-                className="flex items-center gap-2 px-8 py-4 bg-primary-500 text-white font-bold rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              >
-                {loading || uploadingImages ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    <span>{uploadingImages ? 'Upload des images...' : 'Publication...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-5 w-5" />
-                    <span>Publier la propriété</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+          )}
+        </form>
       </div>
 
       {/* Draft confirmation modal */}
@@ -873,36 +963,39 @@ export default function AddProperty() {
         showCloseButton={false}
       >
         <div className="text-center py-4">
-          {/* File icon with animation */}
-          <div className="w-24 h-24 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <FileText className="h-12 w-12 text-primary-600 animate-pulse" />
+          {/* File icon with gradient */}
+          <div 
+            className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg"
+            style={{ background: 'linear-gradient(135deg, var(--color-orange-100), var(--color-orange-50))' }}
+          >
+            <FileText className="h-12 w-12 animate-pulse" style={{ color: 'var(--color-orange)' }} />
           </div>
           
-          <h3 className="text-xl font-bold text-neutral-900 mb-2">
+          <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--color-chocolat)' }}>
             📝 Brouillon trouvé !
           </h3>
           
-          <p className="text-neutral-600 mb-4">
+          <p className="mb-4" style={{ color: 'var(--color-gris-texte)' }}>
             Vous avez un brouillon non terminé pour cette propriété.
           </p>
           
           {pendingDraftData?.title && (
-            <div className="bg-neutral-50 p-4 rounded-xl mb-6 text-left">
-              <p className="text-xs text-neutral-500 uppercase tracking-wide mb-1">Titre sauvegardé</p>
-              <p className="text-neutral-800 font-medium truncate">{pendingDraftData.title}</p>
+            <div className="p-4 rounded-xl mb-6 text-left" style={{ backgroundColor: 'var(--color-creme)' }}>
+              <p className="text-xs uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>Titre sauvegardé</p>
+              <p className="font-medium truncate" style={{ color: 'var(--color-chocolat)' }}>{pendingDraftData.title}</p>
             </div>
           )}
           
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleStartFresh}
-              className="flex-1 px-4 py-3 border border-neutral-300 rounded-xl text-neutral-700 hover:bg-neutral-50 transition-colors font-medium"
+              className="btn-premium-secondary flex-1 justify-center"
             >
               Recommencer à zéro
             </button>
             <button
               onClick={handleContinueDraft}
-              className="flex-1 px-4 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-medium"
+              className="btn-premium-primary flex-1 justify-center"
             >
               Continuer le brouillon
             </button>
