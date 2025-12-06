@@ -23,6 +23,11 @@ export default function PageTransition({ children }: PageTransitionProps) {
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
     : false;
 
+  // Scroll to top on initial mount
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, []);
+
   useEffect(() => {
     // Skip animation if reduced motion is preferred
     if (prefersReducedMotion) {
