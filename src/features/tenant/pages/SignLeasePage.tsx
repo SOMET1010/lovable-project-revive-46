@@ -8,6 +8,7 @@ import Footer from '@/app/layout/Footer';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui/FormStepper';
 import CryptoNeoSignature from '@/shared/ui/CryptoNeoSignature';
 import DigitalCertificateCard from '@/shared/ui/DigitalCertificateCard';
+import { useConfetti } from '@/shared/hooks/useConfetti';
 import { 
   FileText, 
   Shield, 
@@ -69,6 +70,7 @@ export default function SignLeasePage() {
   const { user, profile } = useAuth();
   const { id: leaseId } = useParams<{ id: string }>();
   const { step, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(3);
+  const { triggerCertifiedSignatureConfetti } = useConfetti();
   
   const [lease, setLease] = useState<LeaseContract | null>(null);
   const [property, setProperty] = useState<Property | null>(null);
@@ -187,7 +189,8 @@ export default function SignLeasePage() {
   };
 
   const handleCertifiedSignSuccess = (signedUrl: string) => {
-    setSuccess('✅ Signature certifiée CryptoNeo réussie!');
+    triggerCertifiedSignatureConfetti();
+    setSuccess('🎉 Signature certifiée CryptoNeo réussie!');
     if (signedUrl) {
       setLease(prev => prev ? { ...prev, signed_document_url: signedUrl, status: 'active' } : null);
     }
