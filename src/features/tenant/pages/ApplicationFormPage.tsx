@@ -4,6 +4,7 @@ import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Aw
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService } from '@/services/scoringService';
+import { notifyApplicationReceived } from '@/services/notifications/applicationNotificationService';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -84,27 +85,30 @@ export default function ApplicationForm() {
       const applicationScore = calculateApplicationScore();
 
       // Insert application - types will be updated after migration sync
-      const { error: insertError } = await supabase
-        .from('rental_applications' as any)
+      const { data: applicationData, error: insertError } = await supabase
+        .from('rental_applications')
         .insert({
           property_id: property.id,
           applicant_id: user.id,
           cover_letter: coverLetter,
           application_score: applicationScore,
           status: 'en_attente',
-        } as any);
+        })
+        .select('id')
+        .single();
 
       if (insertError) throw insertError;
 
-      // Send notification message
-      const notificationMessage = `Nouvelle candidature pour ${property.title} (Score: ${applicationScore}/100)`;
-      await supabase
-        .from('messages' as any)
-        .insert({
-          sender_id: user.id,
-          receiver_id: property.owner_id,
-          content: notificationMessage,
-        } as any);
+      // Send notification to owner via edge function (in-app + email)
+      try {
+        const appId = (applicationData as { id: string } | null)?.id;
+        if (appId) {
+          await notifyApplicationReceived(appId);
+        }
+      } catch (notifError) {
+        console.error('Failed to send notification:', notifError);
+        // Don't block the submission if notification fails
+      }
 
       setSuccess(true);
       setTimeout(() => {

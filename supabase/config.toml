@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.check-lease-expirations]
 verify_jwt = false
+
+[functions.send-application-notifications]
+verify_jwt = false
