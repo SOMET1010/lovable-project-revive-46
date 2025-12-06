@@ -91,3 +91,7 @@ export type { FloatingCallButtonProps } from './FloatingCallButton';
 // Validation components
 export { ValidatedInput } from './ValidatedInput';
 export { ValidatedTextarea } from './ValidatedTextarea';
+
+// Form Stepper
+export { FormStepper, FormStepContent, useFormStepper } from './FormStepper';
+export type { FormStepperProps, FormStepContentProps } from './FormStepper';

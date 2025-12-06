@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Award } from 'lucide-react';
+import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Award, ChevronRight } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService } from '@/services/scoringService';
 import { notifyApplicationReceived } from '@/services/notifications/applicationNotificationService';
 import { ValidationService } from '@/services/validation';
 import { useFormValidation } from '@/shared/hooks/useFormValidation';
-import { ValidatedTextarea } from '@/shared/ui';
+import { ValidatedTextarea, FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -46,6 +46,9 @@ export default function ApplicationForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [existingApplication, setExistingApplication] = useState(false);
+  
+  // Form stepper
+  const { step, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(1, 2);
   
   // Form validation
   const { validateField, getFieldState, touched } = useFormValidation<ApplicationFormData>();
@@ -119,7 +122,6 @@ export default function ApplicationForm() {
     try {
       const applicationScore = calculateApplicationScore();
 
-      // Insert application - types will be updated after migration sync
       const { data: applicationData, error: insertError } = await supabase
         .from('rental_applications')
         .insert({
@@ -134,7 +136,7 @@ export default function ApplicationForm() {
 
       if (insertError) throw insertError;
 
-      // Send notification to owner via edge function (in-app + email)
+      // Send notification to owner
       try {
         const appId = (applicationData as { id: string } | null)?.id;
         if (appId) {
@@ -142,7 +144,6 @@ export default function ApplicationForm() {
         }
       } catch (notifError) {
         console.error('Failed to send notification:', notifError);
-        // Don't block the submission if notification fails
       }
 
       setSuccess(true);
@@ -157,14 +158,13 @@ export default function ApplicationForm() {
   };
 
   const calculateApplicationScore = () => {
-    // Utiliser le ScoringService centralisé
     return ScoringService.calculateSimpleScore(profile);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-coral-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-terracotta-500"></div>
+      <div className="form-page-container flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4" style={{ borderColor: 'var(--form-orange)' }}></div>
       </div>
     );
   }
@@ -173,16 +173,16 @@ export default function ApplicationForm() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-coral-50 flex items-center justify-center p-4">
-        <div className="glass-card rounded-3xl p-8 max-w-md text-center animate-scale-in">
-          <div className="w-24 h-24 bg-gradient-to-br from-olive-100 to-green-100 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-olive-200">
-            <CheckCircle className="h-12 w-12 text-olive-600" />
+      <div className="form-page-container flex items-center justify-center p-4">
+        <div className="form-section-premium max-w-md text-center animate-scale-in">
+          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}>
+            <CheckCircle className="h-12 w-12" style={{ color: 'var(--form-success)' }} />
           </div>
-          <h2 className="text-3xl font-bold text-gradient mb-3">Candidature envoyée!</h2>
-          <p className="text-gray-700 mb-6 text-lg">
+          <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--form-chocolat)' }}>Candidature envoyée!</h2>
+          <p className="text-lg mb-6" style={{ color: 'var(--form-sable)' }}>
             Votre candidature a été envoyée avec succès au propriétaire. Vous serez notifié de sa réponse.
           </p>
-          <p className="text-sm text-terracotta-600 font-medium animate-pulse">Redirection en cours...</p>
+          <p className="text-sm font-medium animate-pulse" style={{ color: 'var(--form-orange)' }}>Redirection en cours...</p>
         </div>
       </div>
     );
@@ -191,13 +191,17 @@ export default function ApplicationForm() {
   const applicationScore = calculateApplicationScore();
   const isVerified = profile?.is_verified ?? false;
 
+  const stepLabels = ['Informations', 'Motivation'];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50 custom-cursor">
-      <div className="glass-card border-b border-white/20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="form-page-container">
+      {/* Header */}
+      <div className="form-section-premium mb-6" style={{ borderRadius: 0, border: 'none', borderBottom: '1px solid var(--form-border)' }}>
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <button
             onClick={() => window.history.back()}
-            className="flex items-center space-x-2 text-terracotta-600 hover:text-terracotta-700 transition-all duration-300 transform hover:scale-105 font-medium"
+            className="flex items-center space-x-2 font-medium transition-all duration-300 hover:scale-105"
+            style={{ color: 'var(--form-orange)' }}
           >
             <ArrowLeft className="h-5 w-5" />
             <span>Retour</span>
@@ -205,132 +209,178 @@ export default function ApplicationForm() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="card-scrapbook p-8 animate-slide-down">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gradient mb-3 flex items-center space-x-3">
-              <FileText className="h-10 w-10 text-terracotta-500" />
-              <span>Postuler pour cette propriété</span>
+      <div className="form-content-wrapper px-4">
+        {/* Property Info Header */}
+        <div className="form-section-premium mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <FileText className="h-8 w-8" style={{ color: 'var(--form-orange)' }} />
+            <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--form-chocolat)' }}>
+              Postuler pour cette propriété
             </h1>
-            <div className="bg-gradient-to-r from-terracotta-100 to-coral-100 border-2 border-terracotta-200 rounded-2xl p-4 mt-4">
-              <p className="text-gray-900 font-bold text-xl">{property.title}</p>
-              <p className="text-gray-700 flex items-center space-x-2 mt-1">
-                <MapPin className="h-4 w-4 text-terracotta-500" />
-                <span>{property.city}, {property.neighborhood}</span>
-              </p>
-              <p className="text-terracotta-600 font-bold text-lg mt-2">
-                {property.monthly_rent.toLocaleString()} FCFA/mois
-              </p>
-            </div>
           </div>
+          <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--form-ivoire)', border: '1px solid var(--form-border)' }}>
+            <p className="font-bold text-lg" style={{ color: 'var(--form-chocolat)' }}>{property.title}</p>
+            <p className="flex items-center gap-2 mt-1" style={{ color: 'var(--form-sable)' }}>
+              <MapPin className="h-4 w-4" />
+              <span>{property.city}, {property.neighborhood}</span>
+            </p>
+            <p className="font-bold text-lg mt-2" style={{ color: 'var(--form-orange)' }}>
+              {property.monthly_rent.toLocaleString()} FCFA/mois
+            </p>
+          </div>
+        </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-2xl text-red-700 animate-shake">
-              <strong>Erreur:</strong> {error}
+        {/* Stepper */}
+        <div className="mb-8">
+          <FormStepper
+            currentStep={step}
+            totalSteps={2}
+            onStepChange={goToStep}
+            labels={stepLabels}
+          />
+        </div>
+
+        {error && (
+          <div className="form-error-message mb-6">
+            <strong>Erreur:</strong> {error}
+          </div>
+        )}
+
+        {!isVerified && (
+          <div className="form-error-message mb-6 flex-col items-start gap-3">
+            <div className="flex items-center gap-3">
+              <Shield className="h-6 w-6" />
+              <strong>Vérification d'identité OBLIGATOIRE</strong>
             </div>
-          )}
+            <p>Vous devez compléter la vérification de votre identité avant de postuler.</p>
+            <Link
+              to="/profil"
+              className="form-button-primary mt-2"
+            >
+              Compléter ma vérification →
+            </Link>
+          </div>
+        )}
 
-          {!isVerified && (
-            <div className="mb-6 p-6 glass-card rounded-3xl bg-gradient-to-br from-red-100 to-orange-100 border-2 border-red-400 animate-slide-up">
-              <div className="flex items-start space-x-4">
-                <div className="bg-gradient-to-br from-red-200 to-orange-200 p-3 rounded-2xl">
-                  <Shield className="h-8 w-8 text-red-700" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-bold text-red-900 text-lg mb-2">Vérification d'identité OBLIGATOIRE</p>
-                  <p className="text-red-800 mb-3 font-semibold">
-                    Vous devez compléter la vérification de votre identité avant de postuler.
-                  </p>
-                  <Link
-                    to="/profil"
-                    className="inline-block px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all font-bold shadow-lg"
-                  >
-                    Compléter ma vérification maintenant →
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-gradient-to-br from-cyan-50 to-blue-50 p-6 rounded-2xl border border-cyan-200">
-              <h2 className="text-2xl font-bold text-gradient mb-6 flex items-center space-x-2">
-                <User className="h-6 w-6 text-terracotta-500" />
+        <form onSubmit={handleSubmit}>
+          {/* STEP 1: Informations personnelles */}
+          <FormStepContent step={1} currentStep={step} slideDirection={slideDirection} className="space-y-6">
+            {/* Personal Info */}
+            <div className="form-section-premium">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
+                <User className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
                 <span>Informations personnelles</span>
               </h2>
-              <div className="bg-white rounded-xl p-5 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <User className="h-5 w-5 text-gray-500" />
-                    <span className="text-gray-700 font-medium">Nom complet</span>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
+                  <div className="flex items-center gap-3">
+                    <User className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
+                    <span className="form-label-premium mb-0">Nom complet</span>
                   </div>
-                  <span className="font-bold text-gray-900">{profile?.full_name || 'Non renseigné'}</span>
+                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.full_name || 'Non renseigné'}</span>
                 </div>
-                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-gray-500" />
-                    <span className="text-gray-700 font-medium">Email</span>
+                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
+                    <span className="form-label-premium mb-0">Email</span>
                   </div>
-                  <span className="font-bold text-gray-900">{user?.email}</span>
+                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{user?.email}</span>
                 </div>
-                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-gray-500" />
-                    <span className="text-gray-700 font-medium">Téléphone</span>
+                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
+                    <span className="form-label-premium mb-0">Téléphone</span>
                   </div>
-                  <span className="font-bold text-gray-900">{profile?.phone || 'Non renseigné'}</span>
+                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.phone || 'Non renseigné'}</span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <MapPin className="h-5 w-5 text-gray-500" />
-                    <span className="text-gray-700 font-medium">Ville</span>
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
+                    <span className="form-label-premium mb-0">Ville</span>
                   </div>
-                  <span className="font-bold text-gray-900">{profile?.city || 'Non renseignée'}</span>
+                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.city || 'Non renseignée'}</span>
                 </div>
               </div>
               <Link
                 to="/profil"
-                className="text-terracotta-600 hover:text-terracotta-700 text-sm font-bold mt-3 inline-block transition-all duration-300 transform hover:scale-105"
+                className="text-sm font-bold mt-4 inline-block transition-all hover:scale-105"
+                style={{ color: 'var(--form-orange)' }}
               >
                 Modifier mes informations →
               </Link>
             </div>
 
-            <div className="bg-gradient-to-br from-olive-50 to-green-50 p-6 rounded-2xl border border-olive-200">
-              <h2 className="text-2xl font-bold text-gradient mb-6 flex items-center space-x-2">
-                <Shield className="h-6 w-6 text-terracotta-500" />
+            {/* Verification Status */}
+            <div className="form-section-premium">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
+                <Shield className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
                 <span>Statut de vérification</span>
               </h2>
-              <div className="bg-white rounded-xl p-5 space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-gray-200">
-                  <div className="flex-1">
-                    <span className="text-gray-700 font-medium block">Vérification d'identité</span>
-                    <span className="text-xs text-gray-500">Document CNI authentifié via ONECI/CNAM</span>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
+                  <div>
+                    <span className="form-label-premium mb-0">Vérification d'identité</span>
+                    <span className="text-xs block" style={{ color: 'var(--form-sable)' }}>Document CNI authentifié via ONECI/CNAM</span>
                   </div>
-                  <span className={`font-bold px-4 py-2 rounded-full ${
+                  <span className={`font-bold px-4 py-2 rounded-full text-sm ${
                     isVerified
-                      ? 'bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-800 border border-blue-300'
-                      : 'bg-gray-100 text-gray-500 border border-gray-300'
-                  }`}>
+                      ? 'text-white'
+                      : ''
+                  }`} style={{ 
+                    backgroundColor: isVerified ? 'var(--form-success)' : 'var(--form-ivoire)',
+                    color: isVerified ? 'white' : 'var(--form-sable)'
+                  }}>
                     {isVerified ? '✓ Vérifié' : '✗ Non vérifié'}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-700 font-medium">Profil complet</span>
-                  <span className={`font-bold px-4 py-2 rounded-full ${
-                    profile?.profile_setup_completed
-                      ? 'bg-gradient-to-r from-olive-100 to-green-100 text-olive-800 border border-olive-300'
-                      : 'bg-gray-100 text-gray-500 border border-gray-300'
-                  }`}>
+                <div className="flex items-center justify-between py-3">
+                  <span className="form-label-premium mb-0">Profil complet</span>
+                  <span className={`font-bold px-4 py-2 rounded-full text-sm`} style={{
+                    backgroundColor: profile?.profile_setup_completed ? 'var(--form-success)' : 'var(--form-ivoire)',
+                    color: profile?.profile_setup_completed ? 'white' : 'var(--form-sable)'
+                  }}>
                     {profile?.profile_setup_completed ? '✓ Complet' : '✗ Incomplet'}
                   </span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-terracotta-50 to-coral-50 p-6 rounded-2xl border border-terracotta-200">
-              <h2 className="text-2xl font-bold text-gradient mb-6 flex items-center space-x-2">
-                <FileText className="h-6 w-6 text-terracotta-500" />
+            {/* Score Preview */}
+            <div className="form-section-premium" style={{ backgroundColor: 'var(--form-ivoire)' }}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
+                  <Award className="h-6 w-6" style={{ color: 'var(--form-orange)' }} />
+                  <span>Score de candidature</span>
+                </h3>
+                <span className="text-3xl font-bold" style={{ color: 'var(--form-orange)' }}>{applicationScore}/100</span>
+              </div>
+              <div className="bg-white rounded-full h-4 overflow-hidden shadow-inner">
+                <div
+                  className="h-full transition-all duration-500"
+                  style={{ width: `${applicationScore}%`, backgroundColor: 'var(--form-orange)' }}
+                />
+              </div>
+            </div>
+
+            {/* Next Button */}
+            <div className="form-actions">
+              <div></div>
+              <button
+                type="button"
+                onClick={nextStep}
+                className="form-button-primary"
+              >
+                <span>Continuer</span>
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          </FormStepContent>
+
+          {/* STEP 2: Lettre de motivation */}
+          <FormStepContent step={2} currentStep={step} slideDirection={slideDirection} className="space-y-6">
+            <div className="form-section-premium">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
+                <FileText className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
                 <span>Lettre de motivation</span>
               </h2>
               <ValidatedTextarea
@@ -352,61 +402,52 @@ export default function ApplicationForm() {
               />
             </div>
 
-            <div className="glass-card rounded-3xl p-6 bg-gradient-to-br from-amber-100 to-orange-100 border-2 border-amber-300">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-gray-900 text-lg flex items-center space-x-2">
-                  <Award className="h-6 w-6 text-terracotta-500" />
-                  <span>Score de candidature</span>
-                </h3>
-                <span className="text-3xl font-bold text-gradient">{applicationScore}/100</span>
-              </div>
-              <div className="bg-white rounded-full h-4 overflow-hidden mb-4 shadow-inner">
-                <div
-                  className="bg-gradient-to-r from-terracotta-500 to-coral-500 h-full transition-all duration-500 shadow-glow"
-                  style={{ width: `${applicationScore}%` }}
-                />
-              </div>
-            </div>
-
-            <div className="border-t-2 border-gray-200 pt-6">
-              <div className="flex items-start space-x-3 mb-6 bg-white p-4 rounded-xl border border-gray-200">
+            {/* Terms */}
+            <div className="form-section-premium">
+              <div className="flex items-start gap-3">
                 <input
                   type="checkbox"
                   id="terms"
                   required
-                  className="mt-1 rounded border-gray-300 text-terracotta-600 focus:ring-terracotta-500 w-5 h-5"
+                  className="mt-1 w-5 h-5 rounded"
+                  style={{ accentColor: 'var(--form-orange)' }}
                 />
-                <label htmlFor="terms" className="text-sm text-gray-800">
+                <label htmlFor="terms" className="text-sm" style={{ color: 'var(--form-chocolat)' }}>
                   Je confirme que toutes les informations fournies sont exactes et j'accepte les{' '}
-                  <Link to="/conditions-utilisation" className="text-terracotta-600 hover:text-terracotta-700 font-bold">
+                  <Link to="/conditions-utilisation" className="font-bold" style={{ color: 'var(--form-orange)' }}>
                     conditions d'utilisation
-                  </Link>
-                  .
+                  </Link>.
                 </label>
               </div>
+            </div>
 
+            {/* Actions */}
+            <div className="form-actions">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="form-button-secondary"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span>Retour</span>
+              </button>
               <button
                 type="submit"
                 disabled={submitting || !!error || !isVerified || existingApplication}
-                className="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                className="form-button-primary"
               >
-                <FileText className="h-6 w-6" />
+                <FileText className="h-5 w-5" />
                 <span>
                   {!isVerified
-                    ? '🔒 Vérification requise pour postuler'
+                    ? 'Vérification requise'
                     : submitting
                     ? 'Envoi en cours...'
                     : 'Envoyer ma candidature'}
                 </span>
               </button>
-              {!isVerified && (
-                <p className="text-center text-red-600 font-semibold text-sm mt-2">
-                  Complétez d'abord votre vérification d'identité pour activer le bouton
-                </p>
-              )}
             </div>
-          </form>
-        </div>
+          </FormStepContent>
+        </form>
       </div>
     </div>
   );
