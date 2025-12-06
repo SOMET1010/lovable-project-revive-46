@@ -1,9 +1,50 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, AlertTriangle } from 'lucide-react';
+import { useState, Component, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { CONTACT } from '@/shared/constants/contact';
 
-export default function FooterPremium() {
+// Valeurs par défaut de sécurité en cas de problème d'import
+const SAFE_CONTACT = {
+  PHONE: CONTACT?.PHONE || '+2250700000000',
+  PHONE_DISPLAY: CONTACT?.PHONE_DISPLAY || '+225 07 00 00 00 00',
+  EMAIL: CONTACT?.EMAIL || 'contact@montoit.ci',
+  ADDRESS: CONTACT?.ADDRESS || 'Abidjan, Côte d\'Ivoire',
+};
+
+// ErrorBoundary pour capturer les erreurs de rendu
+class FooterErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  override componentDidCatch(error: Error) {
+    console.error('FooterPremium error:', error);
+  }
+
+  override render() {
+    if (this.state.hasError) {
+      return (
+        <footer className="bg-[#2C1810] text-[#E8D4C5] py-12">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-amber-400 mb-4">
+              <AlertTriangle className="w-5 h-5" />
+              <span>Erreur d'affichage du footer</span>
+            </div>
+            <p className="text-sm text-[#E8D4C5]/60">© {new Date().getFullYear()} Mon Toit. Tous droits réservés.</p>
+          </div>
+        </footer>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function FooterContent() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -149,22 +190,22 @@ export default function FooterPremium() {
             {/* Infos Contact */}
             <div className="space-y-3 pt-6 border-t border-white/10">
               <a 
-                href={`tel:${CONTACT.PHONE}`}
+                href={`tel:${SAFE_CONTACT.PHONE}`}
                 className="flex items-center gap-3 text-[#E8D4C5]/80 hover:text-white transition-colors text-sm"
               >
                 <Phone className="w-4 h-4 text-[#F16522]" />
-                {CONTACT.PHONE_DISPLAY}
+                {SAFE_CONTACT.PHONE_DISPLAY}
               </a>
               <a 
-                href={`mailto:${CONTACT.EMAIL}`}
+                href={`mailto:${SAFE_CONTACT.EMAIL}`}
                 className="flex items-center gap-3 text-[#E8D4C5]/80 hover:text-white transition-colors text-sm"
               >
                 <Mail className="w-4 h-4 text-[#F16522]" />
-                {CONTACT.EMAIL}
+                {SAFE_CONTACT.EMAIL}
               </a>
               <div className="flex items-center gap-3 text-[#E8D4C5]/80 text-sm">
                 <MapPin className="w-4 h-4 text-[#F16522]" />
-                {CONTACT.ADDRESS}
+                {SAFE_CONTACT.ADDRESS}
               </div>
             </div>
           </div>
@@ -204,5 +245,14 @@ export default function FooterPremium() {
         </div>
       </div>
     </footer>
+  );
+}
+
+// Export avec ErrorBoundary
+export default function FooterPremium() {
+  return (
+    <FooterErrorBoundary>
+      <FooterContent />
+    </FooterErrorBoundary>
   );
 }

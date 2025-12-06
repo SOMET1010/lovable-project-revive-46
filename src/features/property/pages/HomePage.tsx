@@ -1,4 +1,4 @@
-// Force re-bundle - 2025-12-06T11:32:00Z
+// Force re-bundle - 2025-12-06T14:00:00Z
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
@@ -13,7 +13,7 @@ import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 import SEOHead, { createOrganizationStructuredData, createWebsiteStructuredData } from '@/shared/components/SEOHead';
 import SUTAChatWidget from '@/shared/components/SUTAChatWidget';
 import { propertyApi } from '../services/property.api';
-// LuxuryPropertiesSection supprimée - images intégrées dans HERO_IMAGES
+import { useHomeStats } from '@/shared/hooks/useHomeStats';
 import type { PropertyWithOwnerScore } from '../types';
 
 // ==================== PALETTE HARMONISÉE ====================
@@ -108,11 +108,12 @@ const TESTIMONIALS = [
   }
 ];
 
-const STATS = [
-  { value: '2,500+', label: 'Locataires logés' },
+// Statistiques dynamiques - utiliser useHomeStats() pour les données réelles
+const getStats = (propertiesCount: number, tenantsCount: number) => [
+  { value: tenantsCount > 0 ? `${tenantsCount.toLocaleString('fr-FR')}+` : '2,500+', label: 'Locataires logés' },
   { value: '98%', label: 'Taux de satisfaction' },
   { value: '48h', label: 'Délai moyen' },
-  { value: '1M+', label: 'Visites virtuelles' }
+  { value: propertiesCount > 0 ? `${propertiesCount.toLocaleString('fr-FR')}` : '150+', label: 'Biens disponibles' }
 ];
 
 const HERO_IMAGES = [
@@ -228,6 +229,10 @@ function PropertyCard({ property, index, isVisible: _isVisible }: { property: Pr
 // ==================== PAGE PRINCIPALE ====================
 export default function HomePage() {
   const navigate = useNavigate();
+  
+  // Hook centralisé pour les statistiques
+  const homeStats = useHomeStats();
+  const STATS = getStats(homeStats.propertiesCount, homeStats.tenantsCount);
   
   // États
   const [propertyType, setPropertyType] = useState('');
@@ -365,30 +370,30 @@ export default function HomePage() {
                   
                   <div className="flex-1 px-6 py-3 w-full group cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl">
                     <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 group-hover:text-[#F16522] transition-colors">
-                      <Home className="w-3 h-3" /> Type de bien
+                      <Home className="w-3 h-3" /> Type
                     </label>
                     <Select value={propertyType} onValueChange={setPropertyType}>
-                      <SelectTrigger className="w-full border-0 shadow-none p-0 h-6 text-base font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="Appartement" /></SelectTrigger>
+                      <SelectTrigger className="w-full border-0 shadow-none p-0 h-7 text-sm font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="Appartement" /></SelectTrigger>
                       <SelectContent>{PROPERTY_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
 
                   <div className="flex-1 px-6 py-3 w-full group cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl">
                     <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 group-hover:text-[#F16522] transition-colors">
-                      <MapPin className="w-3 h-3" /> Localisation
+                      <MapPin className="w-3 h-3" /> Ville
                     </label>
                     <Select value={location} onValueChange={setLocation}>
-                      <SelectTrigger className="w-full border-0 shadow-none p-0 h-6 text-base font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="Cocody" /></SelectTrigger>
+                      <SelectTrigger className="w-full border-0 shadow-none p-0 h-7 text-sm font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="Cocody" /></SelectTrigger>
                       <SelectContent>{LOCATIONS.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
 
                   <div className="flex-1 px-6 py-3 w-full group cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl">
                     <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 group-hover:text-[#F16522] transition-colors">
-                      <Key className="w-3 h-3" /> Budget Max
+                      <Key className="w-3 h-3" /> Budget
                     </label>
                     <Select value={budget} onValueChange={setBudget}>
-                      <SelectTrigger className="w-full border-0 shadow-none p-0 h-6 text-base font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="500.000 FCFA" /></SelectTrigger>
+                      <SelectTrigger className="w-full border-0 shadow-none p-0 h-7 text-sm font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="Max 500k" /></SelectTrigger>
                       <SelectContent>{BUDGETS.map(b => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
