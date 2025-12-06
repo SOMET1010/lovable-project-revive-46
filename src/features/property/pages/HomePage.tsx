@@ -113,6 +113,13 @@ const STATS = [
   { value: '1M+', label: 'Visites virtuelles' }
 ];
 
+const HERO_IMAGES = [
+  { src: '/images/hero/hero-family-cocody.webp', alt: 'Famille devant leur nouvelle villa à Cocody' },
+  { src: '/images/hero/hero-couple-tablet.png', alt: 'Couple découvrant Mon Toit sur tablette' },
+  { src: '/images/hero/hero-roommates.png', alt: 'Colocataires heureux dans leur appartement' },
+  { src: '/images/hero/hero-agent.png', alt: 'Agent Mon Toit accompagnant des clients' },
+];
+
 // ==================== HOOKS ====================
 function useScrollAnimation<T extends HTMLElement>(options = { threshold: 0.1 }) {
   const ref = useRef<T>(null);
@@ -216,6 +223,7 @@ export default function HomePage() {
   const [formData, setFormData] = useState({ name: '', phone: '', project: '' });
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
 
   // Animations
   const { ref: howItWorksRef, isVisible: howItWorksVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.2 });
@@ -245,6 +253,14 @@ export default function HomePage() {
     const timer = setInterval(() => setActiveStep((prev) => (prev + 1) % HOW_IT_WORKS_STEPS.length), 5000);
     return () => clearInterval(timer);
   }, [howItWorksVisible]);
+
+  // Auto-rotation carousel Hero
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setHeroImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Handlers
   const handleSearch = () => {
@@ -373,20 +389,45 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Image Hero Desktop */}
+            {/* Image Hero Desktop - Carousel */}
             <div className="lg:col-span-5 relative h-[650px] hidden lg:block animate-in fade-in duration-1000 delay-300">
               <div className="absolute top-[10%] right-[5%] w-[450px] h-[450px] bg-[#3D261C] rounded-full -z-10 blur-sm" />
               
               <div className="relative w-full h-full group">
-                <img 
-                  src="/images/hero/hero_users_2_family_moving.jpg" 
-                  alt="Famille ivoirienne heureuse Mon Toit"
-                  className="w-full h-full object-cover rounded-[3rem] shadow-2xl ring-1 ring-white/10 transition-transform duration-1000 group-hover:scale-[1.02]"
-                  loading="eager"
-                  fetchPriority="high"
-                  style={{ maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}
-                />
+                {/* Carousel d'images */}
+                {HERO_IMAGES.map((image, index) => (
+                  <img 
+                    key={image.src}
+                    src={image.src} 
+                    alt={image.alt}
+                    className={`absolute inset-0 w-full h-full object-cover rounded-[3rem] shadow-2xl ring-1 ring-[#F16522]/20 transition-all duration-700 ease-in-out ${
+                      index === heroImageIndex 
+                        ? 'opacity-100 scale-100' 
+                        : 'opacity-0 scale-[1.02]'
+                    }`}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    style={{ maskImage: 'linear-gradient(to bottom, black 85%, transparent 100%)' }}
+                  />
+                ))}
 
+                {/* Indicateurs carousel */}
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+                  {HERO_IMAGES.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setHeroImageIndex(index)}
+                      className={`transition-all duration-300 rounded-full ${
+                        index === heroImageIndex 
+                          ? 'w-8 h-2 bg-[#F16522]' 
+                          : 'w-2 h-2 bg-white/50 hover:bg-white/80'
+                      }`}
+                      aria-label={`Image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
+                {/* Badge flottant */}
                 <div className="absolute bottom-[20%] -left-[10%] bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-bounce-slow">
                    <div className="relative">
                      <img src="/images/hero-abidjan-1.jpg" alt="User" className="w-12 h-12 rounded-full border-2 border-[#F16522] object-cover" />
