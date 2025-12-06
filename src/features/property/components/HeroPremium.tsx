@@ -108,10 +108,10 @@ export const HeroPremium = () => {
         <div className="hidden lg:block lg:col-span-5 relative h-[650px]">
             <div className="absolute right-[-50px] top-10 w-[120%] h-[90%]">
                 <img 
-                    src="/images/hero-maison-moderne.jpg" 
-                    alt="Famille ivoirienne heureuse"
+                    src="/images/hero/hero-famille-cocody.webp" 
+                    alt="Famille ivoirienne heureuse devant leur nouvelle maison"
                     className="w-full h-full object-cover rounded-l-[3rem] shadow-2xl shadow-[#523628]/20"
-                    style={{ objectPosition: 'center 20%' }}
+                    style={{ objectPosition: 'center 40%' }}
                 />
                 
                 {/* Badge flottant */}
