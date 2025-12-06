@@ -263,7 +263,7 @@ function StickyCTABar({ propertyId, isOwnerOrAgency }: StickyCTABarProps) {
               <span>Planifier visite</span>
             </button>
             <button
-              onClick={() => navigate(`/postuler/${propertyId}`)}
+              onClick={() => navigate(`/candidature/${propertyId}`)}
               className="flex-1 px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
             >
               Postuler
@@ -574,7 +574,7 @@ export default function PropertyDetailPage() {
                           <span>Planifier une visite</span>
                         </button>
                         <button
-                          onClick={() => navigate(`/postuler/${property.id}`)}
+                          onClick={() => navigate(`/candidature/${property.id}`)}
                           className="w-full py-3 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-700 transition-colors"
                         >
                           Postuler maintenant

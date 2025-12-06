@@ -115,6 +115,7 @@ function FooterContent() {
               {[
                 { label: 'Accueil', href: '/' },
                 { label: 'Rechercher un bien', href: '/recherche' },
+                { label: 'Louer mon bien', href: '/ajouter-propriete' },
                 { label: 'À propos', href: '/a-propos' },
                 { label: 'Comment ça marche', href: '/comment-ca-marche' },
                 { label: 'Contact', href: '/contact' },
