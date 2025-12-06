@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Quote, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
 interface Testimonial {
   id: number;
@@ -13,73 +13,71 @@ interface Testimonial {
 const TESTIMONIALS: Testimonial[] = [
   {
     id: 1,
-    name: 'Mariam B.',
-    location: 'Marcory',
-    quote: 'Le Trust Score a tout changé. J\'ai trouvé mon appartement en 48h !',
-    avatar: '/images/testimonials/avatar-1.jpg',
+    name: 'Mariam Bamba',
+    location: 'Locataire à Marcory',
+    quote: 'Le Trust Score a tout changé. J\'ai trouvé mon appartement en 48h ! Le propriétaire m\'a fait confiance immédiatement grâce à mon score.',
+    avatar: '/images/hero/young-professional.png',
     trustScore: 92
   },
   {
     id: 2,
-    name: 'Kouamé A.',
-    location: 'Cocody Riviera',
-    quote: 'Enfin une plateforme sérieuse. Tout était vérifié, pas de mauvaises surprises.',
-    avatar: '/images/testimonials/avatar-2.jpg',
+    name: 'Kouamé Assi',
+    location: 'Locataire à Cocody Riviera',
+    quote: 'Enfin une plateforme sérieuse. Tout était vérifié, pas de mauvaises surprises. L\'appartement correspondait exactement aux photos.',
+    avatar: '/images/hero/young-couple.png',
     trustScore: 88
   },
   {
     id: 3,
-    name: 'Fatou D.',
-    location: 'Plateau',
-    quote: 'L\'agent m\'a accompagnée du premier appel jusqu\'à la signature. Service exceptionnel !',
-    avatar: '/images/testimonials/avatar-3.jpg',
+    name: 'Fatou Diallo',
+    location: 'Locataire au Plateau',
+    quote: 'L\'agent m\'a accompagnée du premier appel jusqu\'à la signature. Service exceptionnel et humain. Je recommande à tous mes amis.',
+    avatar: '/images/hero/family-moving.png',
     trustScore: 95
   },
   {
     id: 4,
-    name: 'Jean-Marc K.',
-    location: 'Zone 4',
-    quote: 'Je recommande à 100%. Mon propriétaire était fiable grâce au système de notation.',
-    avatar: '/images/testimonials/avatar-4.jpg',
+    name: 'Jean-Marc Koné',
+    location: 'Propriétaire à Zone 4',
+    quote: 'Comme propriétaire, je trouve des locataires fiables grâce au système de notation. Fini les impayés et les mauvaises surprises !',
+    avatar: '/images/hero/students.png',
     trustScore: 90
   }
 ];
 
-function ScoreDisplay({ score }: { score: number }) {
-  const getScoreColor = () => {
-    if (score >= 80) return 'text-green-600 bg-green-50 border-green-200';
-    if (score >= 60) return 'text-amber-600 bg-amber-50 border-amber-200';
-    return 'text-red-600 bg-red-50 border-red-200';
+function TrustScoreBadge({ score }: { score: number }) {
+  const getScoreStyle = () => {
+    if (score >= 80) return { bg: 'rgba(46, 75, 62, 0.1)', color: '#2E4B3E', border: '#2E4B3E' };
+    if (score >= 60) return { bg: 'rgba(241, 101, 34, 0.1)', color: '#F16522', border: '#F16522' };
+    return { bg: 'rgba(220, 38, 38, 0.1)', color: '#DC2626', border: '#DC2626' };
   };
 
+  const style = getScoreStyle();
+
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${getScoreColor()}`}>
-      <Star className="w-3 h-3 fill-current" />
+    <div 
+      className="inline-flex items-center gap-2 px-3 py-1.5 font-semibold"
+      style={{ 
+        backgroundColor: style.bg,
+        color: style.color,
+        borderRadius: '12px',
+        border: `1px solid ${style.border}`,
+        fontSize: '13px'
+      }}
+    >
+      <Star className="w-4 h-4 fill-current" />
       <span>Score {score}</span>
     </div>
   );
 }
 
+/**
+ * TestimonialsSection - Design organique avec coins arrondis 22px
+ * Carrousel horizontal avec avatars et citations
+ */
 export default function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-
-  // Calcul du nombre de cartes visibles selon la taille d'écran
-  const getVisibleCards = () => {
-    if (typeof window === 'undefined') return 3;
-    if (window.innerWidth < 640) return 1;
-    if (window.innerWidth < 1024) return 2;
-    return 3;
-  };
-
-  const [visibleCards, setVisibleCards] = useState(3);
-
-  useEffect(() => {
-    const handleResize = () => setVisibleCards(getVisibleCards());
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Auto-play
   useEffect(() => {
@@ -100,10 +98,10 @@ export default function TestimonialsSection() {
     setIsAutoPlaying(false);
   };
 
-  // Obtenir les témoignages visibles avec wrap-around
+  // Get visible testimonials (3 on desktop, 1 on mobile)
   const getVisibleTestimonials = () => {
     const result: Testimonial[] = [];
-    for (let i = 0; i < visibleCards; i++) {
+    for (let i = 0; i < 3; i++) {
       const index = (currentIndex + i) % TESTIMONIALS.length;
       result.push(TESTIMONIALS[index] as Testimonial);
     }
@@ -111,81 +109,171 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section className="py-20 bg-muted/30">
+    <section 
+      className="py-20 md:py-28 overflow-hidden"
+      style={{ backgroundColor: '#FAFAFA' }}
+    >
       <div className="container mx-auto px-4 md:px-6">
         {/* Header */}
-        <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary mb-4">
+        <div className="text-center mb-16">
+          <span 
+            className="inline-block px-6 py-2.5 text-sm font-semibold mb-6"
+            style={{ 
+              backgroundColor: 'rgba(241, 101, 34, 0.1)',
+              color: '#F16522',
+              borderRadius: '22px'
+            }}
+          >
             Témoignages
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 
+            className="font-bold mb-5"
+            style={{ 
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              color: '#523628',
+              letterSpacing: '-0.02em'
+            }}
+          >
             Ils Nous Ont Fait Confiance
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p 
+            className="max-w-2xl mx-auto"
+            style={{ 
+              fontSize: '18px',
+              lineHeight: '1.7',
+              color: '#737373'
+            }}
+          >
             Des milliers de locataires et propriétaires satisfaits par notre service
           </p>
         </div>
 
         {/* Carousel Container */}
         <div 
-          className="relative"
+          className="relative max-w-6xl mx-auto"
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
           {/* Navigation Buttons */}
           <button
             onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 rounded-full bg-background shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-110 transition-all hidden md:flex"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-8 z-10 w-14 h-14 flex items-center justify-center transition-all duration-300 hover:scale-110 hidden md:flex"
+            style={{ 
+              backgroundColor: '#FFFFFF',
+              borderRadius: '22px',
+              boxShadow: '0 8px 24px rgba(82, 54, 40, 0.15)',
+              border: '1px solid rgba(82, 54, 40, 0.1)'
+            }}
             aria-label="Témoignage précédent"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-6 h-6" style={{ color: '#523628' }} />
           </button>
           
           <button
             onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 rounded-full bg-background shadow-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:scale-110 transition-all hidden md:flex"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-8 z-10 w-14 h-14 flex items-center justify-center transition-all duration-300 hover:scale-110 hidden md:flex"
+            style={{ 
+              backgroundColor: '#FFFFFF',
+              borderRadius: '22px',
+              boxShadow: '0 8px 24px rgba(82, 54, 40, 0.15)',
+              border: '1px solid rgba(82, 54, 40, 0.1)'
+            }}
             aria-label="Témoignage suivant"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className="w-6 h-6" style={{ color: '#523628' }} />
           </button>
 
           {/* Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4 md:px-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-0 md:px-8">
             {getVisibleTestimonials().map((testimonial, idx) => (
               <div
                 key={`${testimonial.id}-${idx}`}
-                className="bg-background rounded-2xl p-6 shadow-lg border border-border/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                className="relative transition-all duration-500"
+                style={{
+                  opacity: idx === 1 ? 1 : 0.7,
+                  transform: idx === 1 ? 'scale(1.02)' : 'scale(0.98)'
+                }}
               >
-                {/* Quote Icon */}
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Quote className="w-5 h-5 text-primary" />
-                </div>
-
-                {/* Quote Text */}
-                <blockquote className="text-foreground text-lg font-medium mb-6 leading-relaxed">
-                  "{testimonial.quote}"
-                </blockquote>
-
-                {/* Author Info */}
-                <div className="flex items-center gap-4">
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-primary/20"
-                    loading="lazy"
-                  />
-                  <div className="flex-1">
-                    <p className="font-semibold text-foreground">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                <div
+                  className="h-full transition-all duration-300 hover:shadow-xl"
+                  style={{ 
+                    backgroundColor: '#FFFFFF',
+                    borderRadius: '22px',
+                    padding: '40px 32px',
+                    boxShadow: idx === 1 
+                      ? '0 20px 60px rgba(82, 54, 40, 0.12)' 
+                      : '0 8px 24px rgba(0, 0, 0, 0.06)',
+                    border: '1px solid rgba(82, 54, 40, 0.08)'
+                  }}
+                >
+                  {/* Giant Quote Icon */}
+                  <div className="absolute -top-4 -left-2 opacity-10">
+                    <Quote 
+                      className="w-24 h-24" 
+                      style={{ color: '#F16522' }} 
+                    />
                   </div>
-                  <ScoreDisplay score={testimonial.trustScore} />
+
+                  {/* Quote Text */}
+                  <blockquote 
+                    className="relative z-10 mb-8 leading-relaxed"
+                    style={{ 
+                      color: '#523628',
+                      fontSize: '17px',
+                      fontStyle: 'italic',
+                      lineHeight: 1.7
+                    }}
+                  >
+                    "{testimonial.quote}"
+                  </blockquote>
+
+                  {/* Author Info */}
+                  <div className="flex items-center gap-4">
+                    {/* Avatar with golden border */}
+                    <div 
+                      className="relative"
+                      style={{ 
+                        padding: '3px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #F16522 0%, #D97706 100%)'
+                      }}
+                    >
+                      <img
+                        src={testimonial.avatar}
+                        alt={testimonial.name}
+                        className="w-16 h-16 object-cover"
+                        style={{ 
+                          borderRadius: '50%',
+                          border: '3px solid white'
+                        }}
+                        loading="lazy"
+                      />
+                    </div>
+                    
+                    <div className="flex-1">
+                      <p 
+                        className="font-bold"
+                        style={{ color: '#523628', fontSize: '16px' }}
+                      >
+                        {testimonial.name}
+                      </p>
+                      <p 
+                        className="text-sm"
+                        style={{ color: '#737373' }}
+                      >
+                        {testimonial.location}
+                      </p>
+                    </div>
+                    
+                    <TrustScoreBadge score={testimonial.trustScore} />
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Mobile Navigation Dots */}
-          <div className="flex justify-center gap-2 mt-8 md:hidden">
+          <div className="flex justify-center gap-3 mt-8">
             {TESTIMONIALS.map((_, index) => (
               <button
                 key={index}
@@ -193,11 +281,13 @@ export default function TestimonialsSection() {
                   setCurrentIndex(index);
                   setIsAutoPlaying(false);
                 }}
-                className={`rounded-full transition-all duration-300 ${
-                  index === currentIndex
-                    ? 'w-8 h-2 bg-primary'
-                    : 'w-2 h-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
-                }`}
+                className="transition-all duration-300"
+                style={{
+                  width: index === currentIndex ? '32px' : '10px',
+                  height: '10px',
+                  borderRadius: '5px',
+                  backgroundColor: index === currentIndex ? '#F16522' : '#D4D4D4'
+                }}
                 aria-label={`Aller au témoignage ${index + 1}`}
               />
             ))}
@@ -205,18 +295,40 @@ export default function TestimonialsSection() {
         </div>
 
         {/* Stats Bar */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { value: '2,500+', label: 'Locataires satisfaits' },
-            { value: '98%', label: 'Taux de satisfaction' },
-            { value: '48h', label: 'Délai moyen de location' },
-            { value: '500+', label: 'Propriétaires partenaires' }
-          ].map((stat, index) => (
-            <div key={index} className="p-4">
-              <p className="text-3xl md:text-4xl font-bold text-primary mb-1">{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-            </div>
-          ))}
+        <div 
+          className="mt-20 max-w-4xl mx-auto py-10 px-8"
+          style={{ 
+            backgroundColor: '#FFFFFF',
+            borderRadius: '22px',
+            boxShadow: '0 8px 32px rgba(82, 54, 40, 0.08)'
+          }}
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            {[
+              { value: '2,500+', label: 'Locataires satisfaits' },
+              { value: '98%', label: 'Taux de satisfaction' },
+              { value: '48h', label: 'Délai moyen de location' },
+              { value: '500+', label: 'Propriétaires partenaires' }
+            ].map((stat, index) => (
+              <div key={index}>
+                <p 
+                  className="font-bold mb-1"
+                  style={{ 
+                    fontSize: 'clamp(28px, 3vw, 40px)',
+                    color: '#F16522'
+                  }}
+                >
+                  {stat.value}
+                </p>
+                <p 
+                  className="text-sm"
+                  style={{ color: '#737373' }}
+                >
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>

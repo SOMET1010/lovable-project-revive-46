@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, Home, ChevronDown, Sparkles } from 'lucide-react';
+import { Search, Home, Users, Gem, GraduationCap, Building } from 'lucide-react';
 
 interface HeroPremiumProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
@@ -8,100 +8,85 @@ interface HeroPremiumProps {
 interface HeroSlide {
   src: string;
   alt: string;
-  position: string;
   title: string;
   subtitle: string;
 }
 
 /**
- * HeroPremium - Human-Centric Hero Section
- * 4 images avec humains pour créer de l'émotion et de la confiance
- * Texte dynamique synchronisé avec chaque slide
+ * HeroPremium - Refonte Complète avec Identité Ivoirienne
+ * Design organique, coins arrondis 22px, palette Sable/Cacao/Orange
  */
 const HERO_SLIDES: HeroSlide[] = [
   {
-    src: '/images/hero/hero_family_keys.jpg',
-    alt: 'Famille ivoirienne heureuse recevant les clés de leur nouvelle maison',
-    position: 'object-center',
+    src: '/images/hero/family-moving.png',
+    alt: 'Famille ivoirienne heureuse emménageant dans leur nouvelle maison',
     title: 'Votre Histoire Commence Ici',
     subtitle: 'Plus qu\'un logement. Un nouveau départ. Certifié par Mon Toit.'
   },
   {
-    src: '/images/hero/hero_couple_search.jpg',
-    alt: 'Jeune couple recherchant leur futur appartement sur Mon Toit',
-    position: 'object-center',
-    title: 'Trouvez Votre Chez-Vous en Toute Confiance',
+    src: '/images/hero/young-couple.png',
+    alt: 'Jeune couple recherchant leur appartement idéal',
+    title: 'Trouvez Votre Chez-Vous Ensemble',
     subtitle: '100% des annonces vérifiées. 0 mauvaise surprise.'
   },
   {
-    src: '/images/hero/hero_agent_showing.jpg',
-    alt: 'Agent immobilier Mon Toit faisant visiter un bien',
-    position: 'object-center',
-    title: 'Un Accompagnement d\'Exception',
-    subtitle: 'Nos experts vous guident de la visite à la remise des clés.'
+    src: '/images/hero/riviera-luxury.png',
+    alt: 'Villa luxueuse avec piscine à Riviera',
+    title: 'Le Luxe Accessible',
+    subtitle: 'Des villas d\'exception à Riviera et Cocody.'
   },
   {
-    src: '/images/hero/hero_woman_balcony.jpg',
-    alt: 'Jeune femme active profitant de la vue depuis son balcon',
-    position: 'object-top',
-    title: 'Vivez Là Où Vous Vous Sentez Bien',
-    subtitle: 'Cocody, Riviera, Plateau... Votre quartier idéal vous attend.'
+    src: '/images/hero/young-professional.png',
+    alt: 'Jeune professionnelle épanouie dans son appartement',
+    title: 'Vivez Votre Réussite',
+    subtitle: 'Votre appartement à la hauteur de vos ambitions.'
+  },
+  {
+    src: '/images/hero/students.png',
+    alt: 'Étudiants colocataires heureux',
+    title: 'La Coloc Parfaite Existe',
+    subtitle: 'Trouvez vos colocataires et votre nid étudiant.'
   }
 ];
 
-const cities = [
-  'Abidjan',
-  'Yamoussoukro',
-  'Bouaké',
-  'San-Pédro',
-  'Korhogo',
-  'Man',
-  'Daloa',
-  'Gagnoa',
+// Placeholders dynamiques qui racontent une histoire
+const DYNAMIC_PLACEHOLDERS = [
+  'Un duplex avec jardin pour les enfants à Cocody...',
+  'Un studio moderne près de l\'université...',
+  'Une villa avec piscine à Riviera...',
+  'Un appartement lumineux au Plateau...',
+  'Une colocation étudiante à Marcory...'
 ];
 
-const propertyTypes = [
-  { value: 'appartement', label: 'Appartement' },
-  { value: 'villa', label: 'Villa' },
-  { value: 'studio', label: 'Studio' },
-  { value: 'maison', label: 'Maison' },
-  { value: 'duplex', label: 'Duplex' },
+// Filtres rapides interactifs
+const QUICK_FILTERS = [
+  { id: 'family', label: 'Idéal Famille', icon: Users, color: 'bg-amber-500' },
+  { id: 'urban', label: 'Urbain & Moderne', icon: Building, color: 'bg-slate-600' },
+  { id: 'luxury', label: 'Luxe Abordable', icon: Gem, color: 'bg-purple-500' },
+  { id: 'student', label: 'Spécial Étudiants', icon: GraduationCap, color: 'bg-blue-500' }
 ];
 
-const budgets = [
-  { value: '100000', label: 'Jusqu\'à 100 000 FCFA' },
-  { value: '200000', label: 'Jusqu\'à 200 000 FCFA' },
-  { value: '350000', label: 'Jusqu\'à 350 000 FCFA' },
-  { value: '500000', label: 'Jusqu\'à 500 000 FCFA' },
-  { value: '750000', label: 'Jusqu\'à 750 000 FCFA' },
-  { value: '1000000', label: 'Plus de 750 000 FCFA' },
-];
-
-const popularDistricts = ['Cocody', 'Plateau', 'Marcory', 'Yopougon', 'Riviera'];
-
-// Composant image optimisé avec lazy loading et responsive sizes
-interface OptimizedHeroImageProps {
-  src: string;
-  alt: string;
-  position: string;
-  isActive: boolean;
+function OptimizedHeroImage({ 
+  src, 
+  alt, 
+  isActive, 
+  priority 
+}: { 
+  src: string; 
+  alt: string; 
+  isActive: boolean; 
   priority?: boolean;
-}
-
-function OptimizedHeroImage({ src, alt, position, isActive, priority }: OptimizedHeroImageProps) {
+}) {
   return (
     <div
-      className={`absolute inset-0 w-full h-full transition-opacity duration-[1500ms] ease-in-out ${
-        isActive ? 'opacity-100' : 'opacity-0'
+      className={`absolute inset-0 w-full h-full transition-all duration-[1500ms] ease-in-out ${
+        isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
       }`}
     >
       <img
         src={src}
         alt={alt}
-        sizes="100vw"
-        className={`w-full h-full object-cover ${position} transition-transform duration-[6000ms] ease-out ${
-          isActive ? 'scale-105' : 'scale-100'
-        }`}
+        className="w-full h-full object-cover object-center"
         loading={priority ? 'eager' : 'lazy'}
         decoding="async"
       />
@@ -110,11 +95,11 @@ function OptimizedHeroImage({ src, alt, position, isActive, priority }: Optimize
 }
 
 export default function HeroPremium({ onSearch }: HeroPremiumProps) {
-  const [city, setCity] = useState('');
-  const [propertyType, setPropertyType] = useState('');
-  const [maxBudget, setMaxBudget] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   // Auto-play slideshow (6 secondes par slide)
   useEffect(() => {
@@ -127,14 +112,38 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
     return () => clearInterval(timer);
   }, [isPaused]);
 
+  // Rotation des placeholders dynamiques
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentPlaceholder((prev) => (prev + 1) % DYNAMIC_PLACEHOLDERS.length);
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    onSearch({ city, propertyType, maxBudget });
-  }, [city, propertyType, maxBudget, onSearch]);
+    onSearch({ city: searchQuery, propertyType: '', maxBudget: '' });
+  }, [searchQuery, onSearch]);
 
-  const handleQuickSearch = useCallback((district: string) => {
-    onSearch({ city: district, propertyType: '', maxBudget: '' });
-  }, [onSearch]);
+  const handleFilterClick = useCallback((filterId: string) => {
+    setActiveFilter(filterId === activeFilter ? null : filterId);
+    // Mapper les filtres aux types de recherche
+    const filterMap: Record<string, { type?: string; city?: string }> = {
+      family: { type: 'villa' },
+      urban: { type: 'appartement', city: 'Plateau' },
+      luxury: { type: 'villa', city: 'Cocody' },
+      student: { type: 'studio' }
+    };
+    const filter = filterMap[filterId];
+    if (filter) {
+      onSearch({ 
+        city: filter.city || '', 
+        propertyType: filter.type || '', 
+        maxBudget: '' 
+      });
+    }
+  }, [activeFilter, onSearch]);
 
   const goToSlide = useCallback((index: number) => {
     setCurrentSlide(index);
@@ -144,120 +153,122 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
 
   return (
     <section 
-      className="relative min-h-[85vh] flex items-center justify-center overflow-hidden bg-neutral-900"
+      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: '#1a1a1a' }}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Slideshow Background avec Fade Transition */}
+      {/* Slideshow Background */}
       <div className="absolute inset-0 z-0">
         {HERO_SLIDES.map((slide, index) => (
           <OptimizedHeroImage
             key={slide.src}
             src={slide.src}
             alt={slide.alt}
-            position={slide.position}
             isActive={index === currentSlide}
             priority={index === 0}
           />
         ))}
         
-        {/* Gradient Overlays améliorés pour lisibilité */}
-        <div className="absolute inset-0 bg-black/40 md:bg-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+        {/* Overlays pour lisibilité */}
+        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-16">
-        {/* Badge Certifié ANSUT */}
-        <div className="flex justify-center mb-6">
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-20">
+        {/* Badge Certifié */}
+        <div className="flex justify-center mb-8">
           <span 
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-white/20 text-white border border-white/30 backdrop-blur-md shadow-lg"
+            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold backdrop-blur-xl shadow-2xl"
+            style={{ 
+              backgroundColor: 'rgba(248, 232, 216, 0.15)',
+              color: '#F8E8D8',
+              borderRadius: '22px',
+              border: '1px solid rgba(248, 232, 216, 0.3)'
+            }}
           >
-            <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
-            </div>
+            <div 
+              className="w-2 h-2 rounded-full animate-pulse"
+              style={{ backgroundColor: '#F16522' }}
+            />
             Plateforme Certifiée ANSUT
           </span>
         </div>
 
         {/* Dynamic Title - synchronized with current slide */}
-        <div className="text-center mb-8 transition-all duration-700">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
+        <div className="text-center mb-10">
+          <h1 
+            className="font-bold mb-5 leading-tight drop-shadow-2xl transition-all duration-700"
+            style={{ 
+              fontSize: 'clamp(36px, 6vw, 64px)',
+              color: '#FFFFFF',
+              fontFamily: "'Inter', sans-serif",
+              letterSpacing: '-0.02em'
+            }}
+          >
             {currentSlideData?.title}
           </h1>
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto drop-shadow-md">
+          <p 
+            className="max-w-2xl mx-auto drop-shadow-lg transition-all duration-700"
+            style={{ 
+              fontSize: 'clamp(16px, 2vw, 20px)',
+              color: 'rgba(248, 232, 216, 0.9)',
+              lineHeight: 1.6
+            }}
+          >
             {currentSlideData?.subtitle}
           </p>
         </div>
 
-        {/* Search Form - Glassmorphism amélioré */}
+        {/* Search Form - Airbnb Style avec design organique */}
         <form 
           onSubmit={handleSearch}
-          className="bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden shadow-2xl border border-white/20"
+          className="max-w-3xl mx-auto mb-8"
         >
-          <div className="flex flex-col lg:flex-row">
-            {/* City Select */}
-            <div className="relative flex-1 border-b lg:border-b-0 lg:border-r border-border">
-              <div className="absolute left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <MapPin className="h-5 w-5 text-primary" />
-              </div>
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                aria-label="Sélectionner une ville"
-                className="w-full h-16 pl-20 pr-12 bg-transparent text-foreground font-medium appearance-none cursor-pointer focus:outline-none hover:bg-muted/50 focus:bg-muted/50"
+          <div 
+            className="flex flex-col sm:flex-row items-stretch backdrop-blur-xl shadow-2xl overflow-hidden"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              borderRadius: '22px',
+              border: '4px solid rgba(241, 101, 34, 0.2)'
+            }}
+          >
+            {/* Search Input avec placeholder dynamique */}
+            <div className="relative flex-1">
+              <div 
+                className="absolute left-5 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center"
+                style={{ 
+                  backgroundColor: 'rgba(241, 101, 34, 0.1)',
+                  borderRadius: '14px'
+                }}
               >
-                <option value="">Ville</option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
-            </div>
-
-            {/* Property Type Select */}
-            <div className="relative flex-1 border-b lg:border-b-0 lg:border-r border-border">
-              <div className="absolute left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Home className="h-5 w-5 text-primary" />
+                <Home className="h-6 w-6" style={{ color: '#F16522' }} />
               </div>
-              <select
-                value={propertyType}
-                onChange={(e) => setPropertyType(e.target.value)}
-                aria-label="Sélectionner un type de bien"
-                className="w-full h-16 pl-20 pr-12 bg-transparent text-foreground font-medium appearance-none cursor-pointer focus:outline-none hover:bg-muted/50 focus:bg-muted/50"
-              >
-                <option value="">Type de bien</option>
-                {propertyTypes.map((type) => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
-            </div>
-
-            {/* Budget Select */}
-            <div className="relative flex-1 border-b lg:border-b-0 lg:border-r border-border">
-              <div className="absolute left-5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <span className="font-bold text-lg text-primary">₣</span>
-              </div>
-              <select
-                value={maxBudget}
-                onChange={(e) => setMaxBudget(e.target.value)}
-                aria-label="Sélectionner un budget maximum"
-                className="w-full h-16 pl-20 pr-12 bg-transparent text-foreground font-medium appearance-none cursor-pointer focus:outline-none hover:bg-muted/50 focus:bg-muted/50"
-              >
-                <option value="">Budget max</option>
-                {budgets.map((b) => (
-                  <option key={b.value} value={b.value}>{b.label}</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={DYNAMIC_PLACEHOLDERS[currentPlaceholder]}
+                className="w-full h-16 sm:h-20 pl-20 pr-6 bg-transparent text-lg font-medium placeholder:text-neutral-400 focus:outline-none transition-all"
+                style={{ 
+                  color: '#523628',
+                  borderRadius: '22px'
+                }}
+              />
             </div>
 
             {/* Search Button */}
-            <div className="p-3">
+            <div className="p-2 sm:p-3">
               <button
                 type="submit"
-                className="w-full lg:w-auto h-14 px-8 min-w-[160px] flex items-center justify-center gap-3 bg-primary text-primary-foreground font-semibold rounded-xl transition-all duration-300 hover:bg-primary/90 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-primary/20 shadow-lg"
+                className="w-full sm:w-auto h-12 sm:h-14 px-8 flex items-center justify-center gap-3 font-semibold transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 shadow-lg"
+                style={{ 
+                  backgroundColor: '#F16522',
+                  color: '#FFFFFF',
+                  borderRadius: '16px',
+                  boxShadow: '0 8px 24px rgba(241, 101, 34, 0.4)'
+                }}
               >
                 <Search className="h-5 w-5" />
                 <span>Rechercher</span>
@@ -266,34 +277,78 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
           </div>
         </form>
 
-        {/* Quick Links */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <span className="text-white/60 text-sm">Populaires :</span>
-          {popularDistricts.map((district) => (
-            <button
-              key={district}
-              type="button"
-              onClick={() => handleQuickSearch(district)}
-              className="px-4 py-2 rounded-full text-white text-sm font-medium bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 hover:bg-white/20 hover:scale-105"
-            >
-              {district}
-            </button>
+        {/* Quick Filters - Icônes interactives */}
+        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+          {QUICK_FILTERS.map((filter) => {
+            const Icon = filter.icon;
+            const isActive = activeFilter === filter.id;
+            return (
+              <button
+                key={filter.id}
+                type="button"
+                onClick={() => handleFilterClick(filter.id)}
+                className={`group flex items-center gap-2 px-5 py-3 font-medium transition-all duration-300 hover:scale-105 ${
+                  isActive ? 'ring-2 ring-white/50' : ''
+                }`}
+                style={{ 
+                  backgroundColor: isActive ? 'rgba(241, 101, 34, 0.9)' : 'rgba(255, 255, 255, 0.15)',
+                  color: '#FFFFFF',
+                  borderRadius: '16px',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                }}
+              >
+                <div 
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${filter.color}`}
+                >
+                  <Icon className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-sm">{filter.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Stats rapides */}
+        <div className="flex flex-wrap items-center justify-center gap-8 text-center">
+          {[
+            { value: '2,500+', label: 'Locataires satisfaits' },
+            { value: '500+', label: 'Propriétés vérifiées' },
+            { value: '48h', label: 'Délai moyen' }
+          ].map((stat, index) => (
+            <div key={index} className="px-4">
+              <p 
+                className="text-2xl sm:text-3xl font-bold"
+                style={{ color: '#F16522' }}
+              >
+                {stat.value}
+              </p>
+              <p 
+                className="text-sm"
+                style={{ color: 'rgba(248, 232, 216, 0.7)' }}
+              >
+                {stat.label}
+              </p>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Slide Indicators - Dots élégants */}
+      {/* Slide Indicators - Design organique */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
         {HERO_SLIDES.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
             aria-label={`Voir l'image ${index + 1}`}
-            className={`rounded-full transition-all duration-500 ease-out shadow-lg border border-white/10 ${
-              index === currentSlide 
-                ? 'w-10 h-2 bg-primary' 
-                : 'w-2 h-2 bg-white/60 hover:bg-white'
-            }`}
+            className="transition-all duration-500 ease-out shadow-lg"
+            style={{
+              width: index === currentSlide ? '40px' : '12px',
+              height: '12px',
+              borderRadius: '6px',
+              backgroundColor: index === currentSlide ? '#F16522' : 'rgba(255, 255, 255, 0.5)',
+              border: '2px solid rgba(255, 255, 255, 0.3)'
+            }}
           />
         ))}
       </div>
