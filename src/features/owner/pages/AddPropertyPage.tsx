@@ -1,12 +1,36 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Save, Upload, X, Image as ImageIcon, Building2 } from 'lucide-react';
+import { ArrowLeft, Home, Upload, X, Image as ImageIcon, Building2, Save } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES } from '@/shared/lib/constants/app.constants';
+import { ValidationService } from '@/services/validation';
+import { useFormValidation } from '@/shared/hooks/useFormValidation';
+import { ValidatedInput } from '@/shared/ui/ValidatedInput';
+import { ValidatedTextarea } from '@/shared/ui/ValidatedTextarea';
 import type { Database } from '@/shared/lib/database.types';
 
 type PropertyType = Database['public']['Tables']['properties']['Row']['property_type'];
+
+interface PropertyFormData {
+  title: string;
+  description: string;
+  address: string;
+  city: string;
+  neighborhood: string;
+  property_type: PropertyType;
+  property_category: 'residentiel' | 'commercial';
+  bedrooms: number;
+  bathrooms: number;
+  surface_area: string;
+  monthly_rent: string;
+  deposit_amount: string;
+  charges_amount: string;
+  has_parking: boolean;
+  has_garden: boolean;
+  is_furnished: boolean;
+  has_ac: boolean;
+}
 
 export default function AddProperty() {
   const { user } = useAuth();
@@ -17,15 +41,18 @@ export default function AddProperty() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  
+  // Hook de validation
+  const { validateField, getFieldState, setFieldTouched } = useFormValidation<PropertyFormData>();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PropertyFormData>({
     title: '',
     description: '',
     address: '',
     city: '',
     neighborhood: '',
     property_type: 'appartement' as PropertyType,
-    property_category: 'residentiel' as 'residentiel' | 'commercial',
+    property_category: 'residentiel',
     bedrooms: 1,
     bathrooms: 1,
     surface_area: '',
@@ -62,6 +89,31 @@ export default function AddProperty() {
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Validation en temps réel pour les champs critiques
+  const handleBlur = (field: keyof PropertyFormData) => {
+    setFieldTouched(field);
+    
+    switch (field) {
+      case 'title':
+        validateField('title', () => ValidationService.validateMinLength(formData.title, 10, 'Le titre'));
+        break;
+      case 'address':
+        validateField('address', () => ValidationService.validateRequired(formData.address, 'L\'adresse'));
+        break;
+      case 'city':
+        validateField('city', () => ValidationService.validateRequired(formData.city, 'La ville'));
+        break;
+      case 'monthly_rent':
+        validateField('monthly_rent', () => ValidationService.validatePositiveNumber(formData.monthly_rent, 'Le loyer'));
+        break;
+      case 'surface_area':
+        if (formData.surface_area) {
+          validateField('surface_area', () => ValidationService.validatePositiveNumber(formData.surface_area, 'La surface'));
+        }
+        break;
     }
   };
 
@@ -296,34 +348,28 @@ export default function AddProperty() {
               <h2 className="text-xl font-semibold text-neutral-900 mb-6">Informations générales</h2>
 
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                    Titre de l'annonce <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required
-                    placeholder="Ex: Bel appartement 3 pièces à Cocody"
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                  />
-                </div>
+                <ValidatedInput
+                  label="Titre de l'annonce"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur('title')}
+                  required
+                  placeholder="Ex: Bel appartement 3 pièces à Cocody"
+                  error={getFieldState('title').error}
+                  touched={getFieldState('title').isInvalid || getFieldState('title').isValid}
+                  isValid={getFieldState('title').isValid}
+                  helperText="Minimum 10 caractères"
+                />
 
-                <div>
-                  <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows={5}
-                    placeholder="Décrivez votre propriété en détail..."
-                    className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                  />
-                </div>
+                <ValidatedTextarea
+                  label="Description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={5}
+                  placeholder="Décrivez votre propriété en détail..."
+                />
 
                 <div>
                   <label className="block text-sm font-semibold text-neutral-800 mb-2">
