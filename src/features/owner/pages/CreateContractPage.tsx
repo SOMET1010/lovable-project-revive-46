@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
+import { generateAndUploadContract } from '@/services/contracts/contractService';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { 
@@ -184,6 +185,14 @@ export default function CreateContractPage() {
 
       if (insertError) throw insertError;
 
+      // Générer et uploader le PDF automatiquement
+      try {
+        await generateAndUploadContract(data.id);
+      } catch (pdfError) {
+        console.error('Error generating PDF:', pdfError);
+        // Continue even if PDF generation fails
+      }
+
       // Update property status
       await supabase
         .from('properties')
@@ -199,7 +208,7 @@ export default function CreateContractPage() {
         action_url: `/signer-bail/${data.id}`
       });
 
-      setSuccess('Contrat créé avec succès!');
+      setSuccess('Contrat créé et PDF généré avec succès!');
       
       setTimeout(() => {
         navigate(`/contrat/${data.id}`);
