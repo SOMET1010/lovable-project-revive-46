@@ -1,10 +1,10 @@
-import { Home, Search, PlusCircle, User, Heart, Calendar, Bell, FileText, Settings, LogOut, Menu, X, MessageCircle } from 'lucide-react';
+import { Home, Search, PlusCircle, User, Heart, Calendar, Bell, FileText, Settings, LogOut, Menu, X, MessageCircle, Building2, Key, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useUnreadCount } from '@/features/messaging/hooks/useUnreadCount';
-import { isUserType } from '@/shared/lib/utils';
+import { useContextualRoles } from '@/shared/hooks/useContextualRoles';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();
@@ -16,14 +16,24 @@ export default function HeaderPremium() {
   const [scrolled, setScrolled] = useState(false);
   
   const { count: unreadCount } = useUnreadCount();
+  const { isOwner, isTenant, propertiesCount, activeLeasesAsTenantCount } = useContextualRoles();
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
     return location.pathname.startsWith(href);
   };
 
-  // Support both French and English user_type values
-  const isOwner = isUserType(profile?.user_type, 'owner', 'proprietaire');
+  // Déterminer le contexte actuel basé sur l'URL
+  const isInOwnerContext = location.pathname.startsWith('/dashboard');
+  const isInTenantContext = location.pathname.startsWith('/tableau-de-bord');
+
+  // Générer le label de rôle contextuel
+  const getRoleLabel = () => {
+    if (isOwner && isTenant) return '🏠 Propriétaire & 🔑 Locataire';
+    if (isOwner) return '🏠 Propriétaire';
+    if (isTenant) return '🔑 Locataire';
+    return '👋 Nouveau membre';
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -148,14 +158,82 @@ export default function HeaderPremium() {
                   </button>
 
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-[0_20px_40px_rgba(44,24,16,0.1)] border border-[#EFEBE9] py-2 z-50 animate-fade-in">
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-[0_20px_40px_rgba(44,24,16,0.1)] border border-[#EFEBE9] py-2 z-50 animate-fade-in">
+                      {/* User Info */}
                       <div className="px-4 py-3 border-b border-[#EFEBE9]">
                         <p className="text-sm font-semibold text-[#2C1810] truncate">
                           {profile?.full_name || 'Utilisateur'}
                         </p>
                         <p className="text-xs text-[#A69B95] truncate">{user.email}</p>
+                        <p className="text-xs text-[#F16522] font-medium mt-1">{getRoleLabel()}</p>
                       </div>
 
+                      {/* Mon Espace - Contextual Dashboard Links */}
+                      <div className="px-2 py-2 border-b border-[#EFEBE9]">
+                        <p className="px-2 py-1 text-xs font-bold text-[#A69B95] uppercase tracking-wider">Mon Espace</p>
+                        
+                        {/* Unified Dashboard */}
+                        <Link
+                          to="/mon-espace"
+                          className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                            location.pathname === '/mon-espace' 
+                              ? 'bg-[#F16522]/10 text-[#F16522]' 
+                              : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                          }`}
+                        >
+                          <LayoutDashboard className="h-4 w-4" />
+                          <span>Vue d'ensemble</span>
+                        </Link>
+
+                        {/* Owner Dashboard */}
+                        {isOwner && (
+                          <Link
+                            to="/dashboard"
+                            className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
+                              isInOwnerContext 
+                                ? 'bg-[#F16522]/10 text-[#F16522]' 
+                                : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Building2 className="h-4 w-4" />
+                              <span>Mes Propriétés</span>
+                            </div>
+                            <span className="bg-[#F16522]/10 text-[#F16522] text-xs font-bold px-2 py-0.5 rounded-full">
+                              {propertiesCount}
+                            </span>
+                          </Link>
+                        )}
+
+                        {/* Tenant Dashboard */}
+                        {isTenant && (
+                          <Link
+                            to="/tableau-de-bord"
+                            className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
+                              isInTenantContext 
+                                ? 'bg-[#F16522]/10 text-[#F16522]' 
+                                : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <Key className="h-4 w-4" />
+                              <span>Mes Locations</span>
+                            </div>
+                            <span className="bg-[#25D366]/10 text-[#25D366] text-xs font-bold px-2 py-0.5 rounded-full">
+                              {activeLeasesAsTenantCount}
+                            </span>
+                          </Link>
+                        )}
+
+                        {/* New user without roles */}
+                        {!isOwner && !isTenant && (
+                          <div className="px-3 py-2 text-xs text-[#A69B95]">
+                            Commencez à chercher un logement ou publiez une annonce pour voir vos espaces ici.
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Other Menu Items */}
                       {userMenuItems.map((item) => (
                         <Link
                           key={item.label}
@@ -248,6 +326,67 @@ export default function HeaderPremium() {
                 {profile?.full_name || 'Utilisateur'}
               </p>
               <p className="text-xs text-[#A69B95] truncate">{user.email}</p>
+              <p className="text-xs text-[#F16522] font-medium mt-1">{getRoleLabel()}</p>
+            </div>
+          )}
+
+          {/* Mon Espace - Mobile Contextual Section */}
+          {user && (
+            <div className="pb-4 border-b border-[#EFEBE9]">
+              <p className="px-4 py-2 text-xs font-bold text-[#A69B95] uppercase tracking-wider">Mon Espace</p>
+              
+              <Link
+                to="/mon-espace"
+                onClick={() => setShowMobileMenu(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
+                  location.pathname === '/mon-espace'
+                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                    : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                }`}
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span className="font-medium">Vue d'ensemble</span>
+              </Link>
+
+              {isOwner && (
+                <Link
+                  to="/dashboard"
+                  onClick={() => setShowMobileMenu(false)}
+                  className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
+                    isInOwnerContext
+                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Building2 className="h-5 w-5" />
+                    <span className="font-medium">Mes Propriétés</span>
+                  </div>
+                  <span className="bg-[#F16522]/10 text-[#F16522] text-xs font-bold px-2 py-0.5 rounded-full">
+                    {propertiesCount}
+                  </span>
+                </Link>
+              )}
+
+              {isTenant && (
+                <Link
+                  to="/tableau-de-bord"
+                  onClick={() => setShowMobileMenu(false)}
+                  className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
+                    isInTenantContext
+                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Key className="h-5 w-5" />
+                    <span className="font-medium">Mes Locations</span>
+                  </div>
+                  <span className="bg-[#25D366]/10 text-[#25D366] text-xs font-bold px-2 py-0.5 rounded-full">
+                    {activeLeasesAsTenantCount}
+                  </span>
+                </Link>
+              )}
             </div>
           )}
 
