@@ -109,7 +109,9 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
             <img
               src={slide.src}
               alt={slide.alt}
-              className={`w-full h-full object-cover ${slide.position}`}
+              className={`w-full h-full object-cover ${slide.position} transition-transform duration-[6000ms] ease-out ${
+                index === currentSlide ? 'scale-110' : 'scale-100'
+              }`}
               loading={index === 0 ? 'eager' : 'lazy'}
               {...(index === 0 ? { fetchPriority: 'high' as const } : {})}
             />
