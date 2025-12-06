@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { generateAndUploadContract } from '@/services/contracts/contractService';
@@ -55,6 +55,12 @@ interface AcceptedApplication {
 export default function CreateContractPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { propertyId: urlPropertyId } = useParams();
+  const [searchParams] = useSearchParams();
+  
+  // Get propertyId and tenantId from URL params or query params
+  const initialPropertyId = urlPropertyId || searchParams.get('propertyId') || '';
+  const initialTenantId = searchParams.get('tenantId') || '';
   
   const [properties, setProperties] = useState<Property[]>([]);
   const [applications, setApplications] = useState<AcceptedApplication[]>([]);
@@ -63,9 +69,9 @@ export default function CreateContractPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
-  // Form state
-  const [selectedProperty, setSelectedProperty] = useState('');
-  const [selectedTenant, setSelectedTenant] = useState('');
+  // Form state - pre-fill from URL params
+  const [selectedProperty, setSelectedProperty] = useState(initialPropertyId);
+  const [selectedTenant, setSelectedTenant] = useState(initialTenantId);
   const [monthlyRent, setMonthlyRent] = useState('');
   const [depositAmount, setDepositAmount] = useState('');
   const [chargesAmount, setChargesAmount] = useState('0');
