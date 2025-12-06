@@ -203,7 +203,9 @@ export function OwnerBadge({
               </span>
             )}
             {!isVerified && !oneciVerified && !cnamVerified && (
-              <span className="text-xs text-neutral-400">Aucune vérification</span>
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full">
+                <Shield className="h-3 w-3" /> Vérification en cours
+              </span>
             )}
           </div>
         </div>

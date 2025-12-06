@@ -45,7 +45,7 @@ export default function HeaderPremium() {
 
   const mainNavItems = [
     { label: 'Rechercher', href: '/recherche', icon: Search },
-    ...(user && isOwner ? [{ label: 'Publier', href: '/ajouter-propriete', icon: PlusCircle }] : []),
+    { label: 'Louer mon bien', href: '/ajouter-propriete', icon: PlusCircle },
   ];
 
   const userMenuItems = user ? [
