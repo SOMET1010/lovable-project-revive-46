@@ -216,6 +216,7 @@ export const STORAGE_KEYS = {
   USER_PREFERENCES: 'user-preferences',
   SEARCH_HISTORY: 'search-history',
   THEME: 'theme',
+  PROPERTY_DRAFT: 'property-form-draft',
 } as const;
 
 // API Rate Limits

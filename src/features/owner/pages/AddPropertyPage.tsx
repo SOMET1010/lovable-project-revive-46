@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Upload, X, Image as ImageIcon, Building2, Save } from 'lucide-react';
+import { ArrowLeft, Home, Upload, X, Image as ImageIcon, Building2, Save, Check, RefreshCw } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES } from '@/shared/lib/constants/app.constants';
+import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES, STORAGE_KEYS } from '@/shared/lib/constants/app.constants';
 import { ValidationService } from '@/services/validation';
 import { useFormValidation } from '@/shared/hooks/useFormValidation';
 import { ValidatedInput } from '@/shared/ui/ValidatedInput';
@@ -38,8 +38,26 @@ const TITLE_MAX = 100;
 const DESC_MIN = 50;
 const DESC_MAX = 1000;
 
-// Combined locations for autocomplete
-const ALL_LOCATIONS = [...CITIES, ...ABIDJAN_COMMUNES];
+// Initial form data
+const INITIAL_FORM_DATA: PropertyFormData = {
+  title: '',
+  description: '',
+  address: '',
+  city: '',
+  neighborhood: '',
+  property_type: 'appartement' as PropertyType,
+  property_category: 'residential',
+  bedrooms: 1,
+  bathrooms: 1,
+  surface_area: '',
+  monthly_rent: '',
+  deposit_amount: '',
+  charges_amount: '0',
+  has_parking: false,
+  has_garden: false,
+  is_furnished: false,
+  has_ac: false,
+};
 
 export default function AddProperty() {
   const { user } = useAuth();
@@ -50,29 +68,62 @@ export default function AddProperty() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Hook de validation
   const { validateField, getFieldState, setFieldTouched } = useFormValidation<PropertyFormData>();
 
-  const [formData, setFormData] = useState<PropertyFormData>({
-    title: '',
-    description: '',
-    address: '',
-    city: '',
-    neighborhood: '',
-    property_type: 'appartement' as PropertyType,
-    property_category: 'residential',
-    bedrooms: 1,
-    bathrooms: 1,
-    surface_area: '',
-    monthly_rent: '',
-    deposit_amount: '',
-    charges_amount: '0',
-    has_parking: false,
-    has_garden: false,
-    is_furnished: false,
-    has_ac: false,
-  });
+  const [formData, setFormData] = useState<PropertyFormData>(INITIAL_FORM_DATA);
+
+  // Load draft from localStorage on mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem(STORAGE_KEYS.PROPERTY_DRAFT);
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft);
+        setHasDraft(true);
+        setFormData(prev => ({ ...prev, ...parsed }));
+      } catch {
+        // Ignore invalid JSON
+      }
+    }
+  }, []);
+
+  // Save draft to localStorage with debounce
+  const saveDraft = useCallback(() => {
+    localStorage.setItem(STORAGE_KEYS.PROPERTY_DRAFT, JSON.stringify(formData));
+    setDraftSaved(true);
+    setTimeout(() => setDraftSaved(false), 2000);
+  }, [formData]);
+
+  // Auto-save draft on form changes (debounced)
+  useEffect(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      if (formData.title || formData.description || formData.city) {
+        saveDraft();
+      }
+    }, 3000); // Save after 3 seconds of inactivity
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, [formData, saveDraft]);
+
+  // Clear draft
+  const clearDraft = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEYS.PROPERTY_DRAFT);
+    setFormData(INITIAL_FORM_DATA);
+    setHasDraft(false);
+    setImageFiles([]);
+    setImagePreviews([]);
+  }, []);
 
   useEffect(() => {
     const category = formData.property_category;
@@ -252,6 +303,9 @@ export default function AddProperty() {
         if (updateError) throw updateError;
       }
 
+      // Clear draft after successful submission
+      localStorage.removeItem(STORAGE_KEYS.PROPERTY_DRAFT);
+      
       setSuccess(true);
       setTimeout(() => {
         navigate('/dashboard/proprietaire');
@@ -284,18 +338,6 @@ export default function AddProperty() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
-      {/* Datalists for autocomplete */}
-      <datalist id="cities-list">
-        {ALL_LOCATIONS.map(loc => (
-          <option key={loc} value={loc} />
-        ))}
-      </datalist>
-      <datalist id="neighborhoods-list">
-        {ABIDJAN_COMMUNES.map(commune => (
-          <option key={commune} value={commune} />
-        ))}
-      </datalist>
-
       <div className="bg-white border-b border-neutral-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
@@ -316,6 +358,31 @@ export default function AddProperty() {
               <span>Ajouter une propriété</span>
             </h1>
             <p className="text-neutral-600 text-lg">Remplissez les informations de votre propriété pour la publier sur Mon Toit</p>
+            
+            {/* Draft indicator */}
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center gap-2 text-sm">
+                {draftSaved && (
+                  <span className="flex items-center gap-1 text-green-600">
+                    <Check className="h-4 w-4" />
+                    Brouillon sauvegardé
+                  </span>
+                )}
+                {hasDraft && !draftSaved && (
+                  <span className="text-neutral-500">Brouillon restauré</span>
+                )}
+              </div>
+              {(hasDraft || formData.title) && (
+                <button
+                  type="button"
+                  onClick={clearDraft}
+                  className="flex items-center gap-1 text-sm text-neutral-500 hover:text-red-500 transition-colors"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Recommencer
+                </button>
+              )}
+            </div>
           </div>
 
           {error && (
@@ -552,32 +619,53 @@ export default function AddProperty() {
                     <label className="block text-sm font-semibold text-neutral-800 mb-2">
                       Ville <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="city"
                       value={formData.city}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        handleChange(e);
+                        // Reset neighborhood when city changes
+                        if (e.target.value !== 'Abidjan') {
+                          setFormData(prev => ({ ...prev, neighborhood: '' }));
+                        }
+                      }}
                       onBlur={() => handleBlur('city')}
                       required
-                      list="cities-list"
-                      placeholder="Ex: Abidjan"
                       className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                    />
+                    >
+                      <option value="">Sélectionnez une ville</option>
+                      {CITIES.map(city => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-semibold text-neutral-800 mb-2">
-                      Quartier
+                      Quartier {formData.city === 'Abidjan' && <span className="text-neutral-500">(commune)</span>}
                     </label>
-                    <input
-                      type="text"
-                      name="neighborhood"
-                      value={formData.neighborhood}
-                      onChange={handleChange}
-                      list="neighborhoods-list"
-                      placeholder="Ex: Cocody"
-                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
-                    />
+                    {formData.city === 'Abidjan' ? (
+                      <select
+                        name="neighborhood"
+                        value={formData.neighborhood}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                      >
+                        <option value="">Sélectionnez une commune</option>
+                        {ABIDJAN_COMMUNES.map(commune => (
+                          <option key={commune} value={commune}>{commune}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        name="neighborhood"
+                        value={formData.neighborhood}
+                        onChange={handleChange}
+                        placeholder="Ex: Centre-ville"
+                        className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white transition-colors"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
