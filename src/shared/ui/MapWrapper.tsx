@@ -39,18 +39,8 @@ export default function MapWrapper(props: MapWrapperProps) {
   const [useAzureFallback, setUseAzureFallback] = useState(false);
 
   useEffect(() => {
-    const checkMapboxToken = () => {
-      const token = import.meta.env['VITE_MAPBOX_PUBLIC_TOKEN'] || import.meta.env['VITE_MAPBOX_TOKEN'];
-      if (!token || token === '' || token === 'undefined') {
-        console.warn('Mapbox token not configured, using Azure Maps fallback');
-        setUseAzureFallback(true);
-      }
-    };
-
-    checkMapboxToken();
-
     const handleMapError = () => {
-      console.error('Mapbox failed to load, switching to Azure Maps');
+      console.error('Mapbox failed to load, switching to fallback');
       setMapError(true);
       setUseAzureFallback(true);
     };
@@ -64,38 +54,7 @@ export default function MapWrapper(props: MapWrapperProps) {
   }
 
   return (
-    <Suspense
-      fallback={
-        <div
-          style={{ height: props.height || '500px' }}
-          className="relative bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden animate-pulse flex items-center justify-center"
-        >
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-terracotta-300 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-cyan-300 rounded-full blur-3xl"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-olive-300 rounded-full blur-3xl"></div>
-          </div>
-          <div className="relative z-10 text-center space-y-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-terracotta-400 to-coral-400 rounded-2xl flex items-center justify-center mx-auto animate-bounce-subtle shadow-lg">
-              <Map className="h-10 w-10 text-white" />
-            </div>
-            <div className="space-y-2">
-              <p className="text-gray-700 font-bold text-lg">Chargement de la carte...</p>
-              <p className="text-gray-600 text-sm">Préparation de vos propriétés</p>
-            </div>
-            <div className="flex items-center justify-center space-x-2">
-              <MapPin className="h-4 w-4 text-terracotta-500 animate-pulse" />
-              <MapPin className="h-4 w-4 text-cyan-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
-              <MapPin className="h-4 w-4 text-olive-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-            </div>
-          </div>
-          <div className="absolute top-4 right-4 space-y-2">
-            <div className="w-10 h-10 bg-white/80 rounded-lg"></div>
-            <div className="w-10 h-10 bg-white/80 rounded-lg"></div>
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<MapLoadingSkeleton height={props.height} />}>
       <div
         onError={() => {
           console.error('Mapbox component error, using fallback');
@@ -106,6 +65,34 @@ export default function MapWrapper(props: MapWrapperProps) {
         <MapboxMap {...props} />
       </div>
     </Suspense>
+  );
+}
+
+function MapLoadingSkeleton({ height = '500px' }: { height?: string }) {
+  return (
+    <div
+      style={{ height }}
+      className="relative bg-gradient-to-br from-muted to-muted/80 rounded-lg overflow-hidden animate-pulse flex items-center justify-center"
+    >
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/30 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-accent/30 rounded-full blur-3xl"></div>
+      </div>
+      <div className="relative z-10 text-center space-y-4">
+        <div className="w-20 h-20 bg-primary rounded-2xl flex items-center justify-center mx-auto animate-bounce shadow-lg">
+          <Map className="h-10 w-10 text-primary-foreground" />
+        </div>
+        <div className="space-y-2">
+          <p className="text-foreground font-bold text-lg">Chargement de la carte...</p>
+          <p className="text-muted-foreground text-sm">Préparation de vos propriétés</p>
+        </div>
+        <div className="flex items-center justify-center space-x-2">
+          <MapPin className="h-4 w-4 text-primary animate-pulse" />
+          <MapPin className="h-4 w-4 text-primary/70 animate-pulse" style={{ animationDelay: '0.2s' }} />
+          <MapPin className="h-4 w-4 text-primary/50 animate-pulse" style={{ animationDelay: '0.4s' }} />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -128,29 +115,29 @@ function AzureMapsComponent({
   return (
     <div
       style={{ height }}
-      className="relative bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg overflow-hidden border-2 border-blue-200"
+      className="relative bg-gradient-to-br from-muted to-accent/20 rounded-lg overflow-hidden border-2 border-border"
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center p-8 max-w-2xl">
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-              <Map className="h-10 w-10 text-white" />
+          <div className="bg-card rounded-2xl shadow-xl p-8 mb-6">
+            <div className="bg-primary rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <Map className="h-10 w-10 text-primary-foreground" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-3">
-              Azure Maps - Mode de Secours
+            <h3 className="text-2xl font-bold text-foreground mb-3">
+              Carte non disponible
             </h3>
-            <p className="text-gray-600 mb-4">
-              Mapbox n'est pas disponible. Utilisation d'Azure Maps comme solution alternative.
+            <p className="text-muted-foreground mb-4">
+              Le service de cartographie n'est pas accessible pour le moment.
             </p>
-            <div className="flex items-center justify-center space-x-2 text-sm text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
+            <div className="flex items-center justify-center space-x-2 text-sm text-primary bg-primary/10 px-4 py-2 rounded-lg">
               <AlertCircle className="h-4 w-4" />
-              <span>Configuration Azure Maps en cours...</span>
+              <span>Vérifiez la configuration du token Mapbox</span>
             </div>
           </div>
 
           {properties.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h4 className="font-bold text-lg mb-4 text-gray-900">
+            <div className="bg-card rounded-2xl shadow-lg p-6">
+              <h4 className="font-bold text-lg mb-4 text-foreground">
                 {properties.length} propriété{properties.length > 1 ? 's' : ''} disponible{properties.length > 1 ? 's' : ''}
               </h4>
               <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
@@ -160,23 +147,23 @@ function AzureMapsComponent({
                     onClick={() => handleMarkerClick(property)}
                     className={`text-left p-4 rounded-xl border-2 transition-all ${
                       selectedProperty?.id === property.id
-                        ? 'border-blue-500 bg-blue-50 shadow-lg'
-                        : 'border-gray-200 hover:border-blue-300 hover:shadow-md'
+                        ? 'border-primary bg-primary/10 shadow-lg'
+                        : 'border-border hover:border-primary/50 hover:shadow-md'
                     }`}
                   >
                     <div className="flex items-start space-x-3">
-                      <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg p-2 flex-shrink-0">
+                      <div className="bg-primary text-primary-foreground rounded-lg p-2 flex-shrink-0">
                         <Map className="h-5 w-5" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h5 className="font-bold text-gray-900 truncate mb-1">
+                        <h5 className="font-bold text-foreground truncate mb-1">
                           {property.title}
                         </h5>
-                        <p className="text-sm text-gray-600 mb-2">
+                        <p className="text-sm text-muted-foreground mb-2">
                           {property.city}
                           {property.neighborhood && `, ${property.neighborhood}`}
                         </p>
-                        <p className="text-lg font-bold text-blue-600">
+                        <p className="text-lg font-bold text-primary">
                           {property.monthly_rent.toLocaleString()} FCFA/mois
                         </p>
                       </div>
@@ -185,18 +172,12 @@ function AzureMapsComponent({
                 ))}
               </div>
               {properties.length > 5 && (
-                <p className="text-sm text-gray-500 mt-4 text-center">
+                <p className="text-sm text-muted-foreground mt-4 text-center">
                   + {properties.length - 5} autre{properties.length - 5 > 1 ? 's' : ''} propriété{properties.length - 5 > 1 ? 's' : ''}
                 </p>
               )}
             </div>
           )}
-
-          <div className="mt-6 text-sm text-gray-500">
-            <p>
-              💡 <strong>Note:</strong> Pour activer Mapbox, ajoutez votre token dans les variables d'environnement
-            </p>
-          </div>
         </div>
       </div>
     </div>
