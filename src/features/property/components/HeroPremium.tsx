@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, MapPin, Home, ChevronDown, Sparkles } from 'lucide-react';
 
 interface HeroPremiumProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
 }
 
-// Configuration des 8 slides premium personas (cycle complet 48s)
-const HERO_SLIDES = [
+interface HeroSlide {
+  src: string;
+  alt: string;
+  position: string;
+}
+
+/**
+ * HeroPremium - Fade Slideshow Hero
+ * 8 images avec transition fade, auto-play 6s (cycle complet 48s), pause au hover
+ * Optimisé avec loading="lazy" et fetchPriority pour les performances
+ */
+const HERO_SLIDES: HeroSlide[] = [
   {
     src: '/images/hero/hero-famille-cles.png',
     alt: 'Famille ivoirienne recevant les clés de leur nouvelle maison',
@@ -79,11 +89,37 @@ const budgets = [
 
 const popularDistricts = ['Cocody', 'Plateau', 'Marcory', 'Yopougon', 'Riviera'];
 
-/**
- * HeroPremium - Fade Slideshow Hero
- * 4 images avec transition fade, auto-play 6s, pause au hover
- * Focus: Search form + quick links
- */
+// Composant image optimisé avec lazy loading et responsive sizes
+interface OptimizedHeroImageProps {
+  src: string;
+  alt: string;
+  position: string;
+  isActive: boolean;
+  priority?: boolean;
+}
+
+function OptimizedHeroImage({ src, alt, position, isActive, priority }: OptimizedHeroImageProps) {
+  return (
+    <div
+      className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+        isActive ? 'opacity-100' : 'opacity-0'
+      }`}
+    >
+      <img
+        src={src}
+        alt={alt}
+        sizes="100vw"
+        className={`w-full h-full object-cover ${position} transition-transform duration-[6000ms] ease-out ${
+          isActive ? 'scale-110' : 'scale-100'
+        }`}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : undefined}
+        decoding="async"
+      />
+    </div>
+  );
+}
+
 export default function HeroPremium({ onSearch }: HeroPremiumProps) {
   const [city, setCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
@@ -102,14 +138,18 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
     return () => clearInterval(timer);
   }, [isPaused]);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     onSearch({ city, propertyType, maxBudget });
-  };
+  }, [city, propertyType, maxBudget, onSearch]);
 
-  const handleQuickSearch = (district: string) => {
+  const handleQuickSearch = useCallback((district: string) => {
     onSearch({ city: district, propertyType: '', maxBudget: '' });
-  };
+  }, [onSearch]);
+
+  const goToSlide = useCallback((index: number) => {
+    setCurrentSlide(index);
+  }, []);
 
   return (
     <section 
@@ -120,22 +160,14 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
       {/* Slideshow Background avec Fade Transition */}
       <div className="absolute inset-0 z-0">
         {HERO_SLIDES.map((slide, index) => (
-          <div
+          <OptimizedHeroImage
             key={slide.src}
-            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <img
-              src={slide.src}
-              alt={slide.alt}
-              className={`w-full h-full object-cover ${slide.position} transition-transform duration-[6000ms] ease-out ${
-                index === currentSlide ? 'scale-110' : 'scale-100'
-              }`}
-              loading={index === 0 ? 'eager' : 'lazy'}
-              {...(index === 0 ? { fetchPriority: 'high' as const } : {})}
-            />
-          </div>
+            src={slide.src}
+            alt={slide.alt}
+            position={slide.position}
+            isActive={index === currentSlide}
+            priority={index === 0}
+          />
         ))}
         
         {/* Gradient Overlays for readability */}
@@ -264,7 +296,7 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
         {HERO_SLIDES.map((_, index) => (
           <button
             key={index}
-            onClick={() => setCurrentSlide(index)}
+            onClick={() => goToSlide(index)}
             aria-label={`Voir l'image ${index + 1}`}
             className={`h-2 rounded-full transition-all duration-500 ease-out shadow-sm ${
               index === currentSlide 
