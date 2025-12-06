@@ -116,25 +116,35 @@ export default function SUTAChatWidget({ className = '' }: SUTAChatWidgetProps) 
         overflow: 'hidden'
       }}
     >
-      {/* Header */}
+      {/* Header Premium */}
       <div 
         className="flex items-center gap-3 px-5 py-4"
         style={{ 
-          backgroundColor: '#075E54',
+          backgroundColor: '#2C1810',
           color: '#FFFFFF'
         }}
       >
+        <img 
+          src="/images/suta-avatar.png" 
+          alt="SUTA Assistant"
+          className="w-10 h-10 rounded-full object-cover ring-2 ring-[#F16522]/50"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+            target.nextElementSibling?.classList.remove('hidden');
+          }}
+        />
         <div 
-          className="w-10 h-10 rounded-full flex items-center justify-center"
-          style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+          className="w-10 h-10 rounded-full hidden items-center justify-center"
+          style={{ backgroundColor: '#F16522' }}
         >
           <Bot className="w-5 h-5" />
         </div>
         <div className="flex-1">
           <p className="font-semibold text-sm">SUTA - Assistant Mon Toit</p>
-          <p className="text-xs opacity-80">En ligne • Répond instantanément</p>
+          <p className="text-xs text-[#E8D4C5]/80">En ligne • Répond instantanément</p>
         </div>
-        <Sparkles className="w-5 h-5 opacity-60" />
+        <Sparkles className="w-5 h-5 text-[#F16522]" />
       </div>
 
       {/* Messages Container */}
@@ -165,7 +175,7 @@ export default function SUTAChatWidget({ className = '' }: SUTAChatWidgetProps) 
               {message.role === 'assistant' && (
                 <div 
                   className="absolute -left-8 top-0 w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: '#075E54' }}
+                  style={{ backgroundColor: '#F16522' }}
                 >
                   <Bot className="w-3 h-3 text-white" />
                 </div>
@@ -214,7 +224,7 @@ export default function SUTAChatWidget({ className = '' }: SUTAChatWidgetProps) 
 
       {/* Quick Questions (show only at start) */}
       {messages.length <= 1 && (
-        <div className="px-4 py-3 flex flex-wrap gap-2" style={{ backgroundColor: '#F5F5F5' }}>
+        <div className="px-4 py-3 flex flex-wrap gap-2" style={{ backgroundColor: '#FAF7F4' }}>
           {QUICK_QUESTIONS.map((question, index) => (
             <button
               key={index}
@@ -222,9 +232,9 @@ export default function SUTAChatWidget({ className = '' }: SUTAChatWidgetProps) 
               className="px-3 py-1.5 text-xs font-medium transition-all hover:scale-105"
               style={{
                 backgroundColor: '#FFFFFF',
-                color: '#075E54',
+                color: '#2C1810',
                 borderRadius: '16px',
-                border: '1px solid #E0E0E0'
+                border: '1px solid #EFEBE9'
               }}
             >
               {question}
@@ -257,7 +267,7 @@ export default function SUTAChatWidget({ className = '' }: SUTAChatWidgetProps) 
           disabled={!inputValue.trim() || isLoading}
           className="w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-105 disabled:opacity-50"
           style={{ 
-            backgroundColor: '#25D366',
+            backgroundColor: '#F16522',
             color: '#FFFFFF'
           }}
         >
