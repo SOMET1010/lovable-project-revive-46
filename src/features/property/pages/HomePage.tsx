@@ -185,9 +185,9 @@ function PropertyCard({ property, index, isVisible: _isVisible }: { property: Pr
           <Heart className="h-5 w-5 fill-transparent hover:fill-current transition-colors" />
         </button>
         
-        {/* Prix en Overlay (Style Premium) */}
+        {/* Prix en Overlay (Style Premium avec bordure) */}
         <div className="absolute bottom-4 left-4">
-          <div className="flex items-baseline gap-1 bg-[#2C1810]/90 backdrop-blur-sm px-4 py-2 rounded-xl text-white shadow-lg">
+          <div className="flex items-baseline gap-1 bg-[#2C1810]/90 backdrop-blur-md px-4 py-2 rounded-xl text-white shadow-lg border border-white/10">
             <span className="text-lg font-bold tracking-tight">
               {property.monthly_rent?.toLocaleString('fr-FR') || 'N/A'}
             </span>
@@ -325,8 +325,13 @@ export default function HomePage() {
       {/* ==================== HERO SECTION (PREMIUM CHOCOLAT) ==================== */}
       <section className="relative w-full min-h-[750px] lg:min-h-[850px] overflow-hidden flex items-center bg-[#2C1810]">
         
-        {/* Texture de fond subtile (Pattern CSS local) */}
-        <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle_at_1px_1px,_white_1px,_transparent_1px)] bg-[length:24px_24px] mix-blend-overlay pointer-events-none" />
+        {/* Texture grain premium (SVG inline - no external dependency) */}
+        <div 
+          className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
+          style={{ 
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` 
+          }}
+        />
         
         {/* Glow Effects */}
         <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-[#F16522]/10 rounded-full blur-[150px] animate-pulse-slow" />
@@ -344,7 +349,7 @@ export default function HomePage() {
                 
                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold leading-[1.1] text-white tracking-tight">
                   Trouvez votre <br/>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F16522] to-[#FF8C55]">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F16522] via-[#FF8C55] to-[#F16522] bg-[length:200%_auto] animate-gradient">
                     nouveau chez-vous
                   </span>
                 </h1>
@@ -358,24 +363,30 @@ export default function HomePage() {
               <div className="bg-white p-2 rounded-[2.5rem] shadow-[0_25px_60px_-12px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-700 delay-200 relative z-20">
                 <div className="flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x divide-[#EFEBE9]">
                   
-                  <div className="flex-1 px-6 py-3 w-full group">
-                    <label className="text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 block group-hover:text-[#F16522] transition-colors">Type de bien</label>
+                  <div className="flex-1 px-6 py-3 w-full group cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl">
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 group-hover:text-[#F16522] transition-colors">
+                      <Home className="w-3 h-3" /> Type de bien
+                    </label>
                     <Select value={propertyType} onValueChange={setPropertyType}>
                       <SelectTrigger className="w-full border-0 shadow-none p-0 h-6 text-base font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="Appartement" /></SelectTrigger>
                       <SelectContent>{PROPERTY_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
 
-                  <div className="flex-1 px-6 py-3 w-full group">
-                    <label className="text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 block group-hover:text-[#F16522] transition-colors">Localisation</label>
+                  <div className="flex-1 px-6 py-3 w-full group cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl">
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 group-hover:text-[#F16522] transition-colors">
+                      <MapPin className="w-3 h-3" /> Localisation
+                    </label>
                     <Select value={location} onValueChange={setLocation}>
                       <SelectTrigger className="w-full border-0 shadow-none p-0 h-6 text-base font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="Cocody" /></SelectTrigger>
                       <SelectContent>{LOCATIONS.map(l => <SelectItem key={l.value} value={l.value}>{l.label}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
 
-                  <div className="flex-1 px-6 py-3 w-full group">
-                    <label className="text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 block group-hover:text-[#F16522] transition-colors">Budget Max</label>
+                  <div className="flex-1 px-6 py-3 w-full group cursor-pointer hover:bg-gray-50/50 transition-colors rounded-xl">
+                    <label className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#A69B95] tracking-wider mb-1 group-hover:text-[#F16522] transition-colors">
+                      <Key className="w-3 h-3" /> Budget Max
+                    </label>
                     <Select value={budget} onValueChange={setBudget}>
                       <SelectTrigger className="w-full border-0 shadow-none p-0 h-6 text-base font-bold text-[#2C1810] focus:ring-0"><SelectValue placeholder="500.000 FCFA" /></SelectTrigger>
                       <SelectContent>{BUDGETS.map(b => <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>)}</SelectContent>
@@ -469,18 +480,20 @@ export default function HomePage() {
                   ))}
                 </div>
 
-                {/* Badge flottant */}
-                <div className="absolute bottom-[20%] -left-[10%] bg-white/10 backdrop-blur-xl border border-white/20 p-4 rounded-2xl shadow-xl flex items-center gap-4 animate-bounce-slow">
+                {/* Badge flottant avec avatar générique amélioré */}
+                <div className="absolute bottom-[20%] -left-[10%] bg-white/10 backdrop-blur-xl border border-white/20 p-5 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.3)] flex items-center gap-4 animate-bounce-slow z-20">
                    <div className="relative">
-                     <img src="/images/hero-abidjan-1.jpg" alt="User" className="w-12 h-12 rounded-full border-2 border-[#F16522] object-cover" />
-                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#2E4B3E] rounded-full flex items-center justify-center text-[10px] text-white">✓</div>
+                     <div className="w-14 h-14 rounded-full border-2 border-[#F16522] bg-[#E8D4C5] flex items-center justify-center overflow-hidden">
+                       <User className="w-8 h-8 text-[#2C1810]" />
+                     </div>
+                     <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#2E4B3E] rounded-full flex items-center justify-center text-[10px] text-white border-2 border-[#2C1810]">✓</div>
                    </div>
                    <div>
                      <div className="flex text-[#F16522] mb-1 gap-0.5">
-                       {[...Array(5)].map((_, i) => <Star key={i} className="w-3 h-3 fill-current" />)}
+                       {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 fill-current" />)}
                      </div>
-                     <p className="text-xs text-white font-medium">"J'ai trouvé en 2 jours !"</p>
-                     <p className="text-[10px] text-white/60">Amina K., Riviera</p>
+                     <p className="text-sm text-white font-bold">"Logement trouvé !"</p>
+                     <p className="text-[11px] text-[#E8D4C5]">Amina K., Riviera</p>
                    </div>
                 </div>
               </div>
