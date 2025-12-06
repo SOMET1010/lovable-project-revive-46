@@ -5,7 +5,7 @@ interface HeroPremiumProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
 }
 
-// Configuration des 4 slides premium
+// Configuration des 8 slides premium personas (cycle complet 48s)
 const HERO_SLIDES = [
   {
     src: '/images/hero/hero-famille-cles.png',
@@ -25,6 +25,26 @@ const HERO_SLIDES = [
   {
     src: '/images/hero/hero-famille-cocody.webp',
     alt: 'Famille heureuse devant leur villa à Cocody',
+    position: 'object-center'
+  },
+  {
+    src: '/images/hero/hero-villa-riviera.png',
+    alt: 'Villa de luxe moderne avec piscine à la Riviera Golf',
+    position: 'object-center'
+  },
+  {
+    src: '/images/hero/hero-appartement-plateau.png',
+    alt: 'Appartement moderne avec vue sur la lagune au Plateau',
+    position: 'object-center'
+  },
+  {
+    src: '/images/hero/hero-colocataires.png',
+    alt: 'Étudiants colocataires dans leur appartement partagé',
+    position: 'object-center'
+  },
+  {
+    src: '/images/hero/hero-agent-visite.png',
+    alt: 'Agent immobilier présentant un bien à des clients',
     position: 'object-center'
   },
 ];
