@@ -1,355 +1,285 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Home, Users, Gem, GraduationCap, Building } from 'lucide-react';
-import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
+import { Search, Home, MapPin, Wallet } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface HeroPremiumProps {
-  onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
+  onSearch?: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
 }
 
-interface HeroSlide {
-  src: string;
-  alt: string;
-  title: string;
-  subtitle: string;
-}
-
-/**
- * HeroPremium - Refonte Complète avec Identité Ivoirienne
- * Design organique, coins arrondis 22px, palette Sable/Cacao/Orange
- * Images corrigées avec chemins réels
- */
-const HERO_SLIDES: HeroSlide[] = [
+// 8 slides premium avec images humaines et lifestyle
+const HERO_SLIDES = [
   {
-    src: '/images/hero-villa-cocody.jpg',
-    alt: 'Villa moderne à Cocody',
-    title: 'Votre Histoire Commence Ici',
-    subtitle: 'Plus qu\'un logement. Un nouveau départ. Certifié par Mon Toit.'
+    id: 1,
+    src: '/images/hero/hero_users_3_young_professional.jpg',
+    alt: 'Jeune femme active profitant de la vue depuis son balcon à Abidjan',
+    position: 'object-top',
+    title: 'Vivez là où vous vous sentez bien',
+    subtitle: 'Des quartiers prisés : Cocody, Riviera, Zone 4.'
   },
   {
-    src: '/images/hero-residence-moderne.jpg',
-    alt: 'Résidence moderne à Abidjan',
-    title: 'Trouvez Votre Chez-Vous',
-    subtitle: '100% des annonces vérifiées. 0 mauvaise surprise.'
+    id: 2,
+    src: '/images/hero/hero_users_5_agent_showing.jpg',
+    alt: 'Agent immobilier Mon Toit faisant visiter un bien à un couple',
+    position: 'object-center',
+    title: 'Des experts à votre service',
+    subtitle: 'Faites-vous accompagner par nos agents certifiés.'
   },
   {
-    src: '/images/hero-maison-moderne.jpg',
-    alt: 'Maison moderne avec jardin',
-    title: 'Le Luxe Accessible',
-    subtitle: 'Des villas d\'exception à Riviera et Cocody.'
+    id: 3,
+    src: '/images/hero/hero_users_2_family_moving.jpg',
+    alt: 'Famille ivoirienne heureuse recevant les clés de leur nouvelle maison',
+    position: 'object-center',
+    title: 'Trouvez le logement de vos rêves',
+    subtitle: 'Villas, appartements et terrains vérifiés.'
   },
   {
-    src: '/images/hero-residence-securisee.jpg',
-    alt: 'Résidence sécurisée',
-    title: 'Vivez en Sécurité',
-    subtitle: 'Des résidences surveillées 24h/24 pour votre tranquillité.'
+    id: 4,
+    src: '/images/hero/hero_villa_riviera.png',
+    alt: 'Villa de luxe moderne avec piscine au coucher du soleil',
+    position: 'object-center',
+    title: "L'immobilier d'exception",
+    subtitle: 'Découvrez nos propriétés de prestige.'
   },
   {
-    src: '/images/hero-immeuble-moderne.png',
-    alt: 'Immeuble moderne au Plateau',
-    title: 'Appartements Premium',
-    subtitle: 'Des espaces de vie pensés pour votre confort.'
-  }
+    id: 5,
+    src: '/images/hero/hero_etudiants_colocation.png',
+    alt: "Groupe d'amis célébrant dans leur nouvel appartement",
+    position: 'object-center',
+    title: "Partagez plus qu'un logement",
+    subtitle: 'Trouvez la colocation idéale.'
+  },
+  {
+    id: 6,
+    src: '/images/hero/hero_vue_plateau.png',
+    alt: 'Vue panoramique nocturne sur le Plateau et la lagune',
+    position: 'object-center',
+    title: "Au cœur de l'action",
+    subtitle: "Vivez au rythme d'Abidjan."
+  },
+  {
+    id: 7,
+    src: '/images/hero/hero_couple_app.png',
+    alt: "Jeune couple utilisant l'application Mon Toit sur un canapé",
+    position: 'object-center',
+    title: 'Votre futur chez-vous, à portée de main',
+    subtitle: 'Une recherche simple et intuitive.'
+  },
+  {
+    id: 8,
+    src: '/images/hero/hero_famille_cocody.webp',
+    alt: 'Famille marchant vers leur nouvelle maison avec jardin',
+    position: 'object-center',
+    title: 'Construisez votre avenir',
+    subtitle: 'Des maisons familiales pour voir grand.'
+  },
 ];
 
-// Placeholders dynamiques qui racontent une histoire
-const DYNAMIC_PLACEHOLDERS = [
-  'Un duplex avec jardin pour les enfants à Cocody...',
-  'Un studio moderne près de l\'université...',
-  'Une villa avec piscine à Riviera...',
-  'Un appartement lumineux au Plateau...',
-  'Une colocation étudiante à Marcory...'
+// Options pour les selects
+const PROPERTY_TYPES = [
+  { value: '', label: 'Type de bien' },
+  { value: 'appartement', label: 'Appartement' },
+  { value: 'villa', label: 'Villa' },
+  { value: 'studio', label: 'Studio' },
+  { value: 'duplex', label: 'Duplex' },
+  { value: 'maison', label: 'Maison' },
+  { value: 'terrain', label: 'Terrain' },
 ];
 
-// Filtres rapides interactifs
-const QUICK_FILTERS = [
-  { id: 'family', label: 'Idéal Famille', icon: Users, color: 'bg-amber-500' },
-  { id: 'urban', label: 'Urbain & Moderne', icon: Building, color: 'bg-slate-600' },
-  { id: 'luxury', label: 'Luxe Abordable', icon: Gem, color: 'bg-purple-500' },
-  { id: 'student', label: 'Spécial Étudiants', icon: GraduationCap, color: 'bg-blue-500' }
+const CITIES = [
+  { value: '', label: 'Localisation' },
+  { value: 'Abidjan', label: 'Abidjan' },
+  { value: 'Cocody', label: 'Cocody' },
+  { value: 'Plateau', label: 'Plateau' },
+  { value: 'Riviera', label: 'Riviera' },
+  { value: 'Marcory', label: 'Marcory' },
+  { value: 'Yopougon', label: 'Yopougon' },
+  { value: 'Bingerville', label: 'Bingerville' },
+  { value: 'Grand-Bassam', label: 'Grand-Bassam' },
 ];
 
-function OptimizedHeroImage({ 
-  src, 
-  alt, 
-  isActive, 
-  priority 
-}: { 
-  src: string; 
-  alt: string; 
-  isActive: boolean; 
-  priority?: boolean;
-}) {
-  return (
-    <div
-      className={`absolute inset-0 w-full h-full transition-all duration-[1500ms] ease-in-out ${
-        isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-      }`}
-    >
-      <img
-        src={src}
-        alt={alt}
-        className="w-full h-full object-cover object-center"
-        loading={priority ? 'eager' : 'lazy'}
-        decoding="async"
-      />
-    </div>
-  );
-}
+const BUDGET_RANGES = [
+  { value: '', label: 'Budget' },
+  { value: '100000', label: 'Jusqu\'à 100 000 F' },
+  { value: '200000', label: 'Jusqu\'à 200 000 F' },
+  { value: '300000', label: 'Jusqu\'à 300 000 F' },
+  { value: '500000', label: 'Jusqu\'à 500 000 F' },
+  { value: '1000000', label: 'Jusqu\'à 1 000 000 F' },
+  { value: '999999999', label: 'Sans limite' },
+];
 
 export default function HeroPremium({ onSearch }: HeroPremiumProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   
-  // Scroll animations
-  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
+  // Form state pour les 3 champs
+  const [propertyType, setPropertyType] = useState('');
+  const [city, setCity] = useState('');
+  const [maxBudget, setMaxBudget] = useState('');
 
-  // Auto-play slideshow (6 secondes par slide)
+  // Auto-play intelligent (6 secondes)
   useEffect(() => {
     if (isPaused) return;
-    
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
     }, 6000);
-
     return () => clearInterval(timer);
   }, [isPaused]);
 
-  // Rotation des placeholders dynamiques
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentPlaceholder((prev) => (prev + 1) % DYNAMIC_PLACEHOLDERS.length);
-    }, 4000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    onSearch({ city: searchQuery, propertyType: '', maxBudget: '' });
-  }, [searchQuery, onSearch]);
-
-  const handleFilterClick = useCallback((filterId: string) => {
-    setActiveFilter(filterId === activeFilter ? null : filterId);
-    // Mapper les filtres aux types de recherche
-    const filterMap: Record<string, { type?: string; city?: string }> = {
-      family: { type: 'villa' },
-      urban: { type: 'appartement', city: 'Plateau' },
-      luxury: { type: 'villa', city: 'Cocody' },
-      student: { type: 'studio' }
-    };
-    const filter = filterMap[filterId];
-    if (filter) {
-      onSearch({ 
-        city: filter.city || '', 
-        propertyType: filter.type || '', 
-        maxBudget: '' 
-      });
+    
+    if (onSearch) {
+      onSearch({ city, propertyType, maxBudget });
     }
-  }, [activeFilter, onSearch]);
-
-  const goToSlide = useCallback((index: number) => {
-    setCurrentSlide(index);
-  }, []);
+    
+    // Navigate to search page with filters
+    const params = new URLSearchParams();
+    if (city) params.set('city', city);
+    if (propertyType) params.set('type', propertyType);
+    if (maxBudget) params.set('maxBudget', maxBudget);
+    
+    navigate(`/recherche?${params.toString()}`);
+  }, [city, propertyType, maxBudget, onSearch, navigate]);
 
   const currentSlideData = HERO_SLIDES[currentSlide];
 
   return (
-    <section 
-      ref={heroRef}
-      className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
-      style={{ backgroundColor: '#1a1a1a' }}
+    <div
+      className="relative w-full h-[650px] md:h-[750px] overflow-hidden flex items-center justify-center bg-neutral-900 font-sans"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* Slideshow Background */}
+      {/* --- 1. SLIDESHOW AVEC TRANSITION DOUCE --- */}
       <div className="absolute inset-0 z-0">
         {HERO_SLIDES.map((slide, index) => (
-          <OptimizedHeroImage
-            key={slide.src}
-            src={slide.src}
-            alt={slide.alt}
-            isActive={index === currentSlide}
-            priority={index === 0}
-          />
+          <div
+            key={slide.id}
+            className={`absolute inset-0 w-full h-full transition-opacity duration-[1500ms] ease-in-out ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <img
+              src={slide.src}
+              alt={slide.alt}
+              className={`w-full h-full object-cover ${slide.position}`}
+              loading={index === 0 ? "eager" : "lazy"}
+            />
+            {/* Overlay sombre pour garantir la lisibilité du texte */}
+            <div className="absolute inset-0 bg-black/40 md:bg-black/30 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+          </div>
         ))}
-        
-        {/* Overlays pour lisibilité */}
-        <div className="absolute inset-0 bg-black/50" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/30" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-20">
-        {/* Badge Certifié - Animation fadeUp */}
-        <div 
-          className={`flex justify-center mb-8 transition-all duration-700 ease-out ${
-            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <span 
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold backdrop-blur-xl shadow-2xl"
-            style={{ 
-              backgroundColor: 'rgba(248, 232, 216, 0.15)',
-              color: '#F8E8D8',
-              borderRadius: '22px',
-              border: '1px solid rgba(248, 232, 216, 0.3)'
-            }}
-          >
-            <div 
-              className="w-2 h-2 rounded-full animate-pulse"
-              style={{ backgroundColor: '#F16522' }}
-            />
+      {/* --- 2. CONTENU TEXTE & RECHERCHE --- */}
+      <div className="relative z-20 container mx-auto px-4 h-full flex flex-col justify-center items-center text-center mt-10">
+
+        {/* Badge Certifié */}
+        <div className="mb-6">
+          <span className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium backdrop-blur-md rounded-full border border-white/20 bg-white/10 text-white">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             Plateforme Certifiée ANSUT
           </span>
         </div>
 
-        {/* Dynamic Title - synchronized with current slide - Animation fadeUp delay 200ms */}
-        <div 
-          className={`text-center mb-10 transition-all duration-700 ease-out delay-100 ${
-            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <h1 
-            className="font-bold mb-5 leading-tight drop-shadow-2xl transition-all duration-700"
-            style={{ 
-              fontSize: 'clamp(36px, 6vw, 64px)',
-              color: '#FFFFFF',
-              fontFamily: "'Inter', sans-serif",
-              letterSpacing: '-0.02em'
-            }}
-          >
+        {/* Texte dynamique selon le slide */}
+        <div className="space-y-4 max-w-4xl mx-auto mb-8 transition-all duration-700 transform">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight drop-shadow-lg">
             {currentSlideData?.title}
           </h1>
-          <p 
-            className="max-w-2xl mx-auto drop-shadow-lg transition-all duration-700"
-            style={{ 
-              fontSize: 'clamp(16px, 2vw, 20px)',
-              color: 'rgba(248, 232, 216, 0.9)',
-              lineHeight: 1.6
-            }}
-          >
+          <p className="text-lg md:text-2xl text-gray-100 font-light drop-shadow-md max-w-2xl mx-auto">
             {currentSlideData?.subtitle}
           </p>
         </div>
 
-        {/* Search Form - Airbnb Style avec design organique - Animation scaleIn delay 400ms */}
+        {/* Barre de Recherche - 3 CHAMPS DISTINCTS */}
         <form 
           onSubmit={handleSearch}
-          className={`max-w-3xl mx-auto mb-8 transition-all duration-700 ease-out delay-200 ${
-            heroVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}
+          className="w-full max-w-4xl bg-white/95 backdrop-blur-md p-2 md:p-3 rounded-2xl border border-white/20 shadow-2xl animate-in slide-in-from-bottom-4 duration-1000"
         >
-          <div 
-            className="flex flex-col sm:flex-row items-stretch backdrop-blur-xl shadow-2xl overflow-hidden"
-            style={{ 
-              backgroundColor: 'rgba(255, 255, 255, 0.95)',
-              borderRadius: '22px',
-              border: '4px solid rgba(241, 101, 34, 0.2)'
-            }}
-          >
-            {/* Search Input avec placeholder dynamique */}
-            <div className="relative flex-1">
-              <div 
-                className="absolute left-5 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center"
-                style={{ 
-                  backgroundColor: 'rgba(241, 101, 34, 0.1)',
-                  borderRadius: '14px'
-                }}
-              >
-                <Home className="h-6 w-6" style={{ color: '#F16522' }} />
+          <div className="flex flex-col md:flex-row items-stretch gap-2">
+            
+            {/* Type de bien */}
+            <div className="relative flex-1 min-w-0">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-primary/10 rounded-xl">
+                <Home className="h-5 w-5 text-primary" />
               </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={DYNAMIC_PLACEHOLDERS[currentPlaceholder]}
-                className="w-full h-16 sm:h-20 pl-20 pr-6 bg-transparent text-lg font-medium placeholder:text-neutral-400 focus:outline-none transition-all"
-                style={{ 
-                  color: '#523628',
-                  borderRadius: '22px'
-                }}
-              />
+              <select
+                value={propertyType}
+                onChange={(e) => setPropertyType(e.target.value)}
+                className="w-full h-14 md:h-16 pl-16 pr-4 bg-transparent text-base font-medium text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl border border-neutral-200 cursor-pointer appearance-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '20px' }}
+              >
+                {PROPERTY_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* Search Button */}
-            <div className="p-2 sm:p-3">
-              <button
-                type="submit"
-                className="w-full sm:w-auto h-12 sm:h-14 px-8 flex items-center justify-center gap-3 font-semibold transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-4 shadow-lg"
-                style={{ 
-                  backgroundColor: '#F16522',
-                  color: '#FFFFFF',
-                  borderRadius: '16px',
-                  boxShadow: '0 8px 24px rgba(241, 101, 34, 0.4)'
-                }}
+            {/* Localisation */}
+            <div className="relative flex-1 min-w-0">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-primary/10 rounded-xl">
+                <MapPin className="h-5 w-5 text-primary" />
+              </div>
+              <select
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full h-14 md:h-16 pl-16 pr-4 bg-transparent text-base font-medium text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl border border-neutral-200 cursor-pointer appearance-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '20px' }}
               >
-                <Search className="h-5 w-5" />
-                <span>Rechercher</span>
-              </button>
+                {CITIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
             </div>
+
+            {/* Budget */}
+            <div className="relative flex-1 min-w-0">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-primary/10 rounded-xl">
+                <Wallet className="h-5 w-5 text-primary" />
+              </div>
+              <select
+                value={maxBudget}
+                onChange={(e) => setMaxBudget(e.target.value)}
+                className="w-full h-14 md:h-16 pl-16 pr-4 bg-transparent text-base font-medium text-neutral-700 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary/20 rounded-xl border border-neutral-200 cursor-pointer appearance-none"
+                style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%239ca3af'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '20px' }}
+              >
+                {BUDGET_RANGES.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {b.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Bouton Rechercher */}
+            <button
+              type="submit"
+              className="h-14 md:h-16 px-6 md:px-8 flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+              style={{ boxShadow: '0 8px 24px rgba(241, 101, 34, 0.35)' }}
+            >
+              <Search className="h-5 w-5" />
+              <span className="hidden sm:inline">Rechercher</span>
+            </button>
           </div>
         </form>
 
-        {/* Quick Filters - Icônes interactives - Animation fadeUp stagger */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
-          {QUICK_FILTERS.map((filter, index) => {
-            const Icon = filter.icon;
-            const isActive = activeFilter === filter.id;
-            return (
-              <button
-                key={filter.id}
-                type="button"
-                onClick={() => handleFilterClick(filter.id)}
-                className={`group flex items-center gap-2 px-5 py-3 font-medium transition-all duration-500 hover:scale-105 ${
-                  isActive ? 'ring-2 ring-white/50' : ''
-                } ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
-                style={{ 
-                  backgroundColor: isActive ? 'rgba(241, 101, 34, 0.9)' : 'rgba(255, 255, 255, 0.15)',
-                  color: '#FFFFFF',
-                  borderRadius: '16px',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  transitionDelay: heroVisible ? `${300 + index * 100}ms` : '0ms'
-                }}
-              >
-                <div 
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${filter.color}`}
-                >
-                  <Icon className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-sm">{filter.label}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Stats rapides - Animation fadeUp stagger */}
-        <div className="flex flex-wrap items-center justify-center gap-8 text-center">
+        {/* Stats rapides */}
+        <div className="flex flex-wrap items-center justify-center gap-8 mt-10 text-center">
           {[
             { value: '2,500+', label: 'Locataires satisfaits' },
             { value: '500+', label: 'Propriétés vérifiées' },
             { value: '48h', label: 'Délai moyen' }
           ].map((stat, index) => (
-            <div 
-              key={index} 
-              className={`px-4 transition-all duration-700 ease-out ${
-                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-              style={{ transitionDelay: heroVisible ? `${500 + index * 100}ms` : '0ms' }}
-            >
-              <p 
-                className="text-2xl sm:text-3xl font-bold"
-                style={{ color: '#F16522' }}
-              >
+            <div key={index} className="px-4">
+              <p className="text-2xl sm:text-3xl font-bold text-primary">
                 {stat.value}
               </p>
-              <p 
-                className="text-sm"
-                style={{ color: 'rgba(248, 232, 216, 0.7)' }}
-              >
+              <p className="text-sm text-white/70">
                 {stat.label}
               </p>
             </div>
@@ -357,24 +287,24 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
         </div>
       </div>
 
-      {/* Slide Indicators - Design organique */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+      {/* --- 3. INDICATEURS (Dots) AMÉLIORÉS --- */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex space-x-3">
         {HERO_SLIDES.map((_, index) => (
           <button
             key={index}
-            onClick={() => goToSlide(index)}
-            aria-label={`Voir l'image ${index + 1}`}
-            className="transition-all duration-500 ease-out shadow-lg"
-            style={{
-              width: index === currentSlide ? '40px' : '12px',
-              height: '12px',
-              borderRadius: '6px',
-              backgroundColor: index === currentSlide ? '#F16522' : 'rgba(255, 255, 255, 0.5)',
-              border: '2px solid rgba(255, 255, 255, 0.3)'
-            }}
+            onClick={() => setCurrentSlide(index)}
+            aria-label={`Aller à l'image ${index + 1}`}
+            className={`transition-all duration-500 rounded-full shadow-lg border border-white/10 ${
+              index === currentSlide
+                ? 'w-10 h-2.5 bg-primary'
+                : 'w-2.5 h-2.5 bg-white/60 hover:bg-white'
+            }`}
           />
         ))}
       </div>
-    </section>
+    </div>
   );
 }
+
+// Named export for compatibility
+export { HeroPremium };
