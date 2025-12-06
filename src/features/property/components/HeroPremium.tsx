@@ -18,43 +18,43 @@ interface HeroSlide {
  */
 const HERO_SLIDES: HeroSlide[] = [
   {
-    src: '/images/hero/hero-famille-cles.png',
-    alt: 'Famille ivoirienne recevant les clés de leur nouvelle maison',
+    src: '/images/hero/hero1.jpg',
+    alt: 'Vue panoramique d\'Abidjan',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero-couple-digital.png',
-    alt: 'Jeune couple recherchant leur logement sur Mon Toit',
+    src: '/images/hero/hero2.jpg',
+    alt: 'Résidence moderne à Cocody',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero-professionnelle-balcon.png',
-    alt: 'Jeune professionnelle profitant de son balcon avec vue sur Abidjan',
-    position: 'object-top'
-  },
-  {
-    src: '/images/hero/hero-famille-cocody.webp',
-    alt: 'Famille heureuse devant leur villa à Cocody',
+    src: '/images/hero/hero3.jpg',
+    alt: 'Quartier résidentiel sécurisé',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero-villa-riviera.png',
-    alt: 'Villa de luxe moderne avec piscine à la Riviera Golf',
+    src: '/images/hero/hero4.jpg',
+    alt: 'Appartement avec vue sur la ville',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero-appartement-plateau.png',
-    alt: 'Appartement moderne avec vue sur la lagune au Plateau',
+    src: '/images/hero-villa-cocody.jpg',
+    alt: 'Villa moderne à Cocody',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero-colocataires.png',
-    alt: 'Étudiants colocataires dans leur appartement partagé',
+    src: '/images/hero-residence-moderne.jpg',
+    alt: 'Résidence moderne avec espaces verts',
     position: 'object-center'
   },
   {
-    src: '/images/hero/hero-agent-visite.png',
-    alt: 'Agent immobilier présentant un bien à des clients',
+    src: '/images/hero-maison-moderne.jpg',
+    alt: 'Maison moderne avec architecture contemporaine',
+    position: 'object-center'
+  },
+  {
+    src: '/images/hero-residence-securisee.jpg',
+    alt: 'Résidence sécurisée avec parking',
     position: 'object-center'
   },
 ];
