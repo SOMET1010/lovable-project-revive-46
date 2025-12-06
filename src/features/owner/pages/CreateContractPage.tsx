@@ -4,6 +4,9 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { generateAndUploadContract } from '@/services/contracts/contractService';
 import { notifyLeaseCreated } from '@/services/notifications/leaseNotificationService';
+import { ValidationService, type FormValidationResult } from '@/services/validation';
+import { useFormValidation } from '@/shared/hooks/useFormValidation';
+import { ValidatedInput } from '@/shared/ui';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { 
@@ -18,6 +21,16 @@ import {
   AlertCircle,
   Plus
 } from 'lucide-react';
+
+interface ContractFormData {
+  monthlyRent: string;
+  depositAmount: string;
+  chargesAmount: string;
+  paymentDay: string;
+  startDate: string;
+  endDate: string;
+  customClauses: string;
+}
 
 interface Property {
   id: string;
@@ -61,6 +74,47 @@ export default function CreateContractPage() {
   const [paymentDay, setPaymentDay] = useState('5');
   const [customClauses, setCustomClauses] = useState('');
 
+  // Form validation
+  const { validateField, getFieldState, touched, setFieldError, clearFieldError } = useFormValidation<ContractFormData>();
+
+  // Validate entire contract form
+  const validateContractForm = (): FormValidationResult => {
+    const errors: Record<string, string> = {};
+    
+    // Validation montants positifs
+    const rentResult = ValidationService.validatePositiveNumber(monthlyRent, 'Loyer mensuel');
+    if (!rentResult.isValid && rentResult.error) errors['monthlyRent'] = rentResult.error;
+    
+    const depositResult = ValidationService.validatePositiveNumber(depositAmount, 'Dépôt de garantie');
+    if (!depositResult.isValid && depositResult.error) errors['depositAmount'] = depositResult.error;
+    
+    // Validation jour de paiement (1-28)
+    const paymentDayNum = parseInt(paymentDay);
+    if (isNaN(paymentDayNum) || paymentDayNum < 1 || paymentDayNum > 28) {
+      errors['paymentDay'] = 'Le jour de paiement doit être entre 1 et 28';
+    }
+    
+    // Validation dates
+    if (!startDate) {
+      errors['startDate'] = 'La date de début est obligatoire';
+    }
+    
+    if (!endDate) {
+      errors['endDate'] = 'La date de fin est obligatoire';
+    }
+    
+    // Validation cohérence des dates
+    if (startDate && endDate) {
+      const dateRangeResult = ValidationService.validateDateRange(startDate, endDate);
+      if (!dateRangeResult.isValid && dateRangeResult.error) errors['endDate'] = dateRangeResult.error;
+    }
+    
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors
+    };
+  };
+
   useEffect(() => {
     if (user) {
       loadData();
@@ -75,6 +129,9 @@ export default function CreateContractPage() {
         setMonthlyRent(property.monthly_rent.toString());
         // Default deposit: 2 months rent
         setDepositAmount((property.monthly_rent * 2).toString());
+        // Clear validation errors when auto-filled
+        clearFieldError('monthlyRent');
+        clearFieldError('depositAmount');
       }
     }
   }, [selectedProperty, properties]);
@@ -156,6 +213,17 @@ export default function CreateContractPage() {
     
     if (!user || !selectedProperty || !selectedTenant) {
       setError('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    // Validate the entire form
+    const validation = validateContractForm();
+    if (!validation.isValid) {
+      // Set individual field errors
+      Object.entries(validation.errors).forEach(([field, errorMsg]) => {
+        setFieldError(field as keyof ContractFormData, errorMsg);
+      });
+      setError('Veuillez corriger les erreurs du formulaire');
       return;
     }
 
@@ -364,33 +432,37 @@ export default function CreateContractPage() {
               </div>
               
               <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Loyer mensuel (FCFA) *
-                  </label>
-                  <input
-                    type="number"
-                    value={monthlyRent}
-                    onChange={(e) => setMonthlyRent(e.target.value)}
-                    required
-                    min="0"
-                    className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                  />
-                </div>
+                <ValidatedInput
+                  label="Loyer mensuel (FCFA) *"
+                  name="monthlyRent"
+                  type="number"
+                  value={monthlyRent}
+                  onChange={(e) => setMonthlyRent(e.target.value)}
+                  onBlur={() => validateField('monthlyRent', () => 
+                    ValidationService.validatePositiveNumber(monthlyRent, 'Loyer mensuel')
+                  )}
+                  required
+                  min={0}
+                  error={getFieldState('monthlyRent').error}
+                  touched={touched['monthlyRent']}
+                  isValid={getFieldState('monthlyRent').isValid}
+                />
                 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Dépôt de garantie (FCFA) *
-                  </label>
-                  <input
-                    type="number"
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    required
-                    min="0"
-                    className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                  />
-                </div>
+                <ValidatedInput
+                  label="Dépôt de garantie (FCFA) *"
+                  name="depositAmount"
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  onBlur={() => validateField('depositAmount', () => 
+                    ValidationService.validatePositiveNumber(depositAmount, 'Dépôt de garantie')
+                  )}
+                  required
+                  min={0}
+                  error={getFieldState('depositAmount').error}
+                  touched={touched['depositAmount']}
+                  isValid={getFieldState('depositAmount').isValid}
+                />
                 
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
@@ -405,19 +477,21 @@ export default function CreateContractPage() {
                   />
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Jour de paiement (1-28)
-                  </label>
-                  <input
-                    type="number"
-                    value={paymentDay}
-                    onChange={(e) => setPaymentDay(e.target.value)}
-                    min="1"
-                    max="28"
-                    className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                  />
-                </div>
+                <ValidatedInput
+                  label="Jour de paiement (1-28)"
+                  name="paymentDay"
+                  type="number"
+                  value={paymentDay}
+                  onChange={(e) => setPaymentDay(e.target.value)}
+                  onBlur={() => validateField('paymentDay', () => 
+                    ValidationService.validateRange(parseInt(paymentDay) || 0, 1, 28, 'Jour de paiement')
+                  )}
+                  min={1}
+                  max={28}
+                  error={getFieldState('paymentDay').error}
+                  touched={touched['paymentDay']}
+                  isValid={getFieldState('paymentDay').isValid}
+                />
               </div>
             </div>
 
@@ -429,31 +503,40 @@ export default function CreateContractPage() {
               </div>
               
               <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Date de début *
-                  </label>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                  />
-                </div>
+                <ValidatedInput
+                  label="Date de début *"
+                  name="startDate"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  onBlur={() => validateField('startDate', () => {
+                    if (!startDate) return { isValid: false, error: 'La date de début est obligatoire' };
+                    return { isValid: true };
+                  })}
+                  required
+                  error={getFieldState('startDate').error}
+                  touched={touched['startDate']}
+                  isValid={getFieldState('startDate').isValid}
+                />
                 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">
-                    Date de fin *
-                  </label>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 border border-border rounded-xl bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition"
-                  />
-                </div>
+                <ValidatedInput
+                  label="Date de fin *"
+                  name="endDate"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  onBlur={() => {
+                    if (startDate && endDate) {
+                      validateField('endDate', () => ValidationService.validateDateRange(startDate, endDate));
+                    } else if (!endDate) {
+                      validateField('endDate', () => ({ isValid: false, error: 'La date de fin est obligatoire' }));
+                    }
+                  }}
+                  required
+                  error={getFieldState('endDate').error}
+                  touched={touched['endDate']}
+                  isValid={getFieldState('endDate').isValid}
+                />
               </div>
             </div>
 

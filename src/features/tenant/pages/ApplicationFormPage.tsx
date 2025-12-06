@@ -5,9 +5,16 @@ import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService } from '@/services/scoringService';
 import { notifyApplicationReceived } from '@/services/notifications/applicationNotificationService';
+import { ValidationService } from '@/services/validation';
+import { useFormValidation } from '@/shared/hooks/useFormValidation';
+import { ValidatedTextarea } from '@/shared/ui';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
+
+interface ApplicationFormData {
+  coverLetter: string;
+}
 
 // Extended profile type with new columns
 interface ExtendedProfile {
@@ -38,6 +45,10 @@ export default function ApplicationForm() {
   const [coverLetter, setCoverLetter] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [existingApplication, setExistingApplication] = useState(false);
+  
+  // Form validation
+  const { validateField, getFieldState, touched } = useFormValidation<ApplicationFormData>();
 
   useEffect(() => {
     if (!user) {
@@ -53,19 +64,34 @@ export default function ApplicationForm() {
 
   const loadProperty = async (id: string) => {
     try {
-      const { data, error } = await supabase
+      const { data, error: propError } = await supabase
         .from('properties')
         .select('*')
         .eq('id', id)
         .maybeSingle();
 
-      if (error) throw error;
+      if (propError) throw propError;
       if (!data) {
         navigate('/recherche');
         return;
       }
 
       setProperty(data);
+
+      // Check for existing application (duplicate detection)
+      if (user) {
+        const { data: existing } = await supabase
+          .from('rental_applications')
+          .select('id')
+          .eq('property_id', id)
+          .eq('applicant_id', user.id)
+          .maybeSingle();
+
+        if (existing) {
+          setExistingApplication(true);
+          setError('Vous avez déjà postulé pour cette propriété');
+        }
+      }
     } catch (err) {
       console.error('Error loading property:', err);
       setError('Erreur lors du chargement de la propriété');
@@ -77,6 +103,15 @@ export default function ApplicationForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !property) return;
+
+    // Validate cover letter
+    const coverLetterValid = validateField('coverLetter', () => 
+      ValidationService.validateMinLength(coverLetter, 50, 'La lettre de motivation')
+    );
+    
+    if (!coverLetterValid) {
+      return;
+    }
 
     setSubmitting(true);
     setError('');
@@ -298,13 +333,22 @@ export default function ApplicationForm() {
                 <FileText className="h-6 w-6 text-terracotta-500" />
                 <span>Lettre de motivation</span>
               </h2>
-              <textarea
+              <ValidatedTextarea
+                name="coverLetter"
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
+                onBlur={() => validateField('coverLetter', () => 
+                  ValidationService.validateMinLength(coverLetter, 50, 'La lettre de motivation')
+                )}
                 rows={10}
                 required
-                placeholder="Présentez-vous et expliquez pourquoi vous souhaitez louer cette propriété..."
-                className="w-full px-4 py-3 border-2 border-terracotta-200 rounded-xl focus:ring-2 focus:ring-terracotta-500 focus:border-terracotta-500 bg-white"
+                placeholder="Présentez-vous et expliquez pourquoi vous souhaitez louer cette propriété... (minimum 50 caractères)"
+                error={getFieldState('coverLetter').error}
+                touched={touched['coverLetter']}
+                isValid={getFieldState('coverLetter').isValid}
+                showCharCount
+                maxLength={2000}
+                helperText={coverLetter.length < 50 ? `${coverLetter.length}/50 caractères minimum` : undefined}
               />
             </div>
 
@@ -343,7 +387,7 @@ export default function ApplicationForm() {
 
               <button
                 type="submit"
-                disabled={submitting || !!error || !isVerified}
+                disabled={submitting || !!error || !isVerified || existingApplication}
                 className="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
                 <FileText className="h-6 w-6" />
