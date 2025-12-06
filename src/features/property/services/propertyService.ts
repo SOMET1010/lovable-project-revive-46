@@ -150,16 +150,17 @@ class PropertyService {
   }
 
   // Upload des images vers Supabase Storage
-  async uploadImages(images: File[], propertyId?: string): Promise<string[]> {
+  async uploadImages(images: File[], userId: string): Promise<string[]> {
     try {
       const uploadedUrls: string[] = [];
-      const folderName = propertyId ? `properties/${propertyId}` : 'properties/temp';
+      // Organiser par utilisateur pour les RLS policies
+      const folderName = `${userId}/${Date.now()}`;
 
       for (let i = 0; i < images.length; i++) {
         const image = images[i];
         if (!image) continue;
         
-        const fileName = `${Date.now()}_${i}_${image.name}`;
+        const fileName = `${i}_${image.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
         const filePath = `${folderName}/${fileName}`;
 
         // Vérifier la taille du fichier (max 5MB)
@@ -196,18 +197,29 @@ class PropertyService {
       return uploadedUrls;
     } catch (error) {
       console.error('Erreur upload images:', error);
-      throw new Error('Erreur lors de l\'upload des images');
+      throw error;
     }
   }
 
   // Sauvegarder la propriété en base de données
   async createProperty(data: PropertyData): Promise<{ id: string; success: boolean }> {
     try {
-      // Upload des images d'abord
-      const imageUrls = await this.uploadImages(data.images);
+      // Récupérer l'utilisateur connecté
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        throw new Error('Vous devez être connecté pour publier une propriété');
+      }
 
-      // Créer l'enregistrement de propriété
+      // Upload des images avec l'ID utilisateur
+      const imageUrls = await this.uploadImages(data.images, user.id);
+
+      // Déterminer l'image principale
+      const mainImageIndex = data.mainImageIndex ?? 0;
+      const mainImageUrl = imageUrls[mainImageIndex] || imageUrls[0] || null;
+
+      // Créer l'enregistrement de propriété avec TOUTES les colonnes correctement mappées
       const propertyData = {
+        owner_id: user.id, // CRUCIAL - Assignation du propriétaire
         title: data.title,
         description: data.description,
         property_type: data.propertyType,
@@ -218,14 +230,17 @@ class PropertyService {
         city: data.city,
         neighborhood: data.district,
         address: data.address,
-        latitude: data.coordinates?.lat,
-        longitude: data.coordinates?.lng,
+        latitude: data.coordinates?.lat ?? null,
+        longitude: data.coordinates?.lng ?? null,
         images: imageUrls,
+        main_image: mainImageUrl,
         amenities: data.amenities,
         is_furnished: data.furnished,
-        status: 'disponible',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        has_parking: data.parking,
+        has_garden: data.garden,
+        has_ac: data.amenities.includes('climatisation'),
+        deposit_amount: data.priceType === 'location' ? data.price * 2 : null, // 2 mois de caution par défaut
+        status: 'disponible'
       };
 
       const { data: property, error } = await supabase.from('properties')

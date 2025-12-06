@@ -30,12 +30,14 @@ const PropertyForm: React.FC = () => {
     formData,
     errors,
     currentStep,
+    isLoading,
     isSubmitting,
     uploadProgress,
     updateField,
     nextStep,
     prevStep,
     validateCurrentStep,
+    validateField,
     submitForm,
     canProceedToNextStep,
     // Images
@@ -53,6 +55,11 @@ const PropertyForm: React.FC = () => {
     }
   };
 
+  // Validation en temps réel au blur
+  const handleBlur = (field: keyof PropertyData) => {
+    validateField(field);
+  };
+
   const handleSubmit = async () => {
     try {
       const result = await submitForm();
@@ -61,6 +68,12 @@ const PropertyForm: React.FC = () => {
           'Propriété créée avec succès !',
           'Votre propriété a été publiée et sera bientôt visible par les acheteurs potentiels.'
         );
+        // Redirection vers la propriété créée
+        if (result.propertyId) {
+          setTimeout(() => {
+            window.location.href = `/proprietes/${result.propertyId}`;
+          }, 2000);
+        }
       } else {
         console.error('Erreur lors de la soumission:', result.error);
         showError(
@@ -76,6 +89,18 @@ const PropertyForm: React.FC = () => {
       );
     }
   };
+
+  // Afficher un loader pendant le chargement initial
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Chargement du formulaire...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -101,9 +126,9 @@ const PropertyForm: React.FC = () => {
     return (
       <div className="space-y-6">
         {/* Titre et description */}
-        <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               <Home className="inline w-4 h-4 mr-2" />
               Titre de la propriété *
             </label>
@@ -111,46 +136,60 @@ const PropertyForm: React.FC = () => {
               type="text"
               value={formData.title}
               onChange={(e) => updateField('title', e.target.value)}
+              onBlur={() => handleBlur('title')}
               placeholder="Ex: Magnifique appartement 3 pièces vue mer"
-              className={`w-full px-3 py-2 border rounded-md ${errors.title ? 'border-red-500' : 'border-gray-300'}`}
+              className={`w-full px-3 py-2 border rounded-lg transition-colors ${
+                errors.title 
+                  ? 'border-destructive bg-destructive/5' 
+                  : formData.title.length >= 5 
+                    ? 'border-green-500 bg-green-50' 
+                    : 'border-input'
+              } focus:ring-2 focus:ring-primary/20 focus:border-primary`}
               maxLength={100}
             />
-            {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
-            <p className="text-xs text-gray-500 mt-1">{formData.title.length}/100 caractères</p>
+            {errors.title && <p className="text-destructive text-xs mt-1">{errors.title}</p>}
+            <p className="text-xs text-muted-foreground mt-1">{formData.title.length}/100 caractères</p>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Type de propriété *
             </label>
             <select
               value={formData.propertyType}
               onChange={(e) => updateField('propertyType', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md ${errors.propertyType ? 'border-red-500' : 'border-gray-300'}`}
+              className={`w-full px-3 py-2 border rounded-lg transition-colors ${errors.propertyType ? 'border-destructive' : 'border-input'} focus:ring-2 focus:ring-primary/20 focus:border-primary`}
             >
               {propertyTypes.map(type => (
                 <option key={type.value} value={type.value}>{type.label}</option>
               ))}
             </select>
-            {errors.propertyType && <p className="text-red-500 text-xs mt-1">{errors.propertyType}</p>}
+            {errors.propertyType && <p className="text-destructive text-xs mt-1">{errors.propertyType}</p>}
           </div>
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-foreground mb-2">
             Description détaillée *
           </label>
           <textarea
             value={formData.description}
             onChange={(e) => updateField('description', e.target.value)}
+            onBlur={() => handleBlur('description')}
             placeholder="Décrivez votre propriété, son environnement, ses avantages..."
             rows={4}
-            className={`w-full px-3 py-2 border rounded-md ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
+            className={`w-full px-3 py-2 border rounded-lg transition-colors ${
+              errors.description 
+                ? 'border-destructive bg-destructive/5' 
+                : formData.description.length >= 20 
+                  ? 'border-green-500 bg-green-50' 
+                  : 'border-input'
+            } focus:ring-2 focus:ring-primary/20 focus:border-primary`}
             maxLength={2000}
           />
-          {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
-          <p className="text-xs text-gray-500 mt-1">{formData.description.length}/2000 caractères</p>
+          {errors.description && <p className="text-destructive text-xs mt-1">{errors.description}</p>}
+          <p className="text-xs text-muted-foreground mt-1">{formData.description.length}/2000 caractères</p>
         </div>
 
         {/* Caractéristiques */}
