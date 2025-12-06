@@ -15,6 +15,9 @@ verify_jwt = false
 [functions.send-sms-hybrid]
 verify_jwt = false
 
+[functions.send-sms-brevo]
+verify_jwt = false
+
 [functions.send-whatsapp-hybrid]
 verify_jwt = false
 
