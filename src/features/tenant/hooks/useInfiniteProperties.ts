@@ -42,6 +42,7 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
   const [totalCount, setTotalCount] = useState(0);
   
   const pageRef = useRef(0);
+  const loadingRef = useRef(false);
   const filtersRef = useRef({ city, propertyType, minPrice, maxPrice, bedrooms, sortBy });
 
   const buildQuery = useCallback(() => {
@@ -112,6 +113,10 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
   }, []);
 
   const fetchProperties = useCallback(async (page: number, isLoadMore = false) => {
+    // Prevent concurrent calls
+    if (loadingRef.current) return;
+    loadingRef.current = true;
+
     if (isLoadMore) {
       setLoadingMore(true);
     } else {
@@ -131,8 +136,6 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
         // Handle 416 Range Not Satisfiable as end of data, not an error
         if (queryError.code === 'PGRST103' || queryError.message?.includes('416')) {
           setHasMore(false);
-          setLoadingMore(false);
-          setLoading(false);
           return;
         }
         
@@ -156,7 +159,8 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
       } else {
         setProperties(enrichedData);
         setTotalCount(currentTotal);
-        setHasMore(enrichedData.length < currentTotal && enrichedData.length === pageSize);
+        // hasMore is true only if we got a full page AND there's more data
+        setHasMore(enrichedData.length === pageSize && enrichedData.length < currentTotal);
       }
 
       pageRef.current = page;
@@ -171,6 +175,7 @@ export function useInfiniteProperties(options: UseInfinitePropertiesOptions): Us
         setProperties([]);
       }
     } finally {
+      loadingRef.current = false;
       setLoading(false);
       setLoadingMore(false);
     }
