@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Phone, MapPin, Shield, Camera, Save, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
-import { toast } from 'sonner';
+import { toast } from '@/shared/hooks/useSafeToast';
 import TenantDashboardLayout from '../components/TenantDashboardLayout';
 
 interface Profile {

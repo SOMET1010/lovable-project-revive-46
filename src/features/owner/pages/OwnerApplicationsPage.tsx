@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { toast } from '@/shared/hooks/useSafeToast';
 import ApplicationCard from '../components/ApplicationCard';
 import {
   getOwnerApplications,

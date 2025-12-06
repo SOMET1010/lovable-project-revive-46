@@ -7,7 +7,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { downloadContract, regenerateContract, deleteContract, sendSignatureReminder } from '@/services/contracts/contractService';
-import { toast } from 'sonner';
+import { toast } from '@/shared/hooks/useSafeToast';
 
 interface Contract {
   id: string;
