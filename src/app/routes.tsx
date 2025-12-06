@@ -53,6 +53,7 @@ const TenantCalendar = lazyWithRetry(() => import('@/features/tenant/pages/Calen
 const TenantMaintenance = lazyWithRetry(() => import('@/features/tenant/pages/MaintenancePage'));
 const TenantScorePage = lazyWithRetry(() => import('@/features/tenant/pages/ScorePage'));
 const MaintenanceRequest = lazyWithRetry(() => import('@/features/tenant/pages/MaintenanceRequestPage'));
+const MyApplications = lazyWithRetry(() => import('@/features/tenant/pages/MyApplicationsPage'));
 
 // Profile page
 const ProfilePage = lazyWithRetry(() => import('@/features/tenant/pages/ProfilePage'));
@@ -182,6 +183,7 @@ export const routes: RouteObject[] = [
       { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={['locataire']}><TenantMaintenance /></ProtectedRoute> },
       { path: 'mon-score', element: <ProtectedRoute allowedRoles={['locataire']}><TenantScorePage /></ProtectedRoute> },
       { path: 'maintenance/nouvelle', element: <ProtectedRoute><MaintenanceRequest /></ProtectedRoute> },
+      { path: 'mes-candidatures', element: <ProtectedRoute><MyApplications /></ProtectedRoute> },
 
       // Owner routes
       { path: 'dashboard/proprietaire', element: <ProtectedRoute allowedRoles={['proprietaire', 'owner']}><OwnerDashboard /></ProtectedRoute> },
