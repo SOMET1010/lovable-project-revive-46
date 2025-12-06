@@ -271,6 +271,23 @@
   }
 }
 
+/* Gradient text animation for hero title */
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient {
+  animation: gradient 4s ease infinite;
+}
+
 @keyframes glow {
   from {
     box-shadow: 0 0 5px var(--color-primary-500);
