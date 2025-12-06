@@ -1,5 +1,6 @@
 import { ServiceManager, ServiceConfig } from '../_shared/serviceManager.ts';
 import { edgeLogger } from '../_shared/logger.ts';
+import { detectCloudflareBlock, formatCloudflareError } from '../_shared/cloudflareDetector.ts';
 import type { SMSRequest, SMSHandlerParams, SMSSuccessResponse } from '../_shared/types/sms.types.ts';
 
 const corsHeaders = {
@@ -8,6 +9,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+const BREVO_SMS_ENDPOINT = 'https://api.brevo.com/v3/transactionalSMS/sms';
 interface InTouchSMSResponse {
   message_id?: string;
   id?: string;
@@ -164,8 +166,7 @@ Deno.serve(async (req: Request) => {
         
         const configWithSender = config.config as { sender?: string } | undefined;
         
-        // Correct Brevo SMS endpoint: /sms (not /send)
-        const response = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
+        const response = await fetch(BREVO_SMS_ENDPOINT, {
           method: 'POST',
           headers: {
             'api-key': apiKey,
@@ -180,18 +181,32 @@ Deno.serve(async (req: Request) => {
           })
         });
 
+        // Get response as text first for Cloudflare detection
+        const responseText = await response.text();
+        
+        // Detect Cloudflare block
+        const cfInfo = detectCloudflareBlock(response.status, responseText);
+        
+        if (cfInfo.isCloudflareBlock) {
+          const errorMsg = formatCloudflareError(cfInfo, BREVO_SMS_ENDPOINT);
+          edgeLogger.error('Brevo SMS Cloudflare block', undefined, { 
+            rayId: cfInfo.rayId, 
+            blockedIp: cfInfo.blockedIp 
+          });
+          throw new Error(`Brevo blocked by Cloudflare. Ray ID: ${cfInfo.rayId || 'unknown'}`);
+        }
+
         if (!response.ok) {
-          const errorText = await response.text();
-          edgeLogger.error('Brevo SMS error', undefined, { status: response.status, error: errorText });
+          edgeLogger.error('Brevo SMS error', undefined, { status: response.status, error: responseText.substring(0, 200) });
           try {
-            const errorData = JSON.parse(errorText) as { message?: string };
+            const errorData = JSON.parse(responseText) as { message?: string };
             throw new Error(`Brevo SMS failed: ${errorData.message || response.statusText}`);
           } catch {
-            throw new Error(`Brevo SMS failed: ${response.status} - ${errorText}`);
+            throw new Error(`Brevo SMS failed: ${response.status} - ${responseText.substring(0, 200)}`);
           }
         }
 
-        const result = await response.json() as BrevoSMSResponse;
+        const result = JSON.parse(responseText) as BrevoSMSResponse;
         edgeLogger.info('Brevo SMS success', { messageId: result.messageId });
         return {
           success: true,

@@ -8,6 +8,8 @@
  * La clé API Brevo n'est JAMAIS exposée côté client.
  */
 
+import { detectCloudflareBlock, formatCloudflareError, getCloudflareUserMessage } from '../_shared/cloudflareDetector.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -23,6 +25,8 @@ interface SmsResponse {
   status: 'ok' | 'error';
   brevoMessageId?: string;
   reason?: string;
+  cloudflareBlock?: boolean;
+  rayId?: string;
 }
 
 /**
@@ -69,6 +73,8 @@ function validatePayload(body: unknown): { valid: boolean; error?: string; data?
     },
   };
 }
+
+const BREVO_SMS_ENDPOINT = 'https://api.brevo.com/v3/transactionalSMS/sms';
 
 Deno.serve(async (req: Request) => {
   // Handle CORS preflight
@@ -122,7 +128,7 @@ Deno.serve(async (req: Request) => {
     console.log('[send-sms-brevo] Sending SMS to:', phone.substring(0, 6) + '****');
 
     // Call Brevo SMS API
-    const brevoResponse = await fetch('https://api.brevo.com/v3/transactionalSMS/sms', {
+    const brevoResponse = await fetch(BREVO_SMS_ENDPOINT, {
       method: 'POST',
       headers: {
         'api-key': brevoApiKey,
@@ -132,22 +138,53 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify(brevoPayload),
     });
 
-    const brevoData = await brevoResponse.json();
-
-    // Log response (without sensitive data)
-    console.log('[send-sms-brevo] Brevo response status:', brevoResponse.status);
+    // Get response as text first for Cloudflare detection
+    const responseText = await brevoResponse.text();
     
-    if (!brevoResponse.ok) {
-      console.error('[send-sms-brevo] Brevo error:', JSON.stringify(brevoData).substring(0, 200));
+    // Detect Cloudflare block
+    const cfInfo = detectCloudflareBlock(brevoResponse.status, responseText);
+    
+    if (cfInfo.isCloudflareBlock) {
+      // Log detailed Cloudflare error
+      console.error(formatCloudflareError(cfInfo, BREVO_SMS_ENDPOINT));
+      
       return new Response(
         JSON.stringify({ 
           status: 'error', 
-          reason: brevoData.message || 'Erreur lors de l\'envoi du SMS' 
+          reason: getCloudflareUserMessage(cfInfo),
+          cloudflareBlock: true,
+          rayId: cfInfo.rayId
+        } as SmsResponse),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Log response status
+    console.log('[send-sms-brevo] Brevo response status:', brevoResponse.status);
+    
+    if (!brevoResponse.ok) {
+      // Try to parse error as JSON
+      let errorMessage = 'Erreur lors de l\'envoi du SMS';
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        errorMessage = responseText.substring(0, 200);
+      }
+      
+      console.error('[send-sms-brevo] Brevo error:', brevoResponse.status, errorMessage);
+      
+      return new Response(
+        JSON.stringify({ 
+          status: 'error', 
+          reason: errorMessage 
         } as SmsResponse),
         { status: brevoResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // Parse successful response
+    const brevoData = JSON.parse(responseText);
     console.log('[send-sms-brevo] SMS sent successfully, messageId:', brevoData.messageId);
 
     return new Response(

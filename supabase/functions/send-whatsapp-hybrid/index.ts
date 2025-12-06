@@ -1,4 +1,5 @@
 import { ServiceManager, ServiceConfig } from '../_shared/serviceManager.ts';
+import { detectCloudflareBlock, formatCloudflareError } from '../_shared/cloudflareDetector.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,6 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+const BREVO_WHATSAPP_ENDPOINT = 'https://api.brevo.com/v3/whatsapp/sendMessage';
 interface WhatsAppRequest {
   phoneNumber: string;
   message: string;
@@ -116,8 +118,9 @@ Deno.serve(async (req: Request) => {
           throw new Error('Brevo API key not configured');
         }
 
-        // Brevo WhatsApp API
-        const response = await fetch('https://api.brevo.com/v3/whatsapp/sendMessage', {
+        console.log(`[WHATSAPP-HYBRID] Calling Brevo: ${BREVO_WHATSAPP_ENDPOINT}`);
+
+        const response = await fetch(BREVO_WHATSAPP_ENDPOINT, {
           method: 'POST',
           headers: {
             'api-key': apiKey,
@@ -131,13 +134,30 @@ Deno.serve(async (req: Request) => {
           })
         });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: response.statusText }));
-          console.error('Brevo WhatsApp error:', errorData);
-          throw new Error(`Brevo WhatsApp failed: ${errorData.message || response.statusText}`);
+        // Get response as text first for Cloudflare detection
+        const responseText = await response.text();
+        
+        // Detect Cloudflare block
+        const cfInfo = detectCloudflareBlock(response.status, responseText);
+        
+        if (cfInfo.isCloudflareBlock) {
+          console.error(formatCloudflareError(cfInfo, BREVO_WHATSAPP_ENDPOINT));
+          throw new Error(`Brevo blocked by Cloudflare. Ray ID: ${cfInfo.rayId || 'unknown'}`);
         }
 
-        const result = await response.json();
+        if (!response.ok) {
+          let errorMessage = response.statusText;
+          try {
+            const errorData = JSON.parse(responseText);
+            errorMessage = errorData.message || errorMessage;
+          } catch {
+            errorMessage = responseText.substring(0, 200);
+          }
+          console.error('Brevo WhatsApp error:', errorMessage);
+          throw new Error(`Brevo WhatsApp failed: ${errorMessage}`);
+        }
+
+        const result = JSON.parse(responseText);
         console.log('✅ Brevo WhatsApp success:', result);
 
         return {
