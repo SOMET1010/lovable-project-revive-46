@@ -2,6 +2,7 @@ import { Search, Shield, FileText, CreditCard, Home as HomeIcon, Users, CheckCir
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
 import SEOHead from '@/shared/components/SEOHead';
+import { useHomeStats } from '@/shared/hooks/useHomeStats';
 
 interface StepCardProps {
   number: number;
@@ -49,14 +50,17 @@ function StepCard({ number, title, description, icon, features, imagePosition = 
 }
 
 export default function HowItWorksPage() {
+  const homeStats = useHomeStats();
+  const propertiesCount = homeStats.propertiesCount || 10;
+  
   const tenantSteps = [
     {
       number: 1,
       title: 'Recherchez votre bien idéal',
-      description: 'Explorez notre catalogue de plus de 31 propriétés disponibles dans 5 villes principales de Côte d\'Ivoire. Utilisez nos filtres avancés pour trouver exactement ce que vous cherchez.',
+      description: `Explorez notre catalogue de plus de ${propertiesCount} propriétés disponibles dans 5 villes principales de Côte d'Ivoire. Utilisez nos filtres avancés pour trouver exactement ce que vous cherchez.`,
       icon: <Search className="h-8 w-8 text-white" />,
       features: [
-        '31+ propriétés vérifiées disponibles',
+        `${propertiesCount}+ propriétés vérifiées disponibles`,
         'Couverture dans 5 villes (Abidjan, Yamoussoukro, Bouaké, Daloa, San-Pédro)',
         'Filtres avancés : prix, chambres, type de bien, équipements',
         'Sauvegardez vos favoris et créez des alertes personnalisées',
@@ -267,7 +271,7 @@ export default function HowItWorksPage() {
         <div className="bg-[#2C1810] rounded-[24px] p-12 mb-20 text-white animate-slide-up">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-5xl font-bold mb-2 text-[#F16522]">31+</div>
+              <div className="text-5xl font-bold mb-2 text-[#F16522]">{propertiesCount}+</div>
               <div className="text-xl text-[#E8D4C5]">Propriétés Vérifiées</div>
             </div>
             <div>

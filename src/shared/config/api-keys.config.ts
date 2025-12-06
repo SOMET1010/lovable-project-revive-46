@@ -234,19 +234,21 @@ class ApiKeysConfig {
     const status = this.getServiceStatus();
     const validation = this.validateConfiguration();
 
-    console.group('📋 Configuration des Services API - Mon Toit');
-    console.log('✅ Services Configurés:', Object.entries(status).filter(([, v]) => v).map(([k]) => k));
-    console.log('❌ Services Non Configurés:', Object.entries(status).filter(([, v]) => !v).map(([k]) => k));
+    if (import.meta.env.DEV) {
+      console.group('📋 Configuration des Services API - Mon Toit');
+      console.log('✅ Services Configurés:', Object.entries(status).filter(([, v]) => v).map(([k]) => k));
+      console.log('❌ Services Non Configurés:', Object.entries(status).filter(([, v]) => !v).map(([k]) => k));
 
-    if (validation.missing.length > 0) {
-      console.error('🚨 Configuration Manquante (Critique):', validation.missing);
+      if (validation.missing.length > 0) {
+        console.error('🚨 Configuration Manquante (Critique):', validation.missing);
+      }
+
+      if (validation.warnings.length > 0) {
+        console.warn('⚠️ Avertissements:', validation.warnings);
+      }
+
+      console.groupEnd();
     }
-
-    if (validation.warnings.length > 0) {
-      console.warn('⚠️ Avertissements:', validation.warnings);
-    }
-
-    console.groupEnd();
 
     return validation;
   }

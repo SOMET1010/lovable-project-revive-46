@@ -35,7 +35,7 @@ export default function QuickActionsPanel({
 }: QuickActionsPanelProps) {
   const [hoveredAction, setHoveredAction] = useState<string | null>(null);
 
-  // Actions par défaut
+  // Actions par défaut - handlers à implémenter
   const defaultActions: QuickActionButton[] = [
     {
       id: 'send_proposal',
@@ -43,7 +43,7 @@ export default function QuickActionsPanel({
       icon: Send,
       color: 'blue',
       count: 4,
-      action: () => console.log('Envoyer proposition')
+      action: () => { /* TODO: Implement send proposal */ }
     },
     {
       id: 'contact_parties',
@@ -51,7 +51,7 @@ export default function QuickActionsPanel({
       icon: MessageSquare,
       color: 'green',
       count: 7,
-      action: () => console.log('Contacter parties')
+      action: () => { /* TODO: Implement contact parties */ }
     },
     {
       id: 'escalate_dispute',
@@ -60,7 +60,7 @@ export default function QuickActionsPanel({
       color: 'red',
       count: 2,
       urgent: true,
-      action: () => console.log('Escalader litige')
+      action: () => { /* TODO: Implement escalate dispute */ }
     },
     {
       id: 'mark_resolved',
@@ -68,7 +68,7 @@ export default function QuickActionsPanel({
       icon: CheckCircle,
       color: 'purple',
       count: 5,
-      action: () => console.log('Marquer résolu')
+      action: () => { /* TODO: Implement mark resolved */ }
     },
     {
       id: 'schedule_meeting',
@@ -76,14 +76,14 @@ export default function QuickActionsPanel({
       icon: Clock,
       color: 'indigo',
       count: 3,
-      action: () => console.log('Programmer réunion')
+      action: () => { /* TODO: Implement schedule meeting */ }
     },
     {
       id: 'generate_report',
       label: 'Générer rapport',
       icon: FileText,
       color: 'orange',
-      action: () => console.log('Générer rapport')
+      action: () => { /* TODO: Implement generate report */ }
     }
   ];
 
@@ -172,25 +172,25 @@ export default function QuickActionsPanel({
             icon={UserCheck}
             label="Validation rapide"
             color="text-green-600"
-            onClick={() => console.log('Validation rapide')}
+            onClick={() => { /* TODO: Implement quick validation */ }}
           />
           <SpecialActionButton
             icon={Phone}
             label="Appel urgence"
             color="text-red-600"
-            onClick={() => console.log('Appel urgence')}
+            onClick={() => { /* TODO: Implement emergency call */ }}
           />
           <SpecialActionButton
             icon={Mail}
             label="Email modèle"
             color="text-blue-600"
-            onClick={() => console.log('Email modèle')}
+            onClick={() => { /* TODO: Implement template email */ }}
           />
           <SpecialActionButton
             icon={Download}
             label="Export données"
             color="text-purple-600"
-            onClick={() => console.log('Export données')}
+            onClick={() => { /* TODO: Implement data export */ }}
           />
         </div>
       </div>
@@ -204,7 +204,7 @@ function SpecialActionButton({
   color, 
   onClick 
 }: { 
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   label: string;
   color: string;
   onClick: () => void;
