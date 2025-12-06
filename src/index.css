@@ -167,3 +167,13 @@ img {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   will-change: transform;
 }
+
+/* Animation bounce lente pour le badge flottant Hero */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
+}
