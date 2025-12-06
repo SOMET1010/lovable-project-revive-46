@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { useConversations } from '../hooks/useConversations';
 import { useMessages } from '../hooks/useMessages';
 import { ConversationList } from '../components/ConversationList';
@@ -10,7 +10,7 @@ import { Conversation } from '../services/messaging.service';
 
 export default function MessagesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user } = useAuthStore();
+  const { user, loading: authLoading } = useAuth();
   
   const { conversations, loading: loadingConversations, getOrCreateConversation } = useConversations();
   
@@ -56,6 +56,14 @@ export default function MessagesPage() {
   const handleBack = () => {
     setShowMobileThread(false);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#111B21] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#25D366]"></div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

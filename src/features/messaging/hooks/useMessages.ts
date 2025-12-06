@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { messagingService, Message, Attachment } from '../services/messaging.service';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useNotificationSound } from './useNotificationSound';
 
 export function useMessages(conversationId: string | null) {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const { playIncomingSound } = useNotificationSound();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
