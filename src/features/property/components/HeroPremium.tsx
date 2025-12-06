@@ -6,39 +6,71 @@ interface HeroPremiumProps {
   onSearch?: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
 }
 
-// 4 slides avec images disponibles
+// 8 slides premium avec vraies images
 const HERO_SLIDES = [
   {
     id: 1,
-    src: '/images/hero/hero1.jpg',
-    alt: 'Propriété moderne à Abidjan',
+    src: '/images/hero-villa-cocody.jpg',
+    alt: 'Villa moderne à Cocody avec jardin',
     position: 'object-center',
     title: 'Vivez là où vous vous sentez bien',
     subtitle: 'Des quartiers prisés : Cocody, Riviera, Zone 4.'
   },
   {
     id: 2,
-    src: '/images/hero/hero2.jpg',
-    alt: 'Villa de luxe avec piscine',
+    src: '/images/hero-residence-moderne.jpg',
+    alt: 'Résidence moderne à Abidjan',
     position: 'object-center',
     title: 'Des experts à votre service',
     subtitle: 'Faites-vous accompagner par nos agents certifiés.'
   },
   {
     id: 3,
-    src: '/images/hero/hero3.jpg',
-    alt: 'Appartement moderne',
+    src: '/images/hero-maison-moderne.jpg',
+    alt: 'Maison moderne avec terrasse',
     position: 'object-center',
     title: 'Trouvez le logement de vos rêves',
     subtitle: 'Villas, appartements et terrains vérifiés.'
   },
   {
     id: 4,
-    src: '/images/hero/hero4.jpg',
-    alt: 'Résidence sécurisée',
+    src: '/images/hero-residence-securisee.jpg',
+    alt: 'Résidence sécurisée avec piscine',
     position: 'object-center',
     title: "L'immobilier d'exception",
     subtitle: 'Découvrez nos propriétés de prestige.'
+  },
+  {
+    id: 5,
+    src: '/images/hero-immeuble-moderne.png',
+    alt: 'Immeuble moderne au Plateau',
+    position: 'object-center',
+    title: "Au cœur de l'action",
+    subtitle: "Vivez au rythme d'Abidjan."
+  },
+  {
+    id: 6,
+    src: '/images/hero-abidjan-1.jpg',
+    alt: 'Vue panoramique sur Abidjan',
+    position: 'object-center',
+    title: 'Votre futur chez-vous, à portée de main',
+    subtitle: 'Une recherche simple et intuitive.'
+  },
+  {
+    id: 7,
+    src: '/images/hero-abidjan-2.jpg',
+    alt: 'Quartier résidentiel à Abidjan',
+    position: 'object-center',
+    title: 'Construisez votre avenir',
+    subtitle: 'Des maisons familiales pour voir grand.'
+  },
+  {
+    id: 8,
+    src: '/images/hero-quartiers-abidjan.jpg',
+    alt: "Les plus beaux quartiers d'Abidjan",
+    position: 'object-center',
+    title: "Partagez plus qu'un logement",
+    subtitle: 'Trouvez la colocation idéale.'
   },
 ];
 
