@@ -86,6 +86,57 @@ export type Database = {
         }
         Relationships: []
       }
+      business_rules: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean | null
+          max_value: number | null
+          min_value: number | null
+          rule_key: string
+          rule_name: string
+          rule_type: string
+          updated_at: string | null
+          value_boolean: boolean | null
+          value_json: Json | null
+          value_number: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          max_value?: number | null
+          min_value?: number | null
+          rule_key: string
+          rule_name: string
+          rule_type: string
+          updated_at?: string | null
+          value_boolean?: boolean | null
+          value_json?: Json | null
+          value_number?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          max_value?: number | null
+          min_value?: number | null
+          rule_key?: string
+          rule_name?: string
+          rule_type?: string
+          updated_at?: string | null
+          value_boolean?: boolean | null
+          value_json?: Json | null
+          value_number?: number | null
+        }
+        Relationships: []
+      }
       cev_missions: {
         Row: {
           assigned_agent_id: string

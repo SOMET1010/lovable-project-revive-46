@@ -82,6 +82,7 @@ const AdminDashboard = lazyWithRetry(() => import('@/features/admin/pages/Dashbo
 const AdminUsers = lazyWithRetry(() => import('@/features/admin/pages/UsersPage'));
 const AdminUserRoles = lazyWithRetry(() => import('@/features/admin/pages/UserRolesPage'));
 const AdminApiKeys = lazyWithRetry(() => import('@/features/admin/pages/ApiKeysPage'));
+const AdminBusinessRules = lazyWithRetry(() => import('@/features/admin/pages/BusinessRulesPage'));
 const AdminCEVManagement = lazyWithRetry(() => import('@/features/admin/pages/CEVManagementPage'));
 const AdminTrustAgents = lazyWithRetry(() => import('@/features/admin/pages/TrustAgentsPage'));
 
