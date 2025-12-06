@@ -1,9 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, MapPin, Home, ChevronDown, Sparkles } from 'lucide-react';
 
 interface HeroPremiumProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
 }
+
+// Configuration des 4 slides premium
+const HERO_SLIDES = [
+  {
+    src: '/images/hero/hero-famille-cocody.webp',
+    alt: 'Famille ivoirienne heureuse devant leur maison à Cocody',
+    position: 'object-center'
+  },
+  {
+    src: '/images/hero/hero-couple-app.png',
+    alt: 'Jeune couple utilisant l\'application Mon Toit',
+    position: 'object-center'
+  },
+  {
+    src: '/images/hero/hero-professionnelle.png',
+    alt: 'Jeune professionnelle détendue sur son balcon',
+    position: 'object-top'
+  },
+  {
+    src: '/images/hero/hero-villa-riviera.png',
+    alt: 'Villa de luxe moderne avec piscine à la Riviera',
+    position: 'object-center'
+  },
+];
 
 const cities = [
   'Abidjan',
@@ -36,14 +60,27 @@ const budgets = [
 const popularDistricts = ['Cocody', 'Plateau', 'Marcory', 'Yopougon', 'Riviera'];
 
 /**
- * HeroPremium - Simplified Static Hero
- * Single static image, no slideshow, no testimonials
+ * HeroPremium - Fade Slideshow Hero
+ * 4 images avec transition fade, auto-play 6s, pause au hover
  * Focus: Search form + quick links
  */
 export default function HeroPremium({ onSearch }: HeroPremiumProps) {
   const [city, setCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  // Auto-play slideshow (6 secondes par slide)
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_SLIDES.length);
+    }, 6000);
+
+    return () => clearInterval(timer);
+  }, [isPaused]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,18 +92,33 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
   };
 
   return (
-    <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-      {/* Static Background Image - Premium Quality */}
-      <div className="absolute inset-0">
-        <img
-          src="/images/hero/hero-famille-cocody.webp"
-          alt="Famille ivoirienne devant leur nouvelle maison à Cocody"
-          className="w-full h-full object-cover"
-          loading="eager"
-        />
-        {/* Lighter Gradient Overlays for bright image */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/40 to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/10" />
+    <section 
+      className="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-neutral-900"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Slideshow Background avec Fade Transition */}
+      <div className="absolute inset-0 z-0">
+        {HERO_SLIDES.map((slide, index) => (
+          <div
+            key={slide.src}
+            className={`absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <img
+              src={slide.src}
+              alt={slide.alt}
+              className={`w-full h-full object-cover ${slide.position}`}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              {...(index === 0 ? { fetchPriority: 'high' as const } : {})}
+            />
+          </div>
+        ))}
+        
+        {/* Gradient Overlays for readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
       </div>
 
       {/* Content */}
@@ -183,6 +235,22 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Slide Indicators (Dots) */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+        {HERO_SLIDES.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentSlide(index)}
+            aria-label={`Voir l'image ${index + 1}`}
+            className={`h-2 rounded-full transition-all duration-500 ease-out shadow-sm ${
+              index === currentSlide 
+                ? 'w-8 bg-white' 
+                : 'w-2 bg-white/50 hover:bg-white/80'
+            }`}
+          />
+        ))}
       </div>
     </section>
   );
