@@ -1,6 +1,5 @@
 import { Shield, Users, Target, Award, ArrowRight, Building2 } from 'lucide-react';
 import PageHeader from '@/shared/components/PageHeader';
-import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
 
 export default function AboutPage() {
