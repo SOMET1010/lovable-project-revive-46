@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import HeroPremium from '../components/HeroPremium';
 import FeaturedProperties from '../components/FeaturedProperties';
-import HowItWorksCompact from '../components/HowItWorksCompact';
+import HowItWorksSection from '../components/HowItWorksSection';
 import TestimonialsSection from '../components/TestimonialsSection';
 import CTASection from '../components/CTASection';
 
@@ -57,7 +57,7 @@ export default function Home() {
       />
 
       <HeroPremium onSearch={handleSearch} />
-      <HowItWorksCompact />
+      <HowItWorksSection />
       <FeaturedProperties properties={properties} loading={loading} />
       <TestimonialsSection />
       <CTASection />
