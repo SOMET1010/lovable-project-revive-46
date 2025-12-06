@@ -97,14 +97,15 @@ export default function TenantDashboardContent() {
   };
 
   const getStatusBadge = (status: string | null) => {
+    const defaultConfig = { label: 'Brouillon', className: 'bg-yellow-100 text-yellow-700', icon: AlertCircle };
     const statusConfig: Record<string, { label: string; className: string; icon: React.ElementType }> = {
       actif: { label: 'Actif', className: 'bg-green-100 text-green-700', icon: CheckCircle },
       en_cours: { label: 'En cours', className: 'bg-blue-100 text-blue-700', icon: CheckCircle },
       signé: { label: 'Signé', className: 'bg-green-100 text-green-700', icon: CheckCircle },
       terminé: { label: 'Terminé', className: 'bg-gray-100 text-gray-700', icon: AlertCircle },
-      brouillon: { label: 'Brouillon', className: 'bg-yellow-100 text-yellow-700', icon: AlertCircle },
+      brouillon: defaultConfig,
     };
-    const config = statusConfig[status || 'brouillon'] || statusConfig['brouillon'];
+    const config = statusConfig[status || 'brouillon'] ?? defaultConfig;
     const Icon = config.icon;
     return (
       <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full ${config.className}`}>
@@ -278,7 +279,9 @@ export default function TenantDashboardContent() {
                     {payment.payment_type === 'loyer' ? 'Loyer' : payment.payment_type}
                   </p>
                   <p className="text-sm text-[#6B5A4E]">
-                    Échéance : {format(new Date(payment.due_date), 'd MMMM yyyy', { locale: fr })}
+                    Échéance : {payment.due_date 
+                      ? format(new Date(payment.due_date), 'd MMMM yyyy', { locale: fr })
+                      : 'Non définie'}
                   </p>
                 </div>
                 <div className="text-right">

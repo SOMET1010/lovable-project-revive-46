@@ -55,6 +55,9 @@ const TenantScorePage = lazyWithRetry(() => import('@/features/tenant/pages/Scor
 const MaintenanceRequest = lazyWithRetry(() => import('@/features/tenant/pages/MaintenanceRequestPage'));
 const MyApplications = lazyWithRetry(() => import('@/features/tenant/pages/MyApplicationsPage'));
 
+// Unified dashboard
+const UnifiedDashboard = lazyWithRetry(() => import('@/features/dashboard/pages/UnifiedDashboardPage'));
+
 // Profile page
 const ProfilePage = lazyWithRetry(() => import('@/features/tenant/pages/ProfilePage'));
 
@@ -150,6 +153,7 @@ export const routes: RouteObject[] = [
 
       // User dashboard
       { path: 'dashboard', element: <ProtectedRoute><TenantDashboard /></ProtectedRoute> },
+      { path: 'mon-espace', element: <ProtectedRoute><UnifiedDashboard /></ProtectedRoute> },
 
       // Profile
       { path: 'profil', element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
