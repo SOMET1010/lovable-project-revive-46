@@ -23,6 +23,9 @@
 @import './shared/styles/breadcrumb.css';
 @import './shared/styles/header-footer-premium.css';
 
+/* Premium Form Styles */
+@import './styles/form-premium.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
