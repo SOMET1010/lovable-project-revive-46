@@ -7,6 +7,9 @@ import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
 import { toast } from '@/shared/hooks/useSafeToast';
 import TenantDashboardLayout from '../components/TenantDashboardLayout';
+import FeatureGate from '@/shared/ui/FeatureGate';
+import ONECIForm from '@/features/verification/components/ONECIForm';
+import CNAMForm from '@/features/verification/components/CNAMForm';
 
 interface Profile {
   id: string;
@@ -263,6 +266,7 @@ export default function ProfilePage() {
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-foreground mb-4">Statut de vérification</h2>
               
+              {/* Statuts actuels */}
               <div className="space-y-4">
                 <VerificationItem
                   title="Identité ANSUT"
@@ -281,11 +285,37 @@ export default function ProfilePage() {
                 />
               </div>
 
-              <div className="mt-6 p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  Pour vérifier votre identité, veuillez vous rendre dans un centre de vérification agréé 
-                  ou contacter notre support pour plus d'informations.
-                </p>
+              {/* Formulaires de vérification */}
+              <div className="border-t border-border pt-6 mt-6">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Lancer une vérification</h3>
+                
+                <div className="space-y-6">
+                  {/* ONECI Form */}
+                  {!profile?.oneci_verified && user && (
+                    <FeatureGate feature="oneci_verification" showMessage>
+                      <div className="border border-border rounded-xl p-6">
+                        <ONECIForm userId={user.id} onSuccess={loadProfile} />
+                      </div>
+                    </FeatureGate>
+                  )}
+
+                  {/* CNAM Form */}
+                  {!profile?.cnam_verified && user && (
+                    <FeatureGate feature="cnam_verification" showMessage>
+                      <div className="border border-border rounded-xl p-6">
+                        <CNAMForm userId={user.id} onSuccess={loadProfile} />
+                      </div>
+                    </FeatureGate>
+                  )}
+
+                  {profile?.oneci_verified && profile?.cnam_verified && (
+                    <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
+                      <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
+                      <h4 className="text-lg font-semibold text-green-700">Toutes les vérifications sont complètes !</h4>
+                      <p className="text-green-600">Votre profil est entièrement vérifié.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
