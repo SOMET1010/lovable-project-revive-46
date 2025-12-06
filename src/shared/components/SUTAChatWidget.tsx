@@ -171,14 +171,13 @@ export default function SUTAChatWidget({ className = '' }: SUTAChatWidgetProps) 
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
               }}
             >
-              {/* Avatar for assistant */}
+              {/* Avatar SUTA for assistant */}
               {message.role === 'assistant' && (
-                <div 
-                  className="absolute -left-8 top-0 w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: '#F16522' }}
-                >
-                  <Bot className="w-3 h-3 text-white" />
-                </div>
+                <img 
+                  src="/images/suta-avatar.png"
+                  alt="SUTA"
+                  className="absolute -left-9 top-0 w-7 h-7 rounded-full object-cover ring-1 ring-[#F16522]/30 shadow-sm"
+                />
               )}
               
               <p 
