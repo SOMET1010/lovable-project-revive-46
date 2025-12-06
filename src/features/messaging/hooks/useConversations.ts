@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { messagingService, Conversation } from '../services/messaging.service';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 
 export function useConversations() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

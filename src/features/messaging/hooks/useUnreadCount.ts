@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { messagingService } from '../services/messaging.service';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 
 export function useUnreadCount() {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [count, setCount] = useState(0);
 
   const fetchCount = useCallback(async () => {
