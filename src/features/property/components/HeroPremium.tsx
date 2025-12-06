@@ -6,71 +6,39 @@ interface HeroPremiumProps {
   onSearch?: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
 }
 
-// 8 slides premium avec images humaines et lifestyle
+// 4 slides avec images disponibles
 const HERO_SLIDES = [
   {
     id: 1,
-    src: '/images/hero/hero_users_3_young_professional.jpg',
-    alt: 'Jeune femme active profitant de la vue depuis son balcon à Abidjan',
-    position: 'object-top',
+    src: '/images/hero/hero1.jpg',
+    alt: 'Propriété moderne à Abidjan',
+    position: 'object-center',
     title: 'Vivez là où vous vous sentez bien',
     subtitle: 'Des quartiers prisés : Cocody, Riviera, Zone 4.'
   },
   {
     id: 2,
-    src: '/images/hero/hero_users_5_agent_showing.jpg',
-    alt: 'Agent immobilier Mon Toit faisant visiter un bien à un couple',
+    src: '/images/hero/hero2.jpg',
+    alt: 'Villa de luxe avec piscine',
     position: 'object-center',
     title: 'Des experts à votre service',
     subtitle: 'Faites-vous accompagner par nos agents certifiés.'
   },
   {
     id: 3,
-    src: '/images/hero/hero_users_2_family_moving.jpg',
-    alt: 'Famille ivoirienne heureuse recevant les clés de leur nouvelle maison',
+    src: '/images/hero/hero3.jpg',
+    alt: 'Appartement moderne',
     position: 'object-center',
     title: 'Trouvez le logement de vos rêves',
     subtitle: 'Villas, appartements et terrains vérifiés.'
   },
   {
     id: 4,
-    src: '/images/hero/hero_villa_riviera.png',
-    alt: 'Villa de luxe moderne avec piscine au coucher du soleil',
+    src: '/images/hero/hero4.jpg',
+    alt: 'Résidence sécurisée',
     position: 'object-center',
     title: "L'immobilier d'exception",
     subtitle: 'Découvrez nos propriétés de prestige.'
-  },
-  {
-    id: 5,
-    src: '/images/hero/hero_etudiants_colocation.png',
-    alt: "Groupe d'amis célébrant dans leur nouvel appartement",
-    position: 'object-center',
-    title: "Partagez plus qu'un logement",
-    subtitle: 'Trouvez la colocation idéale.'
-  },
-  {
-    id: 6,
-    src: '/images/hero/hero_vue_plateau.png',
-    alt: 'Vue panoramique nocturne sur le Plateau et la lagune',
-    position: 'object-center',
-    title: "Au cœur de l'action",
-    subtitle: "Vivez au rythme d'Abidjan."
-  },
-  {
-    id: 7,
-    src: '/images/hero/hero_couple_app.png',
-    alt: "Jeune couple utilisant l'application Mon Toit sur un canapé",
-    position: 'object-center',
-    title: 'Votre futur chez-vous, à portée de main',
-    subtitle: 'Une recherche simple et intuitive.'
-  },
-  {
-    id: 8,
-    src: '/images/hero/hero_famille_cocody.webp',
-    alt: 'Famille marchant vers leur nouvelle maison avec jardin',
-    position: 'object-center',
-    title: 'Construisez votre avenir',
-    subtitle: 'Des maisons familiales pour voir grand.'
   },
 ];
 
