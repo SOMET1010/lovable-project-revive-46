@@ -26,6 +26,11 @@ import {
   ApplicationWithDetails,
   ApplicationStats
 } from '@/services/applications/applicationService';
+import { 
+  notifyApplicationAccepted, 
+  notifyApplicationRejected, 
+  notifyVisitScheduled 
+} from '@/services/notifications/applicationNotificationService';
 
 interface VisitFormData {
   date: string;
@@ -119,6 +124,12 @@ export default function OwnerApplicationsPage() {
     setActionLoading(true);
     try {
       await acceptApplication(applicationId);
+      // Send notification to applicant
+      try {
+        await notifyApplicationAccepted(applicationId);
+      } catch (notifError) {
+        console.error('Failed to send acceptance notification:', notifError);
+      }
       toast.success('Candidature acceptée ! Vous pouvez maintenant créer un contrat.');
       loadData();
     } catch {
@@ -132,6 +143,12 @@ export default function OwnerApplicationsPage() {
     setActionLoading(true);
     try {
       await rejectApplication(applicationId);
+      // Send notification to applicant
+      try {
+        await notifyApplicationRejected(applicationId);
+      } catch (notifError) {
+        console.error('Failed to send rejection notification:', notifError);
+      }
       toast.success('Candidature refusée');
       loadData();
     } catch {
@@ -155,6 +172,13 @@ export default function OwnerApplicationsPage() {
     setActionLoading(true);
     try {
       await scheduleVisitFromApplication(visitApplicationId, visitForm);
+      // Send notification to applicant with visit date
+      try {
+        const visitDateTime = `${new Date(visitForm.date).toLocaleDateString('fr-FR')} à ${visitForm.time}`;
+        await notifyVisitScheduled(visitApplicationId, visitDateTime);
+      } catch (notifError) {
+        console.error('Failed to send visit notification:', notifError);
+      }
       toast.success('Visite planifiée avec succès');
       setShowVisitModal(false);
       setVisitApplicationId(null);

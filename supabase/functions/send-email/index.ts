@@ -517,6 +517,308 @@ const emailTemplates: Record<string, { subject: string; html: (data: any) => str
       </body>
       </html>
     `
+  },
+  // ==================== APPLICATION NOTIFICATION TEMPLATES ====================
+  'application-received': {
+    subject: '📩 Nouvelle candidature reçue - Mon Toit',
+    html: (data: any) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #f97316, #ea580c); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #f97316; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; }
+          .info-box { background: #fff7ed; border-left: 4px solid #f97316; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .score { font-size: 48px; font-weight: bold; color: #f97316; text-align: center; margin: 20px 0; }
+          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📩 Nouvelle Candidature</h1>
+            <p>Mon Toit - Plateforme Immobilière</p>
+          </div>
+          <div class="content">
+            <h2>Bonjour ${data.name} !</h2>
+            <p>Vous avez reçu une nouvelle candidature pour votre propriété.</p>
+            
+            <div class="info-box">
+              <p><strong>Propriété :</strong> ${data.propertyTitle}</p>
+              <p><strong>Ville :</strong> ${data.propertyCity}</p>
+              <p><strong>Candidat :</strong> ${data.applicantName}</p>
+            </div>
+            
+            <p style="text-align: center;">Score de candidature</p>
+            <div class="score">${data.score}/100</div>
+            
+            <p>Consultez le profil du candidat et sa lettre de motivation pour prendre votre décision.</p>
+            
+            <div style="text-align: center;">
+              <a href="${data.applicationUrl}" class="button">Voir la Candidature</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>© 2025 Mon Toit - Tous droits réservés</p>
+            <p>Ce message a été envoyé à ${data.email}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  },
+  'application-viewed': {
+    subject: '👁️ Votre candidature a été consultée - Mon Toit',
+    html: (data: any) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
+          .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>👁️ Candidature Consultée</h1>
+            <p>Mon Toit - Plateforme Immobilière</p>
+          </div>
+          <div class="content">
+            <h2>Bonjour ${data.name} !</h2>
+            <p>Bonne nouvelle ! Le propriétaire a consulté votre candidature.</p>
+            
+            <div class="info-box">
+              <p><strong>Propriété :</strong> ${data.propertyTitle}</p>
+              <p><strong>Ville :</strong> ${data.propertyCity}</p>
+            </div>
+            
+            <p>Restez attentif, une réponse devrait arriver prochainement !</p>
+          </div>
+          <div class="footer">
+            <p>© 2025 Mon Toit - Tous droits réservés</p>
+            <p>Ce message a été envoyé à ${data.email}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  },
+  'application-accepted': {
+    subject: '🎉 Votre candidature a été acceptée ! - Mon Toit',
+    html: (data: any) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #10b981; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; }
+          .celebration { background: #d1fae5; border: 2px dashed #10b981; padding: 20px; margin: 20px 0; border-radius: 10px; text-align: center; }
+          .info-box { background: #f3f4f6; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🎉 Candidature Acceptée !</h1>
+            <p>Mon Toit - Plateforme Immobilière</p>
+          </div>
+          <div class="content">
+            <h2>Félicitations ${data.name} !</h2>
+            
+            <div class="celebration">
+              <p style="font-size: 48px; margin: 0;">🏠 🎊 ✨</p>
+              <p style="font-weight: bold; margin-top: 10px;">Votre candidature a été acceptée !</p>
+            </div>
+            
+            <div class="info-box">
+              <p><strong>Propriété :</strong> ${data.propertyTitle}</p>
+              <p><strong>Ville :</strong> ${data.propertyCity}</p>
+              <p><strong>Loyer mensuel :</strong> ${data.monthlyRent?.toLocaleString('fr-FR')} FCFA</p>
+            </div>
+            
+            <p>Le propriétaire va maintenant préparer le contrat de bail. Vous serez notifié dès qu'il sera prêt à signer.</p>
+            
+            <div style="text-align: center;">
+              <a href="${data.applicationUrl}" class="button">Voir les Détails</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>© 2025 Mon Toit - Tous droits réservés</p>
+            <p>Ce message a été envoyé à ${data.email}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  },
+  'application-rejected': {
+    subject: 'Candidature non retenue - Mon Toit',
+    html: (data: any) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #6b7280, #4b5563); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #f97316; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; }
+          .info-box { background: #f3f4f6; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .encouragement { background: #fff7ed; border-left: 4px solid #f97316; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Candidature Non Retenue</h1>
+            <p>Mon Toit - Plateforme Immobilière</p>
+          </div>
+          <div class="content">
+            <h2>Bonjour ${data.name},</h2>
+            <p>Nous sommes désolés de vous informer que votre candidature n'a pas été retenue pour cette propriété.</p>
+            
+            <div class="info-box">
+              <p><strong>Propriété :</strong> ${data.propertyTitle}</p>
+              <p><strong>Ville :</strong> ${data.propertyCity}</p>
+              ${data.reason ? `<p><strong>Raison :</strong> ${data.reason}</p>` : ''}
+            </div>
+            
+            <div class="encouragement">
+              <p style="margin: 0;"><strong>💪 Ne vous découragez pas !</strong></p>
+              <p style="margin-top: 10px;">De nombreuses autres propriétés vous attendent sur Mon Toit. Continuez vos recherches et vous trouverez le logement idéal.</p>
+            </div>
+            
+            <div style="text-align: center;">
+              <a href="${data.searchUrl}" class="button">Chercher d'Autres Biens</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>© 2025 Mon Toit - Tous droits réservés</p>
+            <p>Ce message a été envoyé à ${data.email}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  },
+  'visit-scheduled-for-application': {
+    subject: '📅 Visite planifiée pour votre candidature - Mon Toit',
+    html: (data: any) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #8b5cf6; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; }
+          .date-box { background: #f5f3ff; border: 2px solid #8b5cf6; padding: 20px; margin: 20px 0; border-radius: 10px; text-align: center; }
+          .info-box { background: #f3f4f6; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📅 Visite Planifiée</h1>
+            <p>Mon Toit - Plateforme Immobilière</p>
+          </div>
+          <div class="content">
+            <h2>Bonjour ${data.name} !</h2>
+            <p>Une visite a été planifiée suite à votre candidature.</p>
+            
+            <div class="date-box">
+              <p style="font-size: 14px; color: #6b7280; margin: 0;">Date de visite</p>
+              <p style="font-size: 24px; font-weight: bold; color: #8b5cf6; margin: 10px 0;">${data.visitDate}</p>
+            </div>
+            
+            <div class="info-box">
+              <p><strong>Propriété :</strong> ${data.propertyTitle}</p>
+              <p><strong>Ville :</strong> ${data.propertyCity}</p>
+            </div>
+            
+            <p>Préparez vos questions et documents nécessaires pour la visite !</p>
+            
+            <div style="text-align: center;">
+              <a href="${data.applicationUrl}" class="button">Voir les Détails</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>© 2025 Mon Toit - Tous droits réservés</p>
+            <p>Ce message a été envoyé à ${data.email}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  },
+  'documents-requested': {
+    subject: '📋 Documents supplémentaires requis - Mon Toit',
+    html: (data: any) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+          .content { background: white; padding: 30px; border: 1px solid #e5e7eb; border-radius: 0 0 10px 10px; }
+          .button { display: inline-block; background: #f59e0b; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: bold; }
+          .docs-list { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .info-box { background: #f3f4f6; padding: 15px; margin: 20px 0; border-radius: 5px; }
+          .footer { text-align: center; margin-top: 30px; color: #6b7280; font-size: 12px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>📋 Documents Requis</h1>
+            <p>Mon Toit - Plateforme Immobilière</p>
+          </div>
+          <div class="content">
+            <h2>Bonjour ${data.name} !</h2>
+            <p>Le propriétaire a besoin de documents supplémentaires pour traiter votre candidature.</p>
+            
+            <div class="docs-list">
+              <p style="margin: 0;"><strong>Documents demandés :</strong></p>
+              <ul style="margin: 10px 0 0 0;">
+                ${data.documents?.map((doc: string) => `<li>${doc}</li>`).join('') || '<li>Documents à fournir</li>'}
+              </ul>
+            </div>
+            
+            <div class="info-box">
+              <p><strong>Propriété :</strong> ${data.propertyTitle}</p>
+              <p><strong>Ville :</strong> ${data.propertyCity}</p>
+            </div>
+            
+            <p>Veuillez soumettre les documents demandés dès que possible pour accélérer le traitement de votre candidature.</p>
+            
+            <div style="text-align: center;">
+              <a href="${data.applicationUrl}" class="button">Soumettre les Documents</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>© 2025 Mon Toit - Tous droits réservés</p>
+            <p>Ce message a été envoyé à ${data.email}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
   }
 };
 
