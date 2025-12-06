@@ -1603,6 +1603,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_feature_flag: {
+        Args: { flag_key: string; user_id?: string }
+        Returns: boolean
+      }
       cleanup_expired_verification_codes: { Args: never; Returns: number }
       cleanup_old_webhook_logs: { Args: never; Returns: number }
       generate_otp: { Args: never; Returns: string }
