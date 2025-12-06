@@ -62,9 +62,7 @@ export default function CTASection() {
     <section 
       ref={sectionRef}
       className="py-20 md:py-28 relative overflow-hidden"
-      style={{ 
-        background: 'linear-gradient(135deg, #F8E8D8 0%, #FFFFFF 50%, rgba(241, 101, 34, 0.05) 100%)'
-      }}
+      style={{ backgroundColor: '#F5E6D3' }}
     >
       {/* Decorative Elements */}
       <div 
