@@ -1,9 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
-import { CreditCard, Smartphone, Building, Coins, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
+import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
+import { 
+  CreditCard, 
+  Smartphone, 
+  Building, 
+  Coins, 
+  AlertCircle, 
+  CheckCircle, 
+  ArrowLeft,
+  ChevronRight
+} from 'lucide-react';
+import '@/styles/form-premium.css';
 
 interface PaymentFormData {
   property_id: string;
@@ -28,8 +40,13 @@ interface Contract {
   owner_name: string;
 }
 
+const STEP_LABELS = ['Sélection', 'Paiement'];
+
 export default function MakePayment() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { step, slideDirection, nextStep, prevStep } = useFormStepper(1, 2);
+  
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -57,7 +74,6 @@ export default function MakePayment() {
     if (!user) return;
     
     try {
-      // Load contracts first
       const { data: contractsData, error: contractsError } = await supabase
         .from('lease_contracts')
         .select('id, property_id, monthly_rent, deposit_amount, owner_id')
@@ -67,7 +83,6 @@ export default function MakePayment() {
 
       if (contractsError) throw contractsError;
 
-      // Format contracts with placeholder data
       const formattedContracts: Contract[] = (contractsData || []).map((contract: any) => ({
         id: contract.id,
         property_id: contract.property_id,
@@ -81,7 +96,6 @@ export default function MakePayment() {
         owner_name: 'Propriétaire'
       }));
 
-      // Load property details for each contract
       for (const contract of formattedContracts) {
         const { data: propertyData } = await supabase
           .from('properties')
@@ -114,6 +128,7 @@ export default function MakePayment() {
       receiver_id: contract.owner_id,
       amount: contract.monthly_rent,
     });
+    nextStep();
   };
 
   const handlePaymentTypeChange = (type: PaymentFormData['payment_type']) => {
@@ -178,7 +193,7 @@ export default function MakePayment() {
 
       setSuccess(true);
       setTimeout(() => {
-        window.location.href = '/mes-paiements';
+        navigate('/mes-paiements');
       }, 2000);
     } catch (err: any) {
       console.error('Error processing payment:', err);
@@ -192,13 +207,13 @@ export default function MakePayment() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
           <div className="text-center">
-            <Coins className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <Coins className="w-16 h-16 text-[#A69B95] mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-[#2C1810] mb-2">
               Connexion requise
             </h2>
-            <p className="text-gray-600">
+            <p className="text-[#A69B95]">
               Veuillez vous connecter pour effectuer un paiement
             </p>
           </div>
@@ -211,49 +226,67 @@ export default function MakePayment() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50 pt-20 pb-12">
+      <div className="min-h-screen bg-[#FAF7F4] pt-20 pb-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <button
-            onClick={() => window.history.back()}
-            className="flex items-center space-x-2 text-terracotta-600 hover:text-terracotta-700 mb-6 transition-all duration-300 transform hover:scale-105 font-medium"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            <span>Retour</span>
-          </button>
-
+          {/* Header Premium Ivorian */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gradient mb-2">Effectuer un paiement</h1>
-            <p className="text-gray-600 text-lg">Payez votre loyer et vos charges en toute sécurité</p>
+            <button
+              onClick={() => step > 1 ? prevStep() : navigate(-1)}
+              className="flex items-center space-x-2 text-[#2C1810] hover:text-[#F16522] mb-6 transition-all duration-300 font-medium"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              <span>Retour</span>
+            </button>
+
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="p-3 bg-[#F16522]/10 rounded-xl">
+                <Coins className="w-8 h-8 text-[#F16522]" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-[#2C1810]">Effectuer un paiement</h1>
+                <p className="text-[#A69B95]">Payez votre loyer et vos charges en toute sécurité</p>
+              </div>
+            </div>
+
+            {/* Stepper */}
+            <FormStepper
+              currentStep={step}
+              totalSteps={2}
+              onStepChange={() => {}}
+              labels={STEP_LABELS}
+              allowClickNavigation={false}
+            />
           </div>
 
           {success ? (
-            <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+            <div className="form-section-premium text-center p-8">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-12 h-12 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Paiement en cours</h2>
-              <p className="text-gray-600 mb-4">
+              <h2 className="text-2xl font-bold text-[#2C1810] mb-2">Paiement en cours</h2>
+              <p className="text-[#A69B95] mb-4">
                 Votre paiement est en cours de traitement. Vous recevrez une confirmation par email.
               </p>
-              <p className="text-sm text-gray-500">Redirection vers l'historique des paiements...</p>
+              <p className="text-sm text-[#A69B95]">Redirection vers l'historique des paiements...</p>
             </div>
           ) : (
             <>
-              {!selectedContract ? (
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Sélectionnez une propriété</h2>
+              {/* Étape 1: Sélection du contrat */}
+              <FormStepContent step={1} currentStep={step} slideDirection={slideDirection}>
+                <div className="form-section-premium">
+                  <h2 className="form-label-premium text-lg mb-6">Sélectionnez une propriété</h2>
 
                   {loading ? (
                     <div className="text-center py-12">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-terracotta-500 mx-auto"></div>
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522] mx-auto"></div>
                     </div>
                   ) : contracts.length === 0 ? (
                     <div className="text-center py-12">
-                      <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      <Building className="w-16 h-16 text-[#A69B95] mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-[#2C1810] mb-2">
                         Aucun contrat actif
                       </h3>
-                      <p className="text-gray-600">
+                      <p className="text-[#A69B95]">
                         Vous n'avez pas de contrat de location actif pour effectuer un paiement
                       </p>
                     </div>
@@ -263,7 +296,7 @@ export default function MakePayment() {
                         <button
                           key={contract.id}
                           onClick={() => handleContractSelect(contract)}
-                          className="w-full bg-gradient-to-br from-white to-amber-50 border-2 border-terracotta-200 rounded-xl p-6 hover:border-terracotta-400 hover:shadow-lg transition-all duration-300 text-left"
+                          className="w-full bg-white border-2 border-[#A69B95]/30 rounded-xl p-6 hover:border-[#F16522] hover:shadow-lg transition-all duration-300 text-left group"
                         >
                           <div className="flex items-start space-x-4">
                             <img
@@ -272,31 +305,35 @@ export default function MakePayment() {
                               className="w-20 h-20 rounded-lg object-cover"
                             />
                             <div className="flex-1">
-                              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                              <h3 className="text-lg font-bold text-[#2C1810] mb-1">
                                 {contract.property_title}
                               </h3>
-                              <p className="text-sm text-gray-600 mb-2">
+                              <p className="text-sm text-[#A69B95] mb-2">
                                 {contract.property_address}, {contract.property_city}
                               </p>
                               <div className="flex items-center space-x-4 text-sm">
-                                <span className="font-semibold text-terracotta-600">
+                                <span className="font-semibold text-[#F16522]">
                                   Loyer: {contract.monthly_rent.toLocaleString()} FCFA
                                 </span>
-                                <span className="text-gray-500">
+                                <span className="text-[#A69B95]">
                                   Propriétaire: {contract.owner_name}
                                 </span>
                               </div>
                             </div>
+                            <ChevronRight className="w-6 h-6 text-[#A69B95] group-hover:text-[#F16522] transition-colors" />
                           </div>
                         </button>
                       ))}
                     </div>
                   )}
                 </div>
-              ) : (
+              </FormStepContent>
+
+              {/* Étape 2: Détails du paiement */}
+              <FormStepContent step={2} currentStep={step} slideDirection={slideDirection}>
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Détails du paiement</h2>
+                  <div className="form-section-premium">
+                    <h2 className="form-label-premium text-lg mb-6">Détails du paiement</h2>
 
                     {error && (
                       <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
@@ -305,30 +342,32 @@ export default function MakePayment() {
                       </div>
                     )}
 
-                    <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <div className="flex items-start space-x-3">
-                        <img
-                          src={selectedContract.property_main_image || 'https://via.placeholder.com/80'}
-                          alt={selectedContract.property_title}
-                          className="w-16 h-16 rounded-lg object-cover"
-                        />
-                        <div>
-                          <h3 className="font-bold text-gray-900">{selectedContract.property_title}</h3>
-                          <p className="text-sm text-gray-600">{selectedContract.property_address}</p>
-                          <p className="text-sm text-gray-500">À: {selectedContract.owner_name}</p>
+                    {/* Propriété sélectionnée */}
+                    {selectedContract && (
+                      <div className="mb-6 p-4 bg-[#F16522]/5 border border-[#F16522]/20 rounded-xl">
+                        <div className="flex items-start space-x-3">
+                          <img
+                            src={selectedContract.property_main_image || 'https://via.placeholder.com/80'}
+                            alt={selectedContract.property_title}
+                            className="w-16 h-16 rounded-lg object-cover"
+                          />
+                          <div>
+                            <h3 className="font-bold text-[#2C1810]">{selectedContract.property_title}</h3>
+                            <p className="text-sm text-[#A69B95]">{selectedContract.property_address}</p>
+                            <p className="text-sm text-[#A69B95]">À: {selectedContract.owner_name}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
 
-                    <div className="space-y-4">
+                    <div className="space-y-6">
+                      {/* Type de paiement */}
                       <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                          Type de paiement
-                        </label>
-                        <div className="grid grid-cols-2 gap-4">
+                        <label className="form-label-premium">Type de paiement</label>
+                        <div className="grid grid-cols-2 gap-4 mt-3">
                           {[
-                            { value: 'loyer', label: 'Loyer mensuel', amount: selectedContract.monthly_rent },
-                            { value: 'depot_garantie', label: 'Dépôt de garantie', amount: selectedContract.deposit_amount || 0 },
+                            { value: 'loyer', label: 'Loyer mensuel', amount: selectedContract?.monthly_rent || 0 },
+                            { value: 'depot_garantie', label: 'Dépôt de garantie', amount: selectedContract?.deposit_amount || 0 },
                             { value: 'charges', label: 'Charges', amount: 0 },
                             { value: 'frais_agence', label: 'Frais d\'agence', amount: 0 },
                           ].map((type) => (
@@ -338,13 +377,15 @@ export default function MakePayment() {
                               onClick={() => handlePaymentTypeChange(type.value as any)}
                               className={`p-4 border-2 rounded-xl text-left transition-all ${
                                 formData.payment_type === type.value
-                                  ? 'border-terracotta-500 bg-terracotta-50'
-                                  : 'border-gray-200 hover:border-terracotta-300'
+                                  ? 'border-[#F16522] bg-[#F16522]/10'
+                                  : 'border-[#A69B95]/30 hover:border-[#F16522]/50'
                               }`}
                             >
-                              <p className="font-semibold text-gray-900">{type.label}</p>
+                              <p className={`font-semibold ${formData.payment_type === type.value ? 'text-[#F16522]' : 'text-[#2C1810]'}`}>
+                                {type.label}
+                              </p>
                               {type.amount > 0 && (
-                                <p className="text-sm text-terracotta-600 font-bold mt-1">
+                                <p className="text-sm text-[#F16522] font-bold mt-1">
                                   {type.amount.toLocaleString()} FCFA
                                 </p>
                               )}
@@ -353,61 +394,62 @@ export default function MakePayment() {
                         </div>
                       </div>
 
+                      {/* Montant */}
                       <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                          Montant
-                        </label>
+                        <label className="form-label-premium">Montant</label>
                         <input
                           type="number"
                           value={formData.amount}
                           onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-terracotta-200 focus:border-terracotta-500 font-bold text-lg"
+                          className="form-input-premium mt-2 font-bold text-lg"
                           required
                         />
                       </div>
 
+                      {/* Méthode de paiement */}
                       <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">
-                          Méthode de paiement
-                        </label>
-                        <div className="grid grid-cols-2 gap-4">
+                        <label className="form-label-premium">Méthode de paiement</label>
+                        <div className="grid grid-cols-2 gap-4 mt-3">
                           <button
                             type="button"
                             onClick={() => setFormData({ ...formData, payment_method: 'mobile_money' })}
                             className={`p-4 border-2 rounded-xl flex items-center space-x-3 transition-all ${
                               formData.payment_method === 'mobile_money'
-                                ? 'border-terracotta-500 bg-terracotta-50'
-                                : 'border-gray-200 hover:border-terracotta-300'
+                                ? 'border-[#F16522] bg-[#F16522]/10'
+                                : 'border-[#A69B95]/30 hover:border-[#F16522]/50'
                             }`}
                           >
-                            <Smartphone className="w-6 h-6 text-terracotta-600" />
-                            <span className="font-semibold text-gray-900">Mobile Money</span>
+                            <Smartphone className={`w-6 h-6 ${formData.payment_method === 'mobile_money' ? 'text-[#F16522]' : 'text-[#A69B95]'}`} />
+                            <span className={`font-semibold ${formData.payment_method === 'mobile_money' ? 'text-[#F16522]' : 'text-[#2C1810]'}`}>
+                              Mobile Money
+                            </span>
                           </button>
                           <button
                             type="button"
                             onClick={() => setFormData({ ...formData, payment_method: 'carte_bancaire' })}
                             className={`p-4 border-2 rounded-xl flex items-center space-x-3 transition-all ${
                               formData.payment_method === 'carte_bancaire'
-                                ? 'border-terracotta-500 bg-terracotta-50'
-                                : 'border-gray-200 hover:border-terracotta-300'
+                                ? 'border-[#F16522] bg-[#F16522]/10'
+                                : 'border-[#A69B95]/30 hover:border-[#F16522]/50'
                             }`}
                           >
-                            <CreditCard className="w-6 h-6 text-terracotta-600" />
-                            <span className="font-semibold text-gray-900">Carte bancaire</span>
+                            <CreditCard className={`w-6 h-6 ${formData.payment_method === 'carte_bancaire' ? 'text-[#F16522]' : 'text-[#A69B95]'}`} />
+                            <span className={`font-semibold ${formData.payment_method === 'carte_bancaire' ? 'text-[#F16522]' : 'text-[#2C1810]'}`}>
+                              Carte bancaire
+                            </span>
                           </button>
                         </div>
                       </div>
 
+                      {/* Mobile Money Options */}
                       {formData.payment_method === 'mobile_money' && (
-                        <div className="space-y-4 p-4 bg-gray-50 rounded-xl">
+                        <div className="space-y-4 p-4 bg-[#FAF7F4] rounded-xl border border-[#A69B95]/20">
                           <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                              Opérateur Mobile Money
-                            </label>
+                            <label className="form-label-premium">Opérateur Mobile Money</label>
                             <select
                               value={formData.mobile_money_provider}
                               onChange={(e) => setFormData({ ...formData, mobile_money_provider: e.target.value as any })}
-                              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-terracotta-200 focus:border-terracotta-500"
+                              className="form-input-premium mt-2"
                               required
                             >
                               <option value="orange_money">🟠 Orange Money</option>
@@ -416,44 +458,53 @@ export default function MakePayment() {
                               <option value="wave">🌊 Wave</option>
                             </select>
                           </div>
-
                           <div>
-                            <label className="block text-sm font-bold text-gray-700 mb-2">
-                              Numéro de téléphone
-                            </label>
+                            <label className="form-label-premium">Numéro Mobile Money</label>
                             <input
                               type="tel"
                               value={formData.mobile_money_number}
                               onChange={(e) => setFormData({ ...formData, mobile_money_number: e.target.value })}
-                              placeholder="Ex: 07 XX XX XX XX"
-                              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-terracotta-200 focus:border-terracotta-500"
+                              className="form-input-premium mt-2"
+                              placeholder="07 XX XX XX XX"
                               required
                             />
                           </div>
                         </div>
                       )}
                     </div>
+                  </div>
 
-                    <div className="mt-8 flex space-x-4">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedContract(null)}
-                        className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition font-semibold"
-                      >
-                        Changer de propriété
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={submitting || formData.amount <= 0}
-                        className="flex-1 px-6 py-3 bg-terracotta-500 text-white rounded-xl hover:bg-terracotta-600 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                      >
-                        <Coins className="w-5 h-5" />
-                        <span>{submitting ? 'Traitement...' : `Payer ${formData.amount.toLocaleString()} FCFA`}</span>
-                      </button>
-                    </div>
+                  {/* Navigation */}
+                  <div className="flex items-center justify-between pt-4">
+                    <button
+                      type="button"
+                      onClick={prevStep}
+                      className="form-button-secondary flex items-center space-x-2"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                      <span>Précédent</span>
+                    </button>
+                    
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="form-button-primary flex items-center space-x-2"
+                    >
+                      {submitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          <span>Traitement...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Confirmer le paiement</span>
+                          <CheckCircle className="w-5 h-5" />
+                        </>
+                      )}
+                    </button>
                   </div>
                 </form>
-              )}
+              </FormStepContent>
             </>
           )}
         </div>
