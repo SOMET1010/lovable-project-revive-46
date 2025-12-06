@@ -9,20 +9,25 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  retryCount: number;
 }
+
+const MAX_AUTO_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
 
 export class ChunkLoadErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, retryCount: 0 };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     // Check if it's a chunk loading error
     const isChunkError = 
       error.message.includes('Failed to fetch dynamically imported module') ||
       error.message.includes('Loading chunk') ||
-      error.message.includes('Loading CSS chunk');
+      error.message.includes('Loading CSS chunk') ||
+      error.message.includes('Unable to preload CSS');
     
     if (isChunkError) {
       return { hasError: true, error };
@@ -32,13 +37,45 @@ export class ChunkLoadErrorBoundary extends Component<Props, State> {
     throw error;
   }
 
-  handleReload = () => {
+  override componentDidUpdate(_prevProps: Props, prevState: State) {
+    // Auto-retry logic
+    if (this.state.hasError && this.state.retryCount < MAX_AUTO_RETRIES) {
+      if (prevState.retryCount === this.state.retryCount) {
+        setTimeout(() => {
+          this.handleAutoRetry();
+        }, RETRY_DELAY_MS);
+      }
+    }
+  }
+
+  handleAutoRetry = () => {
+    this.setState(prevState => ({
+      hasError: false,
+      error: null,
+      retryCount: prevState.retryCount + 1
+    }));
+  };
+
+  handleManualReload = () => {
     // Clear any cached modules and reload
     window.location.reload();
   };
 
   override render() {
     if (this.state.hasError) {
+      // Still auto-retrying
+      if (this.state.retryCount < MAX_AUTO_RETRIES) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center">
+            <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
+            <p className="text-muted-foreground">
+              Chargement en cours... (tentative {this.state.retryCount + 1}/{MAX_AUTO_RETRIES})
+            </p>
+          </div>
+        );
+      }
+
+      // All retries exhausted, show error
       return (
         <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center">
           <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
@@ -50,7 +87,7 @@ export class ChunkLoadErrorBoundary extends Component<Props, State> {
           <p className="text-muted-foreground mb-6 max-w-md">
             Une mise à jour est peut-être en cours. Veuillez recharger la page pour continuer.
           </p>
-          <Button onClick={this.handleReload} className="gap-2">
+          <Button onClick={this.handleManualReload} className="gap-2">
             <RefreshCw className="h-4 w-4" />
             Recharger la page
           </Button>
