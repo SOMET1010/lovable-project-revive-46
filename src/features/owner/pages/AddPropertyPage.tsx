@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Upload, X, Image as ImageIcon, Building2, Save, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Home, Upload, X, Image as ImageIcon, Building2, Save, Check, RefreshCw, FileText } from 'lucide-react';
+import Modal from '@/shared/ui/Modal';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES, STORAGE_KEYS } from '@/shared/lib/constants/app.constants';
@@ -70,6 +71,8 @@ export default function AddProperty() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [draftSaved, setDraftSaved] = useState(false);
   const [hasDraft, setHasDraft] = useState(false);
+  const [showDraftModal, setShowDraftModal] = useState(false);
+  const [pendingDraftData, setPendingDraftData] = useState<PropertyFormData | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Hook de validation
@@ -77,16 +80,20 @@ export default function AddProperty() {
 
   const [formData, setFormData] = useState<PropertyFormData>(INITIAL_FORM_DATA);
 
-  // Load draft from localStorage on mount
+  // Load draft from localStorage on mount - show confirmation modal
   useEffect(() => {
     const savedDraft = localStorage.getItem(STORAGE_KEYS.PROPERTY_DRAFT);
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
-        setHasDraft(true);
-        setFormData(prev => ({ ...prev, ...parsed }));
+        // Show modal if draft has significant data
+        if (parsed.title || parsed.description || parsed.address) {
+          setPendingDraftData(parsed);
+          setShowDraftModal(true);
+        }
       } catch {
-        // Ignore invalid JSON
+        // Remove corrupted draft
+        localStorage.removeItem(STORAGE_KEYS.PROPERTY_DRAFT);
       }
     }
   }, []);
@@ -124,6 +131,25 @@ export default function AddProperty() {
     setImageFiles([]);
     setImagePreviews([]);
   }, []);
+
+  // Handler for "Continue draft"
+  const handleContinueDraft = () => {
+    if (pendingDraftData) {
+      setFormData(prev => ({ ...prev, ...pendingDraftData }));
+      setHasDraft(true);
+    }
+    setShowDraftModal(false);
+    setPendingDraftData(null);
+  };
+
+  // Handler for "Start fresh"
+  const handleStartFresh = () => {
+    localStorage.removeItem(STORAGE_KEYS.PROPERTY_DRAFT);
+    setFormData(INITIAL_FORM_DATA);
+    setHasDraft(false);
+    setShowDraftModal(false);
+    setPendingDraftData(null);
+  };
 
   useEffect(() => {
     const category = formData.property_category;
@@ -309,7 +335,7 @@ export default function AddProperty() {
       setSuccess(true);
       setTimeout(() => {
         navigate('/dashboard/proprietaire');
-      }, 2000);
+      }, 3000);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Erreur lors de l\'ajout de la propriété';
       setError(message);
@@ -321,16 +347,30 @@ export default function AddProperty() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md text-center shadow-card">
-          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-green-200">
-            <Home className="h-10 w-10 text-green-600" />
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-neutral-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-10 max-w-md text-center shadow-xl animate-fade-in">
+          {/* Animated success icon */}
+          <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce">
+            <Check className="h-12 w-12 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-neutral-900 mb-3">Propriété ajoutée!</h2>
-          <p className="text-neutral-600 mb-6 text-lg">
-            Votre propriété a été publiée avec succès et est maintenant visible par les locataires.
+          
+          <h2 className="text-3xl font-bold text-neutral-900 mb-3">
+            🎉 Félicitations !
+          </h2>
+          <p className="text-xl text-neutral-700 mb-2">
+            Propriété publiée avec succès
           </p>
-          <p className="text-sm text-primary-500 font-medium">Redirection en cours...</p>
+          <p className="text-neutral-500 mb-6">
+            Votre annonce est maintenant visible par tous les locataires sur Mon Toit.
+          </p>
+          
+          {/* Animated redirect indicator */}
+          <div className="flex items-center justify-center gap-2 text-primary-500">
+            <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-2 h-2 bg-primary-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            <span className="ml-2 font-medium">Redirection vers votre dashboard...</span>
+          </div>
         </div>
       </div>
     );
@@ -796,6 +836,53 @@ export default function AddProperty() {
           </form>
         </div>
       </div>
+
+      {/* Draft confirmation modal */}
+      <Modal
+        isOpen={showDraftModal}
+        onClose={() => {}}
+        title=""
+        size="sm"
+        closeOnOverlayClick={false}
+        showCloseButton={false}
+      >
+        <div className="text-center py-4">
+          {/* File icon with animation */}
+          <div className="w-24 h-24 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <FileText className="h-12 w-12 text-primary-600 animate-pulse" />
+          </div>
+          
+          <h3 className="text-xl font-bold text-neutral-900 mb-2">
+            📝 Brouillon trouvé !
+          </h3>
+          
+          <p className="text-neutral-600 mb-4">
+            Vous avez un brouillon non terminé pour cette propriété.
+          </p>
+          
+          {pendingDraftData?.title && (
+            <div className="bg-neutral-50 p-4 rounded-xl mb-6 text-left">
+              <p className="text-xs text-neutral-500 uppercase tracking-wide mb-1">Titre sauvegardé</p>
+              <p className="text-neutral-800 font-medium truncate">{pendingDraftData.title}</p>
+            </div>
+          )}
+          
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={handleStartFresh}
+              className="flex-1 px-4 py-3 border border-neutral-300 rounded-xl text-neutral-700 hover:bg-neutral-50 transition-colors font-medium"
+            >
+              Recommencer à zéro
+            </button>
+            <button
+              onClick={handleContinueDraft}
+              className="flex-1 px-4 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors font-medium"
+            >
+              Continuer le brouillon
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
