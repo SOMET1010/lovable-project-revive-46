@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Send, User, Phone, MessageSquare, CheckCircle, Shield, Clock, Award } from 'lucide-react';
 import { toast } from 'sonner';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 interface ContactFormData {
   name: string;
@@ -20,6 +21,9 @@ export default function CTASection() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  
+  // Scroll animations
+  const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.15 });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +56,7 @@ export default function CTASection() {
 
   return (
     <section 
+      ref={sectionRef}
       className="py-20 md:py-28 relative overflow-hidden"
       style={{ 
         background: 'linear-gradient(135deg, #F8E8D8 0%, #FFFFFF 50%, rgba(241, 101, 34, 0.05) 100%)'
@@ -69,8 +74,12 @@ export default function CTASection() {
       
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
-          {/* Left Side - Agent Photo */}
-          <div className="relative order-2 lg:order-1">
+          {/* Left Side - Agent Photo - Animation slideLeft */}
+          <div 
+            className={`relative order-2 lg:order-1 transition-all duration-700 ease-out ${
+              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-12'
+            }`}
+          >
             {/* Agent Photo Container */}
             <div className="relative max-w-lg mx-auto lg:mx-0">
               <div 
@@ -96,9 +105,11 @@ export default function CTASection() {
                 />
               </div>
               
-              {/* Floating Badge */}
+              {/* Floating Badge - Animation delay */}
               <div 
-                className="absolute -bottom-6 -right-6 lg:-right-10 flex items-center gap-4 p-5"
+                className={`absolute -bottom-6 -right-6 lg:-right-10 flex items-center gap-4 p-5 transition-all duration-700 ease-out delay-300 ${
+                  isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+                }`}
                 style={{ 
                   backgroundColor: '#FFFFFF',
                   borderRadius: '22px',
@@ -125,7 +136,7 @@ export default function CTASection() {
                 </div>
               </div>
 
-              {/* Trust Points - Mobile only */}
+              {/* Trust Points - Mobile only - Animation stagger */}
               <div className="mt-16 grid grid-cols-3 gap-4 lg:hidden">
                 {[
                   { icon: Shield, label: '100% gratuit' },
@@ -134,7 +145,10 @@ export default function CTASection() {
                 ].map((item, index) => (
                   <div 
                     key={index} 
-                    className="flex flex-col items-center gap-2 text-center"
+                    className={`flex flex-col items-center gap-2 text-center transition-all duration-500 ${
+                      isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}
+                    style={{ transitionDelay: isVisible ? `${400 + index * 100}ms` : '0ms' }}
                   >
                     <div 
                       className="w-10 h-10 rounded-full flex items-center justify-center"
@@ -151,50 +165,70 @@ export default function CTASection() {
             </div>
           </div>
 
-          {/* Right Side - Form */}
-          <div className="order-1 lg:order-2">
+          {/* Right Side - Form - Animation slideRight */}
+          <div 
+            className={`order-1 lg:order-2 transition-all duration-700 ease-out delay-100 ${
+              isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-12'
+            }`}
+          >
             {/* Header */}
             <div className="mb-10">
               <span 
-                className="inline-block px-6 py-2.5 text-sm font-semibold mb-6"
+                className={`inline-block px-6 py-2.5 text-sm font-semibold mb-6 transition-all duration-500 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
                 style={{ 
                   backgroundColor: 'rgba(241, 101, 34, 0.1)',
                   color: '#F16522',
-                  borderRadius: '22px'
+                  borderRadius: '22px',
+                  transitionDelay: isVisible ? '200ms' : '0ms'
                 }}
               >
                 Accompagnement personnalisé
               </span>
               <h2 
-                className="font-bold mb-5"
+                className={`font-bold mb-5 transition-all duration-700 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                }`}
                 style={{ 
                   fontSize: 'clamp(28px, 4vw, 44px)',
                   color: '#523628',
                   letterSpacing: '-0.02em',
-                  lineHeight: 1.2
+                  lineHeight: 1.2,
+                  transitionDelay: isVisible ? '250ms' : '0ms'
                 }}
               >
                 Votre Projet Mérite un Accompagnement d'Exception
               </h2>
               <p 
+                className={`transition-all duration-700 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+                }`}
                 style={{ 
                   fontSize: '18px',
                   lineHeight: '1.7',
-                  color: '#737373'
+                  color: '#737373',
+                  transitionDelay: isVisible ? '300ms' : '0ms'
                 }}
               >
                 Laissez nos experts vous trouver la perle rare. C'est gratuit, rapide et sans engagement.
               </p>
             </div>
 
-            {/* Trust Points - Desktop only */}
+            {/* Trust Points - Desktop only - Animation stagger */}
             <div className="hidden lg:flex gap-6 mb-10">
               {[
                 { icon: Shield, label: 'Service 100% gratuit' },
                 { icon: Clock, label: 'Réponse sous 24h' },
                 { icon: CheckCircle, label: 'Sans engagement' }
               ].map((item, index) => (
-                <div key={index} className="flex items-center gap-2">
+                <div 
+                  key={index} 
+                  className={`flex items-center gap-2 transition-all duration-500 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`}
+                  style={{ transitionDelay: isVisible ? `${350 + index * 100}ms` : '0ms' }}
+                >
                   <div 
                     className="w-10 h-10 rounded-full flex items-center justify-center"
                     style={{ backgroundColor: 'rgba(46, 75, 62, 0.1)' }}
@@ -208,9 +242,11 @@ export default function CTASection() {
               ))}
             </div>
 
-            {/* Form Card */}
+            {/* Form Card - Animation scaleIn */}
             <div 
-              className="p-8 md:p-10"
+              className={`p-8 md:p-10 transition-all duration-700 ease-out delay-500 ${
+                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              }`}
               style={{ 
                 backgroundColor: '#FFFFFF',
                 borderRadius: '22px',

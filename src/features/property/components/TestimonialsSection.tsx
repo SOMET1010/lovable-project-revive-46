@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Star, ChevronLeft, ChevronRight, Quote } from 'lucide-react';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 interface Testimonial {
   id: number;
@@ -78,6 +79,9 @@ function TrustScoreBadge({ score }: { score: number }) {
 export default function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  
+  // Scroll animations
+  const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
 
   // Auto-play
   useEffect(() => {
@@ -110,12 +114,17 @@ export default function TestimonialsSection() {
 
   return (
     <section 
+      ref={sectionRef}
       className="py-20 md:py-28 overflow-hidden"
       style={{ backgroundColor: '#FAFAFA' }}
     >
       <div className="container mx-auto px-4 md:px-6">
-        {/* Header */}
-        <div className="text-center mb-16">
+        {/* Header - Animation fadeUp */}
+        <div 
+          className={`text-center mb-16 transition-all duration-700 ease-out ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <span 
             className="inline-block px-6 py-2.5 text-sm font-semibold mb-6"
             style={{ 
@@ -148,9 +157,11 @@ export default function TestimonialsSection() {
           </p>
         </div>
 
-        {/* Carousel Container */}
+        {/* Carousel Container - Animation scaleIn */}
         <div 
-          className="relative max-w-6xl mx-auto"
+          className={`relative max-w-6xl mx-auto transition-all duration-700 ease-out delay-200 ${
+            isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
           onMouseEnter={() => setIsAutoPlaying(false)}
           onMouseLeave={() => setIsAutoPlaying(true)}
         >
@@ -183,15 +194,20 @@ export default function TestimonialsSection() {
             <ChevronRight className="w-6 h-6" style={{ color: '#523628' }} />
           </button>
 
-          {/* Cards Grid */}
+          {/* Cards Grid - Stagger animation */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-0 md:px-8">
             {getVisibleTestimonials().map((testimonial, idx) => (
               <div
                 key={`${testimonial.id}-${idx}`}
-                className="relative transition-all duration-500"
+                className={`relative transition-all duration-500 ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
                 style={{
-                  opacity: idx === 1 ? 1 : 0.7,
-                  transform: idx === 1 ? 'scale(1.02)' : 'scale(0.98)'
+                  opacity: isVisible ? (idx === 1 ? 1 : 0.7) : 0,
+                  transform: isVisible 
+                    ? `scale(${idx === 1 ? 1.02 : 0.98}) translateY(0)` 
+                    : 'scale(0.98) translateY(32px)',
+                  transitionDelay: isVisible ? `${300 + idx * 150}ms` : '0ms'
                 }}
               >
                 <div
@@ -294,9 +310,11 @@ export default function TestimonialsSection() {
           </div>
         </div>
 
-        {/* Stats Bar */}
+        {/* Stats Bar - Animation fadeUp with stagger */}
         <div 
-          className="mt-20 max-w-4xl mx-auto py-10 px-8"
+          className={`mt-20 max-w-4xl mx-auto py-10 px-8 transition-all duration-700 ease-out delay-500 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
           style={{ 
             backgroundColor: '#FFFFFF',
             borderRadius: '22px',
@@ -310,7 +328,13 @@ export default function TestimonialsSection() {
               { value: '48h', label: 'Délai moyen de location' },
               { value: '500+', label: 'Propriétaires partenaires' }
             ].map((stat, index) => (
-              <div key={index}>
+              <div 
+                key={index}
+                className={`transition-all duration-700 ease-out ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
+                style={{ transitionDelay: isVisible ? `${600 + index * 100}ms` : '0ms' }}
+              >
                 <p 
                   className="font-bold mb-1"
                   style={{ 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, Home, Users, Gem, GraduationCap, Building } from 'lucide-react';
+import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
 
 interface HeroPremiumProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;
@@ -100,6 +101,9 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
   const [currentPlaceholder, setCurrentPlaceholder] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  
+  // Scroll animations
+  const { ref: heroRef, isVisible: heroVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
 
   // Auto-play slideshow (6 secondes par slide)
   useEffect(() => {
@@ -153,6 +157,7 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
 
   return (
     <section 
+      ref={heroRef}
       className="relative min-h-[90vh] flex items-center justify-center overflow-hidden"
       style={{ backgroundColor: '#1a1a1a' }}
       onMouseEnter={() => setIsPaused(true)}
@@ -177,8 +182,12 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-20">
-        {/* Badge Certifié */}
-        <div className="flex justify-center mb-8">
+        {/* Badge Certifié - Animation fadeUp */}
+        <div 
+          className={`flex justify-center mb-8 transition-all duration-700 ease-out ${
+            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <span 
             className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold backdrop-blur-xl shadow-2xl"
             style={{ 
@@ -196,8 +205,12 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
           </span>
         </div>
 
-        {/* Dynamic Title - synchronized with current slide */}
-        <div className="text-center mb-10">
+        {/* Dynamic Title - synchronized with current slide - Animation fadeUp delay 200ms */}
+        <div 
+          className={`text-center mb-10 transition-all duration-700 ease-out delay-100 ${
+            heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}
+        >
           <h1 
             className="font-bold mb-5 leading-tight drop-shadow-2xl transition-all duration-700"
             style={{ 
@@ -221,10 +234,12 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
           </p>
         </div>
 
-        {/* Search Form - Airbnb Style avec design organique */}
+        {/* Search Form - Airbnb Style avec design organique - Animation scaleIn delay 400ms */}
         <form 
           onSubmit={handleSearch}
-          className="max-w-3xl mx-auto mb-8"
+          className={`max-w-3xl mx-auto mb-8 transition-all duration-700 ease-out delay-200 ${
+            heroVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}
         >
           <div 
             className="flex flex-col sm:flex-row items-stretch backdrop-blur-xl shadow-2xl overflow-hidden"
@@ -277,9 +292,9 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
           </div>
         </form>
 
-        {/* Quick Filters - Icônes interactives */}
+        {/* Quick Filters - Icônes interactives - Animation fadeUp stagger */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
-          {QUICK_FILTERS.map((filter) => {
+          {QUICK_FILTERS.map((filter, index) => {
             const Icon = filter.icon;
             const isActive = activeFilter === filter.id;
             return (
@@ -287,15 +302,16 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
                 key={filter.id}
                 type="button"
                 onClick={() => handleFilterClick(filter.id)}
-                className={`group flex items-center gap-2 px-5 py-3 font-medium transition-all duration-300 hover:scale-105 ${
+                className={`group flex items-center gap-2 px-5 py-3 font-medium transition-all duration-500 hover:scale-105 ${
                   isActive ? 'ring-2 ring-white/50' : ''
-                }`}
+                } ${heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
                 style={{ 
                   backgroundColor: isActive ? 'rgba(241, 101, 34, 0.9)' : 'rgba(255, 255, 255, 0.15)',
                   color: '#FFFFFF',
                   borderRadius: '16px',
                   backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)'
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  transitionDelay: heroVisible ? `${300 + index * 100}ms` : '0ms'
                 }}
               >
                 <div 
@@ -309,14 +325,20 @@ export default function HeroPremium({ onSearch }: HeroPremiumProps) {
           })}
         </div>
 
-        {/* Stats rapides */}
+        {/* Stats rapides - Animation fadeUp stagger */}
         <div className="flex flex-wrap items-center justify-center gap-8 text-center">
           {[
             { value: '2,500+', label: 'Locataires satisfaits' },
             { value: '500+', label: 'Propriétés vérifiées' },
             { value: '48h', label: 'Délai moyen' }
           ].map((stat, index) => (
-            <div key={index} className="px-4">
+            <div 
+              key={index} 
+              className={`px-4 transition-all duration-700 ease-out ${
+                heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+              }`}
+              style={{ transitionDelay: heroVisible ? `${500 + index * 100}ms` : '0ms' }}
+            >
               <p 
                 className="text-2xl sm:text-3xl font-bold"
                 style={{ color: '#F16522' }}
