@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useMapboxToken } from '@/shared/hooks/useMapboxToken';
+import { Loader2, MapPin } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -54,8 +56,8 @@ export default function MapboxMap({
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
   const [mapLoaded, setMapLoaded] = useState(false);
-
-  const MAPBOX_TOKEN = import.meta.env['VITE_MAPBOX_PUBLIC_TOKEN'] || 'pk.eyJ1IjoicHNvbWV0IiwiYSI6ImNtYTgwZ2xmMzEzdWcyaXM2ZG45d3A4NmEifQ.MYXzdc5CREmcvtBLvfV0Lg';
+  
+  const { token: mapboxToken, isLoading: tokenLoading, error: tokenError } = useMapboxToken();
 
   const getMarkerColor = (property: Property) => {
     if (property.status === 'disponible') return '#10B981';
@@ -65,9 +67,9 @@ export default function MapboxMap({
   };
 
   useEffect(() => {
-    if (!mapContainer.current || map.current) return;
+    if (!mapContainer.current || map.current || !mapboxToken) return;
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    mapboxgl.accessToken = mapboxToken;
 
     try {
       map.current = new mapboxgl.Map({
@@ -118,7 +120,7 @@ export default function MapboxMap({
         map.current = null;
       }
     };
-  }, []);
+  }, [mapboxToken]);
 
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
@@ -313,6 +315,36 @@ export default function MapboxMap({
       }
     });
   }, [highlightedPropertyId]);
+
+  // Loading state
+  if (tokenLoading) {
+    return (
+      <div 
+        style={{ width: '100%', height }} 
+        className="rounded-lg overflow-hidden bg-muted flex items-center justify-center"
+      >
+        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span className="text-sm">Chargement de la carte...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (tokenError || !mapboxToken) {
+    return (
+      <div 
+        style={{ width: '100%', height }} 
+        className="rounded-lg overflow-hidden bg-muted flex items-center justify-center"
+      >
+        <div className="flex flex-col items-center gap-2 text-muted-foreground">
+          <MapPin className="h-8 w-8" />
+          <span className="text-sm">Carte non disponible</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
