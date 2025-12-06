@@ -58,37 +58,40 @@ export default function HeaderPremium() {
       <header 
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out motion-reduce:transition-none ${
           scrolled 
-            ? 'bg-white shadow-md border-b border-neutral-200 backdrop-blur-md' 
-            : 'bg-white/95 border-b border-neutral-100'
+            ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-[#EFEBE9]' 
+            : 'bg-white border-b border-[#EFEBE9]'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3 group">
-              <img
-                src="/logo-montoit.png"
-                alt="Mon Toit"
-                className="h-10 w-10 object-contain transition-transform duration-300 ease-out group-hover:scale-110 group-hover:rotate-3 motion-reduce:transform-none"
-              />
+            
+            {/* Logo Premium */}
+            <Link to="/" className="flex items-center gap-3 group">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#F16522] to-[#D95318] rounded-xl flex items-center justify-center text-white shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
+                <Home className="w-6 h-6 fill-current" />
+              </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-neutral-900 transition-colors duration-200 group-hover:text-primary-500">Mon Toit</span>
+                <span className="text-xl font-extrabold text-[#2C1810] leading-none tracking-tight group-hover:text-[#F16522] transition-colors">
+                  Mon Toit
+                </span>
                 {!isMobile && (
-                  <span className="text-xs text-neutral-500 font-medium">Plateforme Immobilière</span>
+                  <span className="text-[10px] font-bold text-[#A69B95] uppercase tracking-wider">
+                    Immobilier Certifié
+                  </span>
                 )}
               </div>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
+            <nav className="hidden md:flex items-center gap-8">
               <Link
                 to="/"
-                className={`font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none ${
-                  isActive('/') ? 'text-primary-500' : 'text-neutral-700 hover:text-primary-500'
+                className={`relative py-2 text-sm font-bold transition-colors group ${
+                  isActive('/') ? 'text-[#F16522]' : 'text-[#6B5A4E] hover:text-[#2C1810]'
                 }`}
               >
                 Accueil
-                <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform origin-left transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                <span className={`absolute bottom-0 left-0 w-full h-[3px] bg-[#F16522] rounded-full transform origin-left transition-transform duration-300 ease-out ${
                   isActive('/') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                 }`} />
               </Link>
@@ -97,14 +100,14 @@ export default function HeaderPremium() {
                 <Link
                   key={item.label}
                   to={item.href}
-                  className={`font-medium transition-all duration-200 relative group py-2 hover:-translate-y-0.5 motion-reduce:transform-none ${
-                    isActive(item.href) ? 'text-primary-500' : 'text-neutral-700 hover:text-primary-500'
+                  className={`relative py-2 text-sm font-bold transition-colors group ${
+                    isActive(item.href) ? 'text-[#F16522]' : 'text-[#6B5A4E] hover:text-[#2C1810]'
                   }`}
                 >
                   <span className="flex items-center gap-1">
                     {item.label}
                   </span>
-                  <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transform origin-left transition-transform duration-300 ease-out motion-reduce:transition-none ${
+                  <span className={`absolute bottom-0 left-0 w-full h-[3px] bg-[#F16522] rounded-full transform origin-left transition-transform duration-300 ease-out ${
                     isActive(item.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
                   }`} />
                 </Link>
@@ -112,17 +115,17 @@ export default function HeaderPremium() {
             </nav>
 
             {/* Desktop Actions */}
-            <div className="hidden md:flex items-center space-x-3">
+            <div className="hidden md:flex items-center gap-4">
               {/* Message Badge - WhatsApp Style */}
               {user && (
                 <Link
                   to="/messages"
-                  className={`relative p-2 rounded-lg transition-all duration-200 hover:bg-neutral-100 ${
-                    isActive('/messages') ? 'bg-neutral-100' : ''
+                  className={`relative p-2.5 rounded-full transition-all duration-200 hover:bg-[#F5E6D3]/50 ${
+                    isActive('/messages') ? 'bg-[#F5E6D3]/50' : ''
                   }`}
                   aria-label={`Messages${unreadCount > 0 ? `, ${unreadCount} non lus` : ''}`}
                 >
-                  <MessageCircle className={`h-6 w-6 ${isActive('/messages') ? 'text-primary-500' : 'text-neutral-600'}`} />
+                  <MessageCircle className={`h-5 w-5 ${isActive('/messages') ? 'text-[#F16522]' : 'text-[#6B5A4E]'}`} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-[#25D366] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md whatsapp-badge-pulse">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -136,28 +139,28 @@ export default function HeaderPremium() {
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
                     onBlur={() => setTimeout(() => setShowUserMenu(false), 200)}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 transition-all duration-200 motion-reduce:transform-none"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#F16522] text-white font-bold hover:bg-[#D95318] shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                   >
                     <User className="h-4 w-4" />
                     <span>Mon Compte</span>
                   </button>
 
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-neutral-200 py-2 z-50 animate-fade-in">
-                      <div className="px-4 py-3 border-b border-neutral-100">
-                        <p className="text-sm font-semibold text-neutral-900 truncate">
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-[0_20px_40px_rgba(44,24,16,0.1)] border border-[#EFEBE9] py-2 z-50 animate-fade-in">
+                      <div className="px-4 py-3 border-b border-[#EFEBE9]">
+                        <p className="text-sm font-semibold text-[#2C1810] truncate">
                           {profile?.full_name || 'Utilisateur'}
                         </p>
-                        <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+                        <p className="text-xs text-[#A69B95] truncate">{user.email}</p>
                       </div>
 
                       {userMenuItems.map((item) => (
                         <Link
                           key={item.label}
                           to={item.href}
-                          className="flex items-center justify-between px-4 py-2.5 text-sm text-neutral-700 hover:bg-neutral-50 hover:text-primary-500 transition-colors duration-150"
+                          className="flex items-center justify-between px-4 py-2.5 text-sm text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522] transition-colors duration-150"
                         >
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center gap-3">
                             <item.icon className="h-4 w-4" />
                             <span>{item.label}</span>
                           </div>
@@ -169,10 +172,10 @@ export default function HeaderPremium() {
                         </Link>
                       ))}
 
-                      <div className="border-t border-neutral-100 mt-2 pt-2">
+                      <div className="border-t border-[#EFEBE9] mt-2 pt-2">
                         <button
                           onClick={handleSignOut}
-                          className="flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 w-full"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 w-full"
                         >
                           <LogOut className="h-4 w-4" />
                           <span>Déconnexion</span>
@@ -182,16 +185,16 @@ export default function HeaderPremium() {
                   )}
                 </div>
               ) : (
-              <>
+                <>
                   <Link 
                     to="/connexion" 
-                    className="px-4 py-2 rounded-lg border border-neutral-300 text-neutral-700 font-medium hover:border-neutral-400 hover:bg-neutral-50 hover:-translate-y-0.5 transition-all duration-200 motion-reduce:transform-none"
+                    className="px-5 py-2.5 rounded-full border border-[#EFEBE9] text-[#6B5A4E] font-bold hover:border-[#F16522] hover:text-[#F16522] hover:-translate-y-0.5 transition-all duration-200"
                   >
                     Connexion
                   </Link>
                   <Link 
                     to="/inscription" 
-                    className="px-5 py-2 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 transition-all duration-200 motion-reduce:transform-none"
+                    className="px-6 py-2.5 rounded-full bg-[#F16522] text-white font-bold hover:bg-[#D95318] shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                   >
                     Inscription
                   </Link>
@@ -202,7 +205,7 @@ export default function HeaderPremium() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 rounded-lg text-neutral-700 hover:bg-neutral-100 transition-colors duration-200"
+              className="md:hidden p-2 rounded-lg text-[#2C1810] hover:bg-[#FAF7F4] transition-colors duration-200"
             >
               {showMobileMenu ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -216,14 +219,14 @@ export default function HeaderPremium() {
       {/* Mobile Menu Overlay */}
       {showMobileMenu && (
         <div 
-          className="fixed inset-0 bg-black/20 z-40 md:hidden"
+          className="fixed inset-0 bg-[#2C1810]/20 z-40 md:hidden"
           onClick={() => setShowMobileMenu(false)}
         />
       )}
 
       {/* Mobile Menu Drawer */}
       <div 
-        className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 transform transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 transform transition-transform duration-300 ease-out md:hidden shadow-[0_0_60px_rgba(44,24,16,0.15)] ${
           showMobileMenu ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -231,18 +234,18 @@ export default function HeaderPremium() {
           <div className="flex justify-end">
             <button
               onClick={() => setShowMobileMenu(false)}
-              className="p-2 rounded-lg text-neutral-500 hover:bg-neutral-100 transition-colors"
+              className="p-2 rounded-lg text-[#A69B95] hover:bg-[#FAF7F4] transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {user && (
-            <div className="pb-4 border-b border-neutral-200">
-              <p className="text-sm font-semibold text-neutral-900 truncate">
+            <div className="pb-4 border-b border-[#EFEBE9]">
+              <p className="text-sm font-semibold text-[#2C1810] truncate">
                 {profile?.full_name || 'Utilisateur'}
               </p>
-              <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+              <p className="text-xs text-[#A69B95] truncate">{user.email}</p>
             </div>
           )}
 
@@ -250,10 +253,10 @@ export default function HeaderPremium() {
             <Link
               to="/"
               onClick={() => setShowMobileMenu(false)}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-r-lg transition-colors ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
                 isActive('/') 
-                  ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-500' 
-                  : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-500'
+                  ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                  : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
               }`}
             >
               <Home className="h-5 w-5" />
@@ -265,10 +268,10 @@ export default function HeaderPremium() {
                 key={item.label}
                 to={item.href}
                 onClick={() => setShowMobileMenu(false)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-r-lg transition-colors ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
                   isActive(item.href) 
-                    ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-500' 
-                    : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-500'
+                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                    : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                 }`}
               >
                 <item.icon className="h-5 w-5" />
@@ -283,11 +286,11 @@ export default function HeaderPremium() {
                 onClick={() => setShowMobileMenu(false)}
                 className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
                   isActive(item.href) 
-                    ? 'bg-primary-50 text-primary-600 border-l-4 border-primary-500' 
-                    : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-500'
+                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                    : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                 }`}
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <item.icon className="h-5 w-5" />
                   <span className="font-medium">{item.label}</span>
                 </div>
@@ -300,14 +303,14 @@ export default function HeaderPremium() {
             ))}
           </nav>
 
-          <div className="pt-4 border-t border-neutral-200 space-y-3">
+          <div className="pt-4 border-t border-[#EFEBE9] space-y-3">
             {user ? (
               <button
                 onClick={() => {
                   handleSignOut();
                   setShowMobileMenu(false);
                 }}
-                className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg text-red-600 border border-red-200 hover:bg-red-50 transition-colors font-medium"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl text-red-600 border border-red-200 hover:bg-red-50 transition-colors font-medium"
               >
                 <LogOut className="h-5 w-5" />
                 <span>Déconnexion</span>
@@ -317,14 +320,14 @@ export default function HeaderPremium() {
                 <Link
                   to="/connexion"
                   onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center justify-center w-full px-4 py-3 rounded-lg text-neutral-700 border border-neutral-300 hover:bg-neutral-50 transition-colors font-medium"
+                  className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-[#6B5A4E] border border-[#EFEBE9] hover:border-[#F16522] hover:text-[#F16522] transition-colors font-medium"
                 >
                   Connexion
                 </Link>
                 <Link
                   to="/inscription"
                   onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center justify-center w-full px-4 py-3 rounded-lg bg-primary-500 text-white hover:bg-primary-600 transition-colors font-medium"
+                  className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors font-medium shadow-lg shadow-orange-500/20"
                 >
                   Inscription
                 </Link>

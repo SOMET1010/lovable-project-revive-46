@@ -1,4 +1,4 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CONTACT } from '@/shared/constants/contact';
@@ -15,73 +15,65 @@ export default function FooterPremium() {
   };
 
   return (
-    <footer className="bg-neutral-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+    <footer className="relative bg-[#2C1810] text-[#E8D4C5] overflow-hidden pt-20 pb-10">
+      
+      {/* Texture de fond Premium */}
+      <div className="absolute inset-0 opacity-[0.03] bg-[url('/images/pattern-topo.svg')] bg-repeat pointer-events-none" />
+      
+      {/* Lueur d'ambiance Orange */}
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#F16522]/10 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Grille 4 colonnes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+          
           {/* Logo & Description */}
-          <div>
-            <div className="flex items-center space-x-3 mb-6">
-              <img
-                src="/logo-montoit.png"
-                alt="Mon Toit Logo"
-                className="h-10 w-10 object-contain"
-              />
-              <span className="text-xl font-bold text-white">Mon Toit</span>
-            </div>
-            <p className="text-sm text-neutral-400 leading-relaxed mb-6">
-              Plateforme immobilière certifiée pour un accès universel au logement en Côte d'Ivoire.
+          <div className="space-y-6">
+            <Link to="/" className="inline-block">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#F16522]">
+                    <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                </div>
+                <span className="text-2xl font-bold text-white tracking-tight">Mon Toit</span>
+              </div>
+            </Link>
+            <p className="text-[#E8D4C5]/70 text-sm leading-relaxed max-w-xs">
+              La première plateforme immobilière certifiée en Côte d'Ivoire. 
+              Accès universel, transparent et sécurisé au logement.
             </p>
             
-            {/* Social Icons Simple */}
-            <div className="flex items-center space-x-3">
-              <a 
-                href="https://facebook.com" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
-                aria-label="Facebook"
-              >
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a 
-                href="https://twitter.com" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
-                aria-label="Twitter"
-              >
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a 
-                href="https://instagram.com" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
-                aria-label="Instagram"
-              >
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-400 hover:bg-primary-500 hover:text-white transition-colors duration-200"
-                aria-label="LinkedIn"
-              >
-                <Linkedin className="h-5 w-5" />
-              </a>
+            {/* Réseaux Sociaux */}
+            <div className="flex gap-4">
+              {[
+                { Icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
+                { Icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
+                { Icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
+                { Icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
+              ].map(({ Icon, href, label }) => (
+                <a 
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#F16522] transition-all duration-300 border border-white/10 hover:border-[#F16522] group"
+                  aria-label={label}
+                >
+                  <Icon className="w-4 h-4 text-[#E8D4C5] group-hover:text-white transition-colors" />
+                </a>
+              ))}
             </div>
           </div>
 
           {/* Liens rapides */}
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
-              Liens rapides
-            </h3>
-            <ul className="space-y-3">
+            <h3 className="text-white font-bold text-lg mb-6">Liens Rapides</h3>
+            <ul className="space-y-4">
               {[
                 { label: 'Accueil', href: '/' },
-                { label: 'Rechercher', href: '/recherche' },
+                { label: 'Rechercher un bien', href: '/recherche' },
                 { label: 'À propos', href: '/a-propos' },
                 { label: 'Comment ça marche', href: '/comment-ca-marche' },
                 { label: 'Contact', href: '/contact' },
@@ -89,9 +81,10 @@ export default function FooterPremium() {
                 <li key={link.label}>
                   <Link 
                     to={link.href} 
-                    className="text-sm text-neutral-400 hover:text-primary-500 transition-colors duration-200"
+                    className="text-[#E8D4C5]/70 hover:text-[#F16522] transition-colors text-sm flex items-center gap-2 group"
                   >
-                    {link.label}
+                    <span className="w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-[#F16522] transition-all duration-300" />
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">{link.label}</span>
                   </Link>
                 </li>
               ))}
@@ -100,10 +93,8 @@ export default function FooterPremium() {
 
           {/* Légal */}
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
-              Légal
-            </h3>
-            <ul className="space-y-3">
+            <h3 className="text-white font-bold text-lg mb-6">Légal</h3>
+            <ul className="space-y-4">
               {[
                 { label: "Conditions d'utilisation", href: '/conditions-utilisation' },
                 { label: 'Politique de confidentialité', href: '/politique-confidentialite' },
@@ -113,7 +104,7 @@ export default function FooterPremium() {
                 <li key={link.label}>
                   <Link 
                     to={link.href} 
-                    className="text-sm text-neutral-400 hover:text-primary-500 transition-colors duration-200"
+                    className="text-[#E8D4C5]/70 hover:text-[#F16522] transition-colors text-sm"
                   >
                     {link.label}
                   </Link>
@@ -124,94 +115,92 @@ export default function FooterPremium() {
 
           {/* Newsletter & Contact */}
           <div>
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
-              Newsletter
-            </h3>
-            <p className="text-sm text-neutral-400 mb-4">
-              Recevez nos dernières offres et actualités
+            <h3 className="text-white font-bold text-lg mb-6">Restez informé</h3>
+            <p className="text-[#E8D4C5]/70 text-sm mb-4">
+              Recevez nos dernières offres exclusives.
             </p>
             
-            <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="votre@email.com"
-                required
-                className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-colors duration-200"
-              />
+            {/* Input Newsletter Premium */}
+            <form onSubmit={handleNewsletterSubmit} className="space-y-3 mb-8">
+              <div className="relative">
+                <Mail className="absolute left-4 top-3.5 w-4 h-4 text-[#E8D4C5]/50" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="votre@email.com"
+                  required
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder:text-[#E8D4C5]/30 focus:outline-none focus:border-[#F16522] focus:ring-1 focus:ring-[#F16522] transition-all"
+                />
+              </div>
               <button
                 type="submit"
-                className={`w-full px-4 py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-all duration-200 ${
+                className={`w-full rounded-xl py-3 font-semibold flex items-center justify-center gap-2 transition-all duration-300 group ${
                   subscribed 
                     ? 'bg-green-500 text-white' 
-                    : 'bg-primary-500 text-white hover:bg-primary-600'
+                    : 'bg-[#F16522] hover:bg-[#d95a1d] text-white shadow-lg shadow-[#F16522]/20 hover:shadow-[#F16522]/40'
                 }`}
               >
-                <Send className="h-4 w-4" />
                 <span>{subscribed ? 'Inscrit !' : "S'inscrire"}</span>
+                {!subscribed && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
               </button>
             </form>
 
-            {/* Contact Info */}
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center space-x-3 text-sm">
-                <Phone className="h-4 w-4 text-primary-500 flex-shrink-0" />
-                <a 
-                  href={`tel:${CONTACT.PHONE}`}
-                  className="text-neutral-400 hover:text-primary-500 transition-colors"
-                >
-                  {CONTACT.PHONE_DISPLAY}
-                </a>
-              </div>
-              <div className="flex items-center space-x-3 text-sm">
-                <Mail className="h-4 w-4 text-primary-500 flex-shrink-0" />
-                <a 
-                  href={`mailto:${CONTACT.EMAIL}`}
-                  className="text-neutral-400 hover:text-primary-500 transition-colors"
-                >
-                  {CONTACT.EMAIL}
-                </a>
-              </div>
-              <div className="flex items-center space-x-3 text-sm">
-                <MapPin className="h-4 w-4 text-primary-500 flex-shrink-0" />
-                <span className="text-neutral-400">{CONTACT.ADDRESS}</span>
+            {/* Infos Contact */}
+            <div className="space-y-3 pt-6 border-t border-white/10">
+              <a 
+                href={`tel:${CONTACT.PHONE}`}
+                className="flex items-center gap-3 text-[#E8D4C5]/80 hover:text-white transition-colors text-sm"
+              >
+                <Phone className="w-4 h-4 text-[#F16522]" />
+                {CONTACT.PHONE_DISPLAY}
+              </a>
+              <a 
+                href={`mailto:${CONTACT.EMAIL}`}
+                className="flex items-center gap-3 text-[#E8D4C5]/80 hover:text-white transition-colors text-sm"
+              >
+                <Mail className="w-4 h-4 text-[#F16522]" />
+                {CONTACT.EMAIL}
+              </a>
+              <div className="flex items-center gap-3 text-[#E8D4C5]/80 text-sm">
+                <MapPin className="w-4 h-4 text-[#F16522]" />
+                {CONTACT.ADDRESS}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Separator */}
-        <div className="border-t border-neutral-800 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-sm text-neutral-500">
-              © {new Date().getFullYear()} Mon Toit. Tous droits réservés.
-            </p>
-            
-            <div className="flex items-center space-x-6">
-              {[
-                { label: 'Aide', href: '/aide' },
-                { label: 'FAQ', href: '/faq' },
-                { label: 'Blog', href: '/blog' },
-              ].map((link) => (
-                <Link 
-                  key={link.label}
-                  to={link.href} 
-                  className="text-sm text-neutral-500 hover:text-primary-500 transition-colors duration-200"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+        {/* Copyright */}
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#E8D4C5]/40">
+          <p>© {new Date().getFullYear()} Mon Toit. Tous droits réservés.</p>
+          
+          <div className="flex items-center gap-6">
+            {[
+              { label: 'Aide', href: '/aide' },
+              { label: 'FAQ', href: '/faq' },
+              { label: 'Blog', href: '/blog' },
+            ].map((link) => (
+              <Link 
+                key={link.label}
+                to={link.href} 
+                className="hover:text-[#F16522] transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
+        </div>
 
-          {/* Badge ANSUT Simple */}
-          <div className="mt-6 flex justify-center">
-            <div className="inline-flex items-center space-x-2 px-4 py-2 bg-neutral-800 rounded-full">
-              <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <span className="text-xs text-neutral-400">Certifié ANSUT</span>
-            </div>
+        {/* Badge Certifié */}
+        <div className="mt-6 flex flex-col md:flex-row justify-center items-center gap-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-xs text-[#E8D4C5]/70">Service Opérationnel</span>
           </div>
+          <span className="text-xs text-[#E8D4C5]/40">Fait avec ♥ à Abidjan</span>
         </div>
       </div>
     </footer>
