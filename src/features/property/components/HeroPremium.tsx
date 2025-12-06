@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, Home, ChevronDown, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Search, MapPin, Home, ChevronDown, ChevronLeft, ChevronRight, Sparkles, Star, User, BadgeCheck } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 
 interface HeroPremiumProps {
@@ -7,11 +7,19 @@ interface HeroPremiumProps {
   stats?: { propertiesCount: number };
 }
 
+interface Testimonial {
+  quote: string;
+  author: string;
+  role: string;
+  rating: number;
+}
+
 interface HeroSlide {
   image: string;
   title: string;
   highlight: string;
   description: string;
+  testimonial: Testimonial;
 }
 
 const heroSlides: HeroSlide[] = [
@@ -19,31 +27,61 @@ const heroSlides: HeroSlide[] = [
     image: '/images/hero-users/hero_users_1_young_couple.png',
     title: 'Leur premier nid,',
     highlight: 'trouvé en confiance',
-    description: 'Pour les jeunes couples qui construisent leur avenir'
+    description: 'Pour les jeunes couples qui construisent leur avenir',
+    testimonial: {
+      quote: "On a trouvé notre nid douillet en 2 semaines. Merci Mon Toit !",
+      author: "Awa & Koné",
+      role: "Jeune couple, Cocody",
+      rating: 5
+    }
   },
   {
     image: '/images/hero-users/hero_users_2_family_moving.png',
     title: "Plus d'espace pour",
     highlight: 'voir grandir la famille',
-    description: 'La sécurité et le confort pour ceux que vous aimez'
+    description: 'La sécurité et le confort pour ceux que vous aimez',
+    testimonial: {
+      quote: "Une villa parfaite pour nos 3 enfants. Simple et sécurisé !",
+      author: "Famille Traoré",
+      role: "Parents, Riviera Golf",
+      rating: 5
+    }
   },
   {
     image: '/images/hero-users/hero_users_3_young_professional.png',
     title: "L'indépendance a une",
     highlight: 'nouvelle adresse',
-    description: 'Pour les professionnels qui visent les sommets'
+    description: 'Pour les professionnels qui visent les sommets',
+    testimonial: {
+      quote: "Mon studio moderne près du bureau, sans tracas administratifs.",
+      author: "Mariam D.",
+      role: "Consultante, Plateau",
+      rating: 5
+    }
   },
   {
     image: '/images/hero-users/hero_users_4_students_roommates.png',
     title: 'La colocation parfaite,',
     highlight: 'sans les tracas',
-    description: 'Pour les étudiants qui veulent vivre leur meilleure vie'
+    description: 'Pour les étudiants qui veulent vivre leur meilleure vie',
+    testimonial: {
+      quote: "Colocation trouvée en 3 jours ! Les colocataires sont géniaux.",
+      author: "Yao & Amara",
+      role: "Étudiants, Yopougon",
+      rating: 5
+    }
   },
   {
     image: '/images/hero-users/hero_users_5_agent_showing.png',
     title: 'Un service humain,',
     highlight: 'une expertise locale',
-    description: 'Nos agents vous accompagnent à chaque étape'
+    description: 'Nos agents vous accompagnent à chaque étape',
+    testimonial: {
+      quote: "Mon Toit m'a permis de doubler mon portefeuille en 6 mois.",
+      author: "Moussa K.",
+      role: "Agent certifié, Abidjan",
+      rating: 5
+    }
   }
 ];
 
@@ -209,6 +247,56 @@ export default function HeroPremium({ onSearch, stats }: HeroPremiumProps) {
           >
             {heroSlides[currentSlide]?.description ?? ''}
           </p>
+        </div>
+
+        {/* Testimonial Badge - Synchronized with current slide */}
+        <div className="flex justify-center mb-6">
+          <div 
+            className={cn(
+              "relative max-w-md px-5 py-4 rounded-2xl transition-all duration-500",
+              "bg-white/10 backdrop-blur-md border border-white/20"
+            )}
+            style={{ 
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+              transform: isTransitioning ? 'translateY(10px) scale(0.95)' : 'translateY(0) scale(1)',
+              opacity: isTransitioning ? 0 : 1
+            }}
+          >
+            {/* Stars */}
+            <div className="flex items-center gap-1 mb-2">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={cn(
+                    "w-4 h-4",
+                    i < (heroSlides[currentSlide]?.testimonial.rating ?? 0)
+                      ? "text-yellow-400 fill-yellow-400" 
+                      : "text-white/30"
+                  )} 
+                />
+              ))}
+              <span className="ml-2 flex items-center gap-1 text-xs text-green-400">
+                <BadgeCheck className="w-3.5 h-3.5" />
+                Avis vérifié
+              </span>
+            </div>
+
+            {/* Quote */}
+            <p className="text-white font-medium italic text-sm leading-relaxed mb-3">
+              "{heroSlides[currentSlide]?.testimonial.quote ?? ''}"
+            </p>
+
+            {/* Author */}
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-primary/30 flex items-center justify-center border border-primary/40">
+                <User className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">{heroSlides[currentSlide]?.testimonial.author ?? ''}</p>
+                <p className="text-white/60 text-xs">{heroSlides[currentSlide]?.testimonial.role ?? ''}</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Slide Indicators */}
