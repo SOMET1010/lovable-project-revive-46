@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { detectCloudflareBlock, formatCloudflareError, getCloudflareUserMessage } from '../_shared/cloudflareDetector.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -6,6 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+const BREVO_WHATSAPP_ENDPOINT = "https://api.brevo.com/v3/whatsapp/sendMessage";
 interface WhatsAppBrevoRequest {
   phoneNumber: string;
   message: string;
@@ -102,11 +104,9 @@ Deno.serve(async (req: Request) => {
       brevoPayload.text = message;
     }
 
-    const brevoUrl = "https://api.brevo.com/v3/whatsapp/sendMessage";
+    console.log(`[WHATSAPP-BREVO] Calling ${BREVO_WHATSAPP_ENDPOINT}`);
 
-    console.log(`[WHATSAPP-BREVO] Calling ${brevoUrl}`);
-
-    const brevoResponse = await fetch(brevoUrl, {
+    const brevoResponse = await fetch(BREVO_WHATSAPP_ENDPOINT, {
       method: "POST",
       headers: {
         "api-key": brevoApiKey,
@@ -115,7 +115,44 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify(brevoPayload),
     });
 
-    const brevoResult = await brevoResponse.json();
+    // Get response as text first for Cloudflare detection
+    const responseText = await brevoResponse.text();
+    
+    // Detect Cloudflare block
+    const cfInfo = detectCloudflareBlock(brevoResponse.status, responseText);
+    
+    if (cfInfo.isCloudflareBlock) {
+      console.error(formatCloudflareError(cfInfo, BREVO_WHATSAPP_ENDPOINT));
+      
+      // Log Cloudflare block
+      await supabaseClient
+        .from("whatsapp_logs")
+        .insert({
+          phone: phoneNumber,
+          message: message || `Template: ${templateId}`,
+          provider: "brevo",
+          status: "failed",
+          error_message: `Cloudflare block - Ray ID: ${cfInfo.rayId || 'unknown'}`,
+        });
+      
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: getCloudflareUserMessage(cfInfo),
+          cloudflareBlock: true,
+          rayId: cfInfo.rayId,
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Parse JSON response
+    let brevoResult: { messageId?: string; id?: string; message?: string; error?: string };
+    try {
+      brevoResult = JSON.parse(responseText);
+    } catch {
+      brevoResult = { message: responseText.substring(0, 200) };
+    }
 
     console.log(`[WHATSAPP-BREVO] Response:`, JSON.stringify(brevoResult, null, 2));
 

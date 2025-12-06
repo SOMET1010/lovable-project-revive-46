@@ -1,143 +1,144 @@
-# Architecture SMS Brevo - Sécurisation par IP Whitelist
+# Sécurité Brevo - Diagnostic Cloudflare
 
-## Vue d'ensemble
-
-Ce document décrit l'architecture sécurisée pour l'envoi de SMS via Brevo dans l'application Mon Toit.
-
-## Architecture cible
+## Architecture Actuelle
 
 ```
-┌─────────────────┐     ┌──────────────────────────┐     ┌─────────────┐
-│  Frontend       │────▶│  Supabase Edge Function  │────▶│  Brevo API  │
-│  Mon Toit       │     │  send-sms-brevo          │     │             │
-└─────────────────┘     └──────────────────────────┘     └─────────────┘
-                                    │
-                                    │ BREVO_API_KEY
-                                    │ (Supabase Secrets)
-                                    ▼
-                        ┌──────────────────────────┐
-                        │  Stockage sécurisé       │
-                        │  Jamais côté client      │
-                        └──────────────────────────┘
+Frontend (navigateur)
+       ↓
+Supabase Edge Functions (Deno)
+       ↓
+API Brevo (https://api.brevo.com)
 ```
 
-### Points clés
+**Clé API Brevo** : stockée exclusivement dans les secrets Supabase, jamais exposée côté client.
 
-1. **Aucune requête directe** du frontend vers Brevo
-2. **La clé API Brevo** est stockée uniquement dans les secrets Supabase
-3. **Seules les IP Supabase** peuvent appeler l'API Brevo
+## ⚠️ Problème Identifié : Blocage Cloudflare
 
-## Plages IP Supabase à whitelister
+### Diagnostic
 
-Les Edge Functions Supabase utilisent des plages IP spécifiques. Consultez la documentation officielle pour les IP à jour :
+Les Edge Functions Supabase sont bloquées par le WAF Cloudflare de Brevo :
 
-📚 **Documentation Supabase** : https://supabase.com/docs/guides/functions/cidr-and-ip
+- **Status HTTP** : `403 Forbidden`
+- **Ray ID exemple** : `9a97ebd9682bbfc6`
+- **IP bloquée** : `2a05:d012:fca:9507:52cb:d93c:eb11:9d04` (IPv6 Supabase)
 
-### Procédure de récupération des IP
+### Cause Racine
 
-1. Aller sur le dashboard Supabase du projet
-2. Naviguer vers **Settings > Infrastructure**
-3. Noter les adresses IP des Edge Functions
-4. Ajouter ces IP dans la whitelist Brevo
+Supabase Edge Functions n'ont **pas d'IP statiques** - elles utilisent des IPs dynamiques partagées. 
+Le WAF Cloudflare de Brevo bloque ces IPs comme potentiellement malveillantes.
 
-## Configuration Brevo
+**Référence officielle** : Les Edge Functions Supabase ne supportent pas les IP statiques sortantes.
+(Voir: https://github.com/supabase/supabase/discussions/15044)
 
-### Étape 1 : Accéder aux paramètres de sécurité
+## Logs Améliorés
 
-1. Se connecter à https://app.brevo.com
-2. Aller dans **Paramètres > API Keys**
-3. Sélectionner l'API Key utilisée
+Les 4 Edge Functions Brevo utilisent maintenant `cloudflareDetector.ts` pour :
 
-### Étape 2 : Activer le blocage IP
+1. Détecter automatiquement les blocages Cloudflare
+2. Extraire le Ray ID et l'IP bloquée
+3. Formater des logs clairs :
 
-1. Cliquer sur **Manage IP restrictions**
-2. Activer l'option **Block requests from unknown IPs**
-3. Ajouter les plages IP Supabase Edge Functions
-
-### Étape 3 : Tester avant activation
-
-⚠️ **IMPORTANT** : Avant d'activer le blocage des IP inconnues :
-
-1. Envoyer un SMS de test via `send-sms-brevo`
-2. Vérifier que le SMS est bien reçu
-3. Confirmer dans les logs Brevo que l'IP source est whitelistée
-4. Seulement ensuite, activer le blocage
-
-## Bonnes pratiques de sécurité
-
-### Stockage des secrets
-
-```bash
-# ✅ CORRECT : Clé stockée dans Supabase Secrets
-BREVO_API_KEY=xkeysib-xxxxx
-
-# ❌ INTERDIT : Jamais dans le code frontend
-# VITE_BREVO_API_KEY=... 
+```
+[CLOUDFLARE_BLOCK] endpoint=https://api.brevo.com/v3/transactionalSMS/sms rayId=abc123 blockedIp=2a05:... action=CONTACT_BREVO_SUPPORT
 ```
 
-### Logs sécurisés
+## Solutions Possibles
+
+### Option 1 : Contacter Brevo Support (Recommandé)
+
+**Email à envoyer** :
+
+```
+À: support@brevo.com
+Objet: Cloudflare blocking Supabase Edge Functions - Request WAF exception
+
+Bonjour,
+
+Nous utilisons l'API SMS transactionnel Brevo depuis des Edge Functions Supabase.
+Nos requêtes sont bloquées par Cloudflare (erreur 403).
+
+Détails :
+- Ray ID: 9a97ebd9682bbfc6
+- IP bloquée: 2a05:d012:fca:9507:52cb:d93c:eb11:9d04
+- Endpoint: https://api.brevo.com/v3/transactionalSMS/sms
+- Clé API: xkeysib-d8c9702a... (masquée)
+
+Pouvez-vous :
+1. Vérifier que notre clé API est active et a les permissions SMS
+2. Ajouter une exception Cloudflare pour les IPs Supabase Edge Functions
+3. Ou nous indiquer comment whitelister notre intégration
+
+Merci.
+```
+
+### Option 2 : Proxy avec IP Statique
+
+Déployer un proxy (AWS Lambda, Google Cloud Function, etc.) avec une IP statique :
+
+```
+Edge Function → Proxy (IP statique) → Brevo API
+```
+
+Coût additionnel et complexité accrue.
+
+### Option 3 : Provider SMS Alternatif
+
+Utiliser InTouch ou Sinch comme provider principal si Brevo reste bloqué.
+
+## Edge Functions Concernées
+
+| Fonction | Endpoint Brevo | Détection CF |
+|----------|----------------|--------------|
+| `send-sms-brevo` | `/v3/transactionalSMS/sms` | ✅ |
+| `send-sms-hybrid` | `/v3/transactionalSMS/sms` | ✅ |
+| `send-whatsapp-brevo` | `/v3/whatsapp/sendMessage` | ✅ |
+| `send-whatsapp-hybrid` | `/v3/whatsapp/sendMessage` | ✅ |
+
+## Vérification des Logs
+
+Pour consulter les logs Cloudflare après un test :
+
+1. Aller sur Lovable Cloud → Edge Functions → Logs
+2. Rechercher `[CLOUDFLARE_BLOCK]` ou `rayId=`
+3. Noter le Ray ID pour le support Brevo
+
+## Test de Diagnostic
+
+Déclencher un SMS test :
 
 ```typescript
-// ✅ CORRECT : Log sans clé API
-console.log('[send-sms-brevo] Sending to:', phone.substring(0, 6) + '****');
+const { data, error } = await supabase.functions.invoke('send-sms-brevo', {
+  body: { 
+    phone: '+2250709753232', 
+    message: 'Test diagnostic Cloudflare',
+    tag: 'DIAGNOSTIC'
+  }
+});
 
-// ❌ INTERDIT : Ne jamais logger la clé
-// console.log('API Key:', brevoApiKey);
+// Si cloudflareBlock: true dans la réponse, contacter Brevo support
+console.log(data);
 ```
 
-### Validation des entrées
-
-```typescript
-// ✅ Toujours valider le format E.164
-const e164Regex = /^\+[1-9]\d{7,14}$/;
-if (!e164Regex.test(phone)) {
-  return { error: 'Format de téléphone invalide' };
-}
-```
-
-## Tests de bout en bout
-
-### Test 1 : Envoi SMS via Edge Function
-
-```bash
-# Via Supabase CLI
-supabase functions invoke send-sms-brevo \
-  --body '{"phone":"+2250700000000","message":"Test SMS","tag":"TEST"}'
-```
-
-### Test 2 : Vérification des logs
-
-1. Aller dans Supabase Dashboard > Edge Functions > Logs
-2. Rechercher `[send-sms-brevo]`
-3. Vérifier que les SMS sont envoyés avec succès
-
-### Test 3 : Vérification du blocage IP
-
-1. Activer le blocage IP dans Brevo
-2. Tenter un envoi depuis une IP non whitelistée (ex: curl local)
-3. Vérifier que la requête est bloquée
-4. Confirmer que l'Edge Function fonctionne toujours
-
-## Fichiers concernés
+## Fichiers Implémentés
 
 | Fichier | Description |
 |---------|-------------|
+| `supabase/functions/_shared/cloudflareDetector.ts` | Utilitaire de détection Cloudflare |
 | `supabase/functions/send-sms-brevo/index.ts` | Edge Function SMS Brevo |
+| `supabase/functions/send-sms-hybrid/index.ts` | Edge Function SMS multi-provider |
+| `supabase/functions/send-whatsapp-brevo/index.ts` | Edge Function WhatsApp Brevo |
+| `supabase/functions/send-whatsapp-hybrid/index.ts` | Edge Function WhatsApp multi-provider |
 | `src/shared/services/sms.ts` | Service client centralisé |
-| `supabase/config.toml` | Configuration des fonctions |
 
-## Checklist de déploiement
+## Status Actuel
 
-- [ ] Edge Function `send-sms-brevo` déployée
-- [ ] `BREVO_API_KEY` configurée dans Supabase Secrets
-- [ ] Aucune référence `BREVO_API_KEY` côté client
-- [ ] Service `src/shared/services/sms.ts` utilisé partout
-- [ ] IP Supabase whitelistées dans Brevo
-- [ ] Tests de bout en bout validés
-- [ ] Blocage IP activé dans Brevo
+- [x] Détection Cloudflare implémentée dans les 4 Edge Functions
+- [x] Logs structurés avec Ray ID, IP bloquée, endpoint
+- [x] Documentation mise à jour
+- [ ] **En attente** : Réponse support Brevo pour exception WAF
 
-## Contacts et support
+## Contacts et Support
 
-- **Brevo Support** : https://help.brevo.com
-- **Supabase Support** : https://supabase.com/support
+- **Brevo Support** : https://help.brevo.com ou support@brevo.com
+- **Supabase Discussions** : https://github.com/supabase/supabase/discussions
 - **Documentation Edge Functions** : https://supabase.com/docs/guides/functions
