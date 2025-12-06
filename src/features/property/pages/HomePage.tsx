@@ -116,13 +116,17 @@ const STATS = [
 ];
 
 const HERO_IMAGES = [
-  { src: '/images/hero/young-couple-tablet.png', alt: 'Jeune couple découvrant Mon Toit sur tablette' },
-  { src: '/images/hero/family-new-home.png', alt: 'Famille heureuse devant leur nouvelle maison' },
-  { src: '/images/hero/plateau-lagoon-night.png', alt: 'Vue nocturne Penthouse Plateau Lagune' },
-  { src: '/images/hero/riviera-luxury-villa.png', alt: 'Villa de luxe contemporaine Riviera Golf' },
-  { src: '/images/hero/professional-balcony.png', alt: 'Jeune professionnelle sur son balcon à Abidjan' },
-  { src: '/images/hero/roommates-happy.png', alt: 'Colocataires heureux dans leur appartement' },
-  { src: '/images/hero/agent-showing.png', alt: 'Agent Mon Toit présentant un appartement à des clients' },
+  { src: '/images/hero/hero_users_1_young_couple.png', alt: 'Jeune couple cherchant un logement sur tablette Mon Toit', position: 'object-center' },
+  { src: '/images/hero/hero_users_2_family_moving.png', alt: 'Famille ivoirienne recevant les clés de leur nouvelle maison', position: 'object-center' },
+  { src: '/images/hero/hero_users_5_agent_showing.png', alt: 'Agent Mon Toit présentant un appartement moderne', position: 'object-center' },
+  { src: '/images/hero/hero_users_4_students_roommates.png', alt: 'Colocataires étudiants heureux dans leur appartement', position: 'object-center' },
+  { src: '/images/hero/hero_users_3_young_professional.png', alt: 'Jeune professionnelle sur son balcon avec vue Abidjan', position: 'object-top' },
+];
+
+const FALLBACK_PROPERTY_IMAGES = [
+  '/images/hero/hero_example_1_riviera_luxury.png',
+  '/images/hero/hero_example_3_plateau_lagoon.png',
+  '/images/hero/hero_example_2_cocody_family.webp',
 ];
 
 
@@ -151,6 +155,9 @@ function useScrollAnimation<T extends HTMLElement>(options = { threshold: 0.1 })
 // ==================== COMPOSANTS ====================
 
 function PropertyCard({ property, index, isVisible }: { property: PropertyWithOwnerScore; index: number; isVisible: boolean }) {
+  // Fallback rotatif basé sur l'index
+  const displayImage = property.images?.[0] || FALLBACK_PROPERTY_IMAGES[index % FALLBACK_PROPERTY_IMAGES.length];
+  
   return (
     <Link
       to={`/proprietes/${property.id}`}
@@ -162,7 +169,7 @@ function PropertyCard({ property, index, isVisible }: { property: PropertyWithOw
       {/* Image Container - Ratio 4:3 pour plus de présence */}
       <div className="relative aspect-[4/3] overflow-hidden">
         <img
-          src={property.images?.[0] || '/images/placeholder-property.jpg'}
+          src={displayImage}
           alt={property.title || 'Propriété Mon Toit'}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
