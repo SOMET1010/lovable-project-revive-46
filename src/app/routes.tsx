@@ -203,6 +203,7 @@ export const routes: RouteObject[] = [
       { path: 'dashboard/ajouter-propriete', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence', 'owner', 'agent']}><AddProperty /></ProtectedRoute> },
       { path: 'add-property', element: <ProtectedRoute allowedRoles={['proprietaire', 'agence', 'owner', 'agent']}><AddProperty /></ProtectedRoute> },
       { path: 'dashboard/creer-contrat', element: <ProtectedRoute allowedRoles={['proprietaire', 'owner']}><CreateContract /></ProtectedRoute> },
+      { path: 'creer-contrat/:propertyId', element: <ProtectedRoute allowedRoles={['proprietaire', 'owner']}><CreateContract /></ProtectedRoute> },
       { path: 'dashboard/mes-contrats', element: <ProtectedRoute allowedRoles={['proprietaire', 'owner']}><OwnerContracts /></ProtectedRoute> },
       { path: 'dashboard/candidatures', element: <ProtectedRoute allowedRoles={['proprietaire', 'owner']}><OwnerApplications /></ProtectedRoute> },
 
