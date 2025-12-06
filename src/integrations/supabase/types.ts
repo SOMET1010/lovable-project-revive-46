@@ -270,6 +270,80 @@ export type Database = {
         }
         Relationships: []
       }
+      digital_certificates: {
+        Row: {
+          certificate_data: Json | null
+          certificate_id: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          certificate_data?: Json | null
+          certificate_id: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          certificate_data?: Json | null
+          certificate_id?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      electronic_signature_logs: {
+        Row: {
+          created_at: string | null
+          cryptoneo_response: Json | null
+          error_message: string | null
+          id: string
+          initiated_by: string
+          lease_id: string
+          operation_id: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cryptoneo_response?: Json | null
+          error_message?: string | null
+          id?: string
+          initiated_by: string
+          lease_id: string
+          operation_id: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cryptoneo_response?: Json | null
+          error_message?: string | null
+          id?: string
+          initiated_by?: string
+          lease_id?: string
+          operation_id?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "electronic_signature_logs_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorites: {
         Row: {
           created_at: string | null
@@ -331,48 +405,72 @@ export type Database = {
       }
       lease_contracts: {
         Row: {
+          charges_amount: number | null
           contract_number: string
           created_at: string | null
+          cryptoneo_operation_id: string | null
+          custom_clauses: string | null
           deposit_amount: number | null
+          document_url: string | null
           end_date: string
           id: string
+          landlord_signed_at: string | null
           monthly_rent: number
           owner_id: string
+          payment_day: number | null
           property_id: string
           signed_at: string | null
+          signed_document_url: string | null
           start_date: string
           status: string | null
           tenant_id: string
+          tenant_signed_at: string | null
           updated_at: string | null
         }
         Insert: {
+          charges_amount?: number | null
           contract_number: string
           created_at?: string | null
+          cryptoneo_operation_id?: string | null
+          custom_clauses?: string | null
           deposit_amount?: number | null
+          document_url?: string | null
           end_date: string
           id?: string
+          landlord_signed_at?: string | null
           monthly_rent: number
           owner_id: string
+          payment_day?: number | null
           property_id: string
           signed_at?: string | null
+          signed_document_url?: string | null
           start_date: string
           status?: string | null
           tenant_id: string
+          tenant_signed_at?: string | null
           updated_at?: string | null
         }
         Update: {
+          charges_amount?: number | null
           contract_number?: string
           created_at?: string | null
+          cryptoneo_operation_id?: string | null
+          custom_clauses?: string | null
           deposit_amount?: number | null
+          document_url?: string | null
           end_date?: string
           id?: string
+          landlord_signed_at?: string | null
           monthly_rent?: number
           owner_id?: string
+          payment_day?: number | null
           property_id?: string
           signed_at?: string | null
+          signed_document_url?: string | null
           start_date?: string
           status?: string | null
           tenant_id?: string
+          tenant_signed_at?: string | null
           updated_at?: string | null
         }
         Relationships: [
