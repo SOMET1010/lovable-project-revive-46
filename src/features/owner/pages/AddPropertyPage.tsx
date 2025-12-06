@@ -346,9 +346,35 @@ export default function AddProperty() {
   };
 
   if (success) {
+    // Generate random confetti positions
+    const confettiColors = ['hsl(var(--primary))', 'hsl(142 76% 36%)', 'hsl(38 92% 50%)', 'hsl(217 91% 60%)'];
+    
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-neutral-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-10 max-w-md text-center shadow-xl animate-fade-in">
+      <div className="fixed inset-0 bg-gradient-to-br from-green-50 to-neutral-50 flex items-center justify-center p-4 z-50">
+        {/* Confetti effect */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(25)].map((_, i) => (
+            <div 
+              key={i}
+              className="absolute animate-confetti-fall"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: '-5%',
+                animationDuration: `${2 + Math.random() * 3}s`,
+                animationDelay: `${Math.random() * 2}s`
+              }}
+            >
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ 
+                  backgroundColor: confettiColors[Math.floor(Math.random() * confettiColors.length)] 
+                }} 
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="relative bg-white rounded-3xl p-10 max-w-md text-center shadow-xl animate-fade-in">
           {/* Animated success icon */}
           <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce">
             <Check className="h-12 w-12 text-white" />
