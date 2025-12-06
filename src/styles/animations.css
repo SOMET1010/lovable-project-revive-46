@@ -97,6 +97,29 @@
   }
 }
 
+/* Multi-step form transitions */
+@keyframes stepSlideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes stepSlideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes scaleIn {
   from {
     opacity: 0;
@@ -366,6 +389,15 @@
 
 .animate-slide-in-right {
   animation: slideInRight 0.8s ease-out;
+}
+
+/* Multi-step form navigation animations */
+.step-enter-forward {
+  animation: stepSlideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.step-enter-backward {
+  animation: stepSlideInFromLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .animate-scale-in {
