@@ -115,10 +115,11 @@ const STATS = [
 ];
 
 const HERO_IMAGES = [
-  { src: '/images/hero/hero1.jpg', alt: 'Belle résidence moderne à Abidjan' },
-  { src: '/images/hero/hero2.jpg', alt: 'Appartement de standing à Cocody' },
-  { src: '/images/hero/hero3.jpg', alt: 'Villa avec piscine en Côte d\'Ivoire' },
-  { src: '/images/hero/hero4.jpg', alt: 'Intérieur moderne d\'un logement Mon Toit' },
+  { src: '/images/hero/young-couple-tablet.png', alt: 'Jeune couple découvrant Mon Toit sur tablette' },
+  { src: '/images/hero/family-new-home.png', alt: 'Famille heureuse devant leur nouvelle maison' },
+  { src: '/images/hero/professional-balcony.png', alt: 'Jeune professionnelle sur son balcon à Abidjan' },
+  { src: '/images/hero/roommates-happy.png', alt: 'Colocataires heureux dans leur appartement' },
+  { src: '/images/hero/agent-showing.png', alt: 'Agent Mon Toit présentant un appartement à des clients' },
 ];
 
 // ==================== HOOKS ====================
