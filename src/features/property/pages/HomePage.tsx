@@ -13,7 +13,7 @@ import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 import SEOHead, { createOrganizationStructuredData, createWebsiteStructuredData } from '@/shared/components/SEOHead';
 import SUTAChatWidget from '@/shared/components/SUTAChatWidget';
 import { propertyApi } from '../services/property.api';
-import { LuxuryPropertiesSection } from '../components/LuxuryPropertiesSection';
+// LuxuryPropertiesSection supprimée - images intégrées dans HERO_IMAGES
 import type { PropertyWithOwnerScore } from '../types';
 
 // ==================== PALETTE HARMONISÉE ====================
@@ -118,6 +118,8 @@ const STATS = [
 const HERO_IMAGES = [
   { src: '/images/hero/young-couple-tablet.png', alt: 'Jeune couple découvrant Mon Toit sur tablette' },
   { src: '/images/hero/family-new-home.png', alt: 'Famille heureuse devant leur nouvelle maison' },
+  { src: '/images/hero/plateau-lagoon-night.png', alt: 'Vue nocturne Penthouse Plateau Lagune' },
+  { src: '/images/hero/riviera-luxury-villa.png', alt: 'Villa de luxe contemporaine Riviera Golf' },
   { src: '/images/hero/professional-balcony.png', alt: 'Jeune professionnelle sur son balcon à Abidjan' },
   { src: '/images/hero/roommates-happy.png', alt: 'Colocataires heureux dans leur appartement' },
   { src: '/images/hero/agent-showing.png', alt: 'Agent Mon Toit présentant un appartement à des clients' },
@@ -452,8 +454,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================== PROPRIÉTÉS D'EXCEPTION ==================== */}
-      <LuxuryPropertiesSection />
+      {/* Section LuxuryPropertiesSection supprimée - images intégrées au Hero carousel */}
 
       {/* ==================== COMMENT ÇA MARCHE ==================== */}
       <section ref={howItWorksRef} className="relative py-20 md:py-28 overflow-hidden bg-white">
