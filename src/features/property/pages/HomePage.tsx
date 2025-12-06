@@ -154,17 +154,15 @@ function useScrollAnimation<T extends HTMLElement>(options = { threshold: 0.1 })
 
 // ==================== COMPOSANTS ====================
 
-function PropertyCard({ property, index, isVisible }: { property: PropertyWithOwnerScore; index: number; isVisible: boolean }) {
+function PropertyCard({ property, index, isVisible: _isVisible }: { property: PropertyWithOwnerScore; index: number; isVisible: boolean }) {
   // Fallback rotatif basé sur l'index
   const displayImage = property.images?.[0] || FALLBACK_PROPERTY_IMAGES[index % FALLBACK_PROPERTY_IMAGES.length];
   
   return (
     <Link
       to={`/proprietes/${property.id}`}
-      className={`group block bg-white rounded-[24px] overflow-hidden border border-transparent hover:border-[#EFEBE9] shadow-sm hover:shadow-[0_20px_40px_rgba(44,24,16,0.08)] transition-all duration-500 ease-out hover:-translate-y-2 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
-      }`}
-      style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
+      className="group block bg-white rounded-[24px] overflow-hidden border border-transparent hover:border-[#EFEBE9] shadow-sm hover:shadow-[0_20px_40px_rgba(44,24,16,0.08)] transition-all duration-500 ease-out hover:-translate-y-2 opacity-100 translate-y-0 animate-in fade-in slide-in-from-bottom-4"
+      style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
     >
       {/* Image Container - Ratio 4:3 pour plus de présence */}
       <div className="relative aspect-[4/3] overflow-hidden">
