@@ -1,5 +1,5 @@
 import { Component, ReactNode } from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Button } from './Button';
 
 interface Props {
@@ -9,22 +9,15 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
-  retryCount: number;
 }
 
-const MAX_AUTO_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
-
 export class ChunkLoadErrorBoundary extends Component<Props, State> {
-  private retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
-
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null, retryCount: 0 };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
-    // Check if it's a chunk loading error
+  static getDerivedStateFromError(error: Error): Partial<State> | null {
     const isChunkError = 
       error.message.includes('Failed to fetch dynamically imported module') ||
       error.message.includes('Loading chunk') ||
@@ -35,90 +28,32 @@ export class ChunkLoadErrorBoundary extends Component<Props, State> {
       return { hasError: true, error };
     }
     
-    // Re-throw non-chunk errors
     throw error;
   }
 
-  override componentDidMount() {
-    this.scheduleRetryIfNeeded();
-  }
-
   override componentDidUpdate(_prevProps: Props, prevState: State) {
-    // Only schedule retry if we just entered error state or retry count changed
     if (this.state.hasError && !prevState.hasError) {
-      this.scheduleRetryIfNeeded();
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     }
   }
-
-  override componentWillUnmount() {
-    if (this.retryTimeoutId) {
-      clearTimeout(this.retryTimeoutId);
-    }
-  }
-
-  scheduleRetryIfNeeded = () => {
-    if (this.state.hasError && this.state.retryCount < MAX_AUTO_RETRIES) {
-      if (this.retryTimeoutId) {
-        clearTimeout(this.retryTimeoutId);
-      }
-      this.retryTimeoutId = setTimeout(() => {
-        this.handleAutoRetry();
-      }, RETRY_DELAY_MS);
-    }
-  };
-
-  handleAutoRetry = () => {
-    // Force reload the page to get fresh chunks
-    if (this.state.retryCount >= MAX_AUTO_RETRIES - 1) {
-      // Last retry - do a hard reload
-      window.location.reload();
-      return;
-    }
-    
-    this.setState(prevState => ({
-      hasError: false,
-      error: null,
-      retryCount: prevState.retryCount + 1
-    }), () => {
-      // Schedule next retry if still failing
-      this.scheduleRetryIfNeeded();
-    });
-  };
 
   handleManualReload = () => {
-    // Clear any cached modules and reload
     window.location.reload();
   };
 
   override render() {
     if (this.state.hasError) {
-      // Still auto-retrying
-      if (this.state.retryCount < MAX_AUTO_RETRIES) {
-        return (
-          <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center">
-            <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
-            <p className="text-muted-foreground">
-              Chargement en cours... (tentative {this.state.retryCount + 1}/{MAX_AUTO_RETRIES})
-            </p>
-          </div>
-        );
-      }
-
-      // All retries exhausted, show error
       return (
         <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center">
-          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
-            <AlertCircle className="h-8 w-8 text-amber-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-foreground mb-2">
-            Page non chargée
-          </h2>
-          <p className="text-muted-foreground mb-6 max-w-md">
-            Une mise à jour est peut-être en cours. Veuillez recharger la page pour continuer.
+          <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
+          <p className="text-muted-foreground mb-4">
+            Rechargement automatique...
           </p>
-          <Button onClick={this.handleManualReload} className="gap-2">
+          <Button onClick={this.handleManualReload} variant="outline" className="gap-2">
             <RefreshCw className="h-4 w-4" />
-            Recharger la page
+            Recharger manuellement
           </Button>
         </div>
       );

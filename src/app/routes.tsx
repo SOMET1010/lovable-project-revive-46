@@ -26,9 +26,9 @@ const lazyWithRetry = (
   });
 };
 
-// Auth pages - Force fresh import with timestamp to bust cache
-const Home = lazyWithRetry(() => import(/* webpackChunkName: "home" */ '@/features/property/pages/HomePage'));
-const NotFound = lazyWithRetry(() => import(/* webpackChunkName: "notfound" */ '@/features/property/pages/NotFoundPage'));
+// Pages principales
+const Home = lazyWithRetry(() => import('@/features/property/pages/HomePage'));
+const NotFound = lazyWithRetry(() => import('@/features/property/pages/NotFoundPage'));
 const AddPropertyLanding = lazyWithRetry(() => import('@/features/property/pages/AddPropertyLandingPage'));
 const ModernAuth = lazyWithRetry(() => import('@/features/auth/pages/ModernAuthPage'));
 const AuthCallback = lazyWithRetry(() => import('@/features/auth/pages/CallbackPage'));
