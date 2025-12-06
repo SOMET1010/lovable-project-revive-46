@@ -112,6 +112,12 @@ const navigationItems = [
     section: 'Configuration',
     items: [
       {
+        name: 'Règles Métier',
+        href: '/admin/regles-metier',
+        icon: Settings,
+        color: 'text-orange-600'
+      },
+      {
         name: 'Service Providers',
         href: '/admin/service-providers',
         icon: TrendingUp,
