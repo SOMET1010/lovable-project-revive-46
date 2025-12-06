@@ -8,39 +8,38 @@ interface StepCardProps {
   title: string;
   description: string;
   icon: React.ReactNode;
-  color: string;
   features: string[];
   imagePosition?: 'left' | 'right';
 }
 
-function StepCard({ number, title, description, icon, color, features, imagePosition = 'right' }: StepCardProps) {
+function StepCard({ number, title, description, icon, features, imagePosition = 'right' }: StepCardProps) {
   return (
     <div className={`flex flex-col ${imagePosition === 'left' ? 'md:flex-row-reverse' : 'md:flex-row'} gap-8 items-center mb-16 animate-fade-in`}>
       <div className="flex-1">
         <div className="flex items-center space-x-4 mb-6">
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center text-white font-bold text-2xl shadow-lg`}>
+          <div className="w-16 h-16 rounded-2xl bg-[#2C1810] flex items-center justify-center text-white font-bold text-2xl shadow-lg">
             {number}
           </div>
-          <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center shadow-lg`}>
+          <div className="w-16 h-16 rounded-2xl bg-[#F16522] flex items-center justify-center shadow-lg">
             {icon}
           </div>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-4">{title}</h3>
-        <p className="text-gray-600 text-lg mb-6 leading-relaxed">{description}</p>
+        <h3 className="text-2xl font-bold text-[#2C1810] mb-4">{title}</h3>
+        <p className="text-[#6B5A4E] text-lg mb-6 leading-relaxed">{description}</p>
         <ul className="space-y-3">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start space-x-3">
-              <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0 mt-1" />
-              <span className="text-gray-700">{feature}</span>
+              <CheckCircle className="h-5 w-5 text-[#F16522] flex-shrink-0 mt-1" />
+              <span className="text-[#6B5A4E]">{feature}</span>
             </li>
           ))}
         </ul>
       </div>
       <div className="flex-1">
-        <div className={`bg-gradient-to-br ${color} rounded-2xl p-8 shadow-2xl transform hover:scale-105 transition-all duration-300`}>
+        <div className="bg-[#2C1810] rounded-[20px] p-8 shadow-2xl transform hover:scale-105 transition-all duration-300">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white">
             <div className="text-6xl mb-4">{number === 1 ? '🔍' : number === 2 ? '🛡️' : number === 3 ? '✍️' : '💳'}</div>
-            <div className="text-sm uppercase tracking-wider opacity-90 mb-2">Étape {number}</div>
+            <div className="text-sm uppercase tracking-wider text-[#E8D4C5] mb-2">Étape {number}</div>
             <div className="text-xl font-bold">{title}</div>
           </div>
         </div>
@@ -56,7 +55,6 @@ export default function HowItWorksPage() {
       title: 'Recherchez votre bien idéal',
       description: 'Explorez notre catalogue de plus de 31 propriétés disponibles dans 5 villes principales de Côte d\'Ivoire. Utilisez nos filtres avancés pour trouver exactement ce que vous cherchez.',
       icon: <Search className="h-8 w-8 text-white" />,
-      color: 'from-orange-500 to-red-500',
       features: [
         '31+ propriétés vérifiées disponibles',
         'Couverture dans 5 villes (Abidjan, Yamoussoukro, Bouaké, Daloa, San-Pédro)',
@@ -71,7 +69,6 @@ export default function HowItWorksPage() {
       title: 'Vérifiez votre identité',
       description: 'Créez un dossier locataire complet et sécurisé. La vérification d\'identité ONECI et la vérification biométrique renforcent la confiance entre vous et les propriétaires.',
       icon: <Shield className="h-8 w-8 text-white" />,
-      color: 'from-cyan-500 to-blue-500',
       features: [
         'Inscription gratuite en 2 minutes',
         'Vérification d\'identité ONECI (Numéro National d\'Identification)',
@@ -86,7 +83,6 @@ export default function HowItWorksPage() {
       title: 'Visitez et postulez',
       description: 'Planifiez des visites en ligne et soumettez votre candidature avec tous vos documents vérifiés. Les propriétaires vous répondent rapidement.',
       icon: <FileText className="h-8 w-8 text-white" />,
-      color: 'from-purple-500 to-pink-500',
       features: [
         'Planification de visite en ligne (frais : 2 000 FCFA)',
         'Soumission de candidature avec documents',
@@ -101,7 +97,6 @@ export default function HowItWorksPage() {
       title: 'Signez et payez en toute sécurité',
       description: 'Signature électronique certifiée CEV avec valeur juridique et paiement 100% sécurisé via Mobile Money ou virement bancaire.',
       icon: <CreditCard className="h-8 w-8 text-white" />,
-      color: 'from-green-500 to-emerald-500',
       features: [
         'Contrat généré automatiquement (conforme Code Civil ivoirien)',
         'Signature électronique CEV via CryptoNeo (valeur juridique)',
@@ -165,7 +160,7 @@ export default function HowItWorksPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-[#FAF7F4]">
       <SEOHead
         title="Comment ça marche | Mon Toit"
         description="Découvrez comment trouver votre logement en 4 étapes simples : recherche, vérification d'identité, signature électronique et paiement sécurisé. Guide complet de la plateforme Mon Toit en Côte d'Ivoire."
@@ -185,14 +180,14 @@ export default function HowItWorksPage() {
 
         {/* Section Intro */}
         <div className="text-center mb-20 animate-fade-in">
-          <div className="inline-flex items-center space-x-2 bg-orange-100 text-orange-700 px-6 py-3 rounded-full font-semibold mb-6">
+          <div className="inline-flex items-center space-x-2 bg-[#F16522]/10 text-[#F16522] px-6 py-3 rounded-full font-semibold mb-6">
             <HomeIcon className="h-5 w-5" />
             <span>Pour les Locataires</span>
           </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl font-bold text-[#2C1810] mb-4">
             4 étapes pour trouver votre logement idéal
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-[#6B5A4E] max-w-3xl mx-auto">
             De la recherche au paiement, nous vous accompagnons à chaque étape avec des outils modernes et sécurisés
           </p>
         </div>
@@ -205,32 +200,32 @@ export default function HowItWorksPage() {
         </div>
 
         {/* Section Propriétaires */}
-        <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-3xl p-12 mb-20 animate-slide-up">
+        <div className="bg-[#2C1810] rounded-[24px] p-8 md:p-12 mb-20 animate-slide-up">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-2 bg-cyan-600 text-white px-6 py-3 rounded-full font-semibold mb-6">
+            <div className="inline-flex items-center space-x-2 bg-[#F16522] text-white px-6 py-3 rounded-full font-semibold mb-6">
               <Users className="h-5 w-5" />
               <span>Pour les Propriétaires</span>
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-white mb-4">
               Louez votre bien en 5 étapes
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-[#E8D4C5] max-w-3xl mx-auto">
               Gérez vos locations en toute simplicité avec notre plateforme automatisée
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ownerSteps.map((step, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-                <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl mb-4">
+              <div key={index} className="bg-white rounded-[20px] p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:border-[#F16522] border-2 border-transparent">
+                <div className="w-12 h-12 bg-[#F16522] rounded-xl flex items-center justify-center text-white font-bold text-xl mb-4">
                   {index + 1}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{step.title}</h3>
-                <p className="text-gray-600 mb-4">{step.description}</p>
+                <h3 className="text-xl font-bold text-[#2C1810] mb-2">{step.title}</h3>
+                <p className="text-[#6B5A4E] mb-4">{step.description}</p>
                 <ul className="space-y-2">
                   {step.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start space-x-2 text-sm text-gray-700">
-                      <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                    <li key={idx} className="flex items-start space-x-2 text-sm text-[#6B5A4E]">
+                      <CheckCircle className="h-4 w-4 text-[#F16522] flex-shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -243,45 +238,45 @@ export default function HowItWorksPage() {
         {/* Section Sécurité */}
         <div className="mb-20 animate-fade-in">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-2 bg-green-100 text-green-700 px-6 py-3 rounded-full font-semibold mb-6">
+            <div className="inline-flex items-center space-x-2 bg-[#2C1810]/10 text-[#2C1810] px-6 py-3 rounded-full font-semibold mb-6">
               <Shield className="h-5 w-5" />
               <span>Sécurité & Conformité</span>
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-[#2C1810] mb-4">
               Votre sécurité est notre priorité
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-[#6B5A4E] max-w-3xl mx-auto">
               Certification ANSUT, vérification d'identité et signature électronique légale
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {securityFeatures.map((feature, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 shadow-lg border-2 border-green-100 hover:border-green-300 transition-all duration-300">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center text-white mb-4">
+              <div key={index} className="bg-white rounded-[20px] p-6 shadow-lg border-2 border-[#EFEBE9] hover:border-[#F16522] transition-all duration-300">
+                <div className="w-12 h-12 bg-[#2C1810] rounded-xl flex items-center justify-center text-white mb-4">
                   {feature.icon}
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm">{feature.description}</p>
+                <h3 className="text-lg font-bold text-[#2C1810] mb-2">{feature.title}</h3>
+                <p className="text-[#6B5A4E] text-sm">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Stats Section */}
-        <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-3xl p-12 mb-20 text-white animate-slide-up">
+        <div className="bg-[#2C1810] rounded-[24px] p-12 mb-20 text-white animate-slide-up">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-5xl font-bold mb-2">31+</div>
-              <div className="text-xl opacity-90">Propriétés Vérifiées</div>
+              <div className="text-5xl font-bold mb-2 text-[#F16522]">31+</div>
+              <div className="text-xl text-[#E8D4C5]">Propriétés Vérifiées</div>
             </div>
             <div>
-              <div className="text-5xl font-bold mb-2">5</div>
-              <div className="text-xl opacity-90">Villes Couvertes</div>
+              <div className="text-5xl font-bold mb-2 text-[#F16522]">5</div>
+              <div className="text-xl text-[#E8D4C5]">Villes Couvertes</div>
             </div>
             <div>
-              <div className="text-5xl font-bold mb-2">100%</div>
-              <div className="text-xl opacity-90">Paiements Sécurisés</div>
+              <div className="text-5xl font-bold mb-2 text-[#F16522]">100%</div>
+              <div className="text-xl text-[#E8D4C5]">Paiements Sécurisés</div>
             </div>
           </div>
         </div>
