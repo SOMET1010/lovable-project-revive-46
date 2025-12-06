@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   User, 
+  Users,
   FileText, 
   CreditCard, 
   Calendar, 
@@ -27,6 +28,7 @@ interface TenantSidebarProps {
 const navItems = [
   { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Mon Profil', href: '/profil', icon: User },
+  { label: 'Mes Candidatures', href: '/mes-candidatures', icon: Users },
   { label: 'Mes Contrats', href: '/mes-contrats', icon: FileText },
   { label: 'Mes Paiements', href: '/mes-paiements', icon: CreditCard },
   { label: 'Mes Visites', href: '/mes-visites', icon: Calendar },
