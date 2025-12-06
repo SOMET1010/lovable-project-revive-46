@@ -16,6 +16,8 @@ const MAX_AUTO_RETRIES = 3;
 const RETRY_DELAY_MS = 1000;
 
 export class ChunkLoadErrorBoundary extends Component<Props, State> {
+  private retryTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
   constructor(props: Props) {
     super(props);
     this.state = { hasError: false, error: null, retryCount: 0 };
@@ -37,23 +39,50 @@ export class ChunkLoadErrorBoundary extends Component<Props, State> {
     throw error;
   }
 
+  override componentDidMount() {
+    this.scheduleRetryIfNeeded();
+  }
+
   override componentDidUpdate(_prevProps: Props, prevState: State) {
-    // Auto-retry logic
-    if (this.state.hasError && this.state.retryCount < MAX_AUTO_RETRIES) {
-      if (prevState.retryCount === this.state.retryCount) {
-        setTimeout(() => {
-          this.handleAutoRetry();
-        }, RETRY_DELAY_MS);
-      }
+    // Only schedule retry if we just entered error state or retry count changed
+    if (this.state.hasError && !prevState.hasError) {
+      this.scheduleRetryIfNeeded();
     }
   }
 
+  override componentWillUnmount() {
+    if (this.retryTimeoutId) {
+      clearTimeout(this.retryTimeoutId);
+    }
+  }
+
+  scheduleRetryIfNeeded = () => {
+    if (this.state.hasError && this.state.retryCount < MAX_AUTO_RETRIES) {
+      if (this.retryTimeoutId) {
+        clearTimeout(this.retryTimeoutId);
+      }
+      this.retryTimeoutId = setTimeout(() => {
+        this.handleAutoRetry();
+      }, RETRY_DELAY_MS);
+    }
+  };
+
   handleAutoRetry = () => {
+    // Force reload the page to get fresh chunks
+    if (this.state.retryCount >= MAX_AUTO_RETRIES - 1) {
+      // Last retry - do a hard reload
+      window.location.reload();
+      return;
+    }
+    
     this.setState(prevState => ({
       hasError: false,
       error: null,
       retryCount: prevState.retryCount + 1
-    }));
+    }), () => {
+      // Schedule next retry if still failing
+      this.scheduleRetryIfNeeded();
+    });
   };
 
   handleManualReload = () => {
