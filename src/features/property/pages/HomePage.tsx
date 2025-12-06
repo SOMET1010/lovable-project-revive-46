@@ -6,8 +6,7 @@ import {
   Bed, Bath, Maximize, Star, Quote, Send, User, Phone, MessageSquare, 
   CheckCircle, Shield, Award, Key
 } from 'lucide-react';
-// toast temporarily disabled due to server issues
-// import { toast } from 'sonner';
+import { toast } from '@/shared/hooks/useSafeToast';
 import { Button } from '@/shared/ui';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui";
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
@@ -278,14 +277,14 @@ export default function HomePage() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) {
-      console.warn('Formulaire incomplet');
+      toast.error('Veuillez remplir les champs obligatoires');
       return;
     }
     setIsFormSubmitting(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsFormSubmitting(false);
     setIsFormSubmitted(true);
-    console.log('Demande envoyée avec succès');
+    toast.success('Votre demande a été envoyée avec succès !');
     setFormData({ name: '', phone: '', project: '' });
   };
 
