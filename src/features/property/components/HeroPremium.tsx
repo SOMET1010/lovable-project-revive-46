@@ -262,7 +262,7 @@ export default function HeroPremium() {
             <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2 shadow-lg">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <span className="text-sm font-medium text-neutral-700">Vérifié ANSUT</span>
+                <span className="text-sm font-medium text-neutral-700">Disponible maintenant</span>
               </div>
             </div>
           </div>
