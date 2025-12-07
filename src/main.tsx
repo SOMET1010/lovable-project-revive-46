@@ -12,6 +12,16 @@ const queryClient = createQueryClient();
 
 registerServiceWorker();
 
+// Supprimer le loader initial une fois React monté
+const removeInitialLoader = () => {
+  const loader = document.getElementById('initial-loader');
+  if (loader) {
+    loader.style.transition = 'opacity 0.3s ease';
+    loader.style.opacity = '0';
+    setTimeout(() => loader.remove(), 300);
+  }
+};
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
@@ -23,3 +33,6 @@ createRoot(document.getElementById('root')!).render(
     </ThemeProvider>
   </StrictMode>
 );
+
+// Retirer le loader initial après le rendu
+removeInitialLoader();
