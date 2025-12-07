@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Home, Building, Users, FileText, Wrench, MessageSquare, Plus, Eye, TrendingUp, Calendar, Handshake } from 'lucide-react';
+import { Home, Building, Building2, Users, FileText, Wrench, MessageSquare, Plus, Eye, TrendingUp, Calendar, Handshake } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
+import InviteAgencyDialog from '@/features/agency/components/InviteAgencyDialog';
+import { useAgencyMandates } from '@/hooks/useAgencyMandates';
 
 interface Property {
   id: string;
@@ -29,6 +31,9 @@ export default function OwnerDashboardPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<Property[]>([]);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [selectedPropertyForInvite, setSelectedPropertyForInvite] = useState<string | undefined>();
+  const { agencies, createMandate } = useAgencyMandates();
   const [stats, setStats] = useState<Stats>({
     totalProperties: 0,
     activeLeases: 0,
@@ -240,7 +245,7 @@ export default function OwnerDashboardPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 items-end">
                         <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                           property.status === 'disponible' ? 'bg-green-100 text-green-700' :
                           property.status === 'loue' ? 'bg-blue-100 text-blue-700' :
@@ -248,12 +253,26 @@ export default function OwnerDashboardPage() {
                         }`}>
                           {property.status === 'disponible' ? 'Disponible' : property.status === 'loue' ? 'Loué' : property.status}
                         </span>
-                        <Link 
-                          to={`/propriete/${property.id}`}
-                          className="text-xs text-[#F16522] hover:underline font-medium"
-                        >
-                          Voir →
-                        </Link>
+                        <div className="flex gap-3">
+                          <Link 
+                            to={`/propriete/${property.id}`}
+                            className="text-xs text-[#F16522] hover:underline font-medium"
+                          >
+                            Voir →
+                          </Link>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setSelectedPropertyForInvite(property.id);
+                              setShowInviteDialog(true);
+                            }}
+                            className="text-xs text-[#6B5A4E] hover:text-[#F16522] font-medium flex items-center gap-1"
+                            title="Déléguer la gestion à une agence"
+                          >
+                            <Building2 className="h-3.5 w-3.5" />
+                            Déléguer
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -314,6 +333,16 @@ export default function OwnerDashboardPage() {
                   <Handshake className="h-5 w-5 mr-2" />
                   Mandats agence
                 </Link>
+                <button 
+                  onClick={() => {
+                    setSelectedPropertyForInvite(undefined);
+                    setShowInviteDialog(true);
+                  }}
+                  className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <Building2 className="h-5 w-5 mr-2" />
+                  Inviter une agence
+                </button>
                 <Link 
                   to="/messages"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
@@ -375,6 +404,27 @@ export default function OwnerDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal Invitation Agence */}
+      <InviteAgencyDialog
+        isOpen={showInviteDialog}
+        onClose={() => {
+          setShowInviteDialog(false);
+          setSelectedPropertyForInvite(undefined);
+        }}
+        onInvite={async (params) => {
+          const result = await createMandate(params);
+          return !!result;
+        }}
+        properties={properties.map(p => ({
+          id: p.id,
+          title: p.title,
+          city: p.city,
+          monthly_rent: p.monthly_rent,
+        }))}
+        agencies={agencies}
+        selectedPropertyId={selectedPropertyForInvite}
+      />
     </div>
   );
 }
