@@ -1,7 +1,7 @@
 /**
- * ModernAuthPage - Authentification simplifiée pour la Côte d'Ivoire
+ * ModernAuthPage - Split Screen Premium Ivorian
  * 
- * FLUX TÉLÉPHONE UNIFIÉ (plus de tabs login/register pour téléphone):
+ * FLUX TÉLÉPHONE UNIFIÉ:
  * 1. Entrer numéro → 2. Vérifier OTP → 3. Auto-détection:
  *    - Si compte existe → Connexion directe
  *    - Si nouveau → Demander nom → Créer compte
@@ -11,25 +11,48 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Building2, Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft, Smartphone } from 'lucide-react';
+import { 
+  Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft, 
+  Smartphone, Star, Home, Shield, MessageCircle 
+} from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { InputWithIcon } from '@/shared/ui';
 
 type AuthMethod = 'phone' | 'email';
-type PhoneStep = 'enter' | 'verify' | 'name'; // Added 'name' step
+type PhoneStep = 'enter' | 'verify' | 'name';
 type EmailMode = 'login' | 'register';
+
+// Slides pour le côté gauche (témoignages)
+const AUTH_SLIDES = [
+  {
+    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
+    quote: "Grâce à Mon Toit, nous avons trouvé notre cocon en 48h.",
+    author: "Sarah & Marc, Cocody"
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
+    quote: "La signature électronique du bail m'a fait gagner un temps fou.",
+    author: "Aïcha K., Plateau"
+  },
+  {
+    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&auto=format&fit=crop&q=80',
+    quote: "Un service fiable et sécurisé pour les propriétaires.",
+    author: "Konan D., Marcory"
+  }
+];
 
 export default function ModernAuthPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
   // State
-  const [authMethod, setAuthMethod] = useState<AuthMethod>('phone'); // Default to phone!
+  const [authMethod, setAuthMethod] = useState<AuthMethod>('phone');
   const [phoneStep, setPhoneStep] = useState<PhoneStep>('enter');
   const [emailMode, setEmailMode] = useState<EmailMode>(location.pathname === '/inscription' ? 'register' : 'login');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [slideIndex, setSlideIndex] = useState(0);
 
   // Email fields
   const [email, setEmail] = useState('');
@@ -44,6 +67,12 @@ export default function ModernAuthPage() {
   const [resendTimer, setResendTimer] = useState(0);
   const [devOtp, setDevOtp] = useState<string | null>(null);
 
+  // Rotation automatique des slides
+  useEffect(() => {
+    const timer = setInterval(() => setSlideIndex(p => (p + 1) % AUTH_SLIDES.length), 5000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Timer countdown
   useEffect(() => {
     if (resendTimer > 0) {
@@ -53,7 +82,7 @@ export default function ModernAuthPage() {
     return undefined;
   }, [resendTimer]);
 
-  // Sync URL with email mode only
+  // Sync URL with email mode
   useEffect(() => {
     const expectedMode: EmailMode = location.pathname === '/inscription' ? 'register' : 'login';
     if (emailMode !== expectedMode) {
@@ -146,7 +175,7 @@ export default function ModernAuthPage() {
     }
   };
 
-  // ===================== PHONE - SEND OTP (SIMPLIFIED) =====================
+  // ===================== PHONE - SEND OTP =====================
   const handleSendOTP = async () => {
     setError('');
     setDevOtp(null);
@@ -154,13 +183,9 @@ export default function ModernAuthPage() {
 
     try {
       const { data, error: invokeError } = await supabase.functions.invoke('send-auth-otp', {
-        body: { 
-          phoneNumber, 
-          method: sendMethod,
-        },
+        body: { phoneNumber, method: sendMethod },
       });
 
-      // Handle rate limiting
       if (data?.rateLimited && data?.retryAfter) {
         setResendTimer(data.retryAfter);
         setError(`Patientez ${data.retryAfter} secondes`);
@@ -168,15 +193,9 @@ export default function ModernAuthPage() {
         return;
       }
 
-      if (invokeError) {
-        throw new Error(invokeError.message || 'Erreur lors de l\'envoi du code');
-      }
+      if (invokeError) throw new Error(invokeError.message || 'Erreur lors de l\'envoi du code');
+      if (data?.error) throw new Error(data.error);
 
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      // Dev mode OTP display
       if (data?.otp) {
         setDevOtp(data.otp);
         setSuccess(`🧪 Mode dev - Code: ${data.otp}`);
@@ -194,29 +213,19 @@ export default function ModernAuthPage() {
     }
   };
 
-  // ===================== PHONE - VERIFY OTP (AUTO-DETECT) =====================
+  // ===================== PHONE - VERIFY OTP =====================
   const handleVerifyOTP = async (withName = false) => {
     setError('');
     setLoading(true);
 
     try {
       const { data, error: invokeError } = await supabase.functions.invoke('verify-auth-otp', {
-        body: { 
-          phoneNumber, 
-          code: otp,
-          fullName: withName ? fullName : undefined,
-        },
+        body: { phoneNumber, code: otp, fullName: withName ? fullName : undefined },
       });
 
-      if (invokeError) {
-        throw new Error(invokeError.message || 'Code invalide');
-      }
+      if (invokeError) throw new Error(invokeError.message || 'Code invalide');
+      if (data?.error) throw new Error(data.error);
 
-      if (data?.error) {
-        throw new Error(data.error);
-      }
-
-      // ===== CASE: NEEDS NAME (new user) =====
       if (data?.action === 'needsName') {
         setSuccess('Code vérifié ! Entrez votre nom pour continuer.');
         setPhoneStep('name');
@@ -224,18 +233,14 @@ export default function ModernAuthPage() {
         return;
       }
 
-      // ===== CASE: LOGIN or REGISTER SUCCESS =====
       if (data?.sessionUrl) {
         setSuccess(data.isNewUser ? 'Compte créé ! Connexion...' : 'Connexion en cours...');
-        
         if (data.needsProfileCompletion) {
           sessionStorage.setItem('needsProfileCompletion', 'true');
         }
-        
         window.location.href = data.sessionUrl;
       } else if (data?.success && !data?.sessionUrl) {
-        // Backend succeeded but no sessionUrl - likely config issue
-        throw new Error('Erreur de génération du lien. Veuillez réessayer ou contacter le support.');
+        throw new Error('Erreur de génération du lien. Veuillez réessayer.');
       } else {
         throw new Error(data?.error || 'Erreur de connexion inattendue');
       }
@@ -247,494 +252,447 @@ export default function ModernAuthPage() {
     }
   };
 
-  // ===================== PHONE - SUBMIT NAME (final step for new users) =====================
   const handleSubmitName = async () => {
     if (!fullName.trim()) {
       setError('Veuillez entrer votre nom');
       return;
     }
-    // Re-verify with name to create account
     await handleVerifyOTP(true);
   };
 
   // ===================== RENDER =====================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-terracotta-50 to-coral-50 flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Building2 className="h-10 w-10 text-terracotta-600" />
-            <span className="text-3xl font-bold bg-gradient-to-r from-terracotta-600 to-coral-600 bg-clip-text text-transparent">
-              Mon Toit
-            </span>
+    <div className="min-h-screen flex bg-white font-sans selection:bg-[#F16522] selection:text-white">
+      
+      {/* --- COLONNE GAUCHE : VISUEL IMMERSIF (Hidden on Mobile) --- */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2C1810]">
+        {AUTH_SLIDES.map((slide, index) => (
+          <div 
+            key={index}
+            className={`absolute inset-0 transition-opacity duration-1000 ${index === slideIndex ? 'opacity-100' : 'opacity-0'}`}
+          >
+            <img 
+              src={slide.image} 
+              alt="Lifestyle" 
+              className="w-full h-full object-cover opacity-60" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#2C1810] via-[#2C1810]/50 to-transparent" />
           </div>
-          <p className="text-gray-600">Trouvez votre logement en Côte d'Ivoire</p>
+        ))}
+
+        {/* Logo Flottant */}
+        <div className="absolute top-8 left-8 flex items-center gap-3 z-10">
+          <div className="w-12 h-12 bg-[#F16522] rounded-xl flex items-center justify-center shadow-lg">
+            <Home className="w-7 h-7 text-white" />
+          </div>
+          <span className="text-2xl font-extrabold text-white tracking-tight">Mon Toit</span>
         </div>
 
-        {/* Auth Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 animate-scale-in">
-          
-          {/* Method selector - Phone is PRIMARY */}
-          <div className="flex gap-2 mb-6">
+        {/* Indicateurs de slide */}
+        <div className="absolute top-1/2 right-8 z-10 flex flex-col gap-2">
+          {AUTH_SLIDES.map((_, idx) => (
             <button
-              onClick={() => handleMethodChange('phone')}
-              className={`flex-1 py-3 px-4 rounded-xl font-medium border-2 transition-all flex items-center justify-center gap-2 ${
-                authMethod === 'phone'
-                  ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
+              key={idx}
+              onClick={() => setSlideIndex(idx)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === slideIndex ? 'bg-[#F16522] h-6' : 'bg-white/40 hover:bg-white/60'
               }`}
-            >
-              <Smartphone className="h-5 w-5" />
-              <span>Téléphone</span>
-              <span className="text-xs bg-green-500 text-white px-1.5 py-0.5 rounded-full">Rapide</span>
-            </button>
-            <button
-              onClick={() => handleMethodChange('email')}
-              className={`flex-1 py-3 px-4 rounded-xl font-medium border-2 transition-all flex items-center justify-center gap-2 ${
-                authMethod === 'email'
-                  ? 'border-terracotta-500 bg-terracotta-50 text-terracotta-700'
-                  : 'border-gray-200 text-gray-600 hover:border-gray-300'
-              }`}
-            >
-              <Mail className="h-5 w-5" />
-              <span>Email</span>
-            </button>
+            />
+          ))}
+        </div>
+
+        {/* Témoignage */}
+        <div className="absolute bottom-16 left-12 right-12 z-10">
+          <div className="flex gap-1 mb-4">
+            {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 text-[#F16522] fill-current" />)}
           </div>
+          <h2 className="text-3xl font-bold text-white mb-4 leading-tight">
+            "{AUTH_SLIDES[slideIndex]?.quote}"
+          </h2>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-1 rounded-full bg-[#F16522]" />
+            <p className="text-[#E8D4C5] font-medium">{AUTH_SLIDES[slideIndex]?.author}</p>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="absolute bottom-16 right-12 z-10 flex gap-6">
+          <div className="text-center">
+            <p className="text-3xl font-bold text-white">500+</p>
+            <p className="text-sm text-[#E8D4C5]">Logements</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl font-bold text-white">98%</p>
+            <p className="text-sm text-[#E8D4C5]">Satisfaits</p>
+          </div>
+        </div>
+      </div>
+
+      {/* --- COLONNE DROITE : FORMULAIRE --- */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 bg-[#FAF7F4] relative">
+        
+        {/* Déco de fond */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#F16522]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#2C1810]/5 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="w-full max-w-md space-y-6 relative z-10">
+          
+          {/* Header Mobile Only */}
+          <div className="lg:hidden flex items-center justify-center gap-2 mb-6">
+            <div className="w-10 h-10 bg-[#F16522] rounded-xl flex items-center justify-center">
+              <Home className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-bold text-[#2C1810]">Mon Toit</span>
+          </div>
+
+          {/* Titre */}
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-extrabold text-[#2C1810]">
+              {phoneStep === 'name' ? 'Bienvenue !' : 
+               phoneStep === 'verify' ? 'Vérification' : 
+               'Bienvenue chez vous'}
+            </h1>
+            <p className="text-[#6B5A4E]">
+              {phoneStep === 'name' ? 'Entrez votre nom pour finaliser' :
+               phoneStep === 'verify' ? `Entrez le code envoyé au ${phoneNumber}` :
+               'Connectez-vous pour accéder à votre espace'}
+            </p>
+          </div>
+
+          {/* Sélecteur de méthode - Style Toggle Premium */}
+          {phoneStep === 'enter' && (
+            <div className="bg-white p-1.5 rounded-2xl border border-[#EFEBE9] flex shadow-sm">
+              <button
+                onClick={() => handleMethodChange('phone')}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
+                  authMethod === 'phone' 
+                    ? 'bg-[#2C1810] text-white shadow-md' 
+                    : 'text-[#A69B95] hover:bg-[#FAF7F4]'
+                }`}
+              >
+                <Smartphone className="w-4 h-4" /> Téléphone
+                {authMethod === 'phone' && (
+                  <span className="text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded-full">Rapide</span>
+                )}
+              </button>
+              <button
+                onClick={() => handleMethodChange('email')}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
+                  authMethod === 'email' 
+                    ? 'bg-[#2C1810] text-white shadow-md' 
+                    : 'text-[#A69B95] hover:bg-[#FAF7F4]'
+                }`}
+              >
+                <Mail className="w-4 h-4" /> Email
+              </button>
+            </div>
+          )}
 
           {/* Messages */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm font-medium animate-slide-down">
+            <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium animate-fade-in">
               {error}
             </div>
           )}
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border-2 border-green-200 rounded-xl text-green-700 text-sm font-medium animate-slide-down">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm font-medium animate-fade-in">
               {success}
             </div>
           )}
 
-          {/* ==================== UNIFIED PHONE AUTH ==================== */}
+          {/* ==================== PHONE AUTH ==================== */}
           {authMethod === 'phone' && (
             <div className="space-y-5">
               
-              {/* STEP 1: Enter Phone Number */}
+              {/* STEP 1: Enter Phone */}
               {phoneStep === 'enter' && (
-                <>
-                  <div className="text-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Connexion rapide</h2>
-                    <p className="text-gray-500 text-sm">
-                      Entrez votre numéro pour vous connecter ou créer un compte
-                    </p>
+                <div className="space-y-4 animate-fade-in">
+                  <div className="relative group">
+                    <div className="absolute left-4 top-4 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors font-bold">
+                      +225
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="07 00 00 00 00"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="w-full py-4 pl-16 pr-4 rounded-xl bg-white border border-[#EFEBE9] text-[#2C1810] font-medium placeholder:text-[#A69B95] focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 outline-none transition-all"
+                      autoFocus
+                    />
                   </div>
 
-                  <InputWithIcon
-                    icon={Phone}
-                    label="Numéro de téléphone"
-                    variant="modern"
-                    type="tel"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="07 XX XX XX XX"
-                    autoFocus
-                  />
-
                   {/* Send method selector */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Recevoir le code par :
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setSendMethod('whatsapp')}
-                        className={`py-3 px-4 rounded-xl border-2 font-medium transition-all flex items-center justify-center gap-2 ${
-                          sendMethod === 'whatsapp'
-                            ? 'border-green-500 bg-green-50 text-green-700'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        💬 WhatsApp
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSendMethod('sms')}
-                        className={`py-3 px-4 rounded-xl border-2 font-medium transition-all flex items-center justify-center gap-2 ${
-                          sendMethod === 'sms'
-                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                            : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        📱 SMS
-                      </button>
-                    </div>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setSendMethod('whatsapp')}
+                      className={`flex-1 py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
+                        sendMethod === 'whatsapp'
+                          ? 'bg-green-50 border-2 border-green-500 text-green-700'
+                          : 'bg-white border border-[#EFEBE9] text-[#6B5A4E] hover:border-[#A69B95]'
+                      }`}
+                    >
+                      <MessageCircle className="w-4 h-4" /> WhatsApp
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSendMethod('sms')}
+                      className={`flex-1 py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
+                        sendMethod === 'sms'
+                          ? 'bg-blue-50 border-2 border-blue-500 text-blue-700'
+                          : 'bg-white border border-[#EFEBE9] text-[#6B5A4E] hover:border-[#A69B95]'
+                      }`}
+                    >
+                      <Phone className="w-4 h-4" /> SMS
+                    </button>
                   </div>
 
                   {/* Info */}
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
-                    <p className="text-sm text-amber-800">
+                  <div className="p-3 bg-[#F16522]/5 border border-[#F16522]/20 rounded-xl">
+                    <p className="text-sm text-[#2C1810]">
                       💡 Un code à 6 chiffres sera envoyé à votre numéro.
-                      <br />
-                      <span className="font-medium">Nouveau ?</span> Votre compte sera créé automatiquement.
+                      <span className="font-medium"> Nouveau ?</span> Votre compte sera créé automatiquement.
                     </p>
                   </div>
 
                   <button
                     onClick={handleSendOTP}
                     disabled={loading || phoneNumber.replace(/\D/g, '').length < 10}
-                    className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-[#F16522] hover:bg-[#D95318] text-white rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
-                      <><Loader2 className="h-5 w-5 animate-spin" /><span>Envoi...</span></>
+                      <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                      <><span>Recevoir mon code</span><ArrowRight className="h-5 w-5" /></>
+                      <>Recevoir mon code <ArrowRight className="w-5 h-5" /></>
                     )}
                   </button>
-                </>
+                </div>
               )}
 
               {/* STEP 2: Verify OTP */}
               {phoneStep === 'verify' && (
-                <OTPVerifyStep
-                  phoneNumber={phoneNumber}
-                  sendMethod={sendMethod}
-                  otp={otp}
-                  setOtp={setOtp}
-                  devOtp={devOtp}
-                  resendTimer={resendTimer}
-                  loading={loading}
-                  onVerify={() => handleVerifyOTP(false)}
-                  onResend={handleSendOTP}
-                  onBack={resetPhoneFlow}
-                />
-              )}
-
-              {/* STEP 3: Enter Name (new users only) */}
-              {phoneStep === 'name' && (
-                <>
+                <div className="space-y-5 animate-fade-in">
                   <button
                     type="button"
                     onClick={resetPhoneFlow}
-                    className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm font-medium mb-4"
+                    className="flex items-center gap-1 text-[#6B5A4E] hover:text-[#2C1810] text-sm font-medium"
                   >
-                    <ArrowLeft className="h-4 w-4" />
-                    Recommencer
+                    <ArrowLeft className="h-4 w-4" /> Modifier le numéro
                   </button>
 
-                  <div className="text-center mb-6">
+                  {devOtp && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm text-center">
+                      🧪 Mode dev - Code: <span className="font-bold">{devOtp}</span>
+                    </div>
+                  )}
+
+                  <div className="flex justify-center gap-2">
+                    {[0, 1, 2, 3, 4, 5].map((idx) => (
+                      <input
+                        key={idx}
+                        type="text"
+                        maxLength={1}
+                        value={otp[idx] || ''}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          const newOtp = otp.split('');
+                          newOtp[idx] = val;
+                          setOtp(newOtp.join('').slice(0, 6));
+                          if (val && idx < 5) {
+                            const next = e.target.nextElementSibling as HTMLInputElement | null;
+                            next?.focus();
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
+                            const prev = (e.target as HTMLElement).previousElementSibling as HTMLInputElement | null;
+                            prev?.focus();
+                          }
+                        }}
+                        className="w-12 h-14 border-2 border-[#EFEBE9] rounded-xl bg-white flex items-center justify-center text-xl font-bold text-[#2C1810] text-center focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 transition-all outline-none"
+                        autoFocus={idx === 0}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="text-center">
+                    <button 
+                      type="button" 
+                      onClick={handleSendOTP}
+                      disabled={resendTimer > 0}
+                      className="text-sm text-[#F16522] font-semibold hover:underline disabled:text-[#A69B95] disabled:no-underline"
+                    >
+                      {resendTimer > 0 ? `Renvoyer le code (${resendTimer}s)` : 'Renvoyer le code'}
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => handleVerifyOTP(false)}
+                    disabled={loading || otp.length !== 6}
+                    className="w-full py-4 bg-[#F16522] hover:bg-[#D95318] text-white rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <>Confirmer <ArrowRight className="w-5 h-5" /></>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* STEP 3: Enter Name */}
+              {phoneStep === 'name' && (
+                <div className="space-y-5 animate-fade-in">
+                  <button
+                    type="button"
+                    onClick={resetPhoneFlow}
+                    className="flex items-center gap-1 text-[#6B5A4E] hover:text-[#2C1810] text-sm font-medium"
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Recommencer
+                  </button>
+
+                  <div className="text-center">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
                       <span className="text-3xl">🎉</span>
                     </div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Bienvenue !</h2>
-                    <p className="text-gray-600 text-sm">
-                      Votre numéro est vérifié.<br />
-                      <span className="font-medium">Comment vous appelez-vous ?</span>
+                    <p className="text-[#6B5A4E] text-sm">
+                      Votre numéro est vérifié. <span className="font-medium">Comment vous appelez-vous ?</span>
                     </p>
                   </div>
 
-                  <InputWithIcon
-                    icon={User}
-                    label="Votre nom complet"
-                    variant="modern"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Ex: Jean Kouassi"
-                    autoFocus
-                  />
+                  <div className="relative group">
+                    <div className="absolute left-4 top-4 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Ex: Jean Kouassi"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="w-full py-4 pl-12 pr-4 rounded-xl bg-white border border-[#EFEBE9] text-[#2C1810] font-medium placeholder:text-[#A69B95] focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 outline-none transition-all"
+                      autoFocus
+                    />
+                  </div>
 
                   <button
                     onClick={handleSubmitName}
                     disabled={loading || !fullName.trim()}
-                    className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-[#F16522] hover:bg-[#D95318] text-white rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
-                      <><Loader2 className="h-5 w-5 animate-spin" /><span>Création...</span></>
+                      <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                      <><span>Créer mon compte</span><ArrowRight className="h-5 w-5" /></>
+                      <>Créer mon compte <ArrowRight className="w-5 h-5" /></>
                     )}
                   </button>
-
-                  <p className="text-xs text-gray-500 text-center mt-3">
-                    En créant un compte, vous acceptez nos conditions d'utilisation.
-                  </p>
-                </>
+                </div>
               )}
             </div>
           )}
 
-          {/* ==================== EMAIL AUTH (keeps login/register tabs) ==================== */}
-          {authMethod === 'email' && (
-            <>
-              {/* Email Tabs */}
-              <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-2xl">
+          {/* ==================== EMAIL AUTH ==================== */}
+          {authMethod === 'email' && phoneStep === 'enter' && (
+            <div className="space-y-5 animate-fade-in">
+              
+              {/* Email Mode Tabs */}
+              <div className="flex gap-2 bg-white p-1 rounded-xl border border-[#EFEBE9]">
                 <button
                   onClick={() => handleEmailModeChange('login')}
-                  className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                     emailMode === 'login'
-                      ? 'bg-gradient-to-r from-terracotta-500 to-coral-500 text-white shadow-lg'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-[#2C1810] text-white'
+                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4]'
                   }`}
                 >
                   Connexion
                 </button>
                 <button
                   onClick={() => handleEmailModeChange('register')}
-                  className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all ${
+                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
                     emailMode === 'register'
-                      ? 'bg-gradient-to-r from-terracotta-500 to-coral-500 text-white shadow-lg'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-[#2C1810] text-white'
+                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4]'
                   }`}
                 >
                   Inscription
                 </button>
               </div>
 
-              {/* EMAIL LOGIN */}
-              {emailMode === 'login' && (
-                <form onSubmit={handleEmailLogin} className="space-y-5">
-                  <div className="text-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Connexion par email</h2>
-                    <p className="text-gray-500 text-sm">Entrez vos identifiants</p>
-                  </div>
-
-                  <InputWithIcon
-                    icon={Mail}
-                    label="Email"
-                    variant="modern"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    required
-                    autoFocus
-                  />
-
-                  <InputWithIcon
-                    icon={Lock}
-                    label="Mot de passe"
-                    variant="modern"
-                    isPassword
-                    showPasswordToggle
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                  />
-
-                  <div className="text-right">
-                    <button
-                      type="button"
-                      onClick={() => navigate('/mot-de-passe-oublie')}
-                      className="text-sm text-terracotta-600 hover:text-terracotta-700 font-semibold"
-                    >
-                      Mot de passe oublié ?
-                    </button>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <><Loader2 className="h-5 w-5 animate-spin" /><span>Connexion...</span></>
-                    ) : (
-                      <><span>Se connecter</span><ArrowRight className="h-5 w-5" /></>
-                    )}
-                  </button>
-                </form>
-              )}
-
-              {/* EMAIL REGISTER */}
-              {emailMode === 'register' && (
-                <form onSubmit={handleEmailRegister} className="space-y-5">
-                  <div className="text-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">Inscription par email</h2>
-                    <p className="text-gray-500 text-sm">Créez votre compte</p>
-                  </div>
-
+              <form onSubmit={emailMode === 'login' ? handleEmailLogin : handleEmailRegister} className="space-y-4">
+                
+                {emailMode === 'register' && (
                   <InputWithIcon
                     icon={User}
                     label="Nom complet"
-                    variant="modern"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Jean Kouassi"
                     required
-                    autoFocus
                   />
+                )}
 
-                  <InputWithIcon
-                    icon={Mail}
-                    label="Email"
-                    variant="modern"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="votre@email.com"
-                    required
-                  />
+                <InputWithIcon
+                  icon={Mail}
+                  label="Email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="exemple@email.com"
+                  required
+                />
 
-                  <InputWithIcon
-                    icon={Lock}
-                    label="Mot de passe"
-                    variant="modern"
-                    isPassword
-                    showPasswordToggle
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Minimum 6 caractères"
-                    required
-                  />
+                <InputWithIcon
+                  icon={Lock}
+                  label="Mot de passe"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                />
 
+                {emailMode === 'register' && (
                   <InputWithIcon
                     icon={Lock}
                     label="Confirmer le mot de passe"
-                    variant="modern"
-                    isPassword
-                    showPasswordToggle
+                    type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirmez"
+                    placeholder="••••••••"
                     required
                   />
+                )}
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <><Loader2 className="h-5 w-5 animate-spin" /><span>Création...</span></>
-                    ) : (
-                      <><span>Créer mon compte</span><ArrowRight className="h-5 w-5" /></>
-                    )}
-                  </button>
-                </form>
-              )}
-            </>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 bg-[#F16522] hover:bg-[#D95318] text-white rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <>{emailMode === 'login' ? 'Se connecter' : 'Créer mon compte'} <ArrowRight className="w-5 h-5" /></>
+                  )}
+                </button>
+              </form>
+            </div>
           )}
 
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-500 text-xs">
+          {/* Footer Légal */}
+          <div className="text-center text-xs text-[#A69B95] space-y-2 pt-4">
+            <p className="flex items-center justify-center gap-1">
+              <Shield className="w-3 h-3" /> Vos données sont chiffrées et sécurisées.
+            </p>
+            <p>
               En continuant, vous acceptez nos{' '}
-              <button onClick={() => navigate('/conditions')} className="text-terracotta-600 hover:underline">
-                conditions d'utilisation
-              </button>
+              <a href="#" className="underline hover:text-[#2C1810]">Conditions</a> et notre{' '}
+              <a href="#" className="underline hover:text-[#2C1810]">Politique de confidentialité</a>.
             </p>
           </div>
+
         </div>
       </div>
     </div>
-  );
-}
-
-// ===================== OTP VERIFY STEP COMPONENT =====================
-interface OTPVerifyStepProps {
-  phoneNumber: string;
-  sendMethod: 'sms' | 'whatsapp';
-  otp: string;
-  setOtp: (otp: string) => void;
-  devOtp: string | null;
-  resendTimer: number;
-  loading: boolean;
-  onVerify: () => void;
-  onResend: () => void;
-  onBack: () => void;
-}
-
-function OTPVerifyStep({
-  phoneNumber,
-  sendMethod,
-  otp,
-  setOtp,
-  devOtp,
-  resendTimer,
-  loading,
-  onVerify,
-  onResend,
-  onBack,
-}: OTPVerifyStepProps) {
-  return (
-    <>
-      <button
-        type="button"
-        onClick={onBack}
-        className="flex items-center gap-1 text-gray-600 hover:text-gray-900 text-sm font-medium mb-4"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Modifier le numéro
-      </button>
-
-      <div className="text-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Entrez votre code</h2>
-        <p className="text-gray-600 text-sm">
-          Code envoyé par {sendMethod === 'sms' ? 'SMS' : 'WhatsApp'} au
-          <br />
-          <span className="font-bold text-gray-900">{phoneNumber}</span>
-        </p>
-      </div>
-
-      {/* Dev Mode OTP */}
-      {devOtp && (
-        <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl animate-pulse">
-          <p className="text-center text-sm text-amber-800 font-medium mb-1">🧪 Mode développement</p>
-          <p className="text-center text-3xl font-mono font-bold text-amber-900 tracking-widest">{devOtp}</p>
-          <button
-            type="button"
-            onClick={() => setOtp(devOtp)}
-            className="w-full mt-2 py-2 text-sm font-semibold text-amber-700 hover:text-amber-900 underline"
-          >
-            Remplir automatiquement
-          </button>
-        </div>
-      )}
-
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-2 text-center">
-          Code à 6 chiffres
-        </label>
-        <input
-          type="text"
-          value={otp}
-          onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-          placeholder="000000"
-          className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:border-terracotta-500 focus:ring-4 focus:ring-terracotta-100 outline-none transition-all text-center text-3xl font-mono tracking-[0.5em]"
-          maxLength={6}
-          autoFocus
-        />
-      </div>
-
-      <div className="text-center mt-4">
-        {resendTimer > 0 ? (
-          <p className="text-sm text-gray-500 font-medium">
-            Renvoyer dans <span className="text-terracotta-600 font-bold">{resendTimer}s</span>
-          </p>
-        ) : (
-          <button
-            type="button"
-            onClick={onResend}
-            className="text-sm text-terracotta-600 hover:text-terracotta-700 font-bold"
-          >
-            Renvoyer le code
-          </button>
-        )}
-      </div>
-
-      <button
-        onClick={onVerify}
-        disabled={loading || otp.length !== 6}
-        className="w-full mt-4 py-4 bg-gradient-to-r from-terracotta-600 to-coral-600 text-white rounded-xl font-bold text-lg hover:from-terracotta-700 hover:to-coral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-      >
-        {loading ? (
-          <><Loader2 className="h-5 w-5 animate-spin" /><span>Vérification...</span></>
-        ) : (
-          <><span>Valider</span><ArrowRight className="h-5 w-5" /></>
-        )}
-      </button>
-    </>
   );
 }

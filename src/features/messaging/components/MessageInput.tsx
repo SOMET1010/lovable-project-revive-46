@@ -67,11 +67,11 @@ export function MessageInput({ onSend, disabled, sending }: MessageInputProps) {
     let attachment: Attachment | null = null;
     if (selectedFile) {
       attachment = {
-        url: previewUrl || '', // Will be replaced by actual URL after upload
+        url: previewUrl || '',
         type: fileType,
         name: selectedFile.name,
         size: selectedFile.size,
-        file: selectedFile, // Pass the file for upload
+        file: selectedFile,
       } as Attachment & { file: File };
     }
 
@@ -91,10 +91,10 @@ export function MessageInput({ onSend, disabled, sending }: MessageInputProps) {
   const hasContent = content.trim().length > 0 || selectedFile !== null;
 
   return (
-    <div className="bg-[#202C33]">
+    <div className="bg-white border-t border-[#EFEBE9]">
       {/* File Preview */}
       {selectedFile && (
-        <div className="px-4 py-3 border-b border-[#374248]">
+        <div className="px-4 py-3 border-b border-[#EFEBE9]">
           <AttachmentPreview
             url={previewUrl || ''}
             type={fileType}
@@ -105,7 +105,7 @@ export function MessageInput({ onSend, disabled, sending }: MessageInputProps) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="px-4 py-3 flex items-end gap-2">
+      <form onSubmit={handleSubmit} className="p-4">
         {/* Hidden file input */}
         <input
           ref={fileInputRef}
@@ -114,82 +114,84 @@ export function MessageInput({ onSend, disabled, sending }: MessageInputProps) {
           onChange={handleFileSelect}
         />
 
-        {/* Emoji button */}
-        <button
-          type="button"
-          className="p-2 hover:bg-[#374248] rounded-full transition-colors flex-shrink-0"
-        >
-          <Smile className="h-6 w-6 text-[#8696A0]" />
-        </button>
-
-        {/* Attachment button with menu */}
-        <div className="relative">
+        <div className="flex items-end gap-3 bg-[#FAF7F4] p-2 rounded-[20px] border border-[#EFEBE9] focus-within:border-[#F16522]/30 focus-within:ring-4 focus-within:ring-[#F16522]/5 transition-all">
+          {/* Emoji button */}
           <button
             type="button"
-            onClick={() => setShowAttachMenu(!showAttachMenu)}
-            className="p-2 hover:bg-[#374248] rounded-full transition-colors flex-shrink-0"
+            className="p-3 hover:bg-white rounded-full transition-colors text-[#A69B95] hover:text-[#6B5A4E]"
           >
-            <Paperclip className="h-6 w-6 text-[#8696A0]" />
+            <Smile className="h-5 w-5" />
           </button>
 
-          {/* Attachment menu */}
-          {showAttachMenu && (
-            <div className="absolute bottom-full left-0 mb-2 bg-[#233138] rounded-lg shadow-lg overflow-hidden">
-              <button
-                type="button"
-                onClick={() => openFilePicker('image')}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-[#374248] w-full text-left"
-              >
-                <div className="w-10 h-10 bg-[#BF59CF] rounded-full flex items-center justify-center">
-                  <ImageIcon className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-[#E9EDEF] text-sm">Photos</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => openFilePicker('document')}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-[#374248] w-full text-left"
-              >
-                <div className="w-10 h-10 bg-[#5157AE] rounded-full flex items-center justify-center">
-                  <FileText className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-[#E9EDEF] text-sm">Documents</span>
-              </button>
-            </div>
+          {/* Attachment button with menu */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowAttachMenu(!showAttachMenu)}
+              className="p-3 hover:bg-white rounded-full transition-colors text-[#A69B95] hover:text-[#6B5A4E]"
+            >
+              <Paperclip className="h-5 w-5" />
+            </button>
+
+            {/* Attachment menu */}
+            {showAttachMenu && (
+              <div className="absolute bottom-full left-0 mb-2 bg-white rounded-xl shadow-lg border border-[#EFEBE9] overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => openFilePicker('image')}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-[#FAF7F4] w-full text-left"
+                >
+                  <div className="w-10 h-10 bg-[#F16522]/10 rounded-full flex items-center justify-center">
+                    <ImageIcon className="h-5 w-5 text-[#F16522]" />
+                  </div>
+                  <span className="text-[#2C1810] text-sm font-medium">Photos</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openFilePicker('document')}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-[#FAF7F4] w-full text-left"
+                >
+                  <div className="w-10 h-10 bg-[#2C1810]/10 rounded-full flex items-center justify-center">
+                    <FileText className="h-5 w-5 text-[#2C1810]" />
+                  </div>
+                  <span className="text-[#2C1810] text-sm font-medium">Documents</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Input */}
+          <div className="flex-1">
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={selectedFile ? "Ajouter un commentaire..." : "Écrivez votre message..."}
+              disabled={disabled || sending}
+              rows={1}
+              className="w-full px-2 py-3 bg-transparent text-sm text-[#2C1810] placeholder-[#A69B95] focus:outline-none resize-none max-h-32 font-medium"
+              style={{ minHeight: '44px' }}
+            />
+          </div>
+
+          {/* Send or Mic button */}
+          {hasContent ? (
+            <button
+              type="submit"
+              disabled={!hasContent || disabled || sending}
+              className="p-3 bg-[#F16522] hover:bg-[#D95318] rounded-full transition-all shadow-md shadow-[#F16522]/20 disabled:opacity-50 hover:scale-105"
+            >
+              <Send className={`h-5 w-5 text-white ${sending ? 'animate-pulse' : ''}`} />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="p-3 hover:bg-white rounded-full transition-colors text-[#A69B95] hover:text-[#6B5A4E]"
+            >
+              <Mic className="h-5 w-5" />
+            </button>
           )}
         </div>
-
-        {/* Input */}
-        <div className="flex-1 bg-[#2A3942] rounded-lg">
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={selectedFile ? "Ajouter un commentaire..." : "Tapez un message"}
-            disabled={disabled || sending}
-            rows={1}
-            className="w-full px-4 py-3 bg-transparent text-sm text-[#E9EDEF] placeholder-[#8696A0] focus:outline-none resize-none max-h-32"
-            style={{ minHeight: '44px' }}
-          />
-        </div>
-
-        {/* Send or Mic button */}
-        {hasContent ? (
-          <button
-            type="submit"
-            disabled={!hasContent || disabled || sending}
-            className="p-3 bg-[#00A884] hover:bg-[#00957A] rounded-full transition-colors flex-shrink-0 disabled:opacity-50"
-          >
-            <Send className={`h-5 w-5 text-[#111B21] ${sending ? 'animate-pulse' : ''}`} />
-          </button>
-        ) : (
-          <button
-            type="button"
-            className="p-3 hover:bg-[#374248] rounded-full transition-colors flex-shrink-0"
-          >
-            <Mic className="h-5 w-5 text-[#8696A0]" />
-          </button>
-        )}
       </form>
     </div>
   );

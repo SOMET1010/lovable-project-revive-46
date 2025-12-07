@@ -1,4 +1,4 @@
-import { Search, MessageSquare, MoreVertical } from 'lucide-react';
+import { Search, MessageSquare } from 'lucide-react';
 import { useState } from 'react';
 import { Conversation } from '../services/messaging.service';
 import { ConversationItem } from './ConversationItem';
@@ -24,50 +24,46 @@ export function ConversationList({ conversations, selectedId, onSelect, loading 
   });
 
   return (
-    <div className="flex flex-col h-full bg-[#111B21]">
-      {/* WhatsApp Header */}
-      <div className="bg-[#202C33] px-4 py-3 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-[#E9EDEF]">Mon Toit</h2>
-        <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-[#374248] rounded-full transition-colors">
-            <MoreVertical className="h-5 w-5 text-[#AEBAC1]" />
-          </button>
-        </div>
-      </div>
-
-      {/* Search Bar - WhatsApp Style */}
-      <div className="px-3 py-2 bg-[#111B21]">
-        <div className="relative bg-[#202C33] rounded-lg flex items-center">
-          <Search className="absolute left-3 h-4 w-4 text-[#8696A0]" />
-          <input
-            type="text"
+    <div className="flex flex-col h-full bg-white">
+      {/* Header Premium Ivorian */}
+      <div className="p-6 border-b border-[#EFEBE9]">
+        <h1 className="text-2xl font-bold text-[#2C1810] mb-4">Messages</h1>
+        <div className="relative">
+          <Search className="absolute left-4 top-3.5 w-4 h-4 text-[#A69B95]" />
+          <input 
+            type="text" 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher ou démarrer une discussion"
-            className="w-full pl-10 pr-4 py-2 bg-transparent text-sm text-[#E9EDEF] placeholder-[#8696A0] focus:outline-none"
+            placeholder="Rechercher une conversation..." 
+            className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#FAF7F4] border-transparent focus:bg-white focus:border-[#F16522] focus:ring-2 focus:ring-[#F16522]/10 transition-all text-sm font-medium text-[#2C1810] placeholder:text-[#A69B95] outline-none"
           />
         </div>
       </div>
 
-      {/* List */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Liste */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-2">
         {loading ? (
-          <div className="p-4 space-y-4">
+          <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center gap-3 animate-pulse px-3">
-                <div className="w-12 h-12 bg-[#202C33] rounded-full" />
+              <div key={i} className="flex items-center gap-3 animate-pulse p-4">
+                <div className="w-12 h-12 bg-[#EFEBE9] rounded-full" />
                 <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-[#202C33] rounded w-3/4" />
-                  <div className="h-3 bg-[#202C33] rounded w-1/2" />
+                  <div className="h-4 bg-[#EFEBE9] rounded w-3/4" />
+                  <div className="h-3 bg-[#EFEBE9] rounded w-1/2" />
                 </div>
               </div>
             ))}
           </div>
         ) : filteredConversations.length === 0 ? (
           <div className="p-8 text-center">
-            <MessageSquare className="h-12 w-12 text-[#3B4A54] mx-auto mb-3" />
-            <p className="text-[#8696A0] text-sm">
+            <div className="w-16 h-16 bg-[#FAF7F4] rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <MessageSquare className="h-8 w-8 text-[#A69B95]" />
+            </div>
+            <p className="text-[#6B5A4E] font-medium">
               {search ? 'Aucune conversation trouvée' : 'Aucune conversation'}
+            </p>
+            <p className="text-[#A69B95] text-sm mt-1">
+              Démarrez une conversation depuis une annonce
             </p>
           </div>
         ) : (
