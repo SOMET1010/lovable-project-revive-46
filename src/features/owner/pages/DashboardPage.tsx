@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Building, Users, FileText, Wrench, MessageSquare, Plus, Eye, TrendingUp, Calendar } from 'lucide-react';
+import { Home, Building, Users, FileText, Wrench, MessageSquare, Plus, Eye, TrendingUp, Calendar, Handshake } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
@@ -306,6 +306,13 @@ export default function OwnerDashboardPage() {
                 >
                   <FileText className="h-5 w-5 mr-2" />
                   Mes contrats
+                </Link>
+                <Link 
+                  to="/mes-mandats"
+                  className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <Handshake className="h-5 w-5 mr-2" />
+                  Mandats agence
                 </Link>
                 <Link 
                   to="/messages"

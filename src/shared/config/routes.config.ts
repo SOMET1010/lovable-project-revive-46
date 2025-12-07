@@ -56,6 +56,8 @@ export const ROUTES = {
     PROPERTIES: '/dashboard/agence/proprietes',
     TEAM: '/dashboard/agence/equipe',
     COMMISSIONS: '/dashboard/agence/commissions',
+    MY_MANDATES: '/mes-mandats',
+    MANDATE_DETAIL: '/mandat/:id',
   },
 
   CONTRACTS: {
