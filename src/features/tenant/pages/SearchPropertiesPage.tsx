@@ -17,7 +17,8 @@ import {
   Banknote,
   Loader2,
   Filter,
-  Bookmark
+  Bookmark,
+  Layers
 } from 'lucide-react';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapWrapper from '@/shared/ui/MapWrapper';
@@ -48,6 +49,7 @@ export default function SearchPropertiesPage() {
   const [activeView, setActiveView] = useState<'list' | 'map'>('list');
   const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [useClusterMode, setUseClusterMode] = useState(true);
 
   // Search filters from URL
   const [city, setCity] = useState(searchParams.get('city') || '');
@@ -694,8 +696,42 @@ export default function SearchPropertiesPage() {
           {/* MAP (Visible seulement si mode Carte activé) */}
           {activeView === 'map' && (
             <div className="hidden lg:block w-[45%] h-[800px] sticky top-24">
+              {/* Toggle Cluster/Marqueurs */}
+              <div className="flex justify-end mb-3">
+                <div 
+                  className="bg-white border rounded-full p-1 flex items-center gap-1 shadow-sm"
+                  style={{ borderColor: COLORS.border }}
+                >
+                  <button 
+                    type="button"
+                    onClick={() => setUseClusterMode(true)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-medium`}
+                    style={{ 
+                      backgroundColor: useClusterMode ? COLORS.orange : 'transparent',
+                      color: useClusterMode ? 'white' : COLORS.grisNeutre
+                    }}
+                    title="Regrouper les propriétés proches en clusters"
+                  >
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>Clusters</span>
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setUseClusterMode(false)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-medium`}
+                    style={{ 
+                      backgroundColor: !useClusterMode ? COLORS.orange : 'transparent',
+                      color: !useClusterMode ? 'white' : COLORS.grisNeutre
+                    }}
+                    title="Afficher chaque propriété individuellement"
+                  >
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span>Marqueurs</span>
+                  </button>
+                </div>
+              </div>
               <div 
-                className="w-full h-full rounded-[24px] overflow-hidden shadow-inner border"
+                className="w-full h-[calc(100%-44px)] rounded-[24px] overflow-hidden shadow-inner border"
                 style={{ borderColor: COLORS.border }}
               >
                 {properties.filter(p => p.longitude !== null && p.latitude !== null).length > 0 ? (
@@ -703,7 +739,7 @@ export default function SearchPropertiesPage() {
                     properties={properties.filter(p => p.longitude !== null && p.latitude !== null) as any}
                     height="100%"
                     fitBounds={properties.length > 0}
-                    useClusterMode={true}
+                    useClusterMode={useClusterMode}
                     onMarkerClick={(property: { id: string }) => {
                       navigate(`/proprietes/${property.id}`);
                     }}
@@ -735,6 +771,38 @@ export default function SearchPropertiesPage() {
         {/* Vue carte mobile */}
         {activeView === 'map' && (
           <div className="lg:hidden space-y-6">
+            {/* Toggle Cluster/Marqueurs Mobile */}
+            <div className="flex justify-end">
+              <div 
+                className="bg-white border rounded-full p-1 flex items-center gap-1 shadow-sm"
+                style={{ borderColor: COLORS.border }}
+              >
+                <button 
+                  type="button"
+                  onClick={() => setUseClusterMode(true)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-medium`}
+                  style={{ 
+                    backgroundColor: useClusterMode ? COLORS.orange : 'transparent',
+                    color: useClusterMode ? 'white' : COLORS.grisNeutre
+                  }}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span>Clusters</span>
+                </button>
+                <button 
+                  type="button"
+                  onClick={() => setUseClusterMode(false)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-medium`}
+                  style={{ 
+                    backgroundColor: !useClusterMode ? COLORS.orange : 'transparent',
+                    color: !useClusterMode ? 'white' : COLORS.grisNeutre
+                  }}
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Marqueurs</span>
+                </button>
+              </div>
+            </div>
             <div 
               className="h-[400px] rounded-2xl overflow-hidden shadow-lg border"
               style={{ borderColor: COLORS.border }}
@@ -744,7 +812,7 @@ export default function SearchPropertiesPage() {
                   properties={properties.filter(p => p.longitude !== null && p.latitude !== null) as any}
                   height="100%"
                   fitBounds={properties.length > 0}
-                  useClusterMode={true}
+                  useClusterMode={useClusterMode}
                   onMarkerClick={(property: { id: string }) => {
                     navigate(`/proprietes/${property.id}`);
                   }}
