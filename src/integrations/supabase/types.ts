@@ -113,6 +113,7 @@ export type Database = {
       agency_mandates: {
         Row: {
           agency_id: string
+          agency_signed_at: string | null
           can_communicate_tenants: boolean | null
           can_create_leases: boolean | null
           can_create_properties: boolean | null
@@ -126,20 +127,25 @@ export type Database = {
           can_view_properties: boolean | null
           commission_rate: number | null
           created_at: string | null
+          cryptoneo_operation_id: string | null
+          cryptoneo_signature_status: string | null
           end_date: string | null
           id: string
           mandate_document_url: string | null
           mandate_scope: string | null
           notes: string | null
           owner_id: string
+          owner_signed_at: string | null
           property_id: string | null
           signed_at: string | null
+          signed_mandate_url: string | null
           start_date: string
           status: string | null
           updated_at: string | null
         }
         Insert: {
           agency_id: string
+          agency_signed_at?: string | null
           can_communicate_tenants?: boolean | null
           can_create_leases?: boolean | null
           can_create_properties?: boolean | null
@@ -153,20 +159,25 @@ export type Database = {
           can_view_properties?: boolean | null
           commission_rate?: number | null
           created_at?: string | null
+          cryptoneo_operation_id?: string | null
+          cryptoneo_signature_status?: string | null
           end_date?: string | null
           id?: string
           mandate_document_url?: string | null
           mandate_scope?: string | null
           notes?: string | null
           owner_id: string
+          owner_signed_at?: string | null
           property_id?: string | null
           signed_at?: string | null
+          signed_mandate_url?: string | null
           start_date?: string
           status?: string | null
           updated_at?: string | null
         }
         Update: {
           agency_id?: string
+          agency_signed_at?: string | null
           can_communicate_tenants?: boolean | null
           can_create_leases?: boolean | null
           can_create_properties?: boolean | null
@@ -180,14 +191,18 @@ export type Database = {
           can_view_properties?: boolean | null
           commission_rate?: number | null
           created_at?: string | null
+          cryptoneo_operation_id?: string | null
+          cryptoneo_signature_status?: string | null
           end_date?: string | null
           id?: string
           mandate_document_url?: string | null
           mandate_scope?: string | null
           notes?: string | null
           owner_id?: string
+          owner_signed_at?: string | null
           property_id?: string | null
           signed_at?: string | null
+          signed_mandate_url?: string | null
           start_date?: string
           status?: string | null
           updated_at?: string | null
@@ -764,6 +779,53 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mandate_signature_logs: {
+        Row: {
+          created_at: string
+          cryptoneo_response: Json | null
+          error_message: string | null
+          id: string
+          ip_address: string | null
+          mandate_id: string
+          operation_id: string | null
+          signer_id: string
+          signer_type: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          cryptoneo_response?: Json | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          mandate_id: string
+          operation_id?: string | null
+          signer_id: string
+          signer_type: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          cryptoneo_response?: Json | null
+          error_message?: string | null
+          id?: string
+          ip_address?: string | null
+          mandate_id?: string
+          operation_id?: string | null
+          signer_id?: string
+          signer_type?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mandate_signature_logs_mandate_id_fkey"
+            columns: ["mandate_id"]
+            isOneToOne: false
+            referencedRelation: "agency_mandates"
             referencedColumns: ["id"]
           },
         ]

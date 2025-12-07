@@ -69,6 +69,12 @@ export interface AgencyMandate {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  // Signature fields
+  cryptoneo_operation_id: string | null;
+  cryptoneo_signature_status: 'pending' | 'owner_signed' | 'agency_signed' | 'completed' | 'failed' | 'expired' | null;
+  signed_mandate_url: string | null;
+  owner_signed_at: string | null;
+  agency_signed_at: string | null;
   // Permissions
   can_view_properties: boolean;
   can_edit_properties: boolean;
