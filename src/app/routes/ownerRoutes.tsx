@@ -3,6 +3,9 @@ import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import ProtectedRoute from '@/shared/ui/ProtectedRoute';
 import { ROLES, OWNER_ROLES, PROPERTY_MANAGER_ROLES } from '@/shared/constants/roles';
 
+// Agency mandates
+const MyMandatesPage = lazyWithRetry(() => import('@/features/agency/pages/MyMandatesPage'));
+
 // Owner pages
 const AddProperty = lazyWithRetry(() => import('@/features/owner/pages/AddPropertyPage'));
 const OwnerDashboard = lazyWithRetry(() => import('@/features/owner/pages/DashboardPage'));
@@ -61,5 +64,15 @@ export const ownerRoutes: RouteObject[] = [
   { 
     path: 'dashboard/agence', 
     element: <ProtectedRoute allowedRoles={[ROLES.AGENCY, ROLES.AGENT]}><AgencyDashboard /></ProtectedRoute> 
+  },
+
+  // Agency mandates
+  { 
+    path: 'mes-mandats', 
+    element: <ProtectedRoute allowedRoles={[ROLES.OWNER, ROLES.AGENCY, ROLES.AGENT]}><MyMandatesPage /></ProtectedRoute> 
+  },
+  { 
+    path: 'dashboard/mes-mandats', 
+    element: <ProtectedRoute allowedRoles={[ROLES.OWNER, ROLES.AGENCY, ROLES.AGENT]}><MyMandatesPage /></ProtectedRoute> 
   },
 ];
