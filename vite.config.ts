@@ -1,3 +1,4 @@
+// Force complete rebuild - 2025-12-07T18:55:00Z
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
