@@ -1,5 +1,5 @@
-// Force re-bundle - 2025-12-06T15:00:00Z
-import { useState, useEffect, useRef } from 'react';
+// Force re-bundle - 2025-12-07T10:00:00Z
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Search, MapPin, Home, FileCheck, 
@@ -214,13 +214,24 @@ export default function HomePage() {
     return () => clearInterval(timer);
   }, [heroImageIndex]);
 
+  // Memoized filters for PropertiesWithMap
+  const heroFilters = useMemo(() => ({
+    type: propertyType,
+    location: location,
+    maxPrice: budget === 'unlimited' ? 0 : parseInt(budget) || 0,
+  }), [propertyType, location, budget]);
+
+  // Reset filters handler
+  const handleResetFilters = () => {
+    setPropertyType('');
+    setLocation('');
+    setBudget('');
+  };
+
   // Handlers
   const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (propertyType) params.set('type', propertyType);
-    if (location) params.set('city', location);
-    if (budget) params.set('maxPrice', budget);
-    navigate(`/recherche?${params.toString()}`);
+    // Scroll to properties section for instant feedback
+    propertiesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   const handleQuickSearch = (term: string) => navigate(`/recherche?q=${encodeURIComponent(term)}`);
@@ -486,6 +497,8 @@ export default function HomePage() {
           properties={properties} 
           isLoading={loadingProperties}
           isVisible={propertiesVisible}
+          filters={heroFilters}
+          onResetFilters={handleResetFilters}
         />
       </div>
 
