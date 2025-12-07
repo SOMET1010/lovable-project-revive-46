@@ -159,9 +159,12 @@ export default function MandateCard({
       {/* Content */}
       <div className="p-4">
         {/* Property Info */}
-        <h3 className="font-semibold text-neutral-900 truncate mb-1">
+        <Link 
+          to={`/mandat/${mandate.id}`}
+          className="block font-semibold text-neutral-900 truncate mb-1 hover:text-primary transition-colors"
+        >
           {mandate.property?.title || 'Propriété'}
-        </h3>
+        </Link>
         
         <div className="flex items-center gap-1 text-sm text-neutral-500 mb-3">
           <MapPin className="h-3.5 w-3.5" />
