@@ -3,6 +3,7 @@
  */
 
 export { default as TrustAgentDashboardPage } from './DashboardPage';
+export { default as CalendarPage } from './CalendarPage';
 export { default as MissionDetailPage } from './MissionDetailPage';
 export { default as PhotoVerificationPage } from './PhotoVerificationPage';
 export { default as DocumentValidationPage } from './DocumentValidationPage';
