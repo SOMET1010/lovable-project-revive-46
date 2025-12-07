@@ -286,7 +286,7 @@ export default function HomePage() {
               <div className="space-y-4 animate-in slide-in-from-bottom-5 duration-700">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm">
                   <Star className="w-3 h-3 text-[#F16522] fill-current" />
-                  <span className="text-[#F5E6D3] text-xs font-bold tracking-wider uppercase">N°1 de la confiance à Abidjan</span>
+                  <span className="text-[#F5E6D3] text-xs font-bold tracking-wider uppercase">Votre partenaire immobilier vérifié</span>
                 </div>
                 
                 <h1 className="text-4xl md:text-5xl lg:text-7xl font-extrabold leading-[1.1] text-white tracking-tight">
