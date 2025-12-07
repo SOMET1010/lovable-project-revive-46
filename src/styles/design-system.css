@@ -9,6 +9,50 @@
 
 /* ===== PALETTE MODERN MINIMALISM PREMIUM ===== */
 :root {
+  /* === VARIABLES SHADCN/UI COMPATIBLES (format HSL sans parenthèses) === */
+  
+  /* Couleurs de base */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  
+  /* Cartes et surfaces */
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9%;
+  
+  /* Popover et menus */
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9%;
+  
+  /* Couleur principale Orange MONTOIT */
+  --primary: 18 100% 59%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Couleur secondaire */
+  --secondary: 0 0% 96%;
+  --secondary-foreground: 0 0% 9%;
+  
+  /* Muted (texte secondaire, fonds légers) */
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  
+  /* Accent */
+  --accent: 18 100% 97%;
+  --accent-foreground: 18 100% 59%;
+  
+  /* Destructif/Erreur */
+  --destructive: 0 84% 50%;
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Bordures et inputs */
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 18 100% 59%;
+  
+  /* Radius global */
+  --radius: 12px;
+
+  /* === PALETTE ORIGINALE MON TOIT === */
+  
   /* Primary Orange - Brand MONTOITVPROD */
   --color-primary-50: #FFF5F0;
   --color-primary-100: #FFE5D6;
