@@ -1,10 +1,19 @@
 import { Link } from 'react-router-dom';
-import { Home as HomeIcon, Bed, Bath, Maximize } from 'lucide-react';
+import { Bed, Bath, Maximize } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
 import { OwnerBadge } from '@/shared/ui';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
+
+const FALLBACK_IMAGE = '/images/hero-villa-cocody.jpg';
+
+function handleImageError(e: React.SyntheticEvent<HTMLImageElement>) {
+  const target = e.target as HTMLImageElement;
+  if (target.src !== FALLBACK_IMAGE) {
+    target.src = FALLBACK_IMAGE;
+  }
+}
 
 interface PropertyCardProps {
   property: Property;
@@ -25,6 +34,8 @@ export default function PropertyCard({
   ownerAvatarUrl,
   ownerIsVerified,
 }: PropertyCardProps) {
+  const imageUrl = property.images?.[0] || FALLBACK_IMAGE;
+
   return (
     <Link
       to={`/propriete/${property.id}`}
@@ -34,20 +45,15 @@ export default function PropertyCard({
     >
       {/* Image Container - 60%+ de la carte */}
       <div className="relative h-72 sm:h-80 bg-[var(--color-creme)] overflow-hidden">
-        {property.images && property.images.length > 0 ? (
-          <img
-            src={property.images[0]}
-            alt={`${property.title} - ${property.city}, ${property.neighborhood}`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
-            width="320"
-            height="320"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-[var(--color-sable-light)]">
-            <HomeIcon className="h-16 w-16 text-[var(--color-gris-neutre)]" />
-          </div>
-        )}
+        <img
+          src={imageUrl}
+          alt={`${property.title} - ${property.city}, ${property.neighborhood}`}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+          width="320"
+          height="320"
+          onError={handleImageError}
+        />
 
         {/* Prix en Overlay - Bottom Left */}
         <div className="absolute bottom-3 left-3 px-4 py-2 bg-[var(--color-chocolat)]/90 backdrop-blur-sm rounded-xl text-white shadow-lg">

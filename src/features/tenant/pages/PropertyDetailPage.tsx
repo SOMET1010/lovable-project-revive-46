@@ -60,32 +60,40 @@ interface ImageGalleryProps {
   onIndexChange: (index: number) => void;
 }
 
-function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalleryProps) {
-  if (!images || images.length === 0) {
-    images = ['/images/placeholder-property.jpg'];
+const FALLBACK_IMAGE = '/images/hero-villa-cocody.jpg';
+
+function handleImageError(e: React.SyntheticEvent<HTMLImageElement>) {
+  const target = e.target as HTMLImageElement;
+  if (target.src !== FALLBACK_IMAGE) {
+    target.src = FALLBACK_IMAGE;
   }
+}
+
+function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalleryProps) {
+  const displayImages = (!images || images.length === 0) ? [FALLBACK_IMAGE] : images;
 
   return (
     <div className="space-y-4">
       <div className="relative h-[400px] md:h-[500px] lg:h-[600px] bg-neutral-100 rounded-xl overflow-hidden">
         <img
-          src={images[currentIndex]}
+          src={displayImages[currentIndex]}
           alt={`${title} - Image ${currentIndex + 1}`}
           className="w-full h-full object-cover transition-opacity duration-300"
           loading="eager"
+          onError={handleImageError}
         />
 
-        {images.length > 1 && (
+        {displayImages.length > 1 && (
           <>
             <button
-              onClick={() => onIndexChange(currentIndex === 0 ? images.length - 1 : currentIndex - 1)}
+              onClick={() => onIndexChange(currentIndex === 0 ? displayImages.length - 1 : currentIndex - 1)}
               className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105"
               aria-label="Image précédente"
             >
               <ChevronLeft className="h-6 w-6 text-neutral-700" />
             </button>
             <button
-              onClick={() => onIndexChange((currentIndex + 1) % images.length)}
+              onClick={() => onIndexChange((currentIndex + 1) % displayImages.length)}
               className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105"
               aria-label="Image suivante"
             >
@@ -95,7 +103,7 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
         )}
 
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/70 text-white rounded-full text-sm font-semibold">
-          {currentIndex + 1} / {images.length}
+          {currentIndex + 1} / {displayImages.length}
         </div>
 
         <div className="absolute top-4 right-4 flex gap-2">
@@ -114,9 +122,9 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
         </div>
       </div>
 
-      {images.length > 1 && (
+      {displayImages.length > 1 && (
         <div className="flex gap-3 overflow-x-auto pb-2">
-          {images.map((image, index) => (
+          {displayImages.map((image, index) => (
             <button
               key={index}
               onClick={() => onIndexChange(index)}
@@ -132,6 +140,7 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
                 alt={`Miniature ${index + 1}`}
                 className="w-full h-full object-cover"
                 loading="lazy"
+                onError={handleImageError}
               />
             </button>
           ))}
@@ -427,7 +436,7 @@ export default function PropertyDetailPage() {
     );
   }
 
-  const images = property.images || ['/images/placeholder-property.jpg'];
+  const images = property.images?.length ? property.images : [FALLBACK_IMAGE];
 
   return (
     <div className="min-h-screen bg-background-page">
