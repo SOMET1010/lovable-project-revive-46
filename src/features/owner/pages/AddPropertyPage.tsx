@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Home, Upload, X, Image as ImageIcon, Building2, Check, RefreshCw, FileText, MapPin, DollarSign, Settings } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Home, X, Image as ImageIcon, Building2, Check, RefreshCw, MapPin, DollarSign, Settings, FileText } from 'lucide-react';
+import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -230,22 +231,6 @@ const [step, setStep] = useState(1);
     if (formData.description.length > 0 && formData.description.length < DESC_MIN) return 'text-[var(--color-orange)]';
     if (formData.description.length > DESC_MAX) return 'text-red-500';
     return 'text-[var(--color-gris-neutre)]';
-  };
-
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-
-    if (imageFiles.length + files.length > 10) {
-      setError('Vous pouvez ajouter maximum 10 images');
-      return;
-    }
-
-    const newFiles = [...imageFiles, ...files];
-    setImageFiles(newFiles);
-
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    setImagePreviews([...imagePreviews, ...newPreviews]);
   };
 
   const removeImage = (index: number) => {
@@ -516,42 +501,65 @@ const [step, setStep] = useState(1);
           {/* STEP 1: Photos & Infos générales */}
           {step === 1 && (
           <div key={`step-1-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
-              {/* Photos Section */}
+              {/* Photos Section with NativeCameraUpload */}
               <div className="bg-white p-6 rounded-2xl border shadow-sm" style={{ borderColor: 'var(--color-border)' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <ImageIcon className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
                   <h2 className="font-bold" style={{ color: 'var(--color-chocolat)' }}>Photos de la propriété</h2>
                 </div>
                 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                  {imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200">
-                      <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                      {index === 0 && (
-                        <div className="absolute bottom-2 left-2 text-white text-xs px-2 py-1 rounded-full font-medium" style={{ backgroundColor: 'var(--color-orange)' }}>
-                          Photo principale
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                  
-                  {imageFiles.length < 10 && (
-                    <label className="aspect-square border-2 border-dashed rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all group hover:bg-[var(--color-orange-50)]" style={{ borderColor: 'var(--color-border)' }}>
-                      <Upload className="w-8 h-8 mb-2 group-hover:scale-110 transition-transform" style={{ color: 'var(--color-gris-neutre)' }} />
-                      <span className="text-xs font-medium text-center px-2" style={{ color: 'var(--color-gris-neutre)' }}>
-                        Cliquez pour ajouter<br/>(Max 10)
-                      </span>
-                      <input type="file" accept="image/*" multiple onChange={handleImageSelect} className="hidden" />
-                    </label>
-                  )}
-                </div>
+                {/* Preview grid for existing images */}
+                {imagePreviews.length > 0 && (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200">
+                        <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                        {index === 0 && (
+                          <div className="absolute bottom-2 left-2 text-white text-xs px-2 py-1 rounded-full font-medium" style={{ backgroundColor: 'var(--color-orange)' }}>
+                            Photo principale
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* NativeCameraUpload for adding new images */}
+                {imageFiles.length < 10 && (
+                  <NativeCameraUpload
+                    multiple
+                    maxImages={10 - imageFiles.length}
+                    showPreview={false}
+                    label="Ajouter des photos"
+                    variant="card"
+                    compressionQuality={0.8}
+                    compressionMaxWidth={1920}
+                    onImageCaptured={(file, preview) => {
+                      if (imageFiles.length < 10) {
+                        setImageFiles(prev => [...prev, file]);
+                        setImagePreviews(prev => [...prev, preview]);
+                      }
+                    }}
+                    onMultipleImages={(files, previews) => {
+                      const remaining = 10 - imageFiles.length;
+                      const filesToAdd = files.slice(0, remaining);
+                      const previewsToAdd = previews.slice(0, remaining);
+                      setImageFiles(prev => [...prev, ...filesToAdd]);
+                      setImagePreviews(prev => [...prev, ...previewsToAdd]);
+                    }}
+                  />
+                )}
+                
+                <p className="text-xs text-center mt-3" style={{ color: 'var(--color-gris-neutre)' }}>
+                  {imageFiles.length}/10 photos • La première photo sera l'image principale
+                </p>
               </div>
 
               {/* General Info Section */}
