@@ -6,6 +6,7 @@ import { ROLES, OWNER_ROLES, PROPERTY_MANAGER_ROLES } from '@/shared/constants/r
 // Agency mandates
 const MyMandatesPage = lazyWithRetry(() => import('@/features/agency/pages/MyMandatesPage'));
 const MandateDetailPage = lazyWithRetry(() => import('@/features/agency/pages/MandateDetailPage'));
+const SignMandatePage = lazyWithRetry(() => import('@/features/agency/pages/SignMandatePage'));
 
 // Owner pages
 const AddProperty = lazyWithRetry(() => import('@/features/owner/pages/AddPropertyPage'));
@@ -79,5 +80,9 @@ export const ownerRoutes: RouteObject[] = [
   { 
     path: 'mandat/:id', 
     element: <ProtectedRoute allowedRoles={[ROLES.OWNER, ROLES.AGENCY, ROLES.AGENT]}><MandateDetailPage /></ProtectedRoute> 
+  },
+  { 
+    path: 'mandat/signer/:id', 
+    element: <ProtectedRoute allowedRoles={[ROLES.OWNER, ROLES.AGENCY, ROLES.AGENT]}><SignMandatePage /></ProtectedRoute> 
   },
 ];

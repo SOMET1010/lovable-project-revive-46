@@ -68,6 +68,8 @@ export {
 
 export { Badge, badgeVariants } from './badge';
 
+export { Checkbox } from './checkbox';
+
 // Custom additional components
 export { Progress } from './Progress';
 export { Table as DataTable, StatsTable } from './DataTable';

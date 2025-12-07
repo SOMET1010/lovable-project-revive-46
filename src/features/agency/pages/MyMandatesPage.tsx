@@ -128,6 +128,10 @@ export default function MyMandatesPage() {
     setShowPermissionsDialog(true);
   };
 
+  const handleSign = (mandate: AgencyMandate) => {
+    navigate(`/mandat/signer/${mandate.id}`);
+  };
+
   const handleSavePermissions = async (permissions: Parameters<typeof updateMandatePermissions>[1]) => {
     if (!selectedMandate) return false;
     return await updateMandatePermissions(selectedMandate.id, permissions);
@@ -302,6 +306,7 @@ export default function MyMandatesPage() {
                 onSuspend={suspendMandate}
                 onReactivate={reactivateMandate}
                 onManagePermissions={handleManagePermissions}
+                onSign={handleSign}
               />
             ))}
           </div>

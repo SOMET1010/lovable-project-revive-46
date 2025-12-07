@@ -12,17 +12,10 @@ import {
   User, 
   Calendar,
   Percent,
-  Eye,
-  Edit,
-  Trash2,
-  MessageCircle,
-  Wrench,
   FileText,
-  CreditCard,
   AlertCircle,
   ArrowLeft,
   Loader2,
-  ShieldCheck,
   PenTool
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -30,13 +23,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useAgencyMandates, type AgencyMandate } from '@/hooks/useAgencyMandates';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui/FormStepper';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import Button from '@/shared/ui/Button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/ui/Card';
+import { Badge } from '@/shared/ui/badge';
+import { Checkbox } from '@/shared/ui/checkbox';
+import { Label } from '@/shared/ui/label';
 import { format } from 'date-fns';
-import { cn } from '@/shared/lib/utils';
 import { fr } from 'date-fns/locale';
 
 const STEP_LABELS = ['Détails du mandat', 'Acceptation', 'Confirmation'];
@@ -53,6 +45,7 @@ export default function SignMandatePage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [acceptedResponsibilities, setAcceptedResponsibilities] = useState(false);
   const [signerType, setSignerType] = useState<'owner' | 'agency' | null>(null);
+  const [_signatureComplete, setSignatureComplete] = useState(false);
 
   const {
     step: currentStep,
@@ -142,10 +135,6 @@ export default function SignMandatePage() {
     } finally {
       setSigning(false);
     }
-  };
-
-  const _getPermissionIcon = (_permission: string) => {
-    return <CheckCircle2 className="h-4 w-4" />;
   };
 
   const getPermissionLabel = (permission: string) => {
@@ -386,7 +375,7 @@ export default function SignMandatePage() {
 
           {canSign && (
             <div className="flex justify-end mt-6">
-              <Button onClick={nextStep} size="lg">
+              <Button onClick={nextStep} size="large">
                 Continuer vers la signature
               </Button>
             </div>
@@ -457,10 +446,9 @@ export default function SignMandatePage() {
                 </div>
               </div>
 
-              {/* Signature method info */}
               <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
                 <div className="flex items-center gap-2 mb-2">
-                  <ShieldCheck className="h-5 w-5 text-primary" />
+                  <FileSignature className="h-5 w-5 text-primary" />
                   <span className="font-medium">Signature électronique</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -478,7 +466,7 @@ export default function SignMandatePage() {
             <Button 
               onClick={handleSignMandate}
               disabled={!acceptedTerms || !acceptedResponsibilities || signing}
-              size="lg"
+              size="large"
               className="min-w-[200px]"
             >
               {signing ? (
