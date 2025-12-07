@@ -120,8 +120,7 @@ export default function MyMandatesPage() {
   };
 
   const handleInvite = async (params: Parameters<typeof createMandate>[0]) => {
-    const result = await createMandate(params);
-    return !!result;
+    return await createMandate(params);
   };
 
   const handleManagePermissions = (mandate: AgencyMandate) => {

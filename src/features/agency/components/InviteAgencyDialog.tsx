@@ -455,7 +455,7 @@ export default function InviteAgencyDialog({
                   </div>
                 </div>
               </>
-            ) : null}
+            )}
           </div>
 
           {/* Footer */}

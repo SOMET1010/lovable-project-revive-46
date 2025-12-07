@@ -33,7 +33,7 @@ export default function OwnerDashboardPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [selectedPropertyForInvite, setSelectedPropertyForInvite] = useState<string | undefined>();
-  const { agencies, createMandate } = useAgencyMandates();
+  const { agencies, createMandate, downloadMandate } = useAgencyMandates();
   const [stats, setStats] = useState<Stats>({
     totalProperties: 0,
     activeLeases: 0,
