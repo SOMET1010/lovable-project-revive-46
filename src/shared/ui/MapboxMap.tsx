@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapboxToken } from '@/shared/hooks/useMapboxToken';
-import { Loader2, MapPin, Navigation2 } from 'lucide-react';
+import { Loader2, MapPin, Navigation2, Focus } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -382,6 +382,21 @@ export default function MapboxMap({
     );
   }
 
+  // Fonction de recentrage sur les propriétés
+  const handleResetView = () => {
+    if (!map.current || validProperties.length === 0) return;
+    
+    const bounds = new mapboxgl.LngLatBounds();
+    validProperties.forEach(p => {
+      bounds.extend([p.longitude, p.latitude]);
+    });
+    map.current.fitBounds(bounds, {
+      padding: { top: 60, bottom: 60, left: 60, right: 60 },
+      maxZoom: 15,
+      duration: 1500
+    });
+  };
+
   // Fonction de géolocalisation utilisateur
   const handleLocateUser = () => {
     if (!navigator.geolocation) {
@@ -450,20 +465,34 @@ export default function MapboxMap({
         aria-label="Carte interactive des propriétés"
       />
       
-      {/* Bouton Géolocalisation */}
-      <button
-        onClick={handleLocateUser}
-        disabled={isLocating}
-        className="absolute bottom-4 right-4 z-10 bg-white hover:bg-neutral-50 p-3 rounded-full shadow-lg border border-neutral-200 transition-all hover:shadow-xl disabled:opacity-50"
-        title="Me localiser"
-        aria-label="Centrer sur ma position"
-      >
-        {isLocating ? (
-          <Loader2 className="w-5 h-5 text-primary animate-spin" />
-        ) : (
-          <Navigation2 className="w-5 h-5 text-primary" />
-        )}
-      </button>
+      {/* Boutons de contrôle carte */}
+      <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
+        {/* Bouton Recentrer sur propriétés */}
+        <button
+          onClick={handleResetView}
+          disabled={validProperties.length === 0}
+          className="bg-white hover:bg-neutral-50 p-3 rounded-full shadow-lg border border-neutral-200 transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Recentrer sur les propriétés"
+          aria-label="Recentrer sur les propriétés"
+        >
+          <Focus className="w-5 h-5 text-primary" />
+        </button>
+        
+        {/* Bouton Géolocalisation */}
+        <button
+          onClick={handleLocateUser}
+          disabled={isLocating}
+          className="bg-white hover:bg-neutral-50 p-3 rounded-full shadow-lg border border-neutral-200 transition-all hover:shadow-xl disabled:opacity-50"
+          title="Me localiser"
+          aria-label="Centrer sur ma position"
+        >
+          {isLocating ? (
+            <Loader2 className="w-5 h-5 text-primary animate-spin" />
+          ) : (
+            <Navigation2 className="w-5 h-5 text-primary" />
+          )}
+        </button>
+      </div>
     </div>
   );
 }
