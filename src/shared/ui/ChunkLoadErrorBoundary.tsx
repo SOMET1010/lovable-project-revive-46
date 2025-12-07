@@ -34,7 +34,9 @@ export class ChunkLoadErrorBoundary extends Component<Props, State> {
   override componentDidUpdate(_prevProps: Props, prevState: State) {
     if (this.state.hasError && !prevState.hasError) {
       setTimeout(() => {
-        window.location.reload();
+        // Force hard reload avec cache-busting
+        const baseUrl = window.location.href.split('?')[0];
+        window.location.href = baseUrl + '?t=' + Date.now();
       }, 100);
     }
   }

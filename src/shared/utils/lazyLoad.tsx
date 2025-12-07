@@ -16,7 +16,11 @@ export const lazyWithRetry = (
       try {
         return await componentImport();
       } catch (error) {
-        if (i === retries - 1) throw error;
+        if (i === retries - 1) {
+          // Dernier retry échoué : force un hard refresh
+          window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now();
+          throw error;
+        }
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
