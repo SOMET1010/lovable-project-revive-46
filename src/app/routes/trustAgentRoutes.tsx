@@ -10,6 +10,10 @@ const MissionDetail = lazyWithRetry(() => import('@/features/trust-agent/pages/M
 const PhotoVerification = lazyWithRetry(() => import('@/features/trust-agent/pages/PhotoVerificationPage'));
 const DocumentValidation = lazyWithRetry(() => import('@/features/trust-agent/pages/DocumentValidationPage'));
 const EtatDesLieux = lazyWithRetry(() => import('@/features/trust-agent/pages/EtatDesLieuxPage'));
+const MissionsList = lazyWithRetry(() => import('@/features/trust-agent/pages/MissionsListPage'));
+const UserCertification = lazyWithRetry(() => import('@/features/trust-agent/pages/UserCertificationPage'));
+const PropertyCertification = lazyWithRetry(() => import('@/features/trust-agent/pages/PropertyCertificationPage'));
+const CertificationHistory = lazyWithRetry(() => import('@/features/trust-agent/pages/CertificationHistoryPage'));
 
 export const trustAgentRoutes: RouteObject = {
   path: 'trust-agent',
@@ -17,9 +21,13 @@ export const trustAgentRoutes: RouteObject = {
   children: [
     { index: true, element: <Navigate to="/trust-agent/dashboard" replace /> },
     { path: 'dashboard', element: <TrustAgentDashboard /> },
+    { path: 'missions', element: <MissionsList /> },
     { path: 'mission/:id', element: <MissionDetail /> },
     { path: 'photos/:id', element: <PhotoVerification /> },
     { path: 'documents/:id', element: <DocumentValidation /> },
     { path: 'etat-des-lieux/:id', element: <EtatDesLieux /> },
+    { path: 'certifications/users', element: <UserCertification /> },
+    { path: 'certifications/properties', element: <PropertyCertification /> },
+    { path: 'history', element: <CertificationHistory /> },
   ]
 };
