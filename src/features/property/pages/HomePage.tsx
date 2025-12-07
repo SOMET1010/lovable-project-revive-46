@@ -118,11 +118,10 @@ const getStats = (propertiesCount: number, tenantsCount: number) => [
 ];
 
 const HERO_IMAGES = [
-  { src: '/images/hero/hero_users_1_young_couple.png', alt: 'Jeune couple cherchant un logement sur tablette Mon Toit', position: 'object-center' },
-  { src: '/images/hero/hero_users_2_family_moving.png', alt: 'Famille ivoirienne recevant les clés de leur nouvelle maison', position: 'object-center' },
-  { src: '/images/hero/hero_users_5_agent_showing.png', alt: 'Agent Mon Toit présentant un appartement moderne', position: 'object-center' },
-  { src: '/images/hero/hero_users_4_students_roommates.png', alt: 'Colocataires étudiants heureux dans leur appartement', position: 'object-center' },
-  { src: '/images/hero/hero_users_3_young_professional.png', alt: 'Jeune professionnelle sur son balcon avec vue Abidjan', position: 'object-top' },
+  { src: '/images/hero/hero1.jpg', alt: 'Belle propriété à Abidjan', position: 'object-center' },
+  { src: '/images/hero/hero2.jpg', alt: 'Appartement moderne Cocody', position: 'object-center' },
+  { src: '/images/hero/hero3.jpg', alt: 'Villa résidentielle', position: 'object-center' },
+  { src: '/images/hero/hero4.jpg', alt: 'Résidence sécurisée', position: 'object-center' },
 ];
 
 // FALLBACK_PROPERTY_IMAGES déplacé dans PropertiesWithMap

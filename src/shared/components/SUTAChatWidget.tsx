@@ -124,21 +124,11 @@ export default function SUTAChatWidget({ className = '' }: SUTAChatWidgetProps) 
           color: '#FFFFFF'
         }}
       >
-        <img 
-          src="/images/suta-avatar.png" 
-          alt="SUTA Assistant"
-          className="w-10 h-10 rounded-full object-cover ring-2 ring-[#F16522]/50"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            target.nextElementSibling?.classList.remove('hidden');
-          }}
-        />
         <div 
-          className="w-10 h-10 rounded-full hidden items-center justify-center"
+          className="w-10 h-10 rounded-full flex items-center justify-center"
           style={{ backgroundColor: '#F16522' }}
         >
-          <Bot className="w-5 h-5" />
+          <Bot className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1">
           <p className="font-semibold text-sm">SUTA - Assistant Mon Toit</p>
@@ -171,13 +161,11 @@ export default function SUTAChatWidget({ className = '' }: SUTAChatWidgetProps) 
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
               }}
             >
-              {/* Avatar SUTA for assistant */}
+              {/* Avatar SUTA for assistant - using icon */}
               {message.role === 'assistant' && (
-                <img 
-                  src="/images/suta-avatar.png"
-                  alt="SUTA"
-                  className="absolute -left-9 top-0 w-7 h-7 rounded-full object-cover ring-1 ring-[#F16522]/30 shadow-sm"
-                />
+                <div className="absolute -left-9 top-0 w-7 h-7 rounded-full flex items-center justify-center bg-[#F16522] ring-1 ring-[#F16522]/30 shadow-sm">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
               )}
               
               <p 
