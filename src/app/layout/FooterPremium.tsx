@@ -1,14 +1,13 @@
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, AlertTriangle } from 'lucide-react';
-import { useState, Component, ReactNode, FormEvent } from 'react';
+import { useState, Component, ReactNode, FormEvent, ErrorInfo } from 'react';
 import { Link } from 'react-router-dom';
-import { CONTACT } from '@/shared/constants/contact';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, AlertTriangle } from 'lucide-react';
 
-// Valeurs par défaut de sécurité en cas de problème d'import
+// Configuration de sécurité pour les contacts (évite les crashs si l'import échoue)
 const SAFE_CONTACT = {
-  PHONE: CONTACT?.PHONE || '+2250700000000',
-  PHONE_DISPLAY: CONTACT?.PHONE_DISPLAY || '+225 07 00 00 00 00',
-  EMAIL: CONTACT?.EMAIL || 'contact@montoit.ci',
-  ADDRESS: CONTACT?.ADDRESS || 'Abidjan, Côte d\'Ivoire',
+  PHONE: '+2250700000000',
+  PHONE_DISPLAY: '+225 07 00 00 00 00',
+  EMAIL: 'contact@montoit.ci',
+  ADDRESS: 'Abidjan, Côte d\'Ivoire',
 };
 
 // ErrorBoundary pour capturer les erreurs de rendu
@@ -22,8 +21,8 @@ class FooterErrorBoundary extends Component<{ children: ReactNode }, { hasError:
     return { hasError: true };
   }
 
-  override componentDidCatch(error: Error) {
-    console.error('FooterPremium error:', error);
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('FooterPremium error:', error, errorInfo);
   }
 
   override render() {
@@ -47,6 +46,7 @@ class FooterErrorBoundary extends Component<{ children: ReactNode }, { hasError:
 function FooterContent() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const handleNewsletterSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -55,11 +55,13 @@ function FooterContent() {
     setTimeout(() => setSubscribed(false), 3000);
   };
 
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="relative bg-[#2C1810] text-[#E8D4C5] overflow-hidden pt-20 pb-10">
       
-      {/* Texture de fond Premium - pattern inline SVG */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`, backgroundRepeat: 'repeat' }} />
+      {/* Texture de fond Premium */}
+      <div className="absolute inset-0 opacity-[0.03] bg-[url('/images/pattern-topo.svg')] bg-repeat pointer-events-none" />
       
       {/* Lueur d'ambiance Orange */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#F16522]/10 rounded-full blur-[120px] pointer-events-none" />
@@ -73,9 +75,19 @@ function FooterContent() {
           <div className="space-y-6">
             <Link to="/" className="inline-block group">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-white/10 rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:bg-[#F16522] transition-colors">
-                  M
-                </div>
+                {/* Gestion intelligente du logo avec Fallback */}
+                {!imgError ? (
+                  <img
+                    src="/logo-montoit.png"
+                    alt="Mon Toit Logo"
+                    className="h-10 w-10 object-contain"
+                    onError={() => setImgError(true)}
+                  />
+                ) : (
+                  <div className="h-10 w-10 bg-white/10 rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:bg-[#F16522] transition-colors border border-white/10">
+                    M
+                  </div>
+                )}
                 <span className="text-2xl font-bold text-white tracking-tight">Mon Toit</span>
               </div>
             </Link>
@@ -87,10 +99,10 @@ function FooterContent() {
             {/* Réseaux Sociaux */}
             <div className="flex gap-4">
               {[
-                { Icon: Facebook, href: 'https://facebook.com', label: 'Facebook' },
-                { Icon: Twitter, href: 'https://twitter.com', label: 'Twitter' },
-                { Icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-                { Icon: Linkedin, href: 'https://linkedin.com', label: 'LinkedIn' },
+                { Icon: Facebook, href: '#', label: 'Facebook' },
+                { Icon: Twitter, href: '#', label: 'Twitter' },
+                { Icon: Instagram, href: '#', label: 'Instagram' },
+                { Icon: Linkedin, href: '#', label: 'LinkedIn' },
               ].map(({ Icon, href, label }) => (
                 <a 
                   key={label}
@@ -160,7 +172,6 @@ function FooterContent() {
               Recevez nos dernières offres exclusives.
             </p>
             
-            {/* Input Newsletter Premium */}
             <form onSubmit={handleNewsletterSubmit} className="space-y-3 mb-8">
               <div className="relative">
                 <Mail className="absolute left-4 top-3.5 w-4 h-4 text-[#E8D4C5]/50" />
@@ -186,7 +197,6 @@ function FooterContent() {
               </button>
             </form>
 
-            {/* Infos Contact */}
             <div className="space-y-3 pt-6 border-t border-white/10">
               <a 
                 href={`tel:${SAFE_CONTACT.PHONE}`}
@@ -212,7 +222,7 @@ function FooterContent() {
 
         {/* Copyright */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#E8D4C5]/40">
-          <p>© {new Date().getFullYear()} Mon Toit. Tous droits réservés.</p>
+          <p>© {currentYear} Mon Toit. Tous droits réservés.</p>
           
           <div className="flex items-center gap-6">
             {[
@@ -247,7 +257,6 @@ function FooterContent() {
   );
 }
 
-// Export avec ErrorBoundary
 export default function FooterPremium() {
   return (
     <FooterErrorBoundary>
