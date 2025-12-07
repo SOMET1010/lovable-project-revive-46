@@ -1,5 +1,5 @@
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, AlertTriangle } from 'lucide-react';
-import { useState, Component, ReactNode } from 'react';
+import { useState, Component, ReactNode, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { CONTACT } from '@/shared/constants/contact';
 
@@ -48,7 +48,7 @@ function FooterContent() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
+  const handleNewsletterSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSubscribed(true);
     setEmail('');
@@ -71,13 +71,11 @@ function FooterContent() {
           
           {/* Logo & Description */}
           <div className="space-y-6">
-            <Link to="/" className="inline-block">
+            <Link to="/" className="inline-block group">
               <div className="flex items-center gap-3">
-                <img
-                  src="/logo-montoit.png"
-                  alt="Mon Toit Logo"
-                  className="h-10 w-10 object-contain"
-                />
+                <div className="h-10 w-10 bg-white/10 rounded-lg flex items-center justify-center text-white font-bold text-xl group-hover:bg-[#F16522] transition-colors">
+                  M
+                </div>
                 <span className="text-2xl font-bold text-white tracking-tight">Mon Toit</span>
               </div>
             </Link>
