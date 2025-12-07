@@ -34,6 +34,7 @@ const navItems = [
   { label: 'Mes Visites', href: '/mes-visites', icon: Calendar },
   { label: 'Maintenance', href: '/maintenance/locataire', icon: Wrench },
   { label: 'Mon Score', href: '/mon-score', icon: Award },
+  { label: 'Historique Locations', href: '/profil/historique-locations', icon: Home },
   { label: 'Mes Favoris', href: '/favoris', icon: Heart },
   { label: 'Messages', href: '/messages', icon: MessageSquare, hasBadge: true },
 ];
