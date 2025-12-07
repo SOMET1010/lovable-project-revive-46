@@ -120,6 +120,9 @@ serve(async (req) => {
       totalReviews: 0,
       averageRating: 0,
       hasHistory: false,
+      rentalHistoryCount: 0,
+      verifiedRentals: 0,
+      rentalHistoryBonus: 0,
     };
 
     // 4.1 Récupérer et analyser les paiements
@@ -183,11 +186,65 @@ serve(async (req) => {
 
     console.log('Reviews:', historyDetails.totalReviews, 'reviews, avg rating:', historyDetails.averageRating);
 
-    // Calculer le score d'historique final (pondération 60% paiements, 40% évaluations)
+    // 4.3 Récupérer l'historique déclaré par le locataire (rental_history)
+    const { data: rentalHistory, error: rentalHistoryError } = await supabase
+      .from('rental_history')
+      .select('*')
+      .eq('tenant_id', applicantId);
+
+    if (rentalHistoryError) {
+      console.error('Error fetching rental history:', rentalHistoryError);
+    }
+
+    if (rentalHistory && rentalHistory.length > 0) {
+      historyDetails.hasHistory = true;
+      historyDetails.rentalHistoryCount = rentalHistory.length;
+
+      let rentalBonus = 0;
+
+      // Calculer le bonus selon le statut de vérification
+      rentalHistory.forEach((rental: any) => {
+        const startDate = new Date(rental.start_date);
+        const endDate = rental.end_date ? new Date(rental.end_date) : new Date();
+        const months = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+
+        if (rental.verification_status === 'verified') {
+          historyDetails.verifiedRentals++;
+          // Historique vérifié = 2 pts par mois, max 20 pts par location
+          rentalBonus += Math.min(months * 2, 20);
+        } else if (rental.verification_status === 'pending') {
+          // Historique en attente = 0.5 pt par mois, max 5 pts
+          rentalBonus += Math.min(months * 0.5, 5);
+        } else if (rental.verification_status === 'unverifiable') {
+          // Non vérifiable = bonus fixe de 2 pts
+          rentalBonus += 2;
+        }
+        // 'rejected' = 0 pts
+      });
+
+      // Bonus ancienneté: si > 24 mois d'historique total
+      const totalMonths = rentalHistory.reduce((sum: number, rental: any) => {
+        const startDate = new Date(rental.start_date);
+        const endDate = rental.end_date ? new Date(rental.end_date) : new Date();
+        return sum + Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+      }, 0);
+
+      if (totalMonths >= 24) {
+        rentalBonus += 10; // Bonus ancienneté
+      }
+
+      historyDetails.rentalHistoryBonus = Math.min(rentalBonus, 50);
+    }
+
+    console.log('Rental History:', historyDetails.rentalHistoryCount, 'rentals,', historyDetails.verifiedRentals, 'verified, bonus:', historyDetails.rentalHistoryBonus);
+
+    // Calculer le score d'historique final
+    // Pondération: 40% paiements, 30% évaluations, 30% historique déclaré
     if (historyDetails.hasHistory) {
       historyScore = Math.round(
-        (historyDetails.paymentReliability * 0.6) + 
-        (historyDetails.landlordRating * 0.4)
+        (historyDetails.paymentReliability * 0.4) + 
+        (historyDetails.landlordRating * 0.3) +
+        (Math.min(historyDetails.rentalHistoryBonus * 2, 100) * 0.3) // Convertir bonus en score /100
       );
     }
 

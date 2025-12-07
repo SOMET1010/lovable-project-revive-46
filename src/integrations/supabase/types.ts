@@ -1053,6 +1053,81 @@ export type Database = {
           },
         ]
       }
+      rental_history: {
+        Row: {
+          city: string
+          created_at: string | null
+          departure_reason: string | null
+          end_date: string | null
+          id: string
+          is_current: boolean | null
+          landlord_email: string | null
+          landlord_name: string | null
+          landlord_phone: string | null
+          monthly_rent: number
+          proof_documents: Json | null
+          property_address: string
+          property_type: string | null
+          self_condition_rating: number | null
+          self_payment_rating: number | null
+          start_date: string
+          tenant_id: string
+          updated_at: string | null
+          verification_notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          city: string
+          created_at?: string | null
+          departure_reason?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          landlord_email?: string | null
+          landlord_name?: string | null
+          landlord_phone?: string | null
+          monthly_rent: number
+          proof_documents?: Json | null
+          property_address: string
+          property_type?: string | null
+          self_condition_rating?: number | null
+          self_payment_rating?: number | null
+          start_date: string
+          tenant_id: string
+          updated_at?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          city?: string
+          created_at?: string | null
+          departure_reason?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          landlord_email?: string | null
+          landlord_name?: string | null
+          landlord_phone?: string | null
+          monthly_rent?: number
+          proof_documents?: Json | null
+          property_address?: string
+          property_type?: string | null
+          self_condition_rating?: number | null
+          self_payment_rating?: number | null
+          start_date?: string
+          tenant_id?: string
+          updated_at?: string | null
+          verification_notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null

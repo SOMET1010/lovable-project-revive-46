@@ -13,6 +13,7 @@ const TenantMaintenance = lazyWithRetry(() => import('@/features/tenant/pages/Ma
 const TenantScorePage = lazyWithRetry(() => import('@/features/tenant/pages/ScorePage'));
 const MaintenanceRequest = lazyWithRetry(() => import('@/features/tenant/pages/MaintenanceRequestPage'));
 const MyApplications = lazyWithRetry(() => import('@/features/tenant/pages/MyApplicationsPage'));
+const RentalHistoryPage = lazyWithRetry(() => import('@/features/tenant/pages/RentalHistoryPage'));
 
 // Unified dashboard
 const UnifiedDashboard = lazyWithRetry(() => import('@/features/dashboard/pages/UnifiedDashboardPage'));
@@ -80,5 +81,6 @@ export const tenantRoutes: RouteObject[] = [
   { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantCalendar /></ProtectedRoute> },
   { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantMaintenance /></ProtectedRoute> },
   { path: 'mon-score', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantScorePage /></ProtectedRoute> },
+  { path: 'profil/historique-locations', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><RentalHistoryPage /></ProtectedRoute> },
   { path: 'maintenance/nouvelle', element: <ProtectedRoute><MaintenanceRequest /></ProtectedRoute> },
 ];

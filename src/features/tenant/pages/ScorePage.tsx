@@ -178,13 +178,22 @@ const ScorePage: React.FC = () => {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <History className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">Construire un historique</span>
+                        <span className="font-medium text-sm">Déclarer vos locations passées</span>
                       </div>
-                      <Badge variant="secondary">Variable</Badge>
+                      <Badge variant="secondary">+5 à +50 pts</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Votre historique de location s'améliore avec le temps et les bonnes évaluations
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Ajoutez vos locations passées pour améliorer votre score d'historique
                     </p>
+                    <Button 
+                      variant="outline" 
+                      size="small"
+                      onClick={() => navigate('/profil/historique-locations')}
+                      className="w-full"
+                    >
+                      Ajouter mon historique
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </Button>
                   </div>
                 )}
               </>
