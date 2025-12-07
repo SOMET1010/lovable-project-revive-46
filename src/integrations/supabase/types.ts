@@ -50,6 +50,162 @@ export type Database = {
         }
         Relationships: []
       }
+      agencies: {
+        Row: {
+          address: string | null
+          agency_name: string
+          city: string | null
+          commission_rate: number | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          id: string
+          is_verified: boolean | null
+          logo_url: string | null
+          phone: string | null
+          registration_number: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string
+          verified_at: string | null
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          agency_name: string
+          city?: string | null
+          commission_rate?: number | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_verified?: boolean | null
+          logo_url?: string | null
+          phone?: string | null
+          registration_number?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+          verified_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          agency_name?: string
+          city?: string | null
+          commission_rate?: number | null
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_verified?: boolean | null
+          logo_url?: string | null
+          phone?: string | null
+          registration_number?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+          verified_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      agency_mandates: {
+        Row: {
+          agency_id: string
+          can_communicate_tenants: boolean | null
+          can_create_leases: boolean | null
+          can_create_properties: boolean | null
+          can_delete_properties: boolean | null
+          can_edit_properties: boolean | null
+          can_manage_applications: boolean | null
+          can_manage_documents: boolean | null
+          can_manage_maintenance: boolean | null
+          can_view_applications: boolean | null
+          can_view_financials: boolean | null
+          can_view_properties: boolean | null
+          commission_rate: number | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          mandate_document_url: string | null
+          notes: string | null
+          owner_id: string
+          property_id: string
+          signed_at: string | null
+          start_date: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agency_id: string
+          can_communicate_tenants?: boolean | null
+          can_create_leases?: boolean | null
+          can_create_properties?: boolean | null
+          can_delete_properties?: boolean | null
+          can_edit_properties?: boolean | null
+          can_manage_applications?: boolean | null
+          can_manage_documents?: boolean | null
+          can_manage_maintenance?: boolean | null
+          can_view_applications?: boolean | null
+          can_view_financials?: boolean | null
+          can_view_properties?: boolean | null
+          commission_rate?: number | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          mandate_document_url?: string | null
+          notes?: string | null
+          owner_id: string
+          property_id: string
+          signed_at?: string | null
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agency_id?: string
+          can_communicate_tenants?: boolean | null
+          can_create_leases?: boolean | null
+          can_create_properties?: boolean | null
+          can_delete_properties?: boolean | null
+          can_edit_properties?: boolean | null
+          can_manage_applications?: boolean | null
+          can_manage_documents?: boolean | null
+          can_manage_maintenance?: boolean | null
+          can_view_applications?: boolean | null
+          can_view_financials?: boolean | null
+          can_view_properties?: boolean | null
+          commission_rate?: number | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          mandate_document_url?: string | null
+          notes?: string | null
+          owner_id?: string
+          property_id?: string
+          signed_at?: string | null
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_mandates_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_mandates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           api_key: string
@@ -1678,6 +1834,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_expire_mandates: { Args: never; Returns: number }
       calculate_profile_score: {
         Args: {
           p_address: string

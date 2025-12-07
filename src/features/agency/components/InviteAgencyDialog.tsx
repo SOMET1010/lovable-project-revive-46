@@ -1,0 +1,405 @@
+/**
+ * Modal pour inviter une agence à gérer un bien
+ */
+
+import { useState, useEffect } from 'react';
+import { X, Building2, Search, Calendar, Percent, Check } from 'lucide-react';
+import { format, addMonths } from 'date-fns';
+import type { Agency, MandatePermissions } from '@/hooks/useAgencyMandates';
+
+interface Property {
+  id: string;
+  title: string;
+  city: string;
+  monthly_rent: number;
+}
+
+interface InviteAgencyDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onInvite: (params: {
+    property_id: string;
+    agency_id: string;
+    start_date: string;
+    end_date: string;
+    commission_rate: number;
+    permissions: Partial<MandatePermissions>;
+  }) => Promise<boolean>;
+  properties: Property[];
+  agencies: Agency[];
+  selectedPropertyId?: string;
+}
+
+const PERMISSION_LABELS: Record<keyof MandatePermissions, { label: string; description: string }> = {
+  can_view_properties: { 
+    label: 'Voir les biens', 
+    description: 'Accéder aux détails du bien' 
+  },
+  can_edit_properties: { 
+    label: 'Modifier les biens', 
+    description: 'Mettre à jour les informations' 
+  },
+  can_create_properties: { 
+    label: 'Créer des biens', 
+    description: 'Ajouter de nouveaux biens' 
+  },
+  can_delete_properties: { 
+    label: 'Supprimer des biens', 
+    description: 'Retirer des biens' 
+  },
+  can_view_applications: { 
+    label: 'Voir les candidatures', 
+    description: 'Consulter les demandes' 
+  },
+  can_manage_applications: { 
+    label: 'Gérer les candidatures', 
+    description: 'Accepter/refuser les demandes' 
+  },
+  can_create_leases: { 
+    label: 'Créer des baux', 
+    description: 'Rédiger et signer des contrats' 
+  },
+  can_view_financials: { 
+    label: 'Voir les finances', 
+    description: 'Accéder aux paiements' 
+  },
+  can_manage_maintenance: { 
+    label: 'Gérer la maintenance', 
+    description: 'Traiter les demandes de travaux' 
+  },
+  can_communicate_tenants: { 
+    label: 'Communiquer avec locataires', 
+    description: 'Envoyer des messages' 
+  },
+  can_manage_documents: { 
+    label: 'Gérer les documents', 
+    description: 'Ajouter/supprimer des fichiers' 
+  },
+};
+
+const DEFAULT_PERMISSIONS: MandatePermissions = {
+  can_view_properties: true,
+  can_edit_properties: false,
+  can_create_properties: false,
+  can_delete_properties: false,
+  can_view_applications: true,
+  can_manage_applications: false,
+  can_create_leases: false,
+  can_view_financials: false,
+  can_manage_maintenance: false,
+  can_communicate_tenants: true,
+  can_manage_documents: false,
+};
+
+export default function InviteAgencyDialog({
+  isOpen,
+  onClose,
+  onInvite,
+  properties,
+  agencies,
+  selectedPropertyId,
+}: InviteAgencyDialogProps) {
+  const [step, setStep] = useState<'select' | 'configure'>('select');
+  const [selectedProperty, setSelectedProperty] = useState<string>(selectedPropertyId || '');
+  const [selectedAgency, setSelectedAgency] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [startDate, setStartDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState(format(addMonths(new Date(), 12), 'yyyy-MM-dd'));
+  const [commissionRate, setCommissionRate] = useState(10);
+  const [permissions, setPermissions] = useState<MandatePermissions>(DEFAULT_PERMISSIONS);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (selectedPropertyId) {
+      setSelectedProperty(selectedPropertyId);
+    }
+  }, [selectedPropertyId]);
+
+  const filteredAgencies = agencies.filter(agency =>
+    agency.agency_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    agency.city?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleContinue = () => {
+    if (selectedProperty && selectedAgency) {
+      setStep('configure');
+    }
+  };
+
+  const handleInvite = async () => {
+    setLoading(true);
+    const success = await onInvite({
+      property_id: selectedProperty,
+      agency_id: selectedAgency,
+      start_date: new Date(startDate).toISOString(),
+      end_date: new Date(endDate).toISOString(),
+      commission_rate: commissionRate,
+      permissions,
+    });
+    setLoading(false);
+    
+    if (success) {
+      onClose();
+      // Reset form
+      setStep('select');
+      setSelectedAgency('');
+      setSearchQuery('');
+      setPermissions(DEFAULT_PERMISSIONS);
+    }
+  };
+
+  const togglePermission = (key: keyof MandatePermissions) => {
+    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  if (!isOpen) return null;
+
+  const selectedAgencyData = agencies.find(a => a.id === selectedAgency);
+  const selectedPropertyData = properties.find(p => p.id === selectedProperty);
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+        
+        <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-neutral-200">
+            <div>
+              <h2 className="text-lg font-bold text-neutral-900">
+                {step === 'select' ? 'Inviter une agence' : 'Configurer le mandat'}
+              </h2>
+              <p className="text-sm text-neutral-500">
+                {step === 'select' 
+                  ? 'Sélectionnez une agence pour gérer votre bien'
+                  : 'Définissez les termes et permissions'
+                }
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 text-neutral-500" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-4 overflow-y-auto max-h-[calc(90vh-180px)]">
+            {step === 'select' ? (
+              <>
+                {/* Property Selection */}
+                {!selectedPropertyId && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Sélectionnez un bien
+                    </label>
+                    <select
+                      value={selectedProperty}
+                      onChange={(e) => setSelectedProperty(e.target.value)}
+                      className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
+                    >
+                      <option value="">Choisir un bien...</option>
+                      {properties.map(property => (
+                        <option key={property.id} value={property.id}>
+                          {property.title} - {property.city} ({property.monthly_rent.toLocaleString()} FCFA)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Search Agencies */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    Rechercher une agence
+                  </label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-neutral-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Nom ou ville..."
+                      className="w-full pl-10 pr-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                {/* Agencies List */}
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {filteredAgencies.length === 0 ? (
+                    <p className="text-center py-8 text-neutral-500">
+                      Aucune agence trouvée
+                    </p>
+                  ) : (
+                    filteredAgencies.map(agency => (
+                      <button
+                        key={agency.id}
+                        onClick={() => setSelectedAgency(agency.id)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-colors ${
+                          selectedAgency === agency.id
+                            ? 'border-primary bg-primary/5'
+                            : 'border-neutral-200 hover:border-neutral-300'
+                        }`}
+                      >
+                        <div className="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                          {agency.logo_url ? (
+                            <img src={agency.logo_url} alt={agency.agency_name} className="w-full h-full object-cover rounded-xl" />
+                          ) : (
+                            <Building2 className="h-6 w-6 text-neutral-400" />
+                          )}
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className="font-medium text-neutral-900">{agency.agency_name}</p>
+                          <p className="text-sm text-neutral-500">{agency.city || 'Côte d\'Ivoire'}</p>
+                        </div>
+                        {selectedAgency === agency.id && (
+                          <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                            <Check className="h-4 w-4 text-white" />
+                          </div>
+                        )}
+                      </button>
+                    ))
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Summary */}
+                <div className="bg-neutral-50 rounded-xl p-4 mb-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    <span className="font-medium">{selectedAgencyData?.agency_name}</span>
+                  </div>
+                  <p className="text-sm text-neutral-600">
+                    Gestion de : {selectedPropertyData?.title}
+                  </p>
+                </div>
+
+                {/* Dates */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      <Calendar className="h-4 w-4 inline mr-1" />
+                      Date de début
+                    </label>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      <Calendar className="h-4 w-4 inline mr-1" />
+                      Date de fin
+                    </label>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => setEndDate(e.target.value)}
+                      className="w-full px-4 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                {/* Commission */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">
+                    <Percent className="h-4 w-4 inline mr-1" />
+                    Taux de commission
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="range"
+                      min="1"
+                      max="20"
+                      value={commissionRate}
+                      onChange={(e) => setCommissionRate(Number(e.target.value))}
+                      className="flex-1"
+                    />
+                    <span className="text-lg font-bold text-primary w-16 text-right">
+                      {commissionRate}%
+                    </span>
+                  </div>
+                  {selectedPropertyData && (
+                    <p className="text-sm text-neutral-500 mt-1">
+                      Soit {Math.round(selectedPropertyData.monthly_rent * commissionRate / 100).toLocaleString()} FCFA/mois
+                    </p>
+                  )}
+                </div>
+
+                {/* Permissions */}
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-3">
+                    Permissions accordées
+                  </label>
+                  <div className="space-y-2">
+                    {(Object.keys(PERMISSION_LABELS) as Array<keyof MandatePermissions>).map(key => (
+                      <label 
+                        key={key}
+                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-neutral-50 cursor-pointer"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={permissions[key]}
+                          onChange={() => togglePermission(key)}
+                          className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
+                        />
+                        <div>
+                          <p className="text-sm font-medium text-neutral-900">
+                            {PERMISSION_LABELS[key].label}
+                          </p>
+                          <p className="text-xs text-neutral-500">
+                            {PERMISSION_LABELS[key].description}
+                          </p>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="p-4 border-t border-neutral-200 flex gap-3">
+            {step === 'configure' && (
+              <button
+                onClick={() => setStep('select')}
+                className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+              >
+                Retour
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors ml-auto"
+            >
+              Annuler
+            </button>
+            {step === 'select' ? (
+              <button
+                onClick={handleContinue}
+                disabled={!selectedProperty || !selectedAgency}
+                className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Continuer
+              </button>
+            ) : (
+              <button
+                onClick={handleInvite}
+                disabled={loading}
+                className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+              >
+                {loading ? 'Envoi...' : 'Envoyer l\'invitation'}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
