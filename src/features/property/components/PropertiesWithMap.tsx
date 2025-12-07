@@ -1,6 +1,6 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, useMemo, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, MapPin, Bed, Bath, Maximize, Heart } from 'lucide-react';
+import { ArrowRight, MapPin, Bed, Bath, Maximize, Heart, X } from 'lucide-react';
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 import PropertyModal from './PropertyModal';
 import type { PropertyWithOwnerScore } from '../types';
@@ -8,10 +8,18 @@ import type { PropertyWithOwnerScore } from '../types';
 // Lazy load MapWrapper for performance
 const MapWrapper = lazy(() => import('@/shared/ui/MapWrapper'));
 
+export interface PropertyFilters {
+  type: string;
+  location: string;
+  maxPrice: number;
+}
+
 interface PropertiesWithMapProps {
   properties: PropertyWithOwnerScore[];
   isLoading?: boolean;
   isVisible?: boolean;
+  filters?: PropertyFilters;
+  onResetFilters?: () => void;
 }
 
 const FALLBACK_PROPERTY_IMAGES = [
@@ -119,13 +127,40 @@ function MapSkeleton() {
 export default function PropertiesWithMap({ 
   properties, 
   isLoading = false,
-  isVisible = true 
+  isVisible = true,
+  filters,
+  onResetFilters
 }: PropertiesWithMapProps) {
   const [selectedProperty, setSelectedProperty] = useState<PropertyWithOwnerScore | null>(null);
   const [highlightedPropertyId, setHighlightedPropertyId] = useState<string | undefined>();
 
+  // Apply filters with useMemo for performance
+  const filteredProperties = useMemo(() => {
+    if (!filters) return properties;
+    
+    return properties.filter((property) => {
+      // Filter by type
+      const matchType = !filters.type || filters.type === 'all' || 
+        property.property_type?.toLowerCase().includes(filters.type.toLowerCase());
+
+      // Filter by location (city or neighborhood)
+      const matchLocation = !filters.location ||
+        property.city?.toLowerCase().includes(filters.location.toLowerCase()) ||
+        property.neighborhood?.toLowerCase().includes(filters.location.toLowerCase());
+
+      // Filter by max price
+      const matchPrice = !filters.maxPrice || filters.maxPrice === 0 ||
+        (property.monthly_rent || 0) <= filters.maxPrice;
+
+      return matchType && matchLocation && matchPrice;
+    });
+  }, [properties, filters]);
+
+  // Check if filters are active
+  const hasActiveFilters = filters && (filters.type || filters.location || filters.maxPrice > 0);
+
   // Filter properties with valid coordinates for map
-  const propertiesWithCoords = properties.filter(
+  const propertiesWithCoords = filteredProperties.filter(
     (p) => p.latitude != null && p.longitude != null
   );
 
@@ -147,18 +182,36 @@ export default function PropertiesWithMap({
               Pépites du moment 🔥
             </h2>
             <p className="text-lg text-muted-foreground">
-              Les dernières annonces vérifiées, prêtes à habiter.
+              {hasActiveFilters ? (
+                <>
+                  <span className="font-bold text-primary">{filteredProperties.length}</span>
+                  {' '}bien{filteredProperties.length > 1 ? 's' : ''} sur {properties.length} correspondent à vos critères
+                </>
+              ) : (
+                <>Les dernières annonces vérifiées, prêtes à habiter.</>
+              )}
             </p>
           </div>
-          <Link 
-            to="/recherche" 
-            className="group inline-flex items-center gap-2 text-primary font-bold hover:text-primary/80 transition-colors"
-          >
-            <span>Voir tout le catalogue</span>
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-background transition-all">
-              <ArrowRight className="h-4 w-4" />
-            </div>
-          </Link>
+          <div className="flex items-center gap-4">
+            {hasActiveFilters && onResetFilters && (
+              <button
+                onClick={onResetFilters}
+                className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-4 h-4" />
+                Réinitialiser
+              </button>
+            )}
+            <Link 
+              to="/recherche" 
+              className="group inline-flex items-center gap-2 text-primary font-bold hover:text-primary/80 transition-colors"
+            >
+              <span>Voir tout le catalogue</span>
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-background transition-all">
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* Content Grid */}
@@ -174,9 +227,9 @@ export default function PropertiesWithMap({
                   />
                 ))}
               </div>
-            ) : properties.length > 0 ? (
+            ) : filteredProperties.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {properties.map((property, index) => (
+                {filteredProperties.map((property, index) => (
                   <div
                     key={property.id}
                     onMouseEnter={() => setHighlightedPropertyId(property.id)}
@@ -189,6 +242,21 @@ export default function PropertiesWithMap({
                     />
                   </div>
                 ))}
+              </div>
+            ) : hasActiveFilters ? (
+              <div className="col-span-full py-12 text-center bg-background rounded-3xl border border-border">
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">Aucun bien ne correspond à vos critères.</p>
+                  {onResetFilters && (
+                    <button
+                      onClick={onResetFilters}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                      Réinitialiser les filtres
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="col-span-full py-12 text-center bg-background rounded-3xl border border-border">
