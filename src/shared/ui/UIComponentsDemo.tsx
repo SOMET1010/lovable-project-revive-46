@@ -58,7 +58,7 @@ export function UIComponentsDemo() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log('Formulaire valide:', formData);
+      if (import.meta.env.DEV) console.log('Formulaire valide:', formData);
       // Simulation d'envoi
       alert('Formulaire envoyé avec succès!');
     }

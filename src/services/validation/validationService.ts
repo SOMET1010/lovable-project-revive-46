@@ -50,6 +50,48 @@ export const ValidationService = {
   },
 
   /**
+   * Valide la longueur min ET max combinées
+   */
+  validateLength(value: string, minLength: number, maxLength: number, fieldName: string): ValidationResult {
+    const trimmed = value.trim();
+    if (trimmed.length < minLength) {
+      return { isValid: false, error: `${fieldName} doit contenir au moins ${minLength} caractères` };
+    }
+    if (trimmed.length > maxLength) {
+      return { isValid: false, error: `${fieldName} ne doit pas dépasser ${maxLength} caractères` };
+    }
+    return { isValid: true };
+  },
+
+  /**
+   * Valide la qualité d'un titre (bloque les titres génériques)
+   */
+  validateTitleQuality(title: string): ValidationResult {
+    const trimmed = title.trim();
+    
+    // Liste des titres génériques interdits
+    const genericTitles = ['test', 'essai', 'aaa', 'abc', 'xxx', '123', 'asdf', 'qwerty', 'azerty'];
+    const lowerTitle = trimmed.toLowerCase();
+    
+    if (genericTitles.some(g => lowerTitle === g || lowerTitle.startsWith(g + ' '))) {
+      return { isValid: false, error: 'Le titre doit être descriptif (pas de titre générique)' };
+    }
+    
+    // Vérifier qu'il y a au moins 2 mots
+    const words = trimmed.split(/\s+/).filter(w => w.length > 1);
+    if (words.length < 2) {
+      return { isValid: false, error: 'Le titre doit contenir au moins 2 mots' };
+    }
+    
+    // Vérifier les caractères répétés abusivement (ex: "aaaaaaa")
+    if (/(.)\1{4,}/.test(trimmed)) {
+      return { isValid: false, error: 'Le titre contient des caractères répétés de manière abusive' };
+    }
+    
+    return { isValid: true };
+  },
+
+  /**
    * Valide un email
    */
   validateEmail(email: string): ValidationResult {

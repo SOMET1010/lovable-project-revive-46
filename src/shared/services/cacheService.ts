@@ -266,6 +266,7 @@ class CacheService {
    * Affiche les statistiques dans la console
    */
   logStats(): void {
+    if (!import.meta.env.DEV) return;
     const stats = this.getStats();
     console.log('📊 Cache Statistics:');
     console.log(`   Items: ${stats.itemCount}`);

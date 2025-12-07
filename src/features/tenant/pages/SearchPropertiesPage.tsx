@@ -707,8 +707,8 @@ export default function SearchPropertiesPage() {
                     onMarkerClick={(property) => {
                       navigate(`/proprietes/${property.id}`);
                     }}
-                    onBoundsChange={(bounds) => {
-                      console.log('Map bounds changed:', bounds);
+                    onBoundsChange={(_bounds) => {
+                      // Bounds changed - silent in production
                     }}
                   />
                 ) : (

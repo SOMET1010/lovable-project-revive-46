@@ -194,8 +194,20 @@ const [step, setStep] = useState(1);
     setFieldTouched(field);
     
     switch (field) {
-      case 'title':
-        validateField('title', () => ValidationService.validateMinLength(formData.title, 10, 'Le titre'));
+      case 'title': {
+        // Validation combinée: longueur + qualité
+        const lengthResult = ValidationService.validateLength(formData.title, TITLE_MIN, TITLE_MAX, 'Le titre');
+        if (!lengthResult.isValid) {
+          validateField('title', () => lengthResult);
+        } else {
+          validateField('title', () => ValidationService.validateTitleQuality(formData.title));
+        }
+        break;
+      }
+      case 'description':
+        if (formData.description) {
+          validateField('description', () => ValidationService.validateLength(formData.description, DESC_MIN, DESC_MAX, 'La description'));
+        }
         break;
       case 'address':
         validateField('address', () => ValidationService.validateRequired(formData.address, 'L\'adresse'));
