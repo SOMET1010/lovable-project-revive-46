@@ -17,6 +17,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import TrustAgentHeader from '../components/TrustAgentHeader';
 import ValidationMetrics from '../components/ValidationMetrics';
 import QuickActionsPanel from '../components/QuickActionsPanel';
+import WeekCalendarWidget from '../components/WeekCalendarWidget';
 
 interface Mission {
   id: string;
@@ -260,6 +261,7 @@ export default function TrustAgentDashboardPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             <ValidationMetrics stats={metricsStats} />
+            <WeekCalendarWidget missions={missions} />
             <QuickActionsPanel />
           </div>
         </div>
