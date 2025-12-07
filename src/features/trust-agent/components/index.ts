@@ -12,3 +12,4 @@ export { default as MissionCalendar } from './MissionCalendar';
 export { default as DayMissionsList } from './DayMissionsList';
 export { default as CalendarLegend } from './CalendarLegend';
 export { default as WeekCalendarWidget } from './WeekCalendarWidget';
+export { default as PlanMissionModal } from './PlanMissionModal';

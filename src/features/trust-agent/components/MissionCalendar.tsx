@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { 
   startOfMonth, 
   endOfMonth, 
@@ -30,6 +30,7 @@ interface MissionCalendarProps {
   missions: Mission[];
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
+  onPlanMission?: (date: Date) => void;
   compact?: boolean;
 }
 
@@ -44,6 +45,7 @@ export default function MissionCalendar({
   missions, 
   selectedDate, 
   onSelectDate,
+  onPlanMission,
   compact = false
 }: MissionCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -136,52 +138,77 @@ export default function MissionCalendar({
             const isTodayDate = isToday(day);
 
             return (
-              <button
+              <div
                 key={day.toISOString()}
-                onClick={() => onSelectDate(day)}
-                className={cn(
-                  "relative flex flex-col items-center justify-center rounded-lg transition-colors",
-                  compact ? "h-8 w-full" : "h-12 w-full",
-                  !isCurrentMonth && "text-muted-foreground/40",
-                  isCurrentMonth && "hover:bg-muted",
-                  isSelected && "bg-primary text-primary-foreground hover:bg-primary",
-                  isTodayDate && !isSelected && "bg-accent text-accent-foreground font-bold"
-                )}
+                className="relative group"
               >
-                <span className={cn("text-sm", compact && "text-xs")}>
-                  {format(day, 'd')}
-                </span>
-                
-                {/* Mission indicators */}
-                {dayMissions.length > 0 && (
-                  <div className={cn(
-                    "flex gap-0.5 mt-0.5",
-                    compact && "absolute bottom-0.5"
-                  )}>
-                    {compact ? (
-                      <span 
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          highestUrgency && urgencyColors[highestUrgency]
-                        )} 
-                      />
-                    ) : (
-                      dayMissions.slice(0, 3).map((mission, idx) => (
+                <button
+                  onClick={() => onSelectDate(day)}
+                  className={cn(
+                    "relative flex flex-col items-center justify-center rounded-lg transition-colors w-full",
+                    compact ? "h-8" : "h-12",
+                    !isCurrentMonth && "text-muted-foreground/40",
+                    isCurrentMonth && "hover:bg-muted",
+                    isSelected && "bg-primary text-primary-foreground hover:bg-primary",
+                    isTodayDate && !isSelected && "bg-accent text-accent-foreground font-bold"
+                  )}
+                >
+                  <span className={cn("text-sm", compact && "text-xs")}>
+                    {format(day, 'd')}
+                  </span>
+                  
+                  {/* Mission indicators */}
+                  {dayMissions.length > 0 && (
+                    <div className={cn(
+                      "flex gap-0.5 mt-0.5",
+                      compact && "absolute bottom-0.5"
+                    )}>
+                      {compact ? (
                         <span 
-                          key={idx}
                           className={cn(
                             "w-1.5 h-1.5 rounded-full",
-                            urgencyColors[mission.urgency] || 'bg-muted-foreground'
+                            highestUrgency && urgencyColors[highestUrgency]
                           )} 
                         />
-                      ))
+                      ) : (
+                        dayMissions.slice(0, 3).map((mission, idx) => (
+                          <span 
+                            key={idx}
+                            className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              urgencyColors[mission.urgency] || 'bg-muted-foreground'
+                            )} 
+                          />
+                        ))
+                      )}
+                      {!compact && dayMissions.length > 3 && (
+                        <span className="text-xs text-muted-foreground">+{dayMissions.length - 3}</span>
+                      )}
+                    </div>
+                  )}
+                </button>
+
+                {/* Add mission button - only in non-compact mode */}
+                {!compact && onPlanMission && isCurrentMonth && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPlanMission(day);
+                    }}
+                    className={cn(
+                      "absolute -top-1 -right-1 w-5 h-5 rounded-full",
+                      "bg-primary text-primary-foreground",
+                      "flex items-center justify-center",
+                      "opacity-0 group-hover:opacity-100 transition-opacity",
+                      "shadow-sm hover:scale-110 transition-transform",
+                      "z-10"
                     )}
-                    {!compact && dayMissions.length > 3 && (
-                      <span className="text-xs text-muted-foreground">+{dayMissions.length - 3}</span>
-                    )}
-                  </div>
+                    title="Planifier une mission"
+                  >
+                    <Plus className="h-3 w-3" />
+                  </button>
                 )}
-              </button>
+              </div>
             );
           })}
         </div>
