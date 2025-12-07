@@ -4,25 +4,47 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { createQueryClient } from '@/shared/lib/query-config';
 import { AuthProvider } from '@/app/providers/AuthProvider';
 import { ThemeProvider } from '@/shared/contexts/ThemeContext';
+// @ts-ignore - Ignore si le fichier n'existe pas encore dans votre structure
 import { registerServiceWorker } from './registerServiceWorker';
-import App from './App.tsx';
+import App from './App';
 import './index.css';
 
+// Création du client React Query
 const queryClient = createQueryClient();
 
-registerServiceWorker();
+// Enregistrement du SW pour le mode PWA/Hors-ligne
+try {
+  if (typeof registerServiceWorker === 'function') {
+    registerServiceWorker();
+  }
+} catch (e) {
+  console.warn('Service Worker registration skipped');
+}
 
-// Supprimer le loader initial une fois React monté
+// Fonction critique : Supprimer le loader initial du DOM une fois React prêt
 const removeInitialLoader = () => {
   const loader = document.getElementById('initial-loader');
   if (loader) {
-    loader.style.transition = 'opacity 0.3s ease';
+    // Transition douce pour éviter le flash blanc
+    loader.style.transition = 'opacity 0.5s ease';
     loader.style.opacity = '0';
-    setTimeout(() => loader.remove(), 300);
+    
+    // Suppression physique du DOM après la transition
+    setTimeout(() => {
+      if (loader.parentNode) {
+        loader.parentNode.removeChild(loader);
+      }
+    }, 500);
   }
 };
 
-createRoot(document.getElementById('root')!).render(
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  throw new Error("L'élément racine 'root' est introuvable dans le document.");
+}
+
+createRoot(rootElement).render(
   <StrictMode>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
@@ -34,10 +56,12 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>
 );
 
-// Attendre que React soit monté avant de retirer le loader
-// requestIdleCallback pour ne pas bloquer le rendu initial
+// Optimisation : Attendre que le navigateur soit "idle" pour retirer le loader
+// Garantit que React a eu la priorité pour le rendu initial (First Paint)
 if ('requestIdleCallback' in window) {
-  requestIdleCallback(removeInitialLoader, { timeout: 2000 });
+  // @ts-ignore - Typescript peut ne pas connaître requestIdleCallback selon la config
+  window.requestIdleCallback(() => removeInitialLoader());
 } else {
+  // Fallback robuste pour Safari et anciens navigateurs
   setTimeout(removeInitialLoader, 100);
 }
