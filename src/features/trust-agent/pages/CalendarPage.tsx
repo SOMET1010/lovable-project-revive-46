@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowLeft } from 'lucide-react';
+import { Calendar, ArrowLeft, Plus } from 'lucide-react';
 import { isSameDay } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -9,6 +9,7 @@ import TrustAgentHeader from '../components/TrustAgentHeader';
 import MissionCalendar from '../components/MissionCalendar';
 import DayMissionsList from '../components/DayMissionsList';
 import CalendarLegend from '../components/CalendarLegend';
+import PlanMissionModal from '../components/PlanMissionModal';
 
 interface Mission {
   id: string;
@@ -31,6 +32,13 @@ export default function CalendarPage() {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [planDate, setPlanDate] = useState<Date>(new Date());
+
+  const handlePlanMission = (date: Date) => {
+    setPlanDate(date);
+    setIsPlanModalOpen(true);
+  };
 
   useEffect(() => {
     if (user) {
@@ -81,13 +89,19 @@ export default function CalendarPage() {
       <TrustAgentHeader title="Calendrier des Missions" />
       
       <main className="container mx-auto px-4 py-6">
-        {/* Back link */}
-        <Link to="/trust-agent/dashboard">
-          <Button variant="ghost" size="small" className="mb-4 -ml-2">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour au dashboard
+        {/* Header with back link and add button */}
+        <div className="flex items-center justify-between mb-4">
+          <Link to="/trust-agent/dashboard">
+            <Button variant="ghost" size="small" className="-ml-2">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour au dashboard
+            </Button>
+          </Link>
+          <Button onClick={() => handlePlanMission(new Date())}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nouvelle Mission
           </Button>
-        </Link>
+        </div>
 
         {/* Stats bar */}
         <div className="grid grid-cols-3 gap-4 mb-6">
@@ -127,6 +141,7 @@ export default function CalendarPage() {
                 missions={missions}
                 selectedDate={selectedDate}
                 onSelectDate={setSelectedDate}
+                onPlanMission={handlePlanMission}
               />
             </div>
 
@@ -141,6 +156,14 @@ export default function CalendarPage() {
           </div>
         )}
       </main>
+
+      {/* Plan Mission Modal */}
+      <PlanMissionModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        initialDate={planDate}
+        onMissionCreated={loadMissions}
+      />
     </div>
   );
 }
