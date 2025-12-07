@@ -28,6 +28,15 @@ const FALLBACK_PROPERTY_IMAGES = [
   '/images/hero/hero_example_2_cocody_family.webp',
 ];
 
+const FALLBACK_IMAGE = '/images/hero-villa-cocody.jpg';
+
+function handleImageError(e: React.SyntheticEvent<HTMLImageElement>) {
+  const target = e.target as HTMLImageElement;
+  if (target.src !== FALLBACK_IMAGE) {
+    target.src = FALLBACK_IMAGE;
+  }
+}
+
 // Property Card with modal trigger
 function PropertyCard({ 
   property, 
@@ -53,6 +62,7 @@ function PropertyCard({
           alt={property.title || 'Propriété Mon Toit'}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           loading="lazy"
+          onError={handleImageError}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
         
