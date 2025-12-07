@@ -1,6 +1,9 @@
 // ============================================
-// FALLBACK IMMÉDIAT - S'exécute même si les imports échouent
+// DIAGNOSTIC - Affiche immédiatement au chargement du module
 // ============================================
+console.log('🟢 main.tsx: Module evaluation started at', new Date().toISOString());
+
+// Fallback immédiat - s'exécute même si les imports suivants échouent
 const LOADER_TIMEOUT = 5000;
 const loaderFallbackTimer = setTimeout(() => {
   const loader = document.getElementById('initial-loader');
@@ -12,25 +15,46 @@ const loaderFallbackTimer = setTimeout(() => {
   }
 }, LOADER_TIMEOUT);
 
-// ============================================
-// IMPORTS
-// ============================================
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { createQueryClient } from '@/shared/lib/query-config';
-import { AuthProvider } from '@/app/providers/AuthProvider';
-import { ThemeProvider } from '@/shared/contexts/ThemeContext';
-import App from './App';
-import './index.css';
+console.log('🟢 main.tsx: Fallback timer set, starting imports...');
 
+// ============================================
+// IMPORTS - Un par un avec logs pour identifier le problème
+// ============================================
+try {
+  console.log('🟢 main.tsx: Importing React...');
+} catch (e) {
+  console.error('❌ main.tsx: Pre-import error', e);
+}
+
+import { StrictMode } from 'react';
+console.log('🟢 main.tsx: React imported');
+
+import { createRoot } from 'react-dom/client';
+console.log('🟢 main.tsx: ReactDOM imported');
+
+import { QueryClientProvider } from '@tanstack/react-query';
+console.log('🟢 main.tsx: React Query imported');
+
+import { createQueryClient } from '@/shared/lib/query-config';
+console.log('🟢 main.tsx: Query config imported');
+
+import { AuthProvider } from '@/app/providers/AuthProvider';
+console.log('🟢 main.tsx: AuthProvider imported');
+
+import { ThemeProvider } from '@/shared/contexts/ThemeContext';
+console.log('🟢 main.tsx: ThemeProvider imported');
+
+import App from './App';
+console.log('🟢 main.tsx: App imported');
+
+import './index.css';
 console.log('✅ main.tsx: All imports successful');
 
 // ============================================
 // FONCTIONS UTILITAIRES
 // ============================================
 const removeInitialLoader = () => {
-  clearTimeout(loaderFallbackTimer); // Annuler le fallback si on supprime proprement
+  clearTimeout(loaderFallbackTimer);
   const loader = document.getElementById('initial-loader');
   if (loader && loader.parentNode) {
     loader.style.transition = 'opacity 0.4s ease';

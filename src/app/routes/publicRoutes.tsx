@@ -1,10 +1,12 @@
-// Force rebuild - 2025-12-07T18:55:00Z
+// Force rebuild - 2025-12-07T20:00:00Z
 import { RouteObject } from 'react-router-dom';
 import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import SearchErrorBoundary from '@/features/tenant/components/SearchErrorBoundary';
 
-// Home page - import direct pour éviter les erreurs de lazy loading
+// TEST: Import direct de HomePage pour déboguer le problème de lazy loading
 import Home from '@/features/property/pages/HomePage';
+
+// Autres pages en lazy load
 const NotFound = lazyWithRetry(() => import('@/features/property/pages/NotFoundPage'));
 const AddPropertyLanding = lazyWithRetry(() => import('@/features/property/pages/AddPropertyLandingPage'));
 
@@ -22,7 +24,7 @@ const FAQPage = lazyWithRetry(() => import('@/features/auth/pages/FAQPage'));
 const HowItWorksPage = lazyWithRetry(() => import('@/features/auth/pages/HowItWorksPage'));
 
 export const publicRoutes: RouteObject[] = [
-  // Home
+  // Home - IMPORT DIRECT pour test
   { index: true, element: <Home /> },
 
   // Static pages
