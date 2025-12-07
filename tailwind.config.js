@@ -5,8 +5,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Couleur principale - Orange MONTOIT avec variables CSS
+        /* === COULEURS SHADCN/UI === */
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
           50: 'var(--color-primary-50)',
           100: 'var(--color-primary-100)',
           500: 'var(--color-primary-500)',
@@ -14,7 +21,31 @@ export default {
           700: 'var(--color-primary-700)',
           900: 'var(--color-primary-900)',
         },
-        // Couleurs neutres WCAG AAA
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        /* === COULEURS NEUTRES MON TOIT === */
         neutral: {
           50: 'var(--color-neutral-50)',
           100: 'var(--color-neutral-100)',
@@ -23,18 +54,12 @@ export default {
           700: 'var(--color-neutral-700)',
           900: 'var(--color-neutral-900)',
         },
-        // Couleurs sémantiques optimisées
+        /* === COULEURS SÉMANTIQUES === */
         semantic: {
           success: 'var(--color-semantic-success)',
           error: 'var(--color-semantic-error)',
           warning: 'var(--color-semantic-warning)',
           info: 'var(--color-semantic-info)',
-        },
-        // Couleurs d'arrière-plan système de design
-        background: {
-          page: 'var(--color-background-page)',
-          surface: 'var(--color-background-surface)',
-          elevated: 'var(--color-background-elevated)',
         },
         
         // Couleurs sémantiques pour messages et états
