@@ -9,7 +9,7 @@ import PageTransition from '@/shared/ui/PageTransition';
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { GlobalLoadingSkeleton } from '@/shared/ui/GlobalLoadingSkeleton';
 import { FloatingCallButton } from '@/shared/ui/FloatingCallButton';
-
+import SUTAChatWidget from '@/shared/components/SUTAChatWidget';
 const noLayoutRoutes = ['/auth/callback'];
 const noHeaderFooterRoutes = [
   '/admin',
@@ -53,6 +53,7 @@ export default function Layout() {
       {shouldShowHeaderFooter && <Breadcrumb />}
       <ToastContainer />
       {shouldShowHeaderFooter && <FloatingCallButton />}
+      {shouldShowHeaderFooter && <SUTAChatWidget mode="floating" position="bottom-right" />}
       <ChunkLoadErrorBoundary>
         <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>
           <main className={shouldShowHeaderFooter ? 'min-h-screen' : ''}>
