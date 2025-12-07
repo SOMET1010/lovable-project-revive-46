@@ -7,6 +7,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { toast } from 'sonner';
+import {
+  notifyMandateCreated,
+  notifyMandateAccepted,
+  notifyMandateRefused,
+  notifyMandateSuspended,
+  notifyMandateReactivated,
+  notifyMandateTerminated,
+  notifyMandatePermissionsUpdated,
+} from '@/services/notifications/mandateNotificationService';
 
 // Types
 export interface Agency {
@@ -210,6 +219,9 @@ export function useAgencyMandates() {
       return null;
     }
     
+    // Send notification to agency
+    await notifyMandateCreated(data.id);
+    
     toast.success('Invitation envoyée à l\'agence');
     await fetchMandates();
     return data as unknown as AgencyMandate;
@@ -230,6 +242,9 @@ export function useAgencyMandates() {
       toast.error('Erreur lors de l\'acceptation du mandat');
       return false;
     }
+    
+    // Send notification to owner
+    await notifyMandateAccepted(mandateId);
     
     toast.success('Mandat accepté');
     await fetchMandates();
@@ -252,6 +267,9 @@ export function useAgencyMandates() {
       return false;
     }
     
+    // Send notification to owner
+    await notifyMandateRefused(mandateId, reason);
+    
     toast.success('Mandat refusé');
     await fetchMandates();
     return true;
@@ -259,6 +277,12 @@ export function useAgencyMandates() {
 
   // Terminate a mandate (owner or agency)
   const terminateMandate = useCallback(async (mandateId: string, reason?: string): Promise<boolean> => {
+    if (!user) return false;
+    
+    // Determine who is terminating
+    const mandate = mandates.find(m => m.id === mandateId);
+    const terminatedBy: 'owner' | 'agency' = mandate?.owner_id === user.id ? 'owner' : 'agency';
+    
     const { error: err } = await supabase
       .from('agency_mandates')
       .update({ 
@@ -274,10 +298,13 @@ export function useAgencyMandates() {
       return false;
     }
     
+    // Send notification to both parties
+    await notifyMandateTerminated(mandateId, terminatedBy, reason);
+    
     toast.success('Mandat résilié');
     await fetchMandates();
     return true;
-  }, [fetchMandates]);
+  }, [user, mandates, fetchMandates]);
 
   // Suspend a mandate (agency)
   const suspendMandate = useCallback(async (mandateId: string, reason?: string): Promise<boolean> => {
@@ -294,6 +321,9 @@ export function useAgencyMandates() {
       toast.error('Erreur lors de la suspension du mandat');
       return false;
     }
+    
+    // Send notification to owner
+    await notifyMandateSuspended(mandateId, reason);
     
     toast.success('Mandat suspendu');
     await fetchMandates();
@@ -316,6 +346,9 @@ export function useAgencyMandates() {
       return false;
     }
     
+    // Send notification to owner
+    await notifyMandateReactivated(mandateId);
+    
     toast.success('Mandat réactivé');
     await fetchMandates();
     return true;
@@ -336,6 +369,9 @@ export function useAgencyMandates() {
       toast.error('Erreur lors de la mise à jour des permissions');
       return false;
     }
+    
+    // Send notification to agency
+    await notifyMandatePermissionsUpdated(mandateId);
     
     toast.success('Permissions mises à jour');
     await fetchMandates();
