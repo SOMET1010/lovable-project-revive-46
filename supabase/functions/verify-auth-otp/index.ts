@@ -375,6 +375,9 @@ Deno.serve(async (req: Request) => {
 
     edgeLogger.info('User created', { userId: newUser.user.id });
 
+    // Calculer le trust_score initial: 10 (nom) + 10 (téléphone vérifié) = 20
+    const initialTrustScore = 20;
+
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .upsert({
@@ -384,6 +387,7 @@ Deno.serve(async (req: Request) => {
         email: generatedEmail,
         full_name: fullName,
         user_type: null,
+        trust_score: initialTrustScore,
         profile_setup_completed: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),

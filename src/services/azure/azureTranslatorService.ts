@@ -8,7 +8,7 @@ export const azureTranslatorService = {
    * Définit la langue cible pour la traduction
    */
   setTargetLanguage: async (lang: string): Promise<void> => {
-    console.log(`[Azure Translator] Language set to: ${lang}`);
+    if (import.meta.env.DEV) console.log(`[Azure Translator] Language set to: ${lang}`);
     localStorage.setItem('preferred_language', lang);
   },
 

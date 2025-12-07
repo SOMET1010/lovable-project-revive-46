@@ -281,7 +281,7 @@ export default function AdminCEVManagement() {
 
   const exportData = () => {
     // Simulation d'export
-    console.log('Export des données CEV...');
+    if (import.meta.env.DEV) console.log('Export des données CEV...');
   };
 
   if (loading) {

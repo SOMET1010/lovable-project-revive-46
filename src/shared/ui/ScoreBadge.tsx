@@ -10,6 +10,16 @@ export interface ScoreBadgeProps {
 }
 
 const getScoreConfig = (score: number) => {
+  // Score 0 = en cours de calcul
+  if (score === 0) {
+    return {
+      label: 'En calcul',
+      bgClass: 'bg-gray-50 border-gray-200',
+      textClass: 'text-gray-600',
+      iconClass: 'text-gray-500',
+      isCalculating: true,
+    };
+  }
   if (score >= 70) {
     return {
       label: 'Fiable',
