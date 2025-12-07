@@ -16,6 +16,7 @@ import {
   notifyMandateTerminated,
   notifyMandatePermissionsUpdated,
 } from '@/services/notifications/mandateNotificationService';
+import { downloadMandatePDF, type MandateData } from '@/services/mandates/mandatePdfGenerator';
 
 // Types
 export interface Agency {
@@ -411,6 +412,67 @@ export function useAgencyMandates() {
     return true;
   }, [fetchMandates]);
 
+  // Download mandate PDF
+  const downloadMandate = useCallback(async (mandateId: string): Promise<boolean> => {
+    const mandate = mandates.find(m => m.id === mandateId);
+    if (!mandate) {
+      toast.error('Mandat introuvable');
+      return false;
+    }
+
+    // Fetch owner profile
+    const { data: ownerProfile } = await supabase
+      .rpc('get_public_profile', { profile_user_id: mandate.owner_id });
+
+    const ownerData = ownerProfile?.[0];
+
+    const pdfData: MandateData = {
+      mandateId: mandate.id,
+      mandateScope: mandate.mandate_scope,
+      ownerName: ownerData?.full_name || 'Propriétaire',
+      agencyName: mandate.agency?.agency_name || 'Agence',
+      agencyRegistrationNumber: mandate.agency?.registration_number || undefined,
+      agencyPhone: mandate.agency?.phone || undefined,
+      agencyEmail: mandate.agency?.email || undefined,
+      agencyAddress: mandate.agency?.address || undefined,
+      property: mandate.property ? {
+        title: mandate.property.title,
+        city: mandate.property.city,
+        neighborhood: mandate.property.neighborhood || undefined,
+        monthlyRent: mandate.property.monthly_rent,
+      } : undefined,
+      startDate: mandate.start_date,
+      endDate: mandate.end_date || undefined,
+      commissionRate: mandate.commission_rate,
+      permissions: {
+        can_view_properties: mandate.can_view_properties,
+        can_edit_properties: mandate.can_edit_properties,
+        can_create_properties: mandate.can_create_properties,
+        can_delete_properties: mandate.can_delete_properties,
+        can_view_applications: mandate.can_view_applications,
+        can_manage_applications: mandate.can_manage_applications,
+        can_create_leases: mandate.can_create_leases,
+        can_view_financials: mandate.can_view_financials,
+        can_manage_maintenance: mandate.can_manage_maintenance,
+        can_communicate_tenants: mandate.can_communicate_tenants,
+        can_manage_documents: mandate.can_manage_documents,
+      },
+      notes: mandate.notes || undefined,
+      signedAt: mandate.signed_at || undefined,
+    };
+
+    try {
+      const filename = `mandat-${mandate.agency?.agency_name?.replace(/\s+/g, '-').toLowerCase() || 'agence'}-${new Date().toISOString().split('T')[0]}.pdf`;
+      await downloadMandatePDF(pdfData, filename);
+      toast.success('Document de mandat téléchargé');
+      return true;
+    } catch (error) {
+      console.error('Error generating mandate PDF:', error);
+      toast.error('Erreur lors de la génération du PDF');
+      return false;
+    }
+  }, [fetchMandates]);
+
   // Initial load
   useEffect(() => {
     if (user) {
@@ -457,6 +519,7 @@ export function useAgencyMandates() {
     reactivateMandate,
     updateMandatePermissions,
     updateCommissionRate,
+    downloadMandate,
     
     // Refresh
     refresh: fetchMandates,

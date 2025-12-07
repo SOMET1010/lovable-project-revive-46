@@ -3,9 +3,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, Building2, Search, Calendar, Percent, Check } from 'lucide-react';
+import { X, Building2, Search, Calendar, Percent, Check, Download, CheckCircle2 } from 'lucide-react';
 import { format, addMonths } from 'date-fns';
-import type { Agency, MandatePermissions } from '@/hooks/useAgencyMandates';
+import type { Agency, MandatePermissions, AgencyMandate } from '@/hooks/useAgencyMandates';
 
 interface Property {
   id: string;
@@ -25,7 +25,8 @@ interface InviteAgencyDialogProps {
     end_date: string;
     commission_rate: number;
     permissions: Partial<MandatePermissions>;
-  }) => Promise<boolean>;
+  }) => Promise<AgencyMandate | null>;
+  onDownloadMandate?: (mandateId: string) => Promise<boolean>;
   properties: Property[];
   agencies: Agency[];
   selectedPropertyId?: string;
@@ -96,11 +97,13 @@ export default function InviteAgencyDialog({
   isOpen,
   onClose,
   onInvite,
+  onDownloadMandate,
   properties,
   agencies,
   selectedPropertyId,
 }: InviteAgencyDialogProps) {
-  const [step, setStep] = useState<'select' | 'configure'>('select');
+  const [step, setStep] = useState<'select' | 'configure' | 'success'>('select');
+  const [createdMandateId, setCreatedMandateId] = useState<string | null>(null);
   const [mandateScope, setMandateScope] = useState<'single_property' | 'all_properties'>('single_property');
   const [selectedProperty, setSelectedProperty] = useState<string>(selectedPropertyId || '');
   const [selectedAgency, setSelectedAgency] = useState<string>('');
@@ -136,7 +139,7 @@ export default function InviteAgencyDialog({
 
   const handleInvite = async () => {
     setLoading(true);
-    const success = await onInvite({
+    const mandate = await onInvite({
       property_id: mandateScope === 'all_properties' ? null : selectedProperty,
       agency_id: selectedAgency,
       mandate_scope: mandateScope,
@@ -147,15 +150,29 @@ export default function InviteAgencyDialog({
     });
     setLoading(false);
     
-    if (success) {
-      onClose();
-      // Reset form
+    if (mandate) {
+      setCreatedMandateId(mandate.id);
+      setStep('success');
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (createdMandateId && onDownloadMandate) {
+      await onDownloadMandate(createdMandateId);
+    }
+  };
+
+  const handleClose = () => {
+    onClose();
+    // Reset form after a small delay
+    setTimeout(() => {
       setStep('select');
       setMandateScope('single_property');
       setSelectedAgency('');
       setSearchQuery('');
       setPermissions(DEFAULT_PERMISSIONS);
-    }
+      setCreatedMandateId(null);
+    }, 200);
   };
 
   const togglePermission = (key: keyof MandatePermissions) => {
@@ -170,24 +187,26 @@ export default function InviteAgencyDialog({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black/50" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/50" onClick={handleClose} />
         
         <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-neutral-200">
             <div>
               <h2 className="text-lg font-bold text-neutral-900">
-                {step === 'select' ? 'Inviter une agence' : 'Configurer le mandat'}
+                {step === 'select' ? 'Inviter une agence' : step === 'configure' ? 'Configurer le mandat' : 'Mandat créé'}
               </h2>
               <p className="text-sm text-neutral-500">
                 {step === 'select' 
                   ? 'Sélectionnez une agence pour gérer votre bien'
-                  : 'Définissez les termes et permissions'
+                  : step === 'configure'
+                  ? 'Définissez les termes et permissions'
+                  : 'L\'invitation a été envoyée avec succès'
                 }
               </p>
             </div>
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
             >
               <X className="h-5 w-5 text-neutral-500" />
@@ -196,7 +215,28 @@ export default function InviteAgencyDialog({
 
           {/* Content */}
           <div className="p-4 overflow-y-auto max-h-[calc(90vh-180px)]">
-            {step === 'select' ? (
+            {step === 'success' ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle2 className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-xl font-bold text-neutral-900 mb-2">Invitation envoyée</h3>
+                <p className="text-neutral-600 mb-6">
+                  L'agence {selectedAgencyData?.agency_name} a reçu votre invitation.
+                  <br />
+                  Vous serez notifié dès qu'elle acceptera le mandat.
+                </p>
+                {onDownloadMandate && (
+                  <button
+                    onClick={handleDownloadPDF}
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-primary text-primary rounded-lg hover:bg-primary/5 transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                    Télécharger le document de mandat
+                  </button>
+                )}
+              </div>
+            ) : step === 'select' ? (
               <>
                 {/* Mandate Scope Selection */}
                 {!selectedPropertyId && properties.length > 0 && (
@@ -415,41 +455,52 @@ export default function InviteAgencyDialog({
                   </div>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
 
           {/* Footer */}
           <div className="p-4 border-t border-neutral-200 flex gap-3">
-            {step === 'configure' && (
+            {step === 'success' ? (
               <button
-                onClick={() => setStep('select')}
-                className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                onClick={handleClose}
+                className="w-full px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium transition-colors"
               >
-                Retour
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors ml-auto"
-            >
-              Annuler
-            </button>
-            {step === 'select' ? (
-              <button
-                onClick={handleContinue}
-                disabled={mandateScope === 'single_property' ? (!selectedProperty || !selectedAgency) : !selectedAgency}
-                className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Continuer
+                Fermer
               </button>
             ) : (
-              <button
-                onClick={handleInvite}
-                disabled={loading}
-                className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
-              >
-                {loading ? 'Envoi...' : 'Envoyer l\'invitation'}
-              </button>
+              <>
+                {step === 'configure' && (
+                <button
+                  onClick={() => setStep('select')}
+                  className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                >
+                  Retour
+                </button>
+                )}
+                <button
+                  onClick={handleClose}
+                  className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors ml-auto"
+                >
+                  Annuler
+                </button>
+                {step === 'select' ? (
+                  <button
+                    onClick={handleContinue}
+                    disabled={mandateScope === 'single_property' ? (!selectedProperty || !selectedAgency) : !selectedAgency}
+                    className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Continuer
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleInvite}
+                    disabled={loading}
+                    className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
+                  >
+                    {loading ? 'Envoi...' : 'Envoyer l\'invitation'}
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -457,3 +508,4 @@ export default function InviteAgencyDialog({
     </div>
   );
 }
+

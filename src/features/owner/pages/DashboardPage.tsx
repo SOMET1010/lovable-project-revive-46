@@ -412,10 +412,8 @@ export default function OwnerDashboardPage() {
           setShowInviteDialog(false);
           setSelectedPropertyForInvite(undefined);
         }}
-        onInvite={async (params) => {
-          const result = await createMandate(params);
-          return !!result;
-        }}
+        onInvite={createMandate}
+        onDownloadMandate={downloadMandate}
         properties={properties.map(p => ({
           id: p.id,
           title: p.title,
