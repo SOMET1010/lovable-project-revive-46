@@ -54,7 +54,6 @@
 
     <!-- Preload Critical Resources -->
     <link rel="preload" as="image" href="/logo-montoit.png" />
-    <!-- Preload first hero image with high priority -->
     <link rel="preload" as="image" href="/images/hero/hero-famille-cles.png" fetchpriority="high" />
     <link rel="dns-prefetch" href="https://api.mapbox.com" />
     <link rel="preconnect" href="https://api.mapbox.com" crossorigin />
@@ -62,14 +61,14 @@
     <title>Mon Toit - Plateforme de Location Immobilière en Côte d'Ivoire</title>
   </head>
   <body>
-    <div id="root">
-      <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;height:100vh;background:#fff;">
-        <div style="text-align:center;">
-          <img src="/logo-montoit.png" alt="Mon Toit" style="width:80px;height:80px;margin-bottom:16px;" />
-          <div style="color:#ea580c;font-family:Inter,sans-serif;font-size:16px;">Chargement...</div>
-        </div>
+    <!-- Loader initial HORS de #root pour éviter qu'il soit écrasé par React -->
+    <div id="initial-loader" style="position:fixed;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:9999;">
+      <div style="text-align:center;">
+        <img src="/logo-montoit.png" alt="Mon Toit" style="width:80px;height:80px;margin-bottom:16px;" />
+        <div style="color:#ea580c;font-family:Inter,sans-serif;font-size:16px;">Chargement...</div>
       </div>
     </div>
+    <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

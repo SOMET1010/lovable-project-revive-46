@@ -4,64 +4,75 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { createQueryClient } from '@/shared/lib/query-config';
 import { AuthProvider } from '@/app/providers/AuthProvider';
 import { ThemeProvider } from '@/shared/contexts/ThemeContext';
-// @ts-ignore - Ignore si le fichier n'existe pas encore dans votre structure
-import { registerServiceWorker } from './registerServiceWorker';
 import App from './App';
 import './index.css';
 
-// Création du client React Query
-const queryClient = createQueryClient();
-
-// Enregistrement du SW pour le mode PWA/Hors-ligne
-try {
-  if (typeof registerServiceWorker === 'function') {
-    registerServiceWorker();
-  }
-} catch (e) {
-  console.warn('Service Worker registration skipped');
-}
-
-// Fonction critique : Supprimer le loader initial du DOM une fois React prêt
+// Fonction critique : Supprimer le loader initial du DOM
 const removeInitialLoader = () => {
   const loader = document.getElementById('initial-loader');
   if (loader) {
-    // Transition douce pour éviter le flash blanc
-    loader.style.transition = 'opacity 0.5s ease';
+    loader.style.transition = 'opacity 0.4s ease';
     loader.style.opacity = '0';
-    
-    // Suppression physique du DOM après la transition
     setTimeout(() => {
-      if (loader.parentNode) {
-        loader.parentNode.removeChild(loader);
-      }
-    }, 500);
+      loader.remove();
+    }, 400);
   }
 };
 
-const rootElement = document.getElementById('root');
+// Fonction pour afficher une erreur dans le loader
+const showErrorInLoader = (error: unknown) => {
+  const loader = document.getElementById('initial-loader');
+  if (loader) {
+    loader.innerHTML = `
+      <div style="text-align:center;padding:20px;">
+        <div style="color:#dc2626;font-family:Inter,sans-serif;font-size:16px;margin-bottom:12px;">
+          Erreur de chargement
+        </div>
+        <button onclick="window.location.reload()" style="background:#ea580c;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:Inter,sans-serif;">
+          Rafraîchir la page
+        </button>
+      </div>
+    `;
+  }
+  console.error('❌ Erreur de démarrage React:', error);
+};
 
-if (!rootElement) {
-  throw new Error("L'élément racine 'root' est introuvable dans le document.");
+// Démarrage de l'application avec gestion d'erreur globale
+try {
+  const queryClient = createQueryClient();
+  const rootElement = document.getElementById('root');
+
+  if (!rootElement) {
+    throw new Error("Élément #root introuvable");
+  }
+
+  createRoot(rootElement).render(
+    <StrictMode>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </StrictMode>
+  );
+
+  // Supprimer le loader une fois React monté
+  if ('requestIdleCallback' in window) {
+    (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(removeInitialLoader);
+  } else {
+    setTimeout(removeInitialLoader, 100);
+  }
+
+} catch (error) {
+  showErrorInLoader(error);
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
-  </StrictMode>
-);
-
-// Optimisation : Attendre que le navigateur soit "idle" pour retirer le loader
-// Garantit que React a eu la priorité pour le rendu initial (First Paint)
-if ('requestIdleCallback' in window) {
-  // @ts-ignore - Typescript peut ne pas connaître requestIdleCallback selon la config
-  window.requestIdleCallback(() => removeInitialLoader());
-} else {
-  // Fallback robuste pour Safari et anciens navigateurs
-  setTimeout(removeInitialLoader, 100);
-}
+// Fallback de sécurité : forcer la suppression du loader après 5 secondes
+setTimeout(() => {
+  const loader = document.getElementById('initial-loader');
+  if (loader && loader.style.opacity !== '0') {
+    removeInitialLoader();
+  }
+}, 5000);
