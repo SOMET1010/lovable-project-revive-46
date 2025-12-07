@@ -37,51 +37,24 @@ const features = [
  * TrustSection - Premium Design
  * 
  * Features:
- * - White background with subtle cards
+ * - Uses shadcn/ui CSS variables for theming
  * - 96px vertical padding
- * - Orange icon accents
+ * - Orange icon accents via primary color
  * - Professional grid layout
  */
 export default function TrustSection() {
   return (
-    <section 
-      className="relative"
-      style={{ 
-        backgroundColor: '#FFFFFF',
-        paddingTop: '96px',
-        paddingBottom: '96px'
-      }}
-    >
+    <section className="relative bg-background py-24">
       <div className="container mx-auto px-4 md:px-6">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <span 
-            className="inline-block px-5 py-2 rounded-full text-sm font-semibold mb-6"
-            style={{ 
-              backgroundColor: 'rgba(255, 108, 47, 0.1)',
-              color: '#FF6C2F'
-            }}
-          >
+          <span className="inline-block px-5 py-2 rounded-full text-sm font-semibold mb-6 bg-primary/10 text-primary">
             Sécurité & Confiance
           </span>
-          <h2 
-            className="font-bold mb-5"
-            style={{ 
-              fontSize: 'clamp(28px, 4vw, 44px)',
-              color: '#171717',
-              letterSpacing: '-0.02em'
-            }}
-          >
+          <h2 className="font-bold mb-5 text-foreground text-[clamp(28px,4vw,44px)] tracking-tight">
             Votre sécurité est notre priorité
           </h2>
-          <p 
-            className="max-w-2xl mx-auto"
-            style={{ 
-              fontSize: '18px',
-              lineHeight: '1.7',
-              color: '#525252'
-            }}
-          >
+          <p className="max-w-2xl mx-auto text-lg leading-relaxed text-muted-foreground">
             Nous mettons en place les meilleurs standards de sécurité pour protéger vos transactions et vos données
           </p>
         </div>
@@ -91,54 +64,20 @@ export default function TrustSection() {
           {features.map((feature) => (
             <div
               key={feature.title}
-              className="group transition-all duration-300"
-              style={{ 
-                backgroundColor: '#FAFAFA',
-                borderRadius: '20px',
-                padding: '40px 32px',
-                border: '1px solid #E5E5E5'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 20px 40px -10px rgba(255, 108, 47, 0.1)';
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.borderColor = '#FF6C2F';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = '#E5E5E5';
-              }}
+              className="group transition-all duration-300 bg-muted rounded-[20px] p-8 md:p-10 border border-border hover:shadow-[0_20px_40px_-10px_hsl(var(--primary)/0.1)] hover:-translate-y-1 hover:border-primary"
             >
               {/* Icon */}
-              <div 
-                className="w-14 h-14 mb-6 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
-                style={{ 
-                  backgroundColor: 'rgba(255, 108, 47, 0.1)',
-                  borderRadius: '14px'
-                }}
-              >
-                <feature.icon className="h-7 w-7" style={{ color: '#FF6C2F' }} />
+              <div className="w-14 h-14 mb-6 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 bg-primary/10 rounded-[14px]">
+                <feature.icon className="h-7 w-7 text-primary" />
               </div>
               
               {/* Title */}
-              <h3 
-                className="font-semibold mb-3"
-                style={{ 
-                  fontSize: '20px',
-                  color: '#171717'
-                }}
-              >
+              <h3 className="font-semibold mb-3 text-xl text-foreground">
                 {feature.title}
               </h3>
               
               {/* Description */}
-              <p 
-                style={{ 
-                  fontSize: '15px',
-                  lineHeight: '1.7',
-                  color: '#525252'
-                }}
-              >
+              <p className="text-[15px] leading-relaxed text-muted-foreground">
                 {feature.description}
               </p>
             </div>
