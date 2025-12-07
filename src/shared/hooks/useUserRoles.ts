@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 // Type des rôles disponibles (correspondant à l'enum app_role en DB)
 export type AppRole = 'admin' | 'moderator' | 'user' | 'trust_agent';
@@ -32,7 +32,7 @@ export interface UseUserRolesReturn {
 }
 
 export function useUserRoles(): UseUserRolesReturn {
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
