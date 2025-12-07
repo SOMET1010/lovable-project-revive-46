@@ -34,5 +34,10 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>
 );
 
-// Retirer le loader initial après le rendu
-removeInitialLoader();
+// Attendre que React soit monté avant de retirer le loader
+// requestIdleCallback pour ne pas bloquer le rendu initial
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(removeInitialLoader, { timeout: 2000 });
+} else {
+  setTimeout(removeInitialLoader, 100);
+}
