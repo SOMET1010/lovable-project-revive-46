@@ -3,7 +3,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { X, Building2, Search, Calendar, Percent, Check, Download, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, Building2, Search, Calendar, Percent, Check, Download, CheckCircle2, FileSignature } from 'lucide-react';
 import { format, addMonths } from 'date-fns';
 import type { Agency, MandatePermissions, AgencyMandate } from '@/hooks/useAgencyMandates';
 
@@ -102,6 +103,7 @@ export default function InviteAgencyDialog({
   agencies,
   selectedPropertyId,
 }: InviteAgencyDialogProps) {
+  const navigate = useNavigate();
   const [step, setStep] = useState<'select' | 'configure' | 'success'>('select');
   const [createdMandateId, setCreatedMandateId] = useState<string | null>(null);
   const [mandateScope, setMandateScope] = useState<'single_property' | 'all_properties'>('single_property');
@@ -233,6 +235,18 @@ export default function InviteAgencyDialog({
                   >
                     <Download className="h-4 w-4" />
                     Télécharger le document de mandat
+                  </button>
+                )}
+                {createdMandateId && (
+                  <button
+                    onClick={() => {
+                      handleClose();
+                      navigate(`/mandat/signer/${createdMandateId}`);
+                    }}
+                    className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+                  >
+                    <FileSignature className="h-4 w-4" />
+                    Signer le mandat maintenant
                   </button>
                 )}
               </div>

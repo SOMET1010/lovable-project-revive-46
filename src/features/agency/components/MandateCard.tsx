@@ -17,7 +17,9 @@ import {
   Trash2,
   Settings,
   Eye,
-  Home
+  Home,
+  FileSignature,
+  PenTool
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -33,6 +35,7 @@ interface MandateCardProps {
   onSuspend?: (id: string) => void;
   onReactivate?: (id: string) => void;
   onManagePermissions?: (mandate: AgencyMandate) => void;
+  onSign?: (mandate: AgencyMandate) => void;
 }
 
 export default function MandateCard({
@@ -44,6 +47,7 @@ export default function MandateCard({
   onSuspend,
   onReactivate,
   onManagePermissions,
+  onSign,
 }: MandateCardProps) {
   const [showMenu, setShowMenu] = useState(false);
 
@@ -109,6 +113,20 @@ export default function MandateCard({
                   >
                     <Settings className="h-4 w-4" />
                     Permissions
+                  </button>
+                )}
+
+                {/* Signature option */}
+                {mandate.status === 'active' && !mandate.signed_mandate_url && onSign && (
+                  <button
+                    onClick={() => {
+                      setShowMenu(false);
+                      onSign(mandate);
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-primary hover:bg-primary/5 w-full"
+                  >
+                    <PenTool className="h-4 w-4" />
+                    Signer électroniquement
                   </button>
                 )}
 
@@ -205,9 +223,25 @@ export default function MandateCard({
             {mandate.property?.monthly_rent && (
               <span className="text-primary font-medium">
                 ({Math.round(mandate.property.monthly_rent * mandate.commission_rate / 100).toLocaleString()} FCFA/mois)
-              </span>
+            </span>
             )}
           </div>
+          
+          {/* Signature Status */}
+          {mandate.cryptoneo_signature_status && (
+            <div className="flex items-center gap-1.5 text-xs text-neutral-600 col-span-2 mt-1">
+              <FileSignature className="h-3.5 w-3.5" />
+              <span>
+                Signature: {
+                  mandate.cryptoneo_signature_status === 'completed' ? '✓ Complète' :
+                  mandate.cryptoneo_signature_status === 'owner_signed' ? '⏳ En attente agence' :
+                  mandate.cryptoneo_signature_status === 'agency_signed' ? '⏳ En attente propriétaire' :
+                  mandate.cryptoneo_signature_status === 'pending' ? '⏳ En attente' :
+                  'Non signé'
+                }
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Actions for Pending Mandates */}
@@ -234,6 +268,17 @@ export default function MandateCard({
           <p className="text-center text-sm text-amber-600 bg-amber-50 py-2 rounded-lg">
             En attente de réponse de l'agence
           </p>
+        )}
+
+        {/* Sign button for active mandates without signature */}
+        {mandate.status === 'active' && !mandate.signed_mandate_url && onSign && (
+          <button
+            onClick={() => onSign(mandate)}
+            className="w-full flex items-center justify-center gap-1.5 bg-primary hover:bg-primary/90 text-white py-2 px-3 rounded-lg text-sm font-medium transition-colors mt-2"
+          >
+            <FileSignature className="h-4 w-4" />
+            Signer le mandat
+          </button>
         )}
       </div>
     </div>
