@@ -1678,6 +1678,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_profile_score: {
+        Args: {
+          p_address: string
+          p_avatar_url: string
+          p_bio: string
+          p_city: string
+          p_full_name: string
+          p_phone: string
+        }
+        Returns: number
+      }
+      calculate_trust_score: {
+        Args: {
+          p_address: string
+          p_avatar_url: string
+          p_bio: string
+          p_city: string
+          p_cnam_verified: boolean
+          p_facial_status: string
+          p_full_name: string
+          p_is_verified: boolean
+          p_oneci_verified: boolean
+          p_phone: string
+        }
+        Returns: number
+      }
+      calculate_verification_score: {
+        Args: {
+          p_cnam_verified: boolean
+          p_facial_status: string
+          p_is_verified: boolean
+          p_oneci_verified: boolean
+        }
+        Returns: number
+      }
       check_feature_flag: {
         Args: { flag_key: string; user_id?: string }
         Returns: boolean
