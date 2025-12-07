@@ -1,4 +1,4 @@
-import { CheckCircle, Shield, MessageSquare } from 'lucide-react';
+import { CheckCircle, Shield, MessageSquare, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
 import { ScoreBadge } from './ScoreBadge';
@@ -23,6 +23,9 @@ export interface OwnerBadgeProps {
   propertyTitle?: string | null;
   onContact?: () => void;
   showContactButton?: boolean;
+  // Gestion anonyme
+  isAnonymous?: boolean;
+  managedByAgencyName?: string | null;
 }
 
 const sizeConfig = {
@@ -72,6 +75,8 @@ export function OwnerBadge({
   propertyTitle,
   onContact,
   showContactButton = true,
+  isAnonymous = false,
+  managedByAgencyName,
 }: OwnerBadgeProps) {
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -137,6 +142,57 @@ export function OwnerBadge({
   }
 
   // Variante card (pour sidebar, détails)
+  // Si gestion anonyme, afficher l'agence au lieu du propriétaire
+  if (isAnonymous && managedByAgencyName) {
+    return (
+      <div className={cn('bg-white rounded-2xl shadow-lg p-6 border border-neutral-100', className)}>
+        <h3 className="text-lg font-semibold text-neutral-900 mb-4">Gestionnaire</h3>
+        
+        <div className={cn('flex items-center', sizes.gap)}>
+          {/* Agency Icon */}
+          <div className="relative flex-shrink-0">
+            <div className={cn(sizes.avatar, 'rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20')}>
+              <Building2 className="h-6 w-6 text-primary" />
+            </div>
+            <div
+              className={cn(
+                'absolute bg-primary rounded-full flex items-center justify-center border-2 border-white',
+                sizes.verifiedBadge
+              )}
+            >
+              <CheckCircle className={cn(sizes.verifiedIcon, 'text-white')} />
+            </div>
+          </div>
+
+          {/* Infos */}
+          <div className="flex-1 min-w-0">
+            <div className={cn(sizes.name, 'font-semibold text-neutral-900 truncate')}>
+              Géré par {managedByAgencyName}
+            </div>
+            <div className="mt-1 text-sm text-neutral-500">
+              Agence immobilière vérifiée
+            </div>
+          </div>
+        </div>
+
+        {/* Bouton Contacter l'agence */}
+        {showContactButton && (
+          <div className="mt-4 pt-4 border-t border-neutral-100">
+            <Button
+              onClick={handleContact}
+              variant="primary"
+              fullWidth
+              className="gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Contacter l'agence
+            </Button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={cn('bg-white rounded-2xl shadow-lg p-6 border border-neutral-100', className)}>
       <h3 className="text-lg font-semibold text-neutral-900 mb-4">Propriétaire</h3>

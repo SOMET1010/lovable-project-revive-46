@@ -18,8 +18,9 @@ interface InviteAgencyDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onInvite: (params: {
-    property_id: string;
+    property_id?: string | null;
     agency_id: string;
+    mandate_scope: 'single_property' | 'all_properties';
     start_date: string;
     end_date: string;
     commission_rate: number;
@@ -100,6 +101,7 @@ export default function InviteAgencyDialog({
   selectedPropertyId,
 }: InviteAgencyDialogProps) {
   const [step, setStep] = useState<'select' | 'configure'>('select');
+  const [mandateScope, setMandateScope] = useState<'single_property' | 'all_properties'>('single_property');
   const [selectedProperty, setSelectedProperty] = useState<string>(selectedPropertyId || '');
   const [selectedAgency, setSelectedAgency] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -112,6 +114,7 @@ export default function InviteAgencyDialog({
   useEffect(() => {
     if (selectedPropertyId) {
       setSelectedProperty(selectedPropertyId);
+      setMandateScope('single_property');
     }
   }, [selectedPropertyId]);
 
@@ -121,7 +124,12 @@ export default function InviteAgencyDialog({
   );
 
   const handleContinue = () => {
-    if (selectedProperty && selectedAgency) {
+    // Pour all_properties, on n'a pas besoin de selectedProperty
+    const canProceed = mandateScope === 'all_properties' 
+      ? selectedAgency !== ''
+      : selectedProperty !== '' && selectedAgency !== '';
+    
+    if (canProceed) {
       setStep('configure');
     }
   };
@@ -129,8 +137,9 @@ export default function InviteAgencyDialog({
   const handleInvite = async () => {
     setLoading(true);
     const success = await onInvite({
-      property_id: selectedProperty,
+      property_id: mandateScope === 'all_properties' ? null : selectedProperty,
       agency_id: selectedAgency,
+      mandate_scope: mandateScope,
       start_date: new Date(startDate).toISOString(),
       end_date: new Date(endDate).toISOString(),
       commission_rate: commissionRate,
@@ -142,6 +151,7 @@ export default function InviteAgencyDialog({
       onClose();
       // Reset form
       setStep('select');
+      setMandateScope('single_property');
       setSelectedAgency('');
       setSearchQuery('');
       setPermissions(DEFAULT_PERMISSIONS);
@@ -188,8 +198,49 @@ export default function InviteAgencyDialog({
           <div className="p-4 overflow-y-auto max-h-[calc(90vh-180px)]">
             {step === 'select' ? (
               <>
-                {/* Property Selection */}
-                {!selectedPropertyId && (
+                {/* Mandate Scope Selection */}
+                {!selectedPropertyId && properties.length > 0 && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-neutral-700 mb-3">
+                      Portée du mandat
+                    </label>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setMandateScope('single_property')}
+                        className={`flex-1 py-3 px-4 rounded-xl border-2 text-center font-medium transition-all ${
+                          mandateScope === 'single_property'
+                            ? 'border-primary bg-primary/5 text-primary'
+                            : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                        }`}
+                      >
+                        Un bien spécifique
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMandateScope('all_properties');
+                          setSelectedProperty('');
+                        }}
+                        className={`flex-1 py-3 px-4 rounded-xl border-2 text-center font-medium transition-all ${
+                          mandateScope === 'all_properties'
+                            ? 'border-primary bg-primary/5 text-primary'
+                            : 'border-neutral-200 hover:border-neutral-300 text-neutral-600'
+                        }`}
+                      >
+                        Tous mes biens ({properties.length})
+                      </button>
+                    </div>
+                    {mandateScope === 'all_properties' && (
+                      <p className="mt-2 text-sm text-neutral-500 bg-amber-50 p-3 rounded-lg border border-amber-100">
+                        ⚠️ L'agence aura accès à toutes vos propriétés actuelles et futures.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Property Selection - Only for single_property */}
+                {mandateScope === 'single_property' && !selectedPropertyId && (
                   <div className="mb-6">
                     <label className="block text-sm font-medium text-neutral-700 mb-2">
                       Sélectionnez un bien
@@ -273,7 +324,10 @@ export default function InviteAgencyDialog({
                     <span className="font-medium">{selectedAgencyData?.agency_name}</span>
                   </div>
                   <p className="text-sm text-neutral-600">
-                    Gestion de : {selectedPropertyData?.title}
+                    {mandateScope === 'all_properties' 
+                      ? `Gestion de tous vos biens (${properties.length} propriétés)`
+                      : `Gestion de : ${selectedPropertyData?.title}`
+                    }
                   </p>
                 </div>
 
@@ -324,7 +378,7 @@ export default function InviteAgencyDialog({
                       {commissionRate}%
                     </span>
                   </div>
-                  {selectedPropertyData && (
+                  {mandateScope === 'single_property' && selectedPropertyData && (
                     <p className="text-sm text-neutral-500 mt-1">
                       Soit {Math.round(selectedPropertyData.monthly_rent * commissionRate / 100).toLocaleString()} FCFA/mois
                     </p>
@@ -383,7 +437,7 @@ export default function InviteAgencyDialog({
             {step === 'select' ? (
               <button
                 onClick={handleContinue}
-                disabled={!selectedProperty || !selectedAgency}
+                disabled={mandateScope === 'single_property' ? (!selectedProperty || !selectedAgency) : !selectedAgency}
                 className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Continuer
