@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye, ArrowLeft, Users, Home, FileText, RefreshCw, CreditCard, CheckCircle, AlertCircle, Loader2, Database, Trash2, ShieldCheck } from 'lucide-react';
+import { Eye, ArrowLeft, Home, FileText, RefreshCw, CreditCard, CheckCircle, AlertCircle, Loader2, Database, Trash2, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/shared/ui';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,99 +20,13 @@ export default function DataGeneratorPage() {
     setResults(prev => ({ ...prev, [key]: result }));
   };
 
-  // Générer des propriétaires de test
-  const generateOwners = async () => {
-    setGenerating('owners');
-    try {
-      const owners = [
-        { full_name: 'Jean-Paul Kouassi', email: 'jean-paul.kouassi@test.ci', phone: '2250707070701', user_type: 'owner', city: 'Abidjan' },
-        { full_name: 'Marie Diabaté', email: 'marie.diabate@test.ci', phone: '2250707070702', user_type: 'owner', city: 'Abidjan' },
-        { full_name: 'Ismaël Traoré', email: 'ismael.traore@test.ci', phone: '2250707070703', user_type: 'owner', city: 'Yamoussoukro' },
-        { full_name: 'Agence Immobilière CI', email: 'contact@immobilier-ci.test', phone: '2250707070704', user_type: 'agent', city: 'Abidjan' },
-        { full_name: 'Prestige Homes Abidjan', email: 'contact@prestige-homes.test', phone: '2250707070705', user_type: 'agent', city: 'Abidjan' },
-      ];
-
-      let count = 0;
-      for (const owner of owners) {
-        const { error } = await supabase
-          .from('profiles')
-          .upsert({
-            user_id: crypto.randomUUID(),
-            ...owner,
-            oneci_verified: true,
-            cnam_verified: true,
-            is_verified: true,
-            trust_score: 85,
-            profile_setup_completed: true,
-          }, { onConflict: 'email' });
-
-        if (!error) count++;
-      }
-
-      addResult('owners', { success: true, message: `${count} propriétaires créés`, count });
-    } catch (error) {
-      addResult('owners', { success: false, message: `Erreur: ${error}` });
-    } finally {
-      setGenerating(null);
-    }
-  };
-
-  // Générer des locataires avec différents niveaux de vérification
-  const generateTenants = async () => {
-    setGenerating('tenants');
-    try {
-      const tenants = [
-        // Non vérifié - pour tester le parcours complet
-        { full_name: 'Koffi Mensah', email: 'koffi.mensah@test.ci', phone: '2250708080801', user_type: 'tenant', oneci_verified: false, cnam_verified: false, facial_verification_status: 'pending', trust_score: 20 },
-        // ONECI seulement - pour tester CNAM + Face
-        { full_name: 'Aminata Touré', email: 'aminata.toure@test.ci', phone: '2250708080802', user_type: 'tenant', oneci_verified: true, cnam_verified: false, facial_verification_status: 'pending', trust_score: 45 },
-        // ONECI + CNAM - pour tester Face
-        { full_name: 'Yao Kouadio', email: 'yao.kouadio@test.ci', phone: '2250708080803', user_type: 'tenant', oneci_verified: true, cnam_verified: true, facial_verification_status: 'pending', trust_score: 65 },
-        // Complètement vérifié
-        { full_name: 'Fanta Diarra', email: 'fanta.diarra@test.ci', phone: '2250708080804', user_type: 'tenant', oneci_verified: true, cnam_verified: true, facial_verification_status: 'verified', trust_score: 92 },
-        { full_name: 'Moussa Koné', email: 'moussa.kone@test.ci', phone: '2250708080805', user_type: 'tenant', oneci_verified: true, cnam_verified: true, facial_verification_status: 'verified', trust_score: 88 },
-        // En attente de vérification faciale
-        { full_name: 'Adjoua Assi', email: 'adjoua.assi@test.ci', phone: '2250708080806', user_type: 'tenant', oneci_verified: true, cnam_verified: true, facial_verification_status: 'waiting', trust_score: 70 },
-        // Vérification échouée
-        { full_name: 'Ibrahim Sanogo', email: 'ibrahim.sanogo@test.ci', phone: '2250708080807', user_type: 'tenant', oneci_verified: true, cnam_verified: false, facial_verification_status: 'failed', trust_score: 35 },
-      ];
-
-      let count = 0;
-      for (const tenant of tenants) {
-        const { error } = await supabase
-          .from('profiles')
-          .upsert({
-            user_id: crypto.randomUUID(),
-            ...tenant,
-            city: 'Abidjan',
-            is_verified: tenant.oneci_verified && tenant.cnam_verified && tenant.facial_verification_status === 'verified',
-            profile_setup_completed: true,
-          }, { onConflict: 'email' });
-
-        if (!error) count++;
-      }
-
-      addResult('tenants', { success: true, message: `${count} locataires créés avec différents niveaux de vérification`, count });
-    } catch (error) {
-      addResult('tenants', { success: false, message: `Erreur: ${error}` });
-    } finally {
-      setGenerating(null);
-    }
-  };
-
-  // Générer des propriétés
+  // Générer des propriétés de test
   const generateProperties = async () => {
     setGenerating('properties');
     try {
-      // Récupérer les propriétaires existants
-      const { data: owners } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .in('user_type', ['owner', 'agent'])
-        .limit(5);
-
-      if (!owners || owners.length === 0) {
-        addResult('properties', { success: false, message: 'Aucun propriétaire trouvé. Créez d\'abord des propriétaires.' });
+      // Utiliser l'utilisateur actuel comme propriétaire
+      if (!user?.id) {
+        addResult('properties', { success: false, message: 'Vous devez être connecté' });
         return;
       }
 
@@ -130,16 +44,20 @@ export default function DataGeneratorPage() {
       ];
 
       let count = 0;
-      for (let i = 0; i < properties.length; i++) {
-        const prop = properties[i];
-        const ownerId = owners[i % owners.length]?.user_id;
-        if (!ownerId) continue;
-
+      for (const prop of properties) {
         const { error } = await supabase
           .from('properties')
           .insert({
-            owner_id: ownerId,
-            ...prop,
+            owner_id: user.id,
+            title: prop.title,
+            city: prop.city,
+            neighborhood: prop.neighborhood,
+            property_type: prop.property_type,
+            monthly_rent: prop.monthly_rent,
+            bedrooms: prop.bedrooms,
+            bathrooms: prop.bathrooms,
+            surface_area: prop.surface_area,
+            status: prop.status,
             address: `${prop.neighborhood}, ${prop.city}`,
             deposit_amount: prop.monthly_rent * 2,
             is_furnished: Math.random() > 0.5,
@@ -162,25 +80,25 @@ export default function DataGeneratorPage() {
     }
   };
 
-  // Générer des contrats de bail à différents stades
+  // Générer des contrats de bail
   const generateLeases = async () => {
     setGenerating('leases');
     try {
-      // Récupérer propriétés et locataires
+      if (!user?.id) {
+        addResult('leases', { success: false, message: 'Vous devez être connecté' });
+        return;
+      }
+
+      // Récupérer les propriétés de l'utilisateur
       const { data: properties } = await supabase
         .from('properties')
-        .select('id, owner_id, monthly_rent, title')
+        .select('id, monthly_rent, title')
+        .eq('owner_id', user.id)
         .eq('status', 'disponible')
         .limit(5);
 
-      const { data: tenants } = await supabase
-        .from('profiles')
-        .select('user_id, full_name')
-        .eq('user_type', 'tenant')
-        .limit(5);
-
-      if (!properties?.length || !tenants?.length) {
-        addResult('leases', { success: false, message: 'Besoin de propriétés et locataires. Créez-les d\'abord.' });
+      if (!properties || properties.length === 0) {
+        addResult('leases', { success: false, message: 'Aucune propriété disponible. Créez d\'abord des propriétés.' });
         return;
       }
 
@@ -197,32 +115,43 @@ export default function DataGeneratorPage() {
       const endDate = new Date();
       endDate.setFullYear(endDate.getFullYear() + 1);
 
-      for (let i = 0; i < Math.min(properties.length, tenants.length, leaseStatuses.length); i++) {
+      for (let i = 0; i < Math.min(properties.length, leaseStatuses.length); i++) {
         const prop = properties[i];
-        const tenant = tenants[i];
         const leaseStatus = leaseStatuses[i];
-        if (!prop || !tenant) continue;
+        
+        if (!prop || !leaseStatus) continue;
 
         const contractNumber = `MT-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(5, '0')}`;
 
+        const insertData: Record<string, unknown> = {
+          contract_number: contractNumber,
+          property_id: prop.id,
+          owner_id: user.id,
+          tenant_id: user.id, // Utiliser le même utilisateur comme locataire pour test
+          status: leaseStatus.status,
+          start_date: startDate.toISOString().split('T')[0],
+          end_date: endDate.toISOString().split('T')[0],
+          monthly_rent: prop.monthly_rent,
+          deposit_amount: prop.monthly_rent * 2,
+          charges_amount: Math.round(prop.monthly_rent * 0.1),
+          payment_day: 5,
+        };
+
+        // Ajouter les signatures selon le statut
+        if (leaseStatus.status === 'partiellement_signe' || leaseStatus.status === 'actif') {
+          insertData['landlord_signed_at'] = new Date().toISOString();
+        }
+        if (leaseStatus.status === 'actif') {
+          insertData['tenant_signed_at'] = new Date().toISOString();
+          insertData['signed_at'] = new Date().toISOString();
+        }
+        if (leaseStatus.status === 'signature_electronique_pending') {
+          insertData['cryptoneo_operation_id'] = `CRYPTO-TEST-${Date.now()}`;
+        }
+
         const { error } = await supabase
           .from('lease_contracts')
-          .insert({
-            contract_number: contractNumber,
-            property_id: prop.id,
-            owner_id: prop.owner_id,
-            tenant_id: tenant.user_id,
-            status: leaseStatus.status,
-            start_date: startDate.toISOString().split('T')[0],
-            end_date: endDate.toISOString().split('T')[0],
-            monthly_rent: prop.monthly_rent,
-            deposit_amount: prop.monthly_rent * 2,
-            charges_amount: Math.round(prop.monthly_rent * 0.1),
-            payment_day: 5,
-            landlord_signed_at: leaseStatus.status === 'partiellement_signe' || leaseStatus.status === 'actif' ? new Date().toISOString() : null,
-            tenant_signed_at: leaseStatus.status === 'actif' ? new Date().toISOString() : null,
-            signed_at: leaseStatus.status === 'actif' ? new Date().toISOString() : null,
-          });
+          .insert(insertData as never);
 
         if (!error) count++;
       }
@@ -239,13 +168,18 @@ export default function DataGeneratorPage() {
   const generatePayments = async () => {
     setGenerating('payments');
     try {
+      if (!user?.id) {
+        addResult('payments', { success: false, message: 'Vous devez être connecté' });
+        return;
+      }
+
       const { data: leases } = await supabase
         .from('lease_contracts')
         .select('id, tenant_id, owner_id, monthly_rent, property_id')
         .eq('status', 'actif')
         .limit(3);
 
-      if (!leases?.length) {
+      if (!leases || leases.length === 0) {
         addResult('payments', { success: false, message: 'Aucun contrat actif. Créez d\'abord des contrats.' });
         return;
       }
@@ -258,7 +192,7 @@ export default function DataGeneratorPage() {
           const dueDate = new Date();
           dueDate.setMonth(dueDate.getMonth() - month);
 
-          const status = month === 0 ? 'pending' : paymentStatuses[Math.floor(Math.random() * 2)];
+          const status = month === 0 ? 'pending' : paymentStatuses[Math.floor(Math.random() * 2)] ?? 'pending';
 
           const { error } = await supabase
             .from('payments')
@@ -288,14 +222,74 @@ export default function DataGeneratorPage() {
     }
   };
 
+  // Mettre à jour le profil avec différents niveaux de vérification
+  const updateProfileVerification = async (level: 'none' | 'oneci' | 'oneci_cnam' | 'full') => {
+    setGenerating(`profile_${level}`);
+    try {
+      if (!user?.id) {
+        addResult(`profile_${level}`, { success: false, message: 'Vous devez être connecté' });
+        return;
+      }
+
+      const updates: Record<string, unknown> = {};
+      
+      switch (level) {
+        case 'none':
+          updates['oneci_verified'] = false;
+          updates['cnam_verified'] = false;
+          updates['facial_verification_status'] = 'pending';
+          updates['is_verified'] = false;
+          updates['trust_score'] = 20;
+          break;
+        case 'oneci':
+          updates['oneci_verified'] = true;
+          updates['cnam_verified'] = false;
+          updates['facial_verification_status'] = 'pending';
+          updates['is_verified'] = false;
+          updates['trust_score'] = 45;
+          break;
+        case 'oneci_cnam':
+          updates['oneci_verified'] = true;
+          updates['cnam_verified'] = true;
+          updates['facial_verification_status'] = 'pending';
+          updates['is_verified'] = false;
+          updates['trust_score'] = 65;
+          break;
+        case 'full':
+          updates['oneci_verified'] = true;
+          updates['cnam_verified'] = true;
+          updates['facial_verification_status'] = 'verified';
+          updates['is_verified'] = true;
+          updates['trust_score'] = 92;
+          break;
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      const labels: Record<string, string> = {
+        none: 'Non vérifié',
+        oneci: 'ONECI seulement',
+        oneci_cnam: 'ONECI + CNAM',
+        full: 'Complètement vérifié'
+      };
+
+      addResult(`profile_${level}`, { success: true, message: `Profil mis à jour: ${labels[level]}` });
+    } catch (error) {
+      addResult(`profile_${level}`, { success: false, message: `Erreur: ${error}` });
+    } finally {
+      setGenerating(null);
+    }
+  };
+
   // Générer le scénario complet
   const generateFullScenario = async () => {
     setGenerating('full');
     try {
-      await generateOwners();
-      await new Promise(r => setTimeout(r, 500));
-      await generateTenants();
-      await new Promise(r => setTimeout(r, 500));
       await generateProperties();
       await new Promise(r => setTimeout(r, 500));
       await generateLeases();
@@ -312,15 +306,19 @@ export default function DataGeneratorPage() {
 
   // Nettoyer les données de test
   const cleanupTestData = async () => {
-    if (!confirm('⚠️ Supprimer TOUTES les données de test? Cette action est irréversible.')) return;
+    if (!confirm('⚠️ Supprimer TOUTES vos données de test (propriétés, contrats, paiements)? Cette action est irréversible.')) return;
     
     setGenerating('cleanup');
     try {
+      if (!user?.id) {
+        addResult('cleanup', { success: false, message: 'Vous devez être connecté' });
+        return;
+      }
+
       // Supprimer dans l'ordre inverse des dépendances
-      await supabase.from('payments').delete().like('transaction_ref', 'TXN-%');
-      await supabase.from('lease_contracts').delete().like('contract_number', 'MT-%');
-      await supabase.from('properties').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-      await supabase.from('profiles').delete().like('email', '%@test.ci');
+      await supabase.from('payments').delete().eq('payer_id', user.id);
+      await supabase.from('lease_contracts').delete().eq('owner_id', user.id);
+      await supabase.from('properties').delete().eq('owner_id', user.id);
 
       addResult('cleanup', { success: true, message: 'Données de test supprimées' });
     } catch (error) {
@@ -381,56 +379,6 @@ export default function DataGeneratorPage() {
 
       {/* Generation Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Propriétaires */}
-        <div className="bg-card rounded-2xl border border-border p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">Propriétaires</h3>
-              <p className="text-sm text-muted-foreground">5 propriétaires/agences</p>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Crée des propriétaires individuels et des agences avec profils vérifiés.
-          </p>
-          <Button 
-            onClick={generateOwners} 
-            disabled={generating !== null}
-            className="w-full"
-          >
-            {generating === 'owners' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Users className="w-4 h-4 mr-2" />}
-            Générer Propriétaires
-          </Button>
-          <ResultBadge result={results['owners']} />
-        </div>
-
-        {/* Locataires */}
-        <div className="bg-card rounded-2xl border border-border p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-green-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-foreground">Locataires Test</h3>
-              <p className="text-sm text-muted-foreground">Différents niveaux de vérification</p>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground mb-4">
-            Crée des locataires avec: non vérifié, ONECI only, ONECI+CNAM, complet, en attente face, échec.
-          </p>
-          <Button 
-            onClick={generateTenants} 
-            disabled={generating !== null}
-            className="w-full"
-          >
-            {generating === 'tenants' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
-            Générer Locataires
-          </Button>
-          <ResultBadge result={results['tenants']} />
-        </div>
-
         {/* Propriétés */}
         <div className="bg-card rounded-2xl border border-border p-6">
           <div className="flex items-center gap-3 mb-4">
@@ -518,7 +466,7 @@ export default function DataGeneratorPage() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            Génère propriétaires, locataires, propriétés, contrats et paiements en séquence.
+            Génère propriétés, contrats et paiements en séquence.
           </p>
           <Button 
             onClick={generateFullScenario} 
@@ -532,6 +480,64 @@ export default function DataGeneratorPage() {
         </div>
       </div>
 
+      {/* Profile Verification Level */}
+      <div className="bg-card rounded-2xl border border-border p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <ShieldCheck className="w-5 h-5 text-green-600" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Niveau de vérification du profil</h3>
+            <p className="text-sm text-muted-foreground">Modifier votre niveau de vérification pour tester différents scénarios</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Button 
+            onClick={() => updateProfileVerification('none')} 
+            disabled={generating !== null}
+            variant="outline"
+            className="flex-col h-auto py-3"
+          >
+            {generating === 'profile_none' && <Loader2 className="w-4 h-4 animate-spin mb-1" />}
+            <span className="text-xs">Non vérifié</span>
+            <span className="text-xs text-muted-foreground">Score: 20</span>
+          </Button>
+          <Button 
+            onClick={() => updateProfileVerification('oneci')} 
+            disabled={generating !== null}
+            variant="outline"
+            className="flex-col h-auto py-3"
+          >
+            {generating === 'profile_oneci' && <Loader2 className="w-4 h-4 animate-spin mb-1" />}
+            <span className="text-xs">ONECI seulement</span>
+            <span className="text-xs text-muted-foreground">Score: 45</span>
+          </Button>
+          <Button 
+            onClick={() => updateProfileVerification('oneci_cnam')} 
+            disabled={generating !== null}
+            variant="outline"
+            className="flex-col h-auto py-3"
+          >
+            {generating === 'profile_oneci_cnam' && <Loader2 className="w-4 h-4 animate-spin mb-1" />}
+            <span className="text-xs">ONECI + CNAM</span>
+            <span className="text-xs text-muted-foreground">Score: 65</span>
+          </Button>
+          <Button 
+            onClick={() => updateProfileVerification('full')} 
+            disabled={generating !== null}
+            variant="outline"
+            className="flex-col h-auto py-3 border-green-300 text-green-700"
+          >
+            {generating === 'profile_full' && <Loader2 className="w-4 h-4 animate-spin mb-1" />}
+            <span className="text-xs">Vérifié complet</span>
+            <span className="text-xs text-muted-foreground">Score: 92</span>
+          </Button>
+        </div>
+        {['none', 'oneci', 'oneci_cnam', 'full'].map(level => (
+          <ResultBadge key={level} result={results[`profile_${level}`]} />
+        ))}
+      </div>
+
       {/* Cleanup Section */}
       <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
         <div className="flex items-center justify-between">
@@ -541,7 +547,7 @@ export default function DataGeneratorPage() {
             </div>
             <div>
               <h3 className="font-semibold text-red-900">Nettoyer les données de test</h3>
-              <p className="text-sm text-red-700">Supprime tous les utilisateurs @test.ci, propriétés et contrats de test</p>
+              <p className="text-sm text-red-700">Supprime toutes vos propriétés, contrats et paiements</p>
             </div>
           </div>
           <Button 
@@ -576,7 +582,7 @@ export default function DataGeneratorPage() {
           <div>
             <h4 className="font-medium text-foreground mb-2">👤 Vérification Faciale (NeoFace)</h4>
             <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-              <li>Se connecter avec un locataire "oneci_only"</li>
+              <li>Mettre votre profil en "ONECI + CNAM"</li>
               <li>Aller sur Mon Profil → Vérifications</li>
               <li>Lancer la vérification faciale</li>
               <li>Prendre un selfie et comparer avec CNI</li>
@@ -585,7 +591,7 @@ export default function DataGeneratorPage() {
           <div>
             <h4 className="font-medium text-foreground mb-2">📝 Parcours Candidature</h4>
             <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-              <li>Se connecter comme locataire vérifié</li>
+              <li>Mettre votre profil "Vérifié complet"</li>
               <li>Rechercher une propriété disponible</li>
               <li>Postuler avec lettre de motivation</li>
               <li>Attendre validation propriétaire</li>
@@ -594,10 +600,10 @@ export default function DataGeneratorPage() {
           <div>
             <h4 className="font-medium text-foreground mb-2">💰 Paiement de Loyer</h4>
             <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
-              <li>Se connecter comme locataire avec contrat actif</li>
+              <li>Créer un contrat actif</li>
+              <li>Générer des paiements</li>
               <li>Aller sur Mes Paiements</li>
               <li>Payer un loyer en attente</li>
-              <li>Vérifier la confirmation</li>
             </ol>
           </div>
         </div>
