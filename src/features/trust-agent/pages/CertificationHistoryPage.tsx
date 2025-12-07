@@ -12,7 +12,7 @@ import {
 import { Card, CardContent } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/Button';
-import { Input } from '@/components/ui/input';
+import Input from '@/shared/ui/Input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -57,7 +57,7 @@ export default function CertificationHistoryPage() {
         .from('admin_audit_logs')
         .select('*')
         .in('action', ['USER_CERTIFIED', 'PROPERTY_CERTIFIED_ANSUT'])
-        .eq('user_email', user.email)
+        .eq('user_email', user.email ?? '')
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -191,7 +191,7 @@ export default function CertificationHistoryPage() {
             <Input
               placeholder="Rechercher par ID, notes..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>

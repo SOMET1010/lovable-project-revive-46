@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/Button';
-import { Input } from '@/components/ui/input';
+import Input from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/label';
 import { Textarea } from '@/shared/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
@@ -171,8 +171,8 @@ export default function UserCertificationPage() {
               <Input
                 placeholder="Email, téléphone ou nom..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
                 className="flex-1"
               />
               <Button onClick={handleSearch} disabled={loading}>
@@ -266,8 +266,8 @@ export default function UserCertificationPage() {
                       <Label>Vérification d'identité (CNI/Passeport)</Label>
                     </div>
                     <Button
-                      variant={certificationData.identityVerified ? 'default' : 'outline'}
-                      size="sm"
+                      variant={certificationData.identityVerified ? 'secondary' : 'outline'}
+                      size="small"
                       onClick={() => setCertificationData(prev => ({ ...prev, identityVerified: !prev.identityVerified }))}
                     >
                       {certificationData.identityVerified ? (
@@ -287,8 +287,8 @@ export default function UserCertificationPage() {
                       <Label>Vérification ONECI</Label>
                     </div>
                     <Button
-                      variant={certificationData.oneciVerified ? 'default' : 'outline'}
-                      size="sm"
+                      variant={certificationData.oneciVerified ? 'secondary' : 'outline'}
+                      size="small"
                       onClick={() => setCertificationData(prev => ({ ...prev, oneciVerified: !prev.oneciVerified }))}
                     >
                       {certificationData.oneciVerified ? (
@@ -301,7 +301,7 @@ export default function UserCertificationPage() {
                   <Input
                     placeholder="Numéro ONECI"
                     value={certificationData.oneciNumber}
-                    onChange={(e) => setCertificationData(prev => ({ ...prev, oneciNumber: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCertificationData(prev => ({ ...prev, oneciNumber: e.target.value }))}
                   />
                 </div>
 
@@ -313,8 +313,8 @@ export default function UserCertificationPage() {
                       <Label>Vérification CNAM</Label>
                     </div>
                     <Button
-                      variant={certificationData.cnamVerified ? 'default' : 'outline'}
-                      size="sm"
+                      variant={certificationData.cnamVerified ? 'secondary' : 'outline'}
+                      size="small"
                       onClick={() => setCertificationData(prev => ({ ...prev, cnamVerified: !prev.cnamVerified }))}
                     >
                       {certificationData.cnamVerified ? (
@@ -327,7 +327,7 @@ export default function UserCertificationPage() {
                   <Input
                     placeholder="Numéro CNAM"
                     value={certificationData.cnamNumber}
-                    onChange={(e) => setCertificationData(prev => ({ ...prev, cnamNumber: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCertificationData(prev => ({ ...prev, cnamNumber: e.target.value }))}
                   />
                 </div>
 
@@ -339,8 +339,8 @@ export default function UserCertificationPage() {
                       <Label>Photo de vérification</Label>
                     </div>
                     <Button
-                      variant={certificationData.photoVerified ? 'default' : 'outline'}
-                      size="sm"
+                      variant={certificationData.photoVerified ? 'secondary' : 'outline'}
+                      size="small"
                       onClick={() => setCertificationData(prev => ({ ...prev, photoVerified: !prev.photoVerified }))}
                     >
                       {certificationData.photoVerified ? (

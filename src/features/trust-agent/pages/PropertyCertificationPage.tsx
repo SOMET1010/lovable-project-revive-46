@@ -15,7 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/Button';
-import { Input } from '@/components/ui/input';
+import Input from '@/shared/ui/Input';
 import { Label } from '@/shared/ui/label';
 import { Textarea } from '@/shared/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
@@ -176,7 +176,7 @@ export default function PropertyCertificationPage() {
                   <Input
                     placeholder="Rechercher..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                     className="pl-10"
                   />
                 </div>
@@ -323,9 +323,9 @@ export default function PropertyCertificationPage() {
                       <Input
                         placeholder="https://..."
                         value={certificationData.ansutCertificateUrl}
-                        onChange={(e) => setCertificationData(prev => ({ ...prev, ansutCertificateUrl: e.target.value }))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCertificationData(prev => ({ ...prev, ansutCertificateUrl: e.target.value }))}
                       />
-                      <Button variant="outline" size="icon">
+                      <Button variant="outline" size="small" className="p-2 min-h-0">
                         <Upload className="h-4 w-4" />
                       </Button>
                     </div>
