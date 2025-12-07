@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapboxToken } from '@/shared/hooks/useMapboxToken';
-import { Loader2, MapPin } from 'lucide-react';
+import { Loader2, MapPin, Navigation2 } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -52,9 +52,69 @@ export default function EnhancedClusterMap({
 }: EnhancedClusterMapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const userMarker = useRef<mapboxgl.Marker | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   
   const { token: mapboxToken, isLoading: tokenLoading, error: tokenError } = useMapboxToken();
+
+  // Fonction de géolocalisation utilisateur
+  const handleLocateUser = () => {
+    if (!navigator.geolocation) {
+      alert('Géolocalisation non disponible sur votre appareil');
+      return;
+    }
+    
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        
+        // Centrer la carte avec animation
+        map.current?.flyTo({
+          center: [coords.lng, coords.lat],
+          zoom: 14,
+          duration: 1500
+        });
+        
+        // Créer ou déplacer le marqueur utilisateur
+        if (userMarker.current) {
+          userMarker.current.setLngLat([coords.lng, coords.lat]);
+        } else {
+          const el = document.createElement('div');
+          el.innerHTML = `
+            <div style="
+              width: 18px;
+              height: 18px;
+              background: hsl(217, 91%, 60%);
+              border-radius: 50%;
+              border: 3px solid white;
+              box-shadow: 0 0 0 6px hsla(217, 91%, 60%, 0.3), 0 2px 8px rgba(0,0,0,0.3);
+              animation: userPulse 2s infinite;
+            "></div>
+            <style>
+              @keyframes userPulse {
+                0%, 100% { box-shadow: 0 0 0 6px hsla(217, 91%, 60%, 0.3), 0 2px 8px rgba(0,0,0,0.3); }
+                50% { box-shadow: 0 0 0 12px hsla(217, 91%, 60%, 0.1), 0 2px 8px rgba(0,0,0,0.3); }
+              }
+            </style>
+          `;
+          
+          userMarker.current = new mapboxgl.Marker({ element: el })
+            .setLngLat([coords.lng, coords.lat])
+            .addTo(map.current!);
+        }
+        
+        setIsLocating(false);
+      },
+      (err) => {
+        console.error('Erreur géolocalisation:', err);
+        alert('Impossible d\'obtenir votre position. Vérifiez les permissions.');
+        setIsLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   // Filtrer et normaliser les propriétés avec coordonnées
   const validProperties = properties.map(p => {
@@ -337,6 +397,21 @@ export default function EnhancedClusterMap({
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg border border-neutral-200">
       <div ref={mapContainer} style={{ width: '100%', height }} />
+      
+      {/* Bouton Géolocalisation */}
+      <button
+        onClick={handleLocateUser}
+        disabled={isLocating}
+        className="absolute bottom-4 right-4 z-10 bg-white hover:bg-neutral-50 p-3 rounded-full shadow-lg border border-neutral-200 transition-all hover:shadow-xl disabled:opacity-50"
+        title="Me localiser"
+        aria-label="Centrer sur ma position"
+      >
+        {isLocating ? (
+          <Loader2 className="w-5 h-5 text-primary animate-spin" />
+        ) : (
+          <Navigation2 className="w-5 h-5 text-primary" />
+        )}
+      </button>
       
       {/* Légende Premium */}
       <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-neutral-100 z-10">
