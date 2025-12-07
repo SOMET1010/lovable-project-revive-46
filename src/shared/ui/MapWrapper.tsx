@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Map, AlertCircle, MapPin } from 'lucide-react';
 
 const MapboxMap = lazy(() => import('./MapboxMap'));
+const EnhancedClusterMap = lazy(() => import('./EnhancedClusterMap'));
 
 interface Property {
   id: string;
@@ -13,6 +14,9 @@ interface Property {
   images?: string[];
   city?: string;
   neighborhood?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  surface_area?: number;
 }
 
 interface MapWrapperProps {
@@ -32,6 +36,7 @@ interface MapWrapperProps {
   onMarkerDrag?: (lngLat: { lng: number; lat: number }) => void;
   searchEnabled?: boolean;
   singleMarker?: boolean;
+  useClusterMode?: boolean;
 }
 
 export default function MapWrapper(props: MapWrapperProps) {
@@ -53,6 +58,9 @@ export default function MapWrapper(props: MapWrapperProps) {
     return <AzureMapsComponent {...props} />;
   }
 
+  // Utiliser EnhancedClusterMap si mode cluster activé et plus de 10 propriétés
+  const shouldUseClusterMap = props.useClusterMode && props.properties.length > 10;
+
   return (
     <Suspense fallback={<MapLoadingSkeleton height={props.height} />}>
       <div
@@ -62,7 +70,18 @@ export default function MapWrapper(props: MapWrapperProps) {
           setUseAzureFallback(true);
         }}
       >
-        <MapboxMap {...props} />
+        {shouldUseClusterMap ? (
+          <EnhancedClusterMap
+            properties={props.properties}
+            onMarkerClick={props.onMarkerClick}
+            center={props.center}
+            zoom={props.zoom}
+            height={props.height}
+            fitBounds={props.fitBounds}
+          />
+        ) : (
+          <MapboxMap {...props} />
+        )}
       </div>
     </Suspense>
   );
