@@ -21,9 +21,13 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 2000,
       launchAutoHide: true,
+      launchFadeOutDuration: 300,
       backgroundColor: '#ffffff',
+      // Android
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
+      // iOS
+      iosSplashResourceName: 'Splash',
       showSpinner: true,
       spinnerColor: '#ea580c'
     },
@@ -32,11 +36,13 @@ const config: CapacitorConfig = {
     },
     Keyboard: {
       resize: 'body',
-      resizeOnFullScreen: true
+      resizeOnFullScreen: true,
+      style: 'light' // iOS: light keyboard style
     },
     StatusBar: {
       style: 'dark',
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      overlaysWebView: false // iOS: don't overlay content
     }
   }
 };
