@@ -6,7 +6,10 @@ import {
   Menu,
   X,
   Shield,
-  Bell
+  Bell,
+  UserCheck,
+  Home,
+  History
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/badge';
@@ -15,6 +18,9 @@ import { cn } from '@/shared/lib/utils';
 const navItems = [
   { path: '/trust-agent/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/trust-agent/missions', label: 'Mes Missions', icon: ClipboardList },
+  { path: '/trust-agent/certifications/users', label: 'Certifier Utilisateurs', icon: UserCheck },
+  { path: '/trust-agent/certifications/properties', label: 'Certifier Propriétés', icon: Home },
+  { path: '/trust-agent/history', label: 'Historique', icon: History },
 ];
 
 export default function TrustAgentLayout() {
