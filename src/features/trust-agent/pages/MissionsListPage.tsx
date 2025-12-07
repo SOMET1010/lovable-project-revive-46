@@ -14,7 +14,7 @@ import {
 import { Card, CardContent } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/Button';
-import { Input } from '@/components/ui/input';
+import Input from '@/shared/ui/Input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -82,7 +82,7 @@ export default function MissionsListPage() {
           *,
           property:properties(title, address, city)
         `)
-        .eq('assigned_agent_id', user?.id)
+        .eq('assigned_agent_id', user?.id ?? '')
         .order('urgency', { ascending: false })
         .order('scheduled_date', { ascending: true });
 
@@ -136,14 +136,14 @@ export default function MissionsListPage() {
             <Input
               placeholder="Rechercher une mission..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
             <Button
-              variant={typeFilter === null ? 'default' : 'outline'}
-              size="sm"
+              variant={typeFilter === null ? 'secondary' : 'outline'}
+              size="small"
               onClick={() => setTypeFilter(null)}
             >
               <Filter className="h-4 w-4 mr-1" />
@@ -152,8 +152,8 @@ export default function MissionsListPage() {
             {Object.entries(missionTypeConfig).map(([key, config]) => (
               <Button
                 key={key}
-                variant={typeFilter === key ? 'default' : 'outline'}
-                size="sm"
+                variant={typeFilter === key ? 'secondary' : 'outline'}
+                size="small"
                 onClick={() => setTypeFilter(key)}
               >
                 <config.icon className="h-4 w-4 mr-1" />
