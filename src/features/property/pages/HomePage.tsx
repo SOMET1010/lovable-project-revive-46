@@ -1,10 +1,10 @@
-// Force re-bundle - 2025-12-06T14:00:00Z
+// Force re-bundle - 2025-12-06T15:00:00Z
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { 
-  Search, MapPin, Home, FileCheck, Heart, ArrowRight, 
-  Bed, Bath, Maximize, Star, Quote, Send, User, Phone, MessageSquare, 
-  CheckCircle, Shield, Award, Key
+  Search, MapPin, Home, FileCheck, 
+  Star, Quote, Send, User, Phone, MessageSquare, 
+  CheckCircle, Shield, Key, Award, Heart
 } from 'lucide-react';
 import { toast } from '@/shared/hooks/useSafeToast';
 import { Button } from '@/shared/ui';
@@ -14,6 +14,7 @@ import SEOHead, { createOrganizationStructuredData, createWebsiteStructuredData 
 import SUTAChatWidget from '@/shared/components/SUTAChatWidget';
 import { propertyApi } from '../services/property.api';
 import { useHomeStats } from '@/shared/hooks/useHomeStats';
+import { PropertiesWithMap } from '../components';
 import type { PropertyWithOwnerScore } from '../types';
 
 // ==================== PALETTE HARMONISÉE ====================
@@ -124,11 +125,7 @@ const HERO_IMAGES = [
   { src: '/images/hero/hero_users_3_young_professional.png', alt: 'Jeune professionnelle sur son balcon avec vue Abidjan', position: 'object-top' },
 ];
 
-const FALLBACK_PROPERTY_IMAGES = [
-  '/images/hero/hero_example_1_riviera_luxury.png',
-  '/images/hero/hero_example_3_plateau_lagoon.png',
-  '/images/hero/hero_example_2_cocody_family.webp',
-];
+// FALLBACK_PROPERTY_IMAGES déplacé dans PropertiesWithMap
 
 
 // ==================== HOOKS ====================
@@ -153,78 +150,7 @@ function useScrollAnimation<T extends HTMLElement>(options = { threshold: 0.1 })
   return { ref, isVisible };
 }
 
-// ==================== COMPOSANTS ====================
-
-function PropertyCard({ property, index, isVisible: _isVisible }: { property: PropertyWithOwnerScore; index: number; isVisible: boolean }) {
-  // Fallback rotatif basé sur l'index
-  const displayImage = property.images?.[0] || FALLBACK_PROPERTY_IMAGES[index % FALLBACK_PROPERTY_IMAGES.length];
-  
-  return (
-    <Link
-      to={`/proprietes/${property.id}`}
-      className="group block bg-white rounded-[24px] overflow-hidden border border-transparent hover:border-[#EFEBE9] shadow-sm hover:shadow-[0_20px_40px_rgba(44,24,16,0.08)] transition-all duration-500 ease-out hover:-translate-y-2 opacity-100 translate-y-0 animate-in fade-in slide-in-from-bottom-4"
-      style={{ animationDelay: `${index * 100}ms`, animationFillMode: 'both' }}
-    >
-      {/* Image Container - Ratio 4:3 pour plus de présence */}
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <img
-          src={displayImage}
-          alt={property.title || 'Propriété Mon Toit'}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
-        
-        {/* Badges Flottants */}
-        <div className="absolute top-4 left-4 flex gap-2">
-          <span className="px-3 py-1.5 bg-white/95 backdrop-blur-md text-[#2C1810] text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm">
-            {property.property_type || 'Bien'}
-          </span>
-        </div>
-
-        <button className="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-[#F16522] transition-all transform hover:scale-110 active:scale-95">
-          <Heart className="h-5 w-5 fill-transparent hover:fill-current transition-colors" />
-        </button>
-        
-        {/* Prix en Overlay (Style Premium avec bordure) */}
-        <div className="absolute bottom-4 left-4">
-          <div className="flex items-baseline gap-1 bg-[#2C1810]/90 backdrop-blur-md px-4 py-2 rounded-xl text-white shadow-lg border border-white/10">
-            <span className="text-lg font-bold tracking-tight">
-              {property.monthly_rent?.toLocaleString('fr-FR') || 'N/A'}
-            </span>
-            <span className="text-[10px] font-medium opacity-80">FCFA/mois</span>
-          </div>
-        </div>
-
-        {property.owner_trust_score != null && (
-          <div className="absolute bottom-4 right-4">
-            <ScoreBadge score={property.owner_trust_score} variant="compact" size="sm" />
-          </div>
-        )}
-      </div>
-
-      {/* Contenu */}
-      <div className="p-5">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-bold text-[#2C1810] leading-tight group-hover:text-[#F16522] transition-colors line-clamp-1">
-            {property.title || 'Appartement de standing'}
-          </h3>
-        </div>
-
-        <div className="flex items-center gap-2 text-[#6B5A4E] mb-4 text-sm">
-          <MapPin className="h-4 w-4 text-[#F16522] flex-shrink-0" />
-          <span className="line-clamp-1">{property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city || 'Abidjan'}</span>
-        </div>
-        
-        <div className="flex items-center justify-between text-xs font-semibold text-[#A69B95] pt-4 border-t border-[#EFEBE9]">
-          <div className="flex items-center gap-1.5"><Bed className="h-4 w-4" /><span>{property.bedrooms || '-'} ch.</span></div>
-          <div className="flex items-center gap-1.5"><Bath className="h-4 w-4" /><span>{property.bathrooms || '-'} sdb</span></div>
-          <div className="flex items-center gap-1.5"><Maximize className="h-4 w-4" /><span>{property.surface_area || '-'} m²</span></div>
-        </div>
-      </div>
-    </Link>
-  );
-}
+// PropertyCard déplacé dans PropertiesWithMap
 
 // ==================== PAGE PRINCIPALE ====================
 export default function HomePage() {
@@ -554,37 +480,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ==================== PROPRIÉTÉS ==================== */}
-      <section ref={propertiesRef} className="py-20 bg-[#FAF7F4]">
-        <div className="container mx-auto px-4">
-          <div className={`flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 transition-all duration-700 ${propertiesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-[#2C1810] mb-3">Pépites du moment 🔥</h2>
-              <p className="text-lg text-[#6B5A4E]">Les dernières annonces vérifiées, prêtes à habiter.</p>
-            </div>
-            <Link to="/recherche" className="group inline-flex items-center gap-2 text-[#F16522] font-bold hover:text-[#d95a1d] transition-colors">
-              <span>Voir tout le catalogue</span>
-              <div className="w-8 h-8 rounded-full bg-[#F16522]/10 flex items-center justify-center group-hover:bg-[#F16522] group-hover:text-white transition-all">
-                <ArrowRight className="h-4 w-4" />
-              </div>
-            </Link>
-          </div>
-
-          {loadingProperties ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1,2,3,4].map(i => (
-                <div key={i} className="bg-white rounded-[20px] h-[380px] animate-pulse border border-[#EFEBE9] bg-[#E8D4C5]/20" />
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {properties.map((property, index) => (
-                <PropertyCard key={property.id} property={property} index={index} isVisible={propertiesVisible} />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+      {/* ==================== PROPRIÉTÉS AVEC CARTE ==================== */}
+      <div ref={propertiesRef as React.RefObject<HTMLDivElement>}>
+        <PropertiesWithMap 
+          properties={properties} 
+          isLoading={loadingProperties}
+          isVisible={propertiesVisible}
+        />
+      </div>
 
       {/* ==================== TÉMOIGNAGES ==================== */}
       <section ref={testimonialsRef} className="py-20 bg-white border-t border-[#EFEBE9]">
