@@ -1,4 +1,4 @@
-// Force re-bundle - 2025-12-07T18:00:00Z
+// Force complete rebuild - 2025-12-07T18:55:00Z
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
