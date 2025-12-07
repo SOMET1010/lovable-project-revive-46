@@ -59,58 +59,59 @@ export default function MessagesPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#111B21] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#25D366]"></div>
+      <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]"></div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#111B21] flex items-center justify-center">
-        <p className="text-[#8696A0]">Veuillez vous connecter pour accéder aux messages.</p>
+      <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
+        <p className="text-[#6B5A4E]">Veuillez vous connecter pour accéder aux messages.</p>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-[#111B21] flex flex-col overflow-hidden">
-      {/* Main content - Full height */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Conversation list - hidden on mobile when viewing thread */}
-        <div
-          className={`w-full lg:w-[420px] flex-shrink-0 border-r border-[#222D34] ${
-            showMobileThread ? 'hidden lg:block' : ''
-          }`}
-        >
-          <ConversationList
-            conversations={conversations}
-            selectedId={selectedConversation?.id ?? null}
-            onSelect={handleSelectConversation}
-            loading={loadingConversations}
-          />
-        </div>
+    <div className="min-h-screen bg-[#FAF7F4] pt-20 pb-4 px-4 flex gap-6">
+      
+      {/* --- SIDEBAR : LISTE DES CONVERSATIONS --- */}
+      <div
+        className={`w-full md:w-80 lg:w-96 bg-white rounded-[24px] border border-[#EFEBE9] shadow-sm flex flex-col overflow-hidden ${
+          showMobileThread ? 'hidden md:flex' : 'flex'
+        }`}
+      >
+        <ConversationList
+          conversations={conversations}
+          selectedId={selectedConversation?.id ?? null}
+          onSelect={handleSelectConversation}
+          loading={loadingConversations}
+        />
+      </div>
 
-        {/* Message thread */}
-        <div
-          className={`flex-1 ${
-            !showMobileThread ? 'hidden lg:block' : ''
-          }`}
-        >
-          {selectedConversation ? (
-            <MessageThread
-              conversation={selectedConversation}
-              messages={messages}
-              currentUserId={user.id}
-              loading={loadingMessages}
-              sending={sending}
-              onSend={sendMessage}
-              onBack={handleBack}
-            />
-          ) : (
-            <EmptyConversation />
-          )}
-        </div>
+      {/* --- ZONE PRINCIPALE : CHAT --- */}
+      <div
+        className={`flex-1 bg-white rounded-[24px] border border-[#EFEBE9] shadow-sm flex flex-col overflow-hidden relative ${
+          !showMobileThread ? 'hidden md:flex' : 'flex'
+        }`}
+      >
+        {/* Texture de fond subtile */}
+        <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none" />
+
+        {selectedConversation ? (
+          <MessageThread
+            conversation={selectedConversation}
+            messages={messages}
+            currentUserId={user.id}
+            loading={loadingMessages}
+            sending={sending}
+            onSend={sendMessage}
+            onBack={handleBack}
+          />
+        ) : (
+          <EmptyConversation />
+        )}
       </div>
     </div>
   );
