@@ -20,7 +20,7 @@ import {
   Bookmark
 } from 'lucide-react';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
-import MapboxMap from '@/shared/ui/MapboxMap';
+import MapWrapper from '@/shared/ui/MapWrapper';
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 import InfiniteScroll from '@/shared/components/InfiniteScroll';
 import { useInfiniteProperties } from '../hooks/useInfiniteProperties';
@@ -699,16 +699,13 @@ export default function SearchPropertiesPage() {
                 style={{ borderColor: COLORS.border }}
               >
                 {properties.filter(p => p.longitude !== null && p.latitude !== null).length > 0 ? (
-                  <MapboxMap
+                  <MapWrapper
                     properties={properties.filter(p => p.longitude !== null && p.latitude !== null) as any}
                     height="100%"
                     fitBounds={properties.length > 0}
-                    clustering={properties.length > 10}
-                    onMarkerClick={(property) => {
+                    useClusterMode={true}
+                    onMarkerClick={(property: { id: string }) => {
                       navigate(`/proprietes/${property.id}`);
-                    }}
-                    onBoundsChange={(_bounds) => {
-                      // Bounds changed - silent in production
                     }}
                   />
                 ) : (
@@ -743,12 +740,12 @@ export default function SearchPropertiesPage() {
               style={{ borderColor: COLORS.border }}
             >
               {properties.filter(p => p.longitude !== null && p.latitude !== null).length > 0 ? (
-                <MapboxMap
+                <MapWrapper
                   properties={properties.filter(p => p.longitude !== null && p.latitude !== null) as any}
                   height="100%"
                   fitBounds={properties.length > 0}
-                  clustering={properties.length > 10}
-                  onMarkerClick={(property) => {
+                  useClusterMode={true}
+                  onMarkerClick={(property: { id: string }) => {
                     navigate(`/proprietes/${property.id}`);
                   }}
                 />
