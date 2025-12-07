@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, X, MessageSquare, Paperclip, Bot } from 'lucide-react';
-import { getAIResponse } from '@/services/chatbotService';
+import { Send, X, MessageSquare, Paperclip, Bot, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { 
+  getOrCreateConversation, 
+  getConversationMessages, 
+  sendMessage,
+  getAIResponse 
+} from '@/services/chatbotService';
 import type { ChatMessage } from '@/shared/types/monToit.types';
 
 // --- TYPES ---
@@ -13,11 +20,8 @@ interface Message {
 }
 
 interface SUTAChatWidgetProps {
-  /** Mode d'affichage : 'floating' (bulle en bas) ou 'embedded' (intégré dans une div) */
   mode?: 'floating' | 'embedded';
-  /** Position si mode floating */
   position?: 'bottom-right' | 'bottom-left';
-  /** Classe CSS additionnelle */
   className?: string;
 }
 
@@ -44,33 +48,72 @@ export default function SUTAChatWidget({
   position = 'bottom-right',
   className = '',
 }: SUTAChatWidgetProps) {
+  const { user } = useAuth();
+  
   // États
   const [isOpen, setIsOpen] = useState(mode === 'embedded');
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   
-  // Refs pour le scroll auto
+  // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-scroll à chaque nouveau message
+  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  // Si on passe en mode embedded, on force l'ouverture
+  // Mode embedded = toujours ouvert
   useEffect(() => {
     if (mode === 'embedded') setIsOpen(true);
   }, [mode]);
 
-  // --- LOGIQUE IA RÉELLE ---
+  // Charger la conversation et l'historique pour les utilisateurs connectés
+  useEffect(() => {
+    const loadConversation = async () => {
+      if (!user?.id) {
+        setIsLoadingHistory(false);
+        return;
+      }
+
+      setIsLoadingHistory(true);
+      try {
+        const conversation = await getOrCreateConversation(user.id);
+        if (conversation) {
+          setConversationId(conversation.id);
+          
+          const existingMessages = await getConversationMessages(conversation.id);
+          if (existingMessages.length > 0) {
+            setMessages(existingMessages.map(msg => ({
+              id: msg.id,
+              text: msg.content,
+              sender: msg.role === 'assistant' ? 'ai' : 'user',
+              timestamp: msg.timestamp
+            })));
+          }
+        }
+      } catch (error) {
+        console.error('Erreur chargement conversation:', error);
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    };
+
+    if (isOpen && user?.id) {
+      loadConversation();
+    }
+  }, [user?.id, isOpen]);
+
+  // --- LOGIQUE IA ---
 
   const handleSendMessage = async (textOverride?: string) => {
     const textToSend = textOverride || inputValue;
     if (!textToSend.trim() || isTyping) return;
 
-    // 1. Ajouter message utilisateur
     const userMsg: Message = {
       id: Date.now().toString(),
       text: textToSend,
@@ -81,11 +124,15 @@ export default function SUTAChatWidget({
     setInputValue('');
     setIsTyping(true);
 
+    // Persister le message utilisateur
+    if (conversationId) {
+      await sendMessage(conversationId, textToSend, 'user');
+    }
+
     try {
-      // Convertir les messages au format ChatMessage pour l'API
       const conversationHistory: ChatMessage[] = messages.map(msg => ({
         id: msg.id,
-        conversationId: 'widget',
+        conversationId: conversationId || 'widget',
         role: msg.sender === 'ai' ? 'assistant' : 'user',
         content: msg.text,
         timestamp: msg.timestamp,
@@ -93,11 +140,10 @@ export default function SUTAChatWidget({
         isRead: true
       }));
 
-      // Appel IA réel via Lovable AI Gateway (Gemini 2.5 Flash)
       const response = await getAIResponse({
         userMessage: textToSend,
         conversationHistory,
-        userId: 'anonymous'
+        userId: user?.id || 'anonymous'
       });
 
       const aiMsg: Message = {
@@ -107,8 +153,12 @@ export default function SUTAChatWidget({
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, aiMsg]);
+
+      // Persister la réponse IA
+      if (conversationId) {
+        await sendMessage(conversationId, response, 'assistant');
+      }
     } catch (error) {
-      // Gestion des erreurs (429, 402, technique)
       let errorText = '❌ Problème technique. Veuillez réessayer.';
       if (error instanceof Error) {
         if (error.message.includes('429')) {
@@ -140,12 +190,10 @@ export default function SUTAChatWidget({
 
   // --- RENDER ---
 
-  // Classes de positionnement pour le mode Floating
   const floatingClasses = mode === 'floating' 
     ? `fixed z-50 ${position === 'bottom-right' ? 'bottom-6 right-6' : 'bottom-6 left-6'}`
     : 'relative w-full h-full';
 
-  // Si fermé en mode floating, afficher juste le bouton
   if (mode === 'floating' && !isOpen) {
     return (
       <button
@@ -165,7 +213,6 @@ export default function SUTAChatWidget({
         
         {/* HEADER */}
         <div className="p-4 flex items-center justify-between text-white relative overflow-hidden shrink-0 bg-[#2C1810]">
-          {/* Background pattern */}
           <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
           
           <div className="flex items-center gap-3 relative z-10">
@@ -194,51 +241,73 @@ export default function SUTAChatWidget({
 
         {/* MESSAGES AREA */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-[#FAF7F4] relative">
-          {/* Date separator */}
-          <div className="flex justify-center my-2">
-            <span className="text-[10px] text-muted-foreground bg-white/50 px-2 py-1 rounded-full">Aujourd'hui</span>
-          </div>
-
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`max-w-[85%] rounded-2xl p-3.5 shadow-sm text-sm leading-relaxed ${
-                msg.sender === 'user' 
-                  ? 'bg-primary text-primary-foreground rounded-tr-sm' 
-                  : 'bg-background text-foreground border border-border rounded-tl-sm'
-              }`}>
-                {msg.text}
-                <p className="text-right mt-1 text-[10px] opacity-60">
-                  {msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                  {msg.sender === 'user' && <span className="ml-1 text-sky-400">✓✓</span>}
-                </p>
-              </div>
+          {/* Loading History */}
+          {isLoadingHistory ? (
+            <div className="flex flex-col items-center justify-center h-full gap-2">
+              <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              <span className="text-xs text-muted-foreground">Chargement de l'historique...</span>
             </div>
-          ))}
+          ) : (
+            <>
+              {/* Indication connexion */}
+              {!user && (
+                <div className="text-center py-2 px-3 bg-amber-50 border border-amber-200 rounded-lg mb-2">
+                  <p className="text-xs text-amber-700">
+                    <Link to="/connexion" className="underline font-medium hover:text-amber-900">
+                      Connectez-vous
+                    </Link>{' '}
+                    pour sauvegarder vos conversations
+                  </p>
+                </div>
+              )}
 
-          {/* Typing Indicator */}
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="bg-background border border-border rounded-2xl rounded-tl-sm p-3 shadow-sm flex gap-1 items-center">
-                <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+              {/* Date separator */}
+              <div className="flex justify-center my-2">
+                <span className="text-[10px] text-muted-foreground bg-white/50 px-2 py-1 rounded-full">Aujourd'hui</span>
               </div>
-            </div>
+
+              {messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-[85%] rounded-2xl p-3.5 shadow-sm text-sm leading-relaxed ${
+                    msg.sender === 'user' 
+                      ? 'bg-primary text-primary-foreground rounded-tr-sm' 
+                      : 'bg-background text-foreground border border-border rounded-tl-sm'
+                  }`}>
+                    {msg.text}
+                    <p className="text-right mt-1 text-[10px] opacity-60">
+                      {msg.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                      {msg.sender === 'user' && <span className="ml-1 text-sky-400">✓✓</span>}
+                    </p>
+                  </div>
+                </div>
+              ))}
+
+              {/* Typing Indicator */}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="bg-background border border-border rounded-2xl rounded-tl-sm p-3 shadow-sm flex gap-1 items-center">
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
           
           <div ref={messagesEndRef} />
         </div>
 
-        {/* QUICK ACTIONS (Chips) */}
+        {/* QUICK ACTIONS */}
         <div className="bg-[#FAF7F4] px-4 pb-2 flex gap-2 overflow-x-auto no-scrollbar shrink-0">
           {QUICK_ACTIONS.map(action => (
             <button
               key={action}
               onClick={() => handleSendMessage(action)}
-              disabled={isTyping}
+              disabled={isTyping || isLoadingHistory}
               className="whitespace-nowrap px-3 py-1.5 bg-background border border-border rounded-full text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors shadow-sm flex-shrink-0 disabled:opacity-50"
             >
               {action}
@@ -262,14 +331,14 @@ export default function SUTAChatWidget({
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyPress}
               placeholder="Écrivez votre message..."
-              disabled={isTyping}
+              disabled={isTyping || isLoadingHistory}
               className="flex-1 bg-transparent border-none outline-none text-sm text-foreground placeholder:text-muted-foreground disabled:opacity-50"
             />
             <button 
               onClick={() => handleSendMessage()}
-              disabled={!inputValue.trim() || isTyping}
+              disabled={!inputValue.trim() || isTyping || isLoadingHistory}
               className={`p-2 rounded-full transition-all ${
-                inputValue.trim() && !isTyping
+                inputValue.trim() && !isTyping && !isLoadingHistory
                   ? 'bg-primary text-primary-foreground hover:opacity-90 shadow-md' 
                   : 'bg-muted-foreground/30 text-muted-foreground cursor-not-allowed'
               }`}
