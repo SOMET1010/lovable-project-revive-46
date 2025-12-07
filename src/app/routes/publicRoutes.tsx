@@ -1,3 +1,4 @@
+// Force rebuild - 2025-12-07T18:20:00Z
 import { RouteObject } from 'react-router-dom';
 import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import SearchErrorBoundary from '@/features/tenant/components/SearchErrorBoundary';
