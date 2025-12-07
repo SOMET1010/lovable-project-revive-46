@@ -1,14 +1,22 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
+// Détection de l'environnement de production
+const isProduction = process.env.NODE_ENV === 'production';
+
 const config: CapacitorConfig = {
-  appId: 'app.lovable.4d8f59374e734af7a740286b13067a1d',
+  appId: 'ci.montoit.app',
   appName: 'Mon Toit',
   webDir: 'dist',
-  server: {
-    // Hot-reload depuis le sandbox Lovable (dev uniquement)
-    url: 'https://4d8f5937-4e73-4af7-a740-286b13067a1d.lovableproject.com?forceHideBadge=true',
-    cleartext: true
-  },
+  
+  // Configuration serveur uniquement en développement
+  ...(isProduction ? {} : {
+    server: {
+      // Hot-reload depuis le sandbox Lovable (dev uniquement)
+      url: 'https://4d8f5937-4e73-4af7-a740-286b13067a1d.lovableproject.com?forceHideBadge=true',
+      cleartext: true
+    }
+  }),
+  
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
