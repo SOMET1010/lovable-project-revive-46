@@ -62,9 +62,11 @@
 
     <!-- Global Error Handler - Executes BEFORE modules load -->
     <script>
+      console.log('🔵 index.html: Script inline started at', new Date().toISOString());
+      
       // Catch all module loading errors
       window.addEventListener('error', function(e) {
-        console.error('❌ Global error caught:', e.message, e.filename);
+        console.error('❌ Global error caught:', e.message, e.filename, e.lineno, e.colno);
         var loader = document.getElementById('initial-loader');
         if (loader && e.message && loader.style.opacity !== '0') {
           loader.innerHTML = '<div style="text-align:center;padding:20px;font-family:Inter,sans-serif;">' +

@@ -12,19 +12,28 @@ export const lazyWithRetry = (
   delay = 1000
 ) => {
   return lazy(async () => {
+    let lastError: Error | null = null;
+    
     for (let i = 0; i < retries; i++) {
       try {
-        return await componentImport();
+        console.log(`🔄 Lazy load attempt ${i + 1}/${retries}`);
+        const module = await componentImport();
+        console.log('✅ Lazy load successful');
+        return module;
       } catch (error) {
-        if (i === retries - 1) {
-          // Dernier retry échoué : force un hard refresh
-          window.location.href = window.location.href.split('?')[0] + '?t=' + Date.now();
-          throw error;
+        console.error(`❌ Lazy load attempt ${i + 1} failed:`, error);
+        lastError = error instanceof Error ? error : new Error(String(error));
+        
+        if (i < retries - 1) {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
-        await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
-    return componentImport();
+    
+    // All retries failed - throw error instead of hard refresh
+    console.error('❌ All lazy load retries failed:', lastError);
+    throw lastError || new Error('Failed to load component after multiple retries');
   });
 };
 
