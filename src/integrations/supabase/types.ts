@@ -129,9 +129,10 @@ export type Database = {
           end_date: string | null
           id: string
           mandate_document_url: string | null
+          mandate_scope: string | null
           notes: string | null
           owner_id: string
-          property_id: string
+          property_id: string | null
           signed_at: string | null
           start_date: string
           status: string | null
@@ -155,9 +156,10 @@ export type Database = {
           end_date?: string | null
           id?: string
           mandate_document_url?: string | null
+          mandate_scope?: string | null
           notes?: string | null
           owner_id: string
-          property_id: string
+          property_id?: string | null
           signed_at?: string | null
           start_date?: string
           status?: string | null
@@ -181,9 +183,10 @@ export type Database = {
           end_date?: string | null
           id?: string
           mandate_document_url?: string | null
+          mandate_scope?: string | null
           notes?: string | null
           owner_id?: string
-          property_id?: string
+          property_id?: string | null
           signed_at?: string | null
           start_date?: string
           status?: string | null
@@ -1026,6 +1029,7 @@ export type Database = {
           has_parking: boolean | null
           id: string
           images: string[] | null
+          is_anonymous: boolean | null
           is_furnished: boolean | null
           latitude: number | null
           longitude: number | null
@@ -1060,6 +1064,7 @@ export type Database = {
           has_parking?: boolean | null
           id?: string
           images?: string[] | null
+          is_anonymous?: boolean | null
           is_furnished?: boolean | null
           latitude?: number | null
           longitude?: number | null
@@ -1094,6 +1099,7 @@ export type Database = {
           has_parking?: boolean | null
           id?: string
           images?: string[] | null
+          is_anonymous?: boolean | null
           is_furnished?: boolean | null
           latitude?: number | null
           longitude?: number | null

@@ -51,12 +51,15 @@ export interface MandatePermissions {
   can_manage_documents: boolean;
 }
 
+export type MandateScope = 'single_property' | 'all_properties';
+
 export interface AgencyMandate {
   id: string;
-  property_id: string;
+  property_id: string | null;
   agency_id: string;
   owner_id: string;
   status: 'pending' | 'active' | 'expired' | 'cancelled' | 'suspended';
+  mandate_scope: MandateScope;
   start_date: string;
   end_date: string | null;
   commission_rate: number;
@@ -90,8 +93,9 @@ export interface AgencyMandate {
 }
 
 export interface CreateMandateParams {
-  property_id: string;
+  property_id?: string | null;
   agency_id: string;
+  mandate_scope?: MandateScope;
   start_date?: string;
   end_date?: string;
   commission_rate?: number;
@@ -192,13 +196,21 @@ export function useAgencyMandates() {
     }
 
     const permissions = { ...DEFAULT_PERMISSIONS, ...params.permissions };
+    const mandateScope = params.mandate_scope || 'single_property';
+    
+    // Validate: single_property requires property_id, all_properties requires null
+    if (mandateScope === 'single_property' && !params.property_id) {
+      toast.error('Veuillez sélectionner un bien');
+      return null;
+    }
     
     const { data, error: err } = await supabase
       .from('agency_mandates')
       .insert({
-        property_id: params.property_id,
+        property_id: mandateScope === 'all_properties' ? null : params.property_id,
         agency_id: params.agency_id,
         owner_id: user.id,
+        mandate_scope: mandateScope,
         start_date: params.start_date || new Date().toISOString(),
         end_date: params.end_date || null,
         commission_rate: params.commission_rate || 10,

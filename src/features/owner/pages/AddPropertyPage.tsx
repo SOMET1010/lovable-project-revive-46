@@ -32,6 +32,7 @@ interface PropertyFormData {
   has_garden: boolean;
   is_furnished: boolean;
   has_ac: boolean;
+  is_anonymous: boolean;
 }
 
 // Character limits
@@ -59,6 +60,7 @@ const INITIAL_FORM_DATA: PropertyFormData = {
   has_garden: false,
   is_furnished: false,
   has_ac: false,
+  is_anonymous: false,
 };
 
 // Step configuration
@@ -313,6 +315,7 @@ const [step, setStep] = useState(1);
           has_garden: formData.has_garden,
           is_furnished: formData.is_furnished,
           has_ac: formData.has_ac,
+          is_anonymous: formData.is_anonymous,
           status: 'disponible',
         })
         .select()
@@ -940,6 +943,35 @@ const [step, setStep] = useState(1);
                       </span>
                     </label>
                   ))}
+                </div>
+
+                {/* Option Gestion Anonyme */}
+                <div className="pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+                  <label
+                    className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all border ${
+                      formData.is_anonymous 
+                        ? 'border-[var(--color-orange)] bg-[var(--color-orange-50)]' 
+                        : 'border-[var(--color-border)] bg-white hover:border-[var(--color-orange)]'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      name="is_anonymous"
+                      checked={formData.is_anonymous}
+                      onChange={handleChange}
+                      className="w-5 h-5 mt-0.5 rounded text-[var(--color-orange)] focus:ring-[var(--color-orange)]"
+                      style={{ accentColor: 'var(--color-orange)' }}
+                    />
+                    <div>
+                      <span className="font-semibold block" style={{ color: formData.is_anonymous ? 'var(--color-chocolat)' : 'var(--color-gris-texte)' }}>
+                        🔒 Gestion anonyme
+                      </span>
+                      <span className="text-sm block mt-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                        Votre nom sera masqué. Les locataires verront "Géré par [Agence]" à la place.
+                        Nécessite un mandat avec une agence.
+                      </span>
+                    </div>
+                  </label>
                 </div>
               </div>
 

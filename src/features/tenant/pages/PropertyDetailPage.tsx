@@ -40,6 +40,8 @@ interface Property {
   owner_id: string | null;
   created_at: string | null;
   updated_at: string | null;
+  // Gestion anonyme
+  is_anonymous: boolean | null;
   // Owner profile fields
   owner_trust_score?: number | null;
   owner_full_name?: string | null;
@@ -47,6 +49,8 @@ interface Property {
   owner_is_verified?: boolean | null;
   owner_oneci_verified?: boolean | null;
   owner_cnam_verified?: boolean | null;
+  // Managing agency (if anonymous)
+  managing_agency_name?: string | null;
 }
 
 interface ImageGalleryProps {
@@ -352,16 +356,37 @@ export default function PropertyDetailPage() {
         }
       }
 
-      // Étape 3: Construire l'objet Property enrichi
+      // Étape 3: Si is_anonymous, récupérer le mandat actif pour avoir le nom de l'agence
+      let managingAgencyName: string | null = null;
+      
+      if (data.is_anonymous) {
+        const { data: mandateData } = await supabase
+          .from('agency_mandates')
+          .select(`
+            agency:agencies(agency_name)
+          `)
+          .eq('property_id', propertyId)
+          .eq('status', 'active')
+          .maybeSingle();
+        
+        if (mandateData?.agency) {
+          const agency = mandateData.agency as { agency_name: string } | null;
+          managingAgencyName = agency?.agency_name ?? null;
+        }
+      }
+
+      // Étape 4: Construire l'objet Property enrichi
       const propertyData = {
         ...data,
         status: data.status ?? undefined,
+        is_anonymous: data.is_anonymous ?? false,
         owner_trust_score: ownerProfile?.trust_score ?? null,
         owner_full_name: ownerProfile?.full_name ?? null,
         owner_avatar_url: ownerProfile?.avatar_url ?? null,
         owner_is_verified: ownerProfile?.is_verified ?? null,
         owner_oneci_verified: ownerProfile?.oneci_verified ?? null,
         owner_cnam_verified: ownerProfile?.cnam_verified ?? null,
+        managing_agency_name: managingAgencyName,
       } as unknown as Property;
       setProperty(propertyData);
     } catch (error) {
@@ -585,7 +610,7 @@ export default function PropertyDetailPage() {
                 </div>
               </div>
 
-              {/* Profil Propriétaire */}
+              {/* Profil Propriétaire ou Agence (si anonyme) */}
               <OwnerBadge
                 name={property.owner_full_name}
                 avatarUrl={property.owner_avatar_url}
@@ -593,13 +618,15 @@ export default function PropertyDetailPage() {
                 isVerified={property.owner_is_verified ?? false}
                 oneciVerified={property.owner_oneci_verified ?? false}
                 cnamVerified={property.owner_cnam_verified ?? false}
-                showVerificationBadges={true}
+                showVerificationBadges={!property.is_anonymous}
                 variant="card"
                 size="lg"
                 ownerId={property.owner_id}
                 propertyId={property.id}
                 propertyTitle={property.title}
                 showContactButton={!isOwnerOrAgency}
+                isAnonymous={property.is_anonymous ?? false}
+                managedByAgencyName={property.managing_agency_name}
               />
             </div>
           </div>
