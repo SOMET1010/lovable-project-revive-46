@@ -1,7 +1,10 @@
 import { RouteObject, Navigate } from 'react-router-dom';
 import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import ProtectedRoute from '@/shared/ui/ProtectedRoute';
-import { ROLES } from '@/shared/constants/roles';
+import { ROLES, OWNER_ROLES, AGENCY_ROLES } from '@/shared/constants/roles';
+
+// Dashboard Router - redirects based on user type
+const DashboardRouter = lazyWithRetry(() => import('@/shared/ui/DashboardRouter'));
 
 // Tenant dashboard pages
 const TenantDashboard = lazyWithRetry(() => import('@/features/tenant/pages/DashboardPage'));
@@ -39,20 +42,20 @@ const PaymentHistory = lazyWithRetry(() => import('@/features/tenant/pages/Payme
 const MessagesPage = lazyWithRetry(() => import('@/features/messaging/pages/MessagesPage'));
 
 export const tenantRoutes: RouteObject[] = [
-  // User dashboard
-  { path: 'dashboard', element: <ProtectedRoute><TenantDashboard /></ProtectedRoute> },
+  // Smart Dashboard Router - redirects based on user_type and roles
+  { path: 'dashboard', element: <ProtectedRoute><DashboardRouter /></ProtectedRoute> },
   { path: 'mon-espace', element: <ProtectedRoute><UnifiedDashboard /></ProtectedRoute> },
 
   // Profile
   { path: 'profil', element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
   { path: 'verification', element: <Navigate to="/profil?tab=verification" replace /> },
 
-  // Favorites & saved searches
-  { path: 'favoris', element: <ProtectedRoute><Favorites /></ProtectedRoute> },
-  { path: 'recherches-sauvegardees', element: <ProtectedRoute><SavedSearches /></ProtectedRoute> },
+  // Favorites & saved searches (tenant only)
+  { path: 'favoris', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><Favorites /></ProtectedRoute> },
+  { path: 'recherches-sauvegardees', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><SavedSearches /></ProtectedRoute> },
 
-  // Messaging
-  { path: 'messages', element: <ProtectedRoute><MessagesPage /></ProtectedRoute> },
+  // Messaging (all authenticated users)
+  { path: 'messages', element: <ProtectedRoute allowedRoles={[ROLES.TENANT, ...OWNER_ROLES, ...AGENCY_ROLES]}><MessagesPage /></ProtectedRoute> },
 
   // Applications
   { path: 'candidature/:id', element: <ProtectedRoute><ApplicationForm /></ProtectedRoute> },
