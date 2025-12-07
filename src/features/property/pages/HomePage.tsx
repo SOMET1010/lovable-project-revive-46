@@ -1,6 +1,9 @@
 import HeroSlideshow from '../components/HeroSlideshow';
 import HowItWorksCompact from '../components/HowItWorksCompact';
 import TrustSection from '../components/TrustSection';
+import PlatformStats from '../components/PlatformStats';
+import Testimonials from '../components/Testimonials';
+import CTASection from '../components/CTASection';
 import { Link } from 'react-router-dom';
 
 export default function HomePage() {
@@ -45,8 +48,17 @@ export default function HomePage() {
       {/* Section Comment ça marche */}
       <HowItWorksCompact />
 
+      {/* Statistiques plateforme */}
+      <PlatformStats />
+
       {/* Section Confiance */}
       <TrustSection />
+
+      {/* Témoignages */}
+      <Testimonials />
+
+      {/* CTA final */}
+      <CTASection />
     </div>
   );
 }
