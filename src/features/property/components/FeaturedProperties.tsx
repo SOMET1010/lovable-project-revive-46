@@ -12,7 +12,7 @@ interface FeaturedPropertiesProps {
 function PropertyCard({ property, index, isVisible }: { property: PropertyWithOwnerScore; index: number; isVisible: boolean }) {
   return (
     <Link
-      to={`/proprietes/${property.id}`}
+      to={`/propriete/${property.id}`}
       className={`group block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 hover:-translate-y-2 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'
       }`}
