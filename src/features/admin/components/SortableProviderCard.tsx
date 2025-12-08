@@ -22,6 +22,7 @@ export function SortableProviderCard({ provider, onToggle }: SortableProviderCar
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 10 : undefined,
+    opacity: isDragging ? 0.4 : 1,
   };
 
   return (

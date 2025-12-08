@@ -8,7 +8,9 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragOverlay,
   type DragEndEvent,
+  type DragStartEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -20,6 +22,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Button } from '@/shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { SortableProviderCard } from '../components/SortableProviderCard';
+import { ProviderCard } from '../components/ProviderCard';
 import { useServiceConfigurations, useUpdateServiceConfiguration, useUpdateProviderPriorities } from '../hooks/useServiceConfigurations';
 
 const SERVICE_TABS = [
@@ -30,6 +33,7 @@ const SERVICE_TABS = [
 
 export default function ServiceProvidersPage() {
   const [activeTab, setActiveTab] = useState('sms');
+  const [activeId, setActiveId] = useState<string | null>(null);
   const { data: configurations, isLoading, error } = useServiceConfigurations();
   const updateConfig = useUpdateServiceConfiguration();
   const updatePriorities = useUpdateProviderPriorities();
@@ -52,11 +56,21 @@ export default function ServiceProvidersPage() {
     }, {} as Record<string, typeof configurations>);
   }, [configurations]);
   
+  const activeProvider = useMemo(() => {
+    if (!activeId || !configurations) return null;
+    return configurations.find(c => c.id === activeId);
+  }, [activeId, configurations]);
+  
   const handleToggle = (id: string, enabled: boolean) => {
     updateConfig.mutate({ id, updates: { is_enabled: enabled } });
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
@@ -154,6 +168,7 @@ export default function ServiceProvidersPage() {
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
                 modifiers={[restrictToVerticalAxis]}
               >
@@ -177,6 +192,16 @@ export default function ServiceProvidersPage() {
                     )}
                   </div>
                 </SortableContext>
+                
+                <DragOverlay dropAnimation={{ duration: 200, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
+                  {activeProvider && (
+                    <ProviderCard
+                      provider={activeProvider}
+                      onToggle={() => {}}
+                      isDragging={true}
+                    />
+                  )}
+                </DragOverlay>
               </DndContext>
             </TabsContent>
           );
