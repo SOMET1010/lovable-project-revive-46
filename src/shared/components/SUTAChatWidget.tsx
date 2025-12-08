@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, X, MessageSquare, Paperclip, Loader2 } from 'lucide-react';
+import { Send, X, Paperclip, Loader2 } from 'lucide-react';
 import sutaAvatar from '@/assets/suta-avatar.jpg';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -199,10 +199,14 @@ export default function SUTAChatWidget({
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed z-50 ${position === 'bottom-right' ? 'bottom-6 right-6' : 'bottom-6 left-6'} w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95 bg-primary`}
+        className={`fixed z-50 ${position === 'bottom-right' ? 'bottom-6 right-6' : 'bottom-6 left-6'} w-16 h-16 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 overflow-hidden border-2 border-primary`}
         aria-label="Ouvrir le chat SUTA"
       >
-        <MessageSquare className="w-8 h-8 text-primary-foreground" />
+        <img 
+          src={sutaAvatar} 
+          alt="SUTA Assistant" 
+          className="w-full h-full object-cover"
+        />
         <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background animate-pulse"></span>
       </button>
     );
