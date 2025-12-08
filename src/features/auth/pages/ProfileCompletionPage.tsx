@@ -1,16 +1,17 @@
 /**
- * ProfileCompletionPage - Complétion du profil après première connexion
- * Design: Premium Ivorian (Chocolat/Orange/Sable)
+ * ProfileCompletionPage - Version Premium "Split Screen"
+ * Une expérience d'onboarding immersive qui valorise l'utilisateur.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Building2, User, MapPin, FileText, Loader2, Check, 
-  Mail, Camera, Phone, CheckCircle2, Key, Briefcase 
+  Mail, Camera, Phone, CheckCircle2, Key, Briefcase, 
+  ShieldCheck, Star, ArrowRight 
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { InputWithIcon, Button } from '@/shared/ui';
+import { Button } from '@/shared/ui';
 import { supabase } from '@/integrations/supabase/client';
 
 // --- CONFIGURATION ---
@@ -19,20 +20,20 @@ const USER_TYPES = [
   { 
     value: 'tenant', 
     label: 'Locataire', 
-    description: 'Je cherche un logement',
-    icon: Key 
+    description: 'Je cherche mon futur logement',
+    icon: Key,
   },
   { 
     value: 'owner', 
     label: 'Propriétaire', 
-    description: 'Je loue mes biens',
-    icon: Building2 
+    description: 'Je veux louer mes biens',
+    icon: Building2,
   },
   { 
     value: 'agent', 
-    label: 'Agence', 
-    description: 'Je gère des biens',
-    icon: Briefcase 
+    label: 'Agent Immobilier', 
+    description: 'Je gère un portefeuille',
+    icon: Briefcase,
   },
 ] as const;
 
@@ -101,71 +102,39 @@ export default function ProfileCompletionPage() {
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!file.type.startsWith('image/')) { setError('Image requise'); return; }
+    if (file.size > 5 * 1024 * 1024) { setError('Max 5 Mo'); return; }
 
-    if (!file.type.startsWith('image/')) {
-      setError('Veuillez sélectionner une image');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError('L\'image ne doit pas dépasser 5 Mo');
-      return;
-    }
-
-    // Preview immédiate
     const reader = new FileReader();
     reader.onload = (event) => setAvatarPreview(event.target?.result as string);
     reader.readAsDataURL(file);
 
-    // Upload
     if (user) {
       setUploadingAvatar(true);
       try {
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}-${Date.now()}.${fileExt}`;
         const filePath = `avatars/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, file, { upsert: true });
-
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
         if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
         setAvatarUrl(publicUrl);
-      } catch (err) {
-        console.error('Avatar upload error:', err);
-        setError('Erreur lors de l\'upload de la photo');
-      } finally {
-        setUploadingAvatar(false);
-      }
+      } catch (_err) { setError("Erreur d'upload"); } finally { setUploadingAvatar(false); }
     }
   };
 
   const handleEmailChange = (value: string) => {
     setEmail(value);
-    setEmailError(value && !isValidEmail(value) ? 'Format email invalide' : '');
+    setEmailError(value && !isValidEmail(value) ? 'Email invalide' : '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (!fullName.trim()) {
-      setError('Veuillez entrer votre nom complet');
-      return;
-    }
-
-    if (email && !isValidEmail(email)) {
-      setError('Veuillez entrer un email valide');
-      return;
-    }
+    if (!fullName.trim()) { setError('Nom requis'); return; }
+    if (email && !isValidEmail(email)) { setError('Email invalide'); return; }
 
     setSubmitting(true);
-
     try {
       await updateProfile({
         full_name: fullName.trim(),
@@ -176,256 +145,273 @@ export default function ProfileCompletionPage() {
         avatar_url: avatarUrl,
         profile_setup_completed: true,
       });
-
-      const redirectPath = userType === 'tenant' 
-        ? '/recherche' 
-        : userType === 'owner' 
-          ? '/dashboard/ajouter-propriete'
-          : '/dashboard';
-
+      const redirectPath = userType === 'tenant' ? '/recherche' : userType === 'owner' ? '/dashboard/ajouter-propriete' : '/dashboard';
       navigate(redirectPath);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
-      setError(errorMessage);
+      setError(err instanceof Error ? err.message : 'Erreur sauvegarde');
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Loading Screen
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-10 w-10 animate-spin text-[#F16522]" />
-          <p className="text-[#6B5A4E] font-medium">Chargement du profil...</p>
-        </div>
+      <div className="h-screen flex items-center justify-center bg-[#FAF7F4]">
+        <Loader2 className="h-10 w-10 animate-spin text-[#F16522]" />
       </div>
     );
   }
-
-  if (!user) {
-    navigate('/connexion');
-    return null;
+  
+  if (!user) { 
+    navigate('/connexion'); 
+    return null; 
   }
 
   const displayPhone = formatPhoneForDisplay(profile?.phone);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F4] py-12 px-4 sm:px-6 font-sans">
-      <div className="max-w-xl mx-auto">
+    <div className="min-h-screen bg-white flex font-sans selection:bg-[#F16522] selection:text-white">
+      
+      {/* ==================== COLONNE GAUCHE (VISUELLE) ==================== */}
+      <div className="hidden lg:flex w-5/12 bg-[#2C1810] relative flex-col justify-between overflow-hidden p-12">
+        {/* Fond Image */}
+        <div className="absolute inset-0 opacity-30">
+           <img 
+             src="/images/hero/hero1.jpg" 
+             alt="Background" 
+             className="w-full h-full object-cover grayscale mix-blend-overlay"
+           />
+        </div>
         
-        {/* Header */}
-        <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="inline-flex items-center justify-center p-3 bg-white rounded-2xl shadow-sm mb-4 border border-[#EFEBE9]">
-            <Building2 className="h-8 w-8 text-[#F16522]" />
-          </div>
-          <h1 className="text-3xl font-extrabold text-[#2C1810] mb-2">
-            Complétez votre profil
-          </h1>
-          <p className="text-[#6B5A4E]">
-            Pour une expérience personnalisée sur <span className="font-bold text-[#F16522]">Mon Toit</span>
-          </p>
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#2C1810] via-[#2C1810]/80 to-transparent" />
+        
+        {/* Contenu Gauche */}
+        <div className="relative z-10 space-y-6">
+           <div className="flex items-center gap-3">
+             <div className="w-10 h-10 bg-[#F16522] rounded-xl flex items-center justify-center shadow-lg">
+                <span className="font-bold text-white text-xl">M</span>
+             </div>
+             <span className="text-white font-bold text-xl tracking-wide">Mon Toit</span>
+           </div>
+           
+           <div className="mt-20">
+             <h1 className="text-4xl font-extrabold text-white leading-tight mb-6">
+               Bienvenue dans la <br/>
+               <span className="text-[#F16522]">référence immobilière</span>
+             </h1>
+             <p className="text-[#E8D4C5] text-lg leading-relaxed max-w-sm">
+               Complétez votre profil pour accéder à des milliers de biens vérifiés et interagir avec notre communauté de confiance.
+             </p>
+           </div>
         </div>
 
-        {/* Card Formulaire */}
-        <div className="bg-white rounded-[32px] shadow-xl shadow-[#2C1810]/5 border border-[#EFEBE9] p-8 md:p-10 animate-in zoom-in-95 duration-500">
+        {/* Avantages */}
+        <div className="relative z-10 space-y-4">
+           {[
+             { icon: ShieldCheck, text: "Identité Vérifiée & Sécurisée" },
+             { icon: Star, text: "Accès au Trust Score" },
+             { icon: FileText, text: "Dossier Locataire Digital" }
+           ].map((item, i) => (
+             <div key={i} className="flex items-center gap-3 text-[#E8D4C5]">
+                <div className="p-2 bg-white/10 rounded-full backdrop-blur-sm">
+                  <item.icon className="w-5 h-5 text-[#F16522]" />
+                </div>
+                <span className="font-medium">{item.text}</span>
+             </div>
+           ))}
+        </div>
+      </div>
+
+      {/* ==================== COLONNE DROITE (FORMULAIRE) ==================== */}
+      <div className="w-full lg:w-7/12 flex flex-col min-h-screen overflow-y-auto bg-[#FAF7F4]">
+        <div className="flex-1 w-full max-w-2xl mx-auto p-6 md:p-12 lg:p-16">
           
+          {/* Header Mobile */}
+          <div className="lg:hidden flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 bg-[#F16522] rounded-xl flex items-center justify-center shadow-lg">
+              <span className="font-bold text-white text-xl">M</span>
+            </div>
+            <span className="text-[#2C1810] font-bold text-xl tracking-wide">Mon Toit</span>
+          </div>
+
+          <div className="mb-10">
+            <h2 className="text-3xl font-bold text-[#2C1810] mb-2">Finalisons votre compte</h2>
+            <p className="text-[#6B5A4E]">Cela ne prendra qu'une minute.</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-8">
             
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-700 text-sm font-medium">
-                <div className="w-1 h-1 rounded-full bg-red-500" />
-                {error}
-              </div>
-            )}
-
-            {/* AVATAR UPLOAD (Centré) */}
-            <div className="flex flex-col items-center">
-              <div className="relative group">
-                <div 
-                  className="w-28 h-28 rounded-full bg-[#FAF7F4] border-4 border-white shadow-lg flex items-center justify-center overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:scale-105"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="w-10 h-10 text-[#A69B95]" />
-                  )}
-                  
-                  {/* Overlay Loader */}
-                  {uploadingAvatar && (
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
-                      <Loader2 className="w-8 h-8 text-white animate-spin" />
-                    </div>
-                  )}
-                </div>
-                
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="absolute bottom-0 right-0 w-9 h-9 bg-[#F16522] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#D95318] transition-colors border-2 border-white"
-                >
-                  <Camera className="w-4 h-4" />
-                </button>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="hidden"
-              />
-              <p className="text-xs text-[#A69B95] mt-3 font-medium">Photo de profil (Optionnel)</p>
+            {/* 1. PHOTO PROFIL */}
+            <div className="flex items-center gap-6 p-6 bg-white rounded-[24px] border border-[#EFEBE9] shadow-sm">
+               <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                 <div className="w-20 h-20 rounded-full bg-[#FAF7F4] flex items-center justify-center overflow-hidden border-2 border-[#EFEBE9] group-hover:border-[#F16522] transition-all">
+                    {avatarPreview ? (
+                      <img src={avatarPreview} className="w-full h-full object-cover" alt="Avatar" />
+                    ) : (
+                      <User className="w-8 h-8 text-[#A69B95]" />
+                    )}
+                 </div>
+                 <div className="absolute bottom-0 right-0 w-7 h-7 bg-[#2C1810] rounded-full flex items-center justify-center text-white border-2 border-white shadow-lg">
+                    {uploadingAvatar ? <Loader2 className="w-3 h-3 animate-spin" /> : <Camera className="w-3 h-3" />}
+                 </div>
+               </div>
+               <div>
+                 <h3 className="font-bold text-[#2C1810]">Photo de profil</h3>
+                 <p className="text-xs text-[#6B5A4E] mt-1 mb-2">Une photo rassure les propriétaires et augmente vos chances.</p>
+                 <button type="button" onClick={() => fileInputRef.current?.click()} className="text-xs font-bold text-[#F16522] hover:underline">
+                   Choisir une photo
+                 </button>
+                 <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+               </div>
             </div>
 
-            {/* INFOS PERSONNELLES */}
-            <div className="space-y-5">
-              {/* Téléphone (Lecture Seule) */}
-              {displayPhone && (
-                <div>
-                  <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 flex items-center gap-2 tracking-wide">
-                    Téléphone vérifié <CheckCircle2 className="w-3 h-3 text-green-500" />
-                  </label>
-                  <div className="w-full px-5 py-3.5 bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl text-[#2C1810] font-bold flex items-center gap-3 opacity-80 cursor-not-allowed shadow-inner">
-                    <Phone className="w-4 h-4 text-[#A69B95]" />
-                    <span>{displayPhone}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Nom Complet */}
-              <div>
-                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block tracking-wide">Nom complet *</label>
-                <InputWithIcon
-                  icon={User}
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Ex: Jean Kouassi"
-                  required
-                  className="w-full px-5 py-3.5 rounded-xl border border-[#EFEBE9] focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 transition-all font-medium text-[#2C1810]"
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 flex justify-between tracking-wide">
-                  <span>Email</span>
-                  <span className="text-[10px] font-normal normal-case bg-[#FAF7F4] px-2 py-0.5 rounded text-[#A69B95]">Pour la récupération du compte</span>
-                </label>
-                <InputWithIcon
-                  icon={Mail}
-                  type="email"
-                  value={email}
-                  onChange={(e) => handleEmailChange(e.target.value)}
-                  placeholder="jean.kouassi@email.com"
-                  className={`w-full px-5 py-3.5 rounded-xl border transition-all font-medium text-[#2C1810] ${emailError ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-[#EFEBE9] focus:border-[#F16522] focus:ring-[#F16522]/10'}`}
-                />
-                {emailError && <p className="text-xs text-red-500 mt-1.5 font-medium">{emailError}</p>}
-              </div>
-            </div>
-
-            {/* TYPE UTILISATEUR (Grille) */}
-            <div>
-              <label className="text-xs font-bold uppercase text-[#A69B95] mb-3 block tracking-wide">Je suis *</label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* 2. TYPE UTILISATEUR */}
+            <div className="space-y-4">
+              <label className="text-xs font-bold uppercase text-[#A69B95] tracking-widest">Je suis ici pour</label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {USER_TYPES.map((type) => {
-                  const Icon = type.icon;
                   const isSelected = userType === type.value;
+                  const Icon = type.icon;
                   return (
                     <button
                       key={type.value}
                       type="button"
                       onClick={() => setUserType(type.value)}
-                      className={`relative p-4 rounded-xl border-2 text-left transition-all duration-300 flex flex-col gap-2 ${
-                        isSelected
-                          ? 'border-[#F16522] bg-[#F16522]/5 shadow-md scale-[1.02] z-10'
-                          : 'border-[#EFEBE9] bg-white hover:border-[#F16522]/30 hover:bg-[#FAF7F4]'
+                      className={`relative p-5 rounded-2xl border-2 text-left transition-all duration-300 flex flex-col justify-between h-32 ${
+                        isSelected 
+                        ? `border-[#F16522] bg-white shadow-[0_10px_30px_rgba(241,101,34,0.15)] ring-1 ring-[#F16522]` 
+                        : 'border-transparent bg-white hover:border-[#EFEBE9] shadow-sm hover:shadow-md'
                       }`}
                     >
-                      <div className={`p-2 rounded-lg w-fit ${isSelected ? 'bg-[#F16522] text-white' : 'bg-[#FAF7F4] text-[#A69B95]'}`}>
-                        <Icon className="w-5 h-5" />
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${isSelected ? 'bg-[#F16522] text-white' : 'bg-[#FAF7F4] text-[#A69B95]'}`}>
+                         <Icon className="w-5 h-5" />
                       </div>
                       <div>
-                        <p className={`font-bold text-sm ${isSelected ? 'text-[#2C1810]' : 'text-[#6B5A4E]'}`}>
-                          {type.label}
-                        </p>
-                        <p className="text-[10px] text-[#A69B95] leading-tight mt-0.5">
-                          {type.description}
-                        </p>
+                        <p className={`font-bold text-sm ${isSelected ? 'text-[#2C1810]' : 'text-[#6B5A4E]'}`}>{type.label}</p>
+                        <p className="text-[10px] text-[#A69B95] mt-1 line-clamp-1">{type.description}</p>
                       </div>
-                      {isSelected && (
-                        <div className="absolute top-2 right-2 text-[#F16522]">
-                          <CheckCircle2 className="w-5 h-5 fill-[#F16522] text-white" />
-                        </div>
-                      )}
+                      {isSelected && <div className="absolute top-3 right-3 text-[#F16522]"><CheckCircle2 className="w-5 h-5" /></div>}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* VILLE & BIO */}
-            <div className="space-y-5">
-              <div>
-                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block tracking-wide">Ville de résidence</label>
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95]" />
-                  <select
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-[#EFEBE9] bg-white focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 outline-none appearance-none font-medium text-[#2C1810] cursor-pointer"
-                  >
-                    <option value="">Sélectionnez une ville</option>
-                    {IVORIAN_CITIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
+            {/* 3. INFORMATIONS PERSONNELLES */}
+            <div className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                 {/* Nom */}
+                 <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase text-[#A69B95] tracking-widest ml-1">Nom Complet *</label>
+                    <div className="relative group">
+                       <User className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors" />
+                       <input 
+                         type="text" 
+                         value={fullName}
+                         onChange={e => setFullName(e.target.value)}
+                         placeholder="Jean Kouassi"
+                         className="w-full pl-12 pr-4 py-3.5 bg-white border border-[#EFEBE9] rounded-xl text-[#2C1810] font-medium focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] outline-none transition-all placeholder:text-[#D5CCC7]"
+                       />
+                    </div>
+                 </div>
+
+                 {/* Ville */}
+                 <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase text-[#A69B95] tracking-widest ml-1">Ville de résidence</label>
+                    <div className="relative group">
+                       <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors" />
+                       <select 
+                         value={city}
+                         onChange={e => setCity(e.target.value)}
+                         className="w-full pl-12 pr-4 py-3.5 bg-white border border-[#EFEBE9] rounded-xl text-[#2C1810] font-medium focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] outline-none transition-all appearance-none cursor-pointer"
+                       >
+                         <option value="">Choisir...</option>
+                         {IVORIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                       </select>
+                    </div>
+                 </div>
               </div>
 
-              <div>
-                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block tracking-wide">À propos de moi</label>
-                <div className="relative">
-                  <FileText className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95]" />
-                  <textarea
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Dites-en un peu plus sur vous..."
-                    rows={3}
-                    maxLength={300}
-                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-[#EFEBE9] focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 outline-none resize-none font-medium text-[#2C1810] placeholder:text-[#A69B95]/50"
-                  />
-                  <p className="text-[10px] text-[#A69B95] text-right mt-1">{bio.length}/300</p>
-                </div>
+              {/* Contact (Tel & Email) */}
+              <div className="p-5 bg-white rounded-2xl border border-[#EFEBE9] space-y-4">
+                 <h4 className="font-bold text-[#2C1810] text-sm flex items-center gap-2">
+                   <Phone className="w-4 h-4 text-[#F16522]" /> Coordonnées
+                 </h4>
+                 
+                 {displayPhone && (
+                   <div className="flex items-center justify-between p-3 bg-[#FAF7F4] rounded-xl border border-[#EFEBE9]">
+                      <div className="flex items-center gap-3">
+                         <span className="text-lg">🇨🇮</span>
+                         <span className="font-bold text-[#2C1810]">{displayPhone}</span>
+                      </div>
+                      <span className="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-md font-bold flex items-center gap-1">
+                        <Check className="w-3 h-3" /> VÉRIFIÉ
+                      </span>
+                   </div>
+                 )}
+
+                 <div className="relative group">
+                    <Mail className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors" />
+                    <input 
+                       type="email" 
+                       value={email}
+                       onChange={e => handleEmailChange(e.target.value)}
+                       placeholder="Email de récupération (Optionnel)"
+                       className={`w-full pl-12 pr-4 py-3.5 bg-white border rounded-xl text-[#2C1810] font-medium focus:ring-2 focus:ring-[#F16522]/20 outline-none transition-all placeholder:text-[#D5CCC7] ${
+                         emailError ? 'border-red-400 focus:border-red-400' : 'border-[#EFEBE9] focus:border-[#F16522]'
+                       }`}
+                    />
+                    {emailError && <p className="text-xs text-red-500 mt-1 ml-1">{emailError}</p>}
+                 </div>
+              </div>
+
+              {/* Bio */}
+              <div className="space-y-2">
+                 <label className="text-xs font-bold uppercase text-[#A69B95] tracking-widest ml-1">À propos de vous</label>
+                 <textarea 
+                   value={bio}
+                   onChange={e => setBio(e.target.value)}
+                   placeholder="Dites bonjour à la communauté..."
+                   rows={3}
+                   maxLength={300}
+                   className="w-full p-4 bg-white border border-[#EFEBE9] rounded-xl text-[#2C1810] font-medium focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] outline-none transition-all resize-none placeholder:text-[#D5CCC7]"
+                 />
+                 <div className="text-right text-[10px] text-[#A69B95]">{bio.length}/300</div>
               </div>
             </div>
 
-            {/* SUBMIT */}
-            <Button
-              type="submit"
-              disabled={submitting || !fullName.trim() || !!emailError}
-              className="w-full bg-[#F16522] hover:bg-[#D95318] text-white py-4 rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Enregistrement...</span>
-                </>
-              ) : (
-                <>
-                  <span>Terminer mon profil</span>
-                  <Check className="h-5 w-5" />
-                </>
-              )}
-            </Button>
+            {/* Error & Submit */}
+            {error && (
+              <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium border border-red-100 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-500" /> {error}
+              </div>
+            )}
+
+            <div className="pt-4">
+              <Button
+                type="submit"
+                disabled={submitting || !fullName.trim() || !!emailError}
+                className="w-full py-4 text-lg rounded-2xl bg-[#F16522] hover:bg-[#D95318] text-white shadow-xl shadow-[#F16522]/20 transition-all transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-3 font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Finalisation...
+                  </>
+                ) : (
+                  <>
+                    Commencer l'aventure <ArrowRight className="w-5 h-5" />
+                  </>
+                )}
+              </Button>
+              <p className="text-center text-xs text-[#A69B95] mt-4">
+                Vos données sont protégées et ne seront pas partagées sans votre accord.
+              </p>
+            </div>
 
           </form>
         </div>
-
-        <p className="text-center mt-8 text-sm text-[#A69B95]">
-          Vous pourrez modifier ces informations plus tard dans <span className="text-[#2C1810] font-medium">Mon Compte</span>
-        </p>
       </div>
     </div>
   );
