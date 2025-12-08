@@ -251,7 +251,7 @@ function FooterContent() {
             <span className="text-xs text-[#E8D4C5]/70">Service Opérationnel</span>
           </div>
           <span className="text-xs text-[#E8D4C5]/40">Fait avec ♥ à Abidjan</span>
-          <span className="text-xs text-[#E8D4C5]/30 font-mono">v1.0.0</span>
+          <span className="text-xs text-[#E8D4C5]/30 font-mono">v3.2.20</span>
         </div>
       </div>
     </footer>

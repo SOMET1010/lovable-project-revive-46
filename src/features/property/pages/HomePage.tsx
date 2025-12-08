@@ -9,13 +9,13 @@ export default function HomePage() {
       {/* Hero premium avec barre de recherche intégrée */}
       <HeroPremium />
 
-      {/* Propriétés en vedette - chargées dynamiquement */}
+      {/* Propriétés en vedette - chargées dynamiquement (padding connecté via couleur) */}
       <FeaturedPropertiesSection />
 
-      {/* Section Comment ça marche */}
+      {/* Section Comment ça marche (transition fluide via gradient) */}
       <HowItWorksCompact />
 
-      {/* Témoignages */}
+      {/* Témoignages (fond neutre pour conclure) */}
       <Testimonials />
     </div>
   );

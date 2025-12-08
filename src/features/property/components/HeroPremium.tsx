@@ -83,6 +83,18 @@ export default function HeroPremium() {
 
   return (
     <section className="relative bg-gradient-to-br from-[#2C1810] via-[#1a0f0a] to-[#0f0805] overflow-hidden">
+      {/* Mobile background image */}
+      <div 
+        className="absolute inset-0 lg:hidden"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?auto=format&fit=crop&w=800&q=80')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2C1810]/90 via-[#1a0f0a]/95 to-[#0f0805]" />
+      </div>
+
       {/* Subtle grid pattern */}
       <div 
         className="absolute inset-0 opacity-[0.03]"
@@ -95,11 +107,11 @@ export default function HeroPremium() {
       {/* Orange glow effect */}
       <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-[#FF6C2F]/20 rounded-full blur-[150px] pointer-events-none transform translate-x-1/2 -translate-y-1/2" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center">
           
           {/* Left column - Text & Search */}
-          <div className="space-y-5 sm:space-y-8">
+          <div className="space-y-4 sm:space-y-6">
             {/* Trust badge - hidden on mobile */}
             <div className="hidden sm:inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2">
               <Star className="w-4 h-4 text-[#FF6C2F] fill-[#FF6C2F]" />
@@ -109,14 +121,14 @@ export default function HeroPremium() {
             </div>
 
             {/* Main headline */}
-            <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2 sm:space-y-3">
               <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 <span className="text-white">Trouvez votre</span>
                 <br />
                 <span className="text-[#FF6C2F]">nouveau chez-vous</span>
               </h1>
               {/* Adaptive subtitle - short on mobile, full on desktop */}
-              <p className="text-base sm:text-lg text-white/70 max-w-lg leading-relaxed">
+              <p className="text-sm sm:text-lg text-white/70 max-w-lg leading-relaxed">
                 <span className="sm:hidden">Logements vérifiés et 100% sécurisés.</span>
                 <span className="hidden sm:inline">
                   Des milliers d'appartements et villas vérifiés physiquement. 
@@ -200,7 +212,7 @@ export default function HeroPremium() {
             </div>
 
             {/* Properties counter - compact on mobile */}
-            <div className="flex items-center gap-4 sm:gap-6 pt-2 sm:pt-4">
+            <div className="flex items-center gap-4 sm:gap-6 pt-2">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="hidden sm:flex w-12 h-12 rounded-full bg-[#FF6C2F]/20 items-center justify-center">
                   <Home className="w-6 h-6 text-[#FF6C2F]" />
@@ -227,21 +239,21 @@ export default function HeroPremium() {
             </div>
           </div>
 
-          {/* Right column - Image & Testimonial card */}
+          {/* Right column - Image & Testimonial card (desktop only) */}
           <div className="relative hidden lg:block">
             {/* Main image */}
             <div className="relative rounded-3xl overflow-hidden shadow-2xl">
               <img
                 src="https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?auto=format&fit=crop&w=800&q=80"
                 alt="Appartement moderne à Abidjan"
-                className="w-full h-[500px] object-cover"
+                className="w-full h-[450px] object-cover"
               />
               {/* Gradient overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>
 
             {/* Floating testimonial card */}
-            <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-5 max-w-xs animate-bounce-slow">
+            <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-5 max-w-xs">
               <div className="flex items-start gap-4">
                 <img
                   src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=100&h=100&q=80"
@@ -271,6 +283,13 @@ export default function HeroPremium() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Wave transition to next section */}
+      <div className="absolute bottom-0 left-0 right-0">
+        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
+          <path d="M0 60V30C240 50 480 60 720 50C960 40 1200 20 1440 30V60H0Z" fill="#FAF7F4"/>
+        </svg>
       </div>
     </section>
   );
