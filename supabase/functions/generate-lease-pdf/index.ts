@@ -9,8 +9,9 @@ const corsHeaders = {
 
 interface LeaseData {
   id: string;
+  contract_number: string;
   property_id: string;
-  landlord_id: string;
+  owner_id: string;
   tenant_id: string;
   monthly_rent: number;
   deposit_amount: number;
@@ -33,15 +34,15 @@ interface LeaseData {
     bedrooms: number;
     bathrooms: number;
   };
-  landlord: {
+  owner: {
     full_name: string;
     phone: string;
-    id: string;
+    user_id: string;
   };
   tenant: {
     full_name: string;
     phone: string;
-    id: string;
+    user_id: string;
   };
 }
 
@@ -53,12 +54,7 @@ serve(async (req) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
     const { leaseId, templateId } = await req.json();
@@ -67,9 +63,11 @@ serve(async (req) => {
       throw new Error('leaseId is required');
     }
 
-    // Récupérer les données du bail
+    console.log('📄 Génération du PDF pour le contrat:', leaseId);
+
+    // Récupérer les données du bail depuis lease_contracts
     const { data: lease, error: leaseError } = await supabaseClient
-      .from('leases')
+      .from('lease_contracts')
       .select(`
         *,
         properties (
@@ -80,32 +78,29 @@ serve(async (req) => {
       .eq('id', leaseId)
       .single();
 
-    if (leaseError) throw leaseError;
+    if (leaseError) {
+      console.error('Erreur récupération contrat:', leaseError);
+      throw leaseError;
+    }
 
-    // Récupérer les profils du propriétaire et locataire avec leurs emails
-    const { data: landlord } = await supabaseClient
+    // Récupérer le profil du propriétaire (owner_id)
+    const { data: owner } = await supabaseClient
       .from('profiles')
-      .select('id, full_name, phone')
-      .eq('id', lease.landlord_id)
+      .select('user_id, full_name, phone')
+      .eq('user_id', lease.owner_id)
       .single();
 
+    // Récupérer le profil du locataire (tenant_id)
     const { data: tenant } = await supabaseClient
       .from('profiles')
-      .select('id, full_name, phone')
-      .eq('id', lease.tenant_id)
+      .select('user_id, full_name, phone')
+      .eq('user_id', lease.tenant_id)
       .single();
-      
-    // Récupérer les emails depuis auth.users
-    const { data: { users: landlordUser } } = await supabaseClient.auth.admin.listUsers();
-    const { data: { users: tenantUser } } = await supabaseClient.auth.admin.listUsers();
-    
-    const landlordEmail = landlordUser?.find(u => u.id === lease.landlord_id)?.email || '';
-    const tenantEmail = tenantUser?.find(u => u.id === lease.tenant_id)?.email || '';
 
     const leaseData: LeaseData = {
       ...lease,
-      landlord,
-      tenant,
+      owner: owner || { full_name: 'N/A', phone: 'N/A', user_id: lease.owner_id },
+      tenant: tenant || { full_name: 'N/A', phone: 'N/A', user_id: lease.tenant_id },
     };
 
     // Fetch template
@@ -132,7 +127,7 @@ serve(async (req) => {
       template = templateData;
     }
 
-    console.log('Using template:', template.name);
+    console.log('📝 Utilisation du template:', template.name);
 
     // Prepare variable replacements
     const leaseDuration = Math.ceil(
@@ -141,17 +136,18 @@ serve(async (req) => {
     );
 
     const variables: Record<string, string> = {
-      landlord_name: leaseData.landlord.full_name || 'N/A',
+      contract_number: leaseData.contract_number || 'N/A',
+      landlord_name: leaseData.owner?.full_name || 'N/A',
       landlord_address: 'N/A',
-      landlord_phone: leaseData.landlord.phone || 'N/A',
-      tenant_name: leaseData.tenant.full_name || 'N/A',
+      landlord_phone: leaseData.owner?.phone || 'N/A',
+      tenant_name: leaseData.tenant?.full_name || 'N/A',
       tenant_address: 'N/A',
-      tenant_phone: leaseData.tenant.phone || 'N/A',
-      property_address: leaseData.properties.address || 'N/A',
-      property_type: leaseData.properties.property_type || 'N/A',
-      bedrooms: leaseData.properties.bedrooms?.toString() || '0',
-      bathrooms: leaseData.properties.bathrooms?.toString() || '0',
-      surface_area: leaseData.properties.surface_area?.toString() || 'N/A',
+      tenant_phone: leaseData.tenant?.phone || 'N/A',
+      property_address: leaseData.properties?.address || 'N/A',
+      property_type: leaseData.properties?.property_type || 'N/A',
+      bedrooms: leaseData.properties?.bedrooms?.toString() || '0',
+      bathrooms: leaseData.properties?.bathrooms?.toString() || '0',
+      surface_area: leaseData.properties?.surface_area?.toString() || 'N/A',
       monthly_rent: leaseData.monthly_rent?.toString() || '0',
       deposit_amount: leaseData.deposit_amount?.toString() || '0',
       charges_amount: leaseData.charges_amount?.toString() || '0',
@@ -195,6 +191,12 @@ serve(async (req) => {
     pdf.setFontSize(20);
     pdf.setFont('helvetica', 'bold');
     pdf.text('CONTRAT DE BAIL', pageWidth / 2, yPos, { align: 'center' });
+    yPos += 8;
+    
+    // Contract number
+    pdf.setFontSize(12);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`N° ${leaseData.contract_number}`, pageWidth / 2, yPos, { align: 'center' });
     yPos += 15;
 
     // Certification badge if applicable
@@ -255,7 +257,7 @@ serve(async (req) => {
     const pageHeight = pdf.internal.pageSize.getHeight();
     pdf.setFontSize(8);
     pdf.setTextColor(128, 128, 128);
-    pdf.text('Généré par MonToit ANSUT - Plateforme de location certifiée', pageWidth / 2, pageHeight - 15, { align: 'center' });
+    pdf.text('Généré par MonToit - Plateforme de location certifiée', pageWidth / 2, pageHeight - 15, { align: 'center' });
     pdf.text(`Document généré le ${new Date().toLocaleString('fr-FR')}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
 
     // Convertir le PDF en bytes
@@ -272,7 +274,10 @@ serve(async (req) => {
         upsert: true,
       });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Erreur upload:', uploadError);
+      throw uploadError;
+    }
 
     // Récupérer l'URL publique
     const { data: urlData } = supabaseClient
@@ -280,53 +285,18 @@ serve(async (req) => {
       .from('lease-documents')
       .getPublicUrl(fileName);
 
-    // Mettre à jour le bail avec l'URL du document
+    // Mettre à jour le contrat avec l'URL du document
     const { error: updateError } = await supabaseClient
-      .from('leases')
+      .from('lease_contracts')
       .update({ document_url: urlData.publicUrl })
       .eq('id', leaseId);
 
-    if (updateError) throw updateError;
-
-    console.log(`PDF généré avec succès pour le bail ${leaseId}`);
-
-    // Envoyer les emails aux deux parties
-    try {
-      // Email au propriétaire
-      await supabaseClient.functions.invoke('send-email', {
-        body: {
-          to: landlordEmail,
-          subject: 'Votre contrat de bail est disponible',
-          template: 'lease-contract-generated',
-          data: {
-            recipientName: leaseData.landlord.full_name,
-            propertyTitle: leaseData.properties.title,
-            documentUrl: urlData.publicUrl,
-            recipientType: 'landlord'
-          }
-        }
-      });
-
-      // Email au locataire
-      await supabaseClient.functions.invoke('send-email', {
-        body: {
-          to: tenantEmail,
-          subject: 'Votre contrat de bail est disponible',
-          template: 'lease-contract-generated',
-          data: {
-            recipientName: leaseData.tenant.full_name,
-            propertyTitle: leaseData.properties.title,
-            documentUrl: urlData.publicUrl,
-            recipientType: 'tenant'
-          }
-        }
-      });
-      
-      console.log('Emails envoyés aux deux parties');
-    } catch (emailError) {
-      console.error('Erreur lors de l\'envoi des emails:', emailError);
-      // Ne pas faire échouer la génération si l'envoi d'email échoue
+    if (updateError) {
+      console.error('Erreur mise à jour:', updateError);
+      throw updateError;
     }
+
+    console.log(`✅ PDF généré avec succès pour le contrat ${leaseId}`);
 
     return new Response(
       JSON.stringify({ 
@@ -341,7 +311,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Erreur lors de la génération du PDF:', error);
+    console.error('❌ Erreur lors de la génération du PDF:', error);
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     return new Response(
       JSON.stringify({ error: errorMessage }),
