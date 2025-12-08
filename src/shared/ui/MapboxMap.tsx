@@ -15,6 +15,9 @@ interface Property {
   images?: string[];
   city?: string;
   neighborhood?: string;
+  main_image?: string;
+  bedrooms?: number;
+  surface_area?: number;
 }
 
 // Styles de carte Mapbox
@@ -33,6 +36,7 @@ interface MapboxMapProps {
   onMarkerClick?: (property: Property) => void;
   onBoundsChange?: (bounds: mapboxgl.LngLatBounds) => void;
   clustering?: boolean;
+  priceLabels?: boolean;
   draggableMarker?: boolean;
   showRadius?: boolean;
   radiusKm?: number;
@@ -58,6 +62,17 @@ const CITY_CENTER_COORDS: Record<string, [number, number]> = {
   'Grand-Bassam': [-3.7400, 5.2100],
   'Bingerville': [-3.8883, 5.3536],
 };
+
+// Formater le prix pour l'affichage sur le marqueur
+function formatPriceLabel(price: number): string {
+  if (price >= 1000000) {
+    return `${(price / 1000000).toFixed(1)}M`;
+  }
+  if (price >= 1000) {
+    return `${Math.round(price / 1000)}k`;
+  }
+  return price.toString();
+}
 
 // Composant de recherche intégré à la carte
 interface MapSearchControlProps {
@@ -87,7 +102,6 @@ function MapSearchControl({ onLocationSelect, mapRef }: MapSearchControlProps) {
     
     const details = await getDetails(suggestion.placeId);
     if (details && details.latitude && details.longitude) {
-      // Animation flyTo vers le lieu
       mapRef.current?.flyTo({
         center: [details.longitude, details.latitude],
         zoom: 16,
@@ -95,7 +109,6 @@ function MapSearchControl({ onLocationSelect, mapRef }: MapSearchControlProps) {
         essential: true
       });
       
-      // Déclencher le callback avec les coordonnées
       onLocationSelect({ lng: details.longitude, lat: details.latitude });
     }
   }, [getDetails, clearSuggestions, mapRef, onLocationSelect]);
@@ -159,7 +172,6 @@ function MapSearchControl({ onLocationSelect, mapRef }: MapSearchControlProps) {
           )}
         </div>
         
-        {/* Suggestions dropdown */}
         {showSuggestions && suggestions.length > 0 && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden max-h-64 overflow-y-auto">
             {suggestions.map((suggestion, index) => (
@@ -195,7 +207,8 @@ export default function MapboxMap({
   highlightedPropertyId,
   onMarkerClick,
   onBoundsChange,
-  clustering: _clustering = false,
+  clustering = false,
+  priceLabels = false,
   draggableMarker = false,
   showRadius = false,
   radiusKm = 1,
@@ -210,14 +223,11 @@ export default function MapboxMap({
   
   // Filtrer les propriétés avec coordonnées valides et ajouter fallback
   const validProperties = properties.map(p => {
-    // Si la propriété a des coordonnées valides, les utiliser
     if (p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0) {
       return p;
     }
-    // Sinon, essayer de récupérer les coordonnées de la ville
     const cityCoords = p.city ? CITY_CENTER_COORDS[p.city] : null;
     if (cityCoords) {
-      // Ajouter un léger décalage aléatoire pour éviter les superpositions
       const jitter = () => (Math.random() - 0.5) * 0.01;
       return {
         ...p,
@@ -227,6 +237,7 @@ export default function MapboxMap({
     }
     return p;
   }).filter(p => p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0);
+
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
@@ -252,6 +263,98 @@ export default function MapboxMap({
     return '#FF6B35';
   };
 
+  // Créer un marqueur avec prix (style Airbnb)
+  const createPriceMarker = useCallback((property: Property) => {
+    const el = document.createElement('div');
+    el.className = 'price-marker';
+    el.innerHTML = `
+      <div style="
+        background: white;
+        border: 2px solid ${property.status === 'disponible' ? '#FF6B35' : '#9CA3AF'};
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: ${property.status === 'disponible' ? '#1F2937' : '#6B7280'};
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+        position: relative;
+      ">
+        ${formatPriceLabel(property.monthly_rent)}
+        <div style="
+          position: absolute;
+          bottom: -6px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 0;
+          height: 0;
+          border-left: 6px solid transparent;
+          border-right: 6px solid transparent;
+          border-top: 6px solid ${property.status === 'disponible' ? '#FF6B35' : '#9CA3AF'};
+        "></div>
+      </div>
+    `;
+
+    el.addEventListener('mouseenter', () => {
+      const inner = el.firstElementChild as HTMLElement;
+      if (inner) {
+        inner.style.transform = 'scale(1.1)';
+        inner.style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
+        inner.style.zIndex = '1000';
+      }
+    });
+
+    el.addEventListener('mouseleave', () => {
+      const inner = el.firstElementChild as HTMLElement;
+      if (inner) {
+        inner.style.transform = 'scale(1)';
+        inner.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        inner.style.zIndex = '1';
+      }
+    });
+
+    return el;
+  }, []);
+
+  // Créer un marqueur standard (cercle coloré)
+  const createStandardMarker = useCallback((property: Property) => {
+    const color = getMarkerColor(property);
+    const el = document.createElement('div');
+    el.className = 'custom-marker';
+    el.style.width = '36px';
+    el.style.height = '36px';
+    el.style.borderRadius = '50%';
+    el.style.backgroundColor = color;
+    el.style.border = '3px solid white';
+    el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+    el.style.cursor = 'pointer';
+    el.style.transition = 'all 0.2s ease';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.color = 'white';
+    el.style.fontSize = '16px';
+    el.style.fontWeight = 'bold';
+    el.style.position = 'relative';
+    el.innerHTML = '🏠';
+
+    el.addEventListener('mouseenter', () => {
+      el.style.boxShadow = '0 6px 16px rgba(0,0,0,0.5)';
+      el.style.filter = 'brightness(1.1)';
+      el.style.zIndex = '1000';
+    });
+
+    el.addEventListener('mouseleave', () => {
+      el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+      el.style.filter = 'brightness(1)';
+      el.style.zIndex = '1';
+    });
+
+    return el;
+  }, []);
+
   useEffect(() => {
     if (!mapContainer.current || map.current || !mapboxToken) return;
 
@@ -260,7 +363,7 @@ export default function MapboxMap({
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
+        style: MAP_STYLES[mapStyle],
         center: center,
         zoom: zoom,
         attributionControl: false,
@@ -308,14 +411,31 @@ export default function MapboxMap({
     };
   }, [mapboxToken]);
 
+  // Gestion des marqueurs et clustering
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
 
+    // Nettoyer les anciens marqueurs
     Object.values(markers.current).forEach((marker) => marker.remove());
     markers.current = {};
 
+    // Supprimer les sources/layers de clustering existants
+    if (map.current.getLayer('clusters')) {
+      map.current.removeLayer('clusters');
+    }
+    if (map.current.getLayer('cluster-count')) {
+      map.current.removeLayer('cluster-count');
+    }
+    if (map.current.getLayer('unclustered-point')) {
+      map.current.removeLayer('unclustered-point');
+    }
+    if (map.current.getSource('properties-cluster')) {
+      map.current.removeSource('properties-cluster');
+    }
+
     if (validProperties.length === 0) return;
 
+    // Mode singleMarker (pour AddPropertyPage)
     if (singleMarker && validProperties.length > 0) {
       const property = validProperties[0];
       if (!property) return;
@@ -339,45 +459,192 @@ export default function MapboxMap({
 
       markers.current[property.id] = marker;
       map.current?.setCenter([property.longitude, property.latitude]);
+      return;
+    }
+
+    // Mode clustering
+    if (clustering && validProperties.length > 5) {
+      const geojsonData: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: validProperties.map(p => ({
+          type: 'Feature' as const,
+          properties: {
+            id: p.id,
+            title: p.title,
+            monthly_rent: p.monthly_rent,
+            status: p.status,
+            city: p.city,
+            neighborhood: p.neighborhood,
+            main_image: p.main_image || (p.images?.[0]),
+            bedrooms: p.bedrooms,
+            surface_area: p.surface_area,
+          },
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [p.longitude, p.latitude],
+          },
+        })),
+      };
+
+      map.current.addSource('properties-cluster', {
+        type: 'geojson',
+        data: geojsonData,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50,
+      });
+
+      // Cercles des clusters
+      map.current.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'properties-cluster',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': [
+            'step',
+            ['get', 'point_count'],
+            '#FF6B35',
+            10, '#F59E0B',
+            30, '#EF4444',
+          ],
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20,
+            10, 25,
+            30, 30,
+          ],
+          'circle-stroke-width': 3,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+
+      // Texte du nombre dans le cluster
+      map.current.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'properties-cluster',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 14,
+        },
+        paint: {
+          'text-color': '#ffffff',
+        },
+      });
+
+      // Clic sur cluster → zoom
+      map.current.on('click', 'clusters', (e) => {
+        const features = map.current?.queryRenderedFeatures(e.point, { layers: ['clusters'] });
+        if (!features?.length) return;
+        
+        const clusterId = features[0]?.properties?.['cluster_id'];
+        const source = map.current?.getSource('properties-cluster') as mapboxgl.GeoJSONSource;
+        
+        source?.getClusterExpansionZoom(clusterId, (err, zoomLevel) => {
+          if (err) return;
+          
+          const geometry = features[0]?.geometry;
+          if (geometry?.type === 'Point') {
+            map.current?.easeTo({
+              center: geometry.coordinates as [number, number],
+              zoom: zoomLevel ?? 14,
+            });
+          }
+        });
+      });
+
+      // Curseur pointer sur clusters
+      map.current.on('mouseenter', 'clusters', () => {
+        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      });
+      map.current.on('mouseleave', 'clusters', () => {
+        if (map.current) map.current.getCanvas().style.cursor = '';
+      });
+
+      // Marqueurs pour les points non clusterisés (avec prix si priceLabels)
+      map.current.on('sourcedata', (e) => {
+        if (e.sourceId !== 'properties-cluster' || !e.isSourceLoaded) return;
+
+        const features = map.current?.querySourceFeatures('properties-cluster', {
+          filter: ['!', ['has', 'point_count']],
+        });
+
+        features?.forEach((feature) => {
+          const props = feature.properties;
+          const id = props?.['id'];
+          if (!id || markers.current[id]) return;
+
+          const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number];
+          
+          const property: Property = {
+            id,
+            title: props?.['title'] || '',
+            monthly_rent: props?.['monthly_rent'] || 0,
+            longitude: coords[0],
+            latitude: coords[1],
+            status: props?.['status'],
+            city: props?.['city'],
+            neighborhood: props?.['neighborhood'],
+            main_image: props?.['main_image'],
+            bedrooms: props?.['bedrooms'],
+            surface_area: props?.['surface_area'],
+          };
+
+          const el = priceLabels ? createPriceMarker(property) : createStandardMarker(property);
+          
+          const popupContent = `
+            <div style="padding: 12px; min-width: 220px;">
+              ${property.main_image ?
+                `<img src="${property.main_image}" alt="${property.title}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />`
+                : ''}
+              <h3 style="font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #1f2937;">${property.title}</h3>
+              ${property.city || property.neighborhood ?
+                `<p style="color: #6b7280; font-size: 13px; margin-bottom: 6px;">${property.city || ''}${property.neighborhood ? ' • ' + property.neighborhood : ''}</p>`
+                : ''}
+              <p style="color: #ff6b35; font-weight: bold; font-size: 16px;">${property.monthly_rent.toLocaleString()} FCFA/mois</p>
+              ${property.bedrooms || property.surface_area ?
+                `<p style="color: #6b7280; font-size: 12px; margin-top: 4px;">
+                  ${property.bedrooms ? property.bedrooms + ' ch.' : ''} 
+                  ${property.surface_area ? '• ' + property.surface_area + ' m²' : ''}
+                </p>` : ''}
+            </div>
+          `;
+
+          const popup = new mapboxgl.Popup({
+            offset: priceLabels ? 15 : 25,
+            closeButton: true,
+            closeOnClick: false,
+            maxWidth: '280px',
+          }).setHTML(popupContent);
+
+          const marker = new mapboxgl.Marker({ element: el, anchor: priceLabels ? 'bottom' : 'bottom' })
+            .setLngLat(coords)
+            .setPopup(popup)
+            .addTo(map.current!);
+
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (onMarkerClick) {
+              onMarkerClick(property);
+            }
+          });
+
+          markers.current[id] = marker;
+        });
+      });
     } else {
+      // Mode standard sans clustering
       validProperties.forEach((property) => {
-        const color = getMarkerColor(property);
-
-        const el = document.createElement('div');
-        el.className = 'custom-marker';
-        el.style.width = '36px';
-        el.style.height = '36px';
-        el.style.borderRadius = '50%';
-        el.style.backgroundColor = color;
-        el.style.border = '3px solid white';
-        el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-        el.style.cursor = 'pointer';
-        el.style.transition = 'all 0.2s ease';
-        el.style.display = 'flex';
-        el.style.alignItems = 'center';
-        el.style.justifyContent = 'center';
-        el.style.color = 'white';
-        el.style.fontSize = '16px';
-        el.style.fontWeight = 'bold';
-        el.style.position = 'relative';
-        el.innerHTML = '🏠';
-
-        el.addEventListener('mouseenter', () => {
-          el.style.boxShadow = '0 6px 16px rgba(0,0,0,0.5)';
-          el.style.filter = 'brightness(1.1)';
-          el.style.zIndex = '1000';
-        });
-
-        el.addEventListener('mouseleave', () => {
-          el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-          el.style.filter = 'brightness(1)';
-          el.style.zIndex = '1';
-        });
+        const el = priceLabels ? createPriceMarker(property) : createStandardMarker(property);
 
         const popupContent = `
           <div style="padding: 12px; min-width: 200px;">
-            ${Array.isArray(property.images) && property.images.length > 0 ?
-              `<img src="${property.images[0]}" alt="${property.title}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />`
+            ${property.main_image || (Array.isArray(property.images) && property.images.length > 0) ?
+              `<img src="${property.main_image || property.images?.[0]}" alt="${property.title}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />`
               : ''}
             <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 4px; color: #1f2937;">${property.title}</h3>
             ${property.city || property.neighborhood ?
@@ -393,7 +660,7 @@ export default function MapboxMap({
         `;
 
         const popup = new mapboxgl.Popup({
-          offset: 25,
+          offset: priceLabels ? 15 : 25,
           closeButton: true,
           closeOnClick: false,
           maxWidth: '300px',
@@ -429,6 +696,7 @@ export default function MapboxMap({
       }
     }
 
+    // Rayon autour du premier bien
     if (showRadius && validProperties.length > 0 && map.current) {
       const property = validProperties[0];
       if (!property) return;
@@ -476,8 +744,9 @@ export default function MapboxMap({
         });
       }
     }
-  }, [properties, mapLoaded, singleMarker, draggableMarker, fitBounds, showRadius, radiusKm]);
+  }, [properties, mapLoaded, singleMarker, draggableMarker, fitBounds, showRadius, radiusKm, clustering, priceLabels, createPriceMarker, createStandardMarker, onMarkerClick, onMarkerDrag]);
 
+  // Gestion du marqueur surligné
   useEffect(() => {
     if (!highlightedPropertyId) {
       Object.values(markers.current).forEach((marker) => {
@@ -559,14 +828,12 @@ export default function MapboxMap({
       (pos) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         
-        // Centrer la carte avec animation
         map.current?.flyTo({
           center: [coords.lng, coords.lat],
           zoom: 14,
           duration: 1500
         });
         
-        // Créer ou déplacer le marqueur utilisateur
         if (userMarker.current) {
           userMarker.current.setLngLat([coords.lng, coords.lat]);
         } else {
