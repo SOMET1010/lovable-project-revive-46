@@ -238,16 +238,17 @@ Deno.serve(async (req: Request) => {
       const { data: userData } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id) as { data: AuthUserData };
       
       if (userData?.user?.email) {
-        const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
-          type: 'magiclink',
-          email: userData.user.email,
-          options: {
-            redirectTo,
-          },
-        });
+        // Générer une session directe avec tokens au lieu d'un magic link
+        const generatedPassword = `otp-${normalizedPhone}-${Date.now()}`;
+        
+        // Mettre à jour le mot de passe temporairement pour créer une session
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+          existingProfile.user_id,
+          { password: generatedPassword }
+        );
 
-        if (sessionError) {
-          edgeLogger.error('Session error', sessionError as Error);
+        if (updateError) {
+          edgeLogger.error('Error updating password for session', updateError as Error);
           return new Response(
             JSON.stringify({ error: 'Erreur de connexion' }),
             {
@@ -257,13 +258,16 @@ Deno.serve(async (req: Request) => {
           );
         }
 
-        const sessionUrl = (sessionData as MagicLinkData)?.properties?.action_link;
-        if (!sessionUrl) {
-          edgeLogger.error('Magic link generation failed - no action_link', undefined, { 
-            email: userData.user.email 
-          });
+        // Créer une session avec signInWithPassword
+        const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.signInWithPassword({
+          email: userData.user.email,
+          password: generatedPassword,
+        });
+
+        if (sessionError || !sessionData?.session) {
+          edgeLogger.error('Session creation error', sessionError as Error);
           return new Response(
-            JSON.stringify({ error: 'Erreur de génération du lien de connexion. Vérifiez la configuration Site URL.' }),
+            JSON.stringify({ error: 'Erreur de création de session' }),
             {
               status: 500,
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -271,14 +275,15 @@ Deno.serve(async (req: Request) => {
           );
         }
 
-        edgeLogger.info('Login sessionUrl generated', { userId: existingProfile.user_id });
+        edgeLogger.info('Direct session created for login', { userId: existingProfile.user_id });
 
         return new Response(
           JSON.stringify({
             success: true,
             action: 'login',
             userId: existingProfile.user_id,
-            sessionUrl,
+            accessToken: sessionData.session.access_token,
+            refreshToken: sessionData.session.refresh_token,
             isNewUser: false,
             message: `Bienvenue ${existingProfile.full_name || ''} !`,
           }),
@@ -399,15 +404,13 @@ Deno.serve(async (req: Request) => {
       edgeLogger.error('Error creating profile', profileError as Error);
     }
 
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'magiclink',
+    // Créer une session directe avec le mot de passe généré
+    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.signInWithPassword({
       email: generatedEmail,
-      options: {
-        redirectTo,
-      },
+      password: generatedPassword,
     });
 
-    if (sessionError) {
+    if (sessionError || !sessionData?.session) {
       edgeLogger.error('Session error for new user', sessionError as Error);
       return new Response(
         JSON.stringify({ error: 'Compte créé mais erreur de connexion' }),
@@ -418,28 +421,15 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const sessionUrl = (sessionData as MagicLinkData)?.properties?.action_link;
-    if (!sessionUrl) {
-      edgeLogger.error('Magic link generation failed for new user - no action_link', undefined, { 
-        email: generatedEmail 
-      });
-      return new Response(
-        JSON.stringify({ error: 'Compte créé mais erreur de génération du lien. Vérifiez la configuration Site URL.' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    edgeLogger.info('New user registered', { userId: newUser.user.id });
+    edgeLogger.info('New user registered with direct session', { userId: newUser.user.id });
 
     return new Response(
       JSON.stringify({
         success: true,
         action: 'register',
         userId: newUser.user.id,
-        sessionUrl,
+        accessToken: sessionData.session.access_token,
+        refreshToken: sessionData.session.refresh_token,
         isNewUser: true,
         needsProfileCompletion: true,
         message: 'Compte créé avec succès ! Bienvenue sur Mon Toit.',
