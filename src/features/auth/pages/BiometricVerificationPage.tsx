@@ -21,9 +21,10 @@ export default function BiometricVerificationPage() {
   } | null>(null);
 
   useEffect(() => {
-    // Pre-fill with avatar if available
-    if (profile?.avatar_url) {
-      setCniPhotoUrl(profile.avatar_url);
+    // Pre-fill with existing CNI photo if available
+    const cniUrl = (profile as { cni_photo_url?: string })?.cni_photo_url;
+    if (cniUrl) {
+      setCniPhotoUrl(cniUrl);
     }
   }, [profile]);
 
@@ -46,7 +47,15 @@ export default function BiometricVerificationPage() {
         .from('avatars')
         .getPublicUrl(fileName);
 
-      setCniPhotoUrl(urlData.publicUrl);
+      const publicUrl = urlData.publicUrl;
+      setCniPhotoUrl(publicUrl);
+
+      // Save CNI photo URL to profile
+      await supabase
+        .from('profiles')
+        .update({ cni_photo_url: publicUrl })
+        .eq('user_id', user.id);
+
       toast.success('Photo CNI téléchargée');
     } catch (err) {
       console.error('[BiometricVerification] Upload error:', err);
