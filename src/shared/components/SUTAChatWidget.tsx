@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, X, MessageSquare, Paperclip, Bot, Loader2 } from 'lucide-react';
+import { Send, X, MessageSquare, Paperclip, Loader2 } from 'lucide-react';
+import sutaAvatar from '@/assets/suta-avatar.jpg';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { 
@@ -216,8 +217,8 @@ export default function SUTAChatWidget({
           <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
           
           <div className="flex items-center gap-3 relative z-10">
-            <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20">
-              <Bot className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/30 shadow-lg">
+              <img src={sutaAvatar} alt="SUTA Assistant" className="w-full h-full object-cover" />
             </div>
             <div>
               <h3 className="font-bold text-sm">Assistant SUTA</h3>
