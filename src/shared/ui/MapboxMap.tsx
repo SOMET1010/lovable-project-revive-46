@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapboxToken } from '@/shared/hooks/useMapboxToken';
 import { usePlacesAutocomplete, PlaceSuggestion } from '@/shared/hooks/usePlacesAutocomplete';
-import { Loader2, MapPin, Navigation2, Focus, Search, X } from 'lucide-react';
+import { Loader2, MapPin, Navigation2, Focus, Search, X, Map, Globe } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -16,6 +16,14 @@ interface Property {
   city?: string;
   neighborhood?: string;
 }
+
+// Styles de carte Mapbox
+const MAP_STYLES = {
+  streets: 'mapbox://styles/mapbox/streets-v12',
+  satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
+} as const;
+
+type MapStyleType = keyof typeof MAP_STYLES;
 
 interface MapboxMapProps {
   center?: [number, number];
@@ -34,6 +42,7 @@ interface MapboxMapProps {
   onMarkerDrag?: (lngLat: { lng: number; lat: number }) => void;
   searchEnabled?: boolean;
   singleMarker?: boolean;
+  styleToggleEnabled?: boolean;
 }
 
 // Coordonnées par défaut des villes ivoiriennes pour fallback
@@ -196,6 +205,7 @@ export default function MapboxMap({
   onMarkerDrag,
   searchEnabled = false,
   singleMarker = false,
+  styleToggleEnabled = false,
 }: MapboxMapProps) {
   
   // Filtrer les propriétés avec coordonnées valides et ajouter fallback
@@ -223,8 +233,17 @@ export default function MapboxMap({
   const userMarker = useRef<mapboxgl.Marker | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [mapStyle, setMapStyle] = useState<MapStyleType>('streets');
   
   const { token: mapboxToken, isLoading: tokenLoading, error: tokenError } = useMapboxToken();
+
+  // Fonction de changement de style
+  const handleStyleChange = useCallback((style: MapStyleType) => {
+    if (!map.current || style === mapStyle) return;
+    
+    setMapStyle(style);
+    map.current.setStyle(MAP_STYLES[style]);
+  }, [mapStyle]);
 
   const getMarkerColor = (property: Property) => {
     if (property.status === 'disponible') return '#10B981';
@@ -609,6 +628,39 @@ export default function MapboxMap({
           onLocationSelect={handleSearchLocationSelect}
           mapRef={map}
         />
+      )}
+      
+      {/* Switch Satellite/Plan */}
+      {styleToggleEnabled && mapLoaded && (
+        <div className="absolute bottom-28 right-4 z-10">
+          <div className="bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
+            <button
+              onClick={() => handleStyleChange('streets')}
+              className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors w-full ${
+                mapStyle === 'streets' 
+                  ? 'bg-primary text-white' 
+                  : 'hover:bg-neutral-50 text-neutral-600'
+              }`}
+              aria-label="Vue Plan"
+            >
+              <Map className="w-4 h-4" />
+              Plan
+            </button>
+            <div className="border-t border-neutral-200" />
+            <button
+              onClick={() => handleStyleChange('satellite')}
+              className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors w-full ${
+                mapStyle === 'satellite' 
+                  ? 'bg-primary text-white' 
+                  : 'hover:bg-neutral-50 text-neutral-600'
+              }`}
+              aria-label="Vue Satellite"
+            >
+              <Globe className="w-4 h-4" />
+              Satellite
+            </button>
+          </div>
+        </div>
       )}
       
       {/* Boutons de contrôle carte */}
