@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { 
   Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft, 
   Smartphone, Star, Home, Shield, MessageCircle 
@@ -653,6 +653,17 @@ export default function ModernAuthPage() {
                   placeholder="••••••••"
                   required
                 />
+
+                {emailMode === 'login' && (
+                  <div className="text-right">
+                    <Link 
+                      to="/mot-de-passe-oublie" 
+                      className="text-sm text-[#F16522] hover:text-[#D95318] font-medium hover:underline transition-colors"
+                    >
+                      Mot de passe oublié ?
+                    </Link>
+                  </div>
+                )}
 
                 {emailMode === 'register' && (
                   <InputWithIcon
