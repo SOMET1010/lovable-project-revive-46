@@ -1,10 +1,26 @@
 import { useState, useMemo } from 'react';
 import { TrendingUp, ArrowLeft, MessageSquare, Mail, Phone, AlertCircle, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { Button } from '@/shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
-import { ProviderCard } from '../components/ProviderCard';
-import { useServiceConfigurations, useUpdateServiceConfiguration } from '../hooks/useServiceConfigurations';
+import { SortableProviderCard } from '../components/SortableProviderCard';
+import { useServiceConfigurations, useUpdateServiceConfiguration, useUpdateProviderPriorities } from '../hooks/useServiceConfigurations';
 
 const SERVICE_TABS = [
   { id: 'sms', label: 'SMS', icon: Phone },
@@ -16,6 +32,14 @@ export default function ServiceProvidersPage() {
   const [activeTab, setActiveTab] = useState('sms');
   const { data: configurations, isLoading, error } = useServiceConfigurations();
   const updateConfig = useUpdateServiceConfiguration();
+  const updatePriorities = useUpdateProviderPriorities();
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
   
   const groupedConfigs = useMemo(() => {
     if (!configurations) return {};
@@ -30,6 +54,29 @@ export default function ServiceProvidersPage() {
   
   const handleToggle = (id: string, enabled: boolean) => {
     updateConfig.mutate({ id, updates: { is_enabled: enabled } });
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const items = groupedConfigs[activeTab] ?? [];
+      const sortedItems = [...items].sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
+      
+      const oldIndex = sortedItems.findIndex(i => i.id === active.id);
+      const newIndex = sortedItems.findIndex(i => i.id === over.id);
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const reorderedItems = arrayMove(sortedItems, oldIndex, newIndex);
+        
+        const updates = reorderedItems.map((item, index) => ({
+          id: item.id,
+          priority: index + 1,
+        }));
+        
+        updatePriorities.mutate(updates);
+      }
+    }
   };
 
   if (isLoading) {
@@ -76,8 +123,8 @@ export default function ServiceProvidersPage() {
         <div>
           <p className="text-sm text-blue-800 font-medium">Système de fallback automatique</p>
           <p className="text-sm text-blue-700">
-            Les providers sont utilisés par ordre de priorité (1 = plus haute). 
-            Si un provider échoue, le système bascule automatiquement sur le suivant.
+            Glissez-déposez les providers pour réorganiser les priorités. 
+            Le système utilise le provider de priorité 1 en premier, puis passe au suivant en cas d'échec.
           </p>
         </div>
       </div>
@@ -98,27 +145,42 @@ export default function ServiceProvidersPage() {
           })}
         </TabsList>
         
-        {SERVICE_TABS.map(tab => (
-          <TabsContent key={tab.id} value={tab.id} className="mt-6">
-            <div className="space-y-3">
-              {(groupedConfigs[tab.id]?.length ?? 0) > 0 ? (
-                [...(groupedConfigs[tab.id] ?? [])]
-                  .sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99))
-                  .map(config => (
-                    <ProviderCard
-                      key={config.id}
-                      provider={config}
-                      onToggle={(enabled) => handleToggle(config.id, enabled)}
-                    />
-                  ))
-              ) : (
-                <div className="bg-neutral-50 rounded-xl p-8 text-center">
-                  <p className="text-neutral-500">Aucun provider configuré pour {tab.label}</p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-        ))}
+        {SERVICE_TABS.map(tab => {
+          const providers = groupedConfigs[tab.id] ?? [];
+          const sortedProviders = [...providers].sort((a, b) => (a.priority ?? 99) - (b.priority ?? 99));
+          
+          return (
+            <TabsContent key={tab.id} value={tab.id} className="mt-6">
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+                modifiers={[restrictToVerticalAxis]}
+              >
+                <SortableContext
+                  items={sortedProviders.map(p => p.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-3">
+                    {sortedProviders.length > 0 ? (
+                      sortedProviders.map(config => (
+                        <SortableProviderCard
+                          key={config.id}
+                          provider={config}
+                          onToggle={(enabled) => handleToggle(config.id, enabled)}
+                        />
+                      ))
+                    ) : (
+                      <div className="bg-neutral-50 rounded-xl p-8 text-center">
+                        <p className="text-neutral-500">Aucun provider configuré pour {tab.label}</p>
+                      </div>
+                    )}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            </TabsContent>
+          );
+        })}
       </Tabs>
 
       {/* Stats Summary */}
