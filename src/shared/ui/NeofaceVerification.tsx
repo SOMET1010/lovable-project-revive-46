@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Camera, CheckCircle, XCircle, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { Button } from './Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './Card';
+import { supabase } from '@/integrations/supabase/client';
 
 interface NeofaceVerificationProps {
   userId: string;
@@ -62,51 +63,42 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   }, []);
 
   const uploadDocument = async (): Promise<VerificationResponse> => {
-    const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
-    const supabaseKey = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'];
-
-    const response = await fetch(`${supabaseUrl}/functions/v1/neoface-verify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseKey}`,
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase.functions.invoke('neoface-verify', {
+      body: {
         action: 'upload_document',
         cni_photo_url: cniPhotoUrl,
         user_id: userId,
-      }),
+      },
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Échec du téléchargement du document');
+    if (error) {
+      throw new Error(error.message || 'Échec du téléchargement du document');
     }
 
-    return await response.json();
+    if (data?.error) {
+      throw new Error(data.error);
+    }
+
+    return data as VerificationResponse;
   };
 
   const checkVerificationStatus = async (
     docId: string,
     verifyId: string
   ): Promise<StatusResponse> => {
-    const supabaseUrl = import.meta.env['VITE_SUPABASE_URL'];
-    const supabaseKey = import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'];
-
-    const response = await fetch(`${supabaseUrl}/functions/v1/neoface-verify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseKey}`,
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase.functions.invoke('neoface-verify', {
+      body: {
         action: 'check_status',
         document_id: docId,
         verification_id: verifyId,
-      }),
+      },
     });
 
-    return await response.json();
+    if (error) {
+      throw new Error(error.message || 'Échec de la vérification du statut');
+    }
+
+    return data as StatusResponse;
   };
 
   const startPolling = (docId: string, verifyId: string) => {
