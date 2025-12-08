@@ -1,5 +1,6 @@
 import { useState, Component, ReactNode, FormEvent, ErrorInfo } from 'react';
 import { Link } from 'react-router-dom';
+import { APP_CONFIG } from '@/shared/config/app.config';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, AlertTriangle } from 'lucide-react';
 
 // Configuration de sécurité pour les contacts (évite les crashs si l'import échoue)
@@ -251,7 +252,7 @@ function FooterContent() {
             <span className="text-xs text-[#E8D4C5]/70">Service Opérationnel</span>
           </div>
           <span className="text-xs text-[#E8D4C5]/40">Fait avec ♥ à Abidjan</span>
-          <span className="text-xs text-[#E8D4C5]/30 font-mono">v3.2.20</span>
+          <span className="text-xs text-[#E8D4C5]/30 font-mono">v{APP_CONFIG.version}</span>
         </div>
       </div>
     </footer>
