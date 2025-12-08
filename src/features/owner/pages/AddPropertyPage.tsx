@@ -1086,6 +1086,7 @@ const [step, setStep] = useState(1);
                     onMarkerDrag={handleMarkerDrag}
                     onMapClick={handleMapClick}
                     searchEnabled={true}
+                    styleToggleEnabled={true}
                     height="320px"
                   />
                   
