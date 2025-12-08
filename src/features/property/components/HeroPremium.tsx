@@ -95,13 +95,13 @@ export default function HeroPremium() {
       {/* Orange glow effect */}
       <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-[#FF6C2F]/20 rounded-full blur-[150px] pointer-events-none transform translate-x-1/2 -translate-y-1/2" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
           
           {/* Left column - Text & Search */}
-          <div className="space-y-8">
-            {/* Trust badge */}
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2">
+          <div className="space-y-5 sm:space-y-8">
+            {/* Trust badge - hidden on mobile */}
+            <div className="hidden sm:inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2">
               <Star className="w-4 h-4 text-[#FF6C2F] fill-[#FF6C2F]" />
               <span className="text-white/90 text-sm font-medium">
                 N°1 DE LA CONFIANCE EN CÔTE D'IVOIRE
@@ -109,30 +109,34 @@ export default function HeroPremium() {
             </div>
 
             {/* Main headline */}
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+            <div className="space-y-3 sm:space-y-4">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 <span className="text-white">Trouvez votre</span>
                 <br />
                 <span className="text-[#FF6C2F]">nouveau chez-vous</span>
               </h1>
-              <p className="text-lg text-white/70 max-w-lg leading-relaxed">
-                Des milliers d'appartements et villas vérifiés physiquement. 
-                Une expérience humaine, simple et 100% sécurisée.
+              {/* Adaptive subtitle - short on mobile, full on desktop */}
+              <p className="text-base sm:text-lg text-white/70 max-w-lg leading-relaxed">
+                <span className="sm:hidden">Logements vérifiés et 100% sécurisés.</span>
+                <span className="hidden sm:inline">
+                  Des milliers d'appartements et villas vérifiés physiquement. 
+                  Une expérience humaine, simple et 100% sécurisée.
+                </span>
               </p>
             </div>
 
-            {/* Search bar */}
+            {/* Search bar - 2x2 grid on mobile */}
             <div className="bg-white rounded-2xl shadow-2xl p-2 sm:p-3">
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {/* Property type select */}
                 <div className="relative">
-                  <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" />
+                  <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
                   <select
                     value={propertyType}
                     onChange={(e) => setPropertyType(e.target.value)}
-                    className="w-full h-12 sm:h-14 pl-10 pr-4 bg-neutral-50 border-0 rounded-xl text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
+                    className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
                   >
-                    <option value="">Type de bien</option>
+                    <option value="">Type</option>
                     {RESIDENTIAL_PROPERTY_TYPES.map((type) => (
                       <option key={type.value} value={type.value}>
                         {type.icon} {type.label}
@@ -143,11 +147,11 @@ export default function HeroPremium() {
 
                 {/* City select */}
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" />
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
                   <select
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    className="w-full h-12 sm:h-14 pl-10 pr-4 bg-neutral-50 border-0 rounded-xl text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
+                    className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
                   >
                     <option value="">Ville</option>
                     {CITIES.map((cityName) => (
@@ -169,13 +173,13 @@ export default function HeroPremium() {
 
                 {/* Budget select */}
                 <div className="relative">
-                  <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" />
+                  <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
                   <select
                     value={maxBudget}
                     onChange={(e) => setMaxBudget(e.target.value)}
-                    className="w-full h-12 sm:h-14 pl-10 pr-4 bg-neutral-50 border-0 rounded-xl text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
+                    className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
                   >
-                    <option value="">Budget max</option>
+                    <option value="">Budget</option>
                     {budgetOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
@@ -187,7 +191,7 @@ export default function HeroPremium() {
                 {/* Search button */}
                 <button
                   onClick={handleSearch}
-                  className="h-12 sm:h-14 px-6 bg-[#FF6C2F] hover:bg-[#e05519] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] shadow-lg shadow-[#FF6C2F]/30"
+                  className="h-11 sm:h-14 px-4 sm:px-6 bg-[#FF6C2F] hover:bg-[#e05519] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] shadow-lg shadow-[#FF6C2F]/30"
                 >
                   <Search className="w-5 h-5" />
                   <span className="hidden sm:inline">Rechercher</span>
@@ -195,29 +199,29 @@ export default function HeroPremium() {
               </div>
             </div>
 
-            {/* Properties counter */}
-            <div className="flex items-center gap-6 pt-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-[#FF6C2F]/20 flex items-center justify-center">
+            {/* Properties counter - compact on mobile */}
+            <div className="flex items-center gap-4 sm:gap-6 pt-2 sm:pt-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="hidden sm:flex w-12 h-12 rounded-full bg-[#FF6C2F]/20 items-center justify-center">
                   <Home className="w-6 h-6 text-[#FF6C2F]" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-white">
+                  <div className="text-xl sm:text-2xl font-bold text-white">
                     <AnimatedCounter target={propertiesCount || 150} suffix="+" />
                   </div>
-                  <div className="text-sm text-white/60">Logements vérifiés</div>
+                  <div className="text-xs sm:text-sm text-white/60">Logements</div>
                 </div>
               </div>
               
-              <div className="h-12 w-px bg-white/20" />
+              <div className="h-8 sm:h-12 w-px bg-white/20" />
               
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="hidden sm:flex w-12 h-12 rounded-full bg-green-500/20 items-center justify-center">
                   <Check className="w-6 h-6 text-green-400" />
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-white">100%</div>
-                  <div className="text-sm text-white/60">Sécurisés</div>
+                  <div className="text-xl sm:text-2xl font-bold text-white">100%</div>
+                  <div className="text-xs sm:text-sm text-white/60">Sécurisés</div>
                 </div>
               </div>
             </div>
