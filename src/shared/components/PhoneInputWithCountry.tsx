@@ -8,8 +8,8 @@
  * - Support des pays d'Afrique de l'Ouest
  */
 
-import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Phone } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { ChevronDown, Phone, Check, X } from 'lucide-react';
 
 export interface Country {
   code: string;
@@ -32,9 +32,39 @@ const COUNTRIES: Country[] = [
   { code: 'GA', name: 'Gabon', dialCode: '+241', flag: '🇬🇦', phoneLength: 7 },
 ];
 
+// Préfixes opérateurs valides pour la Côte d'Ivoire
+const CI_VALID_PREFIXES = ['01', '05', '07', '27'];
+
+// Validation du numéro selon le pays
+const validatePhoneNumber = (digits: string, country: Country): { isValid: boolean; error?: string } => {
+  if (digits.length === 0) {
+    return { isValid: false };
+  }
+  
+  if (digits.length !== country.phoneLength) {
+    return { 
+      isValid: false, 
+      error: `Le numéro doit contenir ${country.phoneLength} chiffres` 
+    };
+  }
+  
+  // Validation spécifique pour la Côte d'Ivoire
+  if (country.code === 'CI') {
+    const prefix = digits.substring(0, 2);
+    if (!CI_VALID_PREFIXES.includes(prefix)) {
+      return { 
+        isValid: false, 
+        error: 'Le numéro doit commencer par 01, 05, 07 ou 27' 
+      };
+    }
+  }
+  
+  return { isValid: true };
+};
+
 interface PhoneInputWithCountryProps {
   value: string;
-  onChange: (value: string, fullNumber: string, countryCode: string) => void;
+  onChange: (value: string, fullNumber: string, countryCode: string, isValid: boolean) => void;
   placeholder?: string;
   disabled?: boolean;
   autoFocus?: boolean;
@@ -55,6 +85,11 @@ export function PhoneInputWithCountry({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Validation du numéro actuel
+  const digits = value.replace(/\D/g, '');
+  const validation = useMemo(() => validatePhoneNumber(digits, selectedCountry), [digits, selectedCountry]);
+  const showValidation = digits.length > 0;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -80,17 +115,19 @@ export function PhoneInputWithCountry({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
-    const digits = rawValue.replace(/\D/g, '');
+    const newDigits = rawValue.replace(/\D/g, '');
     
     // Limit to country's phone length
-    const limitedDigits = digits.slice(0, selectedCountry.phoneLength);
+    const limitedDigits = newDigits.slice(0, selectedCountry.phoneLength);
     const formatted = formatPhoneNumber(limitedDigits);
     
     // Build full number (dialCode without + + digits)
     const dialCodeDigits = selectedCountry.dialCode.replace('+', '');
     const fullNumber = dialCodeDigits + limitedDigits;
     
-    onChange(formatted, fullNumber, selectedCountry.dialCode);
+    // Validate and callback
+    const newValidation = validatePhoneNumber(limitedDigits, selectedCountry);
+    onChange(formatted, fullNumber, selectedCountry.dialCode, newValidation.isValid);
   };
 
   const handleCountrySelect = (country: Country) => {
@@ -98,21 +135,33 @@ export function PhoneInputWithCountry({
     setIsOpen(false);
     
     // Recalculate full number with new country code
-    const digits = value.replace(/\D/g, '');
+    const currentDigits = value.replace(/\D/g, '');
+    const limitedDigits = currentDigits.slice(0, country.phoneLength);
+    const formatted = formatPhoneNumber(limitedDigits);
     const dialCodeDigits = country.dialCode.replace('+', '');
-    const fullNumber = dialCodeDigits + digits;
+    const fullNumber = dialCodeDigits + limitedDigits;
     
-    onChange(value, fullNumber, country.dialCode);
+    // Validate with new country
+    const newValidation = validatePhoneNumber(limitedDigits, country);
+    onChange(formatted, fullNumber, country.dialCode, newValidation.isValid);
     
     // Focus input after selection
     setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  // Déterminer les classes de bordure selon l'état
+  const getBorderClasses = () => {
+    if (error) return 'border-red-400 ring-2 ring-red-100';
+    if (!showValidation) return 'border-[#EFEBE9] focus-within:border-[#F16522] focus-within:ring-4 focus-within:ring-[#F16522]/10';
+    if (validation.isValid) return 'border-green-500 ring-2 ring-green-100';
+    return 'border-red-400 ring-2 ring-red-100';
   };
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       <div className={`
         flex items-stretch rounded-xl bg-white border overflow-hidden transition-all
-        ${error ? 'border-red-400 ring-2 ring-red-100' : 'border-[#EFEBE9] focus-within:border-[#F16522] focus-within:ring-4 focus-within:ring-[#F16522]/10'}
+        ${getBorderClasses()}
         ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
       `}>
         {/* Country Selector Button */}
@@ -143,12 +192,30 @@ export function PhoneInputWithCountry({
             disabled={disabled}
             autoFocus={autoFocus}
             className="
-              w-full py-4 pl-10 pr-4 bg-transparent text-[#2C1810] font-medium 
+              w-full py-4 pl-10 pr-10 bg-transparent text-[#2C1810] font-medium 
               placeholder:text-[#A69B95] outline-none
             "
           />
+          {/* Validation Icon */}
+          {showValidation && (
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {validation.isValid ? (
+                <Check className="w-5 h-5 text-green-500" />
+              ) : (
+                <X className="w-5 h-5 text-red-500" />
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Validation Error Message */}
+      {showValidation && !validation.isValid && validation.error && (
+        <p className="mt-1.5 text-sm text-red-500 flex items-center gap-1">
+          <X className="w-3.5 h-3.5" />
+          {validation.error}
+        </p>
+      )}
 
       {/* Dropdown Menu */}
       {isOpen && (
