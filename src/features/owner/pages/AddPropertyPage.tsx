@@ -1085,7 +1085,8 @@ const [step, setStep] = useState(1);
                     draggableMarker={true}
                     onMarkerDrag={handleMarkerDrag}
                     onMapClick={handleMapClick}
-                    height="280px"
+                    searchEnabled={true}
+                    height="320px"
                   />
                   
                   {/* Overlay état vide */}

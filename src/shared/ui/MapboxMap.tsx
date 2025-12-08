@@ -1,8 +1,9 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapboxToken } from '@/shared/hooks/useMapboxToken';
-import { Loader2, MapPin, Navigation2, Focus } from 'lucide-react';
+import { usePlacesAutocomplete, PlaceSuggestion } from '@/shared/hooks/usePlacesAutocomplete';
+import { Loader2, MapPin, Navigation2, Focus, Search, X } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -49,6 +50,135 @@ const CITY_CENTER_COORDS: Record<string, [number, number]> = {
   'Bingerville': [-3.8883, 5.3536],
 };
 
+// Composant de recherche intégré à la carte
+interface MapSearchControlProps {
+  onLocationSelect: (coords: { lng: number; lat: number }) => void;
+  mapRef: React.MutableRefObject<mapboxgl.Map | null>;
+}
+
+function MapSearchControl({ onLocationSelect, mapRef }: MapSearchControlProps) {
+  const [inputValue, setInputValue] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  
+  const { suggestions, isLoading, setQuery, getDetails, clearSuggestions } = usePlacesAutocomplete({ country: 'ci' });
+
+  const handleInputChange = useCallback((value: string) => {
+    setInputValue(value);
+    setQuery(value);
+    setShowSuggestions(true);
+    setSelectedIndex(-1);
+  }, [setQuery]);
+
+  const handleSelect = useCallback(async (suggestion: PlaceSuggestion) => {
+    setInputValue(suggestion.mainText);
+    setShowSuggestions(false);
+    clearSuggestions();
+    
+    const details = await getDetails(suggestion.placeId);
+    if (details && details.latitude && details.longitude) {
+      // Animation flyTo vers le lieu
+      mapRef.current?.flyTo({
+        center: [details.longitude, details.latitude],
+        zoom: 16,
+        duration: 2000,
+        essential: true
+      });
+      
+      // Déclencher le callback avec les coordonnées
+      onLocationSelect({ lng: details.longitude, lat: details.latitude });
+    }
+  }, [getDetails, clearSuggestions, mapRef, onLocationSelect]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1));
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => Math.max(prev - 1, -1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0 && suggestions[selectedIndex]) {
+          handleSelect(suggestions[selectedIndex]);
+        }
+        break;
+      case 'Escape':
+        setShowSuggestions(false);
+        break;
+    }
+  };
+
+  const handleClear = () => {
+    setInputValue('');
+    clearSuggestions();
+    setShowSuggestions(false);
+    inputRef.current?.focus();
+  };
+
+  return (
+    <div className="absolute top-4 left-4 z-20 w-72">
+      <div className="relative">
+        <div className="flex items-center bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
+          <Search className="w-4 h-4 text-neutral-400 ml-3 flex-shrink-0" />
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+            placeholder="Rechercher un lieu..."
+            className="flex-1 px-3 py-2.5 text-sm bg-transparent border-none outline-none placeholder:text-neutral-400"
+          />
+          {isLoading && (
+            <Loader2 className="w-4 h-4 text-primary animate-spin mr-3" />
+          )}
+          {inputValue && !isLoading && (
+            <button
+              onClick={handleClear}
+              className="p-1.5 mr-2 hover:bg-neutral-100 rounded-full transition-colors"
+            >
+              <X className="w-4 h-4 text-neutral-400" />
+            </button>
+          )}
+        </div>
+        
+        {/* Suggestions dropdown */}
+        {showSuggestions && suggestions.length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden max-h-64 overflow-y-auto">
+            {suggestions.map((suggestion, index) => (
+              <button
+                key={suggestion.placeId}
+                onClick={() => handleSelect(suggestion)}
+                className={`w-full flex items-start gap-3 px-3 py-2.5 text-left hover:bg-neutral-50 transition-colors ${
+                  index === selectedIndex ? 'bg-primary/5' : ''
+                }`}
+              >
+                <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-neutral-900 truncate">
+                    {suggestion.mainText}
+                  </p>
+                  <p className="text-xs text-neutral-500 truncate">
+                    {suggestion.secondaryText}
+                  </p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function MapboxMap({
   center = [-4.0083, 5.3600],
   zoom = 12,
@@ -64,6 +194,7 @@ export default function MapboxMap({
   height = '100%',
   onMapClick,
   onMarkerDrag,
+  searchEnabled = false,
   singleMarker = false,
 }: MapboxMapProps) {
   
@@ -455,6 +586,13 @@ export default function MapboxMap({
     );
   };
 
+  // Handler pour la recherche sur carte
+  const handleSearchLocationSelect = useCallback((coords: { lng: number; lat: number }) => {
+    if (onMapClick) {
+      onMapClick(coords);
+    }
+  }, [onMapClick]);
+
   return (
     <div className="relative w-full h-full">
       <div
@@ -464,6 +602,14 @@ export default function MapboxMap({
         role="application"
         aria-label="Carte interactive des propriétés"
       />
+      
+      {/* Barre de recherche intégrée */}
+      {searchEnabled && mapLoaded && (
+        <MapSearchControl 
+          onLocationSelect={handleSearchLocationSelect}
+          mapRef={map}
+        />
+      )}
       
       {/* Boutons de contrôle carte */}
       <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
