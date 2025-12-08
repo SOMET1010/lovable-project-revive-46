@@ -75,13 +75,13 @@ interface PhoneInputWithCountryProps {
 export function PhoneInputWithCountry({
   value,
   onChange,
-  placeholder = '07 00 00 00 00',
+  placeholder = '   07 00 00 00 00',
   disabled = false,
   autoFocus = false,
   error = false,
   className = '',
 }: PhoneInputWithCountryProps) {
-  const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]!);
+  const [selectedCountry, se  tSelectedCountry] = useState<Country>(COUNTRIES[0]!);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -181,8 +181,13 @@ export function PhoneInputWithCountry({
         </button>
 
         {/* Phone Input */}
+<<<<<<< ours
+        <div className="flex-1 relative flex items-center">
+          <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A69B95] pointer-events-none" />
+=======
         <div className="flex-1 relative">
-          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A69B95]" />
+          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A69B95] pointer-events-none" />
+>>>>>>> theirs
           <input
             ref={inputRef}
             type="tel"
@@ -192,7 +197,11 @@ export function PhoneInputWithCountry({
             disabled={disabled}
             autoFocus={autoFocus}
             className="
-              w-full py-4 pl-10 pr-10 bg-transparent text-[#2C1810] font-medium 
+<<<<<<< ours
+              w-full h-full py-0 pl-14 pr-12 bg-transparent text-[#2C1810] font-medium 
+=======
+              w-full py-4 pl-12 pr-12 bg-transparent text-[#2C1810] font-medium 
+>>>>>>> theirs
               placeholder:text-[#A69B95] outline-none
             "
           />
