@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
 import MapboxMap from '@/shared/ui/MapboxMap';
+import PlacesAutocomplete, { PlaceResult } from '@/shared/ui/PlacesAutocomplete';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES, STORAGE_KEYS } from '@/shared/lib/constants/app.constants';
@@ -973,20 +974,30 @@ const [step, setStep] = useState(1);
                     )}
                   </div>
 
-                  {/* Adresse précise / Repère */}
+                  {/* Adresse précise / Repère - Google Places Autocomplete */}
                   <div className="md:col-span-2">
                     <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--color-gris-neutre)' }}>
                       Quartier précis / Repère
                     </label>
-                    <input
-                      type="text"
-                      name="address"
+                    <PlacesAutocomplete
                       value={formData.address}
-                      onChange={handleChange}
-                      onBlur={() => handleBlur('address')}
-                      placeholder="Ex: Angré 8ème Tranche, Carrefour Sorbonne, Rue L40"
+                      onChange={(value) => setFormData(prev => ({ ...prev, address: value }))}
+                      onSelect={(place: PlaceResult) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          address: place.description,
+                          latitude: place.latitude?.toFixed(6) || prev.latitude,
+                          longitude: place.longitude?.toFixed(6) || prev.longitude,
+                        }));
+                        toast.success('📍 Adresse sélectionnée !');
+                      }}
+                      placeholder="Tapez pour rechercher... Ex: Angré 8ème Tranche, Cocody"
+                      country="ci"
                       className="input-premium w-full"
                     />
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Commencez à taper et sélectionnez une suggestion pour localiser automatiquement
+                    </p>
                   </div>
 
                   {/* Lieu connu à proximité */}
