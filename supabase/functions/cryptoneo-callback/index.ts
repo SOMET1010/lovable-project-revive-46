@@ -21,29 +21,29 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 1. Find the lease by operationId
+    // 1. Trouver le contrat par operationId dans lease_contracts
     const { data: lease, error: leaseError } = await supabaseAdmin
-      .from('leases')
+      .from('lease_contracts')
       .select('*')
       .eq('cryptoneo_operation_id', operationId)
       .single();
 
     if (leaseError || !lease) {
-      console.error('Bail non trouvé pour operationId:', operationId);
+      console.error('Contrat non trouvé pour operationId:', operationId);
       return new Response(
-        JSON.stringify({ error: 'Bail non trouvé' }),
+        JSON.stringify({ error: 'Contrat non trouvé' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('✅ Bail trouvé:', lease.id);
+    console.log('✅ Contrat trouvé:', lease.id);
 
     if (status === 'completed' && signedFiles && signedFiles.length > 0) {
       console.log('📄 Signature réussie, téléchargement du document signé...');
 
       const signedFile = signedFiles[0];
       
-      // 2. Download the signed PDF from CryptoNeo
+      // 2. Télécharger le PDF signé depuis CryptoNeo
       const signedPdfResponse = await fetch(signedFile.downloadUrl);
       if (!signedPdfResponse.ok) {
         throw new Error('Échec téléchargement du PDF signé');
@@ -52,10 +52,10 @@ serve(async (req) => {
       const signedPdfBlob = await signedPdfResponse.blob();
       const signedPdfBuffer = await signedPdfBlob.arrayBuffer();
 
-      // 3. Upload to Supabase Storage
+      // 3. Upload vers Supabase Storage
       const fileName = `${lease.id}_signed_${Date.now()}.pdf`;
-      const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
-        .from('leases')
+      const { error: uploadError } = await supabaseAdmin.storage
+        .from('lease-documents')
         .upload(fileName, signedPdfBuffer, {
           contentType: 'application/pdf',
           upsert: true
@@ -66,103 +66,91 @@ serve(async (req) => {
         throw uploadError;
       }
 
-      // 4. Get public URL
+      // 4. Obtenir l'URL publique
       const { data: { publicUrl } } = supabaseAdmin.storage
-        .from('leases')
+        .from('lease-documents')
         .getPublicUrl(fileName);
 
       console.log('✅ Document signé uploadé:', publicUrl);
 
-      // 5. Update lease with signed document
+      // 5. Mettre à jour le contrat avec le document signé
       const { error: updateError } = await supabaseAdmin
-        .from('leases')
+        .from('lease_contracts')
         .update({
           cryptoneo_signed_document_url: publicUrl,
+          signed_document_url: publicUrl,
           cryptoneo_signature_status: 'completed',
           cryptoneo_callback_received_at: new Date().toISOString(),
           is_electronically_signed: true,
           landlord_cryptoneo_signature_at: new Date().toISOString(),
-          tenant_cryptoneo_signature_at: new Date().toISOString()
+          tenant_cryptoneo_signature_at: new Date().toISOString(),
+          certification_status: 'certified',
+          ansut_certified_at: new Date().toISOString(),
+          status: 'actif'
         })
         .eq('id', lease.id);
 
       if (updateError) {
-        console.error('Erreur mise à jour bail:', updateError);
+        console.error('Erreur mise à jour contrat:', updateError);
         throw updateError;
       }
 
-      // 6. Create notifications for both parties
+      // 6. Créer des notifications pour les deux parties
       await supabaseAdmin.from('notifications').insert([
         {
-          user_id: lease.landlord_id,
-          type: 'lease_electronically_signed',
-          category: 'lease',
+          user_id: lease.owner_id,
+          type: 'contract',
           title: 'Bail signé électroniquement',
           message: 'Le bail a été signé électroniquement avec succès via CryptoNeo.',
-          link: `/leases/${lease.id}`
+          action_url: `/contrat/${lease.id}`
         },
         {
           user_id: lease.tenant_id,
-          type: 'lease_electronically_signed',
-          category: 'lease',
+          type: 'contract',
           title: 'Bail signé électroniquement',
           message: 'Le bail a été signé électroniquement avec succès via CryptoNeo.',
-          link: `/leases/${lease.id}`
+          action_url: `/contrat/${lease.id}`
         }
       ]);
 
-      // 7. Send emails
-      await supabaseAdmin.functions.invoke('send-email', {
-        body: {
-          to: [lease.landlord_id, lease.tenant_id],
-          template: 'lease-signed',
-          data: {
-            leaseId: lease.id,
-            signedDocumentUrl: publicUrl
-          }
-        }
-      });
-
-      // 8. Log in audit logs
+      // 7. Logger dans les audit logs
       await supabaseAdmin.from('admin_audit_logs').insert({
-        admin_id: lease.landlord_id,
-        action_type: 'lease_electronically_signed',
-        target_type: 'lease',
-        target_id: lease.id,
-        notes: `Signature électronique CryptoNeo réussie - Operation: ${operationId}`
+        user_id: lease.owner_id,
+        action: 'lease_electronically_signed',
+        entity_type: 'lease_contract',
+        entity_id: lease.id,
+        details: { operationId, signedDocumentUrl: publicUrl }
       });
 
-      console.log('✅ Callback traité avec succès pour bail:', lease.id);
+      console.log('✅ Callback traité avec succès pour contrat:', lease.id);
 
     } else if (status === 'failed') {
       console.error('❌ Signature échouée pour operationId:', operationId);
 
-      // Update lease with failed status
+      // Mettre à jour le contrat avec le statut échec
       await supabaseAdmin
-        .from('leases')
+        .from('lease_contracts')
         .update({
           cryptoneo_signature_status: 'failed',
           cryptoneo_callback_received_at: new Date().toISOString()
         })
         .eq('id', lease.id);
 
-      // Create notifications
+      // Créer des notifications d'échec
       await supabaseAdmin.from('notifications').insert([
         {
-          user_id: lease.landlord_id,
-          type: 'lease_signature_failed',
-          category: 'lease',
+          user_id: lease.owner_id,
+          type: 'contract',
           title: 'Échec signature électronique',
           message: 'La signature électronique du bail a échoué. Veuillez réessayer.',
-          link: `/leases/${lease.id}`
+          action_url: `/contrat/${lease.id}`
         },
         {
           user_id: lease.tenant_id,
-          type: 'lease_signature_failed',
-          category: 'lease',
+          type: 'contract',
           title: 'Échec signature électronique',
           message: 'La signature électronique du bail a échoué. Veuillez réessayer.',
-          link: `/leases/${lease.id}`
+          action_url: `/contrat/${lease.id}`
         }
       ]);
     }
@@ -173,7 +161,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in cryptoneo-callback:', error);
+    console.error('❌ Error in cryptoneo-callback:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),
@@ -181,4 +169,3 @@ serve(async (req) => {
     );
   }
 });
-

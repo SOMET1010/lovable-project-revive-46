@@ -569,6 +569,57 @@ export type Database = {
           },
         ]
       }
+      facial_verification_attempts: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          document_id: string | null
+          document_url: string | null
+          failure_reason: string | null
+          id: string
+          is_live: boolean | null
+          is_match: boolean | null
+          matching_score: number | null
+          provider: string
+          provider_response: Json | null
+          selfie_url: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          document_url?: string | null
+          failure_reason?: string | null
+          id?: string
+          is_live?: boolean | null
+          is_match?: boolean | null
+          matching_score?: number | null
+          provider?: string
+          provider_response?: Json | null
+          selfie_url?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          document_id?: string | null
+          document_url?: string | null
+          failure_reason?: string | null
+          id?: string
+          is_live?: boolean | null
+          is_match?: boolean | null
+          matching_score?: number | null
+          provider?: string
+          provider_response?: Json | null
+          selfie_url?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string | null
@@ -663,16 +714,24 @@ export type Database = {
       }
       lease_contracts: {
         Row: {
+          ansut_certified_at: string | null
+          certification_status: string | null
           charges_amount: number | null
           contract_number: string
           created_at: string | null
+          cryptoneo_callback_received_at: string | null
           cryptoneo_operation_id: string | null
+          cryptoneo_signature_status: string | null
+          cryptoneo_signed_document_url: string | null
           custom_clauses: string | null
           deposit_amount: number | null
           document_url: string | null
           end_date: string
           id: string
+          is_electronically_signed: boolean | null
+          landlord_cryptoneo_signature_at: string | null
           landlord_signed_at: string | null
+          lease_type: string | null
           monthly_rent: number
           owner_id: string
           payment_day: number | null
@@ -681,21 +740,31 @@ export type Database = {
           signed_document_url: string | null
           start_date: string
           status: string | null
+          template_id: string | null
+          tenant_cryptoneo_signature_at: string | null
           tenant_id: string
           tenant_signed_at: string | null
           updated_at: string | null
         }
         Insert: {
+          ansut_certified_at?: string | null
+          certification_status?: string | null
           charges_amount?: number | null
           contract_number: string
           created_at?: string | null
+          cryptoneo_callback_received_at?: string | null
           cryptoneo_operation_id?: string | null
+          cryptoneo_signature_status?: string | null
+          cryptoneo_signed_document_url?: string | null
           custom_clauses?: string | null
           deposit_amount?: number | null
           document_url?: string | null
           end_date: string
           id?: string
+          is_electronically_signed?: boolean | null
+          landlord_cryptoneo_signature_at?: string | null
           landlord_signed_at?: string | null
+          lease_type?: string | null
           monthly_rent: number
           owner_id: string
           payment_day?: number | null
@@ -704,21 +773,31 @@ export type Database = {
           signed_document_url?: string | null
           start_date: string
           status?: string | null
+          template_id?: string | null
+          tenant_cryptoneo_signature_at?: string | null
           tenant_id: string
           tenant_signed_at?: string | null
           updated_at?: string | null
         }
         Update: {
+          ansut_certified_at?: string | null
+          certification_status?: string | null
           charges_amount?: number | null
           contract_number?: string
           created_at?: string | null
+          cryptoneo_callback_received_at?: string | null
           cryptoneo_operation_id?: string | null
+          cryptoneo_signature_status?: string | null
+          cryptoneo_signed_document_url?: string | null
           custom_clauses?: string | null
           deposit_amount?: number | null
           document_url?: string | null
           end_date?: string
           id?: string
+          is_electronically_signed?: boolean | null
+          landlord_cryptoneo_signature_at?: string | null
           landlord_signed_at?: string | null
+          lease_type?: string | null
           monthly_rent?: number
           owner_id?: string
           payment_day?: number | null
@@ -727,6 +806,8 @@ export type Database = {
           signed_document_url?: string | null
           start_date?: string
           status?: string | null
+          template_id?: string | null
+          tenant_cryptoneo_signature_at?: string | null
           tenant_id?: string
           tenant_signed_at?: string | null
           updated_at?: string | null
@@ -739,7 +820,47 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lease_contracts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "lease_templates"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      lease_templates: {
+        Row: {
+          content: Json
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_default: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       maintenance_requests: {
         Row: {
@@ -2101,6 +2222,28 @@ export type Database = {
           p_entity_type: string
         }
         Returns: string
+      }
+      log_facial_verification_attempt: {
+        Args: {
+          p_document_id?: string
+          p_document_url?: string
+          p_provider?: string
+          p_selfie_url?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
+      update_facial_verification_status: {
+        Args: {
+          p_failure_reason?: string
+          p_is_live?: boolean
+          p_is_match?: boolean
+          p_matching_score?: number
+          p_provider_response?: Json
+          p_status: string
+          p_verification_id: string
+        }
+        Returns: undefined
       }
       upsert_suta_analytics: {
         Args: { p_category: string; p_is_positive?: boolean; p_topic: string }
