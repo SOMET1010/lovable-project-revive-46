@@ -42,6 +42,14 @@ const QUICK_ACTIONS = [
   "📄 Dossier locataire"
 ];
 
+const BUBBLE_MESSAGES = [
+  "Besoin d'aide ? 👋",
+  "Une question ?",
+  "Je suis SUTA !",
+  "Trouvez votre logement",
+  "Parlons immobilier 🏠"
+];
+
 // --- COMPOSANT ---
 
 export default function SUTAChatWidget({
@@ -58,6 +66,8 @@ export default function SUTAChatWidget({
   const [isTyping, setIsTyping] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [bubbleMessage, setBubbleMessage] = useState<string | null>(null);
+  const [showBubble, setShowBubble] = useState(false);
   
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -72,6 +82,39 @@ export default function SUTAChatWidget({
   useEffect(() => {
     if (mode === 'embedded') setIsOpen(true);
   }, [mode]);
+
+  // Animation bulle de dialogue périodique
+  useEffect(() => {
+    if (isOpen || mode === 'embedded') {
+      setShowBubble(false);
+      return;
+    }
+    
+    let messageIndex = 0;
+    
+    // Afficher la première bulle après 3 secondes
+    const initialTimeout = setTimeout(() => {
+      setBubbleMessage(BUBBLE_MESSAGES[0] ?? null);
+      setShowBubble(true);
+      
+      // Cacher après 4 secondes
+      setTimeout(() => setShowBubble(false), 4000);
+    }, 3000);
+    
+    // Puis afficher une bulle toutes les 15 secondes
+    const interval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % BUBBLE_MESSAGES.length;
+      setBubbleMessage(BUBBLE_MESSAGES[messageIndex] ?? null);
+      setShowBubble(true);
+      
+      setTimeout(() => setShowBubble(false), 4000);
+    }, 15000);
+    
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, [isOpen, mode]);
 
   // Charger la conversation et l'historique pour les utilisateurs connectés
   useEffect(() => {
@@ -197,18 +240,32 @@ export default function SUTAChatWidget({
 
   if (mode === 'floating' && !isOpen) {
     return (
-      <button
-        onClick={() => setIsOpen(true)}
-        className={`fixed z-50 ${position === 'bottom-right' ? 'bottom-6 right-6' : 'bottom-6 left-6'} w-16 h-16 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 overflow-hidden border-2 border-primary`}
-        aria-label="Ouvrir le chat SUTA"
-      >
-        <img 
-          src={sutaAvatar} 
-          alt="SUTA Assistant" 
-          className="w-full h-full object-cover"
-        />
-        <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background animate-pulse"></span>
-      </button>
+      <div className={`fixed z-50 ${position === 'bottom-right' ? 'bottom-6 right-6' : 'bottom-6 left-6'}`}>
+        {/* Bulle de dialogue animée */}
+        {showBubble && bubbleMessage && (
+          <div className="absolute bottom-full right-0 mb-3 animate-fade-in">
+            <div className="bg-background rounded-2xl rounded-br-sm shadow-lg px-4 py-2.5 border border-border whitespace-nowrap">
+              <span className="text-sm font-medium text-foreground">{bubbleMessage}</span>
+            </div>
+            {/* Petite flèche pointant vers le bas */}
+            <div className="absolute -bottom-1.5 right-5 w-3 h-3 bg-background border-r border-b border-border transform rotate-45"></div>
+          </div>
+        )}
+        
+        {/* Avatar SUTA */}
+        <button
+          onClick={() => setIsOpen(true)}
+          className="w-16 h-16 rounded-full shadow-2xl transition-all hover:scale-110 active:scale-95 overflow-hidden border-2 border-primary relative"
+          aria-label="Ouvrir le chat SUTA"
+        >
+          <img 
+            src={sutaAvatar} 
+            alt="SUTA Assistant" 
+            className="w-full h-full object-cover"
+          />
+          <span className="absolute -top-1 -right-1 w-4 h-4 bg-destructive rounded-full border-2 border-background animate-pulse"></span>
+        </button>
+      </div>
     );
   }
 
