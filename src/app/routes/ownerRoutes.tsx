@@ -14,6 +14,7 @@ const OwnerDashboard = lazyWithRetry(() => import('@/features/owner/pages/Dashbo
 const CreateContract = lazyWithRetry(() => import('@/features/owner/pages/CreateContractPage'));
 const OwnerContracts = lazyWithRetry(() => import('@/features/owner/pages/OwnerContractsPage'));
 const OwnerApplications = lazyWithRetry(() => import('@/features/owner/pages/OwnerApplicationsPage'));
+const OwnerMaintenance = lazyWithRetry(() => import('@/features/owner/pages/OwnerMaintenancePage'));
 
 // Application form (for owner viewing applications)
 const ApplicationForm = lazyWithRetry(() => import('@/features/tenant/pages/ApplicationFormPage'));
@@ -60,6 +61,12 @@ export const ownerRoutes: RouteObject[] = [
   { 
     path: 'dashboard/candidature/:id', 
     element: <ProtectedRoute allowedRoles={[ROLES.OWNER, ROLES.AGENCY]}><ApplicationForm /></ProtectedRoute> 
+  },
+  
+  // Maintenance
+  { 
+    path: 'dashboard/maintenance', 
+    element: <ProtectedRoute allowedRoles={[...OWNER_ROLES]}><OwnerMaintenance /></ProtectedRoute> 
   },
 
   // Agency dashboard
