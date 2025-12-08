@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { InputWithIcon } from '@/shared/ui';
+import { PhoneInputWithCountry } from '@/shared/components/PhoneInputWithCountry';
 
 type AuthMethod = 'phone' | 'email';
 type PhoneStep = 'enter' | 'verify' | 'name';
@@ -62,6 +63,8 @@ export default function ModernAuthPage() {
 
   // Phone fields
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneDisplay, setPhoneDisplay] = useState('');
+  const [_countryDialCode, setCountryDialCode] = useState('+225');
   const [otp, setOtp] = useState('');
   const [sendMethod, setSendMethod] = useState<'sms' | 'whatsapp'>('whatsapp');
   const [resendTimer, setResendTimer] = useState(0);
@@ -407,19 +410,16 @@ export default function ModernAuthPage() {
               {/* STEP 1: Enter Phone */}
               {phoneStep === 'enter' && (
                 <div className="space-y-4 animate-fade-in">
-                  <div className="relative group">
-                    <div className="absolute left-4 top-4 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors font-bold">
-                      +225
-                    </div>
-                    <input
-                      type="tel"
-                      placeholder="07 00 00 00 00"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="w-full py-4 pl-16 pr-4 rounded-xl bg-white border border-[#EFEBE9] text-[#2C1810] font-medium placeholder:text-[#A69B95] focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 outline-none transition-all"
-                      autoFocus
-                    />
-                  </div>
+                  <PhoneInputWithCountry
+                    value={phoneDisplay}
+                    onChange={(display, fullNumber, dialCode) => {
+                      setPhoneDisplay(display);
+                      setPhoneNumber(fullNumber);
+                      setCountryDialCode(dialCode);
+                    }}
+                    placeholder="07 00 00 00 00"
+                    autoFocus
+                  />
 
                   {/* Send method selector */}
                   <div className="flex gap-3">
