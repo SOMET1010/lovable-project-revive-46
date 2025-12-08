@@ -1,29 +1,39 @@
 /**
  * ProfileCompletionPage - Complétion du profil après première connexion
- * Design Premium Ivorian (Chocolat/Orange/Sable)
- * 
- * Features:
- * - Affichage du numéro vérifié (lecture seule)
- * - Upload photo de profil
- * - Email optionnel
- * - Sélection type d'utilisateur
+ * Design: Premium Ivorian (Chocolat/Orange/Sable)
  */
 
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Building2, User, MapPin, FileText, Loader2, Check, 
-  Mail, Camera, Phone, CheckCircle2 
+  Mail, Camera, Phone, CheckCircle2, Key, Briefcase 
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { InputWithIcon } from '@/shared/ui';
+import { InputWithIcon, Button } from '@/shared/ui';
 import { supabase } from '@/integrations/supabase/client';
-import '@/styles/form-premium.css';
+
+// --- CONFIGURATION ---
 
 const USER_TYPES = [
-  { value: 'tenant', label: 'Locataire', description: 'Je cherche un logement' },
-  { value: 'owner', label: 'Propriétaire', description: 'Je loue mes biens' },
-  { value: 'agent', label: 'Agence', description: 'Je gère des biens immobiliers' },
+  { 
+    value: 'tenant', 
+    label: 'Locataire', 
+    description: 'Je cherche un logement',
+    icon: Key 
+  },
+  { 
+    value: 'owner', 
+    label: 'Propriétaire', 
+    description: 'Je loue mes biens',
+    icon: Building2 
+  },
+  { 
+    value: 'agent', 
+    label: 'Agence', 
+    description: 'Je gère des biens',
+    icon: Briefcase 
+  },
 ] as const;
 
 const IVORIAN_CITIES = [
@@ -33,31 +43,31 @@ const IVORIAN_CITIES = [
   'Plateau', 'Treichville', 'Yopougon', 'Adjamé', 'Abobo',
 ];
 
-// Format phone number for display
+// --- UTILS ---
+
 const formatPhoneForDisplay = (phone: string | null | undefined): string => {
   if (!phone) return '';
-  // Remove non-digits
   const digits = phone.replace(/\D/g, '');
-  // If starts with 225, format as +225 XX XX XX XX XX
   if (digits.startsWith('225') && digits.length >= 13) {
     const localNumber = digits.slice(3);
     return `+225 ${localNumber.replace(/(\d{2})(?=\d)/g, '$1 ').trim()}`;
   }
-  // Fallback: just format with spaces
   return phone;
 };
 
-// Validate email format
 const isValidEmail = (email: string): boolean => {
-  if (!email) return true; // Optional field
+  if (!email) return true;
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
+
+// --- COMPOSANT ---
 
 export default function ProfileCompletionPage() {
   const navigate = useNavigate();
   const { user, profile, loading: authLoading, updateProfile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // États
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [userType, setUserType] = useState<'tenant' | 'owner' | 'agent'>('tenant');
@@ -65,59 +75,49 @@ export default function ProfileCompletionPage() {
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  
+  // États UI
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [emailError, setEmailError] = useState('');
 
-  // Pré-remplir avec les données du profil existant
+  // Init Data
   useEffect(() => {
-    if (profile?.full_name) {
-      setFullName(profile.full_name);
-    }
-    if (profile?.email) {
-      setEmail(profile.email);
-    }
-    if (profile?.user_type) {
-      setUserType(profile.user_type as 'tenant' | 'owner' | 'agent');
-    }
-    if (profile?.city) {
-      setCity(profile.city);
-    }
-    if (profile?.bio) {
-      setBio(profile.bio);
-    }
-    if (profile?.avatar_url) {
-      setAvatarUrl(profile.avatar_url);
-      setAvatarPreview(profile.avatar_url);
+    if (profile) {
+      if (profile.full_name) setFullName(profile.full_name);
+      if (profile.email) setEmail(profile.email);
+      if (profile.user_type) setUserType(profile.user_type as 'tenant' | 'owner' | 'agent');
+      if (profile.city) setCity(profile.city);
+      if (profile.bio) setBio(profile.bio);
+      if (profile.avatar_url) {
+        setAvatarUrl(profile.avatar_url);
+        setAvatarPreview(profile.avatar_url);
+      }
     }
   }, [profile]);
 
-  // Handle avatar file selection
+  // Handlers
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       setError('Veuillez sélectionner une image');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError('L\'image ne doit pas dépasser 5 Mo');
       return;
     }
 
-    // Show preview immediately
+    // Preview immédiate
     const reader = new FileReader();
-    reader.onload = (event) => {
-      setAvatarPreview(event.target?.result as string);
-    };
+    reader.onload = (event) => setAvatarPreview(event.target?.result as string);
     reader.readAsDataURL(file);
 
-    // Upload to Supabase Storage
+    // Upload
     if (user) {
       setUploadingAvatar(true);
       try {
@@ -131,7 +131,6 @@ export default function ProfileCompletionPage() {
 
         if (uploadError) throw uploadError;
 
-        // Get public URL
         const { data: { publicUrl } } = supabase.storage
           .from('avatars')
           .getPublicUrl(filePath);
@@ -146,14 +145,9 @@ export default function ProfileCompletionPage() {
     }
   };
 
-  // Handle email change with validation
   const handleEmailChange = (value: string) => {
     setEmail(value);
-    if (value && !isValidEmail(value)) {
-      setEmailError('Format email invalide');
-    } else {
-      setEmailError('');
-    }
+    setEmailError(value && !isValidEmail(value) ? 'Format email invalide' : '');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -183,7 +177,6 @@ export default function ProfileCompletionPage() {
         profile_setup_completed: true,
       });
 
-      // Redirection selon le type d'utilisateur
       const redirectPath = userType === 'tenant' 
         ? '/recherche' 
         : userType === 'owner' 
@@ -192,26 +185,25 @@ export default function ProfileCompletionPage() {
 
       navigate(redirectPath);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour du profil';
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Afficher un loader pendant le chargement de l'auth
+  // Loading Screen
   if (authLoading) {
     return (
       <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin text-[#F16522] mx-auto" />
-          <p className="text-[#A69B95]">Chargement...</p>
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-10 w-10 animate-spin text-[#F16522]" />
+          <p className="text-[#6B5A4E] font-medium">Chargement du profil...</p>
         </div>
       </div>
     );
   }
 
-  // Rediriger seulement après le chargement si pas d'utilisateur
   if (!user) {
     navigate('/connexion');
     return null;
@@ -220,58 +212,61 @@ export default function ProfileCompletionPage() {
   const displayPhone = formatPhoneForDisplay(profile?.phone);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-lg">
-        {/* Logo & Header */}
-        <div className="text-center mb-8 animate-fade-in">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Building2 className="h-10 w-10 text-[#F16522]" />
-            <span className="text-3xl font-bold bg-gradient-to-r from-[#2C1810] to-[#F16522] bg-clip-text text-transparent">
-              Mon Toit
-            </span>
+    <div className="min-h-screen bg-[#FAF7F4] py-12 px-4 sm:px-6">
+      <div className="max-w-xl mx-auto">
+        
+        {/* Header */}
+        <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="inline-flex items-center justify-center p-3 bg-white rounded-2xl shadow-sm mb-4 border border-[#EFEBE9]">
+            <Building2 className="h-8 w-8 text-[#F16522]" />
           </div>
-          <h1 className="text-2xl font-bold text-[#2C1810] mb-2">Complétez votre profil</h1>
-          <p className="text-[#A69B95]">Quelques informations pour personnaliser votre expérience</p>
+          <h1 className="text-3xl font-extrabold text-[#2C1810] mb-2">
+            Complétez votre profil
+          </h1>
+          <p className="text-[#6B5A4E]">
+            Pour une expérience personnalisée sur <span className="font-bold text-[#F16522]">Mon Toit</span>
+          </p>
         </div>
 
-        {/* Form Card */}
-        <div className="form-section-premium animate-scale-in">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Error Message */}
+        {/* Card Formulaire */}
+        <div className="bg-white rounded-[32px] shadow-xl shadow-[#2C1810]/5 border border-[#EFEBE9] p-8 md:p-10 animate-in zoom-in-95 duration-500">
+          
+          <form onSubmit={handleSubmit} className="space-y-8">
+            
             {error && (
-              <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm font-medium">
+              <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-700 text-sm font-medium">
+                <div className="w-1 h-1 rounded-full bg-red-500" />
                 {error}
               </div>
             )}
 
-            {/* Avatar Upload */}
+            {/* AVATAR UPLOAD (Centré) */}
             <div className="flex flex-col items-center">
-              <div className="relative">
+              <div className="relative group">
                 <div 
-                  className="w-24 h-24 rounded-full bg-[#F5F0EB] border-4 border-white shadow-lg flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-28 h-28 rounded-full bg-[#FAF7F4] border-4 border-white shadow-lg flex items-center justify-center overflow-hidden cursor-pointer transition-all hover:shadow-xl hover:scale-105"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {avatarPreview ? (
-                    <img 
-                      src={avatarPreview} 
-                      alt="Avatar" 
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
                     <User className="w-10 h-10 text-[#A69B95]" />
                   )}
+                  
+                  {/* Overlay Loader */}
                   {uploadingAvatar && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-sm">
+                      <Loader2 className="w-8 h-8 text-white animate-spin" />
                     </div>
                   )}
                 </div>
+                
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#F16522] rounded-full flex items-center justify-center shadow-lg hover:bg-[#E05A1A] transition-colors"
+                  className="absolute bottom-0 right-0 w-9 h-9 bg-[#F16522] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-[#D95318] transition-colors border-2 border-white"
                 >
-                  <Camera className="w-4 h-4 text-white" />
+                  <Camera className="w-4 h-4" />
                 </button>
               </div>
               <input
@@ -281,137 +276,136 @@ export default function ProfileCompletionPage() {
                 onChange={handleAvatarChange}
                 className="hidden"
               />
-              <p className="text-xs text-[#A69B95] mt-2">Cliquez pour ajouter une photo</p>
+              <p className="text-xs text-[#A69B95] mt-3 font-medium">Photo de profil (Optionnel)</p>
             </div>
 
-            {/* Phone Number (Read-only) */}
-            {displayPhone && (
+            {/* INFOS PERSONNELLES */}
+            <div className="space-y-5">
+              {/* Téléphone (Lecture Seule) */}
+              {displayPhone && (
+                <div>
+                  <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 flex items-center gap-2">
+                    Téléphone vérifié <CheckCircle2 className="w-3 h-3 text-green-500" />
+                  </label>
+                  <div className="w-full px-5 py-3.5 bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl text-[#2C1810] font-bold flex items-center gap-3 opacity-80 cursor-not-allowed">
+                    <Phone className="w-4 h-4 text-[#A69B95]" />
+                    <span>{displayPhone}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Nom Complet */}
               <div>
-                <label className="form-label-premium flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Téléphone
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Vérifié
-                  </span>
+                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block">Nom complet *</label>
+                <InputWithIcon
+                  icon={User}
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Ex: Jean Kouassi"
+                  required
+                  className="w-full px-5 py-3.5 rounded-xl border border-[#EFEBE9] focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 transition-all font-medium text-[#2C1810]"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 flex justify-between">
+                  <span>Email</span>
+                  <span className="text-[10px] font-normal normal-case bg-[#FAF7F4] px-2 py-0.5 rounded text-[#A69B95]">Pour la récupération du compte</span>
                 </label>
-                <div className="mt-2 p-4 bg-[#F5F0EB] rounded-xl border border-[#EFEBE9] text-[#2C1810] font-medium flex items-center gap-3">
-                  <span className="text-lg">🇨🇮</span>
-                  <span>{displayPhone}</span>
+                <InputWithIcon
+                  icon={Mail}
+                  type="email"
+                  value={email}
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  placeholder="jean.kouassi@email.com"
+                  className={`w-full px-5 py-3.5 rounded-xl border transition-all font-medium text-[#2C1810] ${emailError ? 'border-red-300 focus:border-red-500 focus:ring-red-100' : 'border-[#EFEBE9] focus:border-[#F16522] focus:ring-[#F16522]/10'}`}
+                />
+                {emailError && <p className="text-xs text-red-500 mt-1.5 font-medium">{emailError}</p>}
+              </div>
+            </div>
+
+            {/* TYPE UTILISATEUR (Grille) */}
+            <div>
+              <label className="text-xs font-bold uppercase text-[#A69B95] mb-3 block">Je suis *</label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {USER_TYPES.map((type) => {
+                  const Icon = type.icon;
+                  const isSelected = userType === type.value;
+                  return (
+                    <button
+                      key={type.value}
+                      type="button"
+                      onClick={() => setUserType(type.value)}
+                      className={`relative p-4 rounded-xl border-2 text-left transition-all duration-300 flex flex-col gap-2 ${
+                        isSelected
+                          ? 'border-[#F16522] bg-[#F16522]/5 shadow-md scale-[1.02] z-10'
+                          : 'border-[#EFEBE9] bg-white hover:border-[#F16522]/30 hover:bg-[#FAF7F4]'
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg w-fit ${isSelected ? 'bg-[#F16522] text-white' : 'bg-[#FAF7F4] text-[#A69B95]'}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className={`font-bold text-sm ${isSelected ? 'text-[#2C1810]' : 'text-[#6B5A4E]'}`}>
+                          {type.label}
+                        </p>
+                        <p className="text-[10px] text-[#A69B95] leading-tight mt-0.5">
+                          {type.description}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 text-[#F16522]">
+                          <CheckCircle2 className="w-5 h-5 fill-[#F16522] text-white" />
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* VILLE & BIO */}
+            <div className="space-y-5">
+              <div>
+                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block">Ville de résidence</label>
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95]" />
+                  <select
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-[#EFEBE9] bg-white focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 outline-none appearance-none font-medium text-[#2C1810] cursor-pointer"
+                  >
+                    <option value="">Sélectionnez une ville</option>
+                    {IVORIAN_CITIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
-            )}
 
-            {/* Full Name */}
-            <div>
-              <label className="form-label-premium">Nom complet *</label>
-              <InputWithIcon
-                icon={User}
-                variant="modern"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Jean Kouassi"
-                required
-                autoFocus={!displayPhone}
-                className="mt-2"
-              />
-            </div>
-
-            {/* Email (Optional) */}
-            <div>
-              <label className="form-label-premium flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Email (optionnel)
-              </label>
-              <InputWithIcon
-                icon={Mail}
-                variant="modern"
-                type="email"
-                value={email}
-                onChange={(e) => handleEmailChange(e.target.value)}
-                placeholder="votre@email.com"
-                className={`mt-2 ${emailError ? 'border-red-400' : ''}`}
-              />
-              {emailError ? (
-                <p className="text-xs text-red-500 mt-1">{emailError}</p>
-              ) : (
-                <p className="text-xs text-[#A69B95] mt-1">Pour récupérer votre compte et recevoir des notifications</p>
-              )}
-            </div>
-
-            {/* User Type Selection */}
-            <div>
-              <label className="form-label-premium mb-3 block">
-                Vous êtes *
-              </label>
-              <div className="space-y-3">
-                {USER_TYPES.map((type) => (
-                  <button
-                    key={type.value}
-                    type="button"
-                    onClick={() => setUserType(type.value)}
-                    className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
-                      userType === type.value
-                        ? 'border-[#F16522] bg-[#F16522]/10 shadow-md'
-                        : 'border-[#A69B95]/30 hover:border-[#F16522]/50'
-                    }`}
-                  >
-                    <div>
-                      <p className={`font-semibold ${userType === type.value ? 'text-[#F16522]' : 'text-[#2C1810]'}`}>
-                        {type.label}
-                      </p>
-                      <p className="text-sm text-[#A69B95]">{type.description}</p>
-                    </div>
-                    {userType === type.value && (
-                      <div className="h-6 w-6 rounded-full bg-[#F16522] flex items-center justify-center">
-                        <Check className="h-4 w-4 text-white" />
-                      </div>
-                    )}
-                  </button>
-                ))}
+              <div>
+                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block">À propos de moi</label>
+                <div className="relative">
+                  <FileText className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95]" />
+                  <textarea
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="Dites-en un peu plus sur vous..."
+                    rows={3}
+                    maxLength={300}
+                    className="w-full pl-12 pr-4 py-3.5 rounded-xl border border-[#EFEBE9] focus:border-[#F16522] focus:ring-4 focus:ring-[#F16522]/10 outline-none resize-none font-medium text-[#2C1810] placeholder:text-[#A69B95]/50"
+                  />
+                  <p className="text-[10px] text-[#A69B95] text-right mt-1">{bio.length}/300</p>
+                </div>
               </div>
             </div>
 
-            {/* City Selection */}
-            <div>
-              <label className="form-label-premium">
-                <MapPin className="inline h-4 w-4 mr-1" />
-                Ville (optionnel)
-              </label>
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="form-input-premium mt-2"
-              >
-                <option value="">Sélectionnez une ville</option>
-                {IVORIAN_CITIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Bio */}
-            <div>
-              <label className="form-label-premium">
-                <FileText className="inline h-4 w-4 mr-1" />
-                Bio (optionnel)
-              </label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Parlez-nous un peu de vous..."
-                rows={3}
-                className="form-input-premium mt-2 resize-none"
-                maxLength={300}
-              />
-              <p className="text-xs text-[#A69B95] mt-1 text-right">{bio.length}/300</p>
-            </div>
-
-            {/* Submit Button */}
-            <button
+            {/* SUBMIT */}
+            <Button
               type="submit"
               disabled={submitting || !fullName.trim() || !!emailError}
-              className="form-button-primary w-full flex items-center justify-center gap-2"
+              className="w-full bg-[#F16522] hover:bg-[#D95318] text-white py-4 rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all"
             >
               {submitting ? (
                 <>
@@ -420,17 +414,17 @@ export default function ProfileCompletionPage() {
                 </>
               ) : (
                 <>
-                  <span>Commencer</span>
+                  <span>Terminer mon profil</span>
                   <Check className="h-5 w-5" />
                 </>
               )}
-            </button>
+            </Button>
+
           </form>
         </div>
 
-        {/* Skip Link */}
-        <p className="text-center mt-6 text-sm text-[#A69B95]">
-          Vous pourrez modifier ces informations plus tard dans votre profil
+        <p className="text-center mt-8 text-sm text-[#A69B95]">
+          Vous pourrez modifier ces informations plus tard dans <span className="text-[#2C1810] font-medium">Mon Compte</span>
         </p>
       </div>
     </div>
