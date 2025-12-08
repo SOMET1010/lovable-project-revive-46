@@ -65,6 +65,7 @@ export default function ModernAuthPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [phoneDisplay, setPhoneDisplay] = useState('');
   const [_countryDialCode, setCountryDialCode] = useState('+225');
+  const [isPhoneValid, setIsPhoneValid] = useState(false);
   const [otp, setOtp] = useState('');
   const [sendMethod, setSendMethod] = useState<'sms' | 'whatsapp'>('whatsapp');
   const [resendTimer, setResendTimer] = useState(0);
@@ -412,10 +413,11 @@ export default function ModernAuthPage() {
                 <div className="space-y-4 animate-fade-in">
                   <PhoneInputWithCountry
                     value={phoneDisplay}
-                    onChange={(display, fullNumber, dialCode) => {
+                    onChange={(display, fullNumber, dialCode, isValid) => {
                       setPhoneDisplay(display);
                       setPhoneNumber(fullNumber);
                       setCountryDialCode(dialCode);
+                      setIsPhoneValid(isValid);
                     }}
                     placeholder="07 00 00 00 00"
                     autoFocus
@@ -457,7 +459,7 @@ export default function ModernAuthPage() {
 
                   <button
                     onClick={handleSendOTP}
-                    disabled={loading || phoneNumber.replace(/\D/g, '').length < 10}
+                    disabled={loading || !isPhoneValid}
                     className="w-full py-4 bg-[#F16522] hover:bg-[#D95318] text-white rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
