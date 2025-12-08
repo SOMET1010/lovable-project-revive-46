@@ -955,6 +955,39 @@ export type Database = {
         }
         Relationships: []
       }
+      password_reset_tokens: {
+        Row: {
+          created_at: string | null
+          email: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          token: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          token: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          token?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -1978,6 +2011,7 @@ export type Database = {
       cleanup_expired_verification_codes: { Args: never; Returns: number }
       cleanup_old_webhook_logs: { Args: never; Returns: number }
       generate_otp: { Args: never; Returns: string }
+      generate_reset_token: { Args: never; Returns: string }
       get_platform_stats: { Args: never; Returns: Json }
       get_public_profile: {
         Args: { profile_user_id: string }
