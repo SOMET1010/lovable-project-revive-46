@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Home, X, Image as ImageIcon, Building2, Check, RefreshCw, MapPin, DollarSign, Settings, FileText, Navigation, Crosshair, Globe, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
+import MapboxMap from '@/shared/ui/MapboxMap';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES, STORAGE_KEYS } from '@/shared/lib/constants/app.constants';
@@ -133,6 +134,65 @@ const [step, setStep] = useState(1);
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }, []);
+
+  // Handler pour le clic sur la carte
+  const handleMapClick = useCallback((lngLat: { lng: number; lat: number }) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: lngLat.lat.toFixed(6),
+      longitude: lngLat.lng.toFixed(6),
+    }));
+    toast.success('Position définie !');
+  }, []);
+
+  // Handler pour le déplacement du marqueur
+  const handleMarkerDrag = useCallback((lngLat: { lng: number; lat: number }) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: lngLat.lat.toFixed(6),
+      longitude: lngLat.lng.toFixed(6),
+    }));
+    toast.success('Position mise à jour !');
+  }, []);
+
+  // Coordonnées de la ville pour centrer la carte
+  const CITY_COORDS: Record<string, [number, number]> = {
+    'Abidjan': [-4.0083, 5.3600],
+    'Cocody': [-3.9878, 5.3545],
+    'Plateau': [-4.0213, 5.3235],
+    'Marcory': [-3.9989, 5.3010],
+    'Yopougon': [-4.0856, 5.3194],
+    'Bouaké': [-5.0306, 7.6936],
+    'Yamoussoukro': [-5.2767, 6.8277],
+    'San-Pédro': [-6.6363, 4.7469],
+    'Assinie': [-3.4586, 5.1353],
+    'Grand-Bassam': [-3.7400, 5.2100],
+    'Bingerville': [-3.8883, 5.3536],
+  };
+
+  // Centre de la carte dynamique
+  const mapCenter: [number, number] = useMemo(() => {
+    // Si des coordonnées sont déjà définies, centrer dessus
+    if (formData.latitude && formData.longitude) {
+      return [parseFloat(formData.longitude), parseFloat(formData.latitude)];
+    }
+    // Sinon, utiliser les coordonnées de la ville
+    return CITY_COORDS[formData.city] || [-4.0083, 5.3600]; // Abidjan par défaut
+  }, [formData.latitude, formData.longitude, formData.city]);
+
+  // Propriété fictive pour afficher un seul marqueur déplaçable
+  const mapMarkerProperty = useMemo(() => {
+    if (!formData.latitude || !formData.longitude) return [];
+    return [{
+      id: 'new-property',
+      title: formData.title || 'Nouvelle propriété',
+      monthly_rent: parseFloat(formData.monthly_rent) || 0,
+      latitude: parseFloat(formData.latitude),
+      longitude: parseFloat(formData.longitude),
+      city: formData.city,
+      neighborhood: formData.neighborhood,
+    }];
+  }, [formData.latitude, formData.longitude, formData.title, formData.monthly_rent, formData.city, formData.neighborhood]);
 
   // Geocode address handler (localise le bien depuis l'adresse)
   const handleGeocodeAddress = useCallback(async () => {
@@ -999,77 +1059,79 @@ const [step, setStep] = useState(1);
                   </p>
                 </div>
 
-                {/* Carte Placeholder Interactive */}
-                <div 
-                  className="relative h-48 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 group"
-                >
-                  {/* Image de fond statique simulant une carte */}
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center opacity-60 grayscale group-hover:grayscale-0 transition-all duration-500"
-                    style={{ backgroundImage: "url('https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/5.3599,-4.0083,11,0/600x300@2x?access_token=pk.placeholder')" }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
-                  
-                  {/* Marqueur central animé */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="flex flex-col items-center">
-                      <div className={`${formData.latitude ? '' : 'animate-bounce'}`}>
-                        <MapPin 
-                          className="w-10 h-10 drop-shadow-lg" 
-                          style={{ color: 'var(--color-orange)', fill: formData.latitude ? 'var(--color-orange)' : 'transparent' }} 
-                        />
-                      </div>
-                      {!formData.latitude && (
-                        <span className="bg-white px-3 py-1 rounded-lg text-xs font-bold shadow-lg mt-1" style={{ color: 'var(--color-chocolat)' }}>
-                          Indiquez la position du bien
-                        </span>
-                      )}
-                    </div>
+                {/* Carte Mapbox Interactive */}
+                <div className="relative rounded-2xl overflow-hidden border border-gray-200">
+                  {/* Instruction au-dessus de la carte */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 bg-white/95 px-4 py-2 rounded-xl shadow-lg border border-gray-200 text-sm font-medium text-gray-700 backdrop-blur-sm">
+                    📍 Cliquez ou déplacez le marqueur pour positionner le bien
                   </div>
                   
-                  {/* Affichage coordonnées */}
+                  <MapboxMap
+                    center={mapCenter}
+                    zoom={formData.latitude ? 15 : 12}
+                    properties={mapMarkerProperty}
+                    singleMarker={true}
+                    draggableMarker={true}
+                    onMarkerDrag={handleMarkerDrag}
+                    onMapClick={handleMapClick}
+                    height="280px"
+                  />
+                  
+                  {/* Overlay état vide */}
+                  {!formData.latitude && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-900/10 backdrop-blur-[1px] z-20 pointer-events-none">
+                      <div className="bg-white px-6 py-3 rounded-xl shadow-xl border font-medium text-gray-700 flex items-center gap-2">
+                        <MapPin className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
+                        Cliquez sur la carte pour positionner le bien
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Badge coordonnées en overlay */}
                   {formData.latitude && formData.longitude && (
-                    <div className="absolute bottom-2 right-2 bg-white/95 px-3 py-1.5 rounded-lg text-xs font-mono shadow-sm border border-gray-200" style={{ color: 'var(--color-gris-texte)' }}>
+                    <div className="absolute bottom-3 right-3 z-10 bg-white/95 px-3 py-1.5 rounded-lg text-xs font-mono shadow-lg border border-gray-200 backdrop-blur-sm">
                       📍 {formData.latitude}, {formData.longitude}
                     </div>
                   )}
                 </div>
 
-                {/* Champs Latitude / Longitude manuels */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs uppercase font-bold mb-1 block" style={{ color: 'var(--color-gris-neutre)' }}>Latitude</label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input 
-                        type="text" 
-                        name="latitude"
-                        value={formData.latitude}
-                        onChange={handleChange}
-                        placeholder="5.xxxxxx" 
-                        className="input-premium w-full pl-10 font-mono text-sm"
-                      />
+                {/* Champs Latitude / Longitude manuels (repliables) */}
+                <details className="group">
+                  <summary className="text-xs cursor-pointer text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                    <span>Saisie manuelle des coordonnées</span>
+                    <span className="group-open:rotate-180 transition-transform">▼</span>
+                  </summary>
+                  <div className="grid grid-cols-2 gap-4 mt-3">
+                    <div>
+                      <label className="text-xs uppercase font-bold mb-1 block" style={{ color: 'var(--color-gris-neutre)' }}>Latitude</label>
+                      <div className="relative">
+                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input 
+                          type="text" 
+                          name="latitude"
+                          value={formData.latitude}
+                          onChange={handleChange}
+                          placeholder="5.xxxxxx" 
+                          className="input-premium w-full pl-10 font-mono text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-xs uppercase font-bold mb-1 block" style={{ color: 'var(--color-gris-neutre)' }}>Longitude</label>
+                      <div className="relative">
+                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input 
+                          type="text" 
+                          name="longitude"
+                          value={formData.longitude}
+                          onChange={handleChange}
+                          placeholder="-4.xxxxxx" 
+                          className="input-premium w-full pl-10 font-mono text-sm"
+                        />
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <label className="text-xs uppercase font-bold mb-1 block" style={{ color: 'var(--color-gris-neutre)' }}>Longitude</label>
-                    <div className="relative">
-                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input 
-                        type="text" 
-                        name="longitude"
-                        value={formData.longitude}
-                        onChange={handleChange}
-                        placeholder="-4.xxxxxx" 
-                        className="input-premium w-full pl-10 font-mono text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-xs" style={{ color: 'var(--color-gris-neutre)' }}>
-                  💡 <strong>Astuce :</strong> Les coordonnées GPS aident les locataires à trouver votre bien sur la carte
-                </p>
+                </details>
               </div>
 
               {/* Step 2 Navigation */}
