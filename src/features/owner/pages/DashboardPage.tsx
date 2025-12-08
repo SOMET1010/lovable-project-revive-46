@@ -370,13 +370,16 @@ export default function OwnerDashboardPage() {
                   </Link>
                 )}
                 {stats.maintenanceRequests > 0 && (
-                  <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-3">
+                  <Link 
+                    to="/dashboard/maintenance"
+                    className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-3 hover:border-blue-400 transition-colors"
+                  >
                     <Wrench className="h-5 w-5 text-blue-600" />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-[#2C1810]">Demandes maintenance</p>
                       <p className="text-2xl font-bold text-blue-600">{stats.maintenanceRequests}</p>
                     </div>
-                  </div>
+                  </Link>
                 )}
                 {stats.unreadMessages > 0 && (
                   <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-xl p-3">
