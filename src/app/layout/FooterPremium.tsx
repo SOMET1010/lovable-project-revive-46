@@ -241,7 +241,7 @@ function FooterContent() {
           </div>
         </div>
 
-        {/* Badge Certifié */}
+        {/* Badge Certifié + Version */}
         <div className="mt-6 flex flex-col md:flex-row justify-center items-center gap-4">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
             <span className="relative flex h-2 w-2">
@@ -251,6 +251,7 @@ function FooterContent() {
             <span className="text-xs text-[#E8D4C5]/70">Service Opérationnel</span>
           </div>
           <span className="text-xs text-[#E8D4C5]/40">Fait avec ♥ à Abidjan</span>
+          <span className="text-xs text-[#E8D4C5]/30 font-mono">v1.0.0</span>
         </div>
       </div>
     </footer>
