@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { TrendingUp, ArrowLeft, MessageSquare, Mail, Phone, AlertCircle, Loader2 } from 'lucide-react';
+import { TrendingUp, ArrowLeft, MessageSquare, Mail, Phone, AlertCircle, Loader2, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   DndContext,
@@ -23,7 +23,8 @@ import { Button } from '@/shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { SortableProviderCard } from '../components/SortableProviderCard';
 import { ProviderCard } from '../components/ProviderCard';
-import { useServiceConfigurations, useUpdateServiceConfiguration, useUpdateProviderPriorities } from '../hooks/useServiceConfigurations';
+import { useServiceConfigurations, useUpdateServiceConfiguration, useUpdateProviderPriorities, useResetProviderPriorities } from '../hooks/useServiceConfigurations';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 
 const SERVICE_TABS = [
   { id: 'sms', label: 'SMS', icon: Phone },
@@ -34,9 +35,11 @@ const SERVICE_TABS = [
 export default function ServiceProvidersPage() {
   const [activeTab, setActiveTab] = useState('sms');
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const { data: configurations, isLoading, error } = useServiceConfigurations();
   const updateConfig = useUpdateServiceConfiguration();
   const updatePriorities = useUpdateProviderPriorities();
+  const resetPriorities = useResetProviderPriorities();
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -63,6 +66,12 @@ export default function ServiceProvidersPage() {
   
   const handleToggle = (id: string, enabled: boolean) => {
     updateConfig.mutate({ id, updates: { is_enabled: enabled } });
+  };
+  
+  const handleResetPriorities = () => {
+    resetPriorities.mutate(activeTab, {
+      onSuccess: () => setShowResetConfirm(false),
+    });
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -165,6 +174,24 @@ export default function ServiceProvidersPage() {
           
           return (
             <TabsContent key={tab.id} value={tab.id} className="mt-6">
+              {/* Header avec bouton reset */}
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-sm text-neutral-500">
+                  {sortedProviders.length} provider(s) configuré(s)
+                </p>
+                {sortedProviders.length > 1 && (
+                  <Button 
+                    variant="ghost" 
+                    size="small"
+                    onClick={() => setShowResetConfirm(true)}
+                    className="text-neutral-500 hover:text-neutral-700 gap-2"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    Réinitialiser l'ordre
+                  </Button>
+                )}
+              </div>
+              
               <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -207,6 +234,31 @@ export default function ServiceProvidersPage() {
           );
         })}
       </Tabs>
+
+      {/* Reset Confirmation Dialog */}
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Réinitialiser les priorités ?</DialogTitle>
+            <DialogDescription>
+              Cette action remettra les providers {activeTab.toUpperCase()} dans leur ordre par défaut.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowResetConfirm(false)}>
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleResetPriorities}
+              disabled={resetPriorities.isPending}
+              className="gap-2"
+            >
+              {resetPriorities.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
+              Confirmer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Summary */}
       <div className="grid grid-cols-3 gap-4">
