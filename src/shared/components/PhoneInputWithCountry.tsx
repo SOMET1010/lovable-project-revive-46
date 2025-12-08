@@ -9,7 +9,7 @@
  */
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { ChevronDown, Phone, Check, X } from 'lucide-react';
+import { ChevronDown, Check, X } from 'lucide-react';
 
 export interface Country {
   code: string;
@@ -182,7 +182,6 @@ export function PhoneInputWithCountry({
 
         {/* Phone Input */}
         <div className="flex-1 relative">
-          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#A69B95]" />
           <input
             ref={inputRef}
             type="tel"
@@ -192,7 +191,7 @@ export function PhoneInputWithCountry({
             disabled={disabled}
             autoFocus={autoFocus}
             className="
-              w-full py-4 pl-10 pr-10 bg-transparent text-[#2C1810] font-medium 
+              w-full py-4 pl-4 pr-10 bg-transparent text-[#2C1810] font-medium 
               placeholder:text-[#A69B95] outline-none
             "
           />
