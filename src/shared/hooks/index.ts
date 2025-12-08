@@ -26,3 +26,7 @@ export {
 
 // Debouncing utilities
 export * from './debouncing';
+
+// Real-time hooks
+export { useLeaseSignatureRealtime } from './useLeaseSignatureRealtime';
+export type { LeaseSignatureData } from './useLeaseSignatureRealtime';
