@@ -1,36 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Building2, Home, Loader2 } from 'lucide-react';
+import { MapPin, Building2, Home, Loader2, ArrowRight, RefreshCw, Warehouse, Tent } from 'lucide-react';
 import type { LngLatBounds } from 'mapbox-gl';
 import MapboxMap from '@/shared/ui/MapboxMap';
 import { useHomeMapProperties } from '../hooks/useHomeMapProperties';
 
+// --- CONFIGURATION PREMIUM ---
+
 const PROPERTY_TYPES = [
-  { value: 'all', label: 'Tous les biens', icon: Building2 },
+  { value: 'all', label: 'Tout', icon: MapPin },
   { value: 'appartement', label: 'Appartements', icon: Building2 },
   { value: 'villa', label: 'Villas', icon: Home },
-  { value: 'studio', label: 'Studios', icon: Building2 },
+  { value: 'studio', label: 'Studios', icon: Tent },
+  { value: 'commerce', label: 'Bureaux', icon: Warehouse },
 ];
 
 const BUDGET_OPTIONS = [
-  { value: 0, label: 'Tous budgets' },
-  { value: 100000, label: '< 100k' },
-  { value: 200000, label: '< 200k' },
+  { value: 0, label: 'Budget Max' },
+  { value: 150000, label: '< 150k' },
   { value: 300000, label: '< 300k' },
   { value: 500000, label: '< 500k' },
+  { value: 1000000, label: '< 1M' },
 ];
-
-interface Property {
-  id: string;
-  title: string;
-  monthly_rent: number;
-  longitude: number;
-  latitude: number;
-  status?: string;
-  images?: string[];
-  city?: string;
-  neighborhood?: string;
-}
 
 export default function HomeMapSection() {
   const navigate = useNavigate();
@@ -56,7 +47,7 @@ export default function HomeMapSection() {
     });
   }, [fetchInitialProperties, filters.propertyType, filters.maxPrice]);
 
-  // Gérer le changement de bounds (déplacement de la carte)
+  // Gérer le changement de bounds
   const handleBoundsChange = useCallback((bounds: LngLatBounds) => {
     const ne = bounds.getNorthEast();
     const sw = bounds.getSouthWest();
@@ -81,7 +72,7 @@ export default function HomeMapSection() {
   }, [pendingBounds, fetchPropertiesInBounds, filters]);
 
   // Gérer le clic sur un marqueur
-  const handleMarkerClick = useCallback((property: Property) => {
+  const handleMarkerClick = useCallback((property: { id: string }) => {
     navigate(`/proprietes/${property.id}`);
   }, [navigate]);
 
@@ -102,63 +93,100 @@ export default function HomeMapSection() {
   }));
 
   return (
-    <section className="py-16 bg-gradient-to-b from-neutral-50 to-white">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">
-            <MapPin className="w-4 h-4" />
-            Découvrez
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-            Explorez les biens disponibles
+    <section className="py-20 bg-[#FAF7F4] relative overflow-hidden">
+      
+      {/* Background Decor - Blob Orange */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#F16522]/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#2C1810]/5 rounded-full blur-[80px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 relative z-10">
+        
+        {/* --- HEADER SECTION PREMIUM --- */}
+        <div className="text-center mb-10 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#2C1810]/5 text-[#2C1810] text-xs font-bold uppercase tracking-wider border border-[#2C1810]/10">
+            <MapPin className="w-3 h-3 text-[#F16522]" />
+            Cartographie Interactive
+          </div>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#2C1810]">
+            Explorez Abidjan <span className="text-[#F16522]">quartier par quartier</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Naviguez sur la carte pour découvrir les propriétés à louer dans votre zone préférée
+          <p className="text-[#6B5A4E] max-w-2xl mx-auto text-lg">
+            Naviguez sur la carte pour dénicher les biens disponibles autour de vos lieux préférés
           </p>
         </div>
 
-        {/* Filtres rapides */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-          {/* Type de bien */}
-          <div className="flex bg-white rounded-xl border border-neutral-200 p-1 shadow-sm">
-            {PROPERTY_TYPES.map((type) => (
-              <button
-                key={type.value}
-                onClick={() => setFilters(f => ({ ...f, propertyType: type.value }))}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  filters.propertyType === type.value
-                    ? 'bg-primary text-white'
-                    : 'text-neutral-600 hover:bg-neutral-50'
-                }`}
-              >
-                <type.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{type.label}</span>
-              </button>
-            ))}
+        {/* --- BARRE DE FILTRES PREMIUM --- */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 bg-white p-2 rounded-[20px] shadow-sm border border-[#EFEBE9] max-w-5xl mx-auto">
+          
+          {/* Types (Chips Scrollables) */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto px-2 py-1">
+            {PROPERTY_TYPES.map((type) => {
+              const Icon = type.icon;
+              const isActive = filters.propertyType === type.value;
+              return (
+                <button
+                  key={type.value}
+                  onClick={() => setFilters(f => ({ ...f, propertyType: type.value }))}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-300 ${
+                    isActive
+                      ? 'bg-[#2C1810] text-white shadow-lg shadow-[#2C1810]/20'
+                      : 'bg-[#FAF7F4] text-[#6B5A4E] hover:bg-[#EFEBE9]'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-[#F16522]' : 'text-[#A69B95]'}`} />
+                  {type.label}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Budget max */}
-          <select
-            value={filters.maxPrice}
-            onChange={(e) => setFilters(f => ({ ...f, maxPrice: Number(e.target.value) }))}
-            className="px-4 py-2.5 bg-white border border-neutral-200 rounded-xl text-sm font-medium text-neutral-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            {BUDGET_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          <div className="h-8 w-px bg-[#EFEBE9] hidden md:block" />
+
+          {/* Budget (Select) */}
+          <div className="w-full md:w-auto px-2">
+            <select
+              value={filters.maxPrice}
+              onChange={(e) => setFilters(f => ({ ...f, maxPrice: Number(e.target.value) }))}
+              className="w-full md:w-48 px-4 py-3 bg-[#FAF7F4] border-transparent rounded-xl text-sm font-bold text-[#2C1810] focus:ring-2 focus:ring-[#F16522]/20 focus:bg-white transition-all outline-none cursor-pointer"
+            >
+              {BUDGET_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* Carte */}
-        <div className="relative rounded-2xl overflow-hidden shadow-xl border border-neutral-200">
+        {/* --- CARTE PREMIUM --- */}
+        <div className="relative h-[600px] rounded-[32px] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-[#EFEBE9]">
+          
+          {/* Bouton Flottant "Chercher ici" - Style Airbnb */}
+          <div className={`absolute top-6 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 transform ${
+            showSearchButton 
+              ? 'translate-y-0 opacity-100' 
+              : '-translate-y-10 opacity-0 pointer-events-none'
+          }`}>
+            <button
+              onClick={handleSearchInZone}
+              disabled={loading}
+              className="flex items-center gap-2 px-6 py-3 bg-white text-[#2C1810] font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all border border-[#EFEBE9] disabled:opacity-50"
+            >
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-[#F16522]" />
+              ) : (
+                <RefreshCw className="w-4 h-4 text-[#F16522]" />
+              )}
+              {loading ? 'Chargement...' : 'Chercher dans cette zone'}
+            </button>
+          </div>
+
+          {/* Map Component */}
           <MapboxMap
             center={[-3.9962, 5.3600]}
             zoom={11}
             properties={mapProperties}
-            height="500px"
+            height="600px"
             clustering={true}
             priceLabels={true}
             styleToggleEnabled={true}
@@ -166,48 +194,30 @@ export default function HomeMapSection() {
             onMarkerClick={handleMarkerClick}
           />
 
-          {/* Bouton "Chercher dans cette zone" */}
-          {showSearchButton && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-              <button
-                onClick={handleSearchInZone}
-                disabled={loading}
-                className="flex items-center gap-2 px-5 py-2.5 bg-white text-primary font-medium rounded-full shadow-lg border border-neutral-200 hover:bg-primary hover:text-white transition-all duration-200 disabled:opacity-50"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <MapPin className="w-4 h-4" />
-                )}
-                Chercher dans cette zone
-              </button>
-            </div>
-          )}
-
-          {/* Loading overlay */}
-          {loading && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-10">
-              <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg">
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                <span className="text-sm font-medium text-neutral-700">Chargement...</span>
+          {/* Loading Overlay Subtil */}
+          {loading && !showSearchButton && (
+            <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px] flex items-center justify-center z-10">
+              <div className="bg-white p-4 rounded-full shadow-xl animate-bounce">
+                <Loader2 className="w-6 h-6 text-[#F16522] animate-spin" />
               </div>
             </div>
           )}
         </div>
 
-        {/* Footer stats */}
-        <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-primary" />
-            <span><strong className="text-foreground">{totalCount}</strong> biens disponibles</span>
+        {/* --- FOOTER STATS PREMIUM --- */}
+        <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-[#6B5A4E]">
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-[#EFEBE9]">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span><strong className="text-[#2C1810]">{totalCount}</strong> biens visibles sur la carte</span>
           </div>
-          <button
+          <button 
             onClick={() => navigate('/recherche')}
-            className="text-primary font-medium hover:underline"
+            className="flex items-center gap-2 font-bold text-[#F16522] hover:text-[#D95318] hover:underline transition-colors"
           >
-            Voir tous les biens →
+            Voir la liste complète <ArrowRight className="w-4 h-4" />
           </button>
         </div>
+
       </div>
     </section>
   );
