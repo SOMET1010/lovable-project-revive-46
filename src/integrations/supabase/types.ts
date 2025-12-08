@@ -1180,6 +1180,7 @@ export type Database = {
           bio: string | null
           city: string | null
           cnam_verified: boolean | null
+          cni_photo_url: string | null
           created_at: string | null
           email: string | null
           facial_verification_date: string | null
@@ -1208,6 +1209,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           cnam_verified?: boolean | null
+          cni_photo_url?: string | null
           created_at?: string | null
           email?: string | null
           facial_verification_date?: string | null
@@ -1236,6 +1238,7 @@ export type Database = {
           bio?: string | null
           city?: string | null
           cnam_verified?: boolean | null
+          cni_photo_url?: string | null
           created_at?: string | null
           email?: string | null
           facial_verification_date?: string | null

@@ -1,8 +1,8 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { User, Phone, MapPin, Shield, Camera, Save, CheckCircle, AlertCircle } from 'lucide-react';
+import { User, Phone, MapPin, Shield, Camera, Save, CheckCircle, AlertCircle, Scan } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
 import { toast } from '@/shared/hooks/useSafeToast';
@@ -26,6 +26,8 @@ interface Profile {
   oneci_verified: boolean | null;
   cnam_verified: boolean | null;
   trust_score: number | null;
+  facial_verification_status: string | null;
+  facial_verification_score: number | null;
 }
 
 export default function ProfilePage() {
@@ -80,6 +82,8 @@ export default function ProfilePage() {
         oneci_verified: data.oneci_verified,
         cnam_verified: data.cnam_verified,
         trust_score: data.trust_score,
+        facial_verification_status: data.facial_verification_status,
+        facial_verification_score: data.facial_verification_score,
       };
       
       setProfile(profileData);
@@ -283,7 +287,39 @@ export default function ProfilePage() {
                   description="Vérification de votre assurance maladie"
                   verified={profile?.cnam_verified ?? null}
                 />
+                <VerificationItem
+                  title="Vérification Faciale"
+                  description="Comparaison biométrique avec votre CNI"
+                  verified={profile?.facial_verification_status === 'verified'}
+                  score={profile?.facial_verification_score ?? undefined}
+                />
               </div>
+
+              {/* Biometric Verification CTA */}
+              {profile?.facial_verification_status !== 'verified' && (
+                <div className="border-t border-border pt-6 mt-6">
+                  <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl p-6 border border-primary/20">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-primary/10 rounded-xl">
+                        <Scan className="h-6 w-6 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground">Vérification Biométrique NeoFace</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Certifiez votre identité en comparant votre photo CNI avec un selfie en temps réel.
+                        </p>
+                        <Link
+                          to="/verification-biometrique"
+                          className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                        >
+                          <Scan className="h-4 w-4" />
+                          Lancer la vérification faciale
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Formulaires de vérification */}
               <div className="border-t border-border pt-6 mt-6">
@@ -325,7 +361,7 @@ export default function ProfilePage() {
   );
 }
 
-function VerificationItem({ title, description, verified }: { title: string; description: string; verified: boolean | null }) {
+function VerificationItem({ title, description, verified, score }: { title: string; description: string; verified: boolean | null; score?: number }) {
   return (
     <div className="flex items-center justify-between p-4 border border-border rounded-lg">
       <div className="flex items-center gap-3">
@@ -337,6 +373,9 @@ function VerificationItem({ title, description, verified }: { title: string; des
         <div>
           <h3 className="font-medium text-foreground">{title}</h3>
           <p className="text-sm text-muted-foreground">{description}</p>
+          {score && verified && (
+            <p className="text-xs text-green-600 mt-0.5">Score: {(score * 100).toFixed(0)}%</p>
+          )}
         </div>
       </div>
       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
