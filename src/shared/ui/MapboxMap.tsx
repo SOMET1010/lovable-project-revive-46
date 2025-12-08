@@ -256,6 +256,13 @@ export default function MapboxMap({
     map.current.setStyle(MAP_STYLES[style]);
   }, [mapStyle]);
 
+  // Handler pour la recherche sur carte (doit être avant les early returns)
+  const handleSearchLocationSelect = useCallback((coords: { lng: number; lat: number }) => {
+    if (onMapClick) {
+      onMapClick(coords);
+    }
+  }, [onMapClick]);
+
   const getMarkerColor = (property: Property) => {
     if (property.status === 'disponible') return '#10B981';
     if (property.status === 'loue') return '#EF4444';
@@ -872,12 +879,6 @@ export default function MapboxMap({
     );
   };
 
-  // Handler pour la recherche sur carte
-  const handleSearchLocationSelect = useCallback((coords: { lng: number; lat: number }) => {
-    if (onMapClick) {
-      onMapClick(coords);
-    }
-  }, [onMapClick]);
 
   return (
     <div className="relative w-full h-full">
