@@ -100,7 +100,7 @@ const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<PropertyFormData>(INITIAL_FORM_DATA);
   const [geolocating, setGeolocating] = useState(false);
 
-  // GPS Geolocation handler
+  // GPS Geolocation handler (position actuelle de l'utilisateur)
   const handleGeolocate = useCallback(() => {
     if (!navigator.geolocation) {
       toast.error('Géolocalisation non supportée par votre navigateur');
@@ -133,6 +133,44 @@ const [step, setStep] = useState(1);
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }, []);
+
+  // Geocode address handler (localise le bien depuis l'adresse)
+  const handleGeocodeAddress = useCallback(async () => {
+    if (!formData.city) {
+      toast.error('Veuillez d\'abord renseigner la ville');
+      return;
+    }
+    
+    setGeolocating(true);
+    toast.loading('Recherche de l\'adresse...', { id: 'geocode' });
+    
+    try {
+      const addressParts = [formData.address, formData.neighborhood].filter(Boolean).join(', ');
+      const { data, error } = await supabase.functions.invoke('geocode-address', {
+        body: {
+          address: addressParts || formData.city,
+          city: formData.city
+        }
+      });
+      
+      if (error) throw error;
+      
+      if (data?.latitude && data?.longitude) {
+        setFormData(prev => ({
+          ...prev,
+          latitude: data.latitude.toFixed(6),
+          longitude: data.longitude.toFixed(6),
+        }));
+        toast.success('Position du bien trouvée !', { id: 'geocode' });
+      } else {
+        toast.error('Adresse non trouvée. Essayez avec plus de détails.', { id: 'geocode' });
+      }
+    } catch (err) {
+      toast.error('Erreur lors de la recherche. Réessayez plus tard.', { id: 'geocode' });
+    } finally {
+      setGeolocating(false);
+    }
+  }, [formData.city, formData.neighborhood, formData.address]);
 
   // Load draft from localStorage on mount - show confirmation modal
   useEffect(() => {
@@ -913,30 +951,57 @@ const [step, setStep] = useState(1);
 
               {/* Bloc Position GPS */}
               <div className="bg-white p-6 md:p-8 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--color-gris-neutre)' }}>
-                    Position GPS <span className="font-normal text-gray-400">(recommandé)</span>
-                  </label>
-                  <button 
-                    type="button"
-                    onClick={handleGeolocate}
-                    disabled={geolocating}
-                    className="flex items-center gap-1.5 text-sm font-bold transition-all hover:scale-105 disabled:opacity-50"
-                    style={{ color: 'var(--color-orange)' }}
-                  >
-                    {geolocating ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Crosshair className="w-4 h-4" />
-                    )}
-                    {geolocating ? 'Localisation...' : 'Me localiser'}
-                  </button>
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Position GPS du bien <span className="font-normal text-gray-400">(recommandé)</span>
+                    </label>
+                  </div>
+                  
+                  {/* Options de localisation */}
+                  <div className="flex flex-wrap gap-3">
+                    {/* Option 1 : Localiser depuis l'adresse (primary) */}
+                    <button 
+                      type="button"
+                      onClick={handleGeocodeAddress}
+                      disabled={geolocating || !formData.city}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed border-2 border-dashed hover:border-solid"
+                      style={{ borderColor: 'var(--color-orange)', color: 'var(--color-orange)' }}
+                    >
+                      {geolocating ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <MapPin className="w-4 h-4" />
+                      )}
+                      Localiser depuis l'adresse
+                    </button>
+                    
+                    {/* Option 2 : Ma position actuelle (secondary) */}
+                    <button 
+                      type="button"
+                      onClick={handleGeolocate}
+                      disabled={geolocating}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all hover:bg-gray-50 disabled:opacity-50 border border-gray-200 text-gray-600"
+                    >
+                      {geolocating ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Crosshair className="w-4 h-4" />
+                      )}
+                      Ma position actuelle
+                      <span className="text-xs text-gray-400 hidden sm:inline">(si sur place)</span>
+                    </button>
+                  </div>
+                  
+                  {/* Hint pour agences */}
+                  <p className="text-xs flex items-start gap-1.5" style={{ color: 'var(--color-gris-neutre)' }}>
+                    💡 <span><strong>Astuce :</strong> Si vous n'êtes pas sur place, renseignez d'abord l'adresse puis cliquez sur "Localiser depuis l'adresse" pour obtenir les coordonnées GPS du bien.</span>
+                  </p>
                 </div>
 
                 {/* Carte Placeholder Interactive */}
                 <div 
-                  className="relative h-48 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 group cursor-crosshair"
-                  onClick={handleGeolocate}
+                  className="relative h-48 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 group"
                 >
                   {/* Image de fond statique simulant une carte */}
                   <div 
@@ -956,7 +1021,7 @@ const [step, setStep] = useState(1);
                       </div>
                       {!formData.latitude && (
                         <span className="bg-white px-3 py-1 rounded-lg text-xs font-bold shadow-lg mt-1" style={{ color: 'var(--color-chocolat)' }}>
-                          Cliquez pour localiser
+                          Indiquez la position du bien
                         </span>
                       )}
                     </div>
