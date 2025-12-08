@@ -1,7 +1,7 @@
 import { RouteObject, Navigate } from 'react-router-dom';
 import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import ProtectedRoute from '@/shared/ui/ProtectedRoute';
-import { ROLES, OWNER_ROLES, AGENCY_ROLES } from '@/shared/constants/roles';
+import { ROLES, OWNER_ROLES, AGENCY_ROLES, TENANT_ROLES } from '@/shared/constants/roles';
 
 // Dashboard Router - redirects based on user type
 const DashboardRouter = lazyWithRetry(() => import('@/shared/ui/DashboardRouter'));
@@ -52,11 +52,11 @@ export const tenantRoutes: RouteObject[] = [
   { path: 'verification', element: <Navigate to="/profil?tab=verification" replace /> },
 
   // Favorites & saved searches (tenant only)
-  { path: 'favoris', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><Favorites /></ProtectedRoute> },
+  { path: 'favoris', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><Favorites /></ProtectedRoute> },
   { path: 'recherches-sauvegardees', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><SavedSearches /></ProtectedRoute> },
 
   // Messaging (all authenticated users)
-  { path: 'messages', element: <ProtectedRoute allowedRoles={[ROLES.TENANT, ...OWNER_ROLES, ...AGENCY_ROLES]}><MessagesPage /></ProtectedRoute> },
+  { path: 'messages', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES, ...OWNER_ROLES, ...AGENCY_ROLES]}><MessagesPage /></ProtectedRoute> },
 
   // Applications
   { path: 'candidature/:id', element: <ProtectedRoute><ApplicationForm /></ProtectedRoute> },
