@@ -4,7 +4,7 @@
 
 export const APP_CONFIG = {
   name: 'Mon Toit',
-  version: '3.2.29',
+  version: '3.2.30',
   description: 'Plateforme de location immobilière sécurisée en Côte d\'Ivoire',
 
   company: {

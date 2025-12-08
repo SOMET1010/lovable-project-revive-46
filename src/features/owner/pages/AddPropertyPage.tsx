@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Home, X, Image as ImageIcon, Building2, Check, RefreshCw, MapPin, DollarSign, Settings, FileText } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Home, X, Image as ImageIcon, Building2, Check, RefreshCw, MapPin, DollarSign, Settings, FileText, Navigation, Crosshair, Globe, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
 import { supabase } from '@/services/supabase/client';
@@ -20,6 +21,9 @@ interface PropertyFormData {
   address: string;
   city: string;
   neighborhood: string;
+  location_details: string; // Lieu connu à proximité / Repère
+  latitude: string;
+  longitude: string;
   property_type: PropertyType;
   property_category: 'residential' | 'commercial';
   bedrooms: number;
@@ -48,6 +52,9 @@ const INITIAL_FORM_DATA: PropertyFormData = {
   address: '',
   city: '',
   neighborhood: '',
+  location_details: '',
+  latitude: '',
+  longitude: '',
   property_type: 'appartement' as PropertyType,
   property_category: 'residential',
   bedrooms: 1,
@@ -91,6 +98,41 @@ const [step, setStep] = useState(1);
   const { validateField, getFieldState, setFieldTouched } = useFormValidation<PropertyFormData>();
 
   const [formData, setFormData] = useState<PropertyFormData>(INITIAL_FORM_DATA);
+  const [geolocating, setGeolocating] = useState(false);
+
+  // GPS Geolocation handler
+  const handleGeolocate = useCallback(() => {
+    if (!navigator.geolocation) {
+      toast.error('Géolocalisation non supportée par votre navigateur');
+      return;
+    }
+    
+    setGeolocating(true);
+    toast.loading('Localisation en cours...', { id: 'geolocation' });
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setFormData(prev => ({
+          ...prev,
+          latitude: position.coords.latitude.toFixed(6),
+          longitude: position.coords.longitude.toFixed(6),
+        }));
+        toast.success('Position GPS trouvée !', { id: 'geolocation' });
+        setGeolocating(false);
+      },
+      (error) => {
+        let message = 'Impossible d\'obtenir votre position';
+        if (error.code === error.PERMISSION_DENIED) {
+          message = 'Permission de localisation refusée';
+        } else if (error.code === error.TIMEOUT) {
+          message = 'Délai de localisation dépassé';
+        }
+        toast.error(message, { id: 'geolocation' });
+        setGeolocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  }, []);
 
   // Load draft from localStorage on mount - show confirmation modal
   useEffect(() => {
@@ -300,9 +342,13 @@ const [step, setStep] = useState(1);
           owner_id: user.id,
           title: formData.title,
           description: formData.description,
-          address: formData.address,
+          address: formData.location_details 
+            ? `${formData.address} (${formData.location_details})` 
+            : formData.address,
           city: formData.city,
           neighborhood: formData.neighborhood || null,
+          latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+          longitude: formData.longitude ? parseFloat(formData.longitude) : null,
           property_type: formData.property_type,
           property_category: formData.property_category,
           bedrooms: parseInt(formData.bedrooms.toString()),
@@ -748,82 +794,217 @@ const [step, setStep] = useState(1);
             </div>
           )}
 
-          {/* STEP 2: Localisation */}
+          {/* STEP 2: Localisation Intelligente */}
           {step === 2 && (
-          <div key={`step-2-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
-              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
-                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Localisation</h2>
+            <div key={`step-2-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
+              
+              {/* Bloc Localisation Précise */}
+              <div className="bg-white p-6 md:p-8 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
+                    <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Localisation précise</h2>
+                  </div>
+                  {(formData.latitude && formData.longitude) && (
+                    <div className="text-xs px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5 animate-pulse" style={{ backgroundColor: 'hsl(var(--primary) / 0.1)', color: 'var(--color-orange)' }}>
+                      <Navigation className="w-3 h-3" />
+                      GPS Activé
+                    </div>
+                  )}
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
-                    Adresse complète
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    placeholder="Ex: Rue des Jardins, Résidence Les Palmiers"
-                    className="input-premium w-full"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                {/* Hiérarchie : Ville → Commune → Quartier */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Ville (Liste fermée) */}
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--color-gris-neutre)' }}>
                       Ville *
                     </label>
-                    <select
-                      name="city"
-                      value={formData.city}
-                      onChange={(e) => {
-                        handleChange(e);
-                        if (e.target.value !== 'Abidjan') {
-                          setFormData(prev => ({ ...prev, neighborhood: '' }));
-                        }
-                      }}
-                      onBlur={() => handleBlur('city')}
-                      required
-                      className="input-premium w-full"
-                    >
-                      <option value="">Sélectionnez une ville</option>
-                      {CITIES.map(city => (
-                        <option key={city} value={city}>{city}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
-                      Quartier {formData.city === 'Abidjan' && <span className="font-normal">(commune)</span>}
-                    </label>
-                    {formData.city === 'Abidjan' ? (
+                    <div className="relative">
                       <select
-                        name="neighborhood"
-                        value={formData.neighborhood}
-                        onChange={handleChange}
-                        className="input-premium w-full"
+                        name="city"
+                        value={formData.city}
+                        onChange={(e) => {
+                          handleChange(e);
+                          if (e.target.value !== 'Abidjan') {
+                            setFormData(prev => ({ ...prev, neighborhood: '' }));
+                          }
+                        }}
+                        onBlur={() => handleBlur('city')}
+                        required
+                        className="input-premium w-full appearance-none pr-10"
                       >
-                        <option value="">Sélectionnez une commune</option>
-                        {ABIDJAN_COMMUNES.map(commune => (
-                          <option key={commune} value={commune}>{commune}</option>
+                        <option value="">Choisir une ville...</option>
+                        {CITIES.map(city => (
+                          <option key={city} value={city}>{city}</option>
                         ))}
                       </select>
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
+                    </div>
+                  </div>
+
+                  {/* Commune / Zone (conditionnel) */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--color-gris-neutre)' }}>
+                      {formData.city === 'Abidjan' ? 'Commune *' : 'Zone / Quartier'}
+                    </label>
+                    {formData.city === 'Abidjan' ? (
+                      <div className="relative">
+                        <select
+                          name="neighborhood"
+                          value={formData.neighborhood}
+                          onChange={handleChange}
+                          className="input-premium w-full appearance-none pr-10"
+                        >
+                          <option value="">Choisir la commune...</option>
+                          {ABIDJAN_COMMUNES.map(commune => (
+                            <option key={commune} value={commune}>{commune}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">▼</div>
+                      </div>
                     ) : (
                       <input
                         type="text"
                         name="neighborhood"
                         value={formData.neighborhood}
                         onChange={handleChange}
-                        placeholder="Ex: Centre-ville"
+                        placeholder="Ex: Centre-ville, Quartier Commerce"
                         className="input-premium w-full"
                       />
                     )}
                   </div>
+
+                  {/* Adresse précise / Repère */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Quartier précis / Repère
+                    </label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      onBlur={() => handleBlur('address')}
+                      placeholder="Ex: Angré 8ème Tranche, Carrefour Sorbonne, Rue L40"
+                      className="input-premium w-full"
+                    />
+                  </div>
+
+                  {/* Lieu connu à proximité */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Lieu connu à proximité <span className="font-normal text-gray-400">(optionnel)</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="location_details"
+                      value={formData.location_details}
+                      onChange={handleChange}
+                      placeholder="Ex: Derrière la pharmacie Saint-Viateur, Face au supermarché Sococé"
+                      className="input-premium w-full"
+                    />
+                    <p className="text-xs mt-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                      Les locataires ivoiriens se repèrent souvent par rapport aux lieux connus
+                    </p>
+                  </div>
                 </div>
+              </div>
+
+              {/* Bloc Position GPS */}
+              <div className="bg-white p-6 md:p-8 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--color-gris-neutre)' }}>
+                    Position GPS <span className="font-normal text-gray-400">(recommandé)</span>
+                  </label>
+                  <button 
+                    type="button"
+                    onClick={handleGeolocate}
+                    disabled={geolocating}
+                    className="flex items-center gap-1.5 text-sm font-bold transition-all hover:scale-105 disabled:opacity-50"
+                    style={{ color: 'var(--color-orange)' }}
+                  >
+                    {geolocating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Crosshair className="w-4 h-4" />
+                    )}
+                    {geolocating ? 'Localisation...' : 'Me localiser'}
+                  </button>
+                </div>
+
+                {/* Carte Placeholder Interactive */}
+                <div 
+                  className="relative h-48 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 group cursor-crosshair"
+                  onClick={handleGeolocate}
+                >
+                  {/* Image de fond statique simulant une carte */}
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center opacity-60 grayscale group-hover:grayscale-0 transition-all duration-500"
+                    style={{ backgroundImage: "url('https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/5.3599,-4.0083,11,0/600x300@2x?access_token=pk.placeholder')" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/80 via-transparent to-transparent" />
+                  
+                  {/* Marqueur central animé */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex flex-col items-center">
+                      <div className={`${formData.latitude ? '' : 'animate-bounce'}`}>
+                        <MapPin 
+                          className="w-10 h-10 drop-shadow-lg" 
+                          style={{ color: 'var(--color-orange)', fill: formData.latitude ? 'var(--color-orange)' : 'transparent' }} 
+                        />
+                      </div>
+                      {!formData.latitude && (
+                        <span className="bg-white px-3 py-1 rounded-lg text-xs font-bold shadow-lg mt-1" style={{ color: 'var(--color-chocolat)' }}>
+                          Cliquez pour localiser
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Affichage coordonnées */}
+                  {formData.latitude && formData.longitude && (
+                    <div className="absolute bottom-2 right-2 bg-white/95 px-3 py-1.5 rounded-lg text-xs font-mono shadow-sm border border-gray-200" style={{ color: 'var(--color-gris-texte)' }}>
+                      📍 {formData.latitude}, {formData.longitude}
+                    </div>
+                  )}
+                </div>
+
+                {/* Champs Latitude / Longitude manuels */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs uppercase font-bold mb-1 block" style={{ color: 'var(--color-gris-neutre)' }}>Latitude</label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input 
+                        type="text" 
+                        name="latitude"
+                        value={formData.latitude}
+                        onChange={handleChange}
+                        placeholder="5.xxxxxx" 
+                        className="input-premium w-full pl-10 font-mono text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs uppercase font-bold mb-1 block" style={{ color: 'var(--color-gris-neutre)' }}>Longitude</label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input 
+                        type="text" 
+                        name="longitude"
+                        value={formData.longitude}
+                        onChange={handleChange}
+                        placeholder="-4.xxxxxx" 
+                        className="input-premium w-full pl-10 font-mono text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs" style={{ color: 'var(--color-gris-neutre)' }}>
+                  💡 <strong>Astuce :</strong> Les coordonnées GPS aident les locataires à trouver votre bien sur la carte
+                </p>
               </div>
 
               {/* Step 2 Navigation */}
