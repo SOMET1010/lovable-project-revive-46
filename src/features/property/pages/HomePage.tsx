@@ -1,7 +1,7 @@
 import HeroPremium from '../components/HeroPremium';
 import FeaturedPropertiesSection from '../components/FeaturedPropertiesSection';
 import HowItWorksCompact from '../components/HowItWorksCompact';
-import Testimonials from '../components/Testimonials';
+import HomeMapSection from '../components/HomeMapSection';
 
 export default function HomePage() {
   return (
@@ -12,11 +12,11 @@ export default function HomePage() {
       {/* Propriétés en vedette - chargées dynamiquement (padding connecté via couleur) */}
       <FeaturedPropertiesSection />
 
+      {/* Carte interactive avec biens disponibles */}
+      <HomeMapSection />
+
       {/* Section Comment ça marche (transition fluide via gradient) */}
       <HowItWorksCompact />
-
-      {/* Témoignages (fond neutre pour conclure) */}
-      <Testimonials />
     </div>
   );
 }
