@@ -212,7 +212,7 @@ export default function ProfileCompletionPage() {
   const displayPhone = formatPhoneForDisplay(profile?.phone);
 
   return (
-    <div className="min-h-screen bg-[#FAF7F4] py-12 px-4 sm:px-6">
+    <div className="min-h-screen bg-[#FAF7F4] py-12 px-4 sm:px-6 font-sans">
       <div className="max-w-xl mx-auto">
         
         {/* Header */}
@@ -284,10 +284,10 @@ export default function ProfileCompletionPage() {
               {/* Téléphone (Lecture Seule) */}
               {displayPhone && (
                 <div>
-                  <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 flex items-center gap-2">
+                  <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 flex items-center gap-2 tracking-wide">
                     Téléphone vérifié <CheckCircle2 className="w-3 h-3 text-green-500" />
                   </label>
-                  <div className="w-full px-5 py-3.5 bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl text-[#2C1810] font-bold flex items-center gap-3 opacity-80 cursor-not-allowed">
+                  <div className="w-full px-5 py-3.5 bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl text-[#2C1810] font-bold flex items-center gap-3 opacity-80 cursor-not-allowed shadow-inner">
                     <Phone className="w-4 h-4 text-[#A69B95]" />
                     <span>{displayPhone}</span>
                   </div>
@@ -296,7 +296,7 @@ export default function ProfileCompletionPage() {
 
               {/* Nom Complet */}
               <div>
-                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block">Nom complet *</label>
+                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block tracking-wide">Nom complet *</label>
                 <InputWithIcon
                   icon={User}
                   value={fullName}
@@ -309,7 +309,7 @@ export default function ProfileCompletionPage() {
 
               {/* Email */}
               <div>
-                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 flex justify-between">
+                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 flex justify-between tracking-wide">
                   <span>Email</span>
                   <span className="text-[10px] font-normal normal-case bg-[#FAF7F4] px-2 py-0.5 rounded text-[#A69B95]">Pour la récupération du compte</span>
                 </label>
@@ -327,7 +327,7 @@ export default function ProfileCompletionPage() {
 
             {/* TYPE UTILISATEUR (Grille) */}
             <div>
-              <label className="text-xs font-bold uppercase text-[#A69B95] mb-3 block">Je suis *</label>
+              <label className="text-xs font-bold uppercase text-[#A69B95] mb-3 block tracking-wide">Je suis *</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {USER_TYPES.map((type) => {
                   const Icon = type.icon;
@@ -368,7 +368,7 @@ export default function ProfileCompletionPage() {
             {/* VILLE & BIO */}
             <div className="space-y-5">
               <div>
-                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block">Ville de résidence</label>
+                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block tracking-wide">Ville de résidence</label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95]" />
                   <select
@@ -385,7 +385,7 @@ export default function ProfileCompletionPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block">À propos de moi</label>
+                <label className="text-xs font-bold uppercase text-[#A69B95] mb-1.5 block tracking-wide">À propos de moi</label>
                 <div className="relative">
                   <FileText className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95]" />
                   <textarea
