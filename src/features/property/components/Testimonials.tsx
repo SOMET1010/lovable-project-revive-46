@@ -87,37 +87,37 @@ export default function Testimonials() {
   if (!currentTestimonial) return null;
 
   return (
-    <section className="py-16 md:py-24 bg-muted/30">
+    <section className="py-10 md:py-14 bg-neutral-50">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-12">
-          <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-primary/10 text-primary mb-4">
+        <div className="text-center mb-8 md:mb-10">
+          <span className="inline-block px-4 py-1.5 rounded-full text-sm font-medium bg-[#FF6C2F]/10 text-[#FF6C2F] mb-3">
             Témoignages
           </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3">
             Ce que disent nos utilisateurs
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-muted-foreground max-w-2xl mx-auto text-base">
             Des milliers d'Ivoiriens nous font confiance pour leurs projets immobiliers
           </p>
         </div>
 
         {/* Main testimonial */}
         <div className="max-w-4xl mx-auto">
-          <div className="relative bg-card rounded-3xl p-8 md:p-12 shadow-lg border border-border">
+          <div className="relative bg-card rounded-3xl p-6 md:p-10 shadow-lg border border-border">
             {/* Quote icon */}
-            <div className="absolute -top-6 left-8 w-12 h-12 bg-primary rounded-2xl flex items-center justify-center">
-              <Quote className="h-6 w-6 text-primary-foreground" />
+            <div className="absolute -top-5 left-6 w-10 h-10 bg-[#FF6C2F] rounded-xl flex items-center justify-center">
+              <Quote className="h-5 w-5 text-white" />
             </div>
 
             {/* Content */}
-            <div className="text-center pt-4">
-              <p className="text-lg md:text-xl text-foreground leading-relaxed mb-8">
+            <div className="text-center pt-3">
+              <p className="text-base md:text-lg text-foreground leading-relaxed mb-6">
                 "{currentTestimonial.content}"
               </p>
 
               {/* Rating */}
-              <div className="flex items-center justify-center gap-1 mb-6">
+              <div className="flex items-center justify-center gap-1 mb-5">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
@@ -135,7 +135,7 @@ export default function Testimonials() {
                 <img
                   src={currentTestimonial.avatar}
                   alt={currentTestimonial.name}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-primary"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-[#FF6C2F]"
                 />
                 <div className="text-left">
                   <p className="font-semibold text-foreground">
@@ -149,35 +149,35 @@ export default function Testimonials() {
             </div>
 
             {/* Navigation arrows */}
-            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-4 md:-mx-6">
+            <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 flex justify-between px-2 md:-mx-4">
               <Button
                 variant="outline"
                 size="small"
                 onClick={goToPrev}
-                className="rounded-full bg-background shadow-md p-2 min-h-0 min-w-0 w-10 h-10"
+                className="rounded-full bg-background shadow-md p-2 min-h-0 min-w-0 w-9 h-9"
               >
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button
                 variant="outline"
                 size="small"
                 onClick={goToNext}
-                className="rounded-full bg-background shadow-md p-2 min-h-0 min-w-0 w-10 h-10"
+                className="rounded-full bg-background shadow-md p-2 min-h-0 min-w-0 w-9 h-9"
               >
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
           {/* Dots */}
-          <div className="flex items-center justify-center gap-2 mt-8">
+          <div className="flex items-center justify-center gap-2 mt-6">
             {testimonials.map((_, index) => (
               <button
                 key={index}
                 onClick={() => goTo(index)}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
                   index === activeIndex 
-                    ? 'w-8 bg-primary' 
+                    ? 'w-8 bg-[#FF6C2F]' 
                     : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
                 }`}
               />

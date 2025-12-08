@@ -131,22 +131,22 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
   const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
   
   return (
-    <section ref={sectionRef} className="py-16 md:py-20" style={{ backgroundColor: '#FAF7F4' }}>
+    <section ref={sectionRef} className="py-10 md:py-14" style={{ backgroundColor: '#FAF7F4' }}>
       <div className="container">
         {/* Section Header - Animation fadeUp */}
         <div 
-          className={`flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 transition-all duration-700 ease-out ${
+          className={`flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8 md:mb-10 transition-all duration-700 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
           <div>
-            <span className="inline-block px-4 py-2 rounded-full bg-[var(--terracotta-100)] text-[var(--terracotta-600)] text-sm font-semibold mb-4">
+            <span className="inline-block px-4 py-2 rounded-full bg-[var(--terracotta-100)] text-[var(--terracotta-600)] text-sm font-semibold mb-3">
               Nouvelles Annonces
             </span>
-            <h2 className="text-h1 font-display text-[var(--earth-900)] mb-3">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-display text-[var(--earth-900)] mb-2">
               Propriétés à découvrir
             </h2>
-            <p className="text-body-lg text-[var(--earth-700)] max-w-xl">
+            <p className="text-base text-[var(--earth-700)] max-w-xl">
               Les dernières annonces vérifiées et prêtes à vous accueillir
             </p>
           </div>
@@ -170,7 +170,7 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
             ))}
           </div>
         ) : displayProperties.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl">
+          <div className="text-center py-16 bg-white rounded-2xl">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
               <MapPin className="h-10 w-10 text-muted-foreground" />
             </div>
@@ -192,7 +192,7 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
 
         {/* CTA Button Mobile - Animation fadeUp */}
         <div 
-          className={`mt-12 text-center md:hidden transition-all duration-700 ease-out delay-500 ${
+          className={`mt-8 text-center md:hidden transition-all duration-700 ease-out delay-500 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
