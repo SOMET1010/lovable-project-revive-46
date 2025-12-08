@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
-import { Heart, MapPin, Bed, Bath, X, Home } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Heart, MapPin, Bed, Bath, Trash2, Home, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import TenantDashboardLayout from '../components/TenantDashboardLayout';
+import { toast } from 'sonner';
 
 interface Favorite {
   id: string;
@@ -29,6 +30,7 @@ export default function Favorites() {
   const { user } = useAuth();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -74,14 +76,14 @@ export default function Favorites() {
       setFavorites(formattedFavorites);
     } catch (error) {
       console.error('Error loading favorites:', error);
+      toast.error('Erreur lors du chargement des favoris');
     } finally {
       setLoading(false);
     }
   };
 
   const removeFavorite = async (favoriteId: string) => {
-    if (!confirm('Retirer cette propriété de vos favoris ?')) return;
-
+    setRemovingId(favoriteId);
     try {
       const { error } = await supabase
         .from('favorites')
@@ -91,32 +93,24 @@ export default function Favorites() {
       if (error) throw error;
 
       setFavorites(favorites.filter(f => f.id !== favoriteId));
+      toast.success('Retiré des favoris');
     } catch (error) {
       console.error('Error removing favorite:', error);
-      alert('Erreur lors de la suppression du favori');
+      toast.error('Erreur lors de la suppression');
+    } finally {
+      setRemovingId(null);
     }
-  };
-
-  const formatDate = (date: string | null) => {
-    if (!date) return '';
-    return new Date(date).toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
   };
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
         <div className="text-center">
-          <Heart className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-            Connexion requise
-          </h2>
-          <p className="text-neutral-600">
-            Veuillez vous connecter pour voir vos favoris
-          </p>
+          <div className="w-20 h-20 rounded-full bg-[#FAF7F4] border border-[#EFEBE9] flex items-center justify-center mx-auto mb-6">
+            <Heart className="w-10 h-10 text-[#A69B95]" />
+          </div>
+          <h2 className="text-xl font-semibold text-[#2C1810] mb-2">Connexion requise</h2>
+          <p className="text-[#6B5A4E]">Veuillez vous connecter pour voir vos favoris</p>
         </div>
       </div>
     );
@@ -125,105 +119,119 @@ export default function Favorites() {
   return (
     <TenantDashboardLayout title="Mes Favoris">
       <div className="max-w-7xl mx-auto">
+        {/* Header Premium */}
         <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-4">
-            <Heart className="w-8 h-8 text-red-500 fill-current" />
-            <h1 className="text-3xl font-bold text-neutral-900">Mes favoris</h1>
+          <div className="flex items-center gap-4 mb-2">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#F16522] to-[#D95318] flex items-center justify-center shadow-lg shadow-[#F16522]/20">
+              <Heart className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-[#2C1810]">Mes Favoris</h1>
+              <p className="text-[#6B5A4E]">
+                {favorites.length} bien{favorites.length !== 1 ? 's' : ''} sauvegardé{favorites.length !== 1 ? 's' : ''}
+              </p>
+            </div>
           </div>
-          <p className="text-neutral-600">
-            {favorites.length} {favorites.length === 1 ? 'propriété sauvegardée' : 'propriétés sauvegardées'}
-          </p>
         </div>
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]"></div>
           </div>
         ) : favorites.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-            <Heart className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-              Aucun favori
-            </h3>
-            <p className="text-neutral-600 mb-6">
+          <div className="bg-white rounded-[24px] border border-[#EFEBE9] shadow-lg shadow-[#2C1810]/5 p-12 text-center">
+            <div className="w-20 h-20 rounded-full bg-[#FAF7F4] flex items-center justify-center mx-auto mb-6">
+              <Heart className="h-10 w-10 text-[#A69B95]" />
+            </div>
+            <h3 className="text-xl font-semibold text-[#2C1810] mb-2">Aucun favori</h3>
+            <p className="text-[#6B5A4E] mb-6 max-w-md mx-auto">
               Explorez nos propriétés et ajoutez vos préférées à vos favoris
             </p>
             <Link
               to="/recherche"
-              className="inline-block px-6 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-[#F16522] hover:bg-[#D95318] text-white font-medium rounded-xl transition-all duration-200 shadow-lg shadow-[#F16522]/20"
             >
               Rechercher des propriétés
+              <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {favorites.map((favorite) => (
-              <div key={favorite.id} className="bg-white rounded-lg shadow-lg overflow-hidden group">
-                <div className="relative">
+              <div key={favorite.id} className="bg-white rounded-[24px] border border-[#EFEBE9] shadow-lg shadow-[#2C1810]/5 overflow-hidden group hover:shadow-xl hover:shadow-[#2C1810]/10 transition-all duration-300">
+                <div className="relative h-48">
                   <img
-                    src={favorite.property?.main_image || 'https://via.placeholder.com/400x300'}
+                    src={favorite.property?.main_image || '/placeholder-property.jpg'}
                     alt={favorite.property?.title}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <button
                     onClick={() => removeFavorite(favorite.id)}
-                    className="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur-sm rounded-full text-red-500 hover:bg-red-500 hover:text-white transition shadow-lg"
-                    title="Retirer des favoris"
+                    disabled={removingId === favorite.id}
+                    className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all duration-200 shadow-lg disabled:opacity-50"
                   >
-                    <X className="w-5 h-5" />
+                    {removingId === favorite.id ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
                   </button>
-                  <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold">
-                    {favorite.property?.status}
+                  <div className="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-semibold text-[#2C1810] border border-[#EFEBE9]">
+                    {favorite.property?.status === 'available' ? 'Disponible' : favorite.property?.status}
+                  </div>
+                  <div className="absolute bottom-3 left-3 px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg">
+                    <span className="text-lg font-bold text-[#F16522]">
+                      {favorite.property?.monthly_rent.toLocaleString()} FCFA
+                    </span>
+                    <span className="text-[#6B5A4E] text-sm">/mois</span>
                   </div>
                 </div>
 
                 <div className="p-5">
-                  <h3 className="text-lg font-bold text-neutral-900 mb-2 line-clamp-1">
+                  <h3 className="text-lg font-bold text-[#2C1810] mb-2 line-clamp-1 group-hover:text-[#F16522] transition-colors">
                     {favorite.property?.title}
                   </h3>
 
-                  <div className="flex items-start space-x-2 text-neutral-600 mb-3">
-                    <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm line-clamp-2">
-                      {favorite.property?.address}, {favorite.property?.city}
-                      {favorite.property?.neighborhood && ` - ${favorite.property.neighborhood}`}
+                  <div className="flex items-center gap-1.5 text-[#6B5A4E] mb-4">
+                    <MapPin className="w-4 h-4 text-[#F16522]" />
+                    <p className="text-sm line-clamp-1">
+                      {favorite.property?.neighborhood ? `${favorite.property.neighborhood}, ` : ''}
+                      {favorite.property?.city}
                     </p>
                   </div>
 
-                  <div className="flex items-center space-x-4 mb-3 text-sm text-neutral-600">
-                    <div className="flex items-center space-x-1">
-                      <Home className="w-4 h-4" />
+                  <div className="flex items-center gap-4 text-sm text-[#6B5A4E] mb-5 pb-5 border-b border-[#EFEBE9]">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-7 h-7 rounded-full bg-[#FAF7F4] flex items-center justify-center">
+                        <Home className="w-3.5 h-3.5 text-[#F16522]" />
+                      </div>
                       <span>{favorite.property?.property_type}</span>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <Bed className="w-4 h-4" />
-                      <span>{favorite.property?.bedrooms}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Bath className="w-4 h-4" />
-                      <span>{favorite.property?.bathrooms}</span>
-                    </div>
+                    {favorite.property?.bedrooms && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-7 h-7 rounded-full bg-[#FAF7F4] flex items-center justify-center">
+                          <Bed className="w-3.5 h-3.5 text-[#F16522]" />
+                        </div>
+                        <span>{favorite.property.bedrooms}</span>
+                      </div>
+                    )}
+                    {favorite.property?.bathrooms && (
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-7 h-7 rounded-full bg-[#FAF7F4] flex items-center justify-center">
+                          <Bath className="w-3.5 h-3.5 text-[#F16522]" />
+                        </div>
+                        <span>{favorite.property.bathrooms}</span>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="mb-3">
-                    <p className="text-2xl font-bold text-primary-500">
-                      {favorite.property?.monthly_rent.toLocaleString()} FCFA
-                      <span className="text-sm text-neutral-500 font-normal">/mois</span>
-                    </p>
-                  </div>
-
-                  <div className="border-t pt-3 flex items-center justify-between text-xs text-neutral-500">
-                    <span>Ajouté le {formatDate(favorite.created_at)}</span>
-                  </div>
-
-                  <div className="border-t pt-3 mt-3">
-                    <Link
-                      to={`/propriete/${favorite.property?.id}`}
-                      className="block w-full py-2 bg-primary-500 text-white text-center rounded-lg hover:bg-primary-600 transition font-semibold"
-                    >
-                      Voir les détails
-                    </Link>
-                  </div>
+                  <Link
+                    to={`/propriete/${favorite.property?.id}`}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-[#F16522] hover:bg-[#D95318] text-white font-medium rounded-xl transition-all duration-200"
+                  >
+                    Voir les détails
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
                 </div>
               </div>
             ))}
