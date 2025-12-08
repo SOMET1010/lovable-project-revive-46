@@ -237,14 +237,28 @@ export default function ModernAuthPage() {
         return;
       }
 
-      if (data?.sessionUrl) {
+      // Nouvelle logique: utiliser les tokens directement au lieu d'un magic link
+      if (data?.accessToken && data?.refreshToken) {
         setSuccess(data.isNewUser ? 'Compte créé ! Connexion...' : 'Connexion en cours...');
-        if (data.needsProfileCompletion) {
-          sessionStorage.setItem('needsProfileCompletion', 'true');
+        
+        // Établir la session côté client avec les tokens reçus
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.accessToken,
+          refresh_token: data.refreshToken,
+        });
+
+        if (sessionError) {
+          throw new Error('Erreur lors de l\'établissement de la session');
         }
-        window.location.href = data.sessionUrl;
-      } else if (data?.success && !data?.sessionUrl) {
-        throw new Error('Erreur de génération du lien. Veuillez réessayer.');
+
+        // Redirection avec React Router (pas de rechargement de page)
+        if (data.needsProfileCompletion) {
+          navigate('/completer-profil', { replace: true });
+        } else {
+          navigate('/', { replace: true });
+        }
+      } else if (data?.success) {
+        throw new Error('Erreur de session. Veuillez réessayer.');
       } else {
         throw new Error(data?.error || 'Erreur de connexion inattendue');
       }
