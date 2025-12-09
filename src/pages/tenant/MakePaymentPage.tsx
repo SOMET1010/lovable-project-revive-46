@@ -16,6 +16,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import '@/styles/form-premium.css';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface PaymentFormData {
   property_id: string;
@@ -34,7 +35,7 @@ interface Contract {
   deposit_amount: number | null;
   owner_id: string;
   property_title: string;
-  property_address: string | null;
+  property_address: AddressValue;
   property_city: string;
   property_main_image: string | null;
   owner_name: string;
@@ -309,7 +310,7 @@ export default function MakePayment() {
                                 {contract.property_title}
                               </h3>
                               <p className="text-sm text-[#A69B95] mb-2">
-                                {contract.property_address}, {contract.property_city}
+                                {formatAddress(contract.property_address, contract.property_city)}
                               </p>
                               <div className="flex items-center space-x-4 text-sm">
                                 <span className="font-semibold text-[#F16522]">
@@ -353,7 +354,9 @@ export default function MakePayment() {
                           />
                           <div>
                             <h3 className="font-bold text-[#2C1810]">{selectedContract.property_title}</h3>
-                            <p className="text-sm text-[#A69B95]">{selectedContract.property_address}</p>
+                            <p className="text-sm text-[#A69B95]">
+                              {formatAddress(selectedContract.property_address, selectedContract.property_city)}
+                            </p>
                             <p className="text-sm text-[#A69B95]">À: {selectedContract.owner_name}</p>
                           </div>
                         </div>

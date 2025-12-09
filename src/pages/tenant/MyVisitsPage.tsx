@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
 import { logger } from '@/shared/lib/logger';
 import type { Visit, VisitFilter } from '@/types/visit.types';
+import { formatAddress } from '@/shared/utils/address';
 
 const statusStyles: Record<string, string> = {
   en_attente: 'bg-yellow-100 text-yellow-800',
@@ -270,7 +271,7 @@ export default function MyVisits() {
                             {visit.property.title}
                           </h3>
                           <p className="text-gray-600 mb-2">
-                            {visit.property.address}, {visit.property.city}
+                            {formatAddress(visit.property.address, visit.property.city)}
                           </p>
                         </div>
                         {getStatusBadge(visit.status)}

@@ -4,11 +4,12 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Calendar, Clock, Video, MapPin, ArrowLeft, Check, ChevronRight, MessageSquare } from 'lucide-react';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface Property {
   id: string;
   title: string;
-  address: string | null;
+  address: AddressValue;
   city: string;
   main_image: string | null;
   owner_id: string | null;
@@ -256,7 +257,7 @@ export default function ScheduleVisit() {
                 Planifier une visite
               </h1>
               <p style={{ color: 'var(--form-chocolat)' }}>{property.title}</p>
-              <p className="text-sm" style={{ color: 'var(--form-sable)' }}>{property.address || ''}, {property.city}</p>
+              <p className="text-sm" style={{ color: 'var(--form-sable)' }}>{formatAddress(property.address, property.city)}</p>
             </div>
           </div>
         </div>

@@ -10,13 +10,14 @@ import MapWrapper from '@/shared/ui/MapWrapper';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { getCreateContractRoute } from '@/shared/config/routes.config';
 import { OwnerBadge } from '@/shared/ui';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 // Extended property type with new columns and owner profile
 interface Property {
   id: string;
   title: string;
   description: string | null;
-  address: string | null;
+  address: AddressValue;
   city: string;
   neighborhood: string | null;
   property_type: string;
@@ -567,7 +568,7 @@ export default function PropertyDetailPage() {
                         <MapPin className="h-12 w-12 text-neutral-300 mx-auto mb-4" />
                         <p className="text-neutral-500">Localisation non disponible</p>
                         <p className="text-sm text-neutral-400 mt-2">
-                          {property.address}, {property.city}
+                          {formatAddress(property.address, property.city)}
                         </p>
                       </div>
                     </div>

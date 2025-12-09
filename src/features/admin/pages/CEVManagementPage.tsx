@@ -410,7 +410,9 @@ export default function AdminCEVManagement() {
                         {request.property.title}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {request.property.address}
+                        {typeof request.property.address === 'string'
+                          ? request.property.address
+                          : `${request.property.address?.street || ''}, ${request.property.address?.city || ''}`}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

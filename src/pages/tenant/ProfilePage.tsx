@@ -10,6 +10,7 @@ import TenantDashboardLayout from '../../features/tenant/components/TenantDashbo
 import FeatureGate from '@/shared/ui/FeatureGate';
 import ONECIForm from '@/features/verification/components/ONECIForm';
 import CNAMForm from '@/features/verification/components/CNAMForm';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface Profile {
   id: string;
@@ -18,7 +19,7 @@ interface Profile {
   email: string | null;
   phone: string | null;
   city: string | null;
-  address: string | null;
+  address: AddressValue;
   bio: string | null;
   avatar_url: string | null;
   user_type: string | null;
@@ -65,6 +66,7 @@ export default function ProfilePage() {
 
       if (error) throw error;
       
+      const formattedAddress = formatAddress(data.address as AddressValue, data.city || undefined);
       const profileData: Profile = {
         id: data.id,
         user_id: data.user_id,
@@ -72,7 +74,7 @@ export default function ProfilePage() {
         email: data.email,
         phone: data.phone,
         city: data.city,
-        address: data.address,
+        address: data.address as AddressValue,
         bio: data.bio,
         avatar_url: data.avatar_url,
         user_type: data.user_type,
@@ -87,7 +89,7 @@ export default function ProfilePage() {
         full_name: data.full_name || '',
         phone: data.phone || '',
         city: data.city || '',
-        address: data.address || '',
+        address: formattedAddress,
         bio: data.bio || '',
       });
     } catch (err) {

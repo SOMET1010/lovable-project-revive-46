@@ -5,6 +5,7 @@ import { downloadContract, regenerateContract } from '@/services/contracts/contr
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { ArrowLeft, FileText, Edit, CheckCircle, X, Download, RefreshCw, Loader, ExternalLink } from 'lucide-react';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface LeaseContract {
   id: string;
@@ -26,7 +27,7 @@ interface LeaseContract {
 
 interface Property {
   title: string;
-  address: string | null;
+  address: AddressValue;
   city: string;
   property_type: string;
   surface_area: number | null;
@@ -142,7 +143,7 @@ OBJET DU CONTRAT
 
 Le bailleur loue au locataire le bien suivant :
 
-Adresse : ${property.address}, ${property.city}
+      Adresse : ${formatAddress(property.address, property.city)}
 Type : ${property.property_type}
 Superficie : ${property.surface_area}m²
 Chambres : ${property.bedrooms}

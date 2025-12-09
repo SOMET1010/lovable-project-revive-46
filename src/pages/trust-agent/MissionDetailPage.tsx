@@ -19,6 +19,7 @@ import { Textarea } from '@/shared/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/shared/useSafeToast';
 import type { Json } from '@/integrations/supabase/types';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface ChecklistItem {
   id: string;
@@ -40,7 +41,7 @@ interface Mission {
   created_at: string;
   property?: {
     title: string;
-    address: string;
+    address: AddressValue;
     city: string;
     owner_id: string;
   };
@@ -221,7 +222,7 @@ export default function MissionDetailPage() {
                   <div>
                     <p className="font-medium">{mission.property?.title}</p>
                     <p className="text-sm text-muted-foreground">
-                      {mission.property?.address}, {mission.property?.city}
+                      {formatAddress(mission.property?.address, mission.property?.city)}
                     </p>
                   </div>
                 </div>

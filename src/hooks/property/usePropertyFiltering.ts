@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback } from 'react';
 import type { PropertyWithOwnerScore } from '../types';
+import { formatAddress } from '@/shared/utils/address';
 
 export interface PropertyFilters {
   type: string;
@@ -28,11 +29,12 @@ export function usePropertyFiltering(properties: PropertyWithOwnerScore[]) {
 
       // Filter by location (city, neighborhood, address)
       const searchTerm = filters.location.toLowerCase().trim();
+      const addressText = formatAddress(property.address as any, property.city).toLowerCase();
       const matchLocation = 
         !searchTerm ||
         property.city?.toLowerCase().includes(searchTerm) ||
         property.neighborhood?.toLowerCase().includes(searchTerm) ||
-        property.address?.toLowerCase().includes(searchTerm);
+        addressText.includes(searchTerm);
 
       // Filter by price range
       const price = property.monthly_rent || 0;

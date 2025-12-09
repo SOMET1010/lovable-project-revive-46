@@ -3,6 +3,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { FileText, Eye, Edit, X, CheckCircle } from 'lucide-react';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface Contract {
   id: string;
@@ -20,9 +21,9 @@ interface Contract {
   created_at: string;
   property: {
     title: string;
-    address: string;
+    address: AddressValue;
     city: string;
-    main_image: string;
+    main_image: string | null;
   };
   owner: {
     id: string;
@@ -271,7 +272,7 @@ export default function MyContracts() {
                             {contract.property.title}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {contract.property.address}, {contract.property.city}
+                            {formatAddress(contract.property.address, contract.property.city)}
                           </p>
                         </div>
                       </div>

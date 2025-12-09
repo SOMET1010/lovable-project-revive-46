@@ -305,7 +305,9 @@ export default function PropertiesTable({
                               <span className="flex items-center space-x-1">
                                 <MapPin className="w-3 h-3" />
                                 <span className="truncate max-w-[100px]">
-                                  {assignment.properties.address}
+                                  {typeof assignment.properties.address === 'string'
+                                    ? assignment.properties.address
+                                    : `${assignment.properties.address?.street || ''}, ${assignment.properties.address?.city || ''}`}
                                 </span>
                               </span>
                             </>

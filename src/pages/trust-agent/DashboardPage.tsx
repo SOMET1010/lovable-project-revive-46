@@ -18,6 +18,7 @@ import TrustAgentHeader from '../../features/trust-agent/components/TrustAgentHe
 import ValidationMetrics from '../../features/trust-agent/components/ValidationMetrics';
 import QuickActionsPanel from '../../features/trust-agent/components/QuickActionsPanel';
 import WeekCalendarWidget from '../../features/trust-agent/components/WeekCalendarWidget';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface Mission {
   id: string;
@@ -30,7 +31,7 @@ interface Mission {
   created_at: string;
   property?: {
     title: string;
-    address: string;
+    address: AddressValue;
     city: string;
   };
 }
@@ -232,7 +233,7 @@ export default function TrustAgentDashboardPage() {
                                 {mission.property?.title || 'Propriété inconnue'}
                               </p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                {mission.property?.address}, {mission.property?.city}
+                                {formatAddress(mission.property?.address, mission.property?.city)}
                               </p>
                               {mission.scheduled_date && (
                                 <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">

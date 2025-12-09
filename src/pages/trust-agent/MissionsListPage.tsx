@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import TrustAgentHeader from '../../features/trust-agent/components/TrustAgentHeader';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface Mission {
   id: string;
@@ -31,7 +32,7 @@ interface Mission {
   created_at: string;
   property?: {
     title: string;
-    address: string;
+    address: AddressValue;
     city: string;
   };
 }
@@ -107,10 +108,11 @@ export default function MissionsListPage() {
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
+      const addressText = formatAddress(mission.property?.address, mission.property?.city).toLowerCase();
       return (
         mission.property?.title?.toLowerCase().includes(query) ||
         mission.property?.city?.toLowerCase().includes(query) ||
-        mission.property?.address?.toLowerCase().includes(query)
+        addressText.includes(query)
       );
     }
     
@@ -234,7 +236,7 @@ export default function MissionsListPage() {
                                 {mission.property?.title || 'Propriété inconnue'}
                               </p>
                               <p className="text-xs text-muted-foreground mt-1">
-                                {mission.property?.address}, {mission.property?.city}
+                                {formatAddress(mission.property?.address, mission.property?.city)}
                               </p>
                               {mission.scheduled_date && (
                                 <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">

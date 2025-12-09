@@ -1,3 +1,5 @@
+import { AddressValue } from '@/shared/utils/address';
+
 /**
  * Types pour les visites (MyVisitsPage)
  */
@@ -9,7 +11,7 @@
 export interface VisitPropertyJoin {
   id: string;
   title: string;
-  address: string | null;
+  address: AddressValue;
   city: string;
   main_image: string | null;
 }

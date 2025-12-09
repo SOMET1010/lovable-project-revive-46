@@ -26,6 +26,7 @@ import {
   ArrowLeft,
   Home
 } from 'lucide-react';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface LeaseContract {
   id: string;
@@ -52,7 +53,7 @@ interface LeaseContract {
 
 interface Property {
   title: string;
-  address: string | null;
+  address: AddressValue;
   city: string;
 }
 
@@ -389,7 +390,7 @@ export default function SignLeasePage() {
                     <div>
                       <p className="text-sm text-[#8B7355]">Propriété</p>
                       <p className="font-medium text-[#4A2C17]">{property.title}</p>
-                      <p className="text-sm text-[#8B7355]">{property.address || ''}, {property.city}</p>
+                      <p className="text-sm text-[#8B7355]">{formatAddress(property.address, property.city)}</p>
                     </div>
                   </div>
 

@@ -22,11 +22,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { toast } from 'sonner';
 import TrustAgentHeader from '../../features/trust-agent/components/TrustAgentHeader';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface Property {
   id: string;
   title: string;
-  address: string;
+  address: AddressValue;
   city: string;
   neighborhood: string | null;
   property_type: string;
@@ -90,10 +91,11 @@ export default function PropertyCertificationPage() {
   const filteredProperties = properties.filter(property => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
+    const addressText = formatAddress(property.address, property.city).toLowerCase();
     return (
       property.title.toLowerCase().includes(query) ||
       property.city.toLowerCase().includes(query) ||
-      property.address?.toLowerCase().includes(query)
+      addressText.includes(query)
     );
   });
 
@@ -271,7 +273,7 @@ export default function PropertyCertificationPage() {
                         <h3 className="font-semibold text-lg">{selectedProperty.title}</h3>
                         <p className="text-sm text-muted-foreground flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
-                          {selectedProperty.address}, {selectedProperty.city}
+                          {formatAddress(selectedProperty.address, selectedProperty.city)}
                         </p>
                         <div className="flex gap-2 mt-2">
                           <Badge>{selectedProperty.property_type}</Badge>

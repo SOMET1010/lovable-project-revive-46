@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Wrench, Upload, AlertCircle, CheckCircle, Camera, X } from 'lucide-react';
+import { formatAddress } from '@/shared/utils/address';
 
 export default function MaintenanceRequest() {
   const { user } = useAuth();
@@ -172,7 +173,9 @@ export default function MaintenanceRequest() {
           <h3 className="text-lg font-bold text-gray-900 mb-3">Propriété concernée</h3>
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="font-bold text-gray-900">{activeLease.properties?.title}</p>
-            <p className="text-sm text-gray-600">{activeLease.properties?.address}, {activeLease.properties?.city}</p>
+            <p className="text-sm text-gray-600">
+              {formatAddress(activeLease.properties?.address, activeLease.properties?.city)}
+            </p>
           </div>
         </div>
 

@@ -4,6 +4,7 @@ import { supabase } from '@/services/supabase/client';
 import { Heart, MapPin, Bed, Bath, X, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
+import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface Favorite {
   id: string;
@@ -12,7 +13,7 @@ interface Favorite {
   property: {
     id: string;
     title: string;
-    address: string | null;
+    address: AddressValue;
     city: string;
     neighborhood: string | null;
     property_type: string;
@@ -185,7 +186,7 @@ export default function Favorites() {
                   <div className="flex items-start space-x-2 text-neutral-600 mb-3">
                     <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <p className="text-sm line-clamp-2">
-                      {favorite.property?.address}, {favorite.property?.city}
+                      {formatAddress(favorite.property?.address, favorite.property?.city)}
                       {favorite.property?.neighborhood && ` - ${favorite.property.neighborhood}`}
                     </p>
                   </div>
