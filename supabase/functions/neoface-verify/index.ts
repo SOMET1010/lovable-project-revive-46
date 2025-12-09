@@ -18,10 +18,10 @@ interface UploadDocumentRequest {
   user_id: string;
 }
 
-interface VerifySelfieRequest {
-  action: 'verify_selfie';
+interface VerifySelfieBase64Request {
+  action: 'verify_selfie_base64';
   document_id: string;
-  selfie_url: string;
+  selfie_base64: string;
   verification_id: string;
 }
 
@@ -33,7 +33,7 @@ interface CheckStatusRequest {
 
 interface NeofaceUploadResponse {
   document_id: string;
-  url: string;
+  url?: string;
   success: boolean;
   error?: string;
 }
@@ -105,13 +105,13 @@ Deno.serve(async (req: Request) => {
 
     if (action === 'upload_document') {
       return await handleUploadDocument(body as UploadDocumentRequest, supabase);
-    } else if (action === 'verify_selfie') {
-      return await handleVerifySelfie(body as VerifySelfieRequest, supabase);
+    } else if (action === 'verify_selfie_base64') {
+      return await handleVerifySelfieBase64(body as VerifySelfieBase64Request, supabase);
     } else if (action === 'check_status') {
       return await handleCheckStatus(body as CheckStatusRequest, supabase);
     } else {
       return new Response(
-        JSON.stringify({ error: 'Action invalide. Actions: upload_document, verify_selfie, check_status' }),
+        JSON.stringify({ error: 'Action invalide. Actions: upload_document, verify_selfie_base64, check_status' }),
         {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -249,7 +249,6 @@ async function handleUploadDocument(
     JSON.stringify({
       success: true,
       document_id: uploadData.document_id,
-      selfie_url: uploadData.url, // URL for popup selfie capture
       verification_id: verificationId,
       provider: 'neoface',
       message: 'Document téléchargé. Veuillez prendre un selfie pour la vérification.',
@@ -261,33 +260,28 @@ async function handleUploadDocument(
   );
 }
 
-async function handleVerifySelfie(
-  request: VerifySelfieRequest,
+async function handleVerifySelfieBase64(
+  request: VerifySelfieBase64Request,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
 ): Promise<Response> {
-  const { document_id, selfie_url, verification_id } = request;
+  const { document_id, selfie_base64, verification_id } = request;
   const startTime = Date.now();
 
-  console.log('[NeoFace] Verifying selfie for document:', document_id);
+  console.log('[NeoFace] Verifying selfie (base64) for document:', document_id);
+  console.log('[NeoFace] Selfie base64 length:', selfie_base64?.length || 0);
 
-  // Télécharger le selfie
-  const selfieResponse = await fetch(selfie_url);
-  if (!selfieResponse.ok) {
-    throw new Error(`Échec téléchargement du selfie: ${selfieResponse.statusText}`);
+  if (!selfie_base64) {
+    throw new Error('Selfie base64 manquant');
   }
 
-  const selfieBlob = await selfieResponse.blob();
-  const base64Data = await blobToBase64(selfieBlob);
-  const mimeType = getMimeType(selfieBlob, 'selfie.jpg');
-
-  // Prepare JSON payload
+  // Prepare JSON payload with the base64 selfie
   const payload = {
     document_id: document_id,
     selfie_file: {
       name: "selfie.jpg",
-      data: base64Data,
-      mime_type: mimeType
+      data: selfie_base64,
+      mime_type: "image/jpeg"
     }
   };
 
@@ -301,7 +295,18 @@ async function handleVerifySelfie(
     body: JSON.stringify(payload),
   });
 
-  const verifyData: NeofaceVerifyResponse = await verifyResponse.json();
+  const responseText = await verifyResponse.text();
+  console.log('[NeoFace] Verify response status:', verifyResponse.status);
+  console.log('[NeoFace] Verify response:', responseText.substring(0, 500));
+
+  let verifyData: NeofaceVerifyResponse;
+  try {
+    verifyData = JSON.parse(responseText);
+  } catch {
+    console.error('[NeoFace] Failed to parse verify response:', responseText);
+    throw new Error('Réponse NeoFace invalide lors de la vérification');
+  }
+
   console.log('[NeoFace] Verification result:', verifyData);
 
   // Mettre à jour le statut de vérification
@@ -334,7 +339,7 @@ async function handleVerifySelfie(
       provider: 'neoface',
     }),
     {
-      status: verifyResponse.status,
+      status: verifyResponse.ok ? 200 : verifyResponse.status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     }
   );
