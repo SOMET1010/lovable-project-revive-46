@@ -216,10 +216,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "agency_mandates_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agencies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "agency_mandates_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_mandates_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -372,6 +386,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cev_missions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -647,6 +668,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "favorites_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
         ]
       }
       feature_flags: {
@@ -821,6 +849,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "lease_contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "lease_contracts_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -933,6 +968,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maintenance_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -1168,6 +1210,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -1465,6 +1514,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rental_applications_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
         ]
       }
       rental_history: {
@@ -1585,6 +1641,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
             referencedColumns: ["id"]
           },
         ]
@@ -1918,6 +1981,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "user_conversations_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -2046,6 +2116,13 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "visit_requests_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
         ]
       }
       webhook_logs: {
@@ -2119,7 +2196,138 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_agencies: {
+        Row: {
+          agency_name: string | null
+          city: string | null
+          description: string | null
+          id: string | null
+          is_verified: boolean | null
+          logo_url: string | null
+          status: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          agency_name?: string | null
+          city?: string | null
+          description?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          status?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          agency_name?: string | null
+          city?: string | null
+          description?: string | null
+          id?: string | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          status?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
+      public_properties: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          ansut_verified: boolean | null
+          bathrooms: number | null
+          bedrooms: number | null
+          charges_amount: number | null
+          city: string | null
+          created_at: string | null
+          deposit_amount: number | null
+          description: string | null
+          has_ac: boolean | null
+          has_garden: boolean | null
+          has_parking: boolean | null
+          id: string | null
+          images: string[] | null
+          is_anonymous: boolean | null
+          is_furnished: boolean | null
+          latitude: number | null
+          longitude: number | null
+          main_image: string | null
+          monthly_rent: number | null
+          neighborhood: string | null
+          owner_id: string | null
+          property_category: string | null
+          property_type: string | null
+          status: string | null
+          surface_area: number | null
+          title: string | null
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          ansut_verified?: boolean | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          charges_amount?: number | null
+          city?: string | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          description?: string | null
+          has_ac?: boolean | null
+          has_garden?: boolean | null
+          has_parking?: boolean | null
+          id?: string | null
+          images?: string[] | null
+          is_anonymous?: boolean | null
+          is_furnished?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          main_image?: string | null
+          monthly_rent?: number | null
+          neighborhood?: string | null
+          owner_id?: never
+          property_category?: string | null
+          property_type?: string | null
+          status?: string | null
+          surface_area?: number | null
+          title?: string | null
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          ansut_verified?: boolean | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          charges_amount?: number | null
+          city?: string | null
+          created_at?: string | null
+          deposit_amount?: number | null
+          description?: string | null
+          has_ac?: boolean | null
+          has_garden?: boolean | null
+          has_parking?: boolean | null
+          id?: string | null
+          images?: string[] | null
+          is_anonymous?: boolean | null
+          is_furnished?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          main_image?: string | null
+          monthly_rent?: number | null
+          neighborhood?: string | null
+          owner_id?: never
+          property_category?: string | null
+          property_type?: string | null
+          status?: string | null
+          surface_area?: number | null
+          title?: string | null
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auto_expire_mandates: { Args: never; Returns: number }
@@ -2181,6 +2389,19 @@ export type Database = {
         }[]
       }
       get_public_profiles: {
+        Args: { profile_user_ids: string[] }
+        Returns: {
+          avatar_url: string
+          city: string
+          cnam_verified: boolean
+          full_name: string
+          is_verified: boolean
+          oneci_verified: boolean
+          trust_score: number
+          user_id: string
+        }[]
+      }
+      get_public_profiles_safe: {
         Args: { profile_user_ids: string[] }
         Returns: {
           avatar_url: string
