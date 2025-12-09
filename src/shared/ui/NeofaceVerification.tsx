@@ -76,7 +76,12 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
 
     if (data?.error) {
-      throw new Error(data.error);
+      // Handle specific error types with user-friendly messages
+      const errorMsg = data.error as string;
+      if (errorMsg.includes('413') || errorMsg.includes('trop volumineuse') || errorMsg.includes('Too Large')) {
+        throw new Error('L\'image CNI est trop volumineuse. Veuillez retourner en arrière et télécharger une image plus petite (< 2MB).');
+      }
+      throw new Error(errorMsg);
     }
 
     return data as VerificationResponse;

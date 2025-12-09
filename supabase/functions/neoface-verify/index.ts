@@ -124,6 +124,17 @@ async function handleUploadDocument(
   }
 
   const imageBlob = await imageResponse.blob();
+  const imageSizeKB = imageBlob.size / 1024;
+  const imageSizeMB = imageSizeKB / 1024;
+  
+  console.log(`[NeoFace] Image fetched, size: ${imageSizeKB.toFixed(0)}KB (${imageSizeMB.toFixed(2)}MB)`);
+
+  // Validate image size before sending to NeoFace (max 2MB to prevent 413 errors)
+  const MAX_SIZE_MB = 2;
+  if (imageSizeMB > MAX_SIZE_MB) {
+    console.error(`[NeoFace] Image too large: ${imageSizeMB.toFixed(2)}MB > ${MAX_SIZE_MB}MB limit`);
+    throw new Error(`Image trop volumineuse (${imageSizeMB.toFixed(1)}MB). Maximum autorisé: ${MAX_SIZE_MB}MB. Veuillez compresser l'image.`);
+  }
 
   // Préparer le FormData pour NeoFace
   const formData = new FormData();
