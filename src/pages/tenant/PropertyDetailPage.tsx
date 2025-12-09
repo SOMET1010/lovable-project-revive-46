@@ -342,26 +342,20 @@ export default function PropertyDetailPage() {
       } | null = null;
 
       if (data.owner_id) {
-        const { data: profileData } = await supabase.rpc('get_public_profile', {
-          profile_user_id: data.owner_id
-        });
+        const { data: profileData } = await supabase
+          .from('public_profiles_view')
+          .select('full_name, avatar_url, trust_score, is_verified, oneci_verified, cnam_verified')
+          .eq('id', data.owner_id)
+          .maybeSingle();
         
-        if (profileData && Array.isArray(profileData) && profileData.length > 0) {
-          const profile = profileData[0] as {
-            full_name: string | null;
-            avatar_url: string | null;
-            trust_score: number | null;
-            is_verified: boolean | null;
-            oneci_verified: boolean | null;
-            cnam_verified: boolean | null;
-          };
+        if (profileData) {
           ownerProfile = {
-            full_name: profile.full_name ?? null,
-            avatar_url: profile.avatar_url ?? null,
-            trust_score: profile.trust_score ?? null,
-            is_verified: profile.is_verified ?? null,
-            oneci_verified: profile.oneci_verified ?? null,
-            cnam_verified: profile.cnam_verified ?? null,
+            full_name: profileData.full_name ?? null,
+            avatar_url: profileData.avatar_url ?? null,
+            trust_score: profileData.trust_score ?? null,
+            is_verified: profileData.is_verified ?? null,
+            oneci_verified: profileData.oneci_verified ?? null,
+            cnam_verified: profileData.cnam_verified ?? null,
           };
         }
       }
@@ -492,7 +486,7 @@ export default function PropertyDetailPage() {
 
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl md:text-5xl font-bold text-primary-500">
-                    {property.monthly_rent?.toLocaleString()}
+                    {(property.monthly_rent ?? property.price ?? 0)?.toLocaleString()}
                   </span>
                   <span className="text-xl text-neutral-500 font-medium">FCFA/mois</span>
                 </div>
@@ -585,7 +579,7 @@ export default function PropertyDetailPage() {
                 <div className="space-y-6">
                   <div>
                     <span className="text-3xl font-bold text-primary-500">
-                      {property.monthly_rent?.toLocaleString()}
+                    {(property.monthly_rent ?? property.price ?? 0)?.toLocaleString()}
                     </span>
                     <span className="text-neutral-500 ml-2">FCFA/mois</span>
                   </div>

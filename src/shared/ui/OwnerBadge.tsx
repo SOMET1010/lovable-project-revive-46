@@ -274,9 +274,8 @@ export function OwnerBadge({
             onClick={handleContact}
             variant="primary"
             fullWidth
-            className="gap-2"
+            className="gap-2 items-center"
           >
-            <MessageSquare className="h-4 w-4" />
             Contacter le propriétaire
           </Button>
         </div>
