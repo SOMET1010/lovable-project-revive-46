@@ -15,6 +15,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/shared/hooks/useSafeToast';
 import ApplicationCard from '../components/ApplicationCard';
+import OwnerDashboardLayout from '../components/OwnerDashboardLayout';
 import {
   getOwnerApplications,
   getApplicationStats,
@@ -193,16 +194,16 @@ export default function OwnerApplicationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50">
+      <OwnerDashboardLayout title="Candidatures">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <OwnerDashboardLayout title="Candidatures">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -538,6 +539,6 @@ export default function OwnerApplicationsPage() {
           </div>
         </div>
       )}
-    </div>
+    </OwnerDashboardLayout>
   );
 }

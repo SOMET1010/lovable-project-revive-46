@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { downloadContract, regenerateContract, deleteContract, sendSignatureReminder } from '@/services/contracts/contractService';
 import { toast } from '@/shared/hooks/useSafeToast';
+import OwnerDashboardLayout from '../components/OwnerDashboardLayout';
 
 interface Contract {
   id: string;
@@ -224,16 +225,16 @@ export default function OwnerContractsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <OwnerDashboardLayout title="Mes Contrats">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <OwnerDashboardLayout title="Mes Contrats">
       {/* Header */}
       <div className="bg-[#2C1810]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -460,6 +461,6 @@ export default function OwnerContractsPage() {
           </div>
         )}
       </div>
-    </div>
+    </OwnerDashboardLayout>
   );
 }
