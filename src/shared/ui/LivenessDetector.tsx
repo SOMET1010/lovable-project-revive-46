@@ -149,11 +149,27 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
       <div className={cn('flex flex-col items-center justify-center p-8 bg-red-50 rounded-2xl', className)}>
         <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
         <p className="text-red-800 font-medium text-center mb-4">
-          Erreur de chargement
+          Erreur de chargement des modèles
         </p>
-        <p className="text-sm text-red-600 text-center">
+        <p className="text-sm text-red-600 text-center mb-6">
           {modelsError}
         </p>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <Button
+            onClick={() => window.location.reload()}
+            className="w-full bg-[#F16522] hover:bg-[#D55A1B] text-white"
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Réessayer
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => onError?.('skip_liveness')}
+            className="w-full border-[#2C1810]/30 text-[#2C1810]"
+          >
+            Continuer sans vérification de vivacité
+          </Button>
+        </div>
       </div>
     );
   }
