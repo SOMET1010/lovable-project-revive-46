@@ -85,7 +85,8 @@ interface UseFaceDetectionReturn extends FaceDetectionState {
   resetChallenges: () => void;
 }
 
-const MODEL_URL = '/models';
+// Use CDN for reliable model loading - vladmandic's official models
+const MODEL_URL = 'https://vladmandic.github.io/face-api/model';
 
 export const useFaceDetection = ({
   videoRef,
@@ -132,11 +133,13 @@ export const useFaceDetection = ({
           modelsError: null,
         }));
       } catch (error) {
-        console.error('Error loading face-api models:', error);
+        if (import.meta.env.DEV) {
+          console.error('Error loading face-api models:', error);
+        }
         setState(prev => ({
           ...prev,
           modelsLoading: false,
-          modelsError: 'Impossible de charger les modèles de détection faciale',
+          modelsError: 'Impossible de charger les modèles de détection faciale. Vérifiez votre connexion internet et réessayez.',
         }));
       }
     };
