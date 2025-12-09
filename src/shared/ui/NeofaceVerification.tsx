@@ -289,7 +289,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           Vérification Faciale NeoFace
         </CardTitle>
         <CardDescription className="text-white/80">
-          Vérification biométrique gratuite avec détection de vivacité
+          Vérification biométrique avec détection de vivacité
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 p-6 bg-[#FDF6E3]">
@@ -424,7 +424,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           <ul className="text-xs text-[#5D4037] space-y-1">
             <li>✓ Détection de vivacité (clignement des yeux)</li>
             <li>✓ Reconnaissance faciale par IA</li>
-            <li>✓ Service 100% gratuit (0 FCFA)</li>
+            <li>✓ Service rapide et sécurisé</li>
             <li>✓ Données cryptées et sécurisées</li>
           </ul>
         </div>
