@@ -4,7 +4,7 @@ import HeaderPremium from './HeaderPremium';
 import FooterPremium from './FooterPremium';
 import { ErrorBoundary } from '@/shared/ui/ErrorBoundary';
 import { ChunkLoadErrorBoundary } from '@/shared/ui/ChunkLoadErrorBoundary';
-import { ToastContainer } from '@/shared/hooks/useToast';
+import { ToastContainer } from '@/hooks/shared/useToast';
 import PageTransition from '@/shared/ui/PageTransition';
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { GlobalLoadingSkeleton } from '@/shared/ui/GlobalLoadingSkeleton';

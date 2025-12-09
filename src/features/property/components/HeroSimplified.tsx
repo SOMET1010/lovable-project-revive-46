@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search, MapPin, Home, Coins } from 'lucide-react';
-import { useParallax } from '@/shared/hooks';
+import { useParallax } from '@/hooks/shared';
 
 interface HeroSimplifiedProps {
   onSearch: (filters: SearchFilters) => void;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight, Maximize2, Download, Share2 } from 'lucide-react';
-import { toast } from '@/shared/hooks/useToast';
+import { toast } from '@/hooks/shared/useToast';
 
 interface ImageGalleryProps {
   images: string[];

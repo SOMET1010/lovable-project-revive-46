@@ -41,7 +41,7 @@ console.log('🟢 main.tsx: Query config imported');
 import { AuthProvider } from '@/app/providers/AuthProvider';
 console.log('🟢 main.tsx: AuthProvider imported');
 
-import { ThemeProvider } from '@/shared/contexts/ThemeContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 console.log('🟢 main.tsx: ThemeProvider imported');
 
 import App from './App';

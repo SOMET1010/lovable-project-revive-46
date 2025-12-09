@@ -20,6 +20,11 @@
 **/.eggs/
 **/lib/
 **/lib64/
+# Keep project source libs tracked
+!/src/lib/
+!/src/lib/**
+!/src/shared/lib/
+!/src/shared/lib/**
 **/parts/
 **/sdist/
 **/var/
@@ -894,4 +899,3 @@
 # data/
 # uploads/
 # downloads/
-

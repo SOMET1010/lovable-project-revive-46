@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useContextualRoles } from '@/shared/hooks/useContextualRoles';
+import { useContextualRoles } from '@/hooks/shared/useContextualRoles';
 import { User, Building2, Key, Home, FileText, Loader2 } from 'lucide-react';
 
 interface RoleTab {

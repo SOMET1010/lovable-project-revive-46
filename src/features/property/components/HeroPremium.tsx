@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, MapPin, Wallet, Search, Star, Check } from 'lucide-react';
 import { RESIDENTIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES } from '@/lib/constants/app.constants';
-import { useHomeStats } from '@/shared/hooks/useHomeStats';
+import { useHomeStats } from '@/hooks/shared/useHomeStats';
 
 // Animated counter component
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {

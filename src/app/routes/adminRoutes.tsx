@@ -5,22 +5,22 @@ import AdminLayout from '@/app/layout/AdminLayout';
 import { ROLES } from '@/shared/constants/roles';
 
 // Admin pages
-const AdminDashboard = lazyWithRetry(() => import('@/features/admin/pages/DashboardPage'));
-const AdminUsers = lazyWithRetry(() => import('@/features/admin/pages/UsersPage'));
-const AdminUserRoles = lazyWithRetry(() => import('@/features/admin/pages/UserRolesPage'));
-const AdminApiKeys = lazyWithRetry(() => import('@/features/admin/pages/ApiKeysPage'));
-const AdminBusinessRules = lazyWithRetry(() => import('@/features/admin/pages/BusinessRulesPage'));
-const AdminCEVManagement = lazyWithRetry(() => import('@/features/admin/pages/CEVManagementPage'));
-const AdminTrustAgents = lazyWithRetry(() => import('@/features/admin/pages/TrustAgentsPage'));
-const AdminAnalytics = lazyWithRetry(() => import('@/features/admin/pages/AnalyticsPage'));
-const AdminProperties = lazyWithRetry(() => import('@/features/admin/pages/PropertiesPage'));
-const AdminTransactions = lazyWithRetry(() => import('@/features/admin/pages/TransactionsPage'));
-const AdminServiceMonitoring = lazyWithRetry(() => import('@/features/admin/pages/ServiceMonitoringPage'));
-const AdminLogs = lazyWithRetry(() => import('@/features/admin/pages/LogsPage'));
-const AdminServiceProviders = lazyWithRetry(() => import('@/features/admin/pages/ServiceProvidersPage'));
-const AdminServiceConfiguration = lazyWithRetry(() => import('@/features/admin/pages/ServiceConfigurationPage'));
-const AdminDataGenerator = lazyWithRetry(() => import('@/features/admin/pages/DataGeneratorPage'));
-const AdminFeatureFlags = lazyWithRetry(() => import('@/features/admin/pages/FeatureFlagsPage'));
+const AdminDashboard = lazyWithRetry(() => import('@/pages/admin/DashboardPage'));
+const AdminUsers = lazyWithRetry(() => import('@/pages/admin/UsersPage'));
+const AdminUserRoles = lazyWithRetry(() => import('@/pages/admin/UserRolesPage'));
+const AdminApiKeys = lazyWithRetry(() => import('@/pages/admin/ApiKeysPage'));
+const AdminBusinessRules = lazyWithRetry(() => import('@/pages/admin/BusinessRulesPage'));
+const AdminCEVManagement = lazyWithRetry(() => import('@/pages/admin/CEVManagementPage'));
+const AdminTrustAgents = lazyWithRetry(() => import('@/pages/admin/TrustAgentsPage'));
+const AdminAnalytics = lazyWithRetry(() => import('@/pages/admin/AnalyticsPage'));
+const AdminProperties = lazyWithRetry(() => import('@/pages/admin/PropertiesPage'));
+const AdminTransactions = lazyWithRetry(() => import('@/pages/admin/TransactionsPage'));
+const AdminServiceMonitoring = lazyWithRetry(() => import('@/pages/admin/ServiceMonitoringPage'));
+const AdminLogs = lazyWithRetry(() => import('@/pages/admin/LogsPage'));
+const AdminServiceProviders = lazyWithRetry(() => import('@/pages/admin/ServiceProvidersPage'));
+const AdminServiceConfiguration = lazyWithRetry(() => import('@/pages/admin/ServiceConfigurationPage'));
+const AdminDataGenerator = lazyWithRetry(() => import('@/pages/admin/DataGeneratorPage'));
+const AdminFeatureFlags = lazyWithRetry(() => import('@/pages/admin/FeatureFlagsPage'));
 
 export const adminRoutes: RouteObject = {
   path: 'admin',

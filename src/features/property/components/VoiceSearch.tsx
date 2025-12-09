@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 import Button from '@/shared/ui/Button';
-import { toast } from '@/shared/hooks/useToast';
+import { toast } from '@/hooks/shared/useToast';
 import { logger } from '@/shared/lib/logger';
 import type {
   SpeechRecognitionInstance,

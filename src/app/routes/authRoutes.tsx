@@ -3,13 +3,13 @@ import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import ProtectedRoute from '@/shared/ui/ProtectedRoute';
 
 // Auth pages
-const ModernAuth = lazyWithRetry(() => import('@/features/auth/pages/ModernAuthPage'));
-const AuthCallback = lazyWithRetry(() => import('@/features/auth/pages/CallbackPage'));
-const ForgotPassword = lazyWithRetry(() => import('@/features/auth/pages/ForgotPasswordPage'));
-const ResetPassword = lazyWithRetry(() => import('@/features/auth/pages/ResetPasswordPage'));
-const ProfileSelection = lazyWithRetry(() => import('@/features/auth/pages/ProfileSelectionPage'));
-const ProfileCompletion = lazyWithRetry(() => import('@/features/auth/pages/ProfileCompletionPage'));
-const BiometricVerification = lazyWithRetry(() => import('@/features/auth/pages/BiometricVerificationPage'));
+const ModernAuth = lazyWithRetry(() => import('@/pages/auth/ModernAuthPage'));
+const AuthCallback = lazyWithRetry(() => import('@/pages/auth/CallbackPage'));
+const ForgotPassword = lazyWithRetry(() => import('@/pages/auth/ForgotPasswordPage'));
+const ResetPassword = lazyWithRetry(() => import('@/pages/auth/ResetPasswordPage'));
+const ProfileSelection = lazyWithRetry(() => import('@/pages/auth/ProfileSelectionPage'));
+const ProfileCompletion = lazyWithRetry(() => import('@/pages/auth/ProfileCompletionPage'));
+const BiometricVerification = lazyWithRetry(() => import('@/pages/auth/BiometricVerificationPage'));
 
 export const authRoutes: RouteObject[] = [
   { path: 'connexion', element: <ModernAuth /> },

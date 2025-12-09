@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useMapboxToken } from '@/shared/hooks/useMapboxToken';
+import { useMapboxToken } from '@/hooks/shared/useMapboxToken';
 import { Loader2, MapPin, Navigation2, Focus } from 'lucide-react';
 
 interface Property {

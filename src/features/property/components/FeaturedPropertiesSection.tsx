@@ -1,4 +1,4 @@
-import { useFeaturedProperties } from '../hooks/useProperties';
+import { useFeaturedProperties } from '../../../hooks/property/useProperties';
 import FeaturedProperties from './FeaturedProperties';
 
 /**

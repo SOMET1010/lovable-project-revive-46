@@ -1,5 +1,5 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { useFeatureFlag } from '@/shared/hooks/useFeatureFlag';
+import { useFeatureFlag } from '@/hooks/shared/useFeatureFlag';
 import { Map, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Shield, Loader, CheckCircle, AlertCircle, Send, RefreshCw } from 'lucide-react';
 import OTPInput from '@/shared/components/modern/OTPInput';
-import { useConfetti } from '@/shared/hooks/useConfetti';
+import { useConfetti } from '@/hooks/shared/useConfetti';
 
 interface CryptoNeoSignatureProps {
   leaseId: string;

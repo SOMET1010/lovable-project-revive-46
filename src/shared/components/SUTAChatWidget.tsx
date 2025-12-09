@@ -9,7 +9,7 @@ import {
   sendMessage,
   getAIResponse 
 } from '@/services/chatbotService';
-import type { ChatMessage } from '@/shared/types/monToit.types';
+import type { ChatMessage } from '@/types/monToit.types';
 
 // --- TYPES ---
 

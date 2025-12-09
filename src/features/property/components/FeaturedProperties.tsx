@@ -1,7 +1,7 @@
 import { MapPin, ArrowRight, Bed, Bath, Maximize, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
-import { useScrollAnimation } from '@/shared/hooks/useScrollAnimation';
+import { useScrollAnimation } from '@/hooks/shared/useScrollAnimation';
 import type { PropertyWithOwnerScore } from '../types';
 
 interface FeaturedPropertiesProps {
@@ -49,7 +49,7 @@ function PropertyCard({ property, index, isVisible }: { property: PropertyWithOw
         <div className="absolute bottom-4 left-4">
           <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
             <span className="text-h3 font-bold text-[var(--terracotta-600)]">
-              {property.monthly_rent?.toLocaleString() || 'N/A'}
+              {property.price?.toLocaleString() || 'N/A'}
             </span>
             <span className="text-sm text-[var(--earth-700)] ml-1">FCFA/mois</span>
           </div>

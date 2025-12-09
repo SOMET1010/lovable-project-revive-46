@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { useFeatureFlag } from '@/shared/hooks/useFeatureFlag';
+import { useFeatureFlag } from '@/hooks/shared/useFeatureFlag';
 import { Lock, Clock } from 'lucide-react';
 
 interface FeatureGateProps {

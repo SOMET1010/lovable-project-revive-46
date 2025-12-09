@@ -1,7 +1,7 @@
 import { SlidersHorizontal, X, MapPin, Home, Bed, Bath, DollarSign, Sofa, ParkingCircle, Wind } from 'lucide-react';
 import { useState } from 'react';
 import Button from '@/shared/ui/Button';
-import { useDebouncedCallback } from '@/shared/hooks';
+import { useDebouncedCallback } from '@/hooks/shared';
 import type { Database } from '@/shared/lib/database.types';
 
 type PropertyType = Database['public']['Tables']['properties']['Row']['property_type'];

@@ -1,5 +1,5 @@
 import { Search, Shield, FileCheck, Key } from 'lucide-react';
-import { useScrollAnimation, getAnimationClasses } from '@/shared/hooks/useScrollAnimation';
+import { useScrollAnimation, getAnimationClasses } from '@/hooks/shared/useScrollAnimation';
 import { Link } from 'react-router-dom';
 
 const steps = [

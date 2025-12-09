@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Heart, User, Loader, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
-import { toast } from '@/shared/hooks/useSafeToast';
+import { toast } from '@/hooks/shared/useSafeToast';
 
 interface CNAMFormProps {
   userId: string;

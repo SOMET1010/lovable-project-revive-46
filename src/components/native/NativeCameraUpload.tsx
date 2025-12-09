@@ -3,7 +3,7 @@ import { Camera, ImagePlus, X, Upload, Loader2 } from 'lucide-react';
 import { CameraResultType } from '@capacitor/camera';
 import { Button } from '@/shared/ui/Button';
 import { useNativeCamera } from '@/hooks/native/useNativeCamera';
-import { processNativeImage, fileToDataUrl } from '@/utils/imageUtils';
+import { processNativeImage, fileToDataUrl } from '@/lib/helpers/imageUtils';
 import { UploadService } from '@/services/upload/uploadService';
 import { cn } from '@/shared/lib/utils';
 

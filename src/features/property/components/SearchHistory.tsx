@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Clock, X, Search, TrendingUp } from 'lucide-react';
-import { useLocalStorage } from '@/shared/hooks/useLocalStorage';
+import { useLocalStorage } from '@/hooks/shared/useLocalStorage';
 
 interface SearchHistoryItem {
   id: string;

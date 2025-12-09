@@ -1,7 +1,7 @@
 import { Share2, Facebook, Twitter, Linkedin, MessageCircle, Link2, Check } from 'lucide-react';
 import { useState } from 'react';
 import Button from './Button';
-import { toast } from '@/shared/hooks/useToast';
+import { toast } from '@/hooks/shared/useToast';
 
 interface SocialShareProps {
   url: string;

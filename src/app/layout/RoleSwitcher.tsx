@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { User, Building2, Briefcase, RefreshCw, CheckCircle, Info } from 'lucide-react';
-import { toast } from '@/shared/hooks/useToast';
+import { toast } from '@/hooks/shared/useToast';
 
 export default function RoleSwitcher() {
   const { profile, user, updateProfile } = useAuth();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search, MapPin, Home, ChevronDown } from 'lucide-react';
-import { useParallax } from '@/shared/hooks';
+import { useParallax } from '@/hooks/shared';
 
 interface HeroAfricanProps {
   onSearch: (filters: { city: string; propertyType: string; maxBudget: string }) => void;

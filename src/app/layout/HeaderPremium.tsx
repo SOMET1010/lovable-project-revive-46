@@ -1,11 +1,11 @@
 import { Home, Search, PlusCircle, User, Heart, Calendar, Bell, FileText, Settings, LogOut, Menu, X, MessageCircle, Building2, Key, LayoutDashboard, Shield, BadgeCheck, Eye } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useState, useEffect } from 'react';
-import { useBreakpoint } from '@/shared/hooks/useBreakpoint';
+import { useBreakpoint } from '@/hooks/shared/useBreakpoint';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
-import { useUnreadCount } from '@/features/messaging/hooks/useUnreadCount';
-import { useContextualRoles } from '@/shared/hooks/useContextualRoles';
-import { usePermissions } from '@/shared/hooks/usePermissions';
+import { useUnreadCount } from '@/hooks/messaging/useUnreadCount';
+import { useContextualRoles } from '@/hooks/shared/useContextualRoles';
+import { usePermissions } from '@/hooks/shared/usePermissions';
 
 export default function HeaderPremium() {
   const { user, profile, signOut } = useAuth();

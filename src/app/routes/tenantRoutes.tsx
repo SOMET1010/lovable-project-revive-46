@@ -1,86 +1,94 @@
 import { RouteObject, Navigate } from 'react-router-dom';
 import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import ProtectedRoute from '@/shared/ui/ProtectedRoute';
-import { ROLES, OWNER_ROLES, AGENCY_ROLES } from '@/shared/constants/roles';
+import { ROLES, OWNER_ROLES, AGENCY_ROLES, TENANT_ROLES, ALL_AUTHENTICATED } from '@/shared/constants/roles';
 
 // Dashboard Router - redirects based on user type
 const DashboardRouter = lazyWithRetry(() => import('@/shared/ui/DashboardRouter'));
 
 // Tenant dashboard pages
-const TenantDashboard = lazyWithRetry(() => import('@/features/tenant/pages/DashboardPage'));
-const TenantCalendar = lazyWithRetry(() => import('@/features/tenant/pages/CalendarPage'));
-const TenantMaintenance = lazyWithRetry(() => import('@/features/tenant/pages/MaintenancePage'));
-const TenantScorePage = lazyWithRetry(() => import('@/features/tenant/pages/ScorePage'));
-const MaintenanceRequest = lazyWithRetry(() => import('@/features/tenant/pages/MaintenanceRequestPage'));
-const MyApplications = lazyWithRetry(() => import('@/features/tenant/pages/MyApplicationsPage'));
-const RentalHistoryPage = lazyWithRetry(() => import('@/features/tenant/pages/RentalHistoryPage'));
+const TenantDashboard = lazyWithRetry(() => import('@/pages/tenant/DashboardPage'));
+const TenantCalendar = lazyWithRetry(() => import('@/pages/tenant/CalendarPage'));
+const TenantMaintenance = lazyWithRetry(() => import('@/pages/tenant/MaintenancePage'));
+const TenantScorePage = lazyWithRetry(() => import('@/pages/tenant/ScorePage'));
+const MaintenanceRequest = lazyWithRetry(() => import('@/pages/tenant/MaintenanceRequestPage'));
+const MyApplications = lazyWithRetry(() => import('@/pages/tenant/MyApplicationsPage'));
+const RentalHistoryPage = lazyWithRetry(() => import('@/pages/tenant/RentalHistoryPage'));
 
 // Unified dashboard
-const UnifiedDashboard = lazyWithRetry(() => import('@/features/dashboard/pages/UnifiedDashboardPage'));
+const UnifiedDashboard = lazyWithRetry(() => import('@/pages/dashboard/UnifiedDashboardPage'));
 
 // Profile page
-const ProfilePage = lazyWithRetry(() => import('@/features/tenant/pages/ProfilePage'));
+const ProfilePage = lazyWithRetry(() => import('@/pages/tenant/ProfilePage'));
 
 // Favorites & saved searches
-const Favorites = lazyWithRetry(() => import('@/features/tenant/pages/FavoritesPage'));
-const SavedSearches = lazyWithRetry(() => import('@/features/tenant/pages/SavedSearchesPage'));
+const Favorites = lazyWithRetry(() => import('@/pages/tenant/FavoritesPage'));
+const SavedSearches = lazyWithRetry(() => import('@/pages/tenant/SavedSearchesPage'));
 
 // Application & Visit pages
-const ApplicationForm = lazyWithRetry(() => import('@/features/tenant/pages/ApplicationFormPage'));
-const ScheduleVisit = lazyWithRetry(() => import('@/features/tenant/pages/ScheduleVisitPage'));
-const MyVisits = lazyWithRetry(() => import('@/features/tenant/pages/MyVisitsPage'));
+const ApplicationForm = lazyWithRetry(() => import('@/pages/tenant/ApplicationFormPage'));
+const ScheduleVisit = lazyWithRetry(() => import('@/pages/tenant/ScheduleVisitPage'));
+const MyVisits = lazyWithRetry(() => import('@/pages/tenant/MyVisitsPage'));
 
 // Contract pages
-const ContractDetail = lazyWithRetry(() => import('@/features/tenant/pages/ContractDetailPage'));
-const MyContracts = lazyWithRetry(() => import('@/features/tenant/pages/MyContractsPage'));
-const SignLease = lazyWithRetry(() => import('@/features/tenant/pages/SignLeasePage'));
+const ContractDetail = lazyWithRetry(() => import('@/pages/tenant/ContractDetailPage'));
+const MyContracts = lazyWithRetry(() => import('@/pages/tenant/MyContractsPage'));
+const SignLease = lazyWithRetry(() => import('@/pages/tenant/SignLeasePage'));
 
 // Payment pages
-const MakePayment = lazyWithRetry(() => import('@/features/tenant/pages/MakePaymentPage'));
-const PaymentHistory = lazyWithRetry(() => import('@/features/tenant/pages/PaymentHistoryPage'));
+const MakePayment = lazyWithRetry(() => import('@/pages/tenant/MakePaymentPage'));
+const PaymentHistory = lazyWithRetry(() => import('@/pages/tenant/PaymentHistoryPage'));
 
 // Messaging
-const MessagesPage = lazyWithRetry(() => import('@/features/messaging/pages/MessagesPage'));
+const MessagesPage = lazyWithRetry(() => import('@/pages/messaging/MessagesPage'));
+
+// Shared tenant layout with sidebar
+const TenantSidebarLayout = lazyWithRetry(() => import('@/features/tenant/components/TenantSidebarLayout'));
 
 export const tenantRoutes: RouteObject[] = [
   // Smart Dashboard Router - redirects based on user_type and roles
   { path: 'dashboard', element: <ProtectedRoute><DashboardRouter /></ProtectedRoute> },
-  { path: 'mon-espace', element: <ProtectedRoute><UnifiedDashboard /></ProtectedRoute> },
 
   // Profile
   { path: 'profil', element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
   { path: 'verification', element: <Navigate to="/profil?tab=verification" replace /> },
 
   // Favorites & saved searches (tenant only)
-  { path: 'favoris', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><Favorites /></ProtectedRoute> },
-  { path: 'recherches-sauvegardees', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><SavedSearches /></ProtectedRoute> },
-
-  // Messaging (all authenticated users)
-  { path: 'messages', element: <ProtectedRoute allowedRoles={[ROLES.TENANT, ...OWNER_ROLES, ...AGENCY_ROLES]}><MessagesPage /></ProtectedRoute> },
+  { path: 'favoris', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><Favorites /></ProtectedRoute> },
 
   // Applications
-  { path: 'candidature/:id', element: <ProtectedRoute><ApplicationForm /></ProtectedRoute> },
-  { path: 'mes-candidatures', element: <ProtectedRoute><MyApplications /></ProtectedRoute> },
+  { path: 'mes-candidatures', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><MyApplications /></ProtectedRoute> },
 
   // Visits
-  { path: 'visiter/:id', element: <ProtectedRoute><ScheduleVisit /></ProtectedRoute> },
   { path: 'visites/planifier/:id', element: <Navigate to="/visiter/:id" replace /> },
-  { path: 'mes-visites', element: <ProtectedRoute><MyVisits /></ProtectedRoute> },
+  { path: 'mes-visites', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><MyVisits /></ProtectedRoute> },
 
   // Contracts
-  { path: 'contrat/:id', element: <ProtectedRoute><ContractDetail /></ProtectedRoute> },
-  { path: 'mes-contrats', element: <ProtectedRoute><MyContracts /></ProtectedRoute> },
-  { path: 'signer-bail/:id', element: <ProtectedRoute><SignLease /></ProtectedRoute> },
+  { path: 'mes-contrats', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><MyContracts /></ProtectedRoute> },
 
   // Payments
-  { path: 'effectuer-paiement', element: <ProtectedRoute><MakePayment /></ProtectedRoute> },
-  { path: 'mes-paiements', element: <ProtectedRoute><PaymentHistory /></ProtectedRoute> },
+  { path: 'mes-paiements', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><PaymentHistory /></ProtectedRoute> },
 
   // Tenant specific routes
-  { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantDashboard /></ProtectedRoute> },
-  { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantCalendar /></ProtectedRoute> },
-  { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantMaintenance /></ProtectedRoute> },
-  { path: 'mon-score', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantScorePage /></ProtectedRoute> },
-  { path: 'profil/historique-locations', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><RentalHistoryPage /></ProtectedRoute> },
-  { path: 'maintenance/nouvelle', element: <ProtectedRoute><MaintenanceRequest /></ProtectedRoute> },
+  { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantDashboard /></ProtectedRoute> },
+  { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantMaintenance /></ProtectedRoute> },
+  { path: 'mon-score', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantScorePage /></ProtectedRoute> },
+  { path: 'profil/historique-locations', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><RentalHistoryPage /></ProtectedRoute> },
+
+  // Routes that should keep the tenant sidebar visible
+  {
+    element: <ProtectedRoute allowedRoles={[...ALL_AUTHENTICATED]}><TenantSidebarLayout /></ProtectedRoute>,
+    children: [
+      { path: 'mon-espace', element: <UnifiedDashboard /> },
+      { path: 'recherches-sauvegardees', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><SavedSearches /></ProtectedRoute> },
+      { path: 'messages', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES, ...OWNER_ROLES, ...AGENCY_ROLES]}><MessagesPage /></ProtectedRoute> },
+      { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantCalendar /></ProtectedRoute> },
+      { path: 'maintenance/nouvelle', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><MaintenanceRequest /></ProtectedRoute> },
+      { path: 'visiter/:id', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><ScheduleVisit /></ProtectedRoute> },
+      { path: 'candidature/:id', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><ApplicationForm /></ProtectedRoute> },
+      { path: 'contrat/:id', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><ContractDetail /></ProtectedRoute> },
+      { path: 'signer-bail/:id', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><SignLease /></ProtectedRoute> },
+      { path: 'effectuer-paiement', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><MakePayment /></ProtectedRoute> },
+    ],
+  },
 ];

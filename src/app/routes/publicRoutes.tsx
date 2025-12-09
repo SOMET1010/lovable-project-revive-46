@@ -4,24 +4,24 @@ import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import SearchErrorBoundary from '@/features/tenant/components/SearchErrorBoundary';
 
 // TEST: Import direct de HomePage pour déboguer le problème de lazy loading
-import Home from '@/features/property/pages/HomePage';
+import Home from '@/pages/public/HomePage';
 
 // Autres pages en lazy load
-const NotFound = lazyWithRetry(() => import('@/features/property/pages/NotFoundPage'));
-const AddPropertyLanding = lazyWithRetry(() => import('@/features/property/pages/AddPropertyLandingPage'));
+const NotFound = lazyWithRetry(() => import('@/pages/public/NotFoundPage'));
+const AddPropertyLanding = lazyWithRetry(() => import('@/pages/public/AddPropertyLandingPage'));
 
 // Property pages
-const SearchProperties = lazyWithRetry(() => import('@/features/tenant/pages/SearchPropertiesPage'));
-const PropertyDetail = lazyWithRetry(() => import('@/features/tenant/pages/PropertyDetailPage'));
+const SearchProperties = lazyWithRetry(() => import('@/pages/tenant/SearchPropertiesPage'));
+const PropertyDetail = lazyWithRetry(() => import('@/pages/tenant/PropertyDetailPage'));
 
 // Static pages
-const AboutPage = lazyWithRetry(() => import('@/features/auth/pages/AboutPage'));
-const TermsOfServicePage = lazyWithRetry(() => import('@/features/auth/pages/TermsOfServicePage'));
-const PrivacyPolicyPage = lazyWithRetry(() => import('@/features/auth/pages/PrivacyPolicyPage'));
-const ContactPage = lazyWithRetry(() => import('@/features/auth/pages/ContactPage'));
-const HelpPage = lazyWithRetry(() => import('@/features/auth/pages/HelpPage'));
-const FAQPage = lazyWithRetry(() => import('@/features/auth/pages/FAQPage'));
-const HowItWorksPage = lazyWithRetry(() => import('@/features/auth/pages/HowItWorksPage'));
+const AboutPage = lazyWithRetry(() => import('@/pages/auth/AboutPage'));
+const TermsOfServicePage = lazyWithRetry(() => import('@/pages/auth/TermsOfServicePage'));
+const PrivacyPolicyPage = lazyWithRetry(() => import('@/pages/auth/PrivacyPolicyPage'));
+const ContactPage = lazyWithRetry(() => import('@/pages/auth/ContactPage'));
+const HelpPage = lazyWithRetry(() => import('@/pages/auth/HelpPage'));
+const FAQPage = lazyWithRetry(() => import('@/pages/auth/FAQPage'));
+const HowItWorksPage = lazyWithRetry(() => import('@/pages/auth/HowItWorksPage'));
 
 export const publicRoutes: RouteObject[] = [
   // Home - IMPORT DIRECT pour test

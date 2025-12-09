@@ -4,22 +4,22 @@ import ProtectedRoute from '@/shared/ui/ProtectedRoute';
 import { ROLES, OWNER_ROLES, PROPERTY_MANAGER_ROLES } from '@/shared/constants/roles';
 
 // Agency mandates
-const MyMandatesPage = lazyWithRetry(() => import('@/features/agency/pages/MyMandatesPage'));
-const MandateDetailPage = lazyWithRetry(() => import('@/features/agency/pages/MandateDetailPage'));
-const SignMandatePage = lazyWithRetry(() => import('@/features/agency/pages/SignMandatePage'));
+const MyMandatesPage = lazyWithRetry(() => import('@/pages/agency/MyMandatesPage'));
+const MandateDetailPage = lazyWithRetry(() => import('@/pages/agency/MandateDetailPage'));
+const SignMandatePage = lazyWithRetry(() => import('@/pages/agency/SignMandatePage'));
 
 // Owner pages
-const AddProperty = lazyWithRetry(() => import('@/features/owner/pages/AddPropertyPage'));
-const OwnerDashboard = lazyWithRetry(() => import('@/features/owner/pages/DashboardPage'));
-const CreateContract = lazyWithRetry(() => import('@/features/owner/pages/CreateContractPage'));
-const OwnerContracts = lazyWithRetry(() => import('@/features/owner/pages/OwnerContractsPage'));
-const OwnerApplications = lazyWithRetry(() => import('@/features/owner/pages/OwnerApplicationsPage'));
+const AddProperty = lazyWithRetry(() => import('@/pages/owner/AddPropertyPage'));
+const OwnerDashboard = lazyWithRetry(() => import('@/pages/owner/DashboardPage'));
+const CreateContract = lazyWithRetry(() => import('@/pages/owner/CreateContractPage'));
+const OwnerContracts = lazyWithRetry(() => import('@/pages/owner/OwnerContractsPage'));
+const OwnerApplications = lazyWithRetry(() => import('@/pages/owner/OwnerApplicationsPage'));
 
 // Application form (for owner viewing applications)
-const ApplicationForm = lazyWithRetry(() => import('@/features/tenant/pages/ApplicationFormPage'));
+const ApplicationForm = lazyWithRetry(() => import('@/pages/tenant/ApplicationFormPage'));
 
 // Agency pages
-const AgencyDashboard = lazyWithRetry(() => import('@/features/agency/pages/DashboardPage'));
+const AgencyDashboard = lazyWithRetry(() => import('@/pages/agency/DashboardPage'));
 
 export const ownerRoutes: RouteObject[] = [
   // Owner dashboard
