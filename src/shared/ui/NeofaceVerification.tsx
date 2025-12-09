@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Camera, CheckCircle, XCircle, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Camera, CheckCircle, XCircle, Loader2, AlertCircle, RefreshCw, ExternalLink } from 'lucide-react';
 import { Button } from './Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './Card';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ interface NeofaceVerificationProps {
   cniPhotoUrl: string;
   onVerified: (verificationData: unknown) => void;
   onFailed: (error: string) => void;
+  returnUrl?: string;
 }
 
 interface VerificationResponse {
@@ -29,14 +30,17 @@ interface StatusResponse {
   provider: string;
 }
 
+const NEOFACE_STORAGE_KEY = 'neoface_verification_data';
+
 const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   userId,
   cniPhotoUrl,
   onVerified,
   onFailed,
+  returnUrl = '/completer-profil',
 }) => {
   const [isVerifying, setIsVerifying] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'uploading' | 'waiting' | 'polling' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'uploading' | 'waiting' | 'redirecting' | 'polling' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
   const [_documentId, setDocumentId] = useState<string | null>(null);
   const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
@@ -44,6 +48,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const [matchingScore, setMatchingScore] = useState<number | null>(null);
   const [attempts, setAttempts] = useState(0);
   const [progress, setProgress] = useState('');
+  const [usePopupMode, setUsePopupMode] = useState(false);
   const selfieWindowRef = useRef<Window | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,7 +81,6 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
 
     if (data?.error) {
-      // Handle specific error types with user-friendly messages
       const errorMsg = data.error as string;
       if (errorMsg.includes('413') || errorMsg.includes('trop volumineuse') || errorMsg.includes('Too Large')) {
         throw new Error('L\'image CNI est trop volumineuse. Veuillez retourner en arrière et télécharger une image plus petite (< 1MB).');
@@ -104,6 +108,18 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
 
     return data as StatusResponse;
+  };
+
+  const saveVerificationData = (docId: string, verifyId: string, url: string) => {
+    const data = {
+      document_id: docId,
+      verification_id: verifyId,
+      selfie_url: url,
+      user_id: userId,
+      returnUrl: returnUrl,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(NEOFACE_STORAGE_KEY, JSON.stringify(data));
   };
 
   const startPolling = (docId: string, verifyId: string) => {
@@ -140,6 +156,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           setStatus('success');
           setMatchingScore(statusData.matching_score || null);
           setProgress('Identité vérifiée avec succès !');
+          localStorage.removeItem(NEOFACE_STORAGE_KEY);
 
           onVerified({
             document_id: docId,
@@ -157,6 +174,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           setStatus('error');
           const errorMsg = statusData.message || 'La vérification a échoué';
           setError(errorMsg);
+          localStorage.removeItem(NEOFACE_STORAGE_KEY);
           onFailed(errorMsg);
         } else {
           setProgress(`En attente du selfie (tentative ${pollAttempts}/${maxAttempts})...`);
@@ -188,20 +206,35 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       setVerificationId(uploadData.verification_id);
       setProgress('Document téléchargé avec succès !');
 
-      setStatus('waiting');
-      setProgress('Ouverture de la fenêtre de capture du selfie...');
-
-      selfieWindowRef.current = window.open(
-        uploadData.selfie_url,
-        'NeofaceVerification',
-        'width=800,height=600,left=100,top=100'
+      // Save verification data for callback page
+      saveVerificationData(
+        uploadData.document_id,
+        uploadData.verification_id,
+        uploadData.selfie_url
       );
 
-      if (!selfieWindowRef.current) {
-        throw new Error('Impossible d\'ouvrir la fenêtre de vérification. Veuillez autoriser les popups.');
-      }
+      if (usePopupMode) {
+        // Try popup mode
+        setStatus('waiting');
+        setProgress('Ouverture de la fenêtre de capture du selfie...');
 
-      startPolling(uploadData.document_id, uploadData.verification_id);
+        selfieWindowRef.current = window.open(
+          uploadData.selfie_url,
+          'NeofaceVerification',
+          'width=800,height=600,left=100,top=100'
+        );
+
+        if (!selfieWindowRef.current) {
+          // Popup blocked, switch to redirect mode
+          setUsePopupMode(false);
+          handleRedirectMode(uploadData.selfie_url);
+        } else {
+          startPolling(uploadData.document_id, uploadData.verification_id);
+        }
+      } else {
+        // Use redirect mode (default)
+        handleRedirectMode(uploadData.selfie_url);
+      }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la vérification';
@@ -210,6 +243,16 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       onFailed(errorMessage);
       setIsVerifying(false);
     }
+  };
+
+  const handleRedirectMode = (url: string) => {
+    setStatus('redirecting');
+    setProgress('Redirection vers NeoFace...');
+    
+    // Small delay for user to see the message
+    setTimeout(() => {
+      window.location.href = url;
+    }, 1000);
   };
 
   const handleRetry = () => {
@@ -222,6 +265,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     setAttempts(0);
     setProgress('');
     setIsVerifying(false);
+    localStorage.removeItem(NEOFACE_STORAGE_KEY);
 
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
@@ -231,13 +275,9 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
   };
 
-  const handleReopenWindow = () => {
-    if (selfieUrl && (!selfieWindowRef.current || selfieWindowRef.current.closed)) {
-      selfieWindowRef.current = window.open(
-        selfieUrl,
-        'NeofaceVerification',
-        'width=800,height=600,left=100,top=100'
-      );
+  const handleOpenInNewTab = () => {
+    if (selfieUrl) {
+      window.open(selfieUrl, '_blank');
     }
   };
 
@@ -263,7 +303,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           </div>
         )}
 
-        {status !== 'idle' && status !== 'success' && (
+        {(status === 'uploading' || status === 'polling') && (
           <div className="bg-[#F16522]/10 border border-[#F16522]/30 rounded-xl p-4">
             <div className="flex items-center gap-3">
               <Loader2 className="h-5 w-5 text-[#F16522] animate-spin flex-shrink-0" />
@@ -279,7 +319,20 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           </div>
         )}
 
-        {status === 'waiting' && selfieUrl && (
+        {status === 'redirecting' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center">
+            <Loader2 className="h-10 w-10 text-blue-600 animate-spin mx-auto mb-4" />
+            <p className="text-lg font-medium text-blue-900">{progress}</p>
+            <p className="text-sm text-blue-700 mt-2">
+              Vous allez être redirigé vers la page de capture du selfie.
+            </p>
+            <p className="text-xs text-blue-600 mt-4">
+              Après la capture, vous reviendrez automatiquement sur Mon Toit.
+            </p>
+          </div>
+        )}
+
+        {status === 'waiting' && selfieUrl && usePopupMode && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <div className="flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
@@ -289,12 +342,13 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
                   Suivez les instructions dans la fenêtre popup pour capturer votre selfie.
                 </p>
                 <Button
-                  onClick={handleReopenWindow}
+                  onClick={handleOpenInNewTab}
                   variant="outline"
                   size="small"
                   className="mt-2 border-[#F16522] text-[#F16522] hover:bg-[#F16522]/10"
                 >
-                  Rouvrir la fenêtre
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Ouvrir dans un nouvel onglet
                 </Button>
               </div>
             </div>
