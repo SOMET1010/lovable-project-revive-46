@@ -27,6 +27,7 @@ interface TenantSidebarProps {
 
 const navItems = [
   { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Mon Espace', href: '/mon-espace', icon: Home },
   { label: 'Mon Profil', href: '/profil', icon: User },
   { label: 'Mes Candidatures', href: '/mes-candidatures', icon: Users },
   { label: 'Mes Contrats', href: '/mes-contrats', icon: FileText },

@@ -117,7 +117,7 @@ export default function UnifiedDashboardPage() {
     <div className="min-h-screen bg-[#FAF7F4]">
       {/* Header */}
       <div className="bg-white border-b border-[#EFEBE9]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <div className="flex items-center justify-between">
               <div>
@@ -190,7 +190,7 @@ export default function UnifiedDashboardPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Empty state for new users */}
         {hasNoContextualRoles && activeTab === 'profile' && (
           <div className="mb-8">

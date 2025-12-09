@@ -432,6 +432,8 @@ export default function PropertyDetailPage() {
   }
 
   const images = property.images?.length ? property.images : [FALLBACK_IMAGE];
+  const displayPrice = property.monthly_rent ?? property.price;
+  const formattedPrice = displayPrice != null ? displayPrice.toLocaleString() : null;
 
   return (
     <div className="min-h-screen bg-background-page">
@@ -486,7 +488,7 @@ export default function PropertyDetailPage() {
 
                 <div className="flex items-baseline gap-3">
                   <span className="text-4xl md:text-5xl font-bold text-primary-500">
-                    {(property.monthly_rent ?? property.price ?? 0)?.toLocaleString()}
+                    {formattedPrice ?? 'Prix sur demande'}
                   </span>
                   <span className="text-xl text-neutral-500 font-medium">FCFA/mois</span>
                 </div>
@@ -579,7 +581,7 @@ export default function PropertyDetailPage() {
                 <div className="space-y-6">
                   <div>
                     <span className="text-3xl font-bold text-primary-500">
-                    {(property.monthly_rent ?? property.price ?? 0)?.toLocaleString()}
+                      {formattedPrice ?? 'Prix sur demande'}
                     </span>
                     <span className="text-neutral-500 ml-2">FCFA/mois</span>
                   </div>
@@ -621,7 +623,6 @@ export default function PropertyDetailPage() {
                 trustScore={property.owner_trust_score}
                 isVerified={property.owner_is_verified ?? false}
                 oneciVerified={property.owner_oneci_verified ?? false}
-                cnamVerified={property.owner_cnam_verified ?? false}
                 showVerificationBadges={!property.is_anonymous}
                 variant="card"
                 size="lg"

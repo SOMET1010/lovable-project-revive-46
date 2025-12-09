@@ -60,10 +60,13 @@ export default function ProfilePage() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
-        .single();
+        .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) {
+        throw new Error('Profil introuvable');
+      }
       
       const formattedAddress = formatAddress(data.address as AddressValue, data.city || undefined);
       const profileData: Profile = {

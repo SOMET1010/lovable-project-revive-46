@@ -66,6 +66,7 @@ export default function HeaderPremium() {
 
   // Menu utilisateur filtré par permissions
   const userMenuItems = user ? [
+    { label: 'Mon Espace', href: '/mon-espace', icon: LayoutDashboard, visible: true },
     { label: 'Mon Profil', href: '/profil', icon: User, visible: true },
     { label: 'Messages', href: '/messages', icon: MessageCircle, badge: unreadCount, visible: permissions.canSendMessages },
     { label: 'Mes Favoris', href: '/favoris', icon: Heart, visible: permissions.isTenant },

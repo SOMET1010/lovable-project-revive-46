@@ -19,6 +19,32 @@ const noHeaderFooterRoutes = [
   '/mes-certificats',
 ];
 
+// Routes qui n'affichent pas le breadcrumb global (héros ou breadcrumb interne)
+const noBreadcrumbRoutes = ['/', '/recherche'];
+
+// Routes avec navigation latérale (éviter header + breadcrumb doublons)
+const tenantSidebarPrefixes = [
+  '/dashboard/locataire',
+  '/dashboard',
+  '/mon-espace',
+  '/mes-candidatures',
+  '/mes-contrats',
+  '/mes-paiements',
+  '/mes-visites',
+  '/mes-favoris',
+  '/recherches-sauvegardees',
+  '/maintenance/locataire',
+  '/maintenance/nouvelle',
+  '/profil',
+  '/mon-score',
+  '/profil/historique-locations',
+  '/effectuer-paiement',
+  '/messages',
+  '/score-locataire',
+  '/maintenance/locataire',
+  '/maintenance/proprietaire',
+];
+
 // Map routes to skeleton variants
 function getSkeletonVariant(path: string): 'default' | 'dashboard' | 'property' | 'list' | 'form' {
   if (path.includes('dashboard') || path.includes('tableau-de-bord')) return 'dashboard';
@@ -33,8 +59,15 @@ export default function Layout() {
   const path = location.pathname;
 
   const shouldShowLayout = !noLayoutRoutes.includes(path);
+  const isTenantSidebarRoute = tenantSidebarPrefixes.some((prefix) => path.startsWith(prefix));
+  const shouldShowBreadcrumb =
+    !noBreadcrumbRoutes.some((route) => path.startsWith(route)) &&
+    !isTenantSidebarRoute &&
+    shouldShowLayout;
   const shouldShowHeaderFooter =
-    !noHeaderFooterRoutes.some((route) => path.startsWith(route)) && !noLayoutRoutes.includes(path);
+    !noHeaderFooterRoutes.some((route) => path.startsWith(route)) &&
+    !noLayoutRoutes.includes(path) &&
+    !isTenantSidebarRoute;
   const skeletonVariant = getSkeletonVariant(path);
 
   if (!shouldShowLayout) {
@@ -50,7 +83,7 @@ export default function Layout() {
   return (
     <ErrorBoundary>
       {shouldShowHeaderFooter && <HeaderPremium />}
-      {shouldShowHeaderFooter && <Breadcrumb />}
+      {shouldShowHeaderFooter && shouldShowBreadcrumb && <Breadcrumb />}
       <ToastContainer />
       {shouldShowHeaderFooter && <FloatingCallButton />}
       {shouldShowHeaderFooter && <SUTAChatWidget mode="floating" position="bottom-right" />}

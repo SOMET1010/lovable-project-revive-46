@@ -11,7 +11,6 @@ export interface OwnerBadgeProps {
   trustScore?: number | null;
   isVerified?: boolean;
   oneciVerified?: boolean;
-  cnamVerified?: boolean;
   showVerificationBadges?: boolean;
   variant?: 'inline' | 'card';
   size?: 'sm' | 'md' | 'lg';
@@ -63,7 +62,6 @@ export function OwnerBadge({
   trustScore,
   isVerified = false,
   oneciVerified = false,
-  cnamVerified = false,
   showVerificationBadges = false,
   variant = 'inline',
   size = 'md',
@@ -253,12 +251,7 @@ export function OwnerBadge({
                 <Shield className="h-3 w-3" /> ONECI
               </span>
             )}
-            {cnamVerified && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full">
-                <Shield className="h-3 w-3" /> CNAM
-              </span>
-            )}
-            {!isVerified && !oneciVerified && !cnamVerified && (
+            {!isVerified && !oneciVerified && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full">
                 <Shield className="h-3 w-3" /> Vérification en cours
               </span>
@@ -276,6 +269,7 @@ export function OwnerBadge({
             fullWidth
             className="gap-2 items-center"
           >
+            <MessageSquare className="h-4 w-4" />
             Contacter le propriétaire
           </Button>
         </div>
