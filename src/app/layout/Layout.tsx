@@ -10,6 +10,7 @@ import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { GlobalLoadingSkeleton } from '@/shared/ui/GlobalLoadingSkeleton';
 import { FloatingCallButton } from '@/shared/ui/FloatingCallButton';
 import SUTAChatWidget from '@/shared/components/SUTAChatWidget';
+import BottomNavigation from '@/shared/components/navigation/BottomNavigation';
 const noLayoutRoutes = ['/auth/callback'];
 const noHeaderFooterRoutes = [
   '/admin',
@@ -56,7 +57,8 @@ export default function Layout() {
       {shouldShowHeaderFooter && <SUTAChatWidget mode="floating" position="bottom-right" />}
       <ChunkLoadErrorBoundary>
         <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>
-          <main className={shouldShowHeaderFooter ? 'min-h-screen' : ''}>
+          {/* Add padding-bottom on mobile for bottom navigation */}
+          <main className={shouldShowHeaderFooter ? 'min-h-screen pb-20 md:pb-0' : ''}>
             <PageTransition key={location.pathname}>
               <Outlet />
             </PageTransition>
@@ -64,6 +66,8 @@ export default function Layout() {
         </Suspense>
       </ChunkLoadErrorBoundary>
       {shouldShowHeaderFooter && <FooterPremium />}
+      {/* Mobile Bottom Navigation */}
+      {shouldShowHeaderFooter && <BottomNavigation />}
     </ErrorBoundary>
   );
 }
