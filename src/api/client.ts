@@ -52,7 +52,7 @@ export async function handleQuery<T>(
  * Helper to handle paginated queries
  */
 export async function handlePaginatedQuery<T>(
-  queryBuilder: ReturnType<typeof supabase.from>,
+  queryBuilder: ReturnType<ReturnType<typeof supabase.from>['select']>,
   page: number = 1,
   pageSize: number = 12
 ): Promise<PaginatedResponse<T>> {
