@@ -8,7 +8,6 @@ import PropertyFormHeader from './PropertyFormHeader';
 import { propertyService } from '../services/propertyService';
 import { useNotifications, NotificationContainer } from '../../../shared/components/Notification';
 import { PropertyData } from '../services/propertyService';
-import { PropertyData } from '../services/propertyService';
 import { 
   Home, 
   MapPin, 
