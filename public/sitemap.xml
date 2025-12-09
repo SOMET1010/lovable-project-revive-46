@@ -1,56 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Homepage -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage - Highest priority -->
   <url>
     <loc>https://montoit.ci/</loc>
-    <lastmod>2024-11-24</lastmod>
+    <lastmod>2025-12-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Main Pages -->
+  <!-- Property Search - High traffic page -->
   <url>
-    <loc>https://montoit.ci/search</loc>
-    <lastmod>2024-11-24</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
+    <loc>https://montoit.ci/recherche</loc>
+    <lastmod>2025-12-09</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.95</priority>
   </url>
 
+  <!-- Authentication -->
   <url>
-    <loc>https://montoit.ci/auth</loc>
-    <lastmod>2024-11-24</lastmod>
+    <loc>https://montoit.ci/connexion</loc>
+    <lastmod>2025-12-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://montoit.ci/about</loc>
-    <lastmod>2024-11-24</lastmod>
+    <loc>https://montoit.ci/inscription</loc>
+    <lastmod>2025-12-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Informational Pages -->
+  <url>
+    <loc>https://montoit.ci/a-propos</loc>
+    <lastmod>2025-12-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
     <loc>https://montoit.ci/contact</loc>
-    <lastmod>2024-11-24</lastmod>
+    <lastmod>2025-12-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <!-- Legal Pages -->
   <url>
-    <loc>https://montoit.ci/privacy</loc>
-    <lastmod>2024-11-24</lastmod>
+    <loc>https://montoit.ci/politique-confidentialite</loc>
+    <lastmod>2025-12-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
-    <loc>https://montoit.ci/terms</loc>
-    <lastmod>2024-11-24</lastmod>
+    <loc>https://montoit.ci/conditions-utilisation</loc>
+    <lastmod>2025-12-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
-  <!-- Note: Dynamic property pages should be generated server-side or via a sitemap generator -->
+  <!-- Owner Landing -->
+  <url>
+    <loc>https://montoit.ci/louer-mon-bien</loc>
+    <lastmod>2025-12-09</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 
+    Note: Dynamic property pages (/propriete/:id) should be generated 
+    server-side or via a sitemap generator for SEO optimization.
+    Consider implementing a dynamic sitemap endpoint that queries 
+    all available properties from the database.
+  -->
+
 </urlset>
