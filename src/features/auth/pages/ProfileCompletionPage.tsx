@@ -24,11 +24,19 @@ const USER_TYPES = [
   { value: 'agent', label: 'Agent Immobilier', description: 'Je gère un portefeuille', icon: Briefcase },
 ] as const;
 
+// Villes ivoiriennes (sans les communes d'Abidjan)
 const IVORIAN_CITIES = [
   'Abidjan', 'Bouaké', 'Yamoussoukro', 'San-Pédro', 'Korhogo',
   'Man', 'Daloa', 'Gagnoa', 'Divo', 'Abengourou',
-  'Grand-Bassam', 'Assinie', 'Bingerville', 'Cocody', 'Marcory',
-  'Plateau', 'Treichville', 'Yopougon', 'Adjamé', 'Abobo',
+  'Grand-Bassam', 'Assinie', 'Bingerville', 'Bondoukou', 'Odienné',
+  'Séguéla', 'Agboville', 'Dabou', 'Dimbokro', 'Duékoué',
+];
+
+// Communes d'Abidjan uniquement
+const ABIDJAN_COMMUNES = [
+  'Abobo', 'Adjamé', 'Anyama', 'Attécoubé', 'Bingerville',
+  'Cocody', 'Koumassi', 'Marcory', 'Plateau', 'Port-Bouët',
+  'Songon', 'Treichville', 'Yopougon',
 ];
 
 // --- UTILS ---
@@ -90,6 +98,7 @@ export default function ProfileCompletionPage() {
   const [email, setEmail] = useState('');
   const [userType, setUserType] = useState<'tenant' | 'owner' | 'agent'>('tenant');
   const [city, setCity] = useState('');
+  const [commune, setCommune] = useState('');
   const [bio, setBio] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -229,11 +238,14 @@ export default function ProfileCompletionPage() {
   const handleFinalSubmit = async () => {
     setSubmitting(true);
     try {
+      // Si Abidjan avec commune, stocker "Abidjan - Commune"
+      const finalCity = city === 'Abidjan' && commune ? `Abidjan - ${commune}` : city || null;
+      
       await updateProfile({
         full_name: fullName.trim(),
         email: email.trim() || null,
         user_type: userType,
-        city: city || null,
+        city: finalCity,
         bio: bio.trim() || null,
         avatar_url: avatarUrl,
         profile_setup_completed: true,
@@ -411,7 +423,7 @@ export default function ProfileCompletionPage() {
                    <div className="space-y-2">
                       <label className="text-xs font-bold uppercase text-[#A69B95] tracking-widest ml-1">Nom Complet *</label>
                       <div className="relative group">
-                         <User className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors" />
+                         <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors z-10 pointer-events-none" />
                          <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} placeholder="Jean Kouassi"
                            className="w-full pl-12 pr-4 py-3.5 bg-white border border-[#EFEBE9] rounded-xl text-[#2C1810] font-medium focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] outline-none transition-all placeholder:text-[#D5CCC7]" />
                       </div>
@@ -419,15 +431,30 @@ export default function ProfileCompletionPage() {
                    <div className="space-y-2">
                       <label className="text-xs font-bold uppercase text-[#A69B95] tracking-widest ml-1">Ville</label>
                       <div className="relative group">
-                         <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors" />
-                         <select value={city} onChange={e => setCity(e.target.value)}
+                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors z-10 pointer-events-none" />
+                         <select value={city} onChange={e => { setCity(e.target.value); setCommune(''); }}
                            className="w-full pl-12 pr-4 py-3.5 bg-white border border-[#EFEBE9] rounded-xl text-[#2C1810] font-medium focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] outline-none transition-all appearance-none cursor-pointer">
-                           <option value="">Choisir...</option>
+                           <option value="">Choisir une ville...</option>
                            {IVORIAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                          </select>
                       </div>
                    </div>
                 </div>
+
+                {/* Commune (visible uniquement si Abidjan) */}
+                {city === 'Abidjan' && (
+                  <div className="space-y-2 animate-in slide-in-from-top duration-200">
+                    <label className="text-xs font-bold uppercase text-[#A69B95] tracking-widest ml-1">Commune</label>
+                    <div className="relative group">
+                       <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors z-10 pointer-events-none" />
+                       <select value={commune} onChange={e => setCommune(e.target.value)}
+                         className="w-full pl-12 pr-4 py-3.5 bg-white border border-[#EFEBE9] rounded-xl text-[#2C1810] font-medium focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] outline-none transition-all appearance-none cursor-pointer">
+                         <option value="">Choisir une commune...</option>
+                         {ABIDJAN_COMMUNES.map(c => <option key={c} value={c}>{c}</option>)}
+                       </select>
+                    </div>
+                  </div>
+                )}
 
                 {/* Contact */}
                 <div className="p-5 bg-white rounded-2xl border border-[#EFEBE9] space-y-4">
@@ -446,7 +473,7 @@ export default function ProfileCompletionPage() {
                      </div>
                    )}
                    <div className="relative group">
-                      <Mail className="absolute left-4 top-3.5 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors" />
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#A69B95] group-focus-within:text-[#F16522] transition-colors z-10 pointer-events-none" />
                       <input type="email" value={email} onChange={e => handleEmailChange(e.target.value)} placeholder="Email (Optionnel)"
                         className={`w-full pl-12 pr-4 py-3.5 bg-white border rounded-xl text-[#2C1810] font-medium focus:ring-2 focus:ring-[#F16522]/20 outline-none transition-all placeholder:text-[#D5CCC7] ${emailError ? 'border-red-400' : 'border-[#EFEBE9] focus:border-[#F16522]'}`} />
                       {emailError && <p className="text-xs text-red-500 mt-1 ml-1">{emailError}</p>}
