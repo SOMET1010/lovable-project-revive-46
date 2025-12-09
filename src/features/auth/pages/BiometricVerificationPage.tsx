@@ -28,18 +28,69 @@ export default function BiometricVerificationPage() {
     }
   }, [profile]);
 
+  // Compress image before upload to prevent 413 errors
+  const compressImage = async (file: File, maxWidth = 1920, quality = 0.8): Promise<Blob> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ratio = Math.min(maxWidth / img.width, maxWidth / img.height, 1);
+        canvas.width = img.width * ratio;
+        canvas.height = img.height * ratio;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Canvas context unavailable'));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Image compression failed'));
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
+    // Validate file size (max 10MB original)
+    const MAX_ORIGINAL_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_ORIGINAL_SIZE) {
+      toast.error('Image trop volumineuse (max 10MB)');
+      return;
+    }
+
     setIsUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/cni-${Date.now()}.${fileExt}`;
+      // Compress image to max 1920px and 80% quality
+      const compressedBlob = await compressImage(file, 1920, 0.8);
+      
+      // Check compressed size (max 2MB for NeoFace)
+      const MAX_COMPRESSED_SIZE = 2 * 1024 * 1024;
+      if (compressedBlob.size > MAX_COMPRESSED_SIZE) {
+        toast.error('Image trop volumineuse après compression. Utilisez une image plus petite.');
+        setIsUploading(false);
+        return;
+      }
+
+      const fileName = `${user.id}/cni-${Date.now()}.jpg`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, file);
+        .upload(fileName, compressedBlob, {
+          contentType: 'image/jpeg',
+        });
 
       if (uploadError) throw uploadError;
 
@@ -56,7 +107,8 @@ export default function BiometricVerificationPage() {
         .update({ cni_photo_url: publicUrl })
         .eq('user_id', user.id);
 
-      toast.success('Photo CNI téléchargée');
+      const sizeKB = Math.round(compressedBlob.size / 1024);
+      toast.success(`Photo CNI téléchargée (${sizeKB}KB)`);
     } catch (err) {
       console.error('[BiometricVerification] Upload error:', err);
       toast.error('Erreur lors du téléchargement');
@@ -226,7 +278,7 @@ export default function BiometricVerificationPage() {
                     <p className="font-medium text-[#3C2A1E]">
                       {isUploading ? 'Téléchargement...' : 'Cliquez pour télécharger'}
                     </p>
-                    <p className="text-sm text-[#5D4037] mt-1">PNG, JPG jusqu'à 10MB</p>
+                    <p className="text-sm text-[#5D4037] mt-1">PNG, JPG (max 5MB recommandé)</p>
                   </div>
                   <input
                     type="file"
