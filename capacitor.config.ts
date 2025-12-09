@@ -12,7 +12,7 @@ const config: CapacitorConfig = {
   ...(isProduction ? {} : {
     server: {
       // Hot-reload depuis le sandbox Lovable (dev uniquement)
-      url: 'https://4d8f5937-4e73-4af7-a740-286b13067a1d.lovableproject.com?forceHideBadge=true',
+      url: 'https://lovable-renewal.lovable.app',
       cleartext: true
     }
   }),

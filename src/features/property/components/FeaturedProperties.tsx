@@ -2,14 +2,22 @@ import { MapPin, ArrowRight, Bed, Bath, Maximize, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ScoreBadge } from '@/shared/ui/ScoreBadge';
 import { useScrollAnimation } from '@/hooks/shared/useScrollAnimation';
-import type { PropertyWithOwnerScore } from '../types';
+import type { PropertyWithOwnerScore } from '@/types/property';
 
 interface FeaturedPropertiesProps {
   properties: PropertyWithOwnerScore[];
   loading: boolean;
 }
 
-function PropertyCard({ property, index, isVisible }: { property: PropertyWithOwnerScore; index: number; isVisible: boolean }) {
+function PropertyCard({
+  property,
+  index,
+  isVisible,
+}: {
+  property: PropertyWithOwnerScore;
+  index: number;
+  isVisible: boolean;
+}) {
   return (
     <Link
       to={`/propriete/${property.id}`}
@@ -21,20 +29,23 @@ function PropertyCard({ property, index, isVisible }: { property: PropertyWithOw
       {/* Image Container */}
       <div className="relative h-64 overflow-hidden">
         <img
-          src={property.images?.[0] || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'}
+          src={
+            property.images?.[0] ||
+            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'
+          }
           alt={property.title || 'Propriété'}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        
+
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        
+
         {/* Top Badges */}
         <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
           <span className="px-3 py-1.5 bg-[var(--terracotta-500)] text-white text-xs font-bold rounded-full uppercase tracking-wide">
             {property.property_type || 'Appartement'}
           </span>
-          <button 
+          <button
             className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white hover:scale-110 transition-all"
             onClick={(e) => {
               e.preventDefault();
@@ -44,7 +55,7 @@ function PropertyCard({ property, index, isVisible }: { property: PropertyWithOw
             <Heart className="h-5 w-5 text-[var(--earth-700)]" />
           </button>
         </div>
-        
+
         {/* Price Badge */}
         <div className="absolute bottom-4 left-4">
           <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
@@ -58,11 +69,7 @@ function PropertyCard({ property, index, isVisible }: { property: PropertyWithOw
         {/* Trust Score Badge */}
         {property.owner_trust_score != null && (
           <div className="absolute bottom-4 right-4">
-            <ScoreBadge 
-              score={property.owner_trust_score} 
-              variant="compact" 
-              size="sm" 
-            />
+            <ScoreBadge score={property.owner_trust_score} variant="compact" size="sm" />
           </div>
         )}
       </div>
@@ -71,29 +78,42 @@ function PropertyCard({ property, index, isVisible }: { property: PropertyWithOw
       <div className="p-6">
         {/* Title */}
         <h3 className="text-h4 font-semibold text-[var(--earth-900)] mb-3 group-hover:text-[var(--terracotta-500)] transition-colors line-clamp-1">
-          {property.title || 'Belle propriété à louer'}
+          {property.title && property.title.trim() !== '' ? property.title : (
+            <>
+              {property.property_type === 'apartment' ? 'Appartement' :
+               property.property_type === 'house' ? 'Maison' :
+               property.property_type === 'studio' ? 'Studio' :
+               property.property_type === 'villa' ? 'Villa' :
+               property.property_type === 'land' ? 'Terrain' :
+               property.property_type === 'commercial' ? 'Local commercial' :
+               'Propriété'}
+              {' '}à {property.city || 'Abidjan'}
+              {property.neighborhood && ` - ${property.neighborhood}`}
+            </>
+          )}
         </h3>
 
         {/* Location */}
         <div className="flex items-center gap-2 text-[var(--earth-700)] mb-4">
           <MapPin className="h-4 w-4 text-[var(--terracotta-500)]" />
           <span className="text-sm">
-            {property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city || 'Abidjan'}
+            {property.neighborhood ? `${property.neighborhood}, ` : ''}
+            {property.city || 'Abidjan'}
           </span>
         </div>
 
         {/* Features */}
         <div className="flex items-center gap-4 text-sm text-[var(--earth-700)] pt-4 border-t border-[var(--sand-200)]">
-          {property.bedrooms && (
+          {property.bedrooms_count && (
             <div className="flex items-center gap-1.5">
               <Bed className="h-4 w-4 text-[var(--terracotta-400)]" />
-              <span>{property.bedrooms} ch.</span>
+              <span>{property.bedrooms_count} ch.</span>
             </div>
           )}
-          {property.bathrooms && (
+          {property.bathrooms_count && (
             <div className="flex items-center gap-1.5">
               <Bath className="h-4 w-4 text-[var(--terracotta-400)]" />
-              <span>{property.bathrooms} sdb</span>
+              <span>{property.bathrooms_count} sdb</span>
             </div>
           )}
           {property.surface_area && (
@@ -124,17 +144,19 @@ function PropertySkeleton() {
 }
 
 export default function FeaturedProperties({ properties, loading }: FeaturedPropertiesProps) {
+  // Ensure properties is an array before using slice
+  const propertiesArray = Array.isArray(properties) ? properties : [];
   // Limit to 4 properties for cleaner homepage
-  const displayProperties = properties.slice(0, 4);
-  
+  const displayProperties = propertiesArray.slice(0, 4);
+
   // Scroll animation
   const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
-  
+
   return (
     <section ref={sectionRef} className="py-10 md:py-14" style={{ backgroundColor: '#FAF7F4' }}>
       <div className="container">
         {/* Section Header - Animation fadeUp */}
-        <div 
+        <div
           className={`flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8 md:mb-10 transition-all duration-700 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
@@ -150,7 +172,7 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
               Les dernières annonces vérifiées et prêtes à vous accueillir
             </p>
           </div>
-          
+
           <Link
             to="/recherche"
             className={`group inline-flex items-center gap-2 text-[var(--terracotta-600)] font-semibold hover:text-[var(--terracotta-700)] transition-all duration-700 delay-200 ${
@@ -174,15 +196,17 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
               <MapPin className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">Aucune propriété disponible</h3>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              Aucune propriété disponible
+            </h3>
             <p className="text-muted-foreground">De nouvelles annonces arrivent bientôt</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {displayProperties.map((property, index) => (
-              <PropertyCard 
-                key={property.id} 
-                property={property} 
+              <PropertyCard
+                key={property.id}
+                property={property}
                 index={index}
                 isVisible={isVisible}
               />
@@ -191,15 +215,12 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
         )}
 
         {/* CTA Button Mobile - Animation fadeUp */}
-        <div 
+        <div
           className={`mt-8 text-center md:hidden transition-all duration-700 ease-out delay-500 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          <Link
-            to="/recherche"
-            className="btn-primary inline-flex items-center gap-2"
-          >
+          <Link to="/recherche" className="btn-primary inline-flex items-center gap-2">
             <span>Toutes les propriétés</span>
             <ArrowRight className="h-5 w-5" />
           </Link>

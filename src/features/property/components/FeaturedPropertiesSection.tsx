@@ -14,8 +14,8 @@ export default function FeaturedPropertiesSection() {
   }
 
   return (
-    <FeaturedProperties 
-      properties={data?.data || []}
+    <FeaturedProperties
+      properties={data || []}
       loading={isLoading}
     />
   );

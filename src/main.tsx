@@ -26,6 +26,14 @@ try {
   console.error('❌ main.tsx: Pre-import error', e);
 }
 
+// Import error interceptor FIRST to catch all JWT errors
+import '@/utils/error-interceptor';
+console.log('🟢 main.tsx: Error interceptor imported');
+
+// Import auth cleanup utilities for global access
+import '@/utils/auth-cleanup';
+console.log('🟢 main.tsx: Auth cleanup utilities imported');
+
 import { StrictMode } from 'react';
 console.log('🟢 main.tsx: React imported');
 

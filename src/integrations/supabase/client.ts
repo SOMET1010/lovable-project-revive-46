@@ -2,16 +2,82 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://silkjqepcbhlflbdtvgg.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNpbGtqcWVwY2JobGZsYmR0dmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3NzUzMDAsImV4cCI6MjA4MDM1MTMwMH0.jqPfDxCxAd8iKl85e3X5gNIQ0v4XfQ3QlRHlpXfu-6M";
+const env = import.meta.env;
+const SUPABASE_URL = env.VITE_SUPABASE_URL || env.VITE_PUBLIC_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY =
+  env.VITE_SUPABASE_ANON_KEY ||
+  env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  env.VITE_PUBLIC_SUPABASE_ANON_KEY ||
+  env.VITE_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error('Supabase configuration is missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+}
+
+// Aggressive token cleanup - remove all Supabase auth data
+const aggressiveTokenCleanup = () => {
+  try {
+    // Remove all possible Supabase auth keys
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.includes('supabase') || key.includes('auth'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => {
+      try {
+        localStorage.removeItem(key);
+      } catch (e) {
+        // Ignore individual removal errors
+      }
+    });
+    console.log('Cleaned up', keysToRemove.length, 'Supabase/auth items from localStorage');
+  } catch (error) {
+    console.warn('Could not perform aggressive token cleanup:', error);
+  }
+};
+
+// Check if we need to clean tokens (run on every load)
+const shouldCleanTokens = () => {
+  try {
+    // Check for any suspicious tokens, but allow Supabase dev keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.includes('supabase')) {
+        const value = localStorage.getItem(key);
+        if (value && (
+          // Clean obvious invalid tokens
+          (value.length < 10) ||
+          (value === 'null') ||
+          (value === 'undefined') ||
+          // But allow valid Supabase tokens that start with 'ey' or 'sb_publishable'
+          (!value.startsWith('ey') && !value.startsWith('sb_publishable') && value.length < 50)
+        )) {
+          return true;
+        }
+      }
+    }
+    return false;
+  } catch (error) {
+    return true; // If in doubt, clean
+  }
+};
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+    detectSessionInUrl: true,
+  }
+});
+
+// Handle auth errors more aggressively
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+    if (!session) {
+      aggressiveTokenCleanup();
+    }
   }
 });

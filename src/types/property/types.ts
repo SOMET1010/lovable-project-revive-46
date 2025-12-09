@@ -25,6 +25,9 @@ export interface PropertyWithOwnerScore extends Property {
   owner_full_name?: string | null;
   owner_avatar_url?: string | null;
   owner_is_verified?: boolean | null;
+  // Ajout des colonnes manquantes de la table properties
+  bedrooms_count?: number;  // Maintenu pour compatibilité avec ancien code
+  bathrooms_count?: number; // Maintenu pour compatibilité avec ancien code
 }
 
 export interface PropertyFilters {

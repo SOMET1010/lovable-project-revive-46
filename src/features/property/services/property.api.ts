@@ -3,12 +3,13 @@
  *
  * Ce service centralise tous les appels API liés aux propriétés immobilières
  * et utilise le CacheService pour optimiser les performances.
- * 
+ *
  * SÉCURITÉ: Utilise get_public_profile() pour récupérer les données propriétaire
  * au lieu de jointures directes sur profiles (RLS sécurisé)
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { withErrorHandling } from '@/integrations/supabase/error-handler';
 import { cacheService } from '@/shared/services/cacheService';
 import type { Database } from '@/shared/lib/database.types';
 import type { PropertyWithOwnerScore } from '../types';
@@ -45,15 +46,17 @@ export interface PropertyFilters {
 }
 
 /**
- * Récupère les profils publics des propriétaires via RPC sécurisé
+ * Récupère les profils publics des propriétaires
  */
 const fetchOwnerProfiles = async (ownerIds: string[]): Promise<Map<string, PublicProfile>> => {
   const uniqueIds = [...new Set(ownerIds.filter(Boolean))];
   if (uniqueIds.length === 0) return new Map();
 
-  const { data, error } = await supabase.rpc('get_public_profiles', {
-    profile_user_ids: uniqueIds
-  });
+  // Use public view for anonymous access
+  const { data, error } = await supabase
+    .from('public_profiles_view')
+    .select('*')
+    .in('id', uniqueIds);
 
   if (error) {
     console.error('Error fetching owner profiles:', error);
@@ -61,8 +64,17 @@ const fetchOwnerProfiles = async (ownerIds: string[]): Promise<Map<string, Publi
   }
 
   const profileMap = new Map<string, PublicProfile>();
-  (data || []).forEach((profile: PublicProfile) => {
-    profileMap.set(profile.user_id, profile);
+  (data || []).forEach((profile: any) => {
+    profileMap.set(profile.id, {
+      user_id: profile.id,
+      full_name: profile.full_name,
+      avatar_url: profile.avatar_url,
+      trust_score: profile.trust_score,
+      is_verified: profile.is_verified,
+      city: profile.city,
+      oneci_verified: profile.oneci_verified,
+      cnam_verified: profile.cnam_verified
+    });
   });
 
   return profileMap;
@@ -102,14 +114,21 @@ const enrichPropertyWithOwner = async (
       owner_full_name: null,
       owner_avatar_url: null,
       owner_is_verified: null,
+      // Backward compatibility for component code
+      bedrooms_count: property.bedrooms,
+      bathrooms_count: property.bathrooms,
+      // Price field compatibility
+      price: property.monthly_rent || property.price,
     } as PropertyWithOwnerScore;
   }
 
-  const { data, error } = await supabase.rpc('get_public_profile', {
-    profile_user_id: property.owner_id
-  });
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id, full_name, avatar_url, trust_score, is_verified')
+    .eq('id', property.owner_id)
+    .single();
 
-  if (error || !data || data.length === 0) {
+  if (error || !data) {
     return {
       ...property,
       owner_trust_score: null,
@@ -119,13 +138,12 @@ const enrichPropertyWithOwner = async (
     } as PropertyWithOwnerScore;
   }
 
-  const owner = data[0] as PublicProfile;
   return {
     ...property,
-    owner_trust_score: owner.trust_score ?? null,
-    owner_full_name: owner.full_name ?? null,
-    owner_avatar_url: owner.avatar_url ?? null,
-    owner_is_verified: owner.is_verified ?? null,
+    owner_trust_score: data.trust_score ?? null,
+    owner_full_name: data.full_name ?? null,
+    owner_avatar_url: data.avatar_url ?? null,
+    owner_is_verified: data.is_verified ?? null,
   } as PropertyWithOwnerScore;
 };
 
@@ -158,11 +176,11 @@ export const propertyApi = {
     }
 
     if (filters?.minPrice !== undefined) {
-      query = query.gte('monthly_rent', filters.minPrice);
+      query = query.gte('price', filters.minPrice);
     }
 
     if (filters?.maxPrice !== undefined) {
-      query = query.lte('monthly_rent', filters.maxPrice);
+      query = query.lte('price', filters.maxPrice);
     }
 
     if (filters?.minRooms !== undefined) {
@@ -258,29 +276,32 @@ export const propertyApi = {
    * Récupère les propriétés en vedette (avec cache)
    */
   getFeatured: async () => {
-    const cacheKey = `${CACHE_PREFIX}featured`;
-    const cached = cacheService.get<PropertyWithOwnerScore[]>(cacheKey);
+    return withErrorHandling(async () => {
+      const cacheKey = `${CACHE_PREFIX}featured`;
+      const cached = cacheService.get<PropertyWithOwnerScore[]>(cacheKey);
 
-    if (cached) {
-      return { data: cached, error: null };
-    }
+      if (cached) {
+        return cached;
+      }
 
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('status', 'disponible')
-      .order('created_at', { ascending: false })
-      .limit(6);
+      // Use public view for anonymous access
+      const { data, error } = await supabase
+        .from('public_properties_view')
+        .select('*')
+        .order('featured', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(6);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    if (data) {
-      const enrichedData = await enrichPropertiesWithOwners(data);
-      cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
-      return { data: enrichedData, error: null };
-    }
+      if (data) {
+        const enrichedData = await enrichPropertiesWithOwners(data);
+        cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
+        return enrichedData;
+      }
 
-    return { data: [], error: null };
+      return [];
+    }, 'Erreur lors du chargement des propriétés en vedette');
   },
 
   /**
