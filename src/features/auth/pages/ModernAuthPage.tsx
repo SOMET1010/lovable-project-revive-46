@@ -23,6 +23,12 @@ type AuthMethod = 'phone' | 'email';
 type PhoneStep = 'enter' | 'verify' | 'name';
 type EmailMode = 'login' | 'register';
 
+const deriveEmailModeFromPath = (path: string): EmailMode =>
+  path.includes('/inscription') ? 'register' : 'login';
+
+const shouldDefaultToEmail = (path: string): boolean =>
+  path.includes('/connexion') || path.includes('/inscription');
+
 // Slides pour le côté gauche (témoignages)
 const AUTH_SLIDES = [
   {
@@ -47,9 +53,11 @@ export default function ModernAuthPage() {
   const location = useLocation();
 
   // State
-  const [authMethod, setAuthMethod] = useState<AuthMethod>('phone');
+  const [authMethod, setAuthMethod] = useState<AuthMethod>(
+    shouldDefaultToEmail(location.pathname) ? 'email' : 'phone'
+  );
   const [phoneStep, setPhoneStep] = useState<PhoneStep>('enter');
-  const [emailMode, setEmailMode] = useState<EmailMode>(location.pathname === '/inscription' ? 'register' : 'login');
+  const [emailMode, setEmailMode] = useState<EmailMode>(deriveEmailModeFromPath(location.pathname));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -88,11 +96,11 @@ export default function ModernAuthPage() {
 
   // Sync URL with email mode
   useEffect(() => {
-    const expectedMode: EmailMode = location.pathname === '/inscription' ? 'register' : 'login';
+    const expectedMode = deriveEmailModeFromPath(location.pathname);
     if (emailMode !== expectedMode) {
       setEmailMode(expectedMode);
     }
-  }, [location.pathname]);
+  }, [location.pathname, emailMode]);
 
   const handleEmailModeChange = (mode: EmailMode) => {
     const targetPath = mode === 'register' ? '/inscription' : '/connexion';
@@ -109,6 +117,10 @@ export default function ModernAuthPage() {
     setSuccess('');
     setOtp('');
     setDevOtp(null);
+
+    if (method === 'email') {
+      setEmailMode(deriveEmailModeFromPath(location.pathname));
+    }
   };
 
   const resetPhoneFlow = () => {
@@ -374,7 +386,7 @@ export default function ModernAuthPage() {
                     : 'text-[#A69B95] hover:bg-[#FAF7F4]'
                 }`}
               >
-                <Smartphone className="w-4 h-4" /> Téléphone
+                <Smartphone className="w-4 h-4 shrink-0" /> Téléphone
                 {authMethod === 'phone' && (
                   <span className="text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded-full">Rapide</span>
                 )}
@@ -387,7 +399,7 @@ export default function ModernAuthPage() {
                     : 'text-[#A69B95] hover:bg-[#FAF7F4]'
                 }`}
               >
-                <Mail className="w-4 h-4" /> Email
+                <Mail className="w-4 h-4 shrink-0" /> Email
               </button>
             </div>
           )}
@@ -419,7 +431,7 @@ export default function ModernAuthPage() {
                       setCountryDialCode(dialCode);
                       setIsPhoneValid(isValid);
                     }}
-                    placeholder="07 00 00 00 00"
+                    placeholder="   07 00 00 00 00"
                     autoFocus
                   />
 
@@ -596,29 +608,20 @@ export default function ModernAuthPage() {
           {authMethod === 'email' && phoneStep === 'enter' && (
             <div className="space-y-5 animate-fade-in">
               
-              {/* Email Mode Tabs */}
-              <div className="flex gap-2 bg-white p-1 rounded-xl border border-[#EFEBE9]">
-                <button
-                  onClick={() => handleEmailModeChange('login')}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                    emailMode === 'login'
-                      ? 'bg-[#2C1810] text-white'
-                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4]'
-                  }`}
-                >
-                  Connexion
-                </button>
-                <button
-                  onClick={() => handleEmailModeChange('register')}
-                  className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                    emailMode === 'register'
-                      ? 'bg-[#2C1810] text-white'
-                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4]'
-                  }`}
-                >
-                  Inscription
-                </button>
-              </div>
+              {/* Email Mode Tabs - Affiché uniquement en mode connexion */}
+              {emailMode === 'login' && (
+                <div className="bg-white p-4 rounded-xl border border-[#EFEBE9] text-center">
+                  <p className="text-[#6B5A4E] text-sm">
+                    Pas encore de compte ?{' '}
+                    <button
+                      onClick={() => handleEmailModeChange('register')}
+                      className="text-[#F16522] hover:text-[#D95318] font-semibold hover:underline transition-colors"
+                    >
+                      Créer un compte
+                    </button>
+                  </p>
+                </div>
+              )}
 
               <form onSubmit={emailMode === 'login' ? handleEmailLogin : handleEmailRegister} className="space-y-4">
                 

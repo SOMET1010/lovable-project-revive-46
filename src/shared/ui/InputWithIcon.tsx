@@ -3,7 +3,7 @@
  * Supports multiple style variants and password visibility toggle
  */
 
-import { forwardRef, useState, InputHTMLAttributes } from 'react';
+import { forwardRef, useId, useState, InputHTMLAttributes } from 'react';
 import { LucideIcon, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 
@@ -77,11 +77,13 @@ const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(
       className,
       type,
       disabled,
+      style,
       ...props
     },
     ref
   ) => {
     const [showPassword, setShowPassword] = useState(false);
+    const inputId = useId();
 
     // Determine actual input type
     const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
@@ -92,6 +94,7 @@ const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(
       <div className={containerClassName}>
         {label && (
           <label
+            htmlFor={inputId}
             className={cn(
               'block text-sm font-semibold mb-2',
               styles.label
@@ -102,31 +105,38 @@ const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(
         )}
         <div className="relative">
           {/* Left Icon */}
-          <Icon
-            className={cn(
-              'absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 pointer-events-none z-10',
-              iconColor || styles.icon
-            )}
-          />
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10 w-12">
+            <Icon
+              className={cn(
+                'h-5 w-5',
+                iconColor || styles.icon
+              )}
+            />
+          </div>
 
           {/* Input */}
           <input
             ref={ref}
             type={inputType}
             disabled={disabled}
+            id={label ? inputId : undefined}
             className={cn(
-              'w-full py-3 rounded-xl transition-all outline-none',
+              'w-full py-3 pl-14 pr-4 rounded-xl transition-all outline-none',
               styles.bg,
               styles.border,
               styles.focus,
-              isPassword && showPasswordToggle ? 'pr-12' : 'pr-4',
+              isPassword && showPasswordToggle && 'pr-12',
               error && 'border-red-500 focus:ring-red-200 focus:border-red-500',
               success && 'border-green-500 focus:ring-green-200 focus:border-green-500',
               disabled && 'opacity-50 cursor-not-allowed bg-gray-100',
               variant === 'glass' && 'placeholder:text-white/60 text-white',
               className
             )}
-            style={{ paddingLeft: '44px' }}
+            style={{
+              paddingLeft: '3.5rem',
+              ...(isPassword && showPasswordToggle ? { paddingRight: '3rem' } : {}),
+              ...style,
+            }}
             {...props}
           />
 
