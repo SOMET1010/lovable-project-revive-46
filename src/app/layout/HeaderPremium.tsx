@@ -101,7 +101,7 @@ export default function HeaderPremium() {
               />
               <div className="flex flex-col">
                 <span className="text-xl font-extrabold text-[#2C1810] leading-none tracking-tight group-hover:text-[#F16522] transition-colors">
-                  Mon Toit
+                 MON TOIT
                 </span>
                 {!isMobile && (
                   <span className="text-[10px] font-bold text-[#A69B95] uppercase tracking-wider">

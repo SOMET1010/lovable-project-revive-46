@@ -280,7 +280,8 @@ export const propertyApi = {
       const cacheKey = `${CACHE_PREFIX}featured`;
       const cached = cacheService.get<PropertyWithOwnerScore[]>(cacheKey);
 
-      if (cached) {
+      // Si un cache existe mais est vide, on force un refresh pour éviter de rester bloqué
+      if (cached && cached.length > 0) {
         return cached;
       }
 
@@ -296,7 +297,12 @@ export const propertyApi = {
 
       if (data) {
         const enrichedData = await enrichPropertiesWithOwners(data);
-        cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
+        // Ne pas figer un cache vide : on veut pouvoir rafraîchir si de nouvelles annonces arrivent
+        if (enrichedData.length > 0) {
+          cacheService.set(cacheKey, enrichedData, CACHE_TTL_MINUTES);
+        } else {
+          cacheService.remove(cacheKey);
+        }
         return enrichedData;
       }
 

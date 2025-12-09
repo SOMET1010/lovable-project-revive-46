@@ -37,7 +37,13 @@ export function useOwnerProperties(ownerId: string | undefined) {
 export function useFeaturedProperties() {
   return useQuery({
     queryKey: ['properties', 'featured'],
-    queryFn: () => propertyApi.getFeatured(),
+    queryFn: async () => {
+      const { data, error } = await propertyApi.getFeatured();
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data || [];
+    },
   });
 }
 
