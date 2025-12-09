@@ -131,29 +131,29 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
   const { ref: sectionRef, isVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
   
   return (
-    <section ref={sectionRef} className="py-10 md:py-14" style={{ backgroundColor: '#FAF7F4' }}>
+    <section ref={sectionRef} className="py-8 sm:py-10 md:py-14" style={{ backgroundColor: '#FAF7F4' }}>
       <div className="container">
         {/* Section Header - Animation fadeUp */}
         <div 
-          className={`flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8 md:mb-10 transition-all duration-700 ease-out ${
+          className={`flex flex-col md:flex-row md:items-end md:justify-between gap-3 sm:gap-4 mb-6 sm:mb-8 md:mb-10 transition-all duration-700 ease-out ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
           <div>
-            <span className="inline-block px-4 py-2 rounded-full bg-[var(--terracotta-100)] text-[var(--terracotta-600)] text-sm font-semibold mb-3">
+            <span className="inline-block px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-[var(--terracotta-100)] text-[var(--terracotta-600)] text-xs sm:text-sm font-semibold mb-2 sm:mb-3">
               Nouvelles Annonces
             </span>
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-display text-[var(--earth-900)] mb-2">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display text-[var(--earth-900)] mb-1 sm:mb-2">
               Propriétés à découvrir
             </h2>
-            <p className="text-base text-[var(--earth-700)] max-w-xl">
+            <p className="text-sm sm:text-base text-[var(--earth-700)] max-w-xl">
               Les dernières annonces vérifiées et prêtes à vous accueillir
             </p>
           </div>
           
           <Link
             to="/recherche"
-            className={`group inline-flex items-center gap-2 text-[var(--terracotta-600)] font-semibold hover:text-[var(--terracotta-700)] transition-all duration-700 delay-200 ${
+            className={`hidden md:inline-flex group items-center gap-2 text-[var(--terracotta-600)] font-semibold hover:text-[var(--terracotta-700)] transition-all duration-700 delay-200 ${
               isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
             }`}
           >
@@ -162,45 +162,88 @@ export default function FeaturedProperties({ properties, loading }: FeaturedProp
           </Link>
         </div>
 
-        {/* Properties Grid - Limited to 4 with stagger animation */}
+        {/* Properties - Horizontal scroll on mobile, grid on desktop */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[...Array(4)].map((_, i) => (
-              <PropertySkeleton key={i} />
-            ))}
-          </div>
-        ) : displayProperties.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-muted flex items-center justify-center">
-              <MapPin className="h-10 w-10 text-muted-foreground" />
+          <>
+            {/* Mobile skeleton - horizontal scroll */}
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:hidden scrollbar-hide">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex-shrink-0 w-[85vw] max-w-[320px] snap-start">
+                  <PropertySkeleton />
+                </div>
+              ))}
             </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">Aucune propriété disponible</h3>
-            <p className="text-muted-foreground">De nouvelles annonces arrivent bientôt</p>
+            {/* Desktop skeleton */}
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {[...Array(4)].map((_, i) => (
+                <PropertySkeleton key={i} />
+              ))}
+            </div>
+          </>
+        ) : displayProperties.length === 0 ? (
+          <div className="text-center py-12 sm:py-16 bg-white rounded-2xl">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 sm:mb-6 rounded-full bg-muted flex items-center justify-center">
+              <MapPin className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">Aucune propriété disponible</h3>
+            <p className="text-sm sm:text-base text-muted-foreground">De nouvelles annonces arrivent bientôt</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayProperties.map((property, index) => (
-              <PropertyCard 
-                key={property.id} 
-                property={property} 
-                index={index}
-                isVisible={isVisible}
-              />
-            ))}
-          </div>
+          <>
+            {/* Mobile: Horizontal swipeable cards */}
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 -mx-4 px-4 md:hidden scrollbar-hide">
+              {displayProperties.map((property, index) => (
+                <div 
+                  key={property.id} 
+                  className={`flex-shrink-0 w-[85vw] max-w-[320px] snap-start transition-all duration-500 ${
+                    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                  }`}
+                  style={{ transitionDelay: isVisible ? `${index * 100}ms` : '0ms' }}
+                >
+                  <PropertyCard 
+                    property={property} 
+                    index={index}
+                    isVisible={isVisible}
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: Grid */}
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6">
+              {displayProperties.map((property, index) => (
+                <PropertyCard 
+                  key={property.id} 
+                  property={property} 
+                  index={index}
+                  isVisible={isVisible}
+                />
+              ))}
+            </div>
+
+            {/* Scroll indicator for mobile */}
+            <div className="flex justify-center gap-2 mt-4 md:hidden">
+              {displayProperties.map((_, i) => (
+                <div 
+                  key={i} 
+                  className="w-2 h-2 rounded-full bg-[var(--terracotta-300)] transition-all"
+                />
+              ))}
+            </div>
+          </>
         )}
 
         {/* CTA Button Mobile - Animation fadeUp */}
         <div 
-          className={`mt-8 text-center md:hidden transition-all duration-700 ease-out delay-500 ${
+          className={`mt-6 sm:mt-8 text-center md:hidden transition-all duration-700 ease-out delay-500 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
           <Link
             to="/recherche"
-            className="btn-primary inline-flex items-center gap-2"
+            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 bg-[var(--terracotta-500)] text-white font-semibold rounded-xl hover:bg-[var(--terracotta-600)] active:scale-[0.98] transition-all shadow-lg shadow-orange-500/20"
           >
-            <span>Toutes les propriétés</span>
+            <span>Voir toutes les propriétés</span>
             <ArrowRight className="h-5 w-5" />
           </Link>
         </div>

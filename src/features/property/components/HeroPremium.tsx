@@ -83,7 +83,7 @@ export default function HeroPremium() {
 
   return (
     <section className="relative bg-gradient-to-br from-[#2C1810] via-[#1a0f0a] to-[#0f0805] overflow-hidden">
-      {/* Mobile background image */}
+      {/* Mobile background image - optimized */}
       <div 
         className="absolute inset-0 lg:hidden"
         style={{
@@ -92,44 +92,45 @@ export default function HeroPremium() {
           backgroundPosition: 'center',
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#2C1810]/90 via-[#1a0f0a]/95 to-[#0f0805]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#2C1810]/85 via-[#1a0f0a]/90 to-[#0f0805]" />
       </div>
 
-      {/* Subtle grid pattern */}
+      {/* Subtle grid pattern - hidden on mobile for performance */}
       <div 
-        className="absolute inset-0 opacity-[0.03]"
+        className="absolute inset-0 opacity-[0.03] hidden sm:block"
         style={{
           backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)`,
           backgroundSize: '32px 32px'
         }}
       />
       
-      {/* Orange glow effect */}
-      <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-[#FF6C2F]/20 rounded-full blur-[150px] pointer-events-none transform translate-x-1/2 -translate-y-1/2" />
+      {/* Orange glow effect - reduced on mobile */}
+      <div className="absolute top-1/2 right-0 w-[300px] sm:w-[600px] h-[300px] sm:h-[600px] bg-[#FF6C2F]/15 sm:bg-[#FF6C2F]/20 rounded-full blur-[100px] sm:blur-[150px] pointer-events-none transform translate-x-1/2 -translate-y-1/2" />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-16 items-center">
           
           {/* Left column - Text & Search */}
           <div className="space-y-4 sm:space-y-6">
-            {/* Trust badge - hidden on mobile */}
-            <div className="hidden sm:inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-4 py-2">
-              <Star className="w-4 h-4 text-[#FF6C2F] fill-[#FF6C2F]" />
-              <span className="text-white/90 text-sm font-medium">
-                N°1 DE LA CONFIANCE EN CÔTE D'IVOIRE
+            {/* Trust badge - compact on mobile */}
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/10 backdrop-blur-sm border border-white/10 rounded-full px-3 py-1.5 sm:px-4 sm:py-2">
+              <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#FF6C2F] fill-[#FF6C2F]" />
+              <span className="text-white/90 text-xs sm:text-sm font-medium">
+                <span className="sm:hidden">N°1 en Côte d'Ivoire</span>
+                <span className="hidden sm:inline">N°1 DE LA CONFIANCE EN CÔTE D'IVOIRE</span>
               </span>
             </div>
 
-            {/* Main headline */}
+            {/* Main headline - optimized sizes for mobile */}
             <div className="space-y-2 sm:space-y-3">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="text-[28px] sm:text-5xl lg:text-6xl font-bold leading-[1.15] sm:leading-tight">
                 <span className="text-white">Trouvez votre</span>
                 <br />
                 <span className="text-[#FF6C2F]">nouveau chez-vous</span>
               </h1>
-              {/* Adaptive subtitle - short on mobile, full on desktop */}
-              <p className="text-sm sm:text-lg text-white/70 max-w-lg leading-relaxed">
-                <span className="sm:hidden">Logements vérifiés et 100% sécurisés.</span>
+              {/* Adaptive subtitle */}
+              <p className="text-[15px] sm:text-lg text-white/70 max-w-lg leading-relaxed">
+                <span className="sm:hidden">Logements vérifiés • 100% sécurisés</span>
                 <span className="hidden sm:inline">
                   Des milliers d'appartements et villas vérifiés physiquement. 
                   Une expérience humaine, simple et 100% sécurisée.
@@ -137,9 +138,73 @@ export default function HeroPremium() {
               </p>
             </div>
 
-            {/* Search bar - 2x2 grid on mobile */}
-            <div className="bg-white rounded-2xl shadow-2xl p-2 sm:p-3">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {/* Search bar - Stacked on mobile, row on desktop */}
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-2 sm:p-3">
+              {/* Mobile: 2 columns stacked */}
+              <div className="grid grid-cols-2 gap-2 sm:hidden">
+                {/* Property type */}
+                <div className="relative">
+                  <Home className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                  <select
+                    value={propertyType}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                    className="w-full h-11 pl-8 pr-2 bg-neutral-50 border-0 rounded-lg text-sm text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none"
+                  >
+                    <option value="">Type</option>
+                    {RESIDENTIAL_PROPERTY_TYPES.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* City */}
+                <div className="relative">
+                  <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                  <select
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full h-11 pl-8 pr-2 bg-neutral-50 border-0 rounded-lg text-sm text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none"
+                  >
+                    <option value="">Ville</option>
+                    {CITIES.map((cityName) => (
+                      <option key={cityName} value={cityName}>
+                        {cityName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Budget - full width */}
+                <div className="relative col-span-2">
+                  <Wallet className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                  <select
+                    value={maxBudget}
+                    onChange={(e) => setMaxBudget(e.target.value)}
+                    className="w-full h-11 pl-8 pr-2 bg-neutral-50 border-0 rounded-lg text-sm text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none"
+                  >
+                    <option value="">Budget max</option>
+                    {budgetOptions.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Search button - full width */}
+                <button
+                  onClick={handleSearch}
+                  className="col-span-2 h-12 px-4 bg-[#FF6C2F] hover:bg-[#e05519] text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-lg shadow-[#FF6C2F]/30"
+                >
+                  <Search className="w-5 h-5" />
+                  <span>Rechercher</span>
+                </button>
+              </div>
+
+              {/* Desktop: 4 columns */}
+              <div className="hidden sm:grid grid-cols-4 gap-2">
                 {/* Property type select */}
                 <div className="relative">
                   <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
