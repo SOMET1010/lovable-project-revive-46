@@ -73,13 +73,13 @@ export default function BiometricVerificationPage() {
 
     setIsUploading(true);
     try {
-      // Compress image to max 1280px and 70% quality for NeoFace API
-      const compressedBlob = await compressImage(file, 1280, 0.7);
+      // Compress image to max 1920px and 85% quality (NeoFace accepts up to 10MB)
+      const compressedBlob = await compressImage(file, 1920, 0.85);
       
-      // Check compressed size (max 1MB for NeoFace API)
-      const MAX_COMPRESSED_SIZE = 1 * 1024 * 1024;
+      // Check compressed size (max 5MB for safety, NeoFace accepts up to 10MB)
+      const MAX_COMPRESSED_SIZE = 5 * 1024 * 1024;
       if (compressedBlob.size > MAX_COMPRESSED_SIZE) {
-        toast.error('Image trop volumineuse (max 1MB). Utilisez une image plus petite ou de moindre résolution.');
+        toast.error('Image trop volumineuse (max 5MB). Utilisez une image plus petite.');
         setIsUploading(false);
         return;
       }
