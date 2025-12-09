@@ -9,6 +9,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { toast } from '@/shared/hooks/useSafeToast';
 import ScheduleMaintenanceModal from '../components/ScheduleMaintenanceModal';
 import RejectMaintenanceModal from '../components/RejectMaintenanceModal';
+import OwnerDashboardLayout from '../components/OwnerDashboardLayout';
 
 interface MaintenanceRequest {
   id: string;
@@ -276,16 +277,16 @@ export default function OwnerMaintenancePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <OwnerDashboardLayout title="Maintenance">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <OwnerDashboardLayout title="Maintenance">
       {/* Header */}
       <div className="bg-[#2C1810]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -615,6 +616,6 @@ export default function OwnerMaintenancePage() {
         onConfirm={onRejectConfirm}
         loading={actionLoading !== null}
       />
-    </div>
+    </OwnerDashboardLayout>
   );
 }

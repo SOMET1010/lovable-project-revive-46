@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Home, Building, Building2, Users, FileText, Wrench, MessageSquare, Plus, Eye, TrendingUp, Calendar, Handshake } from 'lucide-react';
+import { Home, Building, Building2, Users, FileText, Wrench, MessageSquare, Plus, Eye, TrendingUp, Handshake, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import InviteAgencyDialog from '@/features/agency/components/InviteAgencyDialog';
 import { useAgencyMandates } from '@/hooks/useAgencyMandates';
+import OwnerDashboardLayout from '../components/OwnerDashboardLayout';
 
 interface Property {
   id: string;
@@ -128,16 +129,16 @@ export default function OwnerDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF7F4]">
+      <OwnerDashboardLayout title="Tableau de bord">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]"></div>
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F4]">
+    <OwnerDashboardLayout title="Tableau de bord">
       {/* Header */}
       <div className="bg-[#2C1810] dashboard-header-animate">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -426,6 +427,6 @@ export default function OwnerDashboardPage() {
         agencies={agencies}
         selectedPropertyId={selectedPropertyForInvite}
       />
-    </div>
+    </OwnerDashboardLayout>
   );
 }
