@@ -86,7 +86,7 @@ const ScorePage: React.FC = () => {
     { key: 'oneci', label: 'Vérification ONECI', points: 30, description: 'Identité nationale' },
     { key: 'cnam', label: 'Vérification CNAM', points: 25, description: 'Assurance maladie' },
     { key: 'facial', label: 'Vérification faciale', points: 25, description: 'Reconnaissance faciale' },
-    { key: 'ansut', label: 'Certification ANSUT', points: 20, description: 'Certification officielle' },
+    { key: 'ansut', label: 'Certification Mon Toit', points: 20, description: 'Certification officielle' },
   ];
 
   return (
@@ -310,7 +310,7 @@ const ScorePage: React.FC = () => {
             </li>
             <li>
               <strong>Score de Vérification (40%)</strong> : Basé sur les vérifications officielles 
-              (ONECI, CNAM, reconnaissance faciale, ANSUT)
+              (ONECI, CNAM, reconnaissance faciale)
             </li>
             <li>
               <strong>Score d'Historique (40%)</strong> : Basé sur vos locations précédentes et 

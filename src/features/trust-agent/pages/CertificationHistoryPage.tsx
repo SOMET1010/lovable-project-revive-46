@@ -251,7 +251,7 @@ export default function CertificationHistoryPage() {
                             <div className="flex items-start justify-between">
                               <div>
                                 <h3 className="font-semibold">
-                                  {isUserCert ? 'Certification Utilisateur' : 'Certification Propriété ANSUT'}
+                                  {isUserCert ? 'Certification Utilisateur' : 'Certification Propriété Mon Toit'}
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
                                   ID: {log.entity_id.slice(0, 8)}...

@@ -53,10 +53,10 @@ export default function EnhancedAnsutBadge({
         onClick={() => showTooltip && setShowInfo(!showInfo)}
         onMouseEnter={() => showTooltip && setShowInfo(true)}
         onMouseLeave={() => showTooltip && setShowInfo(false)}
-        className={`inline-flex items-center ${classes.badge} bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 border-blue-500 cursor-pointer animate-glow`}
+        className={`inline-flex items-center ${classes.badge} bg-gradient-to-r from-[#F16522] to-[#E55A1B] text-white rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 border-2 border-[#F16522]/80 cursor-pointer animate-glow`}
       >
         <Shield className={`${classes.icon} mr-1.5`} />
-        <span>Vérifié ANSUT</span>
+        <span>Vérifié Mon Toit</span>
         <CheckCircle className={`${classes.icon} ml-1.5 text-green-300`} />
       </button>
 
@@ -66,17 +66,17 @@ export default function EnhancedAnsutBadge({
           {/* Arrow */}
           <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-2 border-8 border-transparent border-t-white"></div>
 
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Shield className="h-5 w-5 text-blue-600" />
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-[#F16522]/10 rounded-lg">
+                  <Shield className="h-5 w-5 text-[#F16522]" />
+                </div>
+                <h4 className="font-bold text-gray-900">Identité Vérifiée</h4>
               </div>
-              <h4 className="font-bold text-gray-900">Vérification ANSUT</h4>
-            </div>
 
-            <p className="text-sm text-gray-600 leading-relaxed">
-              {userName ? `${userName} a été vérifié` : 'Cette personne a été vérifiée'} par l'Agence
-              Nationale de Soutien au Développement de l'Habitat Social (ANSUT) avec validation ONECI.
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {userName ? `${userName} a été vérifié` : 'Cette personne a été vérifiée'} par Mon Toit
+                avec validation ONECI et vérification biométrique.
             </p>
 
             <div className="space-y-2">
@@ -123,9 +123,9 @@ export function CompactAnsutBadge({ verified }: { verified: boolean }) {
   if (!verified) return null;
 
   return (
-    <div className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold">
+    <div className="inline-flex items-center px-2 py-1 bg-[#F16522]/10 text-[#F16522] rounded-md text-xs font-semibold">
       <Shield className="h-3 w-3 mr-1" />
-      <span>ANSUT</span>
+      <span>Vérifié</span>
     </div>
   );
 }

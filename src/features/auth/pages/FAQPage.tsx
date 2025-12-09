@@ -13,7 +13,7 @@ const faqData: FAQItem[] = [
   {
     category: 'Général',
     question: 'Qu\'est-ce que Mon Toit ?',
-    answer: 'Mon Toit est une plateforme immobilière en Côte d\'Ivoire qui facilite la mise en relation entre propriétaires et locataires. Nous offrons une solution sécurisée, transparente et certifiée ANSUT pour trouver et louer des logements.'
+    answer: 'Mon Toit est une plateforme immobilière en Côte d\'Ivoire qui facilite la mise en relation entre propriétaires et locataires. Nous offrons une solution sécurisée et transparente avec vérification d\'identité pour trouver et louer des logements en toute confiance.'
   },
   {
     category: 'Général',
@@ -63,12 +63,12 @@ const faqData: FAQItem[] = [
   {
     category: 'Vérification',
     question: 'Pourquoi vérifier mon identité ?',
-    answer: 'La vérification d\'identité (via ONECI/CEV) renforce la confiance entre utilisateurs et réduit les fraudes. Les profils vérifiés reçoivent un badge spécial et sont prioritaires dans les résultats de recherche.'
+    answer: 'La vérification d\'identité (via ONECI et vérification biométrique) renforce la confiance entre utilisateurs et réduit les fraudes. Les profils vérifiés reçoivent un badge spécial "Vérifié Mon Toit" et sont prioritaires dans les résultats de recherche.'
   },
   {
     category: 'Vérification',
-    question: 'Comment obtenir la certification ANSUT ?',
-    answer: 'ANSUT (Agence Nationale de Soutien à l\'Habitat) certifie les logements conformes aux normes ivoiriennes. Soumettez une demande depuis votre dashboard propriétaire, un agent viendra inspecter le bien. La certification est valable 3 ans.'
+    question: 'Comment obtenir la certification Mon Toit ?',
+    answer: 'Mon Toit certifie les logements conformes aux normes de qualité. Soumettez une demande depuis votre dashboard propriétaire, un agent de confiance viendra inspecter le bien. La certification garantit aux locataires un logement vérifié et sécurisé.'
   },
   {
     category: 'Sécurité',

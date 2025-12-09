@@ -143,8 +143,8 @@ export default function HowItWorksPage() {
   const securityFeatures = [
     {
       icon: <Shield className="h-6 w-6" />,
-      title: 'Certification ANSUT',
-      description: 'Conforme aux normes de l\'Autorité Nationale des Services Universels de Télécommunications'
+      title: 'Certification Mon Toit',
+      description: 'Vérification d\'identité ONECI et certification des propriétés par nos agents de confiance'
     },
     {
       icon: <Lock className="h-6 w-6" />,
@@ -250,7 +250,7 @@ export default function HowItWorksPage() {
               Votre sécurité est notre priorité
             </h2>
             <p className="text-xl text-[#6B5A4E] max-w-3xl mx-auto">
-              Certification ANSUT, vérification d'identité et signature électronique légale
+              Certification Mon Toit, vérification d'identité et signature électronique légale
             </p>
           </div>
 
