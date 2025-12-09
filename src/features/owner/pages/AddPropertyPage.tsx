@@ -80,13 +80,29 @@ const STEPS = [
 ];
 
 export default function AddProperty() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
-const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1);
   const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [ownerVerificationChecked, setOwnerVerificationChecked] = useState(false);
+
+  // Vérification du statut propriétaire vérifié (C-02 audit)
+  useEffect(() => {
+    if (profile && !ownerVerificationChecked) {
+      setOwnerVerificationChecked(true);
+      
+      // Avertir si le propriétaire n'est pas vérifié (mais ne pas bloquer)
+      if (!profile.is_verified) {
+        toast.info(
+          'Conseil : Faites vérifier votre profil pour augmenter la confiance des locataires.',
+          { duration: 6000 }
+        );
+      }
+    }
+  }, [profile, ownerVerificationChecked]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);

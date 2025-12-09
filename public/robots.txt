@@ -1,25 +1,51 @@
 # robots.txt for Mon Toit Platform
+# Updated: December 2025
 
 User-agent: *
 Allow: /
+Allow: /recherche
+Allow: /propriete/
+Allow: /a-propos
+Allow: /contact
 Disallow: /admin/
 Disallow: /dashboard/
-Disallow: /profile/
+Disallow: /mon-espace/
+Disallow: /profil
 Disallow: /messages/
 Disallow: /api/
+Disallow: /connexion
+Disallow: /inscription
+Disallow: /completer-profil
+Disallow: /verification-biometrique
 
 # Sitemap
 Sitemap: https://montoit.ci/sitemap.xml
 
-# Crawl-delay
-Crawl-delay: 10
+# Crawl-delay for general bots
+Crawl-delay: 5
 
-# Specific bots
+# Google bots - full access to public content
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 2
 
 User-agent: Googlebot-Image
-Allow: /images/
+Allow: /
 
+# Bing bot
 User-agent: bingbot
 Allow: /
+Crawl-delay: 5
+
+# Block AI training bots
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: anthropic-ai
+Disallow: /
