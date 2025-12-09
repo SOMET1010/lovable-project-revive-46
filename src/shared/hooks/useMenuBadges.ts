@@ -18,6 +18,11 @@ export interface MenuBadges {
   ownerContractsToSign: number;     // Contrats en attente signature propriétaire
   pendingMaintenance: number;       // Demandes maintenance en attente
   
+  // Agency badges
+  pendingMandates: number;          // Mandats en attente de signature
+  managedProperties: number;        // Propriétés gérées actives
+  agencyApplications: number;       // Candidatures sur propriétés gérées
+  
   isLoading: boolean;
   refetch: () => void;
 }
@@ -31,6 +36,9 @@ export function useMenuBadges(): MenuBadges {
     receivedApplications: 0,
     ownerContractsToSign: 0,
     pendingMaintenance: 0,
+    pendingMandates: 0,
+    managedProperties: 0,
+    agencyApplications: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -43,6 +51,9 @@ export function useMenuBadges(): MenuBadges {
         receivedApplications: 0,
         ownerContractsToSign: 0,
         pendingMaintenance: 0,
+        pendingMandates: 0,
+        managedProperties: 0,
+        agencyApplications: 0,
       });
       setIsLoading(false);
       return;
@@ -57,6 +68,9 @@ export function useMenuBadges(): MenuBadges {
         receivedAppsResult,
         ownerContractsResult,
         maintenanceResult,
+        pendingMandatesResult,
+        managedPropertiesResult,
+        agencyAppsResult,
       ] = await Promise.all([
         // Unread messages
         supabase
@@ -101,6 +115,36 @@ export function useMenuBadges(): MenuBadges {
           .select('id, contract:lease_contracts!inner(owner_id)', { count: 'exact', head: true })
           .eq('lease_contracts.owner_id', user.id)
           .eq('status', 'ouverte'),
+        
+        // Agency: Pending mandates awaiting signature
+        supabase
+          .from('agency_mandates')
+          .select('id, agency:agencies!inner(user_id)', { count: 'exact', head: true })
+          .eq('agencies.user_id', user.id)
+          .eq('status', 'pending'),
+        
+        // Agency: Managed properties count (active mandates)
+        supabase
+          .from('agency_mandates')
+          .select('id, agency:agencies!inner(user_id)', { count: 'exact', head: true })
+          .eq('agencies.user_id', user.id)
+          .eq('status', 'active')
+          .not('property_id', 'is', null),
+        
+        // Agency: Applications on managed properties
+        supabase
+          .from('rental_applications')
+          .select(`
+            id,
+            property:properties!inner(
+              id,
+              mandate:agency_mandates!inner(
+                agency:agencies!inner(user_id)
+              )
+            )
+          `, { count: 'exact', head: true })
+          .eq('properties.agency_mandates.agencies.user_id', user.id)
+          .eq('status', 'en_attente'),
       ]);
 
       setBadges({
@@ -110,6 +154,9 @@ export function useMenuBadges(): MenuBadges {
         receivedApplications: receivedAppsResult.count ?? 0,
         ownerContractsToSign: ownerContractsResult.count ?? 0,
         pendingMaintenance: maintenanceResult.count ?? 0,
+        pendingMandates: pendingMandatesResult.count ?? 0,
+        managedProperties: managedPropertiesResult.count ?? 0,
+        agencyApplications: agencyAppsResult.count ?? 0,
       });
     } catch (error) {
       if (import.meta.env.DEV) {

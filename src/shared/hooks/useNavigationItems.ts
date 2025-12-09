@@ -148,9 +148,30 @@ export function useNavigationItems() {
     const items: (NavigationItem & { visible: boolean })[] = [
       { label: 'Tableau de bord', href: '/agency', icon: LayoutDashboard, visible: true },
       { label: 'Mon Profil', href: '/profil', icon: User, visible: true },
-      { label: 'Propriétés gérées', href: '/agency/proprietes', icon: Building2, visible: permissions.isAgent || permissions.isAdmin },
-      { label: 'Mandats', href: '/agency/mandats', icon: FileText, visible: permissions.isAgent || permissions.isAdmin },
-      { label: 'Candidatures', href: '/agency/candidatures', icon: ClipboardList, visible: permissions.isAgent || permissions.isAdmin },
+      { 
+        label: 'Propriétés gérées', 
+        href: '/agency/proprietes', 
+        icon: Building2, 
+        visible: permissions.isAgent || permissions.isAdmin,
+        badgeCount: badges.managedProperties,
+        badgeColor: 'blue' as BadgeColor,
+      },
+      { 
+        label: 'Mandats', 
+        href: '/agency/mandats', 
+        icon: FileText, 
+        visible: permissions.isAgent || permissions.isAdmin,
+        badgeCount: badges.pendingMandates,
+        badgeColor: 'orange' as BadgeColor,
+      },
+      { 
+        label: 'Candidatures', 
+        href: '/agency/candidatures', 
+        icon: ClipboardList, 
+        visible: permissions.isAgent || permissions.isAdmin,
+        badgeCount: badges.agencyApplications,
+        badgeColor: 'primary' as BadgeColor,
+      },
       { label: 'Contrats', href: '/agency/contrats', icon: FileText, visible: permissions.canManageContracts },
       { 
         label: 'Messages', 
