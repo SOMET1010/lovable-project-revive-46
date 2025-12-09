@@ -51,7 +51,7 @@ const INITIAL_FORM_DATA: PropertyData = {
   bathrooms: 1,
   area: 0,
   price: 0,
-  priceType: 'achat',
+  priceType: 'location',
   city: '',
   district: '',
   address: '',
