@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import TenantSidebar from './TenantSidebar';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/app/providers/AuthProvider';
 
 interface TenantDashboardLayoutProps {
   children: React.ReactNode;
@@ -10,39 +8,14 @@ interface TenantDashboardLayoutProps {
 }
 
 export default function TenantDashboardLayout({ children, title }: TenantDashboardLayoutProps) {
-  const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [unreadMessages, setUnreadMessages] = useState(0);
-
-  useEffect(() => {
-    if (user) {
-      loadUnreadMessages();
-    }
-  }, [user]);
-
-  const loadUnreadMessages = async () => {
-    if (!user) return;
-    
-    try {
-      const { data } = await supabase
-        .from('messages')
-        .select('id')
-        .eq('receiver_id', user.id)
-        .eq('is_read', false);
-      
-      setUnreadMessages(data?.length || 0);
-    } catch (error) {
-      console.error('Error loading unread messages:', error);
-    }
-  };
 
   return (
     <div className="flex min-h-screen bg-neutral-50">
-      {/* Sidebar */}
+      {/* Sidebar - badges are now handled internally via useNavigationItems */}
       <TenantSidebar 
         isOpen={sidebarOpen} 
         onClose={() => setSidebarOpen(false)}
-        unreadMessages={unreadMessages}
       />
 
       {/* Main Content */}

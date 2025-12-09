@@ -1,10 +1,13 @@
 /**
  * useNavigationItems - Centralized navigation items filtered by permissions
  * Returns only the menu items the current user has access to
+ * Includes dynamic badge counts for real-time notifications
  */
 
 import { useMemo } from 'react';
 import { usePermissions } from './usePermissions';
+import { useMenuBadges } from './useMenuBadges';
+import type { BadgeColor } from '@/shared/ui/BadgeIndicator';
 import {
   LayoutDashboard,
   User,
@@ -39,6 +42,9 @@ export interface NavigationItem {
   href: string;
   icon: LucideIcon;
   hasBadge?: boolean;
+  badgeCount?: number;
+  badgeColor?: BadgeColor;
+  badgePulse?: boolean;
   color?: string;
 }
 
@@ -49,24 +55,48 @@ export interface NavigationSection {
 
 export function useNavigationItems() {
   const permissions = usePermissions();
+  const badges = useMenuBadges();
 
   const tenantItems = useMemo(() => {
     const items: (NavigationItem & { visible: boolean })[] = [
       { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard, visible: true },
       { label: 'Mon Profil', href: '/profil', icon: User, visible: true },
-      { label: 'Mes Candidatures', href: '/mes-candidatures', icon: Users, visible: permissions.isTenant || permissions.isAdmin },
-      { label: 'Mes Contrats', href: '/mes-contrats', icon: FileText, visible: permissions.canViewOwnContracts },
+      { 
+        label: 'Mes Candidatures', 
+        href: '/mes-candidatures', 
+        icon: Users, 
+        visible: permissions.isTenant || permissions.isAdmin,
+        badgeCount: badges.pendingApplications,
+        badgeColor: 'orange' as BadgeColor,
+      },
+      { 
+        label: 'Mes Contrats', 
+        href: '/mes-contrats', 
+        icon: FileText, 
+        visible: permissions.canViewOwnContracts,
+        badgeCount: badges.contractsToSign,
+        badgeColor: 'red' as BadgeColor,
+      },
       { label: 'Mes Paiements', href: '/mes-paiements', icon: CreditCard, visible: permissions.canMakePayments },
       { label: 'Mes Visites', href: '/mes-visites', icon: Calendar, visible: permissions.canScheduleVisits },
       { label: 'Maintenance', href: '/maintenance/locataire', icon: Wrench, visible: permissions.canCreateMaintenanceRequest },
       { label: 'Mon Score', href: '/mon-score', icon: Award, visible: permissions.isTenant || permissions.isAdmin },
       { label: 'Historique Locations', href: '/profil/historique-locations', icon: Home, visible: permissions.isTenant || permissions.isAdmin },
       { label: 'Mes Favoris', href: '/favoris', icon: Heart, visible: permissions.isTenant || permissions.isAdmin },
-      { label: 'Messages', href: '/messages', icon: MessageSquare, visible: permissions.canSendMessages, hasBadge: true },
+      { 
+        label: 'Messages', 
+        href: '/messages', 
+        icon: MessageSquare, 
+        visible: permissions.canSendMessages, 
+        hasBadge: true,
+        badgeCount: badges.unreadMessages,
+        badgeColor: 'green' as BadgeColor,
+        badgePulse: true,
+      },
     ];
 
     return items.filter(item => item.visible).map(({ visible: _visible, ...rest }) => rest);
-  }, [permissions]);
+  }, [permissions, badges]);
 
   const ownerItems = useMemo(() => {
     const items: (NavigationItem & { visible: boolean })[] = [
@@ -74,15 +104,45 @@ export function useNavigationItems() {
       { label: 'Mon Profil', href: '/profil', icon: User, visible: true },
       { label: 'Mes Propriétés', href: '/dashboard/mes-proprietes', icon: Building2, visible: permissions.isOwner || permissions.isAdmin },
       { label: 'Ajouter un bien', href: '/ajouter-propriete', icon: PlusCircle, visible: permissions.canAddProperty },
-      { label: 'Candidatures reçues', href: '/dashboard/candidatures', icon: ClipboardList, visible: permissions.isOwner || permissions.isAdmin },
-      { label: 'Mes Contrats', href: '/dashboard/mes-contrats', icon: FileText, visible: permissions.canManageContracts },
-      { label: 'Maintenance', href: '/dashboard/maintenance', icon: Wrench, visible: permissions.isOwner || permissions.isAdmin },
+      { 
+        label: 'Candidatures reçues', 
+        href: '/dashboard/candidatures', 
+        icon: ClipboardList, 
+        visible: permissions.isOwner || permissions.isAdmin,
+        badgeCount: badges.receivedApplications,
+        badgeColor: 'orange' as BadgeColor,
+      },
+      { 
+        label: 'Mes Contrats', 
+        href: '/dashboard/mes-contrats', 
+        icon: FileText, 
+        visible: permissions.canManageContracts,
+        badgeCount: badges.ownerContractsToSign,
+        badgeColor: 'red' as BadgeColor,
+      },
+      { 
+        label: 'Maintenance', 
+        href: '/dashboard/maintenance', 
+        icon: Wrench, 
+        visible: permissions.isOwner || permissions.isAdmin,
+        badgeCount: badges.pendingMaintenance,
+        badgeColor: 'blue' as BadgeColor,
+      },
       { label: 'Statistiques', href: '/dashboard/statistiques', icon: BarChart3, visible: permissions.canViewAnalytics },
-      { label: 'Messages', href: '/messages', icon: MessageSquare, visible: permissions.canSendMessages, hasBadge: true },
+      { 
+        label: 'Messages', 
+        href: '/messages', 
+        icon: MessageSquare, 
+        visible: permissions.canSendMessages, 
+        hasBadge: true,
+        badgeCount: badges.unreadMessages,
+        badgeColor: 'green' as BadgeColor,
+        badgePulse: true,
+      },
     ];
 
     return items.filter(item => item.visible).map(({ visible: _visible, ...rest }) => rest);
-  }, [permissions]);
+  }, [permissions, badges]);
 
   const agentItems = useMemo(() => {
     const items: (NavigationItem & { visible: boolean })[] = [
@@ -92,11 +152,20 @@ export function useNavigationItems() {
       { label: 'Mandats', href: '/agency/mandats', icon: FileText, visible: permissions.isAgent || permissions.isAdmin },
       { label: 'Candidatures', href: '/agency/candidatures', icon: ClipboardList, visible: permissions.isAgent || permissions.isAdmin },
       { label: 'Contrats', href: '/agency/contrats', icon: FileText, visible: permissions.canManageContracts },
-      { label: 'Messages', href: '/messages', icon: MessageSquare, visible: permissions.canSendMessages, hasBadge: true },
+      { 
+        label: 'Messages', 
+        href: '/messages', 
+        icon: MessageSquare, 
+        visible: permissions.canSendMessages, 
+        hasBadge: true,
+        badgeCount: badges.unreadMessages,
+        badgeColor: 'green' as BadgeColor,
+        badgePulse: true,
+      },
     ];
 
     return items.filter(item => item.visible).map(({ visible: _visible, ...rest }) => rest);
-  }, [permissions]);
+  }, [permissions, badges]);
 
   const adminSections = useMemo(() => {
     const sections: (NavigationSection & { visible: boolean })[] = [
@@ -163,6 +232,7 @@ export function useNavigationItems() {
     adminSections,
     bottomItems,
     permissions,
+    badges,
   };
 }
 

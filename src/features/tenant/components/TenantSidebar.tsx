@@ -3,16 +3,16 @@ import { X, Home } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useNavigationItems } from '@/shared/hooks/useNavigationItems';
+import { BadgeIndicator } from '@/shared/ui/BadgeIndicator';
 
 const cn = (...inputs: (string | undefined | null | false)[]) => twMerge(clsx(inputs));
 
 interface TenantSidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  unreadMessages?: number;
 }
 
-export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: TenantSidebarProps) {
+export default function TenantSidebar({ isOpen, onClose }: TenantSidebarProps) {
   const location = useLocation();
   const currentPath = location.pathname;
   const { tenantItems, bottomItems } = useNavigationItems();
@@ -60,7 +60,7 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
           </button>
         </div>
 
-        {/* Navigation - filtered by permissions */}
+        {/* Navigation - filtered by permissions with dynamic badges */}
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
             {tenantItems.map((item) => {
@@ -81,10 +81,12 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
                   >
                     <Icon className={cn('h-5 w-5', active ? 'text-primary-500' : '')} />
                     <span className="flex-1">{item.label}</span>
-                    {item.hasBadge && unreadMessages > 0 && (
-                      <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center animate-pulse">
-                        {unreadMessages > 99 ? '99+' : unreadMessages}
-                      </span>
+                    {item.badgeCount !== undefined && item.badgeCount > 0 && (
+                      <BadgeIndicator 
+                        count={item.badgeCount} 
+                        color={item.badgeColor} 
+                        pulse={item.badgePulse}
+                      />
                     )}
                   </Link>
                 </li>
