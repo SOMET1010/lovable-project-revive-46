@@ -273,8 +273,8 @@ export default function ProfilePage() {
               {/* Statuts actuels */}
               <div className="space-y-4">
                 <VerificationItem
-                  title="Identité ANSUT"
-                  description="Vérification de votre identité via le système ANSUT"
+                  title="Identité Mon Toit"
+                  description="Vérification de votre identité via le système Mon Toit"
                   verified={profile?.is_verified ?? null}
                 />
                 <VerificationItem

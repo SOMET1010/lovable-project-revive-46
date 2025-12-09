@@ -37,9 +37,9 @@ export default function AnsutBadge({
       <div
         className={`
           flex items-center space-x-1.5 rounded-full font-bold
-          bg-gradient-to-r from-green-500 to-emerald-600 text-white
+          bg-gradient-to-r from-[#F16522] to-[#E55A1B] text-white
           shadow-lg hover:shadow-xl transition-all duration-200
-          border-2 border-green-400
+          border-2 border-[#F16522]/80
           ${sizeClasses[size]}
         `}
         onMouseEnter={() => showTooltip && setShowInfo(true)}
@@ -54,11 +54,11 @@ export default function AnsutBadge({
         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-72 z-50">
           <div className="bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl">
             <div className="flex items-start space-x-2 mb-2">
-              <Info className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+              <Info className="w-4 h-4 text-[#F16522] flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-green-400 mb-1">Utilisateur vérifié</p>
+                <p className="font-bold text-[#F16522] mb-1">Utilisateur vérifié</p>
                 <p className="text-gray-300 leading-relaxed">
-                  Identité confirmée via ONECI (CNI) et vérification biométrique.
+                  Identité confirmée via ONECI et vérification biométrique.
                   Badge de confiance Mon Toit.
                 </p>
               </div>

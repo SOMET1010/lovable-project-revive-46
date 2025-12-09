@@ -134,7 +134,7 @@ export default function PropertyCertificationPage() {
         }
       });
 
-      toast.success('Propriété certifiée ANSUT avec succès');
+      toast.success('Propriété certifiée Mon Toit avec succès');
       
       // Remove from list and reset
       setProperties(prev => prev.filter(p => p.id !== selectedProperty.id));
@@ -156,7 +156,7 @@ export default function PropertyCertificationPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <TrustAgentHeader title="Certification Propriétés ANSUT" />
+      <TrustAgentHeader title="Certification Propriétés Mon Toit" />
       
       <main className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
@@ -247,7 +247,7 @@ export default function PropertyCertificationPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileCheck className="h-5 w-5" />
-                    Certification ANSUT
+                    Certification Mon Toit
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -318,7 +318,7 @@ export default function PropertyCertificationPage() {
 
                   {/* Certificate Upload */}
                   <div className="space-y-2">
-                    <Label>URL du certificat ANSUT (optionnel)</Label>
+                    <Label>URL du certificat (optionnel)</Label>
                     <div className="flex gap-2">
                       <Input
                         placeholder="https://..."
@@ -382,7 +382,7 @@ export default function PropertyCertificationPage() {
                 <CardContent className="py-12 text-center">
                   <Home className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">
-                    Sélectionnez une propriété dans la liste pour commencer la certification ANSUT
+                    Sélectionnez une propriété dans la liste pour commencer la certification Mon Toit
                   </p>
                 </CardContent>
               </Card>
