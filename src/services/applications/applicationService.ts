@@ -21,11 +21,14 @@ export interface ApplicationStats {
 export interface ApplicationWithDetails {
   id: string;
   property_id: string;
-  applicant_id: string;
+  tenant_id: string;
+  applicant_id?: string;
   status: string;
-  cover_letter: string | null;
-  application_score: number | null;
-  created_at: string | null;
+  application_message?: string | null;
+  cover_letter?: string | null;
+  credit_score?: number | null;
+  created_at?: string | null;
+  applied_at?: string | null;
   updated_at: string | null;
   property: {
     id: string;
@@ -36,7 +39,8 @@ export interface ApplicationWithDetails {
     main_image: string | null;
   } | null;
   applicant: {
-    user_id: string;
+    user_id?: string;
+    id?: string;
     full_name: string | null;
     email: string | null;
     phone: string | null;
@@ -73,11 +77,11 @@ export async function getOwnerApplications(
     .select(`
       id,
       property_id,
-      applicant_id,
+      tenant_id,
       status,
-      cover_letter,
-      application_score,
-      created_at,
+      application_message,
+      credit_score,
+      applied_at,
       updated_at
     `)
     .in('property_id', propertyIds)
@@ -113,7 +117,7 @@ export async function getOwnerApplications(
   const propertiesMap = new Map(propertiesData?.map(p => [p.id, p]) || []);
 
   // Récupérer les profils des candidats via RPC
-  const applicantIds = [...new Set(applications.map(a => a.applicant_id))];
+  const applicantIds = [...new Set(applications.map(a => a.tenant_id))];
   const { data: profilesData } = await supabase
     .rpc('get_public_profiles', { profile_user_ids: applicantIds });
 
@@ -121,26 +125,29 @@ export async function getOwnerApplications(
   const { data: fullProfiles } = await supabase
     .from('profiles')
     .select('user_id, email, phone')
-    .in('user_id', applicantIds);
+    .in('id', applicantIds);
 
   const profilesMap = new Map(
-    (profilesData || []).map((p: { user_id: string; full_name: string; avatar_url: string; trust_score: number; is_verified: boolean; oneci_verified: boolean; cnam_verified: boolean }) => [p.user_id, p])
+    (profilesData || []).map((p: { user_id: string; id?: string; full_name: string; avatar_url: string; trust_score: number; is_verified: boolean; oneci_verified: boolean; cnam_verified: boolean }) => [p.user_id ?? p.id, p])
   );
-  const emailsMap = new Map(fullProfiles?.map(p => [p.user_id, { email: p.email, phone: p.phone }]) || []);
+  const emailsMap = new Map(fullProfiles?.map(p => [p.id, { email: p.email, phone: p.phone }]) || []);
 
   // Combiner les données
   let result: ApplicationWithDetails[] = applications
     .filter(app => app.status !== null) // Filter out null status
     .map(app => {
-      const profile = profilesMap.get(app.applicant_id);
-      const emailData = emailsMap.get(app.applicant_id);
+      const profile = profilesMap.get(app.tenant_id);
+      const emailData = emailsMap.get(app.tenant_id);
       
       return {
         ...app,
+        applicant_id: app.tenant_id,
         status: app.status as string,
+        created_at: (app as any).applied_at ?? (app as any).created_at ?? null,
         property: propertiesMap.get(app.property_id) || null,
         applicant: profile ? {
           user_id: profile.user_id,
+          id: profile.id,
           full_name: profile.full_name,
           email: emailData?.email || null,
           phone: emailData?.phone || null,
@@ -293,7 +300,7 @@ export async function scheduleVisitFromApplication(
   // Récupérer les détails de la candidature
   const { data: application, error: appError } = await supabase
     .from('rental_applications')
-    .select('property_id, applicant_id')
+    .select('property_id, tenant_id')
     .eq('id', applicationId)
     .single();
 
@@ -317,7 +324,7 @@ export async function scheduleVisitFromApplication(
     .from('visit_requests')
     .insert({
       property_id: application.property_id,
-      tenant_id: application.applicant_id,
+      tenant_id: application.tenant_id,
       owner_id: property.owner_id,
       visit_date: visitData.date,
       visit_time: visitData.time,
@@ -368,11 +375,13 @@ export async function getOwnerProperties(ownerId: string): Promise<{ id: string;
 export interface TenantApplicationWithDetails {
   id: string;
   property_id: string;
-  applicant_id: string;
+  tenant_id: string;
+  applicant_id?: string;
   status: string;
-  cover_letter: string | null;
-  application_score: number | null;
-  created_at: string | null;
+  application_message?: string | null;
+  credit_score?: number | null;
+  created_at?: string | null;
+  applied_at?: string | null;
   updated_at: string | null;
   property: {
     id: string;
@@ -405,15 +414,16 @@ export async function getTenantApplications(
     .select(`
       id,
       property_id,
-      applicant_id,
+      tenant_id,
       status,
-      cover_letter,
-      application_score,
-      created_at,
+      application_message,
+      credit_score,
+      applied_at,
       updated_at
     `)
-    .eq('applicant_id', applicantId)
-    .order('created_at', { ascending: false });
+    .eq('tenant_id', applicantId)
+    .order('applied_at', { ascending: false, nullsFirst: false })
+    .order('updated_at', { ascending: false, nullsFirst: false });
 
   // Appliquer les filtres
   if (filters?.status && filters.status !== 'all') {
@@ -459,7 +469,9 @@ export async function getTenantApplications(
       
       return {
         ...app,
+        applicant_id: app.tenant_id,
         status: app.status as string,
+        created_at: (app as any).applied_at ?? (app as any).created_at ?? null,
         property: property || null,
         owner: owner ? {
           user_id: owner.user_id,
@@ -491,7 +503,7 @@ export async function getTenantApplicationStats(applicantId: string): Promise<Ap
   const { data: applications } = await supabase
     .from('rental_applications')
     .select('status')
-    .eq('applicant_id', applicantId);
+    .eq('tenant_id', applicantId);
 
   if (!applications) {
     return { total: 0, pending: 0, inProgress: 0, accepted: 0, rejected: 0 };

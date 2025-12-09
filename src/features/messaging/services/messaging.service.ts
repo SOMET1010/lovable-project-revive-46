@@ -52,13 +52,14 @@ export interface Attachment {
 }
 
 class MessagingService {
+  private isValidUuid(id: string | null | undefined) {
+    return !!id && /^[0-9a-fA-F-]{36}$/.test(id);
+  }
+
   async getConversations(userId: string): Promise<Conversation[]> {
     const { data, error } = await supabase
       .from('user_conversations')
-      .select(`
-        *,
-        property:properties(id, title)
-      `)
+      .select(`*`)
       .or(`participant_1_id.eq.${userId},participant_2_id.eq.${userId}`)
       .order('last_message_at', { ascending: false });
 
@@ -67,7 +68,24 @@ class MessagingService {
       return [];
     }
 
-    // Fetch participant profiles and unread counts
+    // Fetch participant profiles and unread counts + properties
+    const propertyIds = Array.from(
+      new Set(
+        (data ?? [])
+          .map((c) => c.property_id as string | null)
+          .filter((id): id is string => this.isValidUuid(id))
+      )
+    );
+
+    const { data: propertiesData } = propertyIds.length
+      ? await supabase
+          .from('properties')
+          .select('id, title')
+          .in('id', propertyIds)
+      : { data: [] as any };
+
+    const propertiesMap = new Map((propertiesData ?? []).map((p: any) => [p.id, p]));
+
     const conversationsWithDetails = await Promise.all(
       (data ?? []).map(async (conv) => {
         const otherParticipantId = conv.participant_1_id === userId 
@@ -78,7 +96,7 @@ class MessagingService {
         const { data: profile } = await supabase
           .from('profiles')
           .select('id, full_name, avatar_url')
-          .eq('user_id', otherParticipantId)
+          .eq('id', otherParticipantId)
           .single();
 
         // Get unread count
@@ -92,6 +110,7 @@ class MessagingService {
         return {
           ...conv,
           other_participant: profile ?? { id: otherParticipantId, full_name: null, avatar_url: null },
+          property: propertiesMap.get(conv.property_id) ?? null,
           unread_count: count ?? 0,
         } as Conversation;
       })
@@ -106,6 +125,7 @@ class MessagingService {
     propertyId?: string | null,
     subject?: string | null
   ): Promise<Conversation | null> {
+    const validPropertyId = this.isValidUuid(propertyId || '') ? propertyId : null;
     // First, try to find existing conversation
     // Build query based on whether propertyId exists
     let query = supabase
@@ -113,8 +133,8 @@ class MessagingService {
       .select('*')
       .or(`and(participant_1_id.eq.${userId},participant_2_id.eq.${otherUserId}),and(participant_1_id.eq.${otherUserId},participant_2_id.eq.${userId})`);
     
-    if (propertyId) {
-      query = query.eq('property_id', propertyId);
+    if (validPropertyId) {
+      query = query.eq('property_id', validPropertyId);
     } else {
       query = query.is('property_id', null);
     }
@@ -131,7 +151,7 @@ class MessagingService {
       .insert({
         participant_1_id: userId,
         participant_2_id: otherUserId,
-        property_id: propertyId ?? null,
+        property_id: validPropertyId,
         subject: subject ?? null,
       })
       .select()
@@ -164,7 +184,7 @@ class MessagingService {
         const { data: profile } = await supabase
           .from('profiles')
           .select('id, full_name, avatar_url')
-          .eq('user_id', msg.sender_id)
+          .eq('id', msg.sender_id)
           .single();
 
         return {

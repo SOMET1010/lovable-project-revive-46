@@ -60,7 +60,6 @@ export const tenantRoutes: RouteObject[] = [
   { path: 'mes-candidatures', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><MyApplications /></ProtectedRoute> },
 
   // Visits
-  { path: 'visites/planifier/:id', element: <Navigate to="/visiter/:id" replace /> },
   { path: 'mes-visites', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><MyVisits /></ProtectedRoute> },
 
   // Contracts

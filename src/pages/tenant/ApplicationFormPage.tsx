@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Award, ChevronRight } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -37,10 +37,13 @@ interface ExtendedProfile {
 
 export default function ApplicationForm() {
   const { user, profile: authProfile } = useAuth();
+  const { id: routeId } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
   const profile = authProfile as ExtendedProfile | null;
-  const [property, setProperty] = useState<Property | null>(null);
-  const [loading, setLoading] = useState(true);
+  const initialProperty = (location.state as { property?: Property } | null)?.property ?? null;
+  const [property, setProperty] = useState<Property | null>(initialProperty);
+  const [loading, setLoading] = useState(!initialProperty);
   const [submitting, setSubmitting] = useState(false);
   const [coverLetter, setCoverLetter] = useState('');
   const [error, setError] = useState('');
@@ -59,11 +62,13 @@ export default function ApplicationForm() {
       return;
     }
 
-    const propertyId = window.location.pathname.split('/').pop();
-    if (propertyId) {
+    const propertyId = routeId || window.location.pathname.split('/').pop();
+    if (propertyId && !property) {
       loadProperty(propertyId);
+    } else if (property) {
+      setLoading(false);
     }
-  }, [user, navigate]);
+  }, [user, navigate, routeId, property]);
 
   const loadProperty = async (id: string) => {
     try {
@@ -87,7 +92,7 @@ export default function ApplicationForm() {
           .from('rental_applications')
           .select('id')
           .eq('property_id', id)
-          .eq('applicant_id', user.id)
+          .eq('tenant_id', user.id)
           .maybeSingle();
 
         if (existing) {
@@ -126,11 +131,11 @@ export default function ApplicationForm() {
         .from('rental_applications')
         .insert({
           property_id: property.id,
-          applicant_id: user.id,
-          cover_letter: coverLetter,
-          application_score: applicationScore,
+          tenant_id: user.id,
+          application_message: coverLetter,
+          credit_score: applicationScore,
           status: 'en_attente',
-        })
+        } as never)
         .select('id')
         .single();
 
@@ -169,7 +174,20 @@ export default function ApplicationForm() {
     );
   }
 
-  if (!property) return null;
+  if (!property) {
+    return (
+      <div className="form-page-container flex items-center justify-center">
+        <div className="form-section-premium text-center max-w-md">
+          <p className="mb-4" style={{ color: 'var(--form-sable)' }}>
+            Propriété introuvable ou inaccessible.
+          </p>
+          <Link to="/recherche" className="form-button-primary">
+            Retour à la recherche
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (
@@ -225,7 +243,9 @@ export default function ApplicationForm() {
               <span>{property.city}, {property.neighborhood}</span>
             </p>
             <p className="font-bold text-lg mt-2" style={{ color: 'var(--form-orange)' }}>
-              {property.monthly_rent.toLocaleString()} FCFA/mois
+              {(property.monthly_rent ?? property.price) != null
+                ? `${(property.monthly_rent ?? property.price).toLocaleString()} FCFA/mois`
+                : 'Prix sur demande'}
             </p>
           </div>
         </div>

@@ -17,10 +17,11 @@ interface Favorite {
     city: string;
     neighborhood: string | null;
     property_type: string;
-    bedrooms: number | null;
-    bathrooms: number | null;
+    rooms_count: number | null;
+    bedrooms_count: number | null;
+    bathrooms_count: number | null;
     surface_area: number | null;
-    monthly_rent: number;
+    price: number;
     status: string | null;
     main_image: string | null;
   } | null;
@@ -52,10 +53,11 @@ export default function Favorites() {
             city,
             neighborhood,
             property_type,
-            bedrooms,
-            bathrooms,
+            rooms_count,
+            bedrooms_count,
+            bathrooms_count,
             surface_area,
-            monthly_rent,
+            price,
             status,
             main_image
           )
@@ -198,17 +200,17 @@ export default function Favorites() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <Bed className="w-4 h-4" />
-                      <span>{favorite.property?.bedrooms}</span>
+                      <span>{favorite.property?.bedrooms_count ?? favorite.property?.rooms_count ?? 0}</span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Bath className="w-4 h-4" />
-                      <span>{favorite.property?.bathrooms}</span>
+                      <span>{favorite.property?.bathrooms_count ?? 0}</span>
                     </div>
                   </div>
 
                   <div className="mb-3">
                     <p className="text-2xl font-bold text-primary-500">
-                      {favorite.property?.monthly_rent.toLocaleString()} FCFA
+                      {favorite.property?.price?.toLocaleString() || 'Prix sur demande'} FCFA
                       <span className="text-sm text-neutral-500 font-normal">/mois</span>
                     </p>
                   </div>

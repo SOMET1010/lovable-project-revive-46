@@ -84,7 +84,6 @@ const ScorePage: React.FC = () => {
 
   const verificationItems = [
     { key: 'oneci', label: 'Vérification ONECI', points: 30, description: 'Identité nationale' },
-    { key: 'cnam', label: 'Vérification CNAM', points: 25, description: 'Assurance maladie' },
     { key: 'facial', label: 'Vérification faciale', points: 25, description: 'Reconnaissance faciale' },
     { key: 'ansut', label: 'Certification ANSUT', points: 20, description: 'Certification officielle' },
   ];
@@ -96,7 +95,7 @@ const ScorePage: React.FC = () => {
         <div className="mb-8">
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
-            Mon Trust Score
+            Mon Score
           </h1>
           <p className="text-muted-foreground mt-1">
             Votre score de confiance détermine vos chances d'obtenir une location
@@ -140,7 +139,7 @@ const ScorePage: React.FC = () => {
                       className="w-full"
                     >
                       Modifier le profil
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      
                     </Button>
                   </div>
                 )}
@@ -167,7 +166,6 @@ const ScorePage: React.FC = () => {
                       className="w-full"
                     >
                       Lancer une vérification
-                      <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>
                 )}
@@ -192,7 +190,6 @@ const ScorePage: React.FC = () => {
                       className="w-full"
                     >
                       Ajouter mon historique
-                      <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </div>
                 )}

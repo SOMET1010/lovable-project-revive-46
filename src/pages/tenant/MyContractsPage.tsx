@@ -9,10 +9,9 @@ interface Contract {
   id: string;
   contract_number: string;
   property_id: string;
-  contract_type: string;
   status: string;
   start_date: string;
-  end_date: string | null;
+  end_at: string | null;
   monthly_rent: number;
   deposit_amount: number;
   charges_amount: number;
@@ -59,10 +58,9 @@ export default function MyContracts() {
           id,
           contract_number,
           property_id,
-          contract_type,
           status,
           start_date,
-          end_date,
+          end_at,
           monthly_rent,
           deposit_amount,
           charges_amount,
@@ -92,10 +90,9 @@ export default function MyContracts() {
         id: contract.id,
         contract_number: contract.contract_number,
         property_id: contract.property_id,
-        contract_type: contract.contract_type,
         status: contract.status,
         start_date: contract.start_date,
-        end_date: contract.end_date,
+        end_at: contract.end_at,
         monthly_rent: contract.monthly_rent,
         deposit_amount: contract.deposit_amount,
         charges_amount: contract.charges_amount,
@@ -143,15 +140,7 @@ export default function MyContracts() {
     );
   };
 
-  const getContractTypeLabel = (type: string) => {
-    const labels = {
-      courte_duree: 'Courte durée',
-      longue_duree: 'Longue durée',
-      meuble: 'Meublé',
-      professionnel: 'Professionnel'
-    };
-    return labels[type as keyof typeof labels] || type;
-  };
+  const getContractTypeLabel = () => 'Bail';
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('fr-FR', {

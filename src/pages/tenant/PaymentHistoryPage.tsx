@@ -12,11 +12,8 @@ interface Payment {
   payment_method: string | null;
   status: string | null;
   created_at: string | null;
-  payer_name: string;
-  receiver_name: string;
-  property_title: string;
-  property_address: string;
-  property_city: string;
+  property_title?: string;
+  property_city?: string;
 }
 
 export default function PaymentHistory() {
@@ -39,16 +36,12 @@ export default function PaymentHistory() {
     try {
       let query = supabase
         .from('payments')
-        .select('*')
+        .select('*, properties:property_id(title, city)')
+        .eq('tenant_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (filter === 'sent') {
-        query = query.eq('payer_id', user.id);
-      } else if (filter === 'received') {
-        query = query.eq('receiver_id', user.id);
-      } else {
-        query = query.or(`payer_id.eq.${user.id},receiver_id.eq.${user.id}`);
-      }
+      // Filter is kept for UI compatibility but tenant sees only own payments
+      void filter;
 
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter);
@@ -65,11 +58,8 @@ export default function PaymentHistory() {
         payment_method: payment.payment_method,
         status: payment.status,
         created_at: payment.created_at,
-        payer_name: 'Payeur',
-        receiver_name: 'Destinataire',
-        property_title: 'Paiement',
-        property_address: '',
-        property_city: ''
+        property_title: payment.properties?.title,
+        property_city: payment.properties?.city,
       }));
 
       setPayments(formattedPayments);

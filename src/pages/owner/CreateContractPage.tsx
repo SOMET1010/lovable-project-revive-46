@@ -44,7 +44,7 @@ interface Property {
 
 interface AcceptedApplication {
   id: string;
-  applicant_id: string;
+  tenant_id: string;
   property_id: string;
   status: string | null;
   profiles: {
@@ -169,22 +169,22 @@ export default function CreateContractPage() {
     try {
       const { data, error } = await supabase
         .from('rental_applications')
-        .select('id, applicant_id, property_id, status')
+        .select('id, tenant_id, property_id, status')
         .eq('property_id', propertyId)
         .eq('status', 'acceptee');
 
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const applicantIds = data.map(app => app.applicant_id);
+        const applicantIds = data.map(app => app.tenant_id);
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('user_id, full_name, email, phone')
-          .in('user_id', applicantIds);
+          .select('id, full_name, email, phone')
+          .in('id', applicantIds);
 
         const appsWithProfiles = data.map(app => ({
           ...app,
-          profiles: profiles?.find(p => p.user_id === app.applicant_id) || null
+          profiles: profiles?.find(p => p.id === app.tenant_id) || null
         }));
 
         setApplications(appsWithProfiles);
@@ -416,7 +416,7 @@ export default function CreateContractPage() {
                   >
                     <option value="">Sélectionner un locataire</option>
                     {applications.map(app => (
-                      <option key={app.id} value={app.applicant_id}>
+                      <option key={app.id} value={app.tenant_id}>
                         {app.profiles?.full_name || 'Nom non renseigné'} - {app.profiles?.email}
                       </option>
                     ))}

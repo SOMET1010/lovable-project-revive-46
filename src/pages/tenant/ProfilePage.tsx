@@ -60,7 +60,7 @@ export default function ProfilePage() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .or(`user_id.eq.${user.id},id.eq.${user.id}`)
+        .eq('id', user.id)
         .maybeSingle();
 
       if (error) throw error;
@@ -71,7 +71,7 @@ export default function ProfilePage() {
       const formattedAddress = formatAddress(data.address as AddressValue, data.city || undefined);
       const profileData: Profile = {
         id: data.id,
-        user_id: data.user_id,
+        user_id: data.id,
         full_name: data.full_name,
         email: data.email,
         phone: data.phone,
@@ -109,7 +109,7 @@ export default function ProfilePage() {
       const { error } = await supabase
         .from('profiles')
         .update(formData)
-        .eq('user_id', user.id);
+        .eq('id', user.id);
 
       if (error) throw error;
       toast.success('Profil mis à jour avec succès');

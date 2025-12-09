@@ -254,7 +254,7 @@ export default function ApplicationCard({
 
           {application.status === 'acceptee' && (
             <Link
-              to={`/dashboard/creer-contrat?propertyId=${application.property_id}&tenantId=${application.applicant_id}`}
+              to={`/dashboard/creer-contrat?propertyId=${application.property_id}&tenantId=${application.applicant_id || application.tenant_id}`}
               className="flex-1 min-w-[100px] bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1.5 transition-colors"
             >
               <FileText className="h-4 w-4" />
@@ -275,7 +275,7 @@ export default function ApplicationCard({
 
           {/* Common actions */}
           <Link
-            to={`/messages?to=${application.applicant_id}`}
+            to={`/messages?to=${application.applicant_id || application.tenant_id}`}
             className="border border-neutral-200 hover:border-primary-300 text-neutral-700 font-medium py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1.5 transition-colors"
           >
             <MessageSquare className="h-4 w-4" />

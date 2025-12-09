@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import { Calendar, Clock, Video, MapPin, ArrowLeft, Check, ChevronRight, MessageSquare } from 'lucide-react';
@@ -32,8 +32,11 @@ const DEFAULT_TIME_SLOTS: TimeSlot[] = [
 
 export default function ScheduleVisit() {
   const { user } = useAuth();
+  const { id: routeId } = useParams<{ id: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
-  const [property, setProperty] = useState<Property | null>(null);
+  const initialProperty = (location.state as { property?: Property } | null)?.property ?? null;
+  const [property, setProperty] = useState<Property | null>(initialProperty);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -47,13 +50,15 @@ export default function ScheduleVisit() {
   // Form stepper - 3 steps
   const { step, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(1, 3);
 
-  const propertyId = window.location.pathname.split('/').pop();
+  const propertyId = routeId || window.location.pathname.split('/').pop();
 
   useEffect(() => {
-    if (propertyId) {
+    if (propertyId && !property) {
       loadProperty();
+    } else {
+      setLoading(false);
     }
-  }, [propertyId]);
+  }, [propertyId, property]);
 
   useEffect(() => {
     if (selectedDate && property) {
@@ -72,9 +77,13 @@ export default function ScheduleVisit() {
         .from('properties')
         .select('id, title, address, city, main_image, owner_id')
         .eq('id', propertyId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) {
+        setProperty(null);
+        return;
+      }
       setProperty(data as Property);
     } catch (error) {
       console.error('Error loading property:', error);
@@ -87,16 +96,28 @@ export default function ScheduleVisit() {
     if (!selectedDate || !property) return;
 
     const dateStr = selectedDate.toISOString().split('T')[0] ?? '';
+    const nextDay = new Date(selectedDate);
+    nextDay.setDate(selectedDate.getDate() + 1);
+    const nextStr = nextDay.toISOString().split('T')[0] ?? '';
     
     try {
       const { data: existingVisits } = await supabase
         .from('visit_requests')
-        .select('visit_time')
+        .select('confirmed_date')
         .eq('property_id', property.id)
-        .eq('visit_date', dateStr)
-        .in('status', ['en_attente', 'confirmee']);
+        .in('status', ['en_attente', 'confirmee'])
+        .gte('confirmed_date', `${dateStr}T00:00:00`)
+        .lt('confirmed_date', `${nextStr}T00:00:00`);
 
-      const bookedTimes = new Set((existingVisits || []).map(v => v.visit_time?.substring(0, 5)));
+      const bookedTimes = new Set(
+        (existingVisits || [])
+          .map(v => v.confirmed_date)
+          .filter(Boolean)
+          .map((d: string) => {
+            const dt = new Date(d);
+            return dt.toISOString().substring(11, 16); // HH:MM
+          })
+      );
       
       const slots = DEFAULT_TIME_SLOTS.map(slot => ({
         ...slot,
@@ -116,15 +137,19 @@ export default function ScheduleVisit() {
 
     setSubmitting(true);
     try {
+      const confirmedDate = new Date(selectedDate);
+      const [hours, minutes] = selectedTime.split(':').map((v) => parseInt(v, 10));
+      if (!isNaN(hours)) confirmedDate.setHours(hours, minutes || 0, 0, 0);
+
       const { error } = await supabase
         .from('visit_requests')
         .insert({
           property_id: property.id,
           tenant_id: user.id,
+          owner_id: property.owner_id,
           visit_type: visitType,
-          visit_date: selectedDate.toISOString().split('T')[0] ?? '',
-          visit_time: selectedTime,
-          visitor_notes: notes || null,
+          confirmed_date: confirmedDate.toISOString(),
+          notes: notes || null,
           status: 'en_attente'
         } as never);
 
@@ -199,8 +224,22 @@ export default function ScheduleVisit() {
   if (!property) {
     return (
       <div className="form-page-container flex items-center justify-center">
-        <div className="form-section-premium text-center">
-          <p style={{ color: 'var(--form-sable)' }}>Propriété non trouvée</p>
+        <div className="form-section-premium text-center max-w-md">
+          <p className="mb-4" style={{ color: 'var(--form-sable)' }}>Propriété non trouvée ou inaccessible.</p>
+          <div className="flex justify-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="form-button-secondary"
+            >
+              Retour
+            </button>
+            <button
+              onClick={() => navigate('/recherche')}
+              className="form-button-primary"
+            >
+              Voir les biens
+            </button>
+          </div>
         </div>
       </div>
     );

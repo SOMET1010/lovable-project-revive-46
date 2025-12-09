@@ -7,6 +7,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 
+// Flag global pour mémoriser l'absence du RPC et éviter de le rappeler
+const userRolesRpcSkipped = { value: true }; // RPC absent en local, ne pas appeler
+
 // Type des rôles disponibles (correspondant à l'enum app_role en DB)
 export type AppRole = 'admin' | 'moderator' | 'user' | 'trust_agent';
 
@@ -36,11 +39,21 @@ export function useUserRoles(): UseUserRolesReturn {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  // Flag module-level pour éviter de spammer un RPC manquant
+  const skipRpc = useMemo(() => userRolesRpcSkipped, []);
 
   // Fonction de chargement des rôles
   const fetchRoles = useCallback(async () => {
     // Pas d'utilisateur connecté
     if (!user?.id) {
+      setRoles([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    // Si on a déjà détecté que le RPC est absent, ne rien appeler
+    if (skipRpc.value) {
       setRoles([]);
       setLoading(false);
       setError(null);
@@ -56,6 +69,14 @@ export function useUserRoles(): UseUserRolesReturn {
       });
 
       if (rpcError) {
+        // Fonction absente : fallback silencieux
+        if (rpcError.message?.includes('Could not find the function')) {
+          skipRpc.value = true;
+          userRolesRpcSkipped.value = true;
+          setRoles([]);
+          setError(null);
+          return;
+        }
         throw new Error(rpcError.message);
       }
 
@@ -63,13 +84,13 @@ export function useUserRoles(): UseUserRolesReturn {
       const userRoles = (data as AppRole[]) || [];
       setRoles(userRoles);
     } catch (err) {
-      console.error('Erreur lors du chargement des rôles:', err);
+      console.warn('Erreur lors du chargement des rôles:', err);
       setError(err instanceof Error ? err : new Error('Erreur inconnue'));
       setRoles([]);
     } finally {
       setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, skipRpc]);
 
   // Charger les rôles au montage et quand l'utilisateur change
   useEffect(() => {

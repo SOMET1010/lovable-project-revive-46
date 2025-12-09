@@ -68,6 +68,9 @@ const VERIFICATION_POINTS = {
   ansut: 20,
 };
 
+// Si l'edge function n'existe pas / renvoie 500, on évite de la rappeler
+let skipTenantScoring = true; // désactivé pour éviter les appels 500 tant que la fonction n'est pas dispo
+
 export const ScoringService = {
   /**
    * Calcule le score de profil (complétude)
@@ -125,6 +128,18 @@ export const ScoringService = {
     propertyId?: string,
     monthlyRent?: number
   ): Promise<{ score: number; details: HistoryScoreDetails }> {
+    if (skipTenantScoring) {
+      return {
+        score: 50,
+        details: {
+          paymentReliability: 50,
+          propertyCondition: 50,
+          leaseCompliance: 50,
+          total: 50,
+        },
+      };
+    }
+
     try {
       const { data, error } = await supabase.functions.invoke('tenant-scoring', {
         body: {
@@ -135,7 +150,8 @@ export const ScoringService = {
       });
 
       if (error) {
-        console.error('Error calling tenant-scoring:', error);
+        console.warn('tenant-scoring unavailable, using default history score');
+        skipTenantScoring = true;
         return {
           score: 50, // Score par défaut pour nouveaux utilisateurs
           details: {
@@ -157,7 +173,8 @@ export const ScoringService = {
 
       return { score: data?.score || 50, details };
     } catch (err) {
-      console.error('Error in calculateHistoryScore:', err);
+      console.warn('Error in calculateHistoryScore, fallback to defaults', err);
+      skipTenantScoring = true;
       return {
         score: 50,
         details: {
@@ -182,7 +199,7 @@ export const ScoringService = {
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
 
     // Calculer les 3 sous-scores

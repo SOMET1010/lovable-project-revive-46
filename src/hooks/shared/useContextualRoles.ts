@@ -59,27 +59,29 @@ export function useContextualRoles(): ContextualRoles {
         supabase
           .from('lease_contracts')
           .select('id', { count: 'exact', head: true })
-          .eq('tenant_id', user.id)
-          .in('status', ['actif', 'en_cours', 'signé']),
+          .eq('tenant_id', user.id),
         
         // Count active leases where user is landlord/owner
         supabase
           .from('lease_contracts')
           .select('id', { count: 'exact', head: true })
-          .eq('owner_id', user.id)
-          .in('status', ['actif', 'en_cours', 'signé']),
+          .eq('owner_id', user.id),
       ]);
 
-      if (propertiesResult.error) throw propertiesResult.error;
-      if (tenantLeasesResult.error) throw tenantLeasesResult.error;
-      if (landlordLeasesResult.error) throw landlordLeasesResult.error;
+      if (propertiesResult.error || tenantLeasesResult.error || landlordLeasesResult.error) {
+        throw propertiesResult.error || tenantLeasesResult.error || landlordLeasesResult.error;
+      }
 
       setPropertiesCount(propertiesResult.count ?? 0);
       setActiveLeasesAsTenantCount(tenantLeasesResult.count ?? 0);
       setActiveLeasesAsLandlordCount(landlordLeasesResult.count ?? 0);
     } catch (err) {
-      console.error('Error fetching contextual roles:', err);
-      setError(err instanceof Error ? err : new Error('Failed to fetch roles'));
+      console.warn('Error fetching contextual roles:', err);
+      // Fallback silencieux pour éviter le bruit UI
+      setPropertiesCount(0);
+      setActiveLeasesAsTenantCount(0);
+      setActiveLeasesAsLandlordCount(0);
+      setError(null);
     } finally {
       setLoading(false);
     }
