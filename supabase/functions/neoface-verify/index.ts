@@ -6,8 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-const NEOFACE_API_BASE = Deno.env.get("NEOFACE_API_BASE");
+const NEOFACE_API_BASE = Deno.env.get("NEOFACE_API_BASE") || "https://neoface.aineo.ai/api/v2";
 const NEOFACE_TOKEN = Deno.env.get("NEOFACE_BEARER_TOKEN");
+
+// NeoFace V2 accepts up to 10MB, we use 5MB as safety margin
+const MAX_IMAGE_SIZE_MB = 5;
 
 interface UploadDocumentRequest {
   action: 'upload_document';
@@ -32,6 +35,7 @@ interface NeofaceUploadResponse {
   document_id: string;
   url: string;
   success: boolean;
+  error?: string;
 }
 
 interface NeofaceVerifyResponse {
@@ -40,6 +44,29 @@ interface NeofaceVerifyResponse {
   document_id: string;
   matching_score?: number;
   verified_at?: string;
+  error?: string;
+}
+
+// Helper to convert blob to base64
+async function blobToBase64(blob: Blob): Promise<string> {
+  const arrayBuffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+// Helper to get MIME type from blob or filename
+function getMimeType(blob: Blob, filename: string): string {
+  if (blob.type && blob.type !== 'application/octet-stream') {
+    return blob.type;
+  }
+  const ext = filename.split('.').pop()?.toLowerCase();
+  if (ext === 'png') return 'image/png';
+  if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+  return 'image/jpeg'; // default
 }
 
 Deno.serve(async (req: Request) => {
@@ -51,8 +78,8 @@ Deno.serve(async (req: Request) => {
   }
 
   // Vérifier que les credentials NeoFace sont configurés
-  if (!NEOFACE_API_BASE || !NEOFACE_TOKEN) {
-    console.error('[NeoFace] Missing credentials: NEOFACE_API_BASE or NEOFACE_BEARER_TOKEN');
+  if (!NEOFACE_TOKEN) {
+    console.error('[NeoFace] Missing NEOFACE_BEARER_TOKEN');
     return new Response(
       JSON.stringify({ 
         error: 'Configuration NeoFace manquante. Veuillez contacter l\'administrateur.',
@@ -110,12 +137,14 @@ Deno.serve(async (req: Request) => {
 
 async function handleUploadDocument(
   request: UploadDocumentRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
 ): Promise<Response> {
   const { cni_photo_url, user_id } = request;
   const startTime = Date.now();
 
   console.log('[NeoFace] Uploading document for user:', user_id);
+  console.log('[NeoFace] Image URL:', cni_photo_url);
 
   // Télécharger l'image CNI
   const imageResponse = await fetch(cni_photo_url);
@@ -129,41 +158,72 @@ async function handleUploadDocument(
   
   console.log(`[NeoFace] Image fetched, size: ${imageSizeKB.toFixed(0)}KB (${imageSizeMB.toFixed(2)}MB)`);
 
-  // Validate image size before sending to NeoFace (max 1MB to prevent 413 errors)
-  const MAX_SIZE_MB = 1;
-  if (imageSizeMB > MAX_SIZE_MB) {
-    console.error(`[NeoFace] Image too large: ${imageSizeMB.toFixed(2)}MB > ${MAX_SIZE_MB}MB limit`);
-    throw new Error(`Image trop volumineuse (${imageSizeMB.toFixed(1)}MB). Maximum autorisé: ${MAX_SIZE_MB}MB. Veuillez compresser l'image.`);
+  // Validate image size (NeoFace accepts up to 10MB, we use 5MB safety margin)
+  if (imageSizeMB > MAX_IMAGE_SIZE_MB) {
+    console.error(`[NeoFace] Image too large: ${imageSizeMB.toFixed(2)}MB > ${MAX_IMAGE_SIZE_MB}MB limit`);
+    throw new Error(`Image trop volumineuse (${imageSizeMB.toFixed(1)}MB). Maximum autorisé: ${MAX_IMAGE_SIZE_MB}MB.`);
   }
 
-  // Préparer le FormData pour NeoFace
-  const formData = new FormData();
-  formData.append("token", NEOFACE_TOKEN!);
-  formData.append("doc_file", imageBlob, "cni.jpg");
+  // Convert to Base64 for JSON payload (more reliable than multipart for large files)
+  const base64Data = await blobToBase64(imageBlob);
+  const mimeType = getMimeType(imageBlob, 'cni.jpg');
+  
+  console.log('[NeoFace] Converted to base64, mime type:', mimeType);
 
-  // Appeler l'API NeoFace
+  // Prepare JSON payload with Base64 (as per NeoFace V2 API documentation)
+  const payload = {
+    doc_file: {
+      name: "document.jpg",
+      data: base64Data,
+      mime_type: mimeType
+    }
+  };
+
+  // Call NeoFace API with Bearer token in header
   const uploadResponse = await fetch(`${NEOFACE_API_BASE}/document_capture`, {
     method: "POST",
-    body: formData,
+    headers: {
+      "Authorization": `Bearer ${NEOFACE_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
   });
 
+  const responseText = await uploadResponse.text();
+  console.log('[NeoFace] Upload response status:', uploadResponse.status);
+  console.log('[NeoFace] Upload response:', responseText.substring(0, 500));
+
   if (!uploadResponse.ok) {
-    const errorText = await uploadResponse.text();
-    console.error('[NeoFace] Upload failed:', errorText);
+    console.error('[NeoFace] Upload failed:', responseText);
 
     await supabase.from('service_usage_logs').insert({
       service_name: 'face_recognition',
       provider: 'neoface',
       status: 'failure',
-      error_message: `Upload failed: ${uploadResponse.status} - ${errorText}`,
+      error_message: `Upload failed: ${uploadResponse.status} - ${responseText.substring(0, 200)}`,
       response_time_ms: Date.now() - startTime,
     });
 
-    throw new Error(`NeoFace upload failed: ${uploadResponse.status}`);
+    // Parse error if JSON
+    let errorMsg = `NeoFace upload failed: ${uploadResponse.status}`;
+    try {
+      const errorData = JSON.parse(responseText);
+      if (errorData.error) errorMsg = errorData.error;
+    } catch {
+      // Not JSON, use default message
+    }
+
+    throw new Error(errorMsg);
   }
 
-  const uploadData: NeofaceUploadResponse = await uploadResponse.json();
-  console.log('[NeoFace] Document uploaded:', uploadData.document_id);
+  let uploadData: NeofaceUploadResponse;
+  try {
+    uploadData = JSON.parse(responseText);
+  } catch {
+    throw new Error('Réponse NeoFace invalide');
+  }
+
+  console.log('[NeoFace] Document uploaded successfully:', uploadData.document_id);
 
   // Logger la tentative de vérification
   const { data: verificationId, error: dbError } = await supabase
@@ -189,6 +249,7 @@ async function handleUploadDocument(
     JSON.stringify({
       success: true,
       document_id: uploadData.document_id,
+      selfie_url: uploadData.url, // URL for popup selfie capture
       verification_id: verificationId,
       provider: 'neoface',
       message: 'Document téléchargé. Veuillez prendre un selfie pour la vérification.',
@@ -202,6 +263,7 @@ async function handleUploadDocument(
 
 async function handleVerifySelfie(
   request: VerifySelfieRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
 ): Promise<Response> {
   const { document_id, selfie_url, verification_id } = request;
@@ -216,20 +278,30 @@ async function handleVerifySelfie(
   }
 
   const selfieBlob = await selfieResponse.blob();
+  const base64Data = await blobToBase64(selfieBlob);
+  const mimeType = getMimeType(selfieBlob, 'selfie.jpg');
 
-  // Préparer le FormData pour NeoFace
-  const formData = new FormData();
-  formData.append("token", NEOFACE_TOKEN!);
-  formData.append("document_id", document_id);
-  formData.append("selfie_file", selfieBlob, "selfie.jpg");
+  // Prepare JSON payload
+  const payload = {
+    document_id: document_id,
+    selfie_file: {
+      name: "selfie.jpg",
+      data: base64Data,
+      mime_type: mimeType
+    }
+  };
 
-  // Appeler l'API NeoFace pour la vérification
+  // Call NeoFace API for verification
   const verifyResponse = await fetch(`${NEOFACE_API_BASE}/match_verify`, {
     method: "POST",
-    body: formData,
+    headers: {
+      "Authorization": `Bearer ${NEOFACE_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
   });
 
-  const verifyData = await verifyResponse.json();
+  const verifyData: NeofaceVerifyResponse = await verifyResponse.json();
   console.log('[NeoFace] Verification result:', verifyData);
 
   // Mettre à jour le statut de vérification
@@ -270,6 +342,7 @@ async function handleVerifySelfie(
 
 async function handleCheckStatus(
   request: CheckStatusRequest,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
 ): Promise<Response> {
   const { document_id, verification_id } = request;
@@ -277,14 +350,14 @@ async function handleCheckStatus(
 
   console.log('[NeoFace] Checking status for document:', document_id);
 
-  // Appeler l'API NeoFace pour vérifier le statut
+  // Call NeoFace API to check status (as per V2 documentation)
   const verifyResponse = await fetch(`${NEOFACE_API_BASE}/match_verify`, {
     method: "POST",
     headers: {
+      "Authorization": `Bearer ${NEOFACE_TOKEN}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      token: NEOFACE_TOKEN,
       document_id: document_id,
     }),
   });
