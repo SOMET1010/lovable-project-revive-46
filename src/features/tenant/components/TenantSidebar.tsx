@@ -1,21 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  User, 
-  Users,
-  FileText, 
-  CreditCard, 
-  Calendar, 
-  Wrench, 
-  Award, 
-  Heart, 
-  MessageSquare,
-  Search,
-  X,
-  Home
-} from 'lucide-react';
+import { X, Home } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useNavigationItems } from '@/shared/hooks/useNavigationItems';
 
 const cn = (...inputs: (string | undefined | null | false)[]) => twMerge(clsx(inputs));
 
@@ -25,27 +12,10 @@ interface TenantSidebarProps {
   unreadMessages?: number;
 }
 
-const navItems = [
-  { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Mon Profil', href: '/profil', icon: User },
-  { label: 'Mes Candidatures', href: '/mes-candidatures', icon: Users },
-  { label: 'Mes Contrats', href: '/mes-contrats', icon: FileText },
-  { label: 'Mes Paiements', href: '/mes-paiements', icon: CreditCard },
-  { label: 'Mes Visites', href: '/mes-visites', icon: Calendar },
-  { label: 'Maintenance', href: '/maintenance/locataire', icon: Wrench },
-  { label: 'Mon Score', href: '/mon-score', icon: Award },
-  { label: 'Historique Locations', href: '/profil/historique-locations', icon: Home },
-  { label: 'Mes Favoris', href: '/favoris', icon: Heart },
-  { label: 'Messages', href: '/messages', icon: MessageSquare, hasBadge: true },
-];
-
-const bottomItems = [
-  { label: 'Rechercher', href: '/recherche', icon: Search },
-];
-
 export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: TenantSidebarProps) {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { tenantItems, bottomItems } = useNavigationItems();
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -90,10 +60,10 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
           </button>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - filtered by permissions */}
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
-            {navItems.map((item) => {
+            {tenantItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
               

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useUserRoles } from '@/shared/hooks/useUserRoles';
 import { Loader2 } from 'lucide-react';
+import AccessDenied from './AccessDenied';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -16,18 +17,25 @@ interface ProtectedRouteProps {
   requireAdmin?: boolean;
   /** If true, requires trust_agent role from user_roles table */
   requireTrustAgent?: boolean;
+  /** If true, shows AccessDenied page instead of redirecting to home */
+  showAccessDenied?: boolean;
+  /** Custom message for AccessDenied page */
+  accessDeniedMessage?: string;
 }
 
 export default function ProtectedRoute({ 
   children, 
   allowedRoles,
   requireAdmin,
-  requireTrustAgent 
+  requireTrustAgent,
+  showAccessDenied = false,
+  accessDeniedMessage
 }: ProtectedRouteProps) {
   const navigate = useNavigate();
   const { user, loading: authLoading, profile } = useAuth();
   const { isAdmin, isTrustAgent, loading: rolesLoading, roles } = useUserRoles();
   const [accessChecked, setAccessChecked] = useState(false);
+  const [hasAccess, setHasAccess] = useState(true);
 
   const isLoading = authLoading || rolesLoading;
 
@@ -40,20 +48,20 @@ export default function ProtectedRoute({
       return;
     }
 
+    let accessGranted = true;
+
     // Check admin requirement
     if (requireAdmin && !isAdmin) {
-      navigate('/', { replace: true });
-      return;
+      accessGranted = false;
     }
 
     // Check trust_agent requirement
     if (requireTrustAgent && !isTrustAgent) {
-      navigate('/', { replace: true });
-      return;
+      accessGranted = false;
     }
 
     // Check role-based access
-    if (allowedRoles && allowedRoles.length > 0) {
+    if (accessGranted && allowedRoles && allowedRoles.length > 0) {
       const userType = profile?.user_type || profile?.active_role;
       
       // Check if user has any of the allowed roles
@@ -67,13 +75,19 @@ export default function ProtectedRoute({
       const adminOverride = isAdmin;
       
       if (!hasBusinessType && !hasSystemRole && !adminOverride) {
-        navigate('/', { replace: true });
-        return;
+        accessGranted = false;
       }
     }
 
+    setHasAccess(accessGranted);
+
+    if (!accessGranted && !showAccessDenied) {
+      navigate('/', { replace: true });
+      return;
+    }
+
     setAccessChecked(true);
-  }, [user, isLoading, profile, allowedRoles, requireAdmin, requireTrustAgent, isAdmin, isTrustAgent, roles, navigate]);
+  }, [user, isLoading, profile, allowedRoles, requireAdmin, requireTrustAgent, isAdmin, isTrustAgent, roles, navigate, showAccessDenied]);
 
   if (isLoading) {
     return (
@@ -90,8 +104,13 @@ export default function ProtectedRoute({
     return null;
   }
 
+  // Show AccessDenied page if configured and access is denied
+  if (!hasAccess && showAccessDenied) {
+    return <AccessDenied message={accessDeniedMessage} />;
+  }
+
   // Wait for access check to complete before rendering
-  if (allowedRoles && allowedRoles.length > 0 && !accessChecked) {
+  if ((allowedRoles && allowedRoles.length > 0 || requireAdmin || requireTrustAgent) && !accessChecked) {
     return null;
   }
 

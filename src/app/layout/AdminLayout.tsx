@@ -1,153 +1,33 @@
 import { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Users,
-  Home,
-  FileText,
-  AlertTriangle,
-  Settings,
   Shield,
-  Key,
-  Activity,
-  CheckCircle,
-  TrendingUp,
-  Bell,
-  UserCheck,
-  BarChart3,
+  Users,
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Eye
+  Bell
 } from 'lucide-react';
-
-const navigationItems = [
-  {
-    section: 'Vue d\'ensemble',
-    items: [
-      {
-        name: 'Dashboard',
-        href: '/admin/tableau-de-bord',
-        icon: LayoutDashboard,
-        color: 'text-blue-600'
-      },
-      {
-        name: 'Analytics',
-        href: '/admin/analytics',
-        icon: BarChart3,
-        color: 'text-purple-600'
-      }
-    ]
-  },
-  {
-    section: 'Gestion Utilisateurs',
-    items: [
-      {
-        name: 'Utilisateurs',
-        href: '/admin/utilisateurs',
-        icon: Users,
-        color: 'text-green-600'
-      },
-      {
-        name: 'Rôles & Permissions',
-        href: '/admin/gestion-roles',
-        icon: Shield,
-        color: 'text-orange-600'
-      },
-      {
-        name: 'Trust Agents',
-        href: '/admin/trust-agents',
-        icon: UserCheck,
-        color: 'text-cyan-600'
-      }
-    ]
-  },
-  {
-    section: 'Gestion Contenu',
-    items: [
-      {
-        name: 'Propriétés',
-        href: '/admin/properties',
-        icon: Home,
-        color: 'text-emerald-600'
-      },
-      {
-        name: 'Transactions',
-        href: '/admin/transactions',
-        icon: FileText,
-        color: 'text-indigo-600'
-      },
-      {
-        name: 'CEV Management',
-        href: '/admin/cev-management',
-        icon: CheckCircle,
-        color: 'text-teal-600'
-      }
-    ]
-  },
-  {
-    section: 'Monitoring Système',
-    items: [
-      {
-        name: 'Service Monitoring',
-        href: '/admin/service-monitoring',
-        icon: Activity,
-        color: 'text-red-600'
-      },
-      {
-        name: 'API Keys',
-        href: '/admin/api-keys',
-        icon: Key,
-        color: 'text-yellow-600'
-      },
-      {
-        name: 'Logs & Erreurs',
-        href: '/admin/logs',
-        icon: AlertTriangle,
-        color: 'text-red-500'
-      }
-    ]
-  },
-  {
-    section: 'Configuration',
-    items: [
-      {
-        name: 'Règles Métier',
-        href: '/admin/regles-metier',
-        icon: Settings,
-        color: 'text-orange-600'
-      },
-      {
-        name: 'Service Providers',
-        href: '/admin/service-providers',
-        icon: TrendingUp,
-        color: 'text-blue-500'
-      },
-      {
-        name: 'Service Configuration',
-        href: '/admin/service-configuration',
-        icon: Settings,
-        color: 'text-gray-600'
-      },
-      {
-        name: 'Data Generator',
-        href: '/admin/test-data-generator',
-        icon: Eye,
-        color: 'text-purple-500'
-      }
-    ]
-  }
-];
+import { useNavigationItems } from '@/shared/hooks/useNavigationItems';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { adminSections, permissions } = useNavigationItems();
+  const { profile, signOut } = useAuth();
 
-  const handleLogout = () => {
-    // Logique de déconnexion
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
+
+  // If no admin sections available, user shouldn't be here
+  if (adminSections.length === 0 && !permissions.isAdmin) {
+    navigate('/', { replace: true });
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -180,9 +60,9 @@ export default function AdminLayout() {
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - filtered by permissions */}
         <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
-          {navigationItems.map((section) => (
+          {adminSections.map((section) => (
             <div key={section.section}>
               {!sidebarCollapsed && (
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
@@ -196,18 +76,18 @@ export default function AdminLayout() {
                   
                   return (
                     <button
-                      key={item.name}
+                      key={item.label}
                       onClick={() => navigate(item.href)}
                       className={`w-full flex items-center ${sidebarCollapsed ? 'justify-center px-3' : 'px-4'} py-3 rounded-xl text-left transition-all duration-200 group ${
                         isActive
                           ? 'bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 border border-orange-200'
                           : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                       }`}
-                      title={sidebarCollapsed ? item.name : undefined}
+                      title={sidebarCollapsed ? item.label : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-orange-600' : item.color} flex-shrink-0`} />
+                      <Icon className={`w-5 h-5 ${isActive ? 'text-orange-600' : item.color || 'text-gray-600'} flex-shrink-0`} />
                       {!sidebarCollapsed && (
-                        <span className="ml-3 font-medium">{item.name}</span>
+                        <span className="ml-3 font-medium">{item.label}</span>
                       )}
                     </button>
                   );
@@ -226,8 +106,12 @@ export default function AdminLayout() {
               </div>
               {!sidebarCollapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">Admin</p>
-                  <p className="text-xs text-gray-500 truncate">admin@montoit.com</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {profile?.full_name || 'Admin'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate">
+                    {profile?.email || 'admin@montoit.com'}
+                  </p>
                 </div>
               )}
             </div>
