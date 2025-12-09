@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Building2, User, MapPin, FileText, Loader2, Check, 
   Mail, Camera, Phone, CheckCircle2, Key, Briefcase, 
-  ShieldCheck, Star, ArrowRight, ScanFace, UploadCloud, AlertCircle, RefreshCw
+  ShieldCheck, Star, ArrowRight, ScanFace, UploadCloud, AlertCircle, RefreshCw, Info
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Button } from '@/shared/ui';
@@ -414,6 +414,21 @@ export default function ProfileCompletionPage() {
                       </button>
                     );
                   })}
+                </div>
+                
+                {/* Note explicative multi-rôles */}
+                <div className="flex items-start gap-3 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Info className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div className="text-sm">
+                    <p className="text-blue-800 font-medium">
+                      Ce choix définit uniquement votre écran d'accueil.
+                    </p>
+                    <p className="text-blue-600 mt-1">
+                      Vous pourrez à tout moment publier un bien ou chercher un logement. Mon Toit s'adapte automatiquement à vos besoins.
+                    </p>
+                  </div>
                 </div>
               </div>
 
