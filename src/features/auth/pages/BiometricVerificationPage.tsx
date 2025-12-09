@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, FileCheck, Scan, CheckCircle, ChevronLeft, Upload, AlertCircle } from 'lucide-react';
+import { Camera, FileCheck, Scan, CheckCircle, ChevronLeft, Upload, AlertCircle, RefreshCw } from 'lucide-react';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui/FormStepper';
 import NeofaceVerification from '@/shared/ui/NeofaceVerification';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -260,7 +260,7 @@ export default function BiometricVerificationPage() {
 
               {cniPhotoUrl ? (
                 <div className="space-y-4">
-                  <div className="flex justify-center">
+                  <div className="flex justify-center relative">
                     <img
                       src={cniPhotoUrl}
                       alt="Photo CNI"
@@ -270,6 +270,20 @@ export default function BiometricVerificationPage() {
                   <p className="text-center text-sm text-green-600 font-medium">
                     ✓ Photo prête pour la vérification
                   </p>
+                  {/* Replace photo button */}
+                  <label className="block">
+                    <div className="flex items-center justify-center gap-2 py-2 px-4 border border-[#F16522] text-[#F16522] rounded-lg cursor-pointer hover:bg-[#F16522]/10 transition-colors text-sm font-medium">
+                      <RefreshCw className="h-4 w-4" />
+                      {isUploading ? 'Compression...' : 'Remplacer la photo (si erreur taille)'}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      disabled={isUploading}
+                    />
+                  </label>
                 </div>
               ) : (
                 <label className="block">
