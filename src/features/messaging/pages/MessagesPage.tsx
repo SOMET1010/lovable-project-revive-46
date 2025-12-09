@@ -7,6 +7,7 @@ import { ConversationList } from '../components/ConversationList';
 import { MessageThread } from '../components/MessageThread';
 import { EmptyConversation } from '../components/EmptyConversation';
 import { Conversation } from '../services/messaging.service';
+import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 export default function MessagesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -92,45 +93,43 @@ export default function MessagesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F4] pt-20 pb-4 px-4 flex gap-6">
-      
-      {/* --- SIDEBAR : LISTE DES CONVERSATIONS --- */}
-      <div
-        className={`w-full md:w-80 lg:w-96 bg-white rounded-[24px] border border-[#EFEBE9] shadow-sm flex flex-col overflow-hidden ${
-          showMobileThread ? 'hidden md:flex' : 'flex'
-        }`}
-      >
-        <ConversationList
-          conversations={conversations}
-          selectedId={selectedConversation?.id ?? null}
-          onSelect={handleSelectConversation}
-          loading={loadingConversations}
-        />
-      </div>
-
-      {/* --- ZONE PRINCIPALE : CHAT --- */}
-      <div
-        className={`flex-1 bg-white rounded-[24px] border border-[#EFEBE9] shadow-sm flex flex-col overflow-hidden relative ${
-          !showMobileThread ? 'hidden md:flex' : 'flex'
-        }`}
-      >
-        {/* Texture de fond subtile */}
-        <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none" />
-
-        {selectedConversation ? (
-          <MessageThread
-            conversation={selectedConversation}
-            messages={messages}
-            currentUserId={user.id}
-            loading={loadingMessages}
-            sending={sending}
-            onSend={handleSendMessage}
-            onBack={handleBack}
+    <OwnerDashboardLayout title="Messages">
+      <div className="min-h-[75vh] bg-[#FAF7F4] px-2 sm:px-4 pb-4 pt-6 lg:pt-2 flex gap-4 lg:gap-6">
+        <div
+          className={`w-full md:w-80 lg:w-96 bg-white rounded-[24px] border border-[#EFEBE9] shadow-sm flex flex-col overflow-hidden ${
+            showMobileThread ? 'hidden md:flex' : 'flex'
+          }`}
+        >
+          <ConversationList
+            conversations={conversations}
+            selectedId={selectedConversation?.id ?? null}
+            onSelect={handleSelectConversation}
+            loading={loadingConversations}
           />
-        ) : (
-          <EmptyConversation />
-        )}
+        </div>
+
+        <div
+          className={`flex-1 bg-white rounded-[24px] border border-[#EFEBE9] shadow-sm flex flex-col overflow-hidden relative ${
+            !showMobileThread ? 'hidden md:flex' : 'flex'
+          }`}
+        >
+          <div className="absolute inset-0 opacity-[0.02] bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] pointer-events-none" />
+
+          {selectedConversation ? (
+            <MessageThread
+              conversation={selectedConversation}
+              messages={messages}
+              currentUserId={user.id}
+              loading={loadingMessages}
+              sending={sending}
+              onSend={handleSendMessage}
+              onBack={handleBack}
+            />
+          ) : (
+            <EmptyConversation />
+          )}
+        </div>
       </div>
-    </div>
+    </OwnerDashboardLayout>
   );
 }

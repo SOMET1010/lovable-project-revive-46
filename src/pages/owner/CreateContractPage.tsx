@@ -7,8 +7,6 @@ import { notifyLeaseCreated } from '@/services/notifications/leaseNotificationSe
 import { ValidationService, type FormValidationResult } from '@/services/validation';
 import { useFormValidation } from '@/hooks/shared/useFormValidation';
 import { ValidatedInput, FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 import { 
   FileText, 
   Calendar, 
@@ -23,6 +21,7 @@ import {
   Plus
 } from 'lucide-react';
 import '@/styles/form-premium.css';
+import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 interface ContractFormData {
   monthlyRent: string;
@@ -281,33 +280,28 @@ export default function CreateContractPage() {
 
   if (!user) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
+      <OwnerDashboardLayout title="Créer un contrat">
+        <div className="min-h-[60vh] bg-[#FAF7F4] flex items-center justify-center rounded-2xl">
           <p className="text-[#A69B95]">Veuillez vous connecter</p>
         </div>
-        <Footer />
-      </>
+      </OwnerDashboardLayout>
     );
   }
 
   if (loading) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
+      <OwnerDashboardLayout title="Créer un contrat">
+        <div className="min-h-[60vh] bg-[#FAF7F4] flex items-center justify-center rounded-2xl">
           <Loader className="w-12 h-12 text-[#F16522] animate-spin" />
         </div>
-        <Footer />
-      </>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <>
-      <Header />
-      <div className="min-h-screen bg-[#FAF7F4] pt-20 pb-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <OwnerDashboardLayout title="Créer un contrat">
+      <div className="bg-[#FAF7F4] pt-6 pb-12 rounded-2xl">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Premium */}
           <div className="mb-8">
             <button
@@ -652,7 +646,6 @@ export default function CreateContractPage() {
           </FormStepContent>
         </div>
       </div>
-      <Footer />
-    </>
+    </OwnerDashboardLayout>
   );
 }

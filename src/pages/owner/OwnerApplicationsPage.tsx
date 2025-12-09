@@ -26,11 +26,12 @@ import {
   ApplicationWithDetails,
   ApplicationStats
 } from '@/services/applications/applicationService';
-import { 
+import {
   notifyApplicationAccepted, 
   notifyApplicationRejected, 
   notifyVisitScheduled 
 } from '@/services/notifications/applicationNotificationService';
+import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 interface VisitFormData {
   date: string;
@@ -193,16 +194,16 @@ export default function OwnerApplicationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50">
-        <div className="flex items-center justify-center h-64">
+      <OwnerDashboardLayout title="Candidatures">
+        <div className="min-h-[60vh] bg-neutral-50 flex items-center justify-center rounded-2xl">
           <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <OwnerDashboardLayout title="Candidatures">
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -218,7 +219,7 @@ export default function OwnerApplicationsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
           <button 
@@ -538,6 +539,6 @@ export default function OwnerApplicationsPage() {
           </div>
         </div>
       )}
-    </div>
+    </OwnerDashboardLayout>
   );
 }

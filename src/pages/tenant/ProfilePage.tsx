@@ -7,6 +7,7 @@ import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
 import { toast } from '@/hooks/shared/useSafeToast';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
+import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 import FeatureGate from '@/shared/ui/FeatureGate';
 import ONECIForm from '@/features/verification/components/ONECIForm';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
@@ -30,7 +31,7 @@ interface Profile {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, profile: authProfile } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'infos');
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -124,13 +125,16 @@ export default function ProfilePage() {
     }
   };
 
+  const isOwner = authProfile?.user_type === 'owner' || authProfile?.user_type === 'proprietaire';
+  const Layout = isOwner ? OwnerDashboardLayout : TenantDashboardLayout;
+
   if (loading) {
     return (
-      <TenantDashboardLayout title="Mon Profil">
+      <Layout title="Mon Profil">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      </TenantDashboardLayout>
+      </Layout>
     );
   }
 
@@ -163,7 +167,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <TenantDashboardLayout title="Mon Profil">
+    <Layout title="Mon Profil">
       <div className="w-full">
         {/* Header */}
         <div className="bg-card rounded-2xl shadow-card p-6 mb-6">
@@ -396,7 +400,7 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
-    </TenantDashboardLayout>
+    </Layout>
   );
 }
 

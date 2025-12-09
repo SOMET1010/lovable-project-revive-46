@@ -114,7 +114,7 @@ export default function UnifiedDashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F4]">
+    <div className="flex flex-col min-h-screen bg-[#FAF7F4] w-full">
       {/* Header */}
       <div className="bg-white border-b border-[#EFEBE9]">
         <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -190,7 +190,7 @@ export default function UnifiedDashboardPage() {
       </div>
 
       {/* Content */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 flex-1">
         {/* Empty state for new users */}
         {hasNoContextualRoles && activeTab === 'profile' && (
           <div className="mb-8">

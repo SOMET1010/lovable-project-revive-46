@@ -58,6 +58,10 @@ export const ownerRoutes: RouteObject[] = [
     element: <ProtectedRoute allowedRoles={[...OWNER_ROLES]}><OwnerApplications /></ProtectedRoute> 
   },
   { 
+    path: 'dashboard/mes-candidatures', 
+    element: <ProtectedRoute allowedRoles={[...OWNER_ROLES]}><OwnerApplications /></ProtectedRoute> 
+  },
+  { 
     path: 'dashboard/candidature/:id', 
     element: <ProtectedRoute allowedRoles={[ROLES.OWNER, ROLES.AGENCY]}><ApplicationForm /></ProtectedRoute> 
   },

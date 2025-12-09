@@ -18,10 +18,13 @@ import {
 import { supabase } from '@/services/supabase/client';
 import { InputWithIcon } from '@/shared/ui';
 import { PhoneInputWithCountry } from '@/shared/components/PhoneInputWithCountry';
+import OTPInput from '@/shared/components/modern/OTPInput';
+import { callEdgeFunction } from '@/api/client';
 
 type AuthMethod = 'phone' | 'email';
 type PhoneStep = 'enter' | 'verify' | 'name';
 type EmailMode = 'login' | 'register';
+type EmailStep = 'form' | 'otp' | 'role';
 
 const deriveEmailModeFromPath = (path: string): EmailMode =>
   path.includes('/inscription') ? 'register' : 'login';
@@ -58,6 +61,7 @@ export default function ModernAuthPage() {
   );
   const [phoneStep, setPhoneStep] = useState<PhoneStep>('enter');
   const [emailMode, setEmailMode] = useState<EmailMode>(deriveEmailModeFromPath(location.pathname));
+  const [emailStep, setEmailStep] = useState<EmailStep>('form');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -69,6 +73,11 @@ export default function ModernAuthPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [profileType, setProfileType] = useState<'locataire' | 'proprietaire' | 'agence'>('locataire');
+  const [emailOtp, setEmailOtp] = useState('');
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [pendingPassword, setPendingPassword] = useState('');
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [generatedOtp, setGeneratedOtp] = useState('');
 
   // Phone fields
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -107,6 +116,7 @@ export default function ModernAuthPage() {
     const targetPath = mode === 'register' ? '/inscription' : '/connexion';
     navigate(targetPath, { replace: true });
     setEmailMode(mode);
+    setEmailStep('form');
     setError('');
     setSuccess('');
   };
@@ -118,6 +128,12 @@ export default function ModernAuthPage() {
     setSuccess('');
     setOtp('');
     setDevOtp(null);
+    setEmailStep('form');
+    setEmailOtp('');
+    setPendingEmail('');
+    setPendingPassword('');
+    setPendingUserId(null);
+    setGeneratedOtp('');
 
     if (method === 'email') {
       setEmailMode(deriveEmailModeFromPath(location.pathname));
@@ -131,6 +147,36 @@ export default function ModernAuthPage() {
     setDevOtp(null);
     setError('');
     setSuccess('');
+    setGeneratedOtp('');
+  };
+
+  const sendResendOtp = async (targetEmail: string) => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedOtp(code);
+    sessionStorage.setItem(`otp:${targetEmail}`, code);
+
+    try {
+      const { data, error } = await callEdgeFunction('send-email', {
+        to: targetEmail,
+        template: 'email-verification',
+        data: {
+          otp: code,
+          email: targetEmail,
+          name: fullName || targetEmail,
+          expiresIn: '10 minutes',
+        },
+      });
+
+      if (error) {
+        console.error('Error sending OTP email:', error);
+        throw new Error(error.message || "Envoi du code impossible");
+      }
+
+      return code;
+    } catch (err: any) {
+      console.error('Failed to send OTP email:', err);
+      throw new Error(err?.message || 'Envoi du code impossible');
+    }
   };
 
   // ===================== EMAIL LOGIN =====================
@@ -172,18 +218,25 @@ export default function ModernAuthPage() {
         throw new Error('Veuillez entrer votre nom complet');
       }
 
-      const { error: signUpError } = await supabase.auth.signUp({
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { full_name: fullName, user_type: profileType },
+          data: { full_name: fullName },
         },
       });
 
       if (signUpError) throw signUpError;
 
-      setSuccess('Compte créé ! Vous pouvez maintenant vous connecter.');
-      setTimeout(() => handleEmailModeChange('login'), 2000);
+      setPendingEmail(email);
+      setPendingPassword(password);
+      setPendingUserId(authData.user?.id ?? null);
+
+      // Envoyer OTP via Resend
+      await sendResendOtp(email);
+      setSuccess('Code envoyé à votre email. Saisissez-le pour continuer.');
+      setEmailStep('otp');
+      setEmailOtp('');
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
       setError(errorMessage);
@@ -275,6 +328,91 @@ export default function ModernAuthPage() {
       return;
     }
     await handleVerifyOTP(true);
+  };
+
+  // ===================== EMAIL OTP FLOW =====================
+  const handleVerifyEmailOtp = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const targetEmail = pendingEmail || email;
+      const expected = generatedOtp || sessionStorage.getItem(`otp:${targetEmail}`) || '';
+      if (emailOtp !== expected) {
+        throw new Error('Code invalide ou expiré');
+      }
+      sessionStorage.removeItem(`otp:${targetEmail}`);
+
+      // Se connecter pour créer la session
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: targetEmail,
+        password: pendingPassword || password,
+      });
+      if (loginError) throw loginError;
+
+      // Créer le profil si absent
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', pendingUserId || (await supabase.auth.getUser()).data.user?.id || '')
+        .maybeSingle();
+      const userId = pendingUserId || (await supabase.auth.getUser()).data.user?.id;
+      if (userId && !profile) {
+        await supabase.from('profiles').insert({
+          id: userId,
+          email: targetEmail,
+          full_name: fullName || targetEmail,
+          user_type: null,
+        });
+      }
+
+      setSuccess('Email vérifié ! Choisissez votre rôle.');
+      setEmailStep('role');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Code invalide ou expiré';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailResendOtp = async () => {
+    if (!pendingEmail && !email) return;
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      await sendResendOtp(pendingEmail || email);
+      setSuccess('Nouveau code envoyé.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Impossible de renvoyer le code';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectRole = async (role: 'locataire' | 'proprietaire' | 'agence') => {
+    setProfileType(role);
+    setLoading(true);
+    setError('');
+    try {
+      const { data } = await supabase.auth.getUser();
+      const userId = data.user?.id || pendingUserId;
+      if (!userId) throw new Error('Utilisateur non trouvé après vérification');
+
+      await supabase
+        .from('profiles')
+        .update({ user_type: role })
+        .eq('id', userId);
+
+      // Redirection demandée
+      navigate('/dashboard/locataire');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la sélection du rôle';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ===================== RENDER =====================
@@ -624,102 +762,153 @@ export default function ModernAuthPage() {
                 </div>
               )}
 
-              <form onSubmit={emailMode === 'login' ? handleEmailLogin : handleEmailRegister} className="space-y-4">
-                
-                {emailMode === 'register' && (
+              {/* EMAIL REGISTER STEPS */}
+              {emailMode === 'register' && emailStep === 'otp' && (
+                <div className="space-y-5">
+                  <button
+                    type="button"
+                    onClick={() => setEmailStep('form')}
+                    className="flex items-center gap-1 text-[#6B5A4E] hover:text-[#2C1810] text-sm font-medium"
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Modifier les informations
+                  </button>
+
+                  <p className="text-center text-[#2C1810] font-semibold">
+                    Entrez le code reçu sur {pendingEmail || email}
+                  </p>
+
+                  <OTPInput
+                    value={emailOtp}
+                    onChange={setEmailOtp}
+                    length={6}
+                    autoFocus
+                  />
+
+                  <div className="flex items-center justify-between text-sm text-[#6B5A4E]">
+                    <button
+                      type="button"
+                      onClick={handleEmailResendOtp}
+                      className="text-[#F16522] hover:text-[#D95318] font-semibold"
+                    >
+                      Renvoyer le code
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleVerifyEmailOtp}
+                    disabled={loading || emailOtp.length < 6}
+                    className="w-full py-4 bg-[#F16522] hover:bg-[#D95318] text-white rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Valider le code'}
+                  </button>
+                </div>
+              )}
+
+              {emailMode === 'register' && emailStep === 'role' && (
+                <div className="space-y-5">
+                  <p className="text-center text-[#2C1810] font-semibold">
+                    Choisissez votre profil
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      { value: 'locataire', label: 'Locataire', icon: Home },
+                      { value: 'proprietaire', label: 'Propriétaire', icon: Star },
+                      { value: 'agence', label: 'Agence', icon: Shield },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => handleSelectRole(opt.value as 'locataire' | 'proprietaire' | 'agence')}
+                        className={`flex items-center gap-2 px-3 py-3 rounded-lg border transition ${
+                          profileType === opt.value
+                            ? 'border-[#F16522] bg-[#F16522]/10 text-[#F16522]'
+                            : 'border-gray-200 text-[#2C1810]'
+                        }`}
+                      >
+                        <opt.icon className="h-4 w-4" />
+                        <span className="text-sm font-semibold">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-xs text-center text-[#6B5A4E]">
+                    Vous serez redirigé vers /dashboard/locataire après ce choix.
+                  </p>
+                </div>
+              )}
+
+              {/* EMAIL FORM (login or register form step) */}
+              {(emailMode === 'login' || emailStep === 'form') && (
+                <form onSubmit={emailMode === 'login' ? handleEmailLogin : handleEmailRegister} className="space-y-4">
+                  
+                  {emailMode === 'register' && (
+                    <InputWithIcon
+                      icon={User}
+                      label="Nom complet"
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Jean Kouassi"
+                      required
+                    />
+                  )}
+
                   <InputWithIcon
-                    icon={User}
-                    label="Nom complet"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Jean Kouassi"
+                    icon={Mail}
+                    label="Email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="exemple@email.com"
                     required
                   />
-                )}
 
-                <InputWithIcon
-                  icon={Mail}
-                  label="Email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="exemple@email.com"
-                  required
-                />
-
-                <InputWithIcon
-                  icon={Lock}
-                  label="Mot de passe"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                />
-
-                {emailMode === 'login' && (
-                  <div className="text-right">
-                    <Link 
-                      to="/mot-de-passe-oublie" 
-                      className="text-sm text-[#F16522] hover:text-[#D95318] font-medium hover:underline transition-colors"
-                    >
-                      Mot de passe oublié ?
-                    </Link>
-                  </div>
-                )}
-
-                {emailMode === 'register' && (
                   <InputWithIcon
                     icon={Lock}
-                    label="Confirmer le mot de passe"
+                    label="Mot de passe"
                     type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
                     required
                   />
-                )}
 
-                {emailMode === 'register' && (
-                  <div className="space-y-2">
-                    <div className="text-sm font-semibold text-[#2C1810]">Profil</div>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      {[
-                        { value: 'locataire', label: 'Locataire', icon: Home },
-                        { value: 'proprietaire', label: 'Propriétaire', icon: Star },
-                        { value: 'agence', label: 'Agence', icon: Shield },
-                      ].map((opt) => (
-                        <button
-                          key={opt.value}
-                          type="button"
-                          onClick={() => setProfileType(opt.value as 'locataire' | 'proprietaire' | 'agence')}
-                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition ${
-                            profileType === opt.value
-                              ? 'border-[#F16522] bg-[#F16522]/10 text-[#F16522]'
-                              : 'border-gray-200 text-[#2C1810]'
-                          }`}
-                        >
-                          <opt.icon className="h-4 w-4" />
-                          <span className="text-sm font-semibold">{opt.label}</span>
-                        </button>
-                      ))}
+                  {emailMode === 'login' && (
+                    <div className="text-right">
+                      <Link 
+                        to="/mot-de-passe-oublie" 
+                        className="text-sm text-[#F16522] hover:text-[#D95318] font-medium hover:underline transition-colors"
+                      >
+                        Mot de passe oublié ?
+                      </Link>
                     </div>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-4 bg-[#F16522] hover:bg-[#D95318] text-white rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? (
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                  ) : (
-                    <>{emailMode === 'login' ? 'Se connecter' : 'Créer mon compte'} <ArrowRight className="w-5 h-5" /></>
                   )}
-                </button>
-              </form>
+
+                  {emailMode === 'register' && (
+                    <InputWithIcon
+                      icon={Lock}
+                      label="Confirmer le mot de passe"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      required
+                    />
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 bg-[#F16522] hover:bg-[#D95318] text-white rounded-xl font-bold text-lg shadow-xl shadow-[#F16522]/20 flex items-center justify-center gap-2 transform active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-6 h-6 animate-spin" />
+                    ) : (
+                      <>{emailMode === 'login' ? 'Se connecter' : 'Créer mon compte'} <ArrowRight className="w-5 h-5" /></>
+                    )}
+                  </button>
+                </form>
+              )}
             </div>
           )}
 

@@ -22,6 +22,7 @@ import useAgencyMandates, { AgencyMandate } from '@/hooks/useAgencyMandates';
 import MandateCard from '../../features/agency/components/MandateCard';
 import InviteAgencyDialog from '../../features/agency/components/InviteAgencyDialog';
 import MandatePermissionsForm from '../../features/agency/components/MandatePermissionsForm';
+import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 type ViewMode = 'owner' | 'agency';
 type StatusFilter = 'all' | 'pending' | 'active' | 'expired' | 'cancelled';
@@ -138,9 +139,8 @@ export default function MyMandatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
+    <OwnerDashboardLayout title="Mes Mandats">
+      <div className="bg-card border-b border-border rounded-2xl shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -169,7 +169,6 @@ export default function MyMandatesPage() {
             )}
           </div>
 
-          {/* View Toggle (if user is both owner and agency) */}
           {myAgency && myProperties.length > 0 && (
             <div className="mt-4 flex gap-2">
               <button
@@ -200,7 +199,6 @@ export default function MyMandatesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="bg-card rounded-2xl p-4 border border-border">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
@@ -232,7 +230,6 @@ export default function MyMandatesPage() {
           </div>
         </div>
 
-        {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -261,7 +258,6 @@ export default function MyMandatesPage() {
           </div>
         </div>
 
-        {/* Mandates Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -313,7 +309,6 @@ export default function MyMandatesPage() {
         )}
       </div>
 
-      {/* Dialogs */}
       <InviteAgencyDialog
         isOpen={showInviteDialog}
         onClose={() => setShowInviteDialog(false)}
@@ -333,6 +328,6 @@ export default function MyMandatesPage() {
           onSave={handleSavePermissions}
         />
       )}
-    </div>
+    </OwnerDashboardLayout>
   );
 }

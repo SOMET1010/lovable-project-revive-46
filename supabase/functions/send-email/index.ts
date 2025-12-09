@@ -854,8 +854,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get Resend API key
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    // Get Resend API key (fallbacks for local .env names)
+    const resendApiKey =
+      Deno.env.get('RESEND_API_KEY') ||
+      Deno.env.get('VITE_RESEND_API_KEY');
     
     if (!resendApiKey) {
       console.error('[send-email] RESEND_API_KEY not configured');
@@ -865,31 +867,50 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${resendApiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: 'Mon Toit <no-reply@notifications.ansut.ci>',
-        to: [to],
-        subject: emailTemplate.subject,
-        html: emailTemplate.html(data)
-      })
-    });
+    const fromEmail =
+      Deno.env.get('RESEND_FROM_EMAIL') ||
+      Deno.env.get('VITE_RESEND_FROM_EMAIL') ||
+      (Deno.env.get('RESEND_DOMAIN') || Deno.env.get('VITE_RESEND_DOMAIN')
+        ? `no-reply@${Deno.env.get('RESEND_DOMAIN') || Deno.env.get('VITE_RESEND_DOMAIN')}`
+        : 'no-reply@notifications.ansut.ci');
 
-    const result = await response.json();
+    let response: Response;
+    try {
+      response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: Array.isArray(to) ? to : [to],
+          subject: emailTemplate.subject,
+          html: emailTemplate.html(data),
+        }),
+      });
+    } catch (fetchErr: any) {
+      console.error('[send-email] Network error while calling Resend:', fetchErr?.message || fetchErr);
+      return new Response(
+        JSON.stringify({ error: 'Network error calling Resend', detail: fetchErr?.message || fetchErr }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const resultText = await response.text();
 
     if (!response.ok) {
-      console.error('[send-email] Resend error:', result);
-      throw new Error(result.message || 'Failed to send email');
+      console.error('[send-email] Resend error:', resultText);
+      return new Response(
+        JSON.stringify({ error: 'Failed to send email', detail: resultText }),
+        { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     console.log(`[send-email] Email sent successfully to ${to}, template: ${template}`);
 
     return new Response(
-      JSON.stringify({ success: true, id: result.id }),
+      JSON.stringify({ success: true, raw: resultText }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {

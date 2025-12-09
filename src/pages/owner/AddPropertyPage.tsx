@@ -11,6 +11,7 @@ import { useFormValidation } from '@/hooks/shared/useFormValidation';
 import { ValidatedInput } from '@/shared/ui/ValidatedInput';
 import { ValidatedTextarea } from '@/shared/ui/ValidatedTextarea';
 import type { Database } from '@/shared/lib/database.types';
+import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 type PropertyType = Database['public']['Tables']['properties']['Row']['property_type'];
 
@@ -400,7 +401,7 @@ const [step, setStep] = useState(1);
           ))}
         </div>
 
-        <div className="relative bg-white rounded-3xl p-10 max-w-md text-center shadow-xl animate-fade-in border" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="relative bg-white rounded-3xl p-10 max-w-xl w-full text-center shadow-xl animate-fade-in border" style={{ borderColor: 'var(--color-border)' }}>
           {/* Animated success icon */}
           <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce" style={{ background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))' }}>
             <Check className="h-12 w-12 text-white" />
@@ -429,10 +430,10 @@ const [step, setStep] = useState(1);
   }
 
   return (
-    <div className="min-h-screen pb-20" style={{ backgroundColor: 'var(--color-creme)' }}>
+    <OwnerDashboardLayout title="Ajouter une propriété">
       {/* Header Sticky Premium Ivorian */}
       <div className="bg-white border-b sticky top-0 z-30 shadow-sm" style={{ borderColor: 'var(--color-border)' }}>
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="w-full max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 font-medium transition-colors hover:opacity-80"
@@ -489,7 +490,7 @@ const [step, setStep] = useState(1);
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="w-full max-w-6xl mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -1056,6 +1057,6 @@ const [step, setStep] = useState(1);
           </div>
         </div>
       </Modal>
-    </div>
+    </OwnerDashboardLayout>
   );
 }

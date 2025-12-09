@@ -5,6 +5,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import InviteAgencyDialog from '@/features/agency/components/InviteAgencyDialog';
 import { useAgencyMandates } from '@/hooks/useAgencyMandates';
+import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 interface Property {
   id: string;
@@ -128,19 +129,19 @@ export default function OwnerDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF7F4]">
+      <OwnerDashboardLayout title="Tableau de bord propriétaire">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]"></div>
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F4]">
+    <OwnerDashboardLayout title="Tableau de bord propriétaire">
       {/* Header */}
       <div className="bg-[#2C1810] dashboard-header-animate">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center icon-pulse-premium">
@@ -163,7 +164,7 @@ export default function OwnerDashboardPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-1">
@@ -423,6 +424,6 @@ export default function OwnerDashboardPage() {
         agencies={agencies}
         selectedPropertyId={selectedPropertyForInvite}
       />
-    </div>
+    </OwnerDashboardLayout>
   );
 }

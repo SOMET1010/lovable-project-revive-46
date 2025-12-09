@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { downloadContract, regenerateContract, deleteContract, sendSignatureReminder } from '@/services/contracts/contractService';
 import { toast } from '@/hooks/shared/useSafeToast';
+import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 interface Contract {
   id: string;
@@ -222,21 +223,29 @@ export default function OwnerContractsPage() {
     return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
+  if (!user) {
+    return (
+      <OwnerDashboardLayout title="Mes contrats">
+        <div className="min-h-[60vh] bg-background flex items-center justify-center rounded-2xl">Veuillez vous connecter</div>
+      </OwnerDashboardLayout>
+    );
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="flex items-center justify-center h-64">
+      <OwnerDashboardLayout title="Mes contrats">
+        <div className="min-h-[60vh] bg-background flex items-center justify-center rounded-2xl">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <OwnerDashboardLayout title="Mes contrats">
       {/* Header */}
       <div className="bg-[#2C1810]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center">
@@ -258,7 +267,7 @@ export default function OwnerContractsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-8">
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
           <div className="bg-card rounded-2xl p-4 border border-border">
@@ -460,6 +469,6 @@ export default function OwnerContractsPage() {
           </div>
         )}
       </div>
-    </div>
+    </OwnerDashboardLayout>
   );
 }
