@@ -56,6 +56,11 @@ const isValidEmail = (email: string): boolean => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 };
 
+// Détecte si l'email est un email technique auto-généré pour les inscriptions par téléphone
+const isTechnicalEmail = (email: string): boolean => {
+  return email.endsWith('@phone.montoit.ci');
+};
+
 // Compress image before upload
 const compressImage = async (file: File, maxWidth = 1920, quality = 0.85): Promise<Blob> => {
   return new Promise((resolve, reject) => {
@@ -119,7 +124,9 @@ export default function ProfileCompletionPage() {
   useEffect(() => {
     if (profile) {
       if (profile.full_name) setFullName(profile.full_name);
-      if (profile.email) setEmail(profile.email);
+        if (profile.email && !isTechnicalEmail(profile.email)) {
+          setEmail(profile.email);
+        }
       if (profile.user_type) setUserType(profile.user_type as 'tenant' | 'owner' | 'agent');
       if (profile.city) setCity(profile.city);
       if (profile.bio) setBio(profile.bio);
