@@ -15,7 +15,6 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     headers: {
       'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'SAMEORIGIN',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Permissions-Policy': 'accelerometer=(), camera=(self), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(self), payment=(self), usb=()',
@@ -24,7 +23,6 @@ export default defineConfig(({ mode }) => ({
   preview: {
     headers: {
       'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'SAMEORIGIN',
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
