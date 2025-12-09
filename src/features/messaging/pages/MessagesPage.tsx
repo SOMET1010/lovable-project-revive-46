@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useConversations } from '../hooks/useConversations';
@@ -12,7 +12,7 @@ export default function MessagesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   
-  const { conversations, loading: loadingConversations, getOrCreateConversation } = useConversations();
+  const { conversations, loading: loadingConversations, getOrCreateConversation, refetch: refetchConversations } = useConversations();
   
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [showMobileThread, setShowMobileThread] = useState(false);
@@ -52,6 +52,24 @@ export default function MessagesPage() {
     setSelectedConversation(conv);
     setShowMobileThread(true);
   };
+
+  // Refresh conversations list when messages change (to update preview/order)
+  useEffect(() => {
+    if (selectedConversation) {
+      refetchConversations();
+    }
+  }, [messages, selectedConversation, refetchConversations]);
+
+  const handleSendMessage = useCallback(
+    async (receiverId: string, content: string, attachment?: any) => {
+      const result = await sendMessage(receiverId, content, attachment);
+      if (result) {
+        refetchConversations();
+      }
+      return result;
+    },
+    [sendMessage, refetchConversations]
+  );
 
   const handleBack = () => {
     setShowMobileThread(false);
@@ -106,7 +124,7 @@ export default function MessagesPage() {
             currentUserId={user.id}
             loading={loadingMessages}
             sending={sending}
-            onSend={sendMessage}
+            onSend={handleSendMessage}
             onBack={handleBack}
           />
         ) : (

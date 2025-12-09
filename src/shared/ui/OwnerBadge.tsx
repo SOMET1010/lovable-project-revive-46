@@ -52,8 +52,12 @@ const sizeConfig = {
 };
 
 const getDefaultAvatar = (name?: string | null) => {
-  const displayName = name || 'P';
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=FF6C2F&color=fff&size=128`;
+  const letter = (name?.trim()?.[0] || 'P').toUpperCase();
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'>
+    <rect width='100%' height='100%' rx='64' fill='%23FF6C2F'/>
+    <text x='50%' y='55%' text-anchor='middle' dominant-baseline='middle' font-family='Inter, Arial, sans-serif' font-size='56' fill='white'>${letter}</text>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 };
 
 export function OwnerBadge({
@@ -269,7 +273,6 @@ export function OwnerBadge({
             fullWidth
             className="gap-2 items-center"
           >
-            <MessageSquare className="h-4 w-4" />
             Contacter le propriétaire
           </Button>
         </div>

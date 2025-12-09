@@ -10,6 +10,7 @@ import TenantDashboardLayout from '../../features/tenant/components/TenantDashbo
 import FeatureGate from '@/shared/ui/FeatureGate';
 import ONECIForm from '@/features/verification/components/ONECIForm';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
+import { STORAGE_BUCKETS } from '@/services/upload/uploadService';
 
 interface Profile {
   id: string;
@@ -35,6 +36,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [formData, setFormData] = useState({
     full_name: '',
     phone: '',
@@ -174,9 +176,66 @@ export default function ProfilePage() {
                   <User className="w-12 h-12 text-muted-foreground" />
                 )}
               </div>
-              <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground hover:bg-primary/90">
+              <label className="absolute bottom-0 right-0 w-9 h-9 bg-primary rounded-full flex items-center justify-center text-primary-foreground hover:bg-primary/90 cursor-pointer shadow-md">
                 <Camera className="w-4 h-4" />
-              </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    if (!user) return;
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploadingAvatar(true);
+                    try {
+                      const fileExt = file.name.split('.').pop();
+                      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+                      const bucket = import.meta.env.VITE_SUPABASE_AVATARS_BUCKET || STORAGE_BUCKETS.AVATARS;
+                      const { data: existingBuckets, error: bucketError } = await supabase.storage.listBuckets();
+                      if (bucketError) throw bucketError;
+
+                      const bucketExists = (existingBuckets || []).some((b) => b.name === bucket);
+                      if (!bucketExists) {
+                        const { error: createError } = await supabase.storage.createBucket(bucket, {
+                          public: true,
+                        });
+                        if (createError) throw createError;
+                      }
+
+                      const { error: uploadError } = await supabase.storage
+                        .from(bucket)
+                        .upload(fileName, file, { upsert: true });
+                      if (uploadError) throw uploadError;
+
+                      const { data: publicUrlData } = supabase.storage
+                        .from(bucket)
+                        .getPublicUrl(fileName);
+
+                      const publicUrl = publicUrlData?.publicUrl;
+                      if (!publicUrl) throw new Error('URL publique introuvable');
+
+                      const { error: updateError } = await supabase
+                        .from('profiles')
+                        .update({ avatar_url: publicUrl })
+                        .eq('id', user.id);
+                      if (updateError) throw updateError;
+
+                      await loadProfile();
+                      toast.success('Photo de profil mise à jour');
+                    } catch (err) {
+                      console.error('Error uploading avatar:', err);
+                      toast.error('Échec du téléchargement de la photo');
+                    } finally {
+                      setUploadingAvatar(false);
+                      if (e.target) e.target.value = '';
+                    }
+                  }}
+                  disabled={uploadingAvatar}
+                />
+              </label>
+              {uploadingAvatar && (
+                <span className="absolute -bottom-5 right-0 text-xs text-muted-foreground">Upload...</span>
+              )}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">{displayName}</h1>

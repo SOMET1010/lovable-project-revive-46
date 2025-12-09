@@ -2,14 +2,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface Conversation {
   id: string;
-  participant_1_id: string;
-  participant_2_id: string;
+  participant1_id: string;
+  participant2_id: string;
   property_id: string | null;
-  subject: string | null;
   last_message_at: string;
   last_message_preview: string | null;
   created_at: string;
   updated_at: string;
+  subject?: string | null;
   // Joined data
   other_participant?: {
     id: string;
@@ -58,9 +58,12 @@ class MessagingService {
 
   async getConversations(userId: string): Promise<Conversation[]> {
     const { data, error } = await supabase
-      .from('user_conversations')
-      .select(`*`)
-      .or(`participant_1_id.eq.${userId},participant_2_id.eq.${userId}`)
+      .from('conversations')
+      .select(`
+        *,
+        property:properties!conversations_property_id_fkey(id, title)
+      `)
+      .or(`participant1_id.eq.${userId},participant2_id.eq.${userId}`)
       .order('last_message_at', { ascending: false });
 
     if (error) {
@@ -88,9 +91,9 @@ class MessagingService {
 
     const conversationsWithDetails = await Promise.all(
       (data ?? []).map(async (conv) => {
-        const otherParticipantId = conv.participant_1_id === userId 
-          ? conv.participant_2_id 
-          : conv.participant_1_id;
+        const otherParticipantId = conv.participant1_id === userId 
+          ? conv.participant2_id 
+          : conv.participant1_id;
 
         // Get other participant profile
         const { data: profile } = await supabase
@@ -129,9 +132,9 @@ class MessagingService {
     // First, try to find existing conversation
     // Build query based on whether propertyId exists
     let query = supabase
-      .from('user_conversations')
+      .from('conversations')
       .select('*')
-      .or(`and(participant_1_id.eq.${userId},participant_2_id.eq.${otherUserId}),and(participant_1_id.eq.${otherUserId},participant_2_id.eq.${userId})`);
+      .or(`and(participant1_id.eq.${userId},participant2_id.eq.${otherUserId}),and(participant1_id.eq.${otherUserId},participant2_id.eq.${userId})`);
     
     if (validPropertyId) {
       query = query.eq('property_id', validPropertyId);
@@ -147,12 +150,11 @@ class MessagingService {
 
     // Create new conversation
     const { data: newConv, error } = await supabase
-      .from('user_conversations')
+      .from('conversations')
       .insert({
-        participant_1_id: userId,
-        participant_2_id: otherUserId,
+        participant1_id: userId,
+        participant2_id: otherUserId,
         property_id: validPropertyId,
-        subject: subject ?? null,
       })
       .select()
       .single();
@@ -212,10 +214,12 @@ class MessagingService {
         receiver_id: receiverId,
         content,
         is_read: false,
-        attachment_url: attachment?.url ?? null,
-        attachment_type: attachment?.type ?? null,
-        attachment_name: attachment?.name ?? null,
-        attachment_size: attachment?.size ?? null,
+        attachments: attachment
+          ? [{ url: attachment.url, type: attachment.type, name: attachment.name, size: attachment.size }]
+          : [],
+        attachment_metadata: attachment
+          ? { name: attachment.name, type: attachment.type, size: attachment.size }
+          : {},
       })
       .select()
       .single();
@@ -296,7 +300,7 @@ class MessagingService {
           const { data: profile } = await supabase
             .from('profiles')
             .select('id, full_name, avatar_url')
-            .eq('user_id', msg.sender_id)
+            .eq('id', msg.sender_id)
             .single();
 
           callback({

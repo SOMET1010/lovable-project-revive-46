@@ -16,7 +16,12 @@ interface MessageThreadProps {
 }
 
 function getDefaultAvatar(name: string | null) {
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name ?? 'U')}&background=F16522&color=fff`;
+  const letter = (name?.trim()?.[0] || 'U').toUpperCase();
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128'>
+    <rect width='100%' height='100%' rx='64' fill='%23F16522'/>
+    <text x='50%' y='55%' text-anchor='middle' dominant-baseline='middle' font-family='Inter, Arial, sans-serif' font-size='56' fill='white'>${letter}</text>
+  </svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
 export function MessageThread({
@@ -39,11 +44,12 @@ export function MessageThread({
   }, [messages]);
 
   const otherParticipantId =
-    conversation.participant_1_id === currentUserId
-      ? conversation.participant_2_id
-      : conversation.participant_1_id;
+    conversation.participant1_id === currentUserId
+      ? conversation.participant2_id
+      : conversation.participant1_id;
 
   const handleSend = async (content: string, attachment?: Attachment | null) => {
+    if (!otherParticipantId) return;
     await onSend(otherParticipantId, content, attachment);
   };
 
