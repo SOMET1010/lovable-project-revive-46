@@ -68,6 +68,7 @@ export default function ModernAuthPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [profileType, setProfileType] = useState<'locataire' | 'proprietaire' | 'agence'>('locataire');
 
   // Phone fields
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -175,7 +176,7 @@ export default function ModernAuthPage() {
         email,
         password,
         options: {
-          data: { full_name: fullName },
+          data: { full_name: fullName, user_type: profileType },
         },
       });
 
@@ -678,6 +679,33 @@ export default function ModernAuthPage() {
                     placeholder="••••••••"
                     required
                   />
+                )}
+
+                {emailMode === 'register' && (
+                  <div className="space-y-2">
+                    <div className="text-sm font-semibold text-[#2C1810]">Profil</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {[
+                        { value: 'locataire', label: 'Locataire', icon: Home },
+                        { value: 'proprietaire', label: 'Propriétaire', icon: Star },
+                        { value: 'agence', label: 'Agence', icon: Shield },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setProfileType(opt.value as 'locataire' | 'proprietaire' | 'agence')}
+                          className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition ${
+                            profileType === opt.value
+                              ? 'border-[#F16522] bg-[#F16522]/10 text-[#F16522]'
+                              : 'border-gray-200 text-[#2C1810]'
+                          }`}
+                        >
+                          <opt.icon className="h-4 w-4" />
+                          <span className="text-sm font-semibold">{opt.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 <button

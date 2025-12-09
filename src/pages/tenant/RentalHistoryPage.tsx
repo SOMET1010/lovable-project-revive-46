@@ -256,7 +256,7 @@ const RentalHistoryPage: React.FC = () => {
   if (loading) {
     return (
       <TenantDashboardLayout title="Historique des Locations">
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
@@ -267,7 +267,7 @@ const RentalHistoryPage: React.FC = () => {
 
   return (
     <TenantDashboardLayout title="Historique des Locations">
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>

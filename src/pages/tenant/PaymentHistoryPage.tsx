@@ -175,7 +175,7 @@ export default function PaymentHistory() {
 
   return (
     <TenantDashboardLayout title="Mes Paiements">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-gradient mb-2">Historique des paiements</h1>
             <p className="text-gray-600 text-lg">Gérez et consultez tous vos paiements</p>

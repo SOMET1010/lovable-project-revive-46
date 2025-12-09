@@ -133,7 +133,7 @@ export default function TenantMaintenance() {
 
   return (
     <TenantDashboardLayout title="Maintenance">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center space-x-3">

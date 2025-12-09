@@ -9,7 +9,6 @@ import { toast } from '@/hooks/shared/useSafeToast';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
 import FeatureGate from '@/shared/ui/FeatureGate';
 import ONECIForm from '@/features/verification/components/ONECIForm';
-import CNAMForm from '@/features/verification/components/CNAMForm';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface Profile {
@@ -130,6 +129,29 @@ export default function ProfilePage() {
     );
   }
 
+  const displayName =
+    (profile?.full_name && profile.full_name.trim()) ||
+    (user as any)?.user_metadata?.full_name ||
+    profile?.email ||
+    user?.email ||
+    'Mon Profil';
+
+  const rawRole =
+    profile?.user_type ||
+    (user as any)?.user_metadata?.user_type ||
+    (profile as any)?.active_role ||
+    (user as any)?.role ||
+    '';
+
+  const roleLabel =
+    rawRole === 'locataire'
+      ? 'Locataire'
+      : rawRole === 'proprietaire' || rawRole === 'owner'
+        ? 'Propriétaire'
+        : rawRole === 'agence'
+          ? 'Agence'
+          : rawRole || 'Non renseigné';
+
   const tabs = [
     { id: 'infos', label: 'Informations', icon: User },
     { id: 'verification', label: 'Vérification', icon: Shield },
@@ -137,7 +159,7 @@ export default function ProfilePage() {
 
   return (
     <TenantDashboardLayout title="Mon Profil">
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         {/* Header */}
         <div className="bg-card rounded-2xl shadow-card p-6 mb-6">
           <div className="flex items-center gap-6">
@@ -154,8 +176,11 @@ export default function ProfilePage() {
               </button>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">{profile?.full_name || 'Mon Profil'}</h1>
+              <h1 className="text-2xl font-bold text-foreground">{displayName}</h1>
               <p className="text-muted-foreground">{profile?.email || user?.email}</p>
+              <p className="text-sm text-muted-foreground">
+                Rôle : {roleLabel}
+              </p>
               {profile?.trust_score && (
                 <div className="mt-2 flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Score de confiance:</span>
@@ -276,14 +301,9 @@ export default function ProfilePage() {
                   verified={profile?.is_verified ?? null}
                 />
                 <VerificationItem
-                  title="OnECI"
+                  title="ONECI"
                   description="Vérification de votre carte nationale d'identité"
                   verified={profile?.oneci_verified ?? null}
-                />
-                <VerificationItem
-                  title="CNAM"
-                  description="Vérification de votre assurance maladie"
-                  verified={profile?.cnam_verified ?? null}
                 />
               </div>
 
@@ -301,20 +321,11 @@ export default function ProfilePage() {
                     </FeatureGate>
                   )}
 
-                  {/* CNAM Form */}
-                  {!profile?.cnam_verified && user && (
-                    <FeatureGate feature="cnam_verification" showMessage>
-                      <div className="border border-border rounded-xl p-6">
-                        <CNAMForm userId={user.id} onSuccess={loadProfile} />
-                      </div>
-                    </FeatureGate>
-                  )}
-
-                  {profile?.oneci_verified && profile?.cnam_verified && (
+                  {profile?.oneci_verified && profile?.is_verified && (
                     <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
                       <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
-                      <h4 className="text-lg font-semibold text-green-700">Toutes les vérifications sont complètes !</h4>
-                      <p className="text-green-600">Votre profil est entièrement vérifié.</p>
+                      <h4 className="text-lg font-semibold text-green-700">Vérifications principales complètes !</h4>
+                      <p className="text-green-600">Votre profil est vérifié via ANSUT et ONECI.</p>
                     </div>
                   )}
                 </div>

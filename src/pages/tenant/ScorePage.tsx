@@ -46,7 +46,7 @@ const ScorePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="w-full px-4 py-8">
         <Skeleton className="h-8 w-64 mb-6" />
         <div className="grid gap-6 md:grid-cols-2">
           <Skeleton className="h-[400px]" />
@@ -58,7 +58,7 @@ const ScorePage: React.FC = () => {
 
   if (!scoreBreakdown) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <div className="w-full px-4 py-8">
         <div className="text-center py-12">
           <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">Impossible de charger votre score</h2>
@@ -91,7 +91,7 @@ const ScorePage: React.FC = () => {
 
   return (
     <TenantDashboardLayout title="Mon Score">
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         {/* En-tête */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold flex items-center gap-2">

@@ -210,7 +210,7 @@ export default function SavedSearches() {
 
   return (
     <div className="min-h-screen bg-background py-8">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="w-full px-4">
         {/* Header Premium */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-3">

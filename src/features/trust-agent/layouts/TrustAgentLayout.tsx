@@ -163,8 +163,10 @@ export default function TrustAgentLayout() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 lg:ml-64">
-          <Outlet />
+        <main className="flex-1 lg:ml-64 overflow-auto w-full">
+          <div className="w-full px-4 lg:px-8 py-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

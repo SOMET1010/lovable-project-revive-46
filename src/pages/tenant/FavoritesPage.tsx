@@ -125,7 +125,7 @@ export default function Favorites() {
 
   return (
     <TenantDashboardLayout title="Mes Favoris">
-      <div className="max-w-7xl mx-auto">
+      <div className="w-full">
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-4">
             <Heart className="w-8 h-8 text-red-500 fill-current" />

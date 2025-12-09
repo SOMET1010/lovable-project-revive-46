@@ -64,8 +64,10 @@ export default function TenantDashboardLayout({ children, title }: TenantDashboa
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-8 overflow-auto">
-          {children}
+        <main className="flex-1 overflow-auto w-full">
+          <div className="w-full px-4 lg:px-8 py-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>
