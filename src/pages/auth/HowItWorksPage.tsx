@@ -1,4 +1,18 @@
-import { Search, Shield, FileText, CreditCard, Home as HomeIcon, Users, CheckCircle, ArrowRight, Sparkles, TrendingUp, Award, Lock, Zap } from 'lucide-react';
+import {
+  Search,
+  Shield,
+  FileText,
+  CreditCard,
+  Home as HomeIcon,
+  Users,
+  CheckCircle,
+  ArrowRight,
+  Sparkles,
+  TrendingUp,
+  Award,
+  Lock,
+  Zap,
+} from 'lucide-react';
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
 import SEOHead from '@/shared/components/SEOHead';
@@ -13,9 +27,18 @@ interface StepCardProps {
   imagePosition?: 'left' | 'right';
 }
 
-function StepCard({ number, title, description, icon, features, imagePosition = 'right' }: StepCardProps) {
+function StepCard({
+  number,
+  title,
+  description,
+  icon,
+  features,
+  imagePosition = 'right',
+}: StepCardProps) {
   return (
-    <div className={`flex flex-col ${imagePosition === 'left' ? 'md:flex-row-reverse' : 'md:flex-row'} gap-8 items-center mb-16 animate-fade-in`}>
+    <div
+      className={`flex flex-col ${imagePosition === 'left' ? 'md:flex-row-reverse' : 'md:flex-row'} gap-8 items-center mb-16 animate-fade-in`}
+    >
       <div className="flex-1">
         <div className="flex items-center space-x-4 mb-6">
           <div className="w-16 h-16 rounded-2xl bg-[#2C1810] flex items-center justify-center text-white font-bold text-2xl shadow-lg">
@@ -39,8 +62,12 @@ function StepCard({ number, title, description, icon, features, imagePosition = 
       <div className="flex-1">
         <div className="bg-[#2C1810] rounded-[20px] p-8 shadow-2xl transform hover:scale-105 transition-all duration-300">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white">
-            <div className="text-6xl mb-4">{number === 1 ? '🔍' : number === 2 ? '🛡️' : number === 3 ? '✍️' : '💳'}</div>
-            <div className="text-sm uppercase tracking-wider text-[#E8D4C5] mb-2">Étape {number}</div>
+            <div className="text-6xl mb-4">
+              {number === 1 ? '🔍' : number === 2 ? '🛡️' : number === 3 ? '✍️' : '💳'}
+            </div>
+            <div className="text-sm uppercase tracking-wider text-[#E8D4C5] mb-2">
+              Étape {number}
+            </div>
             <div className="text-xl font-bold">{title}</div>
           </div>
         </div>
@@ -52,7 +79,7 @@ function StepCard({ number, title, description, icon, features, imagePosition = 
 export default function HowItWorksPage() {
   const homeStats = useHomeStats();
   const propertiesCount = homeStats.propertiesCount || 10;
-  
+
   const tenantSteps = [
     {
       number: 1,
@@ -64,103 +91,128 @@ export default function HowItWorksPage() {
         'Couverture dans 5 villes (Abidjan, Yamoussoukro, Bouaké, Daloa, San-Pédro)',
         'Filtres avancés : prix, chambres, type de bien, équipements',
         'Sauvegardez vos favoris et créez des alertes personnalisées',
-        'Photos haute qualité et visites virtuelles'
+        'Photos haute qualité et visites virtuelles',
       ],
-      imagePosition: 'right' as const
+      imagePosition: 'right' as const,
     },
     {
       number: 2,
       title: 'Vérifiez votre identité',
-      description: 'Créez un dossier locataire complet et sécurisé. La vérification d\'identité ONECI et la vérification biométrique renforcent la confiance entre vous et les propriétaires.',
+      description:
+        "Créez un dossier locataire complet et sécurisé. La vérification d'identité ONECI et la vérification biométrique renforcent la confiance entre vous et les propriétaires.",
       icon: <Shield className="h-8 w-8 text-white" />,
       features: [
         'Inscription gratuite en 2 minutes',
-        'Vérification d\'identité ONECI (Numéro National d\'Identification)',
+        "Vérification d'identité ONECI (Numéro National d'Identification)",
         'Vérification biométrique faciale avec NeoFace',
         'Score locataire automatique (0-100 points)',
-        'Badge "Identité Vérifiée" sur votre profil'
+        'Badge "Identité Vérifiée" sur votre profil',
       ],
-      imagePosition: 'left' as const
+      imagePosition: 'left' as const,
     },
     {
       number: 3,
       title: 'Visitez et postulez',
-      description: 'Planifiez des visites en ligne et soumettez votre candidature avec tous vos documents vérifiés. Les propriétaires vous répondent rapidement.',
+      description:
+        'Planifiez des visites en ligne et soumettez votre candidature avec tous vos documents vérifiés. Les propriétaires vous répondent rapidement.',
       icon: <FileText className="h-8 w-8 text-white" />,
       features: [
         'Planification de visite en ligne (frais : 2 000 FCFA)',
         'Soumission de candidature avec documents',
         'Justificatifs de revenus vérifiés',
         'Réponse du propriétaire sous 48h maximum',
-        'Suivi de l\'état de votre candidature en temps réel'
+        "Suivi de l'état de votre candidature en temps réel",
       ],
-      imagePosition: 'right' as const
+      imagePosition: 'right' as const,
     },
     {
       number: 4,
       title: 'Signez et payez en toute sécurité',
-      description: 'Signature électronique certifiée CEV avec valeur juridique et paiement 100% sécurisé via Mobile Money ou virement bancaire.',
+      description:
+        'Signature électronique certifiée CEV avec valeur juridique et paiement 100% sécurisé via Mobile Money ou virement bancaire.',
       icon: <CreditCard className="h-8 w-8 text-white" />,
       features: [
         'Contrat généré automatiquement (conforme Code Civil ivoirien)',
         'Signature électronique CEV via CryptoNeo (valeur juridique)',
         'Paiement Mobile Money (Orange, MTN, Moov, Wave)',
         'Virement bancaire via InTouch',
-        'Reçus automatiques et historique complet'
+        'Reçus automatiques et historique complet',
       ],
-      imagePosition: 'left' as const
-    }
+      imagePosition: 'left' as const,
+    },
   ];
 
   const ownerSteps = [
     {
       title: 'Inscrivez-vous gratuitement',
       description: 'Créez votre compte propriétaire ou agence en quelques minutes.',
-      features: ['Profil propriétaire/agence', 'Vérification identité ONECI', 'Tableau de bord complet']
+      features: [
+        'Profil propriétaire/agence',
+        'Vérification identité ONECI',
+        'Tableau de bord complet',
+      ],
     },
     {
       title: 'Publiez votre bien',
       description: 'Ajoutez votre propriété avec photos et description détaillée.',
-      features: ['1ère annonce gratuite', 'Upload photos HD', 'Visibilité immédiate', 'Modification illimitée']
+      features: [
+        '1ère annonce gratuite',
+        'Upload photos HD',
+        'Visibilité immédiate',
+        'Modification illimitée',
+      ],
     },
     {
       title: 'Recevez les candidatures',
       description: 'Consultez les profils vérifiés et choisissez votre locataire idéal.',
-      features: ['Notifications temps réel', 'Score locataire visible', 'Documents vérifiés', 'Historique locatif']
+      features: [
+        'Notifications temps réel',
+        'Score locataire visible',
+        'Documents vérifiés',
+        'Historique locatif',
+      ],
     },
     {
       title: 'Signez le contrat',
       description: 'Génération automatique et signature électronique certifiée.',
-      features: ['Génération automatique', 'Signature CEV légale', 'Archivage sécurisé', 'Renouvellement auto']
+      features: [
+        'Génération automatique',
+        'Signature CEV légale',
+        'Archivage sécurisé',
+        'Renouvellement auto',
+      ],
     },
     {
       title: 'Encaissez vos loyers',
       description: 'Recevez vos paiements automatiquement chaque mois.',
-      features: ['Paiement automatique', 'Virement sous 48h', 'Commission 5%', 'Reçus fiscaux']
-    }
+      features: ['Paiement automatique', 'Virement sous 48h', 'Commission 5%', 'Reçus fiscaux'],
+    },
   ];
 
   const securityFeatures = [
     {
       icon: <Shield className="h-6 w-6" />,
       title: 'Certification ANSUT',
-      description: 'Conforme aux normes de l\'Autorité Nationale des Services Universels de Télécommunications'
+      description:
+        "Conforme aux normes de l'Autorité Nationale des Services Universels de Télécommunications",
     },
     {
       icon: <Lock className="h-6 w-6" />,
       title: 'Sécurité Maximum',
-      description: 'Chiffrement SSL 256-bit et protection des données personnelles (conformité RGPD)'
+      description:
+        'Chiffrement SSL 256-bit et protection des données personnelles (conformité RGPD)',
     },
     {
       icon: <Award className="h-6 w-6" />,
       title: 'Signature Électronique',
-      description: 'Signature CEV via CryptoNeo avec valeur juridique reconnue par l\'État ivoirien'
+      description: "Signature CEV via CryptoNeo avec valeur juridique reconnue par l'État ivoirien",
     },
     {
       icon: <Zap className="h-6 w-6" />,
       title: 'Traitement Rapide',
-      description: 'Candidatures traitées en 48h, paiements virés en 48h, contrats générés instantanément'
-    }
+      description:
+        'Candidatures traitées en 48h, paiements virés en 48h, contrats générés instantanément',
+    },
   ];
 
   return (
@@ -175,13 +227,10 @@ export default function HowItWorksPage() {
         title="Comment ça marche ?"
         subtitle="Trouvez votre logement en 4 étapes simples et sécurisées"
         icon={<Sparkles className="h-8 w-8 text-white" />}
-        breadcrumbs={[
-          { label: 'Comment ça marche', href: '/comment-ca-marche' }
-        ]}
+        breadcrumbs={[{ label: 'Comment ça marche', href: '/comment-ca-marche' }]}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-
         {/* Section Intro */}
         <div className="text-center mb-20 animate-fade-in">
           <div className="inline-flex items-center space-x-2 bg-[#F16522]/10 text-[#F16522] px-6 py-3 rounded-full font-semibold mb-6">
@@ -192,7 +241,8 @@ export default function HowItWorksPage() {
             4 étapes pour trouver votre logement idéal
           </h2>
           <p className="text-xl text-[#6B5A4E] max-w-3xl mx-auto">
-            De la recherche au paiement, nous vous accompagnons à chaque étape avec des outils modernes et sécurisés
+            De la recherche au paiement, nous vous accompagnons à chaque étape avec des outils
+            modernes et sécurisés
           </p>
         </div>
 
@@ -210,9 +260,7 @@ export default function HowItWorksPage() {
               <Users className="h-5 w-5" />
               <span>Pour les Propriétaires</span>
             </div>
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Louez votre bien en 5 étapes
-            </h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Louez votre bien en 5 étapes</h2>
             <p className="text-xl text-[#E8D4C5] max-w-3xl mx-auto">
               Gérez vos locations en toute simplicité avec notre plateforme automatisée
             </p>
@@ -220,7 +268,10 @@ export default function HowItWorksPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {ownerSteps.map((step, index) => (
-              <div key={index} className="bg-white rounded-[20px] p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:border-[#F16522] border-2 border-transparent">
+              <div
+                key={index}
+                className="bg-white rounded-[20px] p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:border-[#F16522] border-2 border-transparent"
+              >
                 <div className="w-12 h-12 bg-[#F16522] rounded-xl flex items-center justify-center text-white font-bold text-xl mb-4">
                   {index + 1}
                 </div>
@@ -256,7 +307,10 @@ export default function HowItWorksPage() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {securityFeatures.map((feature, index) => (
-              <div key={index} className="bg-white rounded-[20px] p-6 shadow-lg border-2 border-[#EFEBE9] hover:border-[#F16522] transition-all duration-300">
+              <div
+                key={index}
+                className="bg-white rounded-[20px] p-6 shadow-lg border-2 border-[#EFEBE9] hover:border-[#F16522] transition-all duration-300"
+              >
                 <div className="w-12 h-12 bg-[#2C1810] rounded-xl flex items-center justify-center text-white mb-4">
                   {feature.icon}
                 </div>
@@ -284,7 +338,6 @@ export default function HowItWorksPage() {
             </div>
           </div>
         </div>
-
       </div>
 
       <FooterCTA
@@ -296,14 +349,14 @@ export default function HowItWorksPage() {
             label: 'Commencer maintenant',
             href: '/inscription',
             icon: ArrowRight,
-            variant: 'primary'
+            variant: 'primary',
           },
           {
             label: 'Explorer les biens',
             href: '/recherche',
             icon: Search,
-            variant: 'secondary'
-          }
+            variant: 'secondary',
+          },
         ]}
       />
     </div>

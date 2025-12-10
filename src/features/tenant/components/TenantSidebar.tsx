@@ -1,21 +1,23 @@
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  User, 
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  User,
   Users,
-  FileText, 
-  CreditCard, 
-  Calendar, 
-  Wrench, 
-  Award, 
-  Heart, 
+  FileText,
+  CreditCard,
+  Calendar,
+  Wrench,
+  Award,
+  Heart,
   MessageSquare,
   Search,
   X,
-  Home
+  Home,
+  LogOut,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 const cn = (...inputs: (string | undefined | null | false)[]) => twMerge(clsx(inputs));
 
@@ -26,44 +28,48 @@ interface TenantSidebarProps {
 }
 
 const navItems = [
-  { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Mon Espace', href: '/mon-espace', icon: Home },
-  { label: 'Mon Profil', href: '/profil', icon: User },
-  { label: 'Mes Candidatures', href: '/mes-candidatures', icon: Users },
-  { label: 'Mes Contrats', href: '/mes-contrats', icon: FileText },
-  { label: 'Mes Paiements', href: '/mes-paiements', icon: CreditCard },
-  { label: 'Mes Visites', href: '/mes-visites', icon: Calendar },
-  { label: 'Maintenance', href: '/maintenance/locataire', icon: Wrench },
-  { label: 'Mon Score', href: '/mon-score', icon: Award },
-  { label: 'Historique Locations', href: '/profil/historique-locations', icon: Home },
-  { label: 'Mes Favoris', href: '/favoris', icon: Heart },
-  { label: 'Messages', href: '/messages', icon: MessageSquare, hasBadge: true },
+  { label: 'Tableau de bord', href: '/locataire/dashboard', icon: LayoutDashboard },
+  { label: 'Mon Espace', href: '/locataire/mon-espace', icon: Home },
+  { label: 'Mon Profil', href: '/locataire/profil', icon: User },
+  { label: 'Mes Candidatures', href: '/locataire/mes-candidatures', icon: Users },
+  { label: 'Mes Contrats', href: '/locataire/mes-contrats', icon: FileText },
+  { label: 'Mes Paiements', href: '/locataire/mes-paiements', icon: CreditCard },
+  { label: 'Mes Visites', href: '/locataire/mes-visites', icon: Calendar },
+  { label: 'Maintenance', href: '/locataire/maintenance/locataire', icon: Wrench },
+  { label: 'Mon Score', href: '/locataire/mon-score', icon: Award },
+  { label: 'Historique Locations', href: '/locataire/profil/historique-locations', icon: Home },
+  { label: 'Mes Favoris', href: '/locataire/favoris', icon: Heart },
+  { label: 'Messages', href: '/locataire/messages', icon: MessageSquare, hasBadge: true },
 ];
 
-const bottomItems = [
-  { label: 'Rechercher', href: '/recherche', icon: Search },
-];
+const bottomItems = [{ label: 'Rechercher', href: '/recherche', icon: Search }];
 
 export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: TenantSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const currentPath = location.pathname;
 
   const isActive = (href: string) => {
-    if (href === '/dashboard') {
-      return currentPath === '/dashboard' || currentPath === '/';
+    if (href === '/locataire/dashboard') {
+      return currentPath === '/locataire/dashboard' || currentPath === '/';
     }
     return currentPath.startsWith(href);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion', error);
+    }
   };
 
   return (
     <>
       {/* Mobile Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onClose}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
 
       {/* Sidebar */}
       <aside
@@ -83,7 +89,7 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
               <p className="text-xs text-neutral-500">Espace Locataire</p>
             </div>
           </Link>
-          <button 
+          <button
             onClick={onClose}
             className="lg:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
           >
@@ -97,7 +103,7 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
             {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              
+
               return (
                 <li key={item.href}>
                   <Link
@@ -131,7 +137,7 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
             {bottomItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              
+
               return (
                 <li key={item.href}>
                   <Link
@@ -155,7 +161,7 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
 
         {/* Footer */}
         <div className="p-4 border-t border-neutral-100">
-          <div className="bg-primary-50 rounded-xl p-4">
+          <div className="bg-primary-50 rounded-xl p-4 mb-4">
             <p className="text-sm font-medium text-primary-700 mb-1">Besoin d'aide ?</p>
             <p className="text-xs text-primary-600 mb-3">Notre équipe est là pour vous</p>
             <Link
@@ -165,6 +171,13 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
               Nous contacter
             </Link>
           </div>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center justify-center gap-2 w-full text-sm font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 py-2 px-4 rounded-lg transition-colors border border-red-200"
+          >
+            <LogOut className="h-4 w-4" />
+            Déconnexion
+          </button>
         </div>
       </aside>
     </>

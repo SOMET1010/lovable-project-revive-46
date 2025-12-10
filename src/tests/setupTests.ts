@@ -15,7 +15,7 @@ const localStorageMock = {
   clear: vi.fn(),
 };
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
+  value: localStorageMock,
 });
 
 // Mock du sessionStorage
@@ -26,7 +26,7 @@ const sessionStorageMock = {
   clear: vi.fn(),
 };
 Object.defineProperty(window, 'sessionStorage', {
-  value: sessionStorageMock
+  value: sessionStorageMock,
 });
 
 // Mock de l'intersection observer
@@ -34,20 +34,34 @@ global.IntersectionObserver = class IntersectionObserver {
   readonly root: Element | null = null;
   readonly rootMargin: string = '';
   readonly thresholds: ReadonlyArray<number> = [];
-  
+
   constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
-  observe() { return null; }
-  disconnect() { return null; }
-  unobserve() { return null; }
-  takeRecords(): IntersectionObserverEntry[] { return []; }
+  observe() {
+    return null;
+  }
+  disconnect() {
+    return null;
+  }
+  unobserve() {
+    return null;
+  }
+  takeRecords(): IntersectionObserverEntry[] {
+    return [];
+  }
 };
 
 // Mock de resize observer
 global.ResizeObserver = class ResizeObserver {
   constructor(_callback: ResizeObserverCallback) {}
-  observe() { return null; }
-  disconnect() { return null; }
-  unobserve() { return null; }
+  observe() {
+    return null;
+  }
+  disconnect() {
+    return null;
+  }
+  unobserve() {
+    return null;
+  }
 };
 
 // Configuration de console pour les tests

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Search, 
-  Filter, 
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Users,
+  Search,
+  Filter,
+  Clock,
+  CheckCircle,
+  XCircle,
   Loader2,
   AlertCircle,
   Calendar,
-  X
+  X,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
@@ -24,12 +24,12 @@ import {
   scheduleVisitFromApplication,
   reopenApplication,
   ApplicationWithDetails,
-  ApplicationStats
+  ApplicationStats,
 } from '@/services/applications/applicationService';
 import {
-  notifyApplicationAccepted, 
-  notifyApplicationRejected, 
-  notifyVisitScheduled 
+  notifyApplicationAccepted,
+  notifyApplicationRejected,
+  notifyVisitScheduled,
 } from '@/services/notifications/applicationNotificationService';
 import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
@@ -43,27 +43,35 @@ interface VisitFormData {
 export default function OwnerApplicationsPage() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  
+
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [applications, setApplications] = useState<ApplicationWithDetails[]>([]);
-  const [stats, setStats] = useState<ApplicationStats>({ total: 0, pending: 0, inProgress: 0, accepted: 0, rejected: 0 });
+  const [stats, setStats] = useState<ApplicationStats>({
+    total: 0,
+    pending: 0,
+    inProgress: 0,
+    accepted: 0,
+    rejected: 0,
+  });
   const [properties, setProperties] = useState<{ id: string; title: string }[]>([]);
-  
+
   // Filters
   const [statusFilter, setStatusFilter] = useState('all');
   const [propertyFilter, setPropertyFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   // Modals
-  const [selectedApplication, setSelectedApplication] = useState<ApplicationWithDetails | null>(null);
+  const [selectedApplication, setSelectedApplication] = useState<ApplicationWithDetails | null>(
+    null
+  );
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [visitApplicationId, setVisitApplicationId] = useState<string | null>(null);
   const [visitForm, setVisitForm] = useState<VisitFormData>({
     date: '',
     time: '10:00',
     type: 'physique',
-    notes: ''
+    notes: '',
   });
 
   useEffect(() => {
@@ -88,10 +96,10 @@ export default function OwnerApplicationsPage() {
         getOwnerApplications(user.id, {
           status: statusFilter !== 'all' ? statusFilter : undefined,
           propertyId: propertyFilter !== 'all' ? propertyFilter : undefined,
-          searchTerm: searchTerm || undefined
+          searchTerm: searchTerm || undefined,
         }),
         getApplicationStats(user.id),
-        getOwnerProperties(user.id)
+        getOwnerProperties(user.id),
       ]);
 
       setApplications(applicationsData);
@@ -106,7 +114,7 @@ export default function OwnerApplicationsPage() {
   };
 
   const handleAccept = async (applicationId: string) => {
-    const application = applications.find(a => a.id === applicationId);
+    const application = applications.find((a) => a.id === applicationId);
     if (application?.status === 'refusee') {
       // Rouvrir la candidature
       setActionLoading(true);
@@ -222,7 +230,7 @@ export default function OwnerApplicationsPage() {
       <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
-          <button 
+          <button
             onClick={() => setStatusFilter('all')}
             className={`bg-white rounded-2xl p-4 border-2 transition-all ${statusFilter === 'all' ? 'border-primary-500 shadow-md' : 'border-transparent hover:border-neutral-200'}`}
           >
@@ -233,7 +241,7 @@ export default function OwnerApplicationsPage() {
             <p className="text-2xl font-bold text-neutral-900">{stats.total}</p>
           </button>
 
-          <button 
+          <button
             onClick={() => setStatusFilter('en_attente')}
             className={`bg-white rounded-2xl p-4 border-2 transition-all ${statusFilter === 'en_attente' ? 'border-amber-500 shadow-md' : 'border-transparent hover:border-neutral-200'}`}
           >
@@ -244,7 +252,7 @@ export default function OwnerApplicationsPage() {
             <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
           </button>
 
-          <button 
+          <button
             onClick={() => setStatusFilter('en_cours')}
             className={`bg-white rounded-2xl p-4 border-2 transition-all ${statusFilter === 'en_cours' ? 'border-blue-500 shadow-md' : 'border-transparent hover:border-neutral-200'}`}
           >
@@ -255,7 +263,7 @@ export default function OwnerApplicationsPage() {
             <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
           </button>
 
-          <button 
+          <button
             onClick={() => setStatusFilter('acceptee')}
             className={`bg-white rounded-2xl p-4 border-2 transition-all ${statusFilter === 'acceptee' ? 'border-green-500 shadow-md' : 'border-transparent hover:border-neutral-200'}`}
           >
@@ -266,7 +274,7 @@ export default function OwnerApplicationsPage() {
             <p className="text-2xl font-bold text-green-600">{stats.accepted}</p>
           </button>
 
-          <button 
+          <button
             onClick={() => setStatusFilter('refusee')}
             className={`bg-white rounded-2xl p-4 border-2 transition-all ${statusFilter === 'refusee' ? 'border-red-500 shadow-md' : 'border-transparent hover:border-neutral-200'}`}
           >
@@ -298,8 +306,10 @@ export default function OwnerApplicationsPage() {
               className="border border-neutral-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="all">Toutes les propriétés</option>
-              {properties.map(p => (
-                <option key={p.id} value={p.id}>{p.title}</option>
+              {properties.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title}
+                </option>
               ))}
             </select>
           </div>
@@ -308,7 +318,7 @@ export default function OwnerApplicationsPage() {
         {/* Applications List */}
         {applications.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {applications.map(application => (
+            {applications.map((application) => (
               <ApplicationCard
                 key={application.id}
                 application={application}
@@ -327,10 +337,9 @@ export default function OwnerApplicationsPage() {
             </div>
             <h3 className="text-lg font-semibold text-neutral-900 mb-2">Aucune candidature</h3>
             <p className="text-neutral-500">
-              {statusFilter !== 'all' 
+              {statusFilter !== 'all'
                 ? `Aucune candidature avec le statut "${statusFilter === 'en_attente' ? 'En attente' : statusFilter === 'en_cours' ? 'En cours' : statusFilter === 'acceptee' ? 'Acceptée' : 'Refusée'}"`
-                : 'Vous n\'avez pas encore reçu de candidatures pour vos biens.'
-              }
+                : "Vous n'avez pas encore reçu de candidatures pour vos biens."}
             </p>
           </div>
         )}
@@ -345,7 +354,7 @@ export default function OwnerApplicationsPage() {
                 <Calendar className="h-5 w-5 text-primary-500" />
                 Planifier une visite
               </h3>
-              <button 
+              <button
                 onClick={() => setShowVisitModal(false)}
                 className="p-1 hover:bg-neutral-100 rounded-lg"
               >
@@ -368,16 +377,26 @@ export default function OwnerApplicationsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Heure *
-                </label>
+                <label className="block text-sm font-medium text-neutral-700 mb-1">Heure *</label>
                 <select
                   value={visitForm.time}
                   onChange={(e) => setVisitForm({ ...visitForm, time: e.target.value })}
                   className="w-full px-4 py-2.5 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500"
                 >
-                  {['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00', '18:00'].map(time => (
-                    <option key={time} value={time}>{time}</option>
+                  {[
+                    '08:00',
+                    '09:00',
+                    '10:00',
+                    '11:00',
+                    '14:00',
+                    '15:00',
+                    '16:00',
+                    '17:00',
+                    '18:00',
+                  ].map((time) => (
+                    <option key={time} value={time}>
+                      {time}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -453,7 +472,7 @@ export default function OwnerApplicationsPage() {
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-neutral-900">Détails de la candidature</h3>
-                <button 
+                <button
                   onClick={() => setSelectedApplication(null)}
                   className="p-1 hover:bg-neutral-100 rounded-lg"
                 >
@@ -466,17 +485,19 @@ export default function OwnerApplicationsPage() {
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center overflow-hidden">
                     {selectedApplication.applicant?.avatar_url ? (
-                      <img 
-                        src={selectedApplication.applicant.avatar_url} 
-                        alt={selectedApplication.applicant.full_name || ''} 
-                        className="w-full h-full object-cover" 
+                      <img
+                        src={selectedApplication.applicant.avatar_url}
+                        alt={selectedApplication.applicant.full_name || ''}
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <Users className="h-8 w-8 text-primary-500" />
                     )}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-lg">{selectedApplication.applicant?.full_name || 'Candidat'}</h4>
+                    <h4 className="font-semibold text-lg">
+                      {selectedApplication.applicant?.full_name || 'Candidat'}
+                    </h4>
                     <p className="text-neutral-500">{selectedApplication.applicant?.email}</p>
                     {selectedApplication.applicant?.phone && (
                       <p className="text-neutral-500">{selectedApplication.applicant.phone}</p>
@@ -495,24 +516,33 @@ export default function OwnerApplicationsPage() {
                 </div>
 
                 {/* Score */}
-                {(selectedApplication.applicant?.trust_score || selectedApplication.application_score) && (
+                {(selectedApplication.applicant?.trust_score ||
+                  selectedApplication.application_score) && (
                   <div className="bg-neutral-50 rounded-xl p-4">
                     <p className="text-sm text-neutral-500 mb-2">Score de confiance</p>
                     <div className="flex items-center gap-2">
                       <div className="w-full bg-neutral-200 rounded-full h-3">
-                        <div 
+                        <div
                           className={`h-3 rounded-full ${
-                            (selectedApplication.applicant?.trust_score ?? selectedApplication.application_score ?? 0) >= 70 
-                              ? 'bg-green-500' 
-                              : (selectedApplication.applicant?.trust_score ?? selectedApplication.application_score ?? 0) >= 50 
-                                ? 'bg-amber-500' 
+                            (selectedApplication.applicant?.trust_score ??
+                              selectedApplication.application_score ??
+                              0) >= 70
+                              ? 'bg-green-500'
+                              : (selectedApplication.applicant?.trust_score ??
+                                    selectedApplication.application_score ??
+                                    0) >= 50
+                                ? 'bg-amber-500'
                                 : 'bg-red-500'
                           }`}
-                          style={{ width: `${selectedApplication.applicant?.trust_score ?? selectedApplication.application_score ?? 0}%` }}
+                          style={{
+                            width: `${selectedApplication.applicant?.trust_score ?? selectedApplication.application_score ?? 0}%`,
+                          }}
                         />
                       </div>
                       <span className="font-bold text-lg">
-                        {selectedApplication.applicant?.trust_score ?? selectedApplication.application_score}/100
+                        {selectedApplication.applicant?.trust_score ??
+                          selectedApplication.application_score}
+                        /100
                       </span>
                     </div>
                   </div>

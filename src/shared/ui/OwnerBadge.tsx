@@ -91,12 +91,12 @@ export function OwnerBadge({
       onContact();
       return;
     }
-    
+
     const params = new URLSearchParams();
     if (ownerId) params.set('to', ownerId);
     if (propertyId) params.set('property', propertyId);
     if (propertyTitle) params.set('subject', `Demande concernant: ${propertyTitle}`);
-    
+
     navigate(`/messages?${params.toString()}`);
   };
 
@@ -147,13 +147,20 @@ export function OwnerBadge({
   // Si gestion anonyme, afficher l'agence au lieu du propriétaire
   if (isAnonymous && managedByAgencyName) {
     return (
-      <div className={cn('bg-white rounded-2xl shadow-lg p-6 border border-neutral-100', className)}>
+      <div
+        className={cn('bg-white rounded-2xl shadow-lg p-6 border border-neutral-100', className)}
+      >
         <h3 className="text-lg font-semibold text-neutral-900 mb-4">Gestionnaire</h3>
-        
+
         <div className={cn('flex items-center', sizes.gap)}>
           {/* Agency Icon */}
           <div className="relative flex-shrink-0">
-            <div className={cn(sizes.avatar, 'rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20')}>
+            <div
+              className={cn(
+                sizes.avatar,
+                'rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20'
+              )}
+            >
               <Building2 className="h-6 w-6 text-primary" />
             </div>
             <div
@@ -171,21 +178,14 @@ export function OwnerBadge({
             <div className={cn(sizes.name, 'font-semibold text-neutral-900 truncate')}>
               Géré par {managedByAgencyName}
             </div>
-            <div className="mt-1 text-sm text-neutral-500">
-              Agence immobilière vérifiée
-            </div>
+            <div className="mt-1 text-sm text-neutral-500">Agence immobilière vérifiée</div>
           </div>
         </div>
 
         {/* Bouton Contacter l'agence */}
         {showContactButton && (
           <div className="mt-4 pt-4 border-t border-neutral-100">
-            <Button
-              onClick={handleContact}
-              variant="primary"
-              fullWidth
-              className="gap-2"
-            >
+            <Button onClick={handleContact} variant="primary" fullWidth className="gap-2">
               <MessageSquare className="h-4 w-4" />
               Contacter l'agence
             </Button>
@@ -198,7 +198,7 @@ export function OwnerBadge({
   return (
     <div className={cn('bg-white rounded-2xl shadow-lg p-6 border border-neutral-100', className)}>
       <h3 className="text-lg font-semibold text-neutral-900 mb-4">Propriétaire</h3>
-      
+
       <div className={cn('flex items-center', sizes.gap)}>
         {/* Avatar */}
         <div className="relative flex-shrink-0">

@@ -42,7 +42,8 @@ export default function Favorites() {
     try {
       const { data, error } = await supabase
         .from('favorites')
-        .select(`
+        .select(
+          `
           id,
           property_id,
           created_at,
@@ -61,7 +62,8 @@ export default function Favorites() {
             status,
             main_image
           )
-        `)
+        `
+        )
         .eq('user_id', user?.id ?? '')
         .order('created_at', { ascending: false });
 
@@ -71,7 +73,7 @@ export default function Favorites() {
         id: fav.id,
         property_id: fav.property_id,
         created_at: fav.created_at,
-        property: fav.properties
+        property: fav.properties,
       }));
 
       setFavorites(formattedFavorites);
@@ -86,14 +88,11 @@ export default function Favorites() {
     if (!confirm('Retirer cette propriété de vos favoris ?')) return;
 
     try {
-      const { error } = await supabase
-        .from('favorites')
-        .delete()
-        .eq('id', favoriteId);
+      const { error } = await supabase.from('favorites').delete().eq('id', favoriteId);
 
       if (error) throw error;
 
-      setFavorites(favorites.filter(f => f.id !== favoriteId));
+      setFavorites(favorites.filter((f) => f.id !== favoriteId));
     } catch (error) {
       console.error('Error removing favorite:', error);
       alert('Erreur lors de la suppression du favori');
@@ -105,7 +104,7 @@ export default function Favorites() {
     return new Date(date).toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -114,12 +113,8 @@ export default function Favorites() {
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <div className="text-center">
           <Heart className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-neutral-900 mb-2">
-            Connexion requise
-          </h2>
-          <p className="text-neutral-600">
-            Veuillez vous connecter pour voir vos favoris
-          </p>
+          <h2 className="text-xl font-semibold text-neutral-900 mb-2">Connexion requise</h2>
+          <p className="text-neutral-600">Veuillez vous connecter pour voir vos favoris</p>
         </div>
       </div>
     );
@@ -134,7 +129,8 @@ export default function Favorites() {
             <h1 className="text-3xl font-bold text-neutral-900">Mes favoris</h1>
           </div>
           <p className="text-neutral-600">
-            {favorites.length} {favorites.length === 1 ? 'propriété sauvegardée' : 'propriétés sauvegardées'}
+            {favorites.length}{' '}
+            {favorites.length === 1 ? 'propriété sauvegardée' : 'propriétés sauvegardées'}
           </p>
         </div>
 
@@ -145,9 +141,7 @@ export default function Favorites() {
         ) : favorites.length === 0 ? (
           <div className="bg-white rounded-lg shadow-lg p-12 text-center">
             <Heart className="w-16 h-16 text-neutral-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-neutral-900 mb-2">
-              Aucun favori
-            </h3>
+            <h3 className="text-xl font-semibold text-neutral-900 mb-2">Aucun favori</h3>
             <p className="text-neutral-600 mb-6">
               Explorez nos propriétés et ajoutez vos préférées à vos favoris
             </p>
@@ -161,7 +155,10 @@ export default function Favorites() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {favorites.map((favorite) => (
-              <div key={favorite.id} className="bg-white rounded-lg shadow-lg overflow-hidden group">
+              <div
+                key={favorite.id}
+                className="bg-white rounded-lg shadow-lg overflow-hidden group"
+              >
                 <div className="relative">
                   <img
                     src={favorite.property?.main_image || 'https://via.placeholder.com/400x300'}
@@ -200,7 +197,9 @@ export default function Favorites() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <Bed className="w-4 h-4" />
-                      <span>{favorite.property?.bedrooms_count ?? favorite.property?.rooms_count ?? 0}</span>
+                      <span>
+                        {favorite.property?.bedrooms_count ?? favorite.property?.rooms_count ?? 0}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1">
                       <Bath className="w-4 h-4" />

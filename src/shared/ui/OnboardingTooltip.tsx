@@ -15,7 +15,11 @@ interface OnboardingTooltipProps {
   storageKey: string;
 }
 
-export default function OnboardingTooltip({ steps, onComplete, storageKey }: OnboardingTooltipProps) {
+export default function OnboardingTooltip({
+  steps,
+  onComplete,
+  storageKey,
+}: OnboardingTooltipProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -81,12 +85,8 @@ export default function OnboardingTooltip({ steps, onComplete, storageKey }: Onb
 
             {step && (
               <>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {step.description}
-                </p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">{step.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{step.description}</p>
               </>
             )}
           </div>
@@ -98,10 +98,7 @@ export default function OnboardingTooltip({ steps, onComplete, storageKey }: Onb
             >
               Passer le tutoriel
             </button>
-            <button
-              onClick={handleNext}
-              className="btn-primary flex items-center space-x-2"
-            >
+            <button onClick={handleNext} className="btn-primary flex items-center space-x-2">
               {currentStep < steps.length - 1 ? (
                 <>
                   <span>Suivant</span>

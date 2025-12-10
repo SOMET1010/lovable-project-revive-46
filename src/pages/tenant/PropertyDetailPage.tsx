@@ -1,9 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  MapPin, Bed, Bath, Maximize, Heart, Share2, Calendar, 
-  ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Car, 
-  Zap, Building, Home, FileText
+import {
+  MapPin,
+  Bed,
+  Bath,
+  Maximize,
+  Heart,
+  Share2,
+  Calendar,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  Car,
+  Zap,
+  Building,
+  Home,
+  FileText,
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import MapWrapper from '@/shared/ui/MapWrapper';
@@ -71,7 +84,7 @@ function handleImageError(e: React.SyntheticEvent<HTMLImageElement>) {
 }
 
 function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalleryProps) {
-  const displayImages = (!images || images.length === 0) ? [FALLBACK_IMAGE] : images;
+  const displayImages = !images || images.length === 0 ? [FALLBACK_IMAGE] : images;
 
   return (
     <div className="space-y-4">
@@ -87,7 +100,9 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
         {displayImages.length > 1 && (
           <>
             <button
-              onClick={() => onIndexChange(currentIndex === 0 ? displayImages.length - 1 : currentIndex - 1)}
+              onClick={() =>
+                onIndexChange(currentIndex === 0 ? displayImages.length - 1 : currentIndex - 1)
+              }
               className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-105"
               aria-label="Image précédente"
             >
@@ -130,8 +145,8 @@ function ImageGallery({ images, title, currentIndex, onIndexChange }: ImageGalle
               key={index}
               onClick={() => onIndexChange(index)}
               className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                index === currentIndex 
-                  ? 'border-primary-500 shadow-lg' 
+                index === currentIndex
+                  ? 'border-primary-500 shadow-lg'
                   : 'border-neutral-200 hover:border-primary-300'
               }`}
               aria-label={`Voir l'image ${index + 1}`}
@@ -163,7 +178,7 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
       icon: <Bed className="h-6 w-6" />,
       label: 'Chambres',
       value: property.bedrooms.toString(),
-      color: 'text-primary-500'
+      color: 'text-primary-500',
     });
   }
 
@@ -172,7 +187,7 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
       icon: <Bath className="h-6 w-6" />,
       label: 'Salles de bain',
       value: property.bathrooms.toString(),
-      color: 'text-primary-500'
+      color: 'text-primary-500',
     });
   }
 
@@ -181,7 +196,7 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
       icon: <Maximize className="h-6 w-6" />,
       label: 'Surface',
       value: `${property.surface_area} m²`,
-      color: 'text-primary-500'
+      color: 'text-primary-500',
     });
   }
 
@@ -190,54 +205,80 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
       icon: <Car className="h-6 w-6" />,
       label: 'Parking',
       value: 'Disponible',
-      color: 'text-primary-500'
+      color: 'text-primary-500',
     });
   }
 
   if (property.property_type) {
     const propertyTypeLabels: Record<string, string> = {
-      'maison': 'Maison',
-      'appartement': 'Appartement',
-      'villa': 'Villa',
-      'studio': 'Studio',
-      'duplex': 'Duplex',
-      'chambre': 'Chambre',
-      'bureau': 'Bureau',
-      'commerce': 'Commerce',
-      'entrepot': 'Entrepôt',
-      'terrain': 'Terrain'
+      maison: 'Maison',
+      appartement: 'Appartement',
+      villa: 'Villa',
+      studio: 'Studio',
+      duplex: 'Duplex',
+      chambre: 'Chambre',
+      bureau: 'Bureau',
+      commerce: 'Commerce',
+      entrepot: 'Entrepôt',
+      terrain: 'Terrain',
     };
     features.push({
-      icon: property.property_type === 'maison' || property.property_type === 'villa' ? <Home className="h-6 w-6" /> : <Building className="h-6 w-6" />,
+      icon:
+        property.property_type === 'maison' || property.property_type === 'villa' ? (
+          <Home className="h-6 w-6" />
+        ) : (
+          <Building className="h-6 w-6" />
+        ),
       label: 'Type de bien',
       value: propertyTypeLabels[property.property_type] || property.property_type,
-      color: 'text-primary-500'
+      color: 'text-primary-500',
     });
   }
 
   const amenities = [
-    { key: 'parking', available: property.has_parking, label: 'Parking', icon: <Car className="h-5 w-5" /> },
-    { key: 'garden', available: property.has_garden, label: 'Jardin', icon: <CheckCircle className="h-5 w-5" /> },
-    { key: 'furnished', available: property.is_furnished, label: 'Meublé', icon: <CheckCircle className="h-5 w-5" /> },
-    { key: 'ac', available: property.has_ac, label: 'Climatisation', icon: <Zap className="h-5 w-5" /> },
-  ].filter(a => a.available);
+    {
+      key: 'parking',
+      available: property.has_parking,
+      label: 'Parking',
+      icon: <Car className="h-5 w-5" />,
+    },
+    {
+      key: 'garden',
+      available: property.has_garden,
+      label: 'Jardin',
+      icon: <CheckCircle className="h-5 w-5" />,
+    },
+    {
+      key: 'furnished',
+      available: property.is_furnished,
+      label: 'Meublé',
+      icon: <CheckCircle className="h-5 w-5" />,
+    },
+    {
+      key: 'ac',
+      available: property.has_ac,
+      label: 'Climatisation',
+      icon: <Zap className="h-5 w-5" />,
+    },
+  ].filter((a) => a.available);
 
   amenities.slice(0, 4).forEach((amenity) => {
     features.push({
       icon: amenity.icon,
       label: amenity.label,
       value: 'Disponible',
-      color: 'text-semantic-success'
+      color: 'text-semantic-success',
     });
   });
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {features.map((feature, index) => (
-        <div key={index} className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-100">
-          <div className={`${feature.color}`}>
-            {feature.icon}
-          </div>
+        <div
+          key={index}
+          className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-100"
+        >
+          <div className={`${feature.color}`}>{feature.icon}</div>
           <div>
             <div className="text-sm text-neutral-500">{feature.label}</div>
             <div className="font-semibold text-neutral-900">{feature.value}</div>
@@ -270,26 +311,26 @@ function StickyCTABar({ propertyId, isOwnerOrAgency }: StickyCTABarProps) {
         ) : (
           <>
             <button
-            onClick={() =>
-            navigate(`/visiter/${propertyId}`, {
-              state: { property },
-            })
-          }
-            className="flex-1 px-4 py-3 border-2 border-primary-500 text-primary-500 font-semibold rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
-          >
-            <Calendar className="h-5 w-5" />
-            <span>Planifier visite</span>
-          </button>
-          <button
-            onClick={() =>
-              navigate(`/candidature/${propertyId}`, {
-                state: { property },
-              })
-            }
-            className="flex-1 px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
-          >
-            Postuler
-          </button>
+              onClick={() =>
+                navigate(`/visiter/${propertyId}`, {
+                  state: { property },
+                })
+              }
+              className="flex-1 px-4 py-3 border-2 border-primary-500 text-primary-500 font-semibold rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
+            >
+              <Calendar className="h-5 w-5" />
+              <span>Planifier visite</span>
+            </button>
+            <button
+              onClick={() =>
+                navigate(`/candidature/${propertyId}`, {
+                  state: { property },
+                })
+              }
+              className="flex-1 px-4 py-3 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-700 transition-colors"
+            >
+              Postuler
+            </button>
           </>
         )}
       </div>
@@ -307,11 +348,12 @@ export default function PropertyDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
-  const isOwnerOrAgency = user && property && (
-    user.id === property.owner_id || 
-    profile?.user_type === 'agence' ||
-    profile?.user_type === 'proprietaire'
-  );
+  const isOwnerOrAgency =
+    user &&
+    property &&
+    (user.id === property.owner_id ||
+      profile?.user_type === 'agence' ||
+      profile?.user_type === 'proprietaire');
 
   useEffect(() => {
     if (id) {
@@ -344,7 +386,7 @@ export default function PropertyDetailPage() {
         setProperty(null);
         return;
       }
-      
+
       // Étape 2: Récupérer le profil public du propriétaire via RPC sécurisé
       let ownerProfile: {
         full_name: string | null;
@@ -361,7 +403,7 @@ export default function PropertyDetailPage() {
           .select('full_name, avatar_url, trust_score, is_verified, oneci_verified, cnam_verified')
           .eq('id', data.owner_id)
           .maybeSingle();
-        
+
         if (profileData) {
           ownerProfile = {
             full_name: profileData.full_name ?? null,
@@ -376,17 +418,19 @@ export default function PropertyDetailPage() {
 
       // Étape 3: Si is_anonymous, récupérer le mandat actif pour avoir le nom de l'agence
       let managingAgencyName: string | null = null;
-      
+
       if (data.is_anonymous) {
         const { data: mandateData } = await supabase
           .from('agency_mandates')
-          .select(`
+          .select(
+            `
             agency:agencies(agency_name)
-          `)
+          `
+          )
           .eq('property_id', propertyId)
           .eq('status', 'active')
           .maybeSingle();
-        
+
         if (mandateData?.agency) {
           const agency = mandateData.agency as { agency_name: string } | null;
           managingAgencyName = agency?.agency_name ?? null;
@@ -435,10 +479,7 @@ export default function PropertyDetailPage() {
           </div>
           <h2 className="text-2xl font-bold text-neutral-900 mb-4">Propriété introuvable</h2>
           <p className="text-neutral-500 mb-8">Cette propriété n'existe pas ou a été supprimée</p>
-          <button
-            onClick={() => navigate('/recherche')}
-            className="btn-primary w-full sm:w-auto"
-          >
+          <button onClick={() => navigate('/recherche')} className="btn-primary w-full sm:w-auto">
             Retour à la recherche
           </button>
         </div>
@@ -523,7 +564,10 @@ export default function PropertyDetailPage() {
                 </div>
               </div>
 
-              {(property.has_parking || property.has_garden || property.is_furnished || property.has_ac) && (
+              {(property.has_parking ||
+                property.has_garden ||
+                property.is_furnished ||
+                property.has_ac) && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold text-neutral-900">Équipements</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -563,15 +607,17 @@ export default function PropertyDetailPage() {
                       center={[property.longitude, property.latitude]}
                       zoom={15}
                       height="400px"
-                      properties={[{ 
-                        id: property.id, 
-                        title: property.title, 
-                        latitude: property.latitude,
-                        longitude: property.longitude,
-                        monthly_rent: property.monthly_rent,
-                        status: property.status ?? 'disponible',
-                        city: property.city
-                      }]}
+                      properties={[
+                        {
+                          id: property.id,
+                          title: property.title,
+                          latitude: property.latitude,
+                          longitude: property.longitude,
+                          monthly_rent: property.monthly_rent,
+                          status: property.status ?? 'disponible',
+                          city: property.city,
+                        },
+                      ]}
                     />
                   ) : (
                     <div className="h-[400px] flex items-center justify-center">
@@ -662,10 +708,7 @@ export default function PropertyDetailPage() {
       </main>
 
       {showStickyBar && (
-        <StickyCTABar 
-          propertyId={property.id} 
-          isOwnerOrAgency={isOwnerOrAgency ?? false}
-        />
+        <StickyCTABar propertyId={property.id} isOwnerOrAgency={isOwnerOrAgency ?? false} />
       )}
     </div>
   );

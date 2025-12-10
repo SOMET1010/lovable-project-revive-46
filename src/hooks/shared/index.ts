@@ -5,7 +5,7 @@ export {
   useDebouncedSearch,
   useDebouncedFilters,
   useDebouncedAutoSave,
-  DEBOUNCE_DELAYS
+  DEBOUNCE_DELAYS,
 } from '../useDebounce';
 
 // Export all shared hooks

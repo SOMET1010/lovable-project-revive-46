@@ -17,11 +17,12 @@ export default function PageTransition({ children }: PageTransitionProps) {
   const [displayChildren, setDisplayChildren] = useState(children);
   const [transitionStage, setTransitionStage] = useState<'enter' | 'exit' | 'idle'>('enter');
   const previousPathRef = useRef(location.pathname);
-  
+
   // Check for reduced motion preference
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
-    : false;
+  const prefersReducedMotion =
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false;
 
   // Scroll to top on initial mount
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
       // After exit animation, update children and trigger enter
       setDisplayChildren(children);
       setTransitionStage('enter');
-      
+
       // Scroll to top smoothly
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (transitionStage === 'enter') {
@@ -62,7 +63,7 @@ export default function PageTransition({ children }: PageTransitionProps) {
   }
 
   return (
-    <div 
+    <div
       className={`page-transition ${transitionStage}`}
       onAnimationEnd={handleAnimationEnd}
       aria-live="polite"

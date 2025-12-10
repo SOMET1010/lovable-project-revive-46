@@ -10,10 +10,7 @@ export function registerServiceWorker(): void {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
-                if (
-                  newWorker.state === 'installed' &&
-                  navigator.serviceWorker.controller
-                ) {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   console.log('🔄 New version available! Refresh to update.');
 
                   if (confirm('Une nouvelle version est disponible. Voulez-vous actualiser?')) {

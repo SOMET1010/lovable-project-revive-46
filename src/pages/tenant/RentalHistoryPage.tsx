@@ -15,7 +15,7 @@ import {
   Trash2,
   Edit2,
   TrendingUp,
-  FileText
+  FileText,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -58,10 +58,25 @@ const PROPERTY_TYPES = [
 ];
 
 const CITIES = [
-  'Abidjan', 'Cocody', 'Plateau', 'Marcory', 'Treichville',
-  'Yopougon', 'Abobo', 'Koumassi', 'Adjamé', 'Port-Bouët',
-  'Bingerville', 'Grand-Bassam', 'Yamoussoukro', 'Bouaké',
-  'San Pedro', 'Daloa', 'Korhogo', 'Man', 'Autre'
+  'Abidjan',
+  'Cocody',
+  'Plateau',
+  'Marcory',
+  'Treichville',
+  'Yopougon',
+  'Abobo',
+  'Koumassi',
+  'Adjamé',
+  'Port-Bouët',
+  'Bingerville',
+  'Grand-Bassam',
+  'Yamoussoukro',
+  'Bouaké',
+  'San Pedro',
+  'Daloa',
+  'Korhogo',
+  'Man',
+  'Autre',
 ];
 
 const RentalHistoryPage: React.FC = () => {
@@ -109,7 +124,7 @@ const RentalHistoryPage: React.FC = () => {
       setHistory((data || []) as RentalHistoryItem[]);
     } catch (error) {
       console.error('Error loading rental history:', error);
-      toast.error('Erreur lors du chargement de l\'historique');
+      toast.error("Erreur lors du chargement de l'historique");
     } finally {
       setLoading(false);
     }
@@ -160,16 +175,11 @@ const RentalHistoryPage: React.FC = () => {
       };
 
       if (editingId) {
-        const { error } = await supabase
-          .from('rental_history')
-          .update(payload)
-          .eq('id', editingId);
+        const { error } = await supabase.from('rental_history').update(payload).eq('id', editingId);
         if (error) throw error;
         toast.success('Location mise à jour');
       } else {
-        const { error } = await supabase
-          .from('rental_history')
-          .insert(payload);
+        const { error } = await supabase.from('rental_history').insert(payload);
         if (error) throw error;
         toast.success('Location ajoutée');
       }
@@ -208,10 +218,7 @@ const RentalHistoryPage: React.FC = () => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette location ?')) return;
 
     try {
-      const { error } = await supabase
-        .from('rental_history')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('rental_history').delete().eq('id', id);
       if (error) throw error;
       toast.success('Location supprimée');
       loadHistory();
@@ -224,13 +231,29 @@ const RentalHistoryPage: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'verified':
-        return <Badge variant="success" className="gap-1"><CheckCircle className="h-3 w-3" /> Vérifié</Badge>;
+        return (
+          <Badge variant="success" className="gap-1">
+            <CheckCircle className="h-3 w-3" /> Vérifié
+          </Badge>
+        );
       case 'pending':
-        return <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" /> En attente</Badge>;
+        return (
+          <Badge variant="secondary" className="gap-1">
+            <Clock className="h-3 w-3" /> En attente
+          </Badge>
+        );
       case 'rejected':
-        return <Badge variant="destructive" className="gap-1"><XCircle className="h-3 w-3" /> Rejeté</Badge>;
+        return (
+          <Badge variant="destructive" className="gap-1">
+            <XCircle className="h-3 w-3" /> Rejeté
+          </Badge>
+        );
       case 'unverifiable':
-        return <Badge variant="outline" className="gap-1"><AlertTriangle className="h-3 w-3" /> Non vérifiable</Badge>;
+        return (
+          <Badge variant="outline" className="gap-1">
+            <AlertTriangle className="h-3 w-3" /> Non vérifiable
+          </Badge>
+        );
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
@@ -238,11 +261,16 @@ const RentalHistoryPage: React.FC = () => {
 
   const calculateScoreImpact = () => {
     let bonus = 0;
-    history.forEach(item => {
+    history.forEach((item) => {
       if (item.verification_status === 'verified') {
         const months = item.end_date
-          ? Math.ceil((new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) / (1000 * 60 * 60 * 24 * 30))
-          : Math.ceil((Date.now() - new Date(item.start_date).getTime()) / (1000 * 60 * 60 * 24 * 30));
+          ? Math.ceil(
+              (new Date(item.end_date).getTime() - new Date(item.start_date).getTime()) /
+                (1000 * 60 * 60 * 24 * 30)
+            )
+          : Math.ceil(
+              (Date.now() - new Date(item.start_date).getTime()) / (1000 * 60 * 60 * 24 * 30)
+            );
         bonus += Math.min(months * 2, 20);
       } else if (item.verification_status === 'pending') {
         bonus += 5;
@@ -298,7 +326,8 @@ const RentalHistoryPage: React.FC = () => {
                 <div>
                   <p className="font-semibold text-primary-900">Impact sur votre score</p>
                   <p className="text-sm text-primary-700">
-                    {history.length} location{history.length > 1 ? 's' : ''} déclarée{history.length > 1 ? 's' : ''}
+                    {history.length} location{history.length > 1 ? 's' : ''} déclarée
+                    {history.length > 1 ? 's' : ''}
                   </p>
                 </div>
               </div>
@@ -329,12 +358,14 @@ const RentalHistoryPage: React.FC = () => {
                       type="text"
                       required
                       value={formData.property_address}
-                      onChange={(e) => setFormData({ ...formData, property_address: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, property_address: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       placeholder="Ex: Cocody Riviera 3, Rue des Jardins"
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium mb-1">Ville *</label>
                     <select
@@ -343,8 +374,10 @@ const RentalHistoryPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                       className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     >
-                      {CITIES.map(city => (
-                        <option key={city} value={city}>{city}</option>
+                      {CITIES.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -357,8 +390,10 @@ const RentalHistoryPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, property_type: e.target.value })}
                       className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                     >
-                      {PROPERTY_TYPES.map(type => (
-                        <option key={type.value} value={type.value}>{type.label}</option>
+                      {PROPERTY_TYPES.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -406,7 +441,9 @@ const RentalHistoryPage: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={formData.is_current}
-                        onChange={(e) => setFormData({ ...formData, is_current: e.target.checked, end_date: '' })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, is_current: e.target.checked, end_date: '' })
+                        }
                         className="w-4 h-4 text-primary-500 rounded focus:ring-primary-500"
                       />
                       <span className="text-sm font-medium">Location actuelle</span>
@@ -426,7 +463,9 @@ const RentalHistoryPage: React.FC = () => {
                       <input
                         type="text"
                         value={formData.landlord_name}
-                        onChange={(e) => setFormData({ ...formData, landlord_name: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, landlord_name: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         placeholder="Nom du propriétaire"
                       />
@@ -436,7 +475,9 @@ const RentalHistoryPage: React.FC = () => {
                       <input
                         type="tel"
                         value={formData.landlord_phone}
-                        onChange={(e) => setFormData({ ...formData, landlord_phone: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, landlord_phone: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         placeholder="07 XX XX XX XX"
                       />
@@ -446,7 +487,9 @@ const RentalHistoryPage: React.FC = () => {
                       <input
                         type="email"
                         value={formData.landlord_email}
-                        onChange={(e) => setFormData({ ...formData, landlord_email: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, landlord_email: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                         placeholder="email@exemple.com"
                       />
@@ -462,16 +505,20 @@ const RentalHistoryPage: React.FC = () => {
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-medium mb-1">Ponctualité des paiements</label>
+                      <label className="block text-sm font-medium mb-1">
+                        Ponctualité des paiements
+                      </label>
                       <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map(rating => (
+                        {[1, 2, 3, 4, 5].map((rating) => (
                           <button
                             key={rating}
                             type="button"
-                            onClick={() => setFormData({ ...formData, self_payment_rating: rating })}
+                            onClick={() =>
+                              setFormData({ ...formData, self_payment_rating: rating })
+                            }
                             className={`p-2 rounded ${
-                              formData.self_payment_rating >= rating 
-                                ? 'text-yellow-500' 
+                              formData.self_payment_rating >= rating
+                                ? 'text-yellow-500'
                                 : 'text-neutral-300'
                             }`}
                           >
@@ -483,14 +530,16 @@ const RentalHistoryPage: React.FC = () => {
                     <div>
                       <label className="block text-sm font-medium mb-1">Entretien du bien</label>
                       <div className="flex gap-1">
-                        {[1, 2, 3, 4, 5].map(rating => (
+                        {[1, 2, 3, 4, 5].map((rating) => (
                           <button
                             key={rating}
                             type="button"
-                            onClick={() => setFormData({ ...formData, self_condition_rating: rating })}
+                            onClick={() =>
+                              setFormData({ ...formData, self_condition_rating: rating })
+                            }
                             className={`p-2 rounded ${
-                              formData.self_condition_rating >= rating 
-                                ? 'text-yellow-500' 
+                              formData.self_condition_rating >= rating
+                                ? 'text-yellow-500'
                                 : 'text-neutral-300'
                             }`}
                           >
@@ -505,10 +554,14 @@ const RentalHistoryPage: React.FC = () => {
                 {/* Departure Reason */}
                 {!formData.is_current && (
                   <div>
-                    <label className="block text-sm font-medium mb-1">Raison du départ (optionnel)</label>
+                    <label className="block text-sm font-medium mb-1">
+                      Raison du départ (optionnel)
+                    </label>
                     <textarea
                       value={formData.departure_reason}
-                      onChange={(e) => setFormData({ ...formData, departure_reason: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, departure_reason: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       rows={2}
                       placeholder="Ex: Déménagement pour raisons professionnelles"
@@ -560,7 +613,7 @@ const RentalHistoryPage: React.FC = () => {
                         </div>
                         {getStatusBadge(item.verification_status)}
                       </div>
-                      
+
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mb-3">
                         <span className="flex items-center gap-1">
                           <MapPin className="h-4 w-4" />
@@ -570,7 +623,11 @@ const RentalHistoryPage: React.FC = () => {
                           <Calendar className="h-4 w-4" />
                           {format(new Date(item.start_date), 'MMM yyyy', { locale: fr })}
                           {' → '}
-                          {item.is_current ? 'Actuel' : item.end_date ? format(new Date(item.end_date), 'MMM yyyy', { locale: fr }) : 'N/A'}
+                          {item.is_current
+                            ? 'Actuel'
+                            : item.end_date
+                              ? format(new Date(item.end_date), 'MMM yyyy', { locale: fr })
+                              : 'N/A'}
                         </span>
                         <span className="font-medium text-neutral-700">
                           {item.monthly_rent.toLocaleString('fr-FR')} FCFA/mois
@@ -580,7 +637,7 @@ const RentalHistoryPage: React.FC = () => {
                       {/* Self ratings */}
                       <div className="flex gap-4 text-sm">
                         <span className="flex items-center gap-1">
-                          Paiement: 
+                          Paiement:
                           {[...Array(item.self_payment_rating || 0)].map((_, i) => (
                             <Star key={i} className="h-3 w-3 text-yellow-500 fill-yellow-500" />
                           ))}
@@ -604,8 +661,8 @@ const RentalHistoryPage: React.FC = () => {
                     {/* Actions */}
                     {item.verification_status === 'pending' && (
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="small"
                           onClick={() => handleEdit(item)}
                           className="gap-1"
@@ -613,8 +670,8 @@ const RentalHistoryPage: React.FC = () => {
                           <Edit2 className="h-4 w-4" />
                           Modifier
                         </Button>
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="small"
                           onClick={() => handleDelete(item.id)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -640,19 +697,30 @@ const RentalHistoryPage: React.FC = () => {
             <div className="space-y-2 text-sm text-muted-foreground">
               <p className="flex items-start gap-2">
                 <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                <span><strong>Vérifié :</strong> Nous avons contacté le propriétaire qui a confirmé vos informations (+20 pts max)</span>
+                <span>
+                  <strong>Vérifié :</strong> Nous avons contacté le propriétaire qui a confirmé vos
+                  informations (+20 pts max)
+                </span>
               </p>
               <p className="flex items-start gap-2">
                 <Clock className="h-4 w-4 text-yellow-500 mt-0.5 shrink-0" />
-                <span><strong>En attente :</strong> Votre déclaration est en cours de vérification (+5 pts)</span>
+                <span>
+                  <strong>En attente :</strong> Votre déclaration est en cours de vérification (+5
+                  pts)
+                </span>
               </p>
               <p className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-neutral-400 mt-0.5 shrink-0" />
-                <span><strong>Non vérifiable :</strong> Nous n'avons pas pu contacter le propriétaire (+2 pts)</span>
+                <span>
+                  <strong>Non vérifiable :</strong> Nous n'avons pas pu contacter le propriétaire
+                  (+2 pts)
+                </span>
               </p>
               <p className="flex items-start gap-2">
                 <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
-                <span><strong>Rejeté :</strong> Les informations n'ont pas pu être confirmées (0 pt)</span>
+                <span>
+                  <strong>Rejeté :</strong> Les informations n'ont pas pu être confirmées (0 pt)
+                </span>
               </p>
             </div>
           </CardContent>

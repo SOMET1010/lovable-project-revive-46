@@ -50,16 +50,12 @@ export default function OwnerDashboardLayout({ children, title }: OwnerDashboard
             >
               <Menu className="h-6 w-6 text-neutral-700" />
             </button>
-            {title && (
-              <h1 className="text-lg font-semibold text-neutral-900 truncate">{title}</h1>
-            )}
+            {title && <h1 className="text-lg font-semibold text-neutral-900 truncate">{title}</h1>}
           </div>
         </header>
 
         <main className="flex-1 overflow-auto w-full">
-          <div className="w-full px-4 lg:px-10 xl:px-12 py-6">
-            {children}
-          </div>
+          <div className="w-full px-4 lg:px-10 xl:px-12 py-6">{children}</div>
         </main>
       </div>
     </div>

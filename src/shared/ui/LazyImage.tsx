@@ -15,7 +15,7 @@ export default function LazyImage({
   className = '',
   placeholder = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23e5e7eb" width="400" height="300"/%3E%3C/svg%3E',
   onLoad,
-  onError
+  onError,
 }: LazyImageProps) {
   const [imageSrc, setImageSrc] = useState(placeholder);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +50,7 @@ export default function LazyImage({
           });
         },
         {
-          rootMargin: '50px'
+          rootMargin: '50px',
         }
       );
 

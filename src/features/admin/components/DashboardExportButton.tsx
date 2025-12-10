@@ -10,7 +10,7 @@ interface DashboardExportButtonProps {
 export default function DashboardExportButton({
   onExportPDF,
   onExportCSV,
-  label = 'Exporter'
+  label = 'Exporter',
 }: DashboardExportButtonProps) {
   const [showMenu, setShowMenu] = useState(false);
 
@@ -26,10 +26,7 @@ export default function DashboardExportButton({
 
       {showMenu && (
         <>
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setShowMenu(false)}
-          />
+          <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border-2 border-gray-200 z-20">
             <button
               onClick={() => {

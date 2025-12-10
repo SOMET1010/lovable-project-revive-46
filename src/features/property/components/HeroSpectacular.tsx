@@ -12,11 +12,12 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
   const [maxPrice, setMaxPrice] = useState('');
   const [titleVisible, setTitleVisible] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  
+
   // Check for reduced motion preference
-  const prefersReducedMotion = typeof window !== 'undefined' 
-    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches 
-    : false;
+  const prefersReducedMotion =
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      : false;
 
   // Parallax scroll handler
   const handleScroll = useCallback(() => {
@@ -28,7 +29,7 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
   // Scroll listener for parallax
   useEffect(() => {
     if (prefersReducedMotion) return;
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll, prefersReducedMotion]);
@@ -43,8 +44,8 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
     '/images/hero/hero4.jpg',
   ];
 
-  const title = "Trouvez votre logement en toute confiance";
-  const subtitle = "Identité certifiée • Paiement sécurisé • Pour tous les Ivoiriens";
+  const title = 'Trouvez votre logement en toute confiance';
+  const subtitle = 'Identité certifiée • Paiement sécurisé • Pour tous les Ivoiriens';
 
   // Auto-rotation diaporama
   useEffect(() => {
@@ -86,9 +87,9 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
             willChange: prefersReducedMotion ? 'auto' : 'transform',
           }}
         >
-          <div 
+          <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ 
+            style={{
               backgroundImage: `url(${image})`,
               transform: 'scale(1.1)', // Extra scale to prevent white edges during parallax
             }}
@@ -128,15 +129,16 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
           {/* Titre avec effet spectaculaire */}
           <div className="text-center mb-6 sm:mb-8 px-4 hero-glow-orange">
             <h1 className="hero-title-spectacular hero-text-enhanced text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 leading-tight">
-              {titleVisible && title.split('').map((char, index) => (
-                <span
-                  key={index}
-                  className="hero-title-letter"
-                  style={{ animationDelay: `${index * 0.03}s` }}
-                >
-                  {char === ' ' ? '\u00A0' : char}
-                </span>
-              ))}
+              {titleVisible &&
+                title.split('').map((char, index) => (
+                  <span
+                    key={index}
+                    className="hero-title-letter"
+                    style={{ animationDelay: `${index * 0.03}s` }}
+                  >
+                    {char === ' ' ? '\u00A0' : char}
+                  </span>
+                ))}
             </h1>
             <p className="hero-subtitle-spectacular hero-text-enhanced text-base sm:text-lg md:text-2xl font-medium px-4">
               {subtitle}
@@ -153,7 +155,10 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center divide-y sm:divide-y-0 sm:divide-x divide-white/20 gap-y-1 sm:gap-y-0">
               {/* Où */}
               <div className="flex-1 px-4 sm:px-6 py-3 sm:py-4">
-                <label htmlFor="search-city" className="block text-xs font-semibold text-white/90 mb-2">
+                <label
+                  htmlFor="search-city"
+                  className="block text-xs font-semibold text-white/90 mb-2"
+                >
                   Où ?
                 </label>
                 <input
@@ -169,7 +174,10 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
 
               {/* Type */}
               <div className="flex-1 px-4 sm:px-6 py-3 sm:py-4">
-                <label htmlFor="search-type" className="block text-xs font-semibold text-white/90 mb-2">
+                <label
+                  htmlFor="search-type"
+                  className="block text-xs font-semibold text-white/90 mb-2"
+                >
                   Type
                 </label>
                 <select
@@ -179,17 +187,30 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
                   onChange={(e) => setPropertyType(e.target.value)}
                   aria-label="Type de propriété"
                 >
-                  <option value="" className="bg-gray-900">Tous</option>
-                  <option value="appartement" className="bg-gray-900">Appartement</option>
-                  <option value="villa" className="bg-gray-900">Villa</option>
-                  <option value="studio" className="bg-gray-900">Studio</option>
-                  <option value="maison" className="bg-gray-900">Maison</option>
+                  <option value="" className="bg-gray-900">
+                    Tous
+                  </option>
+                  <option value="appartement" className="bg-gray-900">
+                    Appartement
+                  </option>
+                  <option value="villa" className="bg-gray-900">
+                    Villa
+                  </option>
+                  <option value="studio" className="bg-gray-900">
+                    Studio
+                  </option>
+                  <option value="maison" className="bg-gray-900">
+                    Maison
+                  </option>
                 </select>
               </div>
 
               {/* Prix max */}
               <div className="flex-1 px-4 sm:px-6 py-3 sm:py-4">
-                <label htmlFor="search-price" className="block text-xs font-semibold text-white/90 mb-2">
+                <label
+                  htmlFor="search-price"
+                  className="block text-xs font-semibold text-white/90 mb-2"
+                >
                   Prix max
                 </label>
                 <input
@@ -221,7 +242,9 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
 
       {/* Boutons de navigation latéraux */}
       <button
-        onClick={() => setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length)}
+        onClick={() =>
+          setCurrentSlide((prev) => (prev - 1 + heroImages.length) % heroImages.length)
+        }
         className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 backdrop-blur-md hover:bg-white/20 rounded-full flex items-center justify-center transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-900"
         aria-label="Diapositive précédente"
       >

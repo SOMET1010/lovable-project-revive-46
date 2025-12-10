@@ -7,7 +7,7 @@ import type {
   SpeechRecognitionInstance,
   SpeechRecognitionEvent,
   SpeechRecognitionErrorEvent,
-  ParsedVoiceQuery
+  ParsedVoiceQuery,
 } from '@/types/speech-recognition.types';
 
 interface VoiceSearchProps {
@@ -48,9 +48,9 @@ export default function VoiceSearch({ onTranscript, onError }: VoiceSearchProps)
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-        logger.error('Speech recognition error', undefined, { 
+        logger.error('Speech recognition error', undefined, {
           errorCode: event.error,
-          errorMessage: event.message 
+          errorMessage: event.message,
         });
         let errorMessage = 'Erreur lors de la reconnaissance vocale';
 
@@ -134,11 +134,26 @@ export default function VoiceSearch({ onTranscript, onError }: VoiceSearchProps)
       {/* Visual Indicator */}
       {isListening && (
         <div className="flex items-center space-x-1">
-          <div className="w-1 h-4 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
-          <div className="w-1 h-6 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '150ms' }}></div>
-          <div className="w-1 h-8 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
-          <div className="w-1 h-6 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '450ms' }}></div>
-          <div className="w-1 h-4 bg-red-500 rounded-full animate-pulse" style={{ animationDelay: '600ms' }}></div>
+          <div
+            className="w-1 h-4 bg-red-500 rounded-full animate-pulse"
+            style={{ animationDelay: '0ms' }}
+          ></div>
+          <div
+            className="w-1 h-6 bg-red-500 rounded-full animate-pulse"
+            style={{ animationDelay: '150ms' }}
+          ></div>
+          <div
+            className="w-1 h-8 bg-red-500 rounded-full animate-pulse"
+            style={{ animationDelay: '300ms' }}
+          ></div>
+          <div
+            className="w-1 h-6 bg-red-500 rounded-full animate-pulse"
+            style={{ animationDelay: '450ms' }}
+          ></div>
+          <div
+            className="w-1 h-4 bg-red-500 rounded-full animate-pulse"
+            style={{ animationDelay: '600ms' }}
+          ></div>
         </div>
       )}
 
@@ -159,9 +174,23 @@ export function parseVoiceQuery(transcript: string): ParsedVoiceQuery {
 
   // Parse city
   const ivoirianCities = [
-    'abidjan', 'cocody', 'yopougon', 'abobo', 'plateau', 'marcory',
-    'treichville', 'koumassi', 'adjamé', 'attécoubé', 'port-bouët',
-    'yamoussoukro', 'bouaké', 'daloa', 'san-pédro', 'korhogo', 'man'
+    'abidjan',
+    'cocody',
+    'yopougon',
+    'abobo',
+    'plateau',
+    'marcory',
+    'treichville',
+    'koumassi',
+    'adjamé',
+    'attécoubé',
+    'port-bouët',
+    'yamoussoukro',
+    'bouaké',
+    'daloa',
+    'san-pédro',
+    'korhogo',
+    'man',
   ];
 
   for (const city of ivoirianCities) {
@@ -183,7 +212,7 @@ export function parseVoiceQuery(transcript: string): ParsedVoiceQuery {
   ];
 
   for (const type of propertyTypes) {
-    if (type.keywords.some(keyword => lowerTranscript.includes(keyword))) {
+    if (type.keywords.some((keyword) => lowerTranscript.includes(keyword))) {
       result.propertyType = type.value;
       break;
     }

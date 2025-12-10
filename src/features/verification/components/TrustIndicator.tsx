@@ -20,7 +20,7 @@ export default function TrustIndicator({
   reviewCount = 0,
   showDetails = false,
   size = 'md',
-  userType
+  userType,
 }: TrustIndicatorProps) {
   const getTrustScore = () => {
     let score = 0;
@@ -39,10 +39,37 @@ export default function TrustIndicator({
   const percentage = (score / maxScore) * 100;
 
   const getTrustLevel = () => {
-    if (percentage >= 80) return { label: 'Excellent', color: 'green', bgColor: 'bg-green-50', textColor: 'text-green-800', iconColor: 'text-green-600' };
-    if (percentage >= 60) return { label: 'Bon', color: 'cyan', bgColor: 'bg-cyan-50', textColor: 'text-cyan-800', iconColor: 'text-cyan-600' };
-    if (percentage >= 40) return { label: 'Moyen', color: 'amber', bgColor: 'bg-amber-50', textColor: 'text-amber-800', iconColor: 'text-amber-600' };
-    return { label: 'Faible', color: 'orange', bgColor: 'bg-orange-50', textColor: 'text-orange-800', iconColor: 'text-orange-600' };
+    if (percentage >= 80)
+      return {
+        label: 'Excellent',
+        color: 'green',
+        bgColor: 'bg-green-50',
+        textColor: 'text-green-800',
+        iconColor: 'text-green-600',
+      };
+    if (percentage >= 60)
+      return {
+        label: 'Bon',
+        color: 'cyan',
+        bgColor: 'bg-cyan-50',
+        textColor: 'text-cyan-800',
+        iconColor: 'text-cyan-600',
+      };
+    if (percentage >= 40)
+      return {
+        label: 'Moyen',
+        color: 'amber',
+        bgColor: 'bg-amber-50',
+        textColor: 'text-amber-800',
+        iconColor: 'text-amber-600',
+      };
+    return {
+      label: 'Faible',
+      color: 'orange',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-800',
+      iconColor: 'text-orange-600',
+    };
   };
 
   const trustLevel = getTrustLevel();
@@ -54,14 +81,14 @@ export default function TrustIndicator({
           container: 'p-2',
           icon: 'h-4 w-4',
           text: 'text-xs',
-          badge: 'text-xs px-2 py-1'
+          badge: 'text-xs px-2 py-1',
         };
       case 'lg':
         return {
           container: 'p-6',
           icon: 'h-8 w-8',
           text: 'text-lg',
-          badge: 'text-base px-4 py-2'
+          badge: 'text-base px-4 py-2',
         };
       case 'md':
       default:
@@ -69,7 +96,7 @@ export default function TrustIndicator({
           container: 'p-4',
           icon: 'h-6 w-6',
           text: 'text-sm',
-          badge: 'text-sm px-3 py-1.5'
+          badge: 'text-sm px-3 py-1.5',
         };
     }
   };
@@ -78,7 +105,9 @@ export default function TrustIndicator({
 
   if (!showDetails) {
     return (
-      <div className={`inline-flex items-center space-x-2 ${trustLevel.bgColor} ${sizeClasses.badge} rounded-full font-semibold ${trustLevel.textColor}`}>
+      <div
+        className={`inline-flex items-center space-x-2 ${trustLevel.bgColor} ${sizeClasses.badge} rounded-full font-semibold ${trustLevel.textColor}`}
+      >
         <Shield className={`${sizeClasses.icon} ${trustLevel.iconColor}`} />
         <span>Confiance: {trustLevel.label}</span>
       </div>
@@ -86,13 +115,17 @@ export default function TrustIndicator({
   }
 
   return (
-    <div className={`bg-gradient-to-br from-white to-gray-50 rounded-2xl border-2 border-gray-100 ${sizeClasses.container}`}>
+    <div
+      className={`bg-gradient-to-br from-white to-gray-50 rounded-2xl border-2 border-gray-100 ${sizeClasses.container}`}
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
           <Shield className={`${sizeClasses.icon} text-terracotta-600`} />
           <h3 className="font-bold text-gray-900">Indicateur de confiance</h3>
         </div>
-        <div className={`${trustLevel.bgColor} ${trustLevel.textColor} px-3 py-1 rounded-full ${sizeClasses.text} font-bold`}>
+        <div
+          className={`${trustLevel.bgColor} ${trustLevel.textColor} px-3 py-1 rounded-full ${sizeClasses.text} font-bold`}
+        >
           {trustLevel.label}
         </div>
       </div>
@@ -100,7 +133,9 @@ export default function TrustIndicator({
       <div className="mb-4">
         <div className="flex items-center justify-between mb-2 text-sm">
           <span className="text-gray-600">Score global</span>
-          <span className="font-bold text-gray-900">{score}/{maxScore}</span>
+          <span className="font-bold text-gray-900">
+            {score}/{maxScore}
+          </span>
         </div>
         <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
           <div
@@ -119,7 +154,11 @@ export default function TrustIndicator({
               ) : (
                 <AlertCircle className={`${sizeClasses.icon} text-gray-400`} />
               )}
-              <span className={verificationStatus.oneci_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+              <span
+                className={
+                  verificationStatus.oneci_verified ? 'text-gray-900 font-medium' : 'text-gray-500'
+                }
+              >
                 Identité ONECI
               </span>
             </div>
@@ -135,7 +174,11 @@ export default function TrustIndicator({
               ) : (
                 <AlertCircle className={`${sizeClasses.icon} text-gray-400`} />
               )}
-              <span className={verificationStatus.cnam_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+              <span
+                className={
+                  verificationStatus.cnam_verified ? 'text-gray-900 font-medium' : 'text-gray-500'
+                }
+              >
                 Affiliation CNAM
               </span>
             </div>
@@ -151,7 +194,13 @@ export default function TrustIndicator({
               ) : (
                 <AlertCircle className={`${sizeClasses.icon} text-gray-400`} />
               )}
-              <span className={verificationStatus.identity_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+              <span
+                className={
+                  verificationStatus.identity_verified
+                    ? 'text-gray-900 font-medium'
+                    : 'text-gray-500'
+                }
+              >
                 Profil vérifié
               </span>
             </div>
@@ -172,16 +221,12 @@ export default function TrustIndicator({
                   <span className="text-lg font-bold text-gray-900">{rating.toFixed(1)}</span>
                   <span className="text-sm text-gray-500">/5</span>
                 </div>
-                <div className={`${sizeClasses.text} text-gray-600`}>
-                  {reviewCount} avis
-                </div>
+                <div className={`${sizeClasses.text} text-gray-600`}>{reviewCount} avis</div>
               </div>
             </div>
             {userType && (
               <div className="text-right">
-                <div className={`${sizeClasses.text} text-gray-600 capitalize`}>
-                  {userType}
-                </div>
+                <div className={`${sizeClasses.text} text-gray-600 capitalize`}>{userType}</div>
                 <div className="flex items-center space-x-1 text-xs text-gray-500">
                   <Eye className="h-3 w-3" />
                   <span>Public</span>
@@ -191,7 +236,6 @@ export default function TrustIndicator({
           </div>
         </div>
       )}
-
     </div>
   );
 }

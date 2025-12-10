@@ -1,5 +1,17 @@
 import { useState, useEffect } from 'react';
-import { Building2, Users, Coins, FileText, Home, MessageSquare, TrendingUp, Plus, Eye, BarChart3, Handshake } from 'lucide-react';
+import {
+  Building2,
+  Users,
+  Coins,
+  FileText,
+  Home,
+  MessageSquare,
+  TrendingUp,
+  Plus,
+  Eye,
+  BarChart3,
+  Handshake,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
@@ -74,10 +86,13 @@ export default function AgencyDashboardPage() {
         .eq('status', 'actif');
 
       const activeLeases = leasesData || [];
-      const monthlyRevenue = activeLeases.reduce((sum, lease) => sum + (lease.monthly_rent || 0), 0);
+      const monthlyRevenue = activeLeases.reduce(
+        (sum, lease) => sum + (lease.monthly_rent || 0),
+        0
+      );
 
       // Load pending applications
-      const propertyIds = props.map(p => p.id);
+      const propertyIds = props.map((p) => p.id);
       let pendingApplications = 0;
       if (propertyIds.length > 0) {
         const { data: applicationsData } = await supabase
@@ -180,7 +195,9 @@ export default function AgencyDashboardPage() {
               </div>
               <span className="text-sm text-[#6B5A4E]">Revenus/mois</span>
             </div>
-            <p className="text-2xl font-bold text-[#F16522]">{stats.monthlyRevenue.toLocaleString()} <span className="text-sm">FCFA</span></p>
+            <p className="text-2xl font-bold text-[#F16522]">
+              {stats.monthlyRevenue.toLocaleString()} <span className="text-sm">FCFA</span>
+            </p>
           </div>
 
           <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-4">
@@ -190,7 +207,9 @@ export default function AgencyDashboardPage() {
               </div>
               <span className="text-sm text-[#6B5A4E]">Commissions</span>
             </div>
-            <p className="text-2xl font-bold text-[#2C1810]">{stats.totalCommissions.toLocaleString()} <span className="text-sm">FCFA</span></p>
+            <p className="text-2xl font-bold text-[#2C1810]">
+              {stats.totalCommissions.toLocaleString()} <span className="text-sm">FCFA</span>
+            </p>
           </div>
         </div>
 
@@ -204,7 +223,10 @@ export default function AgencyDashboardPage() {
                   <Home className="h-6 w-6 text-[#F16522]" />
                   <span>Biens en Gestion</span>
                 </h2>
-                <Link to="/dashboard/ajouter-propriete" className="text-[#F16522] hover:underline text-sm font-medium">
+                <Link
+                  to="/dashboard/ajouter-propriete"
+                  className="text-[#F16522] hover:underline text-sm font-medium"
+                >
                   + Ajouter
                 </Link>
               </div>
@@ -212,10 +234,17 @@ export default function AgencyDashboardPage() {
               {properties.length > 0 ? (
                 <div className="space-y-4">
                   {properties.slice(0, 5).map((property) => (
-                    <div key={property.id} className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 flex items-center gap-4 hover:border-[#F16522] transition-colors">
+                    <div
+                      key={property.id}
+                      className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 flex items-center gap-4 hover:border-[#F16522] transition-colors"
+                    >
                       <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-[#EFEBE9]">
                         {property.main_image ? (
-                          <img src={property.main_image} alt={property.title} className="w-full h-full object-cover" />
+                          <img
+                            src={property.main_image}
+                            alt={property.title}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Home className="h-8 w-8 text-[#6B5A4E]" />
@@ -224,23 +253,35 @@ export default function AgencyDashboardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-[#2C1810] truncate">{property.title}</h3>
-                        <p className="text-sm text-[#6B5A4E]">{property.city} {property.neighborhood && `• ${property.neighborhood}`}</p>
+                        <p className="text-sm text-[#6B5A4E]">
+                          {property.city} {property.neighborhood && `• ${property.neighborhood}`}
+                        </p>
                         <div className="flex items-center gap-4 mt-2">
-                          <span className="text-[#F16522] font-bold">{property.monthly_rent.toLocaleString()} FCFA</span>
+                          <span className="text-[#F16522] font-bold">
+                            {property.monthly_rent.toLocaleString()} FCFA
+                          </span>
                           <span className="flex items-center gap-1 text-xs text-[#6B5A4E]">
                             <Eye className="h-3 w-3" /> {property.view_count || 0} vues
                           </span>
                         </div>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                          property.status === 'disponible' ? 'bg-green-100 text-green-700' :
-                          property.status === 'loue' ? 'bg-blue-100 text-blue-700' :
-                          'bg-[#EFEBE9] text-[#6B5A4E]'
-                        }`}>
-                          {property.status === 'disponible' ? 'Disponible' : property.status === 'loue' ? 'Loué' : property.status}
+                        <span
+                          className={`text-xs px-3 py-1 rounded-full font-medium ${
+                            property.status === 'disponible'
+                              ? 'bg-green-100 text-green-700'
+                              : property.status === 'loue'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-[#EFEBE9] text-[#6B5A4E]'
+                          }`}
+                        >
+                          {property.status === 'disponible'
+                            ? 'Disponible'
+                            : property.status === 'loue'
+                              ? 'Loué'
+                              : property.status}
                         </span>
-                        <Link 
+                        <Link
                           to={`/propriete/${property.id}`}
                           className="text-xs text-[#F16522] hover:underline font-medium"
                         >
@@ -256,8 +297,10 @@ export default function AgencyDashboardPage() {
                     <Building2 className="h-10 w-10 text-[#F16522]" />
                   </div>
                   <h3 className="text-lg font-bold text-[#2C1810] mb-2">Aucun bien en gestion</h3>
-                  <p className="text-[#6B5A4E] mb-4">Commencez à gérer des biens pour vos clients</p>
-                  <Link 
+                  <p className="text-[#6B5A4E] mb-4">
+                    Commencez à gérer des biens pour vos clients
+                  </p>
+                  <Link
                     to="/dashboard/ajouter-propriete"
                     className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
                   >
@@ -278,9 +321,10 @@ export default function AgencyDashboardPage() {
                 <div className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 text-center">
                   <p className="text-sm text-[#6B5A4E] mb-1">Taux occupation</p>
                   <p className="text-2xl font-bold text-green-600">
-                    {stats.totalProperties > 0 
-                      ? Math.round((stats.activeLeases / stats.totalProperties) * 100) 
-                      : 0}%
+                    {stats.totalProperties > 0
+                      ? Math.round((stats.activeLeases / stats.totalProperties) * 100)
+                      : 0}
+                    %
                   </p>
                 </div>
                 <div className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 text-center">
@@ -301,28 +345,28 @@ export default function AgencyDashboardPage() {
             <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-5">
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Actions Rapides</h3>
               <div className="space-y-3">
-                <Link 
+                <Link
                   to="/dashboard/ajouter-propriete"
                   className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Ajouter un bien
                 </Link>
-                <Link 
+                <Link
                   to="/mes-contrats"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <FileText className="h-5 w-5 mr-2" />
                   Contrats
                 </Link>
-                <Link 
+                <Link
                   to="/mes-mandats"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Handshake className="h-5 w-5 mr-2" />
                   Mes mandats
                 </Link>
-                <Link 
+                <Link
                   to="/messages"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
@@ -341,7 +385,9 @@ export default function AgencyDashboardPage() {
                     <Users className="h-5 w-5 text-amber-600" />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-[#2C1810]">Candidatures</p>
-                      <p className="text-2xl font-bold text-amber-600">{stats.pendingApplications}</p>
+                      <p className="text-2xl font-bold text-amber-600">
+                        {stats.pendingApplications}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -366,8 +412,12 @@ export default function AgencyDashboardPage() {
                 <Coins className="h-5 w-5 text-[#F16522]" />
                 <span>Commissions du mois</span>
               </h3>
-              <p className="text-4xl font-bold mb-2">{stats.totalCommissions.toLocaleString()} <span className="text-lg">FCFA</span></p>
-              <p className="text-sm text-[#E8D4C5]">5% sur {stats.monthlyRevenue.toLocaleString()} FCFA de loyers</p>
+              <p className="text-4xl font-bold mb-2">
+                {stats.totalCommissions.toLocaleString()} <span className="text-lg">FCFA</span>
+              </p>
+              <p className="text-sm text-[#E8D4C5]">
+                5% sur {stats.monthlyRevenue.toLocaleString()} FCFA de loyers
+              </p>
             </div>
           </div>
         </div>

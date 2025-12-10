@@ -35,16 +35,13 @@ const DraggableImageGrid: React.FC<DraggableImageGridProps> = ({
   onImagesReorder,
   onImageRemove,
   onMainImageSet,
-  disabled = false
+  disabled = false,
 }) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   // Générer des IDs stables pour chaque image
-  const imageIds = useMemo(() => 
-    images.map((_, index) => `image-${index}`),
-    [images.length]
-  );
+  const imageIds = useMemo(() => images.map((_, index) => `image-${index}`), [images.length]);
 
   // Configurer les sensors pour le drag
   const sensors = useSensors(
@@ -62,19 +59,22 @@ const DraggableImageGrid: React.FC<DraggableImageGridProps> = ({
     setActiveId(event.active.id as string);
   }, []);
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveId(null);
 
-    if (over && active.id !== over.id) {
-      const oldIndex = imageIds.indexOf(active.id as string);
-      const newIndex = imageIds.indexOf(over.id as string);
-      
-      if (oldIndex !== -1 && newIndex !== -1) {
-        onImagesReorder(oldIndex, newIndex);
+      if (over && active.id !== over.id) {
+        const oldIndex = imageIds.indexOf(active.id as string);
+        const newIndex = imageIds.indexOf(over.id as string);
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          onImagesReorder(oldIndex, newIndex);
+        }
       }
-    }
-  }, [imageIds, onImagesReorder]);
+    },
+    [imageIds, onImagesReorder]
+  );
 
   const handleZoom = useCallback((index: number) => {
     setLightboxIndex(index);

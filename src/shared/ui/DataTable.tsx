@@ -24,15 +24,15 @@ export interface TableProps<T = any> extends HTMLAttributes<HTMLTableElement> {
   className?: string;
 }
 
-export function Table<T = any>({ 
-  columns, 
-  data, 
-  loading = false, 
+export function Table<T = any>({
+  columns,
+  data,
+  loading = false,
   emptyMessage = 'Aucune donnée disponible',
   rowKey = 'id',
   onRowClick,
   className = '',
-  ...props 
+  ...props
 }: TableProps<T>) {
   const getRowKey = (record: T, index: number): string => {
     if (typeof rowKey === 'function') {
@@ -67,7 +67,9 @@ export function Table<T = any>({
   }
 
   return (
-    <div className={`bg-background-page rounded-xl border border-neutral-100 overflow-hidden ${className}`}>
+    <div
+      className={`bg-background-page rounded-xl border border-neutral-100 overflow-hidden ${className}`}
+    >
       <div className="overflow-x-auto">
         <table className="w-full" {...props}>
           <thead className="bg-neutral-50 border-b border-neutral-100">
@@ -83,9 +85,7 @@ export function Table<T = any>({
                 >
                   {column.title}
                   {column.sortable && (
-                    <button className="ml-2 text-text-disabled hover:text-text-primary">
-                      ↕️
-                    </button>
+                    <button className="ml-2 text-text-disabled hover:text-text-primary">↕️</button>
                   )}
                 </th>
               ))}
@@ -117,18 +117,15 @@ export function Table<T = any>({
                             index
                           )
                         : column.dataIndex
-                        ? (record as any)[column.dataIndex]
-                        : ''}
+                          ? (record as any)[column.dataIndex]
+                          : ''}
                     </td>
                   ))}
                 </tr>
               ))
             ) : (
               <tr>
-                <td 
-                  colSpan={columns.length} 
-                  className="px-6 py-12 text-center text-text-secondary"
-                >
+                <td colSpan={columns.length} className="px-6 py-12 text-center text-text-secondary">
                   {emptyMessage}
                 </td>
               </tr>
@@ -141,7 +138,11 @@ export function Table<T = any>({
 }
 
 // Composants spécialisés pour les tableaux de données du dashboard
-export function StatsTable({ data }: { data: Array<{ label: string; value: number; change?: number }> }) {
+export function StatsTable({
+  data,
+}: {
+  data: Array<{ label: string; value: number; change?: number }>;
+}) {
   const columns: Column<{ label: string; value: number; change?: number }>[] = [
     {
       key: 'label',
@@ -164,10 +165,12 @@ export function StatsTable({ data }: { data: Array<{ label: string; value: numbe
         if (change === undefined) return '-';
         const isPositive = change >= 0;
         return (
-          <span className={`
+          <span
+            className={`
             inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
             ${isPositive ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}
-          `}>
+          `}
+          >
             {isPositive ? '↗️' : '↘️'} {Math.abs(change)}%
           </span>
         );

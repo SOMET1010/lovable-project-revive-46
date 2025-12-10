@@ -54,12 +54,12 @@ export const VISIT_STATUS_STYLES: Record<VisitStatus | string, string> = {
   en_attente: 'bg-yellow-100 text-yellow-800',
   confirmee: 'bg-green-100 text-green-800',
   annulee: 'bg-red-100 text-red-800',
-  terminee: 'bg-blue-100 text-blue-800'
+  terminee: 'bg-blue-100 text-blue-800',
 };
 
 export const VISIT_STATUS_LABELS: Record<VisitStatus | string, string> = {
   en_attente: 'En attente',
   confirmee: 'Confirmée',
   annulee: 'Annulée',
-  terminee: 'Terminée'
+  terminee: 'Terminée',
 };

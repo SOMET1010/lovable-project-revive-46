@@ -1,7 +1,7 @@
 /**
  * HMAC Utilities Unit Tests
  * Tests for webhook signature verification functions
- * 
+ *
  * Functions tested:
  * - timingSafeEqual: Constant-time string comparison
  * - verifyHmacSignature: HMAC-SHA256 signature verification
@@ -22,12 +22,12 @@ function timingSafeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) {
     return false;
   }
-  
+
   let result = 0;
   for (let i = 0; i < a.length; i++) {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
-  
+
   return result === 0;
 }
 
@@ -53,19 +53,15 @@ async function verifyHmacSignature(
       ['sign']
     );
 
-    const signatureBuffer = await crypto.subtle.sign(
-      'HMAC',
-      key,
-      encoder.encode(payload)
-    );
+    const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
 
     const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
-      .map(b => b.toString(16).padStart(2, '0'))
+      .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
 
     // Handle sha256= prefix
     const cleanSignature = signature.replace(/^sha256=/i, '').toLowerCase();
-    
+
     return timingSafeEqual(expectedSignature.toLowerCase(), cleanSignature);
   } catch (_error) {
     return false;
@@ -78,9 +74,9 @@ async function verifyHmacSignature(
 function extractSignature(req: Request): string | null {
   const headerNames = [
     'X-Webhook-Signature',
-    'X-InTouch-Signature', 
+    'X-InTouch-Signature',
     'X-Hub-Signature-256',
-    'X-Signature'
+    'X-Signature',
   ];
 
   for (const headerName of headerNames) {
@@ -126,7 +122,6 @@ async function logWebhookAttempt(
 // ============= TESTS =============
 
 describe('HMAC Utilities', () => {
-  
   // ============= timingSafeEqual Tests =============
   describe('timingSafeEqual', () => {
     it('returns true for identical strings', () => {
@@ -188,10 +183,10 @@ describe('HMAC Utilities', () => {
   // ============= verifyHmacSignature Tests =============
   describe('verifyHmacSignature', () => {
     const testSecret = 'test-webhook-secret-key-2024';
-    
+
     // Pre-computed HMAC-SHA256 signatures for known payloads
     // These were computed using: HMAC-SHA256(payload, secret)
-    
+
     it('returns true for valid signature', async () => {
       const payload = 'test payload';
       // Generate expected signature
@@ -205,9 +200,9 @@ describe('HMAC Utilities', () => {
       );
       const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
       const validSignature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       const result = await verifyHmacSignature(payload, validSignature, testSecret);
       expect(result).toBe(true);
     });
@@ -215,7 +210,7 @@ describe('HMAC Utilities', () => {
     it('returns false for invalid signature', async () => {
       const payload = 'test payload';
       const invalidSignature = 'invalid123456789abcdef0123456789abcdef0123456789abcdef0123456789';
-      
+
       const result = await verifyHmacSignature(payload, invalidSignature, testSecret);
       expect(result).toBe(false);
     });
@@ -233,9 +228,9 @@ describe('HMAC Utilities', () => {
       );
       const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
       const validSignature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       const result = await verifyHmacSignature(payload, `sha256=${validSignature}`, testSecret);
       expect(result).toBe(true);
     });
@@ -252,9 +247,9 @@ describe('HMAC Utilities', () => {
       );
       const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
       const validSignature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       // Test uppercase signature
       const result = await verifyHmacSignature(payload, validSignature.toUpperCase(), testSecret);
       expect(result).toBe(true);
@@ -287,9 +282,9 @@ describe('HMAC Utilities', () => {
       );
       const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
       const validSignature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       const result = await verifyHmacSignature(payload, validSignature, testSecret);
       expect(result).toBe(true);
     });
@@ -306,9 +301,9 @@ describe('HMAC Utilities', () => {
       );
       const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
       const validSignature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       const result = await verifyHmacSignature(payload, validSignature, testSecret);
       expect(result).toBe(true);
     });
@@ -325,9 +320,9 @@ describe('HMAC Utilities', () => {
       );
       const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
       const validSignature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       const result = await verifyHmacSignature(payload, validSignature, testSecret);
       expect(result).toBe(true);
     });
@@ -335,7 +330,7 @@ describe('HMAC Utilities', () => {
     it('returns false when payload is tampered', async () => {
       const originalPayload = 'original payload';
       const tamperedPayload = 'tampered payload';
-      
+
       // Generate signature for original payload
       const encoder = new TextEncoder();
       const key = await crypto.subtle.importKey(
@@ -345,11 +340,15 @@ describe('HMAC Utilities', () => {
         false,
         ['sign']
       );
-      const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(originalPayload));
+      const signatureBuffer = await crypto.subtle.sign(
+        'HMAC',
+        key,
+        encoder.encode(originalPayload)
+      );
       const originalSignature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       // Verify with tampered payload should fail
       const result = await verifyHmacSignature(tamperedPayload, originalSignature, testSecret);
       expect(result).toBe(false);
@@ -358,7 +357,7 @@ describe('HMAC Utilities', () => {
     it('returns false for wrong secret', async () => {
       const payload = 'test payload';
       const wrongSecret = 'wrong-secret';
-      
+
       // Generate signature with correct secret
       const encoder = new TextEncoder();
       const key = await crypto.subtle.importKey(
@@ -370,9 +369,9 @@ describe('HMAC Utilities', () => {
       );
       const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
       const validSignature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
-      
+
       // Verify with wrong secret should fail
       const result = await verifyHmacSignature(payload, validSignature, wrongSecret);
       expect(result).toBe(false);
@@ -383,35 +382,35 @@ describe('HMAC Utilities', () => {
   describe('extractSignature', () => {
     it('extracts X-Webhook-Signature header', () => {
       const req = new Request('https://example.com', {
-        headers: { 'X-Webhook-Signature': 'sig123' }
+        headers: { 'X-Webhook-Signature': 'sig123' },
       });
       expect(extractSignature(req)).toBe('sig123');
     });
 
     it('extracts X-InTouch-Signature header', () => {
       const req = new Request('https://example.com', {
-        headers: { 'X-InTouch-Signature': 'intouch-sig456' }
+        headers: { 'X-InTouch-Signature': 'intouch-sig456' },
       });
       expect(extractSignature(req)).toBe('intouch-sig456');
     });
 
     it('extracts X-Hub-Signature-256 header', () => {
       const req = new Request('https://example.com', {
-        headers: { 'X-Hub-Signature-256': 'sha256=hubsig789' }
+        headers: { 'X-Hub-Signature-256': 'sha256=hubsig789' },
       });
       expect(extractSignature(req)).toBe('sha256=hubsig789');
     });
 
     it('extracts X-Signature header', () => {
       const req = new Request('https://example.com', {
-        headers: { 'X-Signature': 'generic-sig' }
+        headers: { 'X-Signature': 'generic-sig' },
       });
       expect(extractSignature(req)).toBe('generic-sig');
     });
 
     it('returns null when no signature header present', () => {
       const req = new Request('https://example.com', {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
       expect(extractSignature(req)).toBeNull();
     });
@@ -421,8 +420,8 @@ describe('HMAC Utilities', () => {
         headers: {
           'X-Webhook-Signature': 'priority1',
           'X-InTouch-Signature': 'priority2',
-          'X-Hub-Signature-256': 'priority3'
-        }
+          'X-Hub-Signature-256': 'priority3',
+        },
       });
       expect(extractSignature(req)).toBe('priority1');
     });
@@ -431,15 +430,15 @@ describe('HMAC Utilities', () => {
       const req = new Request('https://example.com', {
         headers: {
           'X-InTouch-Signature': 'intouch-sig',
-          'X-Hub-Signature-256': 'hub-sig'
-        }
+          'X-Hub-Signature-256': 'hub-sig',
+        },
       });
       expect(extractSignature(req)).toBe('intouch-sig');
     });
 
     it('handles empty header value', () => {
       const req = new Request('https://example.com', {
-        headers: { 'X-Webhook-Signature': '' }
+        headers: { 'X-Webhook-Signature': '' },
       });
       // Empty string is falsy, so it should fall through
       expect(extractSignature(req)).toBeNull();
@@ -455,8 +454,8 @@ describe('HMAC Utilities', () => {
       mockInsert = vi.fn().mockResolvedValue({ error: null });
       mockSupabase = {
         from: vi.fn().mockReturnValue({
-          insert: mockInsert
-        })
+          insert: mockInsert,
+        }),
       };
     });
 
@@ -467,7 +466,7 @@ describe('HMAC Utilities', () => {
         signature_provided: 'sha256=abc123',
         source_ip: '192.168.1.1',
         payload: { transaction_id: '12345' },
-        processing_result: 'success'
+        processing_result: 'success',
       };
 
       await logWebhookAttempt(mockSupabase, entry);
@@ -486,7 +485,7 @@ describe('HMAC Utilities', () => {
         source_ip: '10.0.0.1',
         payload: null,
         processing_result: 'signature_invalid',
-        error_message: 'Missing signature'
+        error_message: 'Missing signature',
       };
 
       // Should not throw
@@ -502,7 +501,7 @@ describe('HMAC Utilities', () => {
         signature_provided: null,
         source_ip: null,
         payload: null,
-        processing_result: 'error'
+        processing_result: 'error',
       };
 
       // Should not throw
@@ -520,10 +519,10 @@ describe('HMAC Utilities', () => {
           amount: 50000,
           currency: 'XOF',
           status: 'completed',
-          customer: { phone: '225XXXXXXXXX' }
+          customer: { phone: '225XXXXXXXXX' },
         },
         processing_result: 'payment_validated',
-        error_message: null
+        error_message: null,
       };
 
       await logWebhookAttempt(mockSupabase, entry);
@@ -539,7 +538,7 @@ describe('HMAC Utilities', () => {
       const secret = 'production-secret-key';
       const payload = JSON.stringify({
         event: 'payment.completed',
-        data: { amount: 10000, transaction_id: 'TXN123' }
+        data: { amount: 10000, transaction_id: 'TXN123' },
       });
 
       // Generate signature like a webhook provider would
@@ -552,18 +551,20 @@ describe('HMAC Utilities', () => {
         ['sign']
       );
       const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
-      const signature = 'sha256=' + Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
+      const signature =
+        'sha256=' +
+        Array.from(new Uint8Array(signatureBuffer))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
 
       // Create request with signature
       const req = new Request('https://api.example.com/webhook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Webhook-Signature': signature
+          'X-Webhook-Signature': signature,
         },
-        body: payload
+        body: payload,
       });
 
       // Extract and verify
@@ -588,9 +589,13 @@ describe('HMAC Utilities', () => {
         false,
         ['sign']
       );
-      const signatureBuffer = await crypto.subtle.sign('HMAC', key, encoder.encode(originalPayload));
+      const signatureBuffer = await crypto.subtle.sign(
+        'HMAC',
+        key,
+        encoder.encode(originalPayload)
+      );
       const signature = Array.from(new Uint8Array(signatureBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
+        .map((b) => b.toString(16).padStart(2, '0'))
         .join('');
 
       // Verify with tampered payload should fail

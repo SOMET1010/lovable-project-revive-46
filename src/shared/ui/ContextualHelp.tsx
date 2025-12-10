@@ -13,7 +13,11 @@ interface ContextualHelpProps {
   className?: string;
 }
 
-export default function ContextualHelp({ tips, position = 'right', className = '' }: ContextualHelpProps) {
+export default function ContextualHelp({
+  tips,
+  position = 'right',
+  className = '',
+}: ContextualHelpProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const getIcon = (type: HelpTip['type']) => {
@@ -54,10 +58,7 @@ export default function ContextualHelp({ tips, position = 'right', className = '
 
       {isOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div
             className={`absolute z-50 w-80 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 ${getPositionClasses()}`}
           >
@@ -81,16 +82,10 @@ export default function ContextualHelp({ tips, position = 'right', className = '
                   className="p-3 rounded-xl bg-gradient-to-br from-gray-50 to-white border border-gray-100"
                 >
                   <div className="flex items-start space-x-3">
-                    <div className="flex-shrink-0 mt-0.5">
-                      {getIcon(tip.type)}
-                    </div>
+                    <div className="flex-shrink-0 mt-0.5">{getIcon(tip.type)}</div>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 text-sm mb-1">
-                        {tip.title}
-                      </h4>
-                      <p className="text-gray-600 text-xs leading-relaxed">
-                        {tip.description}
-                      </p>
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1">{tip.title}</h4>
+                      <p className="text-gray-600 text-xs leading-relaxed">{tip.description}</p>
                     </div>
                   </div>
                 </div>

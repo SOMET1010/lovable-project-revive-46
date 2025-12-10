@@ -100,7 +100,7 @@ export interface PropertyFormData {
 }
 
 // Notification types for applications
-export type NotificationType = 
+export type NotificationType =
   | 'application_received'
   | 'application_status_change'
   | 'document_reminder'

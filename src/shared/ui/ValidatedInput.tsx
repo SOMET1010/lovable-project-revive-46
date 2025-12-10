@@ -15,11 +15,11 @@ interface ValidatedInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>
 
 /**
  * Composant Input avec feedback visuel de validation
- * 
+ *
  * - Bordure verte si valide et touché
  * - Bordure rouge + message d'erreur si invalide
  * - Bordure neutre si non touché
- * 
+ *
  * @example
  * <ValidatedInput
  *   label="Email"
@@ -56,10 +56,7 @@ export const ValidatedInput = forwardRef<HTMLInputElement, ValidatedInputProps>(
     return (
       <div className={cn('space-y-1.5', containerClassName)}>
         {label && (
-          <label
-            htmlFor={inputId}
-            className="block text-sm font-semibold text-foreground"
-          >
+          <label htmlFor={inputId} className="block text-sm font-semibold text-foreground">
             {label}
             {required && <span className="text-destructive ml-1">*</span>}
           </label>
@@ -70,16 +67,20 @@ export const ValidatedInput = forwardRef<HTMLInputElement, ValidatedInputProps>(
             ref={ref}
             id={inputId}
             aria-invalid={showError ? 'true' : 'false'}
-            aria-describedby={showError ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
+            aria-describedby={
+              showError ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined
+            }
             className={cn(
               'w-full px-4 py-3 border rounded-xl bg-background text-foreground transition-all duration-200',
               'focus:ring-2 focus:outline-none',
               // État par défaut
               !touched && 'border-border focus:ring-primary/20 focus:border-primary',
               // État valide
-              showSuccess && 'border-green-500 focus:ring-green-500/20 focus:border-green-500 pr-10',
+              showSuccess &&
+                'border-green-500 focus:ring-green-500/20 focus:border-green-500 pr-10',
               // État invalide
-              showError && 'border-destructive focus:ring-destructive/20 focus:border-destructive pr-10',
+              showError &&
+                'border-destructive focus:ring-destructive/20 focus:border-destructive pr-10',
               // Disabled
               props.disabled && 'opacity-50 cursor-not-allowed bg-muted',
               inputClassName

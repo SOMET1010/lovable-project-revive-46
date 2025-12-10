@@ -67,18 +67,18 @@ class SearchErrorBoundary extends Component<Props, State> {
                 <AlertCircle className="h-10 w-10 text-red-600" />
               </div>
 
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">
-                Une erreur est survenue
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">Une erreur est survenue</h1>
 
               <p className="text-lg text-gray-600 mb-8">
-                La page de recherche a rencontré un problème technique.
-                Nos équipes ont été notifiées et travaillent sur une solution.
+                La page de recherche a rencontré un problème technique. Nos équipes ont été
+                notifiées et travaillent sur une solution.
               </p>
 
               {process.env['NODE_ENV'] === 'development' && this.state.error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 text-left">
-                  <h3 className="font-semibold text-red-900 mb-2">Détails de l'erreur (dev only)</h3>
+                  <h3 className="font-semibold text-red-900 mb-2">
+                    Détails de l'erreur (dev only)
+                  </h3>
                   <pre className="text-xs text-red-800 overflow-auto">
                     {this.state.error.toString()}
                     {this.state.errorInfo?.componentStack}

@@ -101,20 +101,20 @@ const showErrorInLoader = (error: unknown) => {
 // ============================================
 try {
   console.log('🚀 main.tsx: Starting React application...');
-  
+
   const queryClient = createQueryClient();
   const rootElement = document.getElementById('root');
 
   if (!rootElement) {
-    throw new Error("Élément #root introuvable dans le DOM");
+    throw new Error('Élément #root introuvable dans le DOM');
   }
 
   console.log('📦 main.tsx: Creating React root...');
-  
+
   const root = createRoot(rootElement);
-  
+
   console.log('🎨 main.tsx: Rendering application...');
-  
+
   root.render(
     <StrictMode>
       <ThemeProvider>
@@ -131,17 +131,18 @@ try {
 
   // Supprimer le loader une fois React monté
   if ('requestIdleCallback' in window) {
-    (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(() => {
-      console.log('✅ main.tsx: Removing loader via requestIdleCallback');
-      removeInitialLoader();
-    });
+    (window as Window & { requestIdleCallback: (cb: () => void) => void }).requestIdleCallback(
+      () => {
+        console.log('✅ main.tsx: Removing loader via requestIdleCallback');
+        removeInitialLoader();
+      }
+    );
   } else {
     setTimeout(() => {
       console.log('✅ main.tsx: Removing loader via setTimeout');
       removeInitialLoader();
     }, 100);
   }
-
 } catch (error) {
   console.error('❌ main.tsx: Critical error during startup:', error);
   showErrorInLoader(error);

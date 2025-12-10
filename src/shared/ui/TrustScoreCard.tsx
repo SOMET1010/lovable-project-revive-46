@@ -18,7 +18,8 @@ const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
   compact = false,
   className = '',
 }) => {
-  const { globalScore, profileScore, verificationScore, historyScore, recommendation, details } = scoreBreakdown;
+  const { globalScore, profileScore, verificationScore, historyScore, recommendation, details } =
+    scoreBreakdown;
 
   const getScoreColor = (score: number): string => {
     if (score >= 70) return 'text-green-600';
@@ -51,9 +52,7 @@ const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         <div className="relative">
-          <div className={`text-2xl font-bold ${getScoreColor(globalScore)}`}>
-            {globalScore}
-          </div>
+          <div className={`text-2xl font-bold ${getScoreColor(globalScore)}`}>{globalScore}</div>
           <div className="text-xs text-muted-foreground">/100</div>
         </div>
         {getRecommendationBadge()}
@@ -95,7 +94,9 @@ const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
                 fill="none"
                 strokeDasharray={`${(globalScore / 100) * 352} 352`}
                 className={getScoreColor(globalScore).replace('text-', 'text-')}
-                style={{ stroke: globalScore >= 70 ? '#16a34a' : globalScore >= 50 ? '#ca8a04' : '#dc2626' }}
+                style={{
+                  stroke: globalScore >= 70 ? '#16a34a' : globalScore >= 50 ? '#ca8a04' : '#dc2626',
+                }}
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -159,19 +160,35 @@ const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
               <p className="text-sm font-medium mb-2">Vérifications</p>
               <div className="flex flex-wrap gap-2">
                 <Badge variant={details.verification.oneci ? 'success' : 'secondary'}>
-                  {details.verification.oneci ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                  {details.verification.oneci ? (
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                  ) : (
+                    <XCircle className="h-3 w-3 mr-1" />
+                  )}
                   ONECI
                 </Badge>
                 <Badge variant={details.verification.cnam ? 'success' : 'secondary'}>
-                  {details.verification.cnam ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                  {details.verification.cnam ? (
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                  ) : (
+                    <XCircle className="h-3 w-3 mr-1" />
+                  )}
                   CNAM
                 </Badge>
                 <Badge variant={details.verification.facial ? 'success' : 'secondary'}>
-                  {details.verification.facial ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                  {details.verification.facial ? (
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                  ) : (
+                    <XCircle className="h-3 w-3 mr-1" />
+                  )}
                   Facial
                 </Badge>
                 <Badge variant={details.verification.ansut ? 'success' : 'secondary'}>
-                  {details.verification.ansut ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                  {details.verification.ansut ? (
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                  ) : (
+                    <XCircle className="h-3 w-3 mr-1" />
+                  )}
                   ANSUT
                 </Badge>
               </div>

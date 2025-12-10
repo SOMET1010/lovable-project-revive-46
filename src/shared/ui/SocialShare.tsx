@@ -11,14 +11,20 @@ interface SocialShareProps {
   hashtags?: string[];
 }
 
-export default function SocialShare({ url, title, description, image: _image, hashtags = [] }: SocialShareProps) {
+export default function SocialShare({
+  url,
+  title,
+  description,
+  image: _image,
+  hashtags = [],
+}: SocialShareProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const fullUrl = url.startsWith('http') ? url : `${window.location.origin}${url}`;
   const encodedUrl = encodeURIComponent(fullUrl);
   const encodedTitle = encodeURIComponent(title);
-  const hashtagString = hashtags.map(tag => tag.replace('#', '')).join(',');
+  const hashtagString = hashtags.map((tag) => tag.replace('#', '')).join(',');
 
   const shareLinks = [
     {

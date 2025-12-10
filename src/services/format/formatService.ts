@@ -13,7 +13,10 @@ export class FormatService {
     return value.toLocaleString('fr-FR');
   }
 
-  static formatDate(date: string | Date | null | undefined, options?: Intl.DateTimeFormatOptions): string {
+  static formatDate(
+    date: string | Date | null | undefined,
+    options?: Intl.DateTimeFormatOptions
+  ): string {
     if (!date) return 'N/A';
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     if (isNaN(dateObj.getTime())) return 'N/A';
@@ -21,7 +24,7 @@ export class FormatService {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
-      ...options
+      ...options,
     };
     return dateObj.toLocaleDateString('fr-FR', defaultOptions);
   }
@@ -30,7 +33,7 @@ export class FormatService {
     return this.formatDate(date, {
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
+      day: '2-digit',
     });
   }
 
@@ -38,7 +41,7 @@ export class FormatService {
     const dateObj = typeof date === 'string' ? new Date(date) : date;
     return dateObj.toLocaleTimeString('fr-FR', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
@@ -52,7 +55,7 @@ export class FormatService {
     const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
 
     if (diffInSeconds < 60) {
-      return 'À l\'instant';
+      return "À l'instant";
     }
 
     const diffInMinutes = Math.floor(diffInSeconds / 60);
@@ -108,33 +111,33 @@ export class FormatService {
 
   static formatPropertyType(type: string): string {
     const types: Record<string, string> = {
-      'appartement': 'Appartement',
-      'maison': 'Maison',
-      'studio': 'Studio',
-      'villa': 'Villa',
-      'duplex': 'Duplex',
-      'bureau': 'Bureau',
-      'local_commercial': 'Local commercial',
-      'entrepot': 'Entrepôt',
-      'terrain': 'Terrain'
+      appartement: 'Appartement',
+      maison: 'Maison',
+      studio: 'Studio',
+      villa: 'Villa',
+      duplex: 'Duplex',
+      bureau: 'Bureau',
+      local_commercial: 'Local commercial',
+      entrepot: 'Entrepôt',
+      terrain: 'Terrain',
     };
     return types[type] || type;
   }
 
   static formatStatus(status: string): { text: string; color: string } {
     const statusMap: Record<string, { text: string; color: string }> = {
-      'disponible': { text: 'Disponible', color: 'green' },
-      'loue': { text: 'Loué', color: 'blue' },
-      'reserve': { text: 'Réservé', color: 'yellow' },
-      'indisponible': { text: 'Indisponible', color: 'gray' },
-      'en_attente': { text: 'En attente', color: 'yellow' },
-      'verifie': { text: 'Vérifié', color: 'green' },
-      'rejete': { text: 'Rejeté', color: 'red' },
-      'actif': { text: 'Actif', color: 'green' },
-      'termine': { text: 'Terminé', color: 'gray' },
-      'annule': { text: 'Annulé', color: 'red' },
-      'en_cours': { text: 'En cours', color: 'blue' },
-      'complete': { text: 'Complété', color: 'green' }
+      disponible: { text: 'Disponible', color: 'green' },
+      loue: { text: 'Loué', color: 'blue' },
+      reserve: { text: 'Réservé', color: 'yellow' },
+      indisponible: { text: 'Indisponible', color: 'gray' },
+      en_attente: { text: 'En attente', color: 'yellow' },
+      verifie: { text: 'Vérifié', color: 'green' },
+      rejete: { text: 'Rejeté', color: 'red' },
+      actif: { text: 'Actif', color: 'green' },
+      termine: { text: 'Terminé', color: 'gray' },
+      annule: { text: 'Annulé', color: 'red' },
+      en_cours: { text: 'En cours', color: 'blue' },
+      complete: { text: 'Complété', color: 'green' },
     };
 
     return statusMap[status] || { text: status, color: 'gray' };
@@ -198,7 +201,7 @@ export class FormatService {
   static generateInitials(name: string): string {
     return name
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase())
+      .map((word) => word.charAt(0).toUpperCase())
       .slice(0, 2)
       .join('');
   }

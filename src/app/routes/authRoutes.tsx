@@ -19,7 +19,28 @@ export const authRoutes: RouteObject[] = [
   { path: 'auth/callback', element: <AuthCallback /> },
   { path: 'mot-de-passe-oublie', element: <ForgotPassword /> },
   { path: 'reinitialiser-mot-de-passe', element: <ResetPassword /> },
-  { path: 'choix-profil', element: <ProtectedRoute><ProfileSelection /></ProtectedRoute> },
-  { path: 'completer-profil', element: <ProtectedRoute><ProfileCompletion /></ProtectedRoute> },
-  { path: 'verification-biometrique', element: <ProtectedRoute><BiometricVerification /></ProtectedRoute> },
+  {
+    path: 'choix-profil',
+    element: (
+      <ProtectedRoute>
+        <ProfileSelection />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'completer-profil',
+    element: (
+      <ProtectedRoute>
+        <ProfileCompletion />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'verification-biometrique',
+    element: (
+      <ProtectedRoute>
+        <BiometricVerification />
+      </ProtectedRoute>
+    ),
+  },
 ];

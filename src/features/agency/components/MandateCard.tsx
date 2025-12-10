@@ -4,11 +4,11 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  Building2, 
-  MapPin, 
-  Calendar, 
-  Percent, 
+import {
+  Building2,
+  MapPin,
+  Calendar,
+  Percent,
   MoreVertical,
   Check,
   X,
@@ -19,7 +19,7 @@ import {
   Eye,
   Home,
   FileSignature,
-  PenTool
+  PenTool,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -61,8 +61,8 @@ export default function MandateCard({
       {/* Property Image */}
       <div className="relative h-40 bg-neutral-100">
         {mandate.property?.main_image ? (
-          <img 
-            src={mandate.property.main_image} 
+          <img
+            src={mandate.property.main_image}
             alt={mandate.property?.title}
             className="w-full h-full object-cover"
           />
@@ -71,7 +71,7 @@ export default function MandateCard({
             <Home className="h-12 w-12 text-neutral-400" />
           </div>
         )}
-        
+
         {/* Status Badge */}
         <div className="absolute top-3 left-3">
           <MandateStatusBadge status={mandate.status} size="sm" />
@@ -79,7 +79,7 @@ export default function MandateCard({
 
         {/* Menu Button */}
         <div className="absolute top-3 right-3">
-          <button 
+          <button
             onClick={() => setShowMenu(!showMenu)}
             className="bg-white/90 backdrop-blur-sm p-1.5 rounded-lg hover:bg-white transition-colors"
           >
@@ -89,10 +89,7 @@ export default function MandateCard({
           {/* Dropdown Menu */}
           {showMenu && (
             <>
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setShowMenu(false)}
-              />
+              <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)} />
               <div className="absolute right-0 top-10 z-20 bg-white rounded-xl shadow-lg border border-neutral-200 py-1 min-w-[160px]">
                 <Link
                   to={`/propriete/${mandate.property_id}`}
@@ -102,7 +99,7 @@ export default function MandateCard({
                   <Eye className="h-4 w-4" />
                   Voir le bien
                 </Link>
-                
+
                 {viewAs === 'owner' && mandate.status === 'active' && onManagePermissions && (
                   <button
                     onClick={() => {
@@ -177,13 +174,13 @@ export default function MandateCard({
       {/* Content */}
       <div className="p-4">
         {/* Property Info */}
-        <Link 
+        <Link
           to={`/mandat/${mandate.id}`}
           className="block font-semibold text-neutral-900 truncate mb-1 hover:text-primary transition-colors"
         >
           {mandate.property?.title || 'Propriété'}
         </Link>
-        
+
         <div className="flex items-center gap-1 text-sm text-neutral-500 mb-3">
           <MapPin className="h-3.5 w-3.5" />
           <span className="truncate">
@@ -222,23 +219,30 @@ export default function MandateCard({
             <span>Commission: {mandate.commission_rate}%</span>
             {mandate.property?.monthly_rent && (
               <span className="text-primary font-medium">
-                ({Math.round(mandate.property.monthly_rent * mandate.commission_rate / 100).toLocaleString()} FCFA/mois)
-            </span>
+                (
+                {Math.round(
+                  (mandate.property.monthly_rent * mandate.commission_rate) / 100
+                ).toLocaleString()}{' '}
+                FCFA/mois)
+              </span>
             )}
           </div>
-          
+
           {/* Signature Status */}
           {mandate.cryptoneo_signature_status && (
             <div className="flex items-center gap-1.5 text-xs text-neutral-600 col-span-2 mt-1">
               <FileSignature className="h-3.5 w-3.5" />
               <span>
-                Signature: {
-                  mandate.cryptoneo_signature_status === 'completed' ? '✓ Complète' :
-                  mandate.cryptoneo_signature_status === 'owner_signed' ? '⏳ En attente agence' :
-                  mandate.cryptoneo_signature_status === 'agency_signed' ? '⏳ En attente propriétaire' :
-                  mandate.cryptoneo_signature_status === 'pending' ? '⏳ En attente' :
-                  'Non signé'
-                }
+                Signature:{' '}
+                {mandate.cryptoneo_signature_status === 'completed'
+                  ? '✓ Complète'
+                  : mandate.cryptoneo_signature_status === 'owner_signed'
+                    ? '⏳ En attente agence'
+                    : mandate.cryptoneo_signature_status === 'agency_signed'
+                      ? '⏳ En attente propriétaire'
+                      : mandate.cryptoneo_signature_status === 'pending'
+                        ? '⏳ En attente'
+                        : 'Non signé'}
               </span>
             </div>
           )}

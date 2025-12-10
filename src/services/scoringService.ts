@@ -6,10 +6,10 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ScoreBreakdown {
-  profileScore: number;        // 0-100 (20% du total)
-  verificationScore: number;   // 0-100 (40% du total)
-  historyScore: number;        // 0-100 (40% du total)
-  globalScore: number;         // 0-100 (moyenne pondérée)
+  profileScore: number; // 0-100 (20% du total)
+  verificationScore: number; // 0-100 (40% du total)
+  historyScore: number; // 0-100 (40% du total)
+  globalScore: number; // 0-100 (moyenne pondérée)
   recommendation: 'approved' | 'conditional' | 'rejected';
   details: {
     profile: ProfileScoreDetails;
@@ -45,9 +45,9 @@ export interface HistoryScoreDetails {
 
 // Pondérations des sous-scores
 const WEIGHTS = {
-  profile: 0.20,      // 20%
-  verification: 0.40, // 40%
-  history: 0.40,      // 40%
+  profile: 0.2, // 20%
+  verification: 0.4, // 40%
+  history: 0.4, // 40%
 };
 
 // Points pour chaque élément du profil
@@ -196,11 +196,7 @@ export const ScoringService = {
     monthlyRent?: number
   ): Promise<ScoreBreakdown> {
     // Récupérer le profil utilisateur
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', userId).single();
 
     // Calculer les 3 sous-scores
     const profileResult = this.calculateProfileScore(profile);
@@ -210,8 +206,8 @@ export const ScoringService = {
     // Calculer le score global pondéré
     const globalScore = Math.round(
       profileResult.score * WEIGHTS.profile +
-      verificationResult.score * WEIGHTS.verification +
-      historyResult.score * WEIGHTS.history
+        verificationResult.score * WEIGHTS.verification +
+        historyResult.score * WEIGHTS.history
     );
 
     // Déterminer la recommandation
@@ -244,14 +240,14 @@ export const ScoringService = {
   calculateSimpleScore(profile: any): number {
     const profileResult = this.calculateProfileScore(profile);
     const verificationResult = this.calculateVerificationScore(profile);
-    
+
     // Score simplifié sans l'historique (pour les nouvelles candidatures)
     const baseHistoryScore = 50; // Score par défaut
-    
+
     return Math.round(
       profileResult.score * WEIGHTS.profile +
-      verificationResult.score * WEIGHTS.verification +
-      baseHistoryScore * WEIGHTS.history
+        verificationResult.score * WEIGHTS.verification +
+        baseHistoryScore * WEIGHTS.history
     );
   },
 

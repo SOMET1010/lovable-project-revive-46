@@ -9,48 +9,48 @@ import { ChevronRight, Home } from 'lucide-react';
 // Mapping des routes vers leurs labels
 const ROUTE_LABELS: Record<string, string> = {
   '': 'Accueil',
-  'recherche': 'Recherche',
-  'propriete': 'Propriété',
-  'properties': 'Propriété',
-  'proprietes': 'Propriété',
-  'favoris': 'Favoris',
-  'messages': 'Messages',
+  recherche: 'Recherche',
+  propriete: 'Propriété',
+  properties: 'Propriété',
+  proprietes: 'Propriété',
+  favoris: 'Favoris',
+  messages: 'Messages',
   'recherches-sauvegardees': 'Recherches sauvegardées',
-  'candidature': 'Candidature',
-  'visiter': 'Planifier une visite',
+  candidature: 'Candidature',
+  visiter: 'Planifier une visite',
   'mes-visites': 'Mes visites',
-  'dashboard': 'Tableau de bord',
-  'locataire': 'Locataire',
-  'proprietaire': 'Propriétaire',
-  'calendrier': 'Calendrier',
-  'maintenance': 'Maintenance',
+  dashboard: 'Tableau de bord',
+  locataire: 'Locataire',
+  proprietaire: 'Propriétaire',
+  calendrier: 'Calendrier',
+  maintenance: 'Maintenance',
   'mon-score': 'Mon Score',
   'ajouter-propriete': 'Ajouter une propriété',
   'add-property': 'Ajouter une propriété',
-  'connexion': 'Connexion',
-  'inscription': 'Inscription',
-  'auth': 'Authentification',
+  connexion: 'Connexion',
+  inscription: 'Inscription',
+  auth: 'Authentification',
   'mot-de-passe-oublie': 'Mot de passe oublié',
   'completer-profil': 'Compléter le profil',
   'choix-profil': 'Choix du profil',
   'a-propos': 'À propos',
-  'conditions-utilisation': 'Conditions d\'utilisation',
+  'conditions-utilisation': "Conditions d'utilisation",
   'politique-confidentialite': 'Politique de confidentialité',
   'mentions-legales': 'Mentions légales',
-  'contact': 'Contact',
-  'aide': 'Aide',
-  'faq': 'FAQ',
+  contact: 'Contact',
+  aide: 'Aide',
+  faq: 'FAQ',
   'comment-ca-marche': 'Comment ça marche',
-  'guide': 'Guide',
+  guide: 'Guide',
   'louer-mon-bien': 'Louer mon bien',
-  'admin': 'Administration',
+  admin: 'Administration',
   'tableau-de-bord': 'Tableau de bord',
-  'utilisateurs': 'Utilisateurs',
+  utilisateurs: 'Utilisateurs',
   'gestion-roles': 'Gestion des rôles',
   'api-keys': 'Clés API',
   'cev-management': 'Gestion CEV',
   'trust-agents': 'Agents de confiance',
-  'nouvelle': 'Nouvelle demande',
+  nouvelle: 'Nouvelle demande',
 };
 
 // Pages où ne pas afficher le breadcrumb
@@ -85,13 +85,16 @@ function generateBreadcrumbs(pathname: string): BreadcrumbItem[] {
   let currentPath = '';
   segments.forEach((segment, index) => {
     currentPath += `/${segment}`;
-    
+
     // Ignorer les IDs (UUIDs ou nombres)
-    const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment) ||
-                 /^\d+$/.test(segment);
+    const isId =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(segment) ||
+      /^\d+$/.test(segment);
 
     if (!isId) {
-      const label = ROUTE_LABELS[segment] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+      const label =
+        ROUTE_LABELS[segment] ||
+        segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
       breadcrumbs.push({
         label,
         path: currentPath,
@@ -114,7 +117,7 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ className = '' }: BreadcrumbProps) {
   const location = useLocation();
-  
+
   // Ne pas afficher sur les pages exclues
   if (EXCLUDED_ROUTES.includes(location.pathname)) {
     return null;
@@ -136,10 +139,8 @@ export function Breadcrumb({ className = '' }: BreadcrumbProps) {
         <ol className="flex items-center py-3 text-sm overflow-x-auto">
           {breadcrumbs.map((item, index) => (
             <li key={item.path} className="flex items-center whitespace-nowrap">
-              {index > 0 && (
-                <ChevronRight className="h-4 w-4 mx-2 text-gray-400 flex-shrink-0" />
-              )}
-              
+              {index > 0 && <ChevronRight className="h-4 w-4 mx-2 text-gray-400 flex-shrink-0" />}
+
               {item.isLast ? (
                 <span className="text-terracotta-600 font-medium flex items-center gap-1.5">
                   {index === 0 && <Home className="h-4 w-4" />}

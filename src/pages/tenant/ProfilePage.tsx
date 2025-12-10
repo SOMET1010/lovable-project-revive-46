@@ -70,7 +70,7 @@ export default function ProfilePage() {
       if (!data) {
         throw new Error('Profil introuvable');
       }
-      
+
       const formattedAddress = formatAddress(data.address as AddressValue, data.city || undefined);
       const profileData: Profile = {
         id: data.id,
@@ -88,7 +88,7 @@ export default function ProfilePage() {
         cnam_verified: data.cnam_verified,
         trust_score: data.trust_score,
       };
-      
+
       setProfile(profileData);
       setFormData({
         full_name: data.full_name || '',
@@ -109,10 +109,7 @@ export default function ProfilePage() {
     if (!user) return;
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update(formData)
-        .eq('id', user.id);
+      const { error } = await supabase.from('profiles').update(formData).eq('id', user.id);
 
       if (error) throw error;
       toast.success('Profil mis à jour avec succès');
@@ -175,7 +172,11 @@ export default function ProfilePage() {
             <div className="relative">
               <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden">
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                  <img
+                    src={profile.avatar_url}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <User className="w-12 h-12 text-muted-foreground" />
                 )}
@@ -194,8 +195,10 @@ export default function ProfilePage() {
                     try {
                       const fileExt = file.name.split('.').pop();
                       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-                      const bucket = import.meta.env.VITE_SUPABASE_AVATARS_BUCKET || STORAGE_BUCKETS.AVATARS;
-                      const { data: existingBuckets, error: bucketError } = await supabase.storage.listBuckets();
+                      const bucket =
+                        import.meta.env.VITE_SUPABASE_AVATARS_BUCKET || STORAGE_BUCKETS.AVATARS;
+                      const { data: existingBuckets, error: bucketError } =
+                        await supabase.storage.listBuckets();
                       if (bucketError) throw bucketError;
 
                       const bucketExists = (existingBuckets || []).some((b) => b.name === bucket);
@@ -238,19 +241,21 @@ export default function ProfilePage() {
                 />
               </label>
               {uploadingAvatar && (
-                <span className="absolute -bottom-5 right-0 text-xs text-muted-foreground">Upload...</span>
+                <span className="absolute -bottom-5 right-0 text-xs text-muted-foreground">
+                  Upload...
+                </span>
               )}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">{displayName}</h1>
               <p className="text-muted-foreground">{profile?.email || user?.email}</p>
-              <p className="text-sm text-muted-foreground">
-                Rôle : {roleLabel}
-              </p>
+              <p className="text-sm text-muted-foreground">Rôle : {roleLabel}</p>
               {profile?.trust_score && (
                 <div className="mt-2 flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Score de confiance:</span>
-                  <span className={`font-semibold ${profile.trust_score >= 70 ? 'text-green-600' : profile.trust_score >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                  <span
+                    className={`font-semibold ${profile.trust_score >= 70 ? 'text-green-600' : profile.trust_score >= 50 ? 'text-amber-600' : 'text-red-600'}`}
+                  >
                     {profile.trust_score}%
                   </span>
                 </div>
@@ -281,16 +286,22 @@ export default function ProfilePage() {
         <div className="bg-card rounded-2xl shadow-card p-6">
           {activeTab === 'infos' && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Informations personnelles</h2>
-              
+              <h2 className="text-xl font-semibold text-foreground mb-4">
+                Informations personnelles
+              </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Nom complet</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Nom complet
+                  </label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       value={formData.full_name}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, full_name: e.target.value })}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setFormData({ ...formData, full_name: e.target.value })
+                      }
                       className="pl-10"
                       placeholder="Votre nom complet"
                     />
@@ -298,12 +309,16 @@ export default function ProfilePage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Téléphone</label>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Téléphone
+                  </label>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       value={formData.phone}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
                       className="pl-10"
                       placeholder="+225 XX XX XX XX"
                     />
@@ -316,7 +331,9 @@ export default function ProfilePage() {
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       value={formData.city}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, city: e.target.value })}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setFormData({ ...formData, city: e.target.value })
+                      }
                       className="pl-10"
                       placeholder="Votre ville"
                     />
@@ -329,7 +346,9 @@ export default function ProfilePage() {
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                       value={formData.address}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, address: e.target.value })}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setFormData({ ...formData, address: e.target.value })
+                      }
                       className="pl-10"
                       placeholder="Votre adresse"
                     />
@@ -358,7 +377,7 @@ export default function ProfilePage() {
           {activeTab === 'verification' && (
             <div className="space-y-6">
               <h2 className="text-xl font-semibold text-foreground mb-4">Statut de vérification</h2>
-              
+
               {/* Statuts actuels */}
               <div className="space-y-4">
                 <VerificationItem
@@ -375,8 +394,10 @@ export default function ProfilePage() {
 
               {/* Formulaires de vérification */}
               <div className="border-t border-border pt-6 mt-6">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Lancer une vérification</h3>
-                
+                <h3 className="text-lg font-semibold text-foreground mb-4">
+                  Lancer une vérification
+                </h3>
+
                 <div className="space-y-6">
                   {/* ONECI Form */}
                   {!profile?.oneci_verified && user && (
@@ -390,7 +411,9 @@ export default function ProfilePage() {
                   {profile?.oneci_verified && profile?.is_verified && (
                     <div className="text-center py-6 bg-green-50 rounded-xl border border-green-200">
                       <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
-                      <h4 className="text-lg font-semibold text-green-700">Vérifications principales complètes !</h4>
+                      <h4 className="text-lg font-semibold text-green-700">
+                        Vérifications principales complètes !
+                      </h4>
                       <p className="text-green-600">Votre profil est vérifié via ANSUT et ONECI.</p>
                     </div>
                   )}
@@ -404,7 +427,15 @@ export default function ProfilePage() {
   );
 }
 
-function VerificationItem({ title, description, verified }: { title: string; description: string; verified: boolean | null }) {
+function VerificationItem({
+  title,
+  description,
+  verified,
+}: {
+  title: string;
+  description: string;
+  verified: boolean | null;
+}) {
   return (
     <div className="flex items-center justify-between p-4 border border-border rounded-lg">
       <div className="flex items-center gap-3">
@@ -418,9 +449,11 @@ function VerificationItem({ title, description, verified }: { title: string; des
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
       </div>
-      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-        verified ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-      }`}>
+      <span
+        className={`px-3 py-1 rounded-full text-sm font-medium ${
+          verified ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+        }`}
+      >
         {verified ? 'Vérifié' : 'Non vérifié'}
       </span>
     </div>

@@ -1,4 +1,15 @@
-import { SlidersHorizontal, X, MapPin, Home, Bed, Bath, DollarSign, Sofa, ParkingCircle, Wind } from 'lucide-react';
+import {
+  SlidersHorizontal,
+  X,
+  MapPin,
+  Home,
+  Bed,
+  Bath,
+  DollarSign,
+  Sofa,
+  ParkingCircle,
+  Wind,
+} from 'lucide-react';
 import { useState } from 'react';
 import Button from '@/shared/ui/Button';
 import { useDebouncedCallback } from '@/hooks/shared';
@@ -57,17 +68,33 @@ export default function SearchFilters({
   onReset,
 }: SearchFiltersProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  
+
   // Débouncer les changements de filtres
   const debouncedUpdateFilters = useDebouncedCallback((callback: () => void) => {
     callback();
   }, 300);
 
   const ivoirianCities = [
-    'Abidjan', 'Yamoussoukro', 'Bouaké', 'Daloa', 'San-Pédro',
-    'Korhogo', 'Man', 'Gagnoa', 'Abengourou', 'Agboville',
-    'Cocody', 'Yopougon', 'Abobo', 'Plateau', 'Marcory',
-    'Treichville', 'Koumassi', 'Port-Bouët', 'Adjamé', 'Attécoubé'
+    'Abidjan',
+    'Yamoussoukro',
+    'Bouaké',
+    'Daloa',
+    'San-Pédro',
+    'Korhogo',
+    'Man',
+    'Gagnoa',
+    'Abengourou',
+    'Agboville',
+    'Cocody',
+    'Yopougon',
+    'Abobo',
+    'Plateau',
+    'Marcory',
+    'Treichville',
+    'Koumassi',
+    'Port-Bouët',
+    'Adjamé',
+    'Attécoubé',
   ];
 
   const propertyTypes: { value: PropertyType; label: string }[] = [
@@ -312,13 +339,7 @@ export default function SearchFilters({
       )}
 
       {/* Bouton de recherche */}
-      <Button
-        onClick={onSearch}
-        variant="primary"
-        size="large"
-        fullWidth
-        className="mt-4"
-      >
+      <Button onClick={onSearch} variant="primary" size="large" fullWidth className="mt-4">
         Rechercher
       </Button>
     </div>

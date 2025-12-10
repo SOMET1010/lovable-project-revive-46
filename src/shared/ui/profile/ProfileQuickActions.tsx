@@ -1,6 +1,16 @@
 import {
-  Search, MessageSquare, CreditCard, Home, PlusCircle, Users,
-  BarChart3, Wrench, Star, Bell, HelpCircle, Building2
+  Search,
+  MessageSquare,
+  CreditCard,
+  Home,
+  PlusCircle,
+  Users,
+  BarChart3,
+  Wrench,
+  Star,
+  Bell,
+  HelpCircle,
+  Building2,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -21,43 +31,43 @@ export default function ProfileQuickActions() {
       label: 'Rechercher un logement',
       href: '/recherche',
       color: 'from-cyan-400 to-blue-500',
-      description: 'Trouvez votre logement idéal'
+      description: 'Trouvez votre logement idéal',
     },
     {
       icon: MessageSquare,
       label: 'Mes messages',
       href: '/messages',
       color: 'from-olive-400 to-green-500',
-      description: 'Contactez les propriétaires'
+      description: 'Contactez les propriétaires',
     },
     {
       icon: CreditCard,
       label: 'Payer mon loyer',
       href: '/paiement',
       color: 'from-coral-400 to-pink-500',
-      description: 'Paiement sécurisé Mobile Money'
+      description: 'Paiement sécurisé Mobile Money',
     },
     {
       icon: Home,
       label: 'Mon contrat',
       href: '/mes-contrats',
       color: 'from-amber-400 to-orange-500',
-      description: 'Consultez votre bail'
+      description: 'Consultez votre bail',
     },
     {
       icon: Wrench,
       label: 'Demander une réparation',
       href: '/maintenance',
       color: 'from-terracotta-400 to-red-500',
-      description: 'Signalez un problème'
+      description: 'Signalez un problème',
     },
     {
       icon: Star,
       label: 'Mon score',
       href: '/score',
       color: 'from-purple-400 to-indigo-500',
-      description: 'Améliorez votre profil'
-    }
+      description: 'Améliorez votre profil',
+    },
   ];
 
   const getOwnerActions = (): QuickAction[] => [
@@ -66,43 +76,43 @@ export default function ProfileQuickActions() {
       label: 'Publier un bien',
       href: '/ajouter-propriete',
       color: 'from-terracotta-400 to-coral-500',
-      description: 'Ajoutez une nouvelle propriété'
+      description: 'Ajoutez une nouvelle propriété',
     },
     {
       icon: Building2,
       label: 'Mes propriétés',
       href: '/mes-proprietes',
       color: 'from-cyan-400 to-blue-500',
-      description: 'Gérez vos biens'
+      description: 'Gérez vos biens',
     },
     {
       icon: Users,
       label: 'Candidatures',
       href: '/candidatures',
       color: 'from-olive-400 to-green-500',
-      description: 'Sélectionnez vos locataires'
+      description: 'Sélectionnez vos locataires',
     },
     {
       icon: MessageSquare,
       label: 'Messages',
       href: '/messages',
       color: 'from-amber-400 to-orange-500',
-      description: 'Répondez aux demandes'
+      description: 'Répondez aux demandes',
     },
     {
       icon: BarChart3,
       label: 'Statistiques',
       href: '/dashboard/proprietaire',
       color: 'from-purple-400 to-indigo-500',
-      description: 'Suivez vos revenus'
+      description: 'Suivez vos revenus',
     },
     {
       icon: Wrench,
       label: 'Maintenance',
       href: '/proprietaire/maintenance',
       color: 'from-coral-400 to-pink-500',
-      description: 'Demandes de réparation'
-    }
+      description: 'Demandes de réparation',
+    },
   ];
 
   const getAgencyActions = (): QuickAction[] => [
@@ -111,43 +121,43 @@ export default function ProfileQuickActions() {
       label: 'Dashboard',
       href: '/agence/dashboard',
       color: 'from-terracotta-400 to-coral-500',
-      description: 'Vue d\'ensemble'
+      description: "Vue d'ensemble",
     },
     {
       icon: Building2,
       label: 'Propriétés',
       href: '/agence/proprietes',
       color: 'from-cyan-400 to-blue-500',
-      description: 'Gérez votre portefeuille'
+      description: 'Gérez votre portefeuille',
     },
     {
       icon: Users,
       label: 'Équipe',
       href: '/agence/equipe',
       color: 'from-olive-400 to-green-500',
-      description: 'Gérez vos agents'
+      description: 'Gérez vos agents',
     },
     {
       icon: CreditCard,
       label: 'Commissions',
       href: '/agence/commissions',
       color: 'from-amber-400 to-orange-500',
-      description: 'Suivi des revenus'
+      description: 'Suivi des revenus',
     },
     {
       icon: MessageSquare,
       label: 'CRM',
       href: '/agence/crm',
       color: 'from-purple-400 to-indigo-500',
-      description: 'Gestion des prospects'
+      description: 'Gestion des prospects',
     },
     {
       icon: BarChart3,
       label: 'Rapports',
       href: '/agence/rapports',
       color: 'from-coral-400 to-pink-500',
-      description: 'Analyses détaillées'
-    }
+      description: 'Analyses détaillées',
+    },
   ];
 
   const getActions = () => {
@@ -186,7 +196,9 @@ export default function ProfileQuickActions() {
               href={action.href}
               className="group relative bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 rounded-2xl p-4 hover:shadow-xl hover:border-terracotta-200 transition-all duration-300 transform hover:-translate-y-1"
             >
-              <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg`}>
+              <div
+                className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-lg`}
+              >
                 <Icon className="h-6 w-6 text-white" />
               </div>
               <h3 className="font-bold text-gray-900 text-center text-sm mb-1 group-hover:text-terracotta-600 transition-colors">
@@ -209,7 +221,9 @@ export default function ProfileQuickActions() {
                 Complétez votre vérification d'identité
               </h4>
               <p className="text-gray-600 text-xs mb-3">
-                Vérifiez votre identité via ONECI pour débloquer toutes les fonctionnalités et gagner la confiance des {profile?.user_type === 'locataire' ? 'propriétaires' : 'locataires'}.
+                Vérifiez votre identité via ONECI pour débloquer toutes les fonctionnalités et
+                gagner la confiance des{' '}
+                {profile?.user_type === 'locataire' ? 'propriétaires' : 'locataires'}.
               </p>
               <a
                 href="/verification"

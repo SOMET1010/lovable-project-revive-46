@@ -36,7 +36,7 @@ export async function getOrCreateConversation(userId: string): Promise<ChatConve
         metadata: { priority: 'normal' },
         createdAt: new Date(data.created_at || Date.now()),
         updatedAt: new Date(data.updated_at || Date.now()),
-        archivedAt: data.archived_at ? new Date(data.archived_at) : undefined
+        archivedAt: data.archived_at ? new Date(data.archived_at) : undefined,
       } as unknown as ChatConversation;
     }
 
@@ -47,7 +47,7 @@ export async function getOrCreateConversation(userId: string): Promise<ChatConve
         user_id: userId,
         title: 'Conversation avec SUTA',
         status: 'active',
-        metadata: { type: 'general' }
+        metadata: { type: 'general' },
       })
       .select()
       .single();
@@ -66,7 +66,7 @@ export async function getOrCreateConversation(userId: string): Promise<ChatConve
       messageCount: 0,
       metadata: { priority: 'normal' },
       createdAt: new Date(newConv.created_at || Date.now()),
-      updatedAt: new Date(newConv.updated_at || Date.now())
+      updatedAt: new Date(newConv.updated_at || Date.now()),
     } as unknown as ChatConversation;
   } catch (error) {
     console.error('Error in getOrCreateConversation:', error);
@@ -90,18 +90,21 @@ export async function getConversationMessages(conversationId: string): Promise<C
       return [];
     }
 
-    return (data || []).map((msg) => ({
-      id: msg.id,
-      conversationId: msg.conversation_id,
-      role: msg.role as 'user' | 'assistant' | 'system',
-      content: msg.content,
-      timestamp: new Date(msg.created_at || Date.now()),
-      metadata: {},
-      isRead: msg.is_read || false,
-      readAt: msg.read_at ? new Date(msg.read_at) : undefined,
-      attachments: [],
-      reactions: []
-    } as ChatMessage));
+    return (data || []).map(
+      (msg) =>
+        ({
+          id: msg.id,
+          conversationId: msg.conversation_id,
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: msg.content,
+          timestamp: new Date(msg.created_at || Date.now()),
+          metadata: {},
+          isRead: msg.is_read || false,
+          readAt: msg.read_at ? new Date(msg.read_at) : undefined,
+          attachments: [],
+          reactions: [],
+        }) as ChatMessage
+    );
   } catch (error) {
     console.error('Error in getConversationMessages:', error);
     return [];
@@ -123,7 +126,7 @@ export async function sendMessage(
         conversation_id: conversationId,
         role,
         content,
-        metadata: {}
+        metadata: {},
       })
       .select()
       .single();
@@ -140,7 +143,7 @@ export async function sendMessage(
       content: data.content,
       timestamp: new Date(data.created_at || Date.now()),
       metadata: {},
-      isRead: false
+      isRead: false,
     } as ChatMessage;
   } catch (error) {
     console.error('Error in sendMessage:', error);
@@ -161,11 +164,11 @@ export async function getAIResponse(params: {
       body: {
         message: params.userMessage,
         userId: params.userId,
-        conversationHistory: params.conversationHistory.slice(-10).map(msg => ({
+        conversationHistory: params.conversationHistory.slice(-10).map((msg) => ({
           role: msg.role,
-          content: msg.content
-        }))
-      }
+          content: msg.content,
+        })),
+      },
     });
 
     if (error) {
@@ -173,7 +176,7 @@ export async function getAIResponse(params: {
       throw new Error('Erreur lors de la génération de la réponse');
     }
 
-    return data.response || 'Désolé, je n\'ai pas pu générer une réponse.';
+    return data.response || "Désolé, je n'ai pas pu générer une réponse.";
   } catch (error) {
     console.error('Error in getAIResponse:', error);
     throw error;
@@ -196,18 +199,21 @@ export async function getAllConversations(userId: string): Promise<ChatConversat
       return [];
     }
 
-    return (data || []).map((conv) => ({
-      id: conv.id,
-      userId: conv.user_id || '',
-      title: conv.title || 'Conversation',
-      status: conv.status || 'active',
-      type: 'general',
-      messageCount: conv.message_count || 0,
-      metadata: { priority: 'normal' },
-      createdAt: new Date(conv.created_at || Date.now()),
-      updatedAt: new Date(conv.updated_at || Date.now()),
-      archivedAt: conv.archived_at ? new Date(conv.archived_at) : undefined
-    } as unknown as ChatConversation));
+    return (data || []).map(
+      (conv) =>
+        ({
+          id: conv.id,
+          userId: conv.user_id || '',
+          title: conv.title || 'Conversation',
+          status: conv.status || 'active',
+          type: 'general',
+          messageCount: conv.message_count || 0,
+          metadata: { priority: 'normal' },
+          createdAt: new Date(conv.created_at || Date.now()),
+          updatedAt: new Date(conv.updated_at || Date.now()),
+          archivedAt: conv.archived_at ? new Date(conv.archived_at) : undefined,
+        }) as unknown as ChatConversation
+    );
   } catch (error) {
     console.error('Error in getAllConversations:', error);
     return [];
@@ -223,7 +229,7 @@ export async function archiveConversation(conversationId: string): Promise<void>
       .from('chatbot_conversations')
       .update({
         status: 'archived',
-        archived_at: new Date().toISOString()
+        archived_at: new Date().toISOString(),
       })
       .eq('id', conversationId);
 
@@ -242,5 +248,5 @@ export const chatbotService = {
   sendMessage,
   getAIResponse,
   getAllConversations,
-  archiveConversation
+  archiveConversation,
 };

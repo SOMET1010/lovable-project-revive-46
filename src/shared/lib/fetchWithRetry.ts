@@ -16,12 +16,7 @@ export async function fetchWithRetry<T = unknown>(
   url: string,
   options: FetchOptions = {}
 ): Promise<FetchResponse<T>> {
-  const {
-    retries = 3,
-    retryDelay = 1000,
-    timeout = 10000,
-    ...fetchOptions
-  } = options;
+  const { retries = 3, retryDelay = 1000, timeout = 10000, ...fetchOptions } = options;
 
   let lastError: Error | null = null;
 

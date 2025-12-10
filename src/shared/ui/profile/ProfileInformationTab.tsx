@@ -7,7 +7,11 @@ interface ProfileInformationTabProps {
   onSave: (formData: any) => Promise<void>;
 }
 
-export default function ProfileInformationTab({ profile, user, onSave }: ProfileInformationTabProps) {
+export default function ProfileInformationTab({
+  profile,
+  user,
+  onSave,
+}: ProfileInformationTabProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     full_name: profile?.full_name || '',
@@ -17,9 +21,9 @@ export default function ProfileInformationTab({ profile, user, onSave }: Profile
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 

@@ -2,7 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Download, ArrowLeft, Coins, Home as HomeIcon, Eye, Wrench } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  Download,
+  ArrowLeft,
+  Coins,
+  Home as HomeIcon,
+  Eye,
+  Wrench,
+} from 'lucide-react';
 
 interface CalendarEvent {
   id: string;
@@ -169,11 +179,13 @@ export default function TenantCalendar() {
   };
 
   const getEventsForDay = (day: number) => {
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventDate = new Date(event.date);
-      return eventDate.getDate() === day &&
-             eventDate.getMonth() === currentDate.getMonth() &&
-             eventDate.getFullYear() === currentDate.getFullYear();
+      return (
+        eventDate.getDate() === day &&
+        eventDate.getMonth() === currentDate.getMonth() &&
+        eventDate.getFullYear() === currentDate.getFullYear()
+      );
     });
   };
 
@@ -217,7 +229,7 @@ export default function TenantCalendar() {
     icsContent += 'PRODID:-//Mon Toit//Tenant Calendar//FR\n';
     icsContent += 'CALSCALE:GREGORIAN\n';
 
-    events.forEach(event => {
+    events.forEach((event) => {
       const eventDate = new Date(event.date);
       const dateStr = eventDate.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
 
@@ -250,7 +262,11 @@ export default function TenantCalendar() {
     if (!event) return;
 
     const startDate = new Date(event.date).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    const endDate = new Date(event.date.getTime() + 60 * 60 * 1000).toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const endDate =
+      new Date(event.date.getTime() + 60 * 60 * 1000)
+        .toISOString()
+        .replace(/[-:]/g, '')
+        .split('.')[0] + 'Z';
 
     const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDate}/${endDate}&details=${encodeURIComponent(event.description || '')}`;
     window.open(googleUrl, '_blank');
@@ -289,10 +305,7 @@ export default function TenantCalendar() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <button
-                onClick={exportToICS}
-                className="btn-secondary text-sm flex items-center"
-              >
+              <button onClick={exportToICS} className="btn-secondary text-sm flex items-center">
                 <Download className="h-4 w-4 mr-2" />
                 Export iCal
               </button>
@@ -327,7 +340,7 @@ export default function TenantCalendar() {
           </div>
 
           <div className="grid grid-cols-7 gap-2 mb-4">
-            {['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map(day => (
+            {['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'].map((day) => (
               <div key={day} className="text-center font-bold text-gray-700 text-sm py-2">
                 {day}
               </div>
@@ -341,9 +354,10 @@ export default function TenantCalendar() {
             {Array.from({ length: daysInMonth }, (_, i) => {
               const day = i + 1;
               const dayEvents = getEventsForDay(day);
-              const isToday = new Date().getDate() === day &&
-                            new Date().getMonth() === currentDate.getMonth() &&
-                            new Date().getFullYear() === currentDate.getFullYear();
+              const isToday =
+                new Date().getDate() === day &&
+                new Date().getMonth() === currentDate.getMonth() &&
+                new Date().getFullYear() === currentDate.getFullYear();
 
               return (
                 <div
@@ -356,7 +370,7 @@ export default function TenantCalendar() {
                 >
                   <div className="font-bold text-gray-900 text-sm mb-1">{day}</div>
                   <div className="space-y-1">
-                    {dayEvents.slice(0, 3).map(event => (
+                    {dayEvents.slice(0, 3).map((event) => (
                       <button
                         key={event.id}
                         onClick={() => setSelectedEvent(event)}
@@ -403,8 +417,14 @@ export default function TenantCalendar() {
         </div>
 
         {selectedEvent && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50" onClick={() => setSelectedEvent(null)}>
-            <div className="card-scrapbook p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => setSelectedEvent(null)}
+          >
+            <div
+              className="card-scrapbook p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
               <h3 className="text-xl font-bold text-gradient mb-4">{selectedEvent.title}</h3>
               <div className="space-y-3">
                 <div>
@@ -434,10 +454,7 @@ export default function TenantCalendar() {
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => setSelectedEvent(null)}
-                className="btn-primary w-full mt-6"
-              >
+              <button onClick={() => setSelectedEvent(null)} className="btn-primary w-full mt-6">
                 Fermer
               </button>
             </div>

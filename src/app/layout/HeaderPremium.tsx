@@ -1,4 +1,24 @@
-import { Home, Search, PlusCircle, User, Heart, Calendar, Bell, FileText, Settings, LogOut, Menu, X, MessageCircle, Building2, Key, LayoutDashboard, Shield, BadgeCheck, Eye } from 'lucide-react';
+import {
+  Home,
+  Search,
+  PlusCircle,
+  User,
+  Heart,
+  Calendar,
+  Bell,
+  FileText,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  MessageCircle,
+  Building2,
+  Key,
+  LayoutDashboard,
+  Shield,
+  BadgeCheck,
+  Eye,
+} from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useState, useEffect } from 'react';
 import { useBreakpoint } from '@/hooks/shared/useBreakpoint';
@@ -15,7 +35,7 @@ export default function HeaderPremium() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  
+
   const { count: unreadCount } = useUnreadCount();
   const { propertiesCount, activeLeasesAsTenantCount } = useContextualRoles();
   const permissions = usePermissions();
@@ -26,8 +46,8 @@ export default function HeaderPremium() {
   };
 
   // Déterminer le contexte actuel basé sur l'URL
-  const isInOwnerContext = location.pathname.startsWith('/dashboard');
-  const isInTenantContext = location.pathname.startsWith('/tableau-de-bord');
+  const isInOwnerContext = location.pathname.startsWith('/proprietaire');
+  const isInTenantContext = location.pathname.startsWith('/locataire');
   const isInAdminContext = location.pathname.startsWith('/admin');
   const isInTrustAgentContext = location.pathname.startsWith('/trust-agent');
 
@@ -42,9 +62,16 @@ export default function HeaderPremium() {
 
   // Badge rôle système (Admin, Trust Agent, Moderator)
   const getSystemRoleBadge = () => {
-    if (permissions.isAdmin) return { label: 'Admin', icon: Shield, color: 'bg-purple-100 text-purple-700' };
-    if (permissions.isTrustAgent) return { label: 'Agent Certifié', icon: BadgeCheck, color: 'bg-emerald-100 text-emerald-700' };
-    if (permissions.isModerator) return { label: 'Modérateur', icon: Eye, color: 'bg-blue-100 text-blue-700' };
+    if (permissions.isAdmin)
+      return { label: 'Admin', icon: Shield, color: 'bg-purple-100 text-purple-700' };
+    if (permissions.isTrustAgent)
+      return {
+        label: 'Agent Certifié',
+        icon: BadgeCheck,
+        color: 'bg-emerald-100 text-emerald-700',
+      };
+    if (permissions.isModerator)
+      return { label: 'Modérateur', icon: Eye, color: 'bg-blue-100 text-blue-700' };
     return null;
   };
 
@@ -61,20 +88,58 @@ export default function HeaderPremium() {
   // Navigation principale filtrée par permissions
   const mainNavItems = [
     { label: 'Rechercher', href: '/recherche', icon: Search, visible: true },
-    { label: 'Louer mon bien', href: '/ajouter-propriete', icon: PlusCircle, visible: permissions.canAddProperty || !permissions.isAuthenticated },
-  ].filter(item => item.visible);
+    {
+      label: 'Louer mon bien',
+      href: '/ajouter-propriete',
+      icon: PlusCircle,
+      visible: permissions.canAddProperty || !permissions.isAuthenticated,
+    },
+  ].filter((item) => item.visible);
 
   // Menu utilisateur filtré par permissions
-  const userMenuItems = user ? [
-    { label: 'Mon Espace', href: '/mon-espace', icon: LayoutDashboard, visible: true },
-    { label: 'Mon Profil', href: '/profil', icon: User, visible: true },
-    { label: 'Messages', href: '/messages', icon: MessageCircle, badge: unreadCount, visible: permissions.canSendMessages },
-    { label: 'Mes Favoris', href: '/favoris', icon: Heart, visible: permissions.isTenant },
-    { label: 'Mes Visites', href: '/mes-visites', icon: Calendar, visible: permissions.canScheduleVisits },
-    { label: 'Mes Alertes', href: '/recherches-sauvegardees', icon: Bell, visible: permissions.isTenant },
-    { label: 'Mes Contrats', href: '/mes-contrats', icon: FileText, visible: permissions.canViewOwnContracts },
-    { label: 'Paramètres', href: '/profil', icon: Settings, visible: true },
-  ].filter(item => item.visible) : [];
+  const userMenuItems = user
+    ? [
+        {
+          label: 'Mon Espace',
+          href: '/locataire/mon-espace',
+          icon: LayoutDashboard,
+          visible: true,
+        },
+        { label: 'Mon Profil', href: '/locataire/profil', icon: User, visible: true },
+        {
+          label: 'Messages',
+          href: '/locataire/messages',
+          icon: MessageCircle,
+          badge: unreadCount,
+          visible: permissions.canSendMessages,
+        },
+        {
+          label: 'Mes Favoris',
+          href: '/locataire/favoris',
+          icon: Heart,
+          visible: permissions.isTenant,
+        },
+        {
+          label: 'Mes Visites',
+          href: '/locataire/mes-visites',
+          icon: Calendar,
+          visible: permissions.canScheduleVisits,
+        },
+        {
+          label: 'Mes Alertes',
+          href: '/locataire/recherches-sauvegardees',
+          icon: Bell,
+          visible: permissions.isTenant,
+        },
+        {
+          label: 'Mes Contrats',
+          href: '/locataire/mes-contrats',
+          icon: FileText,
+          visible: permissions.canViewOwnContracts,
+        },
+        { label: 'Paramètres', href: '/locataire/profil', icon: Settings, visible: true },
+      ].filter((item) => item.visible)
+    : [];
 
   const handleSignOut = async () => {
     await signOut();
@@ -83,16 +148,15 @@ export default function HeaderPremium() {
 
   return (
     <>
-      <header 
+      <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out motion-reduce:transition-none ${
-          scrolled 
-            ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-[#EFEBE9]' 
+          scrolled
+            ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-[#EFEBE9]'
             : 'bg-white border-b border-[#EFEBE9]'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-[72px]">
-            
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
               <img
@@ -102,7 +166,7 @@ export default function HeaderPremium() {
               />
               <div className="flex flex-col">
                 <span className="text-xl font-extrabold text-[#2C1810] leading-none tracking-tight group-hover:text-[#F16522] transition-colors">
-                 MON TOIT
+                  MON TOIT
                 </span>
                 {!isMobile && (
                   <span className="text-[10px] font-bold text-[#A69B95] uppercase tracking-wider">
@@ -121,9 +185,11 @@ export default function HeaderPremium() {
                 }`}
               >
                 Accueil
-                <span className={`absolute bottom-0 left-0 w-full h-[3px] bg-[#F16522] rounded-full transform origin-left transition-transform duration-300 ease-out ${
-                  isActive('/') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                }`} />
+                <span
+                  className={`absolute bottom-0 left-0 w-full h-[3px] bg-[#F16522] rounded-full transform origin-left transition-transform duration-300 ease-out ${
+                    isActive('/') ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                  }`}
+                />
               </Link>
 
               {mainNavItems.map((item) => (
@@ -134,12 +200,12 @@ export default function HeaderPremium() {
                     isActive(item.href) ? 'text-[#F16522]' : 'text-[#6B5A4E] hover:text-[#2C1810]'
                   }`}
                 >
-                  <span className="flex items-center gap-1">
-                    {item.label}
-                  </span>
-                  <span className={`absolute bottom-0 left-0 w-full h-[3px] bg-[#F16522] rounded-full transform origin-left transition-transform duration-300 ease-out ${
-                    isActive(item.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
-                  }`} />
+                  <span className="flex items-center gap-1">{item.label}</span>
+                  <span
+                    className={`absolute bottom-0 left-0 w-full h-[3px] bg-[#F16522] rounded-full transform origin-left transition-transform duration-300 ease-out ${
+                      isActive(item.href) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`}
+                  />
                 </Link>
               ))}
             </nav>
@@ -149,13 +215,15 @@ export default function HeaderPremium() {
               {/* Message Badge - WhatsApp Style */}
               {user && permissions.canSendMessages && (
                 <Link
-                  to="/messages"
+                  to="/locataire/messages"
                   className={`relative p-2.5 rounded-full transition-all duration-200 hover:bg-[#F5E6D3]/50 ${
-                    isActive('/messages') ? 'bg-[#F5E6D3]/50' : ''
+                    isActive('/locataire/messages') ? 'bg-[#F5E6D3]/50' : ''
                   }`}
                   aria-label={`Messages${unreadCount > 0 ? `, ${unreadCount} non lus` : ''}`}
                 >
-                  <MessageCircle className={`h-5 w-5 ${isActive('/messages') ? 'text-[#F16522]' : 'text-[#6B5A4E]'}`} />
+                  <MessageCircle
+                    className={`h-5 w-5 ${isActive('/locataire/messages') ? 'text-[#F16522]' : 'text-[#6B5A4E]'}`}
+                  />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-[#25D366] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md whatsapp-badge-pulse">
                       {unreadCount > 9 ? '9+' : unreadCount}
@@ -184,7 +252,9 @@ export default function HeaderPremium() {
                             {profile?.full_name || 'Utilisateur'}
                           </p>
                           {systemRoleBadge && (
-                            <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${systemRoleBadge.color}`}>
+                            <span
+                              className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${systemRoleBadge.color}`}
+                            >
                               <systemRoleBadge.icon className="h-3 w-3" />
                               {systemRoleBadge.label}
                             </span>
@@ -197,14 +267,16 @@ export default function HeaderPremium() {
                       {/* Admin & Trust Agent Links */}
                       {(permissions.canAccessAdmin || permissions.canCertifyUser) && (
                         <div className="px-2 py-2 border-b border-[#EFEBE9]">
-                          <p className="px-2 py-1 text-xs font-bold text-[#A69B95] uppercase tracking-wider">Administration</p>
-                          
+                          <p className="px-2 py-1 text-xs font-bold text-[#A69B95] uppercase tracking-wider">
+                            Administration
+                          </p>
+
                           {permissions.canAccessAdmin && (
                             <Link
                               to="/admin"
                               className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                isInAdminContext 
-                                  ? 'bg-purple-100 text-purple-700' 
+                                isInAdminContext
+                                  ? 'bg-purple-100 text-purple-700'
                                   : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-purple-700'
                               }`}
                             >
@@ -217,8 +289,8 @@ export default function HeaderPremium() {
                             <Link
                               to="/trust-agent/dashboard"
                               className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                isInTrustAgentContext 
-                                  ? 'bg-emerald-100 text-emerald-700' 
+                                isInTrustAgentContext
+                                  ? 'bg-emerald-100 text-emerald-700'
                                   : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-emerald-700'
                               }`}
                             >
@@ -231,14 +303,16 @@ export default function HeaderPremium() {
 
                       {/* Mon Espace - Contextual Dashboard Links */}
                       <div className="px-2 py-2 border-b border-[#EFEBE9]">
-                        <p className="px-2 py-1 text-xs font-bold text-[#A69B95] uppercase tracking-wider">Mon Espace</p>
-                        
+                        <p className="px-2 py-1 text-xs font-bold text-[#A69B95] uppercase tracking-wider">
+                          Mon Espace
+                        </p>
+
                         {/* Unified Dashboard */}
                         <Link
-                          to="/mon-espace"
+                          to="/locataire/mon-espace"
                           className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                            location.pathname === '/mon-espace' 
-                              ? 'bg-[#F16522]/10 text-[#F16522]' 
+                            location.pathname === '/locataire/mon-espace'
+                              ? 'bg-[#F16522]/10 text-[#F16522]'
                               : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                           }`}
                         >
@@ -249,10 +323,10 @@ export default function HeaderPremium() {
                         {/* Owner Dashboard */}
                         {permissions.isOwner && (
                           <Link
-                            to="/dashboard"
+                            to="/proprietaire/dashboard/proprietaire"
                             className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
-                              isInOwnerContext 
-                                ? 'bg-[#F16522]/10 text-[#F16522]' 
+                              isInOwnerContext
+                                ? 'bg-[#F16522]/10 text-[#F16522]'
                                 : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                             }`}
                           >
@@ -269,10 +343,10 @@ export default function HeaderPremium() {
                         {/* Tenant Dashboard */}
                         {permissions.isTenant && (
                           <Link
-                            to="/tableau-de-bord"
+                            to="/locataire/dashboard"
                             className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
-                              isInTenantContext 
-                                ? 'bg-[#F16522]/10 text-[#F16522]' 
+                              isInTenantContext
+                                ? 'bg-[#F16522]/10 text-[#F16522]'
                                 : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                             }`}
                           >
@@ -289,7 +363,8 @@ export default function HeaderPremium() {
                         {/* New user without roles */}
                         {!permissions.isOwner && !permissions.isTenant && !permissions.isAgent && (
                           <div className="px-3 py-2 text-xs text-[#A69B95]">
-                            Commencez à chercher un logement ou publiez une annonce pour voir vos espaces ici.
+                            Commencez à chercher un logement ou publiez une annonce pour voir vos
+                            espaces ici.
                           </div>
                         )}
                       </div>
@@ -327,14 +402,14 @@ export default function HeaderPremium() {
                 </div>
               ) : (
                 <>
-                  <Link 
-                    to="/connexion" 
+                  <Link
+                    to="/connexion"
                     className="px-5 py-2.5 rounded-full border border-[#EFEBE9] text-[#6B5A4E] font-bold hover:border-[#F16522] hover:text-[#F16522] hover:-translate-y-0.5 transition-all duration-200"
                   >
                     Connexion
                   </Link>
-                  <Link 
-                    to="/inscription" 
+                  <Link
+                    to="/inscription"
                     className="px-6 py-2.5 rounded-full bg-[#F16522] text-white font-bold hover:bg-[#D95318] shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200"
                   >
                     Inscription
@@ -359,14 +434,14 @@ export default function HeaderPremium() {
 
       {/* Mobile Menu Overlay */}
       {showMobileMenu && (
-        <div 
+        <div
           className="fixed inset-0 bg-[#2C1810]/20 z-40 md:hidden"
           onClick={() => setShowMobileMenu(false)}
         />
       )}
 
       {/* Mobile Menu Drawer */}
-      <div 
+      <div
         className={`fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 transform transition-transform duration-300 ease-out md:hidden shadow-[0_0_60px_rgba(44,24,16,0.15)] ${
           showMobileMenu ? 'translate-x-0' : 'translate-x-full'
         }`}
@@ -388,7 +463,9 @@ export default function HeaderPremium() {
                   {profile?.full_name || 'Utilisateur'}
                 </p>
                 {systemRoleBadge && (
-                  <span className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${systemRoleBadge.color}`}>
+                  <span
+                    className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${systemRoleBadge.color}`}
+                  >
                     <systemRoleBadge.icon className="h-3 w-3" />
                     {systemRoleBadge.label}
                   </span>
@@ -402,15 +479,17 @@ export default function HeaderPremium() {
           {/* Admin & Trust Agent Links - Mobile */}
           {user && (permissions.canAccessAdmin || permissions.canCertifyUser) && (
             <div className="pb-4 border-b border-[#EFEBE9]">
-              <p className="px-4 py-2 text-xs font-bold text-[#A69B95] uppercase tracking-wider">Administration</p>
-              
+              <p className="px-4 py-2 text-xs font-bold text-[#A69B95] uppercase tracking-wider">
+                Administration
+              </p>
+
               {permissions.canAccessAdmin && (
                 <Link
                   to="/admin"
                   onClick={() => setShowMobileMenu(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
                     isInAdminContext
-                      ? 'bg-purple-100 text-purple-700 border-l-4 border-purple-500' 
+                      ? 'bg-purple-100 text-purple-700 border-l-4 border-purple-500'
                       : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-purple-700'
                   }`}
                 >
@@ -425,7 +504,7 @@ export default function HeaderPremium() {
                   onClick={() => setShowMobileMenu(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
                     isInTrustAgentContext
-                      ? 'bg-emerald-100 text-emerald-700 border-l-4 border-emerald-500' 
+                      ? 'bg-emerald-100 text-emerald-700 border-l-4 border-emerald-500'
                       : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-emerald-700'
                   }`}
                 >
@@ -439,14 +518,16 @@ export default function HeaderPremium() {
           {/* Mon Espace - Mobile Contextual Section */}
           {user && (
             <div className="pb-4 border-b border-[#EFEBE9]">
-              <p className="px-4 py-2 text-xs font-bold text-[#A69B95] uppercase tracking-wider">Mon Espace</p>
-              
+              <p className="px-4 py-2 text-xs font-bold text-[#A69B95] uppercase tracking-wider">
+                Mon Espace
+              </p>
+
               <Link
-                to="/mon-espace"
+                to="/locataire/mon-espace"
                 onClick={() => setShowMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
-                  location.pathname === '/mon-espace'
-                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                  location.pathname === '/locataire/mon-espace'
+                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
                     : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                 }`}
               >
@@ -456,11 +537,11 @@ export default function HeaderPremium() {
 
               {permissions.isOwner && (
                 <Link
-                  to="/dashboard"
+                  to="/proprietaire/dashboard/proprietaire"
                   onClick={() => setShowMobileMenu(false)}
                   className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
                     isInOwnerContext
-                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
                       : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                   }`}
                 >
@@ -476,11 +557,11 @@ export default function HeaderPremium() {
 
               {permissions.isTenant && (
                 <Link
-                  to="/tableau-de-bord"
+                  to="/locataire/dashboard"
                   onClick={() => setShowMobileMenu(false)}
                   className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
                     isInTenantContext
-                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
                       : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                   }`}
                 >
@@ -501,8 +582,8 @@ export default function HeaderPremium() {
               to="/"
               onClick={() => setShowMobileMenu(false)}
               className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
-                isActive('/') 
-                  ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                isActive('/')
+                  ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
                   : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
               }`}
             >
@@ -516,8 +597,8 @@ export default function HeaderPremium() {
                 to={item.href}
                 onClick={() => setShowMobileMenu(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
-                  isActive(item.href) 
-                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
+                  isActive(item.href)
+                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
                     : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
                 }`}
               >
@@ -526,28 +607,29 @@ export default function HeaderPremium() {
               </Link>
             ))}
 
-            {user && userMenuItems.map((item) => (
-              <Link
-                key={item.label}
-                to={item.href}
-                onClick={() => setShowMobileMenu(false)}
-                className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
-                  isActive(item.href) 
-                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]' 
-                    : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <item.icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </div>
-                {item.badge && item.badge > 0 && (
-                  <span className="bg-[#25D366] text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                    {item.badge > 9 ? '9+' : item.badge}
-                  </span>
-                )}
-              </Link>
-            ))}
+            {user &&
+              userMenuItems.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  onClick={() => setShowMobileMenu(false)}
+                  className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
+                    isActive(item.href)
+                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
+                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <item.icon className="h-5 w-5" />
+                    <span className="font-medium">{item.label}</span>
+                  </div>
+                  {item.badge && item.badge > 0 && (
+                    <span className="bg-[#25D366] text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {item.badge > 9 ? '9+' : item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
           </nav>
 
           <div className="pt-4 border-t border-[#EFEBE9] space-y-3">

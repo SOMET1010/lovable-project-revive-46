@@ -17,31 +17,24 @@ export interface UploadResult {
 
 export class UploadService {
   static async uploadFile(options: UploadOptions): Promise<UploadResult> {
-    const {
-      bucket,
-      folder = '',
-      file,
-      fileName,
-      maxSizeMB = 10,
-      allowedTypes = []
-    } = options;
+    const { bucket, folder = '', file, fileName, maxSizeMB = 10, allowedTypes = [] } = options;
 
     try {
       if (maxSizeMB && file.size > maxSizeMB * 1024 * 1024) {
         return {
           url: '',
           path: '',
-          error: `Le fichier ne doit pas dépasser ${maxSizeMB} MB`
+          error: `Le fichier ne doit pas dépasser ${maxSizeMB} MB`,
         };
       }
 
       if (allowedTypes.length > 0) {
         const fileType = file.type;
-        if (!allowedTypes.some(type => fileType.includes(type))) {
+        if (!allowedTypes.some((type) => fileType.includes(type))) {
           return {
             url: '',
             path: '',
-            error: `Type de fichier non autorisé. Types acceptés: ${allowedTypes.join(', ')}`
+            error: `Type de fichier non autorisé. Types acceptés: ${allowedTypes.join(', ')}`,
           };
         }
       }
@@ -52,53 +45,50 @@ export class UploadService {
       const finalFileName = fileName || `${timestamp}_${randomString}.${fileExt}`;
       const filePath = folder ? `${folder}/${finalFileName}` : finalFileName;
 
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      const { data, error } = await supabase.storage.from(bucket).upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
 
       if (error) {
         console.error('Upload error:', error);
         return {
           url: '',
           path: '',
-          error: 'Erreur lors du téléchargement du fichier'
+          error: 'Erreur lors du téléchargement du fichier',
         };
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(data.path);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(bucket).getPublicUrl(data.path);
 
       return {
         url: publicUrl,
         path: data.path,
-        error: undefined
+        error: undefined,
       };
     } catch (err: any) {
       console.error('Upload exception:', err);
       return {
         url: '',
         path: '',
-        error: err.message || 'Erreur inattendue'
+        error: err.message || 'Erreur inattendue',
       };
     }
   }
 
-  static async uploadMultiple(files: File[], options: Omit<UploadOptions, 'file'>): Promise<UploadResult[]> {
-    const uploadPromises = files.map(file =>
-      this.uploadFile({ ...options, file })
-    );
+  static async uploadMultiple(
+    files: File[],
+    options: Omit<UploadOptions, 'file'>
+  ): Promise<UploadResult[]> {
+    const uploadPromises = files.map((file) => this.uploadFile({ ...options, file }));
     return Promise.all(uploadPromises);
   }
 
   static async deleteFile(bucket: string, path: string): Promise<{ error?: string }> {
     try {
-      const { error } = await supabase.storage
-        .from(bucket)
-        .remove([path]);
+      const { error } = await supabase.storage.from(bucket).remove([path]);
 
       if (error) {
         console.error('Delete error:', error);
@@ -123,14 +113,14 @@ export class UploadService {
     return this.uploadFile({
       bucket,
       file: newFile,
-      ...options
+      ...options,
     });
   }
 
   static getFileUrl(bucket: string, path: string): string {
-    const { data: { publicUrl } } = supabase.storage
-      .from(bucket)
-      .getPublicUrl(path);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from(bucket).getPublicUrl(path);
     return publicUrl;
   }
 
@@ -140,14 +130,14 @@ export class UploadService {
     if (!allowedTypes.includes(file.type)) {
       return {
         valid: false,
-        error: 'Seuls les fichiers JPEG, PNG et WebP sont autorisés'
+        error: 'Seuls les fichiers JPEG, PNG et WebP sont autorisés',
       };
     }
 
     if (file.size > 5 * 1024 * 1024) {
       return {
         valid: false,
-        error: 'L\'image ne doit pas dépasser 5 MB'
+        error: "L'image ne doit pas dépasser 5 MB",
       };
     }
 
@@ -160,14 +150,14 @@ export class UploadService {
     if (!allowedTypes.includes(file.type)) {
       return {
         valid: false,
-        error: 'Seuls les fichiers PDF, JPEG et PNG sont autorisés'
+        error: 'Seuls les fichiers PDF, JPEG et PNG sont autorisés',
       };
     }
 
     if (file.size > 10 * 1024 * 1024) {
       return {
         valid: false,
-        error: 'Le document ne doit pas dépasser 10 MB'
+        error: 'Le document ne doit pas dépasser 10 MB',
       };
     }
 
@@ -202,7 +192,7 @@ export class UploadService {
               if (blob) {
                 const compressedFile = new File([blob], file.name, {
                   type: 'image/jpeg',
-                  lastModified: Date.now()
+                  lastModified: Date.now(),
                 });
                 resolve(compressedFile);
               } else {
@@ -226,5 +216,5 @@ export const STORAGE_BUCKETS = {
   AVATARS: 'avatars',
   VERIFICATIONS: 'verifications',
   MAINTENANCE: 'maintenance-photos',
-  REVIEWS: 'review-photos'
+  REVIEWS: 'review-photos',
 } as const;

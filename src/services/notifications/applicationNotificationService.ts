@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Types de notifications pour les candidatures
  */
-export type ApplicationNotificationType = 
+export type ApplicationNotificationType =
   | 'application_received'
   | 'application_viewed'
   | 'application_accepted'
@@ -25,7 +25,7 @@ interface NotificationPayload {
  */
 async function sendApplicationNotification(payload: NotificationPayload): Promise<void> {
   const { error } = await supabase.functions.invoke('send-application-notifications', {
-    body: payload
+    body: payload,
   });
 
   if (error) {
@@ -41,7 +41,7 @@ async function sendApplicationNotification(payload: NotificationPayload): Promis
 export async function notifyApplicationReceived(applicationId: string): Promise<void> {
   return sendApplicationNotification({
     applicationId,
-    type: 'application_received'
+    type: 'application_received',
   });
 }
 
@@ -52,7 +52,7 @@ export async function notifyApplicationReceived(applicationId: string): Promise<
 export async function notifyApplicationViewed(applicationId: string): Promise<void> {
   return sendApplicationNotification({
     applicationId,
-    type: 'application_viewed'
+    type: 'application_viewed',
   });
 }
 
@@ -63,7 +63,7 @@ export async function notifyApplicationViewed(applicationId: string): Promise<vo
 export async function notifyApplicationAccepted(applicationId: string): Promise<void> {
   return sendApplicationNotification({
     applicationId,
-    type: 'application_accepted'
+    type: 'application_accepted',
   });
 }
 
@@ -72,11 +72,14 @@ export async function notifyApplicationAccepted(applicationId: string): Promise<
  * @param applicationId ID de la candidature
  * @param reason Raison du refus (optionnel)
  */
-export async function notifyApplicationRejected(applicationId: string, reason?: string): Promise<void> {
+export async function notifyApplicationRejected(
+  applicationId: string,
+  reason?: string
+): Promise<void> {
   return sendApplicationNotification({
     applicationId,
     type: 'application_rejected',
-    reason
+    reason,
   });
 }
 
@@ -85,11 +88,14 @@ export async function notifyApplicationRejected(applicationId: string, reason?: 
  * @param applicationId ID de la candidature
  * @param visitDate Date et heure de la visite formatée
  */
-export async function notifyVisitScheduled(applicationId: string, visitDate: string): Promise<void> {
+export async function notifyVisitScheduled(
+  applicationId: string,
+  visitDate: string
+): Promise<void> {
   return sendApplicationNotification({
     applicationId,
     type: 'visit_scheduled',
-    visitDate
+    visitDate,
   });
 }
 
@@ -98,11 +104,14 @@ export async function notifyVisitScheduled(applicationId: string, visitDate: str
  * @param applicationId ID de la candidature
  * @param documents Liste des documents demandés
  */
-export async function notifyDocumentsRequested(applicationId: string, documents: string[]): Promise<void> {
+export async function notifyDocumentsRequested(
+  applicationId: string,
+  documents: string[]
+): Promise<void> {
   return sendApplicationNotification({
     applicationId,
     type: 'documents_requested',
-    documents
+    documents,
   });
 }
 
@@ -112,5 +121,5 @@ export default {
   notifyApplicationAccepted,
   notifyApplicationRejected,
   notifyVisitScheduled,
-  notifyDocumentsRequested
+  notifyDocumentsRequested,
 };

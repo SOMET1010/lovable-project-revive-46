@@ -52,7 +52,7 @@ export default function TenantMaintenance() {
       const { data, error } = await query;
 
       if (error) throw error;
-      
+
       // Format the data with default values for missing properties
       const formattedRequests: MaintenanceRequest[] = (data || []).map((req: any) => ({
         id: req.id,
@@ -66,9 +66,9 @@ export default function TenantMaintenance() {
         rejection_reason: req.rejection_reason || null,
         created_at: req.created_at,
         property_title: 'Propriété', // Default value since we don't have property join
-        property_address: ''
+        property_address: '',
       }));
-      
+
       setRequests(formattedRequests);
     } catch (err) {
       console.error('Error loading requests:', err);
@@ -78,21 +78,27 @@ export default function TenantMaintenance() {
   };
 
   const getStatusBadge = (status: string | null) => {
-    const defaultConfig = { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'En attente' };
+    const defaultConfig = {
+      color: 'bg-yellow-100 text-yellow-800',
+      icon: Clock,
+      label: 'En attente',
+    };
     const configs: Record<string, { color: string; icon: any; label: string }> = {
       ouverte: defaultConfig,
       acceptee: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle, label: 'Acceptée' },
       en_cours: { color: 'bg-purple-100 text-purple-800', icon: Wrench, label: 'En cours' },
       planifiee: { color: 'bg-cyan-100 text-cyan-800', icon: Calendar, label: 'Planifiée' },
       resolue: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Résolue' },
-      refusee: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Refusée' }
+      refusee: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Refusée' },
     };
 
     const config = configs[status || 'ouverte'] ?? defaultConfig;
     const Icon = config.icon;
 
     return (
-      <span className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-bold ${config.color}`}>
+      <span
+        className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-bold ${config.color}`}
+      >
         <Icon className="w-4 h-4" />
         <span>{config.label}</span>
       </span>
@@ -104,7 +110,7 @@ export default function TenantMaintenance() {
       basse: 'text-gray-600',
       normale: 'text-blue-600',
       haute: 'text-orange-600',
-      urgente: 'text-red-600'
+      urgente: 'text-red-600',
     };
     return colors[priority || 'normale'] || colors['normale'];
   };
@@ -116,7 +122,7 @@ export default function TenantMaintenance() {
       heating: 'Chauffage',
       appliance: 'Électroménager',
       structural: 'Structure',
-      other: 'Autre'
+      other: 'Autre',
     };
     return labels[type] || type;
   };
@@ -184,7 +190,7 @@ export default function TenantMaintenance() {
         </div>
 
         <div className="space-y-4">
-          {requests.map(request => (
+          {requests.map((request) => (
             <div key={request.id} className="card-scrapbook p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
@@ -199,12 +205,18 @@ export default function TenantMaintenance() {
                 </div>
                 <div className="text-right">
                   <p className={`text-sm font-bold ${getPriorityColor(request.priority)}`}>
-                    {request.priority === 'urgente' ? '🔴 URGENT' :
-                     request.priority === 'haute' ? '🟠 Prioritaire' :
-                     request.priority === 'normale' ? '🟡 Moyenne' : '🟢 Faible'}
+                    {request.priority === 'urgente'
+                      ? '🔴 URGENT'
+                      : request.priority === 'haute'
+                        ? '🟠 Prioritaire'
+                        : request.priority === 'normale'
+                          ? '🟡 Moyenne'
+                          : '🟢 Faible'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {request.created_at ? new Date(request.created_at).toLocaleDateString('fr-FR') : ''}
+                    {request.created_at
+                      ? new Date(request.created_at).toLocaleDateString('fr-FR')
+                      : ''}
                   </p>
                 </div>
               </div>
@@ -229,7 +241,8 @@ export default function TenantMaintenance() {
                 <div className="p-3 bg-blue-50 rounded-lg flex items-center space-x-2">
                   <Calendar className="w-5 h-5 text-blue-600" />
                   <span className="text-sm font-medium text-blue-800">
-                    Intervention planifiée le {new Date(request.scheduled_date).toLocaleDateString('fr-FR')}
+                    Intervention planifiée le{' '}
+                    {new Date(request.scheduled_date).toLocaleDateString('fr-FR')}
                   </span>
                 </div>
               )}
@@ -260,7 +273,10 @@ export default function TenantMaintenance() {
               <Wrench className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-xl text-gray-600 mb-2">Aucune demande de maintenance</p>
               <p className="text-gray-500 mb-4">Commencez par créer votre première demande</p>
-              <Link to="/maintenance/nouvelle" className="btn-primary inline-flex items-center space-x-2">
+              <Link
+                to="/maintenance/nouvelle"
+                className="btn-primary inline-flex items-center space-x-2"
+              >
                 <Plus className="w-4 h-4" />
                 <span>Nouvelle demande</span>
               </Link>

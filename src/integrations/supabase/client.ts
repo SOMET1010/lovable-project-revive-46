@@ -11,7 +11,9 @@ const SUPABASE_PUBLISHABLE_KEY =
   env.VITE_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error('Supabase configuration is missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
+  throw new Error(
+    'Supabase configuration is missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'
+  );
 }
 
 // Aggressive token cleanup - remove all Supabase auth data
@@ -25,7 +27,7 @@ const aggressiveTokenCleanup = () => {
         keysToRemove.push(key);
       }
     }
-    keysToRemove.forEach(key => {
+    keysToRemove.forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch (e) {
@@ -46,14 +48,15 @@ const shouldCleanTokens = () => {
       const key = localStorage.key(i);
       if (key && key.includes('supabase')) {
         const value = localStorage.getItem(key);
-        if (value && (
+        if (
+          value &&
           // Clean obvious invalid tokens
-          (value.length < 10) ||
-          (value === 'null') ||
-          (value === 'undefined') ||
-          // But allow valid Supabase tokens that start with 'ey' or 'sb_publishable'
-          (!value.startsWith('ey') && !value.startsWith('sb_publishable') && value.length < 50)
-        )) {
+          (value.length < 10 ||
+            value === 'null' ||
+            value === 'undefined' ||
+            // But allow valid Supabase tokens that start with 'ey' or 'sb_publishable'
+            (!value.startsWith('ey') && !value.startsWith('sb_publishable') && value.length < 50))
+        ) {
           return true;
         }
       }
@@ -70,7 +73,7 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-  }
+  },
 });
 
 // Handle auth errors more aggressively

@@ -1,6 +1,6 @@
 /**
  * Service API pour l'authentification
- * 
+ *
  * Ce service centralise tous les appels API liés à l'authentification et à la gestion des utilisateurs.
  */
 
@@ -147,11 +147,7 @@ export const authApi = {
    * Récupère le profil d'un utilisateur
    */
   getProfile: async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
 
     if (error) throw error;
     return { data, error: null };
@@ -216,4 +212,3 @@ export const authApi = {
     return { data, error: null };
   },
 };
-

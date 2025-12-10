@@ -7,5 +7,5 @@ export const CONTACT = {
   PHONE_DISPLAY: '+225 07 00 00 00 00',
   EMAIL: 'contact@montoit.ci',
   WHATSAPP: '+2250700000000',
-  ADDRESS: 'Abidjan, Côte d\'Ivoire',
+  ADDRESS: "Abidjan, Côte d'Ivoire",
 } as const;

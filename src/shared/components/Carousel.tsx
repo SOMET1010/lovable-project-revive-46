@@ -9,7 +9,13 @@ interface CarouselProps {
   viewAllText?: string;
 }
 
-export default function Carousel({ children, title, subtitle, viewAllLink, viewAllText = "Voir tout" }: CarouselProps) {
+export default function Carousel({
+  children,
+  title,
+  subtitle,
+  viewAllLink,
+  viewAllText = 'Voir tout',
+}: CarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: 'left' | 'right') => {
@@ -30,9 +36,7 @@ export default function Carousel({ children, title, subtitle, viewAllLink, viewA
                 {title}
               </h2>
             )}
-            {subtitle && (
-              <p className="text-sm sm:text-base text-gray-600">{subtitle}</p>
-            )}
+            {subtitle && <p className="text-sm sm:text-base text-gray-600">{subtitle}</p>}
           </div>
           {viewAllLink && (
             <a
@@ -63,7 +67,7 @@ export default function Carousel({ children, title, subtitle, viewAllLink, viewA
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch'
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {children}

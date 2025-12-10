@@ -17,32 +17,76 @@ const PERMISSION_GROUPS = [
   {
     title: 'Gestion des biens',
     permissions: [
-      { key: 'can_view_properties', label: 'Voir les biens', description: 'Consulter les détails des propriétés' },
-      { key: 'can_edit_properties', label: 'Modifier les biens', description: 'Mettre à jour les informations' },
-      { key: 'can_create_properties', label: 'Créer des biens', description: 'Ajouter de nouvelles propriétés' },
-      { key: 'can_delete_properties', label: 'Supprimer des biens', description: 'Retirer des propriétés' },
+      {
+        key: 'can_view_properties',
+        label: 'Voir les biens',
+        description: 'Consulter les détails des propriétés',
+      },
+      {
+        key: 'can_edit_properties',
+        label: 'Modifier les biens',
+        description: 'Mettre à jour les informations',
+      },
+      {
+        key: 'can_create_properties',
+        label: 'Créer des biens',
+        description: 'Ajouter de nouvelles propriétés',
+      },
+      {
+        key: 'can_delete_properties',
+        label: 'Supprimer des biens',
+        description: 'Retirer des propriétés',
+      },
     ],
   },
   {
     title: 'Candidatures & Baux',
     permissions: [
-      { key: 'can_view_applications', label: 'Voir les candidatures', description: 'Consulter les demandes de location' },
-      { key: 'can_manage_applications', label: 'Gérer les candidatures', description: 'Accepter ou refuser les demandes' },
-      { key: 'can_create_leases', label: 'Créer des baux', description: 'Rédiger et signer des contrats' },
+      {
+        key: 'can_view_applications',
+        label: 'Voir les candidatures',
+        description: 'Consulter les demandes de location',
+      },
+      {
+        key: 'can_manage_applications',
+        label: 'Gérer les candidatures',
+        description: 'Accepter ou refuser les demandes',
+      },
+      {
+        key: 'can_create_leases',
+        label: 'Créer des baux',
+        description: 'Rédiger et signer des contrats',
+      },
     ],
   },
   {
     title: 'Finances & Maintenance',
     permissions: [
-      { key: 'can_view_financials', label: 'Voir les finances', description: 'Accéder aux paiements et relevés' },
-      { key: 'can_manage_maintenance', label: 'Gérer la maintenance', description: 'Traiter les demandes de travaux' },
+      {
+        key: 'can_view_financials',
+        label: 'Voir les finances',
+        description: 'Accéder aux paiements et relevés',
+      },
+      {
+        key: 'can_manage_maintenance',
+        label: 'Gérer la maintenance',
+        description: 'Traiter les demandes de travaux',
+      },
     ],
   },
   {
     title: 'Communication & Documents',
     permissions: [
-      { key: 'can_communicate_tenants', label: 'Communiquer', description: 'Envoyer des messages aux locataires' },
-      { key: 'can_manage_documents', label: 'Gérer les documents', description: 'Ajouter ou supprimer des fichiers' },
+      {
+        key: 'can_communicate_tenants',
+        label: 'Communiquer',
+        description: 'Envoyer des messages aux locataires',
+      },
+      {
+        key: 'can_manage_documents',
+        label: 'Gérer les documents',
+        description: 'Ajouter ou supprimer des fichiers',
+      },
     ],
   },
 ];
@@ -69,7 +113,7 @@ export default function MandatePermissionsForm({
   const [loading, setLoading] = useState(false);
 
   const handleToggle = (key: string) => {
-    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+    setPermissions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleSave = async () => {
@@ -89,7 +133,7 @@ export default function MandatePermissionsForm({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-        
+
         <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-neutral-200">
@@ -113,13 +157,11 @@ export default function MandatePermissionsForm({
           {/* Content */}
           <div className="p-4 overflow-y-auto max-h-[calc(90vh-180px)]">
             <div className="space-y-6">
-              {PERMISSION_GROUPS.map(group => (
+              {PERMISSION_GROUPS.map((group) => (
                 <div key={group.title}>
-                  <h3 className="text-sm font-semibold text-neutral-900 mb-3">
-                    {group.title}
-                  </h3>
+                  <h3 className="text-sm font-semibold text-neutral-900 mb-3">{group.title}</h3>
                   <div className="space-y-2">
-                    {group.permissions.map(perm => (
+                    {group.permissions.map((perm) => (
                       <label
                         key={perm.key}
                         className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors ${
@@ -137,9 +179,11 @@ export default function MandatePermissionsForm({
                           />
                         </div>
                         <div>
-                          <p className={`text-sm font-medium ${
-                            permissions[perm.key] ? 'text-primary' : 'text-neutral-700'
-                          }`}>
+                          <p
+                            className={`text-sm font-medium ${
+                              permissions[perm.key] ? 'text-primary' : 'text-neutral-700'
+                            }`}
+                          >
                             {perm.label}
                           </p>
                           <p className="text-xs text-neutral-500">{perm.description}</p>

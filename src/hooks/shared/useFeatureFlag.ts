@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import * as React from "react";
-import { supabase } from "@/services/supabase/client";
+import { useQuery } from '@tanstack/react-query';
+import * as React from 'react';
+import { supabase } from '@/services/supabase/client';
 
 /**
  * Hook pour vérifier si un feature flag est activé
@@ -16,15 +16,17 @@ export function useFeatureFlag(
   const { forceDisabled = false, forceEnabled = false, refetchInterval } = options;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["feature-flag", flagKey],
+    queryKey: ['feature-flag', flagKey],
     queryFn: async () => {
       if (forceDisabled) return { enabled: false, key: flagKey };
       if (forceEnabled) return { enabled: true, key: flagKey };
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       const headers: Record<string, string> = {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       };
 
       if (session) {
@@ -37,7 +39,7 @@ export function useFeatureFlag(
       );
 
       if (!response.ok) {
-        throw new Error("Failed to check feature flag");
+        throw new Error('Failed to check feature flag');
       }
 
       return response.json();
@@ -60,11 +62,14 @@ export function useFeatureFlag(
  * Hook pour vérifier plusieurs feature flags en une seule fois
  */
 export function useFeatureFlags(flagKeys: string[]) {
-  const flags = flagKeys.reduce((acc, key) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    acc[key] = useFeatureFlag(key);
-    return acc;
-  }, {} as Record<string, ReturnType<typeof useFeatureFlag>>);
+  const flags = flagKeys.reduce(
+    (acc, key) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      acc[key] = useFeatureFlag(key);
+      return acc;
+    },
+    {} as Record<string, ReturnType<typeof useFeatureFlag>>
+  );
 
   return flags;
 }
@@ -74,10 +79,12 @@ export function useFeatureFlags(flagKeys: string[]) {
  */
 export function useFeatureFlagsByCategory(category: string) {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["feature-flags-category", category],
+    queryKey: ['feature-flags-category', category],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
       const response = await fetch(
         `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/manage-feature-flags?category=${category}`,
@@ -88,7 +95,7 @@ export function useFeatureFlagsByCategory(category: string) {
         }
       );
 
-      if (!response.ok) throw new Error("Failed to fetch feature flags");
+      if (!response.ok) throw new Error('Failed to fetch feature flags');
 
       const result = await response.json();
       return result.flags;

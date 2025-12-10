@@ -1,11 +1,30 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Home, X, Image as ImageIcon, Building2, Check, RefreshCw, MapPin, DollarSign, Settings, FileText } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Home,
+  X,
+  Image as ImageIcon,
+  Building2,
+  Check,
+  RefreshCw,
+  MapPin,
+  DollarSign,
+  Settings,
+  FileText,
+} from 'lucide-react';
 import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES, STORAGE_KEYS } from '@/shared/lib/constants/app.constants';
+import {
+  RESIDENTIAL_PROPERTY_TYPES,
+  COMMERCIAL_PROPERTY_TYPES,
+  CITIES,
+  ABIDJAN_COMMUNES,
+  STORAGE_KEYS,
+} from '@/shared/lib/constants/app.constants';
 import { ValidationService } from '@/services/validation';
 import { useFormValidation } from '@/hooks/shared/useFormValidation';
 import { ValidatedInput } from '@/shared/ui/ValidatedInput';
@@ -74,7 +93,7 @@ const STEPS = [
 export default function AddProperty() {
   const { user } = useAuth();
   const navigate = useNavigate();
-const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1);
   const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -87,7 +106,7 @@ const [step, setStep] = useState(1);
   const [showDraftModal, setShowDraftModal] = useState(false);
   const [pendingDraftData, setPendingDraftData] = useState<PropertyFormData | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Hook de validation
   const { validateField, getFieldState, setFieldTouched } = useFormValidation<PropertyFormData>();
 
@@ -149,7 +168,7 @@ const [step, setStep] = useState(1);
   // Handler for "Continue draft"
   const handleContinueDraft = () => {
     if (pendingDraftData) {
-      setFormData(prev => ({ ...prev, ...pendingDraftData }));
+      setFormData((prev) => ({ ...prev, ...pendingDraftData }));
       setHasDraft(true);
     }
     setShowDraftModal(false);
@@ -169,37 +188,45 @@ const [step, setStep] = useState(1);
     const category = formData.property_category;
     const currentType = formData.property_type;
 
-    const validTypes: string[] = category === 'commercial'
-      ? COMMERCIAL_PROPERTY_TYPES.map(pt => pt.value)
-      : RESIDENTIAL_PROPERTY_TYPES.map(pt => pt.value);
+    const validTypes: string[] =
+      category === 'commercial'
+        ? COMMERCIAL_PROPERTY_TYPES.map((pt) => pt.value)
+        : RESIDENTIAL_PROPERTY_TYPES.map((pt) => pt.value);
 
     if (!validTypes.includes(currentType)) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        property_type: validTypes[0] as PropertyType
+        property_type: validTypes[0] as PropertyType,
       }));
     }
   }, [formData.property_category]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
-      setFormData(prev => ({ ...prev, [name]: checked }));
+      setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   // Validation en temps réel pour les champs critiques
   const handleBlur = (field: keyof PropertyFormData) => {
     setFieldTouched(field);
-    
+
     switch (field) {
       case 'title': {
         // Validation combinée: longueur + qualité
-        const lengthResult = ValidationService.validateLength(formData.title, TITLE_MIN, TITLE_MAX, 'Le titre');
+        const lengthResult = ValidationService.validateLength(
+          formData.title,
+          TITLE_MIN,
+          TITLE_MAX,
+          'Le titre'
+        );
         if (!lengthResult.isValid) {
           validateField('title', () => lengthResult);
         } else {
@@ -209,21 +236,34 @@ const [step, setStep] = useState(1);
       }
       case 'description':
         if (formData.description) {
-          validateField('description', () => ValidationService.validateLength(formData.description, DESC_MIN, DESC_MAX, 'La description'));
+          validateField('description', () =>
+            ValidationService.validateLength(
+              formData.description,
+              DESC_MIN,
+              DESC_MAX,
+              'La description'
+            )
+          );
         }
         break;
       case 'address':
-        validateField('address', () => ValidationService.validateRequired(formData.address, 'L\'adresse'));
+        validateField('address', () =>
+          ValidationService.validateRequired(formData.address, "L'adresse")
+        );
         break;
       case 'city':
         validateField('city', () => ValidationService.validateRequired(formData.city, 'La ville'));
         break;
       case 'monthly_rent':
-        validateField('monthly_rent', () => ValidationService.validatePositiveNumber(formData.monthly_rent, 'Le loyer'));
+        validateField('monthly_rent', () =>
+          ValidationService.validatePositiveNumber(formData.monthly_rent, 'Le loyer')
+        );
         break;
       case 'surface_area':
         if (formData.surface_area) {
-          validateField('surface_area', () => ValidationService.validatePositiveNumber(formData.surface_area, 'La surface'));
+          validateField('surface_area', () =>
+            ValidationService.validatePositiveNumber(formData.surface_area, 'La surface')
+          );
         }
         break;
     }
@@ -243,7 +283,8 @@ const [step, setStep] = useState(1);
   };
 
   const getDescCharClass = () => {
-    if (formData.description.length > 0 && formData.description.length < DESC_MIN) return 'text-[var(--color-orange)]';
+    if (formData.description.length > 0 && formData.description.length < DESC_MIN)
+      return 'text-[var(--color-orange)]';
     if (formData.description.length > DESC_MAX) return 'text-red-500';
     return 'text-[var(--color-gris-neutre)]';
   };
@@ -274,9 +315,9 @@ const [step, setStep] = useState(1);
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('property-images')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('property-images').getPublicUrl(fileName);
 
       uploadedUrls.push(publicUrl);
     }
@@ -351,14 +392,16 @@ const [step, setStep] = useState(1);
 
       // Clear draft after successful submission
       localStorage.removeItem(STORAGE_KEYS.PROPERTY_DRAFT);
-      
+
       setSuccess(true);
       setTimeout(() => {
         navigate('/dashboard/proprietaire');
       }, 3000);
     } catch (err: unknown) {
       const supabaseErr = err as { message?: string; details?: string; hint?: string };
-      const message = supabaseErr?.message || (err instanceof Error ? err.message : 'Erreur lors de l\'ajout de la propriété');
+      const message =
+        supabaseErr?.message ||
+        (err instanceof Error ? err.message : "Erreur lors de l'ajout de la propriété");
       const details = supabaseErr?.details ? ` (${supabaseErr.details})` : '';
       const hint = supabaseErr?.hint ? ` — ${supabaseErr.hint}` : '';
       console.error('Error inserting property:', err);
@@ -386,40 +429,60 @@ const [step, setStep] = useState(1);
   };
 
   // Confetti colors with Premium Ivorian palette
-  const confettiColors = ['var(--color-orange)', 'var(--color-chocolat)', 'hsl(38 92% 50%)', 'hsl(142 76% 36%)'];
+  const confettiColors = [
+    'var(--color-orange)',
+    'var(--color-chocolat)',
+    'hsl(38 92% 50%)',
+    'hsl(142 76% 36%)',
+  ];
 
   if (success) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center p-4 z-50" style={{ background: 'linear-gradient(to bottom right, var(--color-orange-50), var(--color-creme))' }}>
+      <div
+        className="fixed inset-0 flex items-center justify-center p-4 z-50"
+        style={{
+          background:
+            'linear-gradient(to bottom right, var(--color-orange-50), var(--color-creme))',
+        }}
+      >
         {/* Confetti effect */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {[...Array(25)].map((_, i) => (
-            <div 
+            <div
               key={i}
               className="absolute animate-confetti-fall"
               style={{
                 left: `${Math.random() * 100}%`,
                 top: '-5%',
                 animationDuration: `${2 + Math.random() * 3}s`,
-                animationDelay: `${Math.random() * 2}s`
+                animationDelay: `${Math.random() * 2}s`,
               }}
             >
-              <div 
-                className="w-3 h-3 rounded-full" 
-                style={{ 
-                  backgroundColor: confettiColors[Math.floor(Math.random() * confettiColors.length)] 
-                }} 
+              <div
+                className="w-3 h-3 rounded-full"
+                style={{
+                  backgroundColor:
+                    confettiColors[Math.floor(Math.random() * confettiColors.length)],
+                }}
               />
             </div>
           ))}
         </div>
 
-        <div className="relative bg-white rounded-3xl p-10 max-w-xl w-full text-center shadow-xl animate-fade-in border" style={{ borderColor: 'var(--color-border)' }}>
+        <div
+          className="relative bg-white rounded-3xl p-10 max-w-xl w-full text-center shadow-xl animate-fade-in border"
+          style={{ borderColor: 'var(--color-border)' }}
+        >
           {/* Animated success icon */}
-          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce" style={{ background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))' }}>
+          <div
+            className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg animate-bounce"
+            style={{
+              background: 'linear-gradient(135deg, var(--color-orange), var(--color-orange-dark))',
+            }}
+          >
             <Check className="h-12 w-12 text-white" />
           </div>
-          
+
           <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--color-chocolat)' }}>
             🎉 Félicitations !
           </h2>
@@ -429,12 +492,24 @@ const [step, setStep] = useState(1);
           <p className="mb-6" style={{ color: 'var(--color-gris-neutre)' }}>
             Votre annonce est maintenant visible par tous les locataires sur Mon Toit.
           </p>
-          
+
           {/* Animated redirect indicator */}
-          <div className="flex items-center justify-center gap-2" style={{ color: 'var(--color-orange)' }}>
-            <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--color-orange)', animationDelay: '0ms' }} />
-            <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--color-orange)', animationDelay: '150ms' }} />
-            <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: 'var(--color-orange)', animationDelay: '300ms' }} />
+          <div
+            className="flex items-center justify-center gap-2"
+            style={{ color: 'var(--color-orange)' }}
+          >
+            <div
+              className="w-2 h-2 rounded-full animate-bounce"
+              style={{ backgroundColor: 'var(--color-orange)', animationDelay: '0ms' }}
+            />
+            <div
+              className="w-2 h-2 rounded-full animate-bounce"
+              style={{ backgroundColor: 'var(--color-orange)', animationDelay: '150ms' }}
+            />
+            <div
+              className="w-2 h-2 rounded-full animate-bounce"
+              style={{ backgroundColor: 'var(--color-orange)', animationDelay: '300ms' }}
+            />
             <span className="ml-2 font-medium">Redirection vers votre dashboard...</span>
           </div>
         </div>
@@ -445,7 +520,10 @@ const [step, setStep] = useState(1);
   return (
     <OwnerDashboardLayout title="Ajouter une propriété">
       {/* Header Sticky Premium Ivorian */}
-      <div className="bg-white border-b sticky top-0 z-30 shadow-sm" style={{ borderColor: 'var(--color-border)' }}>
+      <div
+        className="bg-white border-b sticky top-0 z-30 shadow-sm"
+        style={{ borderColor: 'var(--color-border)' }}
+      >
         <div className="w-full max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
@@ -455,7 +533,7 @@ const [step, setStep] = useState(1);
             <ArrowLeft className="h-5 w-5" />
             <span>Retour</span>
           </button>
-          
+
           {/* Progress Dots */}
           <div className="flex items-center gap-3">
             {STEPS.map((s, idx) => (
@@ -464,29 +542,35 @@ const [step, setStep] = useState(1);
                 onClick={() => goToStep(s.id)}
                 className={`flex items-center gap-2 transition-all ${step === s.id ? 'opacity-100' : 'opacity-50 hover:opacity-75'}`}
               >
-                <div 
+                <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
-                    step >= s.id 
-                      ? 'text-white shadow-lg' 
-                      : 'bg-gray-200 text-gray-500'
+                    step >= s.id ? 'text-white shadow-lg' : 'bg-gray-200 text-gray-500'
                   }`}
-                  style={{ 
+                  style={{
                     backgroundColor: step >= s.id ? 'var(--color-orange)' : undefined,
-                    boxShadow: step >= s.id ? '0 4px 12px rgba(241, 101, 34, 0.3)' : undefined
+                    boxShadow: step >= s.id ? '0 4px 12px rgba(241, 101, 34, 0.3)' : undefined,
                   }}
                 >
                   {s.id}
                 </div>
-                <span className={`hidden md:block text-sm font-medium ${step === s.id ? '' : 'text-gray-400'}`} style={{ color: step === s.id ? 'var(--color-chocolat)' : undefined }}>
+                <span
+                  className={`hidden md:block text-sm font-medium ${step === s.id ? '' : 'text-gray-400'}`}
+                  style={{ color: step === s.id ? 'var(--color-chocolat)' : undefined }}
+                >
                   {s.label}
                 </span>
                 {idx < STEPS.length - 1 && (
-                  <div className="w-8 h-0.5 hidden md:block" style={{ backgroundColor: step > s.id ? 'var(--color-orange)' : 'var(--color-border)' }} />
+                  <div
+                    className="w-8 h-0.5 hidden md:block"
+                    style={{
+                      backgroundColor: step > s.id ? 'var(--color-orange)' : 'var(--color-border)',
+                    }}
+                  />
                 )}
               </button>
             ))}
           </div>
-          
+
           {/* Draft saved indicator */}
           {draftSaved && (
             <span className="flex items-center gap-1 text-xs font-medium text-green-600">
@@ -495,7 +579,11 @@ const [step, setStep] = useState(1);
             </span>
           )}
           {!draftSaved && hasDraft && (
-            <button onClick={clearDraft} className="flex items-center gap-1 text-xs hover:text-red-500 transition-colors" style={{ color: 'var(--color-gris-neutre)' }}>
+            <button
+              onClick={clearDraft}
+              className="flex items-center gap-1 text-xs hover:text-red-500 transition-colors"
+              style={{ color: 'var(--color-gris-neutre)' }}
+            >
               <RefreshCw className="h-3 w-3" />
               Effacer
             </button>
@@ -526,23 +614,37 @@ const [step, setStep] = useState(1);
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          
           {/* STEP 1: Photos & Infos générales */}
           {step === 1 && (
-          <div key={`step-1-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
+            <div
+              key={`step-1-${slideDirection}`}
+              className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}
+            >
               {/* Photos Section with NativeCameraUpload */}
-              <div className="bg-white p-6 rounded-2xl border shadow-sm" style={{ borderColor: 'var(--color-border)' }}>
+              <div
+                className="bg-white p-6 rounded-2xl border shadow-sm"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
                 <div className="flex items-center gap-2 mb-4">
                   <ImageIcon className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
-                  <h2 className="font-bold" style={{ color: 'var(--color-chocolat)' }}>Photos de la propriété</h2>
+                  <h2 className="font-bold" style={{ color: 'var(--color-chocolat)' }}>
+                    Photos de la propriété
+                  </h2>
                 </div>
-                
+
                 {/* Preview grid for existing images */}
                 {imagePreviews.length > 0 && (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     {imagePreviews.map((preview, index) => (
-                      <div key={index} className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200">
-                        <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                      <div
+                        key={index}
+                        className="relative aspect-square rounded-xl overflow-hidden group border border-gray-200"
+                      >
+                        <img
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
@@ -551,7 +653,10 @@ const [step, setStep] = useState(1);
                           <X className="h-4 w-4" />
                         </button>
                         {index === 0 && (
-                          <div className="absolute bottom-2 left-2 text-white text-xs px-2 py-1 rounded-full font-medium" style={{ backgroundColor: 'var(--color-orange)' }}>
+                          <div
+                            className="absolute bottom-2 left-2 text-white text-xs px-2 py-1 rounded-full font-medium"
+                            style={{ backgroundColor: 'var(--color-orange)' }}
+                          >
                             Photo principale
                           </div>
                         )}
@@ -559,7 +664,7 @@ const [step, setStep] = useState(1);
                     ))}
                   </div>
                 )}
-                
+
                 {/* NativeCameraUpload for adding new images */}
                 {imageFiles.length < 10 && (
                   <NativeCameraUpload
@@ -572,61 +677,88 @@ const [step, setStep] = useState(1);
                     compressionMaxWidth={1920}
                     onImageCaptured={(file, preview) => {
                       if (imageFiles.length < 10) {
-                        setImageFiles(prev => [...prev, file]);
-                        setImagePreviews(prev => [...prev, preview]);
+                        setImageFiles((prev) => [...prev, file]);
+                        setImagePreviews((prev) => [...prev, preview]);
                       }
                     }}
                     onMultipleImages={(files, previews) => {
                       const remaining = 10 - imageFiles.length;
                       const filesToAdd = files.slice(0, remaining);
                       const previewsToAdd = previews.slice(0, remaining);
-                      setImageFiles(prev => [...prev, ...filesToAdd]);
-                      setImagePreviews(prev => [...prev, ...previewsToAdd]);
+                      setImageFiles((prev) => [...prev, ...filesToAdd]);
+                      setImagePreviews((prev) => [...prev, ...previewsToAdd]);
                     }}
                   />
                 )}
-                
-                <p className="text-xs text-center mt-3" style={{ color: 'var(--color-gris-neutre)' }}>
+
+                <p
+                  className="text-xs text-center mt-3"
+                  style={{ color: 'var(--color-gris-neutre)' }}
+                >
                   {imageFiles.length}/10 photos • La première photo sera l'image principale
                 </p>
               </div>
 
               {/* General Info Section */}
-              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
-                <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Informations générales</h2>
-                
+              <div
+                className="bg-white p-6 rounded-2xl border shadow-sm space-y-6"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
+                <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>
+                  Informations générales
+                </h2>
+
                 {/* Category Toggle */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--color-gris-neutre)' }}>
+                  <label
+                    className="block text-xs font-bold uppercase tracking-wide mb-2"
+                    style={{ color: 'var(--color-gris-neutre)' }}
+                  >
                     Catégorie de bien *
                   </label>
                   <div className="flex gap-4">
                     <button
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, property_category: 'residential' }))}
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, property_category: 'residential' }))
+                      }
                       className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
                         formData.property_category === 'residential'
                           ? 'text-white shadow-lg'
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                       }`}
-                      style={{ 
-                        backgroundColor: formData.property_category === 'residential' ? 'var(--color-orange)' : undefined,
-                        boxShadow: formData.property_category === 'residential' ? '0 8px 20px rgba(241, 101, 34, 0.25)' : undefined
+                      style={{
+                        backgroundColor:
+                          formData.property_category === 'residential'
+                            ? 'var(--color-orange)'
+                            : undefined,
+                        boxShadow:
+                          formData.property_category === 'residential'
+                            ? '0 8px 20px rgba(241, 101, 34, 0.25)'
+                            : undefined,
                       }}
                     >
                       <Home className="w-4 h-4" /> Résidentiel
                     </button>
                     <button
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, property_category: 'commercial' }))}
+                      onClick={() =>
+                        setFormData((prev) => ({ ...prev, property_category: 'commercial' }))
+                      }
                       className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
                         formData.property_category === 'commercial'
                           ? 'text-white shadow-lg'
                           : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                       }`}
-                      style={{ 
-                        backgroundColor: formData.property_category === 'commercial' ? 'var(--color-orange)' : undefined,
-                        boxShadow: formData.property_category === 'commercial' ? '0 8px 20px rgba(241, 101, 34, 0.25)' : undefined
+                      style={{
+                        backgroundColor:
+                          formData.property_category === 'commercial'
+                            ? 'var(--color-orange)'
+                            : undefined,
+                        boxShadow:
+                          formData.property_category === 'commercial'
+                            ? '0 8px 20px rgba(241, 101, 34, 0.25)'
+                            : undefined,
                       }}
                     >
                       <Building2 className="w-4 h-4" /> Commercial
@@ -636,7 +768,10 @@ const [step, setStep] = useState(1);
 
                 {/* Title */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                  <label
+                    className="block text-xs font-bold uppercase tracking-wide mb-1"
+                    style={{ color: 'var(--color-gris-neutre)' }}
+                  >
                     Titre de l'annonce *
                   </label>
                   <ValidatedInput
@@ -658,7 +793,10 @@ const [step, setStep] = useState(1);
 
                 {/* Description */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                  <label
+                    className="block text-xs font-bold uppercase tracking-wide mb-1"
+                    style={{ color: 'var(--color-gris-neutre)' }}
+                  >
                     Description
                   </label>
                   <ValidatedTextarea
@@ -680,7 +818,10 @@ const [step, setStep] = useState(1);
                 {/* Property Type & Surface */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-gris-neutre)' }}
+                    >
                       Type de bien *
                     </label>
                     <select
@@ -690,7 +831,7 @@ const [step, setStep] = useState(1);
                       required
                       className="input-premium w-full"
                     >
-                      {getPropertyTypesForCategory().map(type => (
+                      {getPropertyTypesForCategory().map((type) => (
                         <option key={type.value} value={type.value}>
                           {type.label}
                         </option>
@@ -699,7 +840,10 @@ const [step, setStep] = useState(1);
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-gris-neutre)' }}
+                    >
                       Surface (m²)
                     </label>
                     <input
@@ -717,7 +861,10 @@ const [step, setStep] = useState(1);
                 {/* Bedrooms & Bathrooms */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-gris-neutre)' }}
+                    >
                       Chambres *
                     </label>
                     <input
@@ -732,7 +879,10 @@ const [step, setStep] = useState(1);
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-gris-neutre)' }}
+                    >
                       Salles de bain *
                     </label>
                     <input
@@ -764,15 +914,26 @@ const [step, setStep] = useState(1);
 
           {/* STEP 2: Localisation */}
           {step === 2 && (
-          <div key={`step-2-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
-              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+            <div
+              key={`step-2-${slideDirection}`}
+              className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}
+            >
+              <div
+                className="bg-white p-6 rounded-2xl border shadow-sm space-y-6"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
-                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Localisation</h2>
+                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>
+                    Localisation
+                  </h2>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                  <label
+                    className="block text-xs font-bold uppercase tracking-wide mb-1"
+                    style={{ color: 'var(--color-gris-neutre)' }}
+                  >
                     Adresse complète
                   </label>
                   <input
@@ -787,7 +948,10 @@ const [step, setStep] = useState(1);
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-gris-neutre)' }}
+                    >
                       Ville *
                     </label>
                     <select
@@ -796,7 +960,7 @@ const [step, setStep] = useState(1);
                       onChange={(e) => {
                         handleChange(e);
                         if (e.target.value !== 'Abidjan') {
-                          setFormData(prev => ({ ...prev, neighborhood: '' }));
+                          setFormData((prev) => ({ ...prev, neighborhood: '' }));
                         }
                       }}
                       onBlur={() => handleBlur('city')}
@@ -804,15 +968,23 @@ const [step, setStep] = useState(1);
                       className="input-premium w-full"
                     >
                       <option value="">Sélectionnez une ville</option>
-                      {CITIES.map(city => (
-                        <option key={city} value={city}>{city}</option>
+                      {CITIES.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
-                      Quartier {formData.city === 'Abidjan' && <span className="font-normal">(commune)</span>}
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-gris-neutre)' }}
+                    >
+                      Quartier{' '}
+                      {formData.city === 'Abidjan' && (
+                        <span className="font-normal">(commune)</span>
+                      )}
                     </label>
                     {formData.city === 'Abidjan' ? (
                       <select
@@ -822,8 +994,10 @@ const [step, setStep] = useState(1);
                         className="input-premium w-full"
                       >
                         <option value="">Sélectionnez une commune</option>
-                        {ABIDJAN_COMMUNES.map(commune => (
-                          <option key={commune} value={commune}>{commune}</option>
+                        {ABIDJAN_COMMUNES.map((commune) => (
+                          <option key={commune} value={commune}>
+                            {commune}
+                          </option>
                         ))}
                       </select>
                     ) : (
@@ -842,11 +1016,7 @@ const [step, setStep] = useState(1);
 
               {/* Step 2 Navigation */}
               <div className="flex justify-between">
-                <button
-                  type="button"
-                  onClick={() => goToStep(1)}
-                  className="btn-premium-secondary"
-                >
+                <button type="button" onClick={() => goToStep(1)} className="btn-premium-secondary">
                   <ArrowLeft className="w-4 h-4" /> Retour
                 </button>
                 <button
@@ -863,17 +1033,28 @@ const [step, setStep] = useState(1);
 
           {/* STEP 3: Tarification & Équipements */}
           {step === 3 && (
-            <div key={`step-3-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
+            <div
+              key={`step-3-${slideDirection}`}
+              className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}
+            >
               {/* Pricing */}
-              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+              <div
+                className="bg-white p-6 rounded-2xl border shadow-sm space-y-6"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
-                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Tarification</h2>
+                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>
+                    Tarification
+                  </h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-orange)' }}>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-orange)' }}
+                    >
                       Loyer mensuel (FCFA) *
                     </label>
                     <input
@@ -886,12 +1067,18 @@ const [step, setStep] = useState(1);
                       min="0"
                       placeholder="Ex: 150000"
                       className="input-premium w-full font-bold text-lg"
-                      style={{ borderColor: 'var(--color-orange-100)', color: 'var(--color-chocolat)' }}
+                      style={{
+                        borderColor: 'var(--color-orange-100)',
+                        color: 'var(--color-chocolat)',
+                      }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-gris-neutre)' }}
+                    >
                       Dépôt de garantie (FCFA)
                     </label>
                     <input
@@ -906,7 +1093,10 @@ const [step, setStep] = useState(1);
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>
+                    <label
+                      className="block text-xs font-bold uppercase tracking-wide mb-1"
+                      style={{ color: 'var(--color-gris-neutre)' }}
+                    >
                       Charges (FCFA)
                     </label>
                     <input
@@ -923,10 +1113,15 @@ const [step, setStep] = useState(1);
               </div>
 
               {/* Equipment */}
-              <div className="bg-white p-6 rounded-2xl border shadow-sm space-y-6" style={{ borderColor: 'var(--color-border)' }}>
+              <div
+                className="bg-white p-6 rounded-2xl border shadow-sm space-y-6"
+                style={{ borderColor: 'var(--color-border)' }}
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <Settings className="w-5 h-5" style={{ color: 'var(--color-orange)' }} />
-                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>Équipements</h2>
+                  <h2 className="font-bold text-lg" style={{ color: 'var(--color-chocolat)' }}>
+                    Équipements
+                  </h2>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -939,8 +1134,8 @@ const [step, setStep] = useState(1);
                     <label
                       key={item.name}
                       className={`flex items-center gap-3 p-4 rounded-xl cursor-pointer transition-all border ${
-                        item.checked 
-                          ? 'border-[var(--color-orange)] bg-[var(--color-orange-50)]' 
+                        item.checked
+                          ? 'border-[var(--color-orange)] bg-[var(--color-orange-50)]'
                           : 'border-[var(--color-border)] bg-white hover:border-[var(--color-orange)]'
                       }`}
                     >
@@ -952,7 +1147,12 @@ const [step, setStep] = useState(1);
                         className="w-5 h-5 rounded text-[var(--color-orange)] focus:ring-[var(--color-orange)]"
                         style={{ accentColor: 'var(--color-orange)' }}
                       />
-                      <span className="font-medium" style={{ color: item.checked ? 'var(--color-chocolat)' : 'var(--color-gris-texte)' }}>
+                      <span
+                        className="font-medium"
+                        style={{
+                          color: item.checked ? 'var(--color-chocolat)' : 'var(--color-gris-texte)',
+                        }}
+                      >
                         {item.label}
                       </span>
                     </label>
@@ -963,8 +1163,8 @@ const [step, setStep] = useState(1);
                 <div className="pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
                   <label
                     className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all border ${
-                      formData.is_anonymous 
-                        ? 'border-[var(--color-orange)] bg-[var(--color-orange-50)]' 
+                      formData.is_anonymous
+                        ? 'border-[var(--color-orange)] bg-[var(--color-orange-50)]'
                         : 'border-[var(--color-border)] bg-white hover:border-[var(--color-orange)]'
                     }`}
                   >
@@ -977,12 +1177,22 @@ const [step, setStep] = useState(1);
                       style={{ accentColor: 'var(--color-orange)' }}
                     />
                     <div>
-                      <span className="font-semibold block" style={{ color: formData.is_anonymous ? 'var(--color-chocolat)' : 'var(--color-gris-texte)' }}>
+                      <span
+                        className="font-semibold block"
+                        style={{
+                          color: formData.is_anonymous
+                            ? 'var(--color-chocolat)'
+                            : 'var(--color-gris-texte)',
+                        }}
+                      >
                         🔒 Gestion anonyme
                       </span>
-                      <span className="text-sm block mt-1" style={{ color: 'var(--color-gris-neutre)' }}>
-                        Votre nom sera masqué. Les locataires verront "Géré par [Agence]" à la place.
-                        Nécessite un mandat avec une agence.
+                      <span
+                        className="text-sm block mt-1"
+                        style={{ color: 'var(--color-gris-neutre)' }}
+                      >
+                        Votre nom sera masqué. Les locataires verront "Géré par [Agence]" à la
+                        place. Nécessite un mandat avec une agence.
                       </span>
                     </div>
                   </label>
@@ -991,11 +1201,7 @@ const [step, setStep] = useState(1);
 
               {/* Step 3 Navigation & Submit */}
               <div className="flex justify-between items-center pt-4">
-                <button
-                  type="button"
-                  onClick={() => goToStep(2)}
-                  className="btn-premium-secondary"
-                >
+                <button type="button" onClick={() => goToStep(2)} className="btn-premium-secondary">
                   <ArrowLeft className="w-4 h-4" /> Retour
                 </button>
                 <button
@@ -1032,28 +1238,44 @@ const [step, setStep] = useState(1);
       >
         <div className="text-center py-4">
           {/* File icon with gradient */}
-          <div 
+          <div
             className="w-24 h-24 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg"
-            style={{ background: 'linear-gradient(135deg, var(--color-orange-100), var(--color-orange-50))' }}
+            style={{
+              background:
+                'linear-gradient(135deg, var(--color-orange-100), var(--color-orange-50))',
+            }}
           >
-            <FileText className="h-12 w-12 animate-pulse" style={{ color: 'var(--color-orange)' }} />
+            <FileText
+              className="h-12 w-12 animate-pulse"
+              style={{ color: 'var(--color-orange)' }}
+            />
           </div>
-          
+
           <h3 className="text-xl font-bold mb-2" style={{ color: 'var(--color-chocolat)' }}>
             📝 Brouillon trouvé !
           </h3>
-          
+
           <p className="mb-4" style={{ color: 'var(--color-gris-texte)' }}>
             Vous avez un brouillon non terminé pour cette propriété.
           </p>
-          
+
           {pendingDraftData?.title && (
-            <div className="p-4 rounded-xl mb-6 text-left" style={{ backgroundColor: 'var(--color-creme)' }}>
-              <p className="text-xs uppercase tracking-wide mb-1" style={{ color: 'var(--color-gris-neutre)' }}>Titre sauvegardé</p>
-              <p className="font-medium truncate" style={{ color: 'var(--color-chocolat)' }}>{pendingDraftData.title}</p>
+            <div
+              className="p-4 rounded-xl mb-6 text-left"
+              style={{ backgroundColor: 'var(--color-creme)' }}
+            >
+              <p
+                className="text-xs uppercase tracking-wide mb-1"
+                style={{ color: 'var(--color-gris-neutre)' }}
+              >
+                Titre sauvegardé
+              </p>
+              <p className="font-medium truncate" style={{ color: 'var(--color-chocolat)' }}>
+                {pendingDraftData.title}
+              </p>
             </div>
           )}
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleStartFresh}

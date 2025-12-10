@@ -10,7 +10,7 @@ export interface PropertyData {
   area: number; // surface en m²
   price: number;
   priceType: 'achat' | 'location';
-  
+
   // Localisation
   city: string;
   district: string;
@@ -19,11 +19,11 @@ export interface PropertyData {
     lat: number;
     lng: number;
   };
-  
+
   // Photos
   images: File[];
   mainImageIndex?: number;
-  
+
   // Détails supplémentaires
   amenities: string[];
   furnished: boolean;
@@ -32,7 +32,7 @@ export interface PropertyData {
   terrace: boolean;
   elevator: boolean;
   security: boolean;
-  
+
   // Contact
   ownerName: string;
   ownerEmail: string;
@@ -110,7 +110,7 @@ class PropertyService {
     }
 
     if (!data.address || data.address.trim().length < 5) {
-      errors.address = 'L\'adresse doit contenir au moins 5 caractères';
+      errors.address = "L'adresse doit contenir au moins 5 caractères";
     }
 
     // Validation images
@@ -159,7 +159,7 @@ class PropertyService {
       for (let i = 0; i < images.length; i++) {
         const image = images[i];
         if (!image) continue;
-        
+
         const fileName = `${i}_${image.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
         const filePath = `${folderName}/${fileName}`;
 
@@ -173,21 +173,17 @@ class PropertyService {
           throw new Error(`Le fichier ${image.name} n'est pas une image valide`);
         }
 
-        const { error } = await supabase.storage
-          .from('property-images')
-          .upload(filePath, image, {
-            cacheControl: '3600',
-            upsert: false
-          });
+        const { error } = await supabase.storage.from('property-images').upload(filePath, image, {
+          cacheControl: '3600',
+          upsert: false,
+        });
 
         if (error) {
           throw new Error(`Erreur lors de l'upload de ${image.name}: ${error.message}`);
         }
 
         // Générer l'URL publique
-        const { data: urlData } = supabase.storage
-          .from('property-images')
-          .getPublicUrl(filePath);
+        const { data: urlData } = supabase.storage.from('property-images').getPublicUrl(filePath);
 
         if (urlData?.publicUrl) {
           uploadedUrls.push(urlData.publicUrl);
@@ -205,7 +201,10 @@ class PropertyService {
   async createProperty(data: PropertyData): Promise<{ id: string; success: boolean }> {
     try {
       // Récupérer l'utilisateur connecté
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
       if (userError || !user) {
         throw new Error('Vous devez être connecté pour publier une propriété');
       }
@@ -240,10 +239,11 @@ class PropertyService {
         has_garden: data.garden,
         has_ac: data.amenities.includes('climatisation'),
         deposit_amount: data.priceType === 'location' ? data.price * 2 : null, // 2 mois de caution par défaut
-        status: 'disponible'
+        status: 'disponible',
       };
 
-      const { data: property, error } = await supabase.from('properties')
+      const { data: property, error } = await supabase
+        .from('properties')
         .insert([propertyData])
         .select()
         .single();
@@ -262,37 +262,37 @@ class PropertyService {
   // Obtenir les villes populaires
   getPopularCities() {
     return [
-      { 
-        name: 'Abidjan', 
-        properties: 1200, 
+      {
+        name: 'Abidjan',
+        properties: 1200,
         image: '/cities/abidjan.jpg',
-        districts: ['Cocody', 'Plateau', 'Marcory', 'Treichville', 'Yopougon']
+        districts: ['Cocody', 'Plateau', 'Marcory', 'Treichville', 'Yopougon'],
       },
-      { 
-        name: 'Yamoussoukro', 
-        properties: 150, 
+      {
+        name: 'Yamoussoukro',
+        properties: 150,
         image: '/cities/yamoussoukro.jpg',
-        districts: ['Centre-ville', 'Plateau', 'Adjamé', 'Résidentiel']
+        districts: ['Centre-ville', 'Plateau', 'Adjamé', 'Résidentiel'],
       },
-      { 
-        name: 'Bouaké', 
-        properties: 80, 
+      {
+        name: 'Bouaké',
+        properties: 80,
         image: '/cities/bouake.jpg',
-        districts: ['Centre-ville', 'Kokoin', 'Bracodi']
+        districts: ['Centre-ville', 'Kokoin', 'Bracodi'],
       },
-      { 
-        name: 'San-Pédro', 
-        properties: 60, 
+      {
+        name: 'San-Pédro',
+        properties: 60,
         image: '/cities/san-pedro.jpg',
-        districts: ['Centre-ville', 'Port', 'Résidentiel']
-      }
+        districts: ['Centre-ville', 'Port', 'Résidentiel'],
+      },
     ];
   }
 
   // Obtenir les quartiers d'une ville
   getCityDistricts(cityName: string): string[] {
     const cities = this.getPopularCities();
-    const city = cities.find(c => c.name === cityName);
+    const city = cities.find((c) => c.name === cityName);
     return city ? city.districts : [];
   }
 
@@ -304,7 +304,7 @@ class PropertyService {
       { value: 'villa', label: 'Villa' },
       { value: 'terrain', label: 'Terrain' },
       { value: 'bureau', label: 'Bureau' },
-      { value: 'local-commercial', label: 'Local Commercial' }
+      { value: 'local-commercial', label: 'Local Commercial' },
     ];
   }
 
@@ -320,7 +320,7 @@ class PropertyService {
       { value: 'cuisine-equipee', label: 'Cuisine équipée', icon: 'chef-hat' },
       { value: 'balcon', label: 'Balcon', icon: 'building' },
       { value: 'vue-mer', label: 'Vue sur mer', icon: 'waves' },
-      { value: 'piscine', label: 'Piscine', icon: 'waves' }
+      { value: 'piscine', label: 'Piscine', icon: 'waves' },
     ];
   }
 }

@@ -4,14 +4,14 @@
 
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Home, 
-  MapPin, 
-  Banknote, 
-  Building2, 
-  Calendar, 
-  Percent, 
+import {
+  ArrowLeft,
+  Home,
+  MapPin,
+  Banknote,
+  Building2,
+  Calendar,
+  Percent,
   FileText,
   Download,
   Check,
@@ -32,7 +32,7 @@ import {
   MessageSquare,
   FolderOpen,
   Wrench,
-  FileSignature
+  FileSignature,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -50,40 +50,90 @@ const PERMISSIONS_CONFIG: {
 }[] = [
   // Gestion des biens
   { key: 'can_view_properties', label: 'Voir les biens', icon: Eye, group: 'Gestion des biens' },
-  { key: 'can_edit_properties', label: 'Modifier les biens', icon: Edit, group: 'Gestion des biens' },
-  { key: 'can_create_properties', label: 'Créer des biens', icon: PlusCircle, group: 'Gestion des biens' },
-  { key: 'can_delete_properties', label: 'Supprimer des biens', icon: Trash2, group: 'Gestion des biens' },
+  {
+    key: 'can_edit_properties',
+    label: 'Modifier les biens',
+    icon: Edit,
+    group: 'Gestion des biens',
+  },
+  {
+    key: 'can_create_properties',
+    label: 'Créer des biens',
+    icon: PlusCircle,
+    group: 'Gestion des biens',
+  },
+  {
+    key: 'can_delete_properties',
+    label: 'Supprimer des biens',
+    icon: Trash2,
+    group: 'Gestion des biens',
+  },
   // Candidatures & Baux
-  { key: 'can_view_applications', label: 'Voir les candidatures', icon: Eye, group: 'Candidatures & Baux' },
-  { key: 'can_manage_applications', label: 'Gérer les candidatures', icon: UserCheck, group: 'Candidatures & Baux' },
-  { key: 'can_create_leases', label: 'Créer des baux', icon: FileSignature, group: 'Candidatures & Baux' },
+  {
+    key: 'can_view_applications',
+    label: 'Voir les candidatures',
+    icon: Eye,
+    group: 'Candidatures & Baux',
+  },
+  {
+    key: 'can_manage_applications',
+    label: 'Gérer les candidatures',
+    icon: UserCheck,
+    group: 'Candidatures & Baux',
+  },
+  {
+    key: 'can_create_leases',
+    label: 'Créer des baux',
+    icon: FileSignature,
+    group: 'Candidatures & Baux',
+  },
   // Finances & Maintenance
-  { key: 'can_view_financials', label: 'Voir les finances', icon: Banknote, group: 'Finances & Maintenance' },
-  { key: 'can_manage_maintenance', label: 'Gérer la maintenance', icon: Wrench, group: 'Finances & Maintenance' },
+  {
+    key: 'can_view_financials',
+    label: 'Voir les finances',
+    icon: Banknote,
+    group: 'Finances & Maintenance',
+  },
+  {
+    key: 'can_manage_maintenance',
+    label: 'Gérer la maintenance',
+    icon: Wrench,
+    group: 'Finances & Maintenance',
+  },
   // Communication & Documents
-  { key: 'can_communicate_tenants', label: 'Contacter les locataires', icon: MessageSquare, group: 'Communication & Documents' },
-  { key: 'can_manage_documents', label: 'Gérer les documents', icon: FolderOpen, group: 'Communication & Documents' },
+  {
+    key: 'can_communicate_tenants',
+    label: 'Contacter les locataires',
+    icon: MessageSquare,
+    group: 'Communication & Documents',
+  },
+  {
+    key: 'can_manage_documents',
+    label: 'Gérer les documents',
+    icon: FolderOpen,
+    group: 'Communication & Documents',
+  },
 ];
 
 export default function MandateDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { 
-    mandates, 
+  const {
+    mandates,
     loading,
-    acceptMandate, 
-    refuseMandate, 
-    terminateMandate, 
-    suspendMandate, 
+    acceptMandate,
+    refuseMandate,
+    terminateMandate,
+    suspendMandate,
     reactivateMandate,
-    updateMandatePermissions 
+    updateMandatePermissions,
   } = useAgencyMandates();
 
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const mandate = mandates.find(m => m.id === id);
+  const mandate = mandates.find((m) => m.id === id);
   const viewAs = mandate?.owner_id === user?.id ? 'owner' : 'agency';
 
   const formatDate = (dateString: string | null) => {
@@ -97,7 +147,9 @@ export default function MandateDetailPage() {
     setActionLoading(false);
   };
 
-  const handleSavePermissions = async (permissions: Partial<MandatePermissions>): Promise<boolean> => {
+  const handleSavePermissions = async (
+    permissions: Partial<MandatePermissions>
+  ): Promise<boolean> => {
     if (!mandate) return false;
     const result = await updateMandatePermissions(mandate.id, permissions);
     if (result) setShowPermissionsModal(false);
@@ -105,11 +157,14 @@ export default function MandateDetailPage() {
   };
 
   // Group permissions by category
-  const groupedPermissions = PERMISSIONS_CONFIG.reduce<Record<string, typeof PERMISSIONS_CONFIG>>((acc, perm) => {
-    if (!acc[perm.group]) acc[perm.group] = [];
-    acc[perm.group]?.push(perm);
-    return acc;
-  }, {});
+  const groupedPermissions = PERMISSIONS_CONFIG.reduce<Record<string, typeof PERMISSIONS_CONFIG>>(
+    (acc, perm) => {
+      if (!acc[perm.group]) acc[perm.group] = [];
+      acc[perm.group]?.push(perm);
+      return acc;
+    },
+    {}
+  );
 
   if (loading) {
     return (
@@ -134,7 +189,9 @@ export default function MandateDetailPage() {
         <div className="text-center">
           <Shield className="h-16 w-16 text-neutral-300 mx-auto mb-4" />
           <h1 className="text-xl font-semibold text-neutral-900 mb-2">Mandat non trouvé</h1>
-          <p className="text-neutral-500 mb-6">Ce mandat n'existe pas ou vous n'y avez pas accès.</p>
+          <p className="text-neutral-500 mb-6">
+            Ce mandat n'existe pas ou vous n'y avez pas accès.
+          </p>
           <Link
             to="/mes-mandats"
             className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl hover:bg-primary/90 transition-colors"
@@ -147,8 +204,8 @@ export default function MandateDetailPage() {
     );
   }
 
-  const commissionAmount = mandate.property?.monthly_rent 
-    ? Math.round(mandate.property.monthly_rent * mandate.commission_rate / 100)
+  const commissionAmount = mandate.property?.monthly_rent
+    ? Math.round((mandate.property.monthly_rent * mandate.commission_rate) / 100)
     : 0;
 
   return (
@@ -156,8 +213,8 @@ export default function MandateDetailPage() {
       {/* Header with Property Image */}
       <div className="relative h-48 md:h-64 bg-neutral-200">
         {mandate.property?.main_image ? (
-          <img 
-            src={mandate.property.main_image} 
+          <img
+            src={mandate.property.main_image}
             alt={mandate.property?.title}
             className="w-full h-full object-cover"
           />
@@ -167,7 +224,7 @@ export default function MandateDetailPage() {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-        
+
         {/* Back button & Status */}
         <div className="absolute top-4 left-4 right-4 flex items-center justify-between">
           <button
@@ -209,8 +266,8 @@ export default function MandateDetailPage() {
               <div className="flex gap-4">
                 <div className="w-24 h-24 rounded-xl overflow-hidden bg-neutral-100 flex-shrink-0">
                   {mandate.property?.main_image ? (
-                    <img 
-                      src={mandate.property.main_image} 
+                    <img
+                      src={mandate.property.main_image}
                       alt={mandate.property?.title}
                       className="w-full h-full object-cover"
                     />
@@ -221,9 +278,7 @@ export default function MandateDetailPage() {
                   )}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-neutral-900 mb-1">
-                    {mandate.property?.title}
-                  </h3>
+                  <h3 className="font-medium text-neutral-900 mb-1">{mandate.property?.title}</h3>
                   <p className="text-sm text-neutral-500 flex items-center gap-1 mb-2">
                     <MapPin className="h-3.5 w-3.5" />
                     {mandate.property?.city}
@@ -274,7 +329,9 @@ export default function MandateDetailPage() {
                           <div
                             key={perm.key}
                             className={`flex items-center gap-2 p-2 rounded-lg ${
-                              isEnabled ? 'bg-green-50 text-green-700' : 'bg-neutral-50 text-neutral-400'
+                              isEnabled
+                                ? 'bg-green-50 text-green-700'
+                                : 'bg-neutral-50 text-neutral-400'
                             }`}
                           >
                             {isEnabled ? (
@@ -313,13 +370,13 @@ export default function MandateDetailPage() {
                 <Building2 className="h-5 w-5 text-primary" />
                 {viewAs === 'owner' ? 'Agence mandatée' : 'Propriétaire'}
               </h2>
-              
+
               {viewAs === 'owner' && mandate.agency ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     {mandate.agency.logo_url ? (
-                      <img 
-                        src={mandate.agency.logo_url} 
+                      <img
+                        src={mandate.agency.logo_url}
                         alt={mandate.agency.agency_name}
                         className="w-12 h-12 rounded-xl object-cover"
                       />
@@ -358,7 +415,12 @@ export default function MandateDetailPage() {
                   {mandate.agency.website && (
                     <div className="flex items-center gap-2 text-sm text-neutral-600">
                       <Globe className="h-4 w-4 text-neutral-400" />
-                      <a href={mandate.agency.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                      <a
+                        href={mandate.agency.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-primary"
+                      >
                         Site web
                       </a>
                     </div>
@@ -383,7 +445,7 @@ export default function MandateDetailPage() {
                 <Calendar className="h-5 w-5 text-primary" />
                 Dates & Commission
               </h2>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-neutral-500">Date de début</span>
@@ -451,7 +513,7 @@ export default function MandateDetailPage() {
                 <Settings className="h-5 w-5 text-primary" />
                 Actions
               </h2>
-              
+
               <div className="space-y-2">
                 {/* Pending actions for agency */}
                 {mandate.status === 'pending' && viewAs === 'agency' && (

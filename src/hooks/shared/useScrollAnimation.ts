@@ -18,19 +18,15 @@ interface UseScrollAnimationReturn<T extends HTMLElement> {
 export function useScrollAnimation<T extends HTMLElement = HTMLDivElement>(
   options: UseScrollAnimationOptions = {}
 ): UseScrollAnimationReturn<T> {
-  const { 
-    threshold = 0.15, 
-    rootMargin = '0px 0px -50px 0px',
-    triggerOnce = true 
-  } = options;
-  
+  const { threshold = 0.15, rootMargin = '0px 0px -50px 0px', triggerOnce = true } = options;
+
   const ref = useRef<T>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+
     if (prefersReducedMotion) {
       setIsVisible(true);
       return;
@@ -71,28 +67,28 @@ export function getAnimationClasses(
 ): string {
   const baseClasses = 'transition-all duration-700 ease-out';
   const delayClass = delay > 0 ? `delay-[${delay}ms]` : '';
-  
+
   const animations = {
     fadeUp: {
       hidden: 'opacity-0 translate-y-8',
-      visible: 'opacity-100 translate-y-0'
+      visible: 'opacity-100 translate-y-0',
     },
     fadeIn: {
       hidden: 'opacity-0',
-      visible: 'opacity-100'
+      visible: 'opacity-100',
     },
     slideLeft: {
       hidden: 'opacity-0 -translate-x-12',
-      visible: 'opacity-100 translate-x-0'
+      visible: 'opacity-100 translate-x-0',
     },
     slideRight: {
       hidden: 'opacity-0 translate-x-12',
-      visible: 'opacity-100 translate-x-0'
+      visible: 'opacity-100 translate-x-0',
     },
     scaleIn: {
       hidden: 'opacity-0 scale-95',
-      visible: 'opacity-100 scale-100'
-    }
+      visible: 'opacity-100 scale-100',
+    },
   };
 
   const animation = animations[animationType];

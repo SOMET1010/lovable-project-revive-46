@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { 
-  Home, 
-  MapPin, 
-  CheckCircle2, 
+import {
+  Home,
+  MapPin,
+  CheckCircle2,
   XCircle,
   Upload,
   FileCheck,
@@ -10,7 +10,7 @@ import {
   Zap,
   Droplets,
   Shield,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
@@ -51,19 +51,19 @@ export default function PropertyCertificationPage() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [certifying, setCertifying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   const [checklist, setChecklist] = useState<ChecklistItem[]>([
     { id: 'electricity', label: 'Installation électrique conforme', icon: Zap, checked: false },
     { id: 'plumbing', label: 'Plomberie en bon état', icon: Droplets, checked: false },
     { id: 'security', label: 'Sécurité des accès vérifiée', icon: Shield, checked: false },
     { id: 'structure', label: 'Structure du bâtiment saine', icon: Home, checked: false },
-    { id: 'documents', label: 'Documents de propriété vérifiés', icon: FileCheck, checked: false }
+    { id: 'documents', label: 'Documents de propriété vérifiés', icon: FileCheck, checked: false },
   ]);
-  
+
   const [certificationData, setCertificationData] = useState({
     ansutCertificateUrl: '',
     notes: '',
-    photoUrls: [] as string[]
+    photoUrls: [] as string[],
   });
 
   useEffect(() => {
@@ -74,7 +74,9 @@ export default function PropertyCertificationPage() {
     try {
       const { data, error } = await supabase
         .from('properties')
-        .select('id, title, address, city, neighborhood, property_type, main_image, ansut_verified, ansut_verification_date, owner_id')
+        .select(
+          'id, title, address, city, neighborhood, property_type, main_image, ansut_verified, ansut_verification_date, owner_id'
+        )
         .eq('ansut_verified', false)
         .order('created_at', { ascending: false });
 
@@ -88,7 +90,7 @@ export default function PropertyCertificationPage() {
     }
   };
 
-  const filteredProperties = properties.filter(property => {
+  const filteredProperties = properties.filter((property) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     const addressText = formatAddress(property.address, property.city).toLowerCase();
@@ -100,16 +102,16 @@ export default function PropertyCertificationPage() {
   });
 
   const handleChecklistToggle = (id: string) => {
-    setChecklist(prev => prev.map(item => 
-      item.id === id ? { ...item, checked: !item.checked } : item
-    ));
+    setChecklist((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item))
+    );
   };
 
-  const allChecksPassed = checklist.every(item => item.checked);
+  const allChecksPassed = checklist.every((item) => item.checked);
 
   const handleCertify = async () => {
     if (!selectedProperty || !user || !allChecksPassed) return;
-    
+
     setCertifying(true);
     try {
       // Update property with ANSUT certification
@@ -118,7 +120,7 @@ export default function PropertyCertificationPage() {
         .update({
           ansut_verified: true,
           ansut_verification_date: new Date().toISOString(),
-          ansut_certificate_url: certificationData.ansutCertificateUrl || null
+          ansut_certificate_url: certificationData.ansutCertificateUrl || null,
         })
         .eq('id', selectedProperty.id);
 
@@ -131,18 +133,17 @@ export default function PropertyCertificationPage() {
         p_entity_id: selectedProperty.id,
         p_details: {
           certified_by: user.email,
-          checklist_passed: checklist.map(c => ({ id: c.id, label: c.label, passed: c.checked })),
-          notes: certificationData.notes
-        }
+          checklist_passed: checklist.map((c) => ({ id: c.id, label: c.label, passed: c.checked })),
+          notes: certificationData.notes,
+        },
       });
 
       toast.success('Propriété certifiée ANSUT avec succès');
-      
+
       // Remove from list and reset
-      setProperties(prev => prev.filter(p => p.id !== selectedProperty.id));
+      setProperties((prev) => prev.filter((p) => p.id !== selectedProperty.id));
       setSelectedProperty(null);
       resetForm();
-      
     } catch (error) {
       console.error('Certification error:', error);
       toast.error('Erreur lors de la certification');
@@ -152,14 +153,14 @@ export default function PropertyCertificationPage() {
   };
 
   const resetForm = () => {
-    setChecklist(prev => prev.map(item => ({ ...item, checked: false })));
+    setChecklist((prev) => prev.map((item) => ({ ...item, checked: false })));
     setCertificationData({ ansutCertificateUrl: '', notes: '', photoUrls: [] });
   };
 
   return (
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Certification Propriétés ANSUT" />
-      
+
       <main className="container mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Properties List */}
@@ -178,14 +179,16 @@ export default function PropertyCertificationPage() {
                   <Input
                     placeholder="Rechercher..."
                     value={searchQuery}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setSearchQuery(e.target.value)
+                    }
                     className="pl-10"
                   />
                 </div>
 
                 {loading ? (
                   <div className="space-y-2">
-                    {[1, 2, 3].map(i => (
+                    {[1, 2, 3].map((i) => (
                       <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />
                     ))}
                   </div>
@@ -196,12 +199,12 @@ export default function PropertyCertificationPage() {
                   </div>
                 ) : (
                   <div className="space-y-2 max-h-[500px] overflow-y-auto">
-                    {filteredProperties.map(property => (
+                    {filteredProperties.map((property) => (
                       <div
                         key={property.id}
                         className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                          selectedProperty?.id === property.id 
-                            ? 'border-primary bg-primary/5' 
+                          selectedProperty?.id === property.id
+                            ? 'border-primary bg-primary/5'
                             : 'hover:bg-muted'
                         }`}
                         onClick={() => {
@@ -212,8 +215,8 @@ export default function PropertyCertificationPage() {
                         <div className="flex gap-3">
                           <div className="w-12 h-12 rounded-lg bg-muted overflow-hidden flex-shrink-0">
                             {property.main_image ? (
-                              <img 
-                                src={property.main_image} 
+                              <img
+                                src={property.main_image}
                                 alt={property.title}
                                 className="w-full h-full object-cover"
                               />
@@ -258,8 +261,8 @@ export default function PropertyCertificationPage() {
                     <div className="flex gap-4">
                       <div className="w-24 h-24 rounded-lg bg-background overflow-hidden flex-shrink-0">
                         {selectedProperty.main_image ? (
-                          <img 
-                            src={selectedProperty.main_image} 
+                          <img
+                            src={selectedProperty.main_image}
                             alt={selectedProperty.title}
                             className="w-full h-full object-cover"
                           />
@@ -290,7 +293,7 @@ export default function PropertyCertificationPage() {
                   <div className="space-y-3">
                     <h4 className="font-medium">Checklist de conformité</h4>
                     <div className="space-y-2">
-                      {checklist.map(item => (
+                      {checklist.map((item) => (
                         <div
                           key={item.id}
                           className={`p-3 rounded-lg border cursor-pointer transition-colors ${
@@ -299,8 +302,12 @@ export default function PropertyCertificationPage() {
                           onClick={() => handleChecklistToggle(item.id)}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${item.checked ? 'bg-green-100' : 'bg-muted'}`}>
-                              <item.icon className={`h-5 w-5 ${item.checked ? 'text-green-600' : 'text-muted-foreground'}`} />
+                            <div
+                              className={`p-2 rounded-lg ${item.checked ? 'bg-green-100' : 'bg-muted'}`}
+                            >
+                              <item.icon
+                                className={`h-5 w-5 ${item.checked ? 'text-green-600' : 'text-muted-foreground'}`}
+                              />
                             </div>
                             <span className={item.checked ? 'text-green-700 font-medium' : ''}>
                               {item.label}
@@ -325,7 +332,12 @@ export default function PropertyCertificationPage() {
                       <Input
                         placeholder="https://..."
                         value={certificationData.ansutCertificateUrl}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCertificationData(prev => ({ ...prev, ansutCertificateUrl: e.target.value }))}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setCertificationData((prev) => ({
+                            ...prev,
+                            ansutCertificateUrl: e.target.value,
+                          }))
+                        }
                       />
                       <Button variant="outline" size="small" className="p-2 min-h-0">
                         <Upload className="h-4 w-4" />
@@ -339,7 +351,9 @@ export default function PropertyCertificationPage() {
                     <Textarea
                       placeholder="Observations sur l'état du bien, remarques particulières..."
                       value={certificationData.notes}
-                      onChange={(e) => setCertificationData(prev => ({ ...prev, notes: e.target.value }))}
+                      onChange={(e) =>
+                        setCertificationData((prev) => ({ ...prev, notes: e.target.value }))
+                      }
                       rows={4}
                     />
                   </div>
@@ -349,27 +363,29 @@ export default function PropertyCertificationPage() {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium">Progression</span>
                       <span className="text-sm text-muted-foreground">
-                        {checklist.filter(c => c.checked).length}/{checklist.length} vérifications
+                        {checklist.filter((c) => c.checked).length}/{checklist.length} vérifications
                       </span>
                     </div>
                     <div className="h-2 rounded-full bg-background overflow-hidden">
-                      <div 
+                      <div
                         className="h-full bg-primary transition-all"
-                        style={{ width: `${(checklist.filter(c => c.checked).length / checklist.length) * 100}%` }}
+                        style={{
+                          width: `${(checklist.filter((c) => c.checked).length / checklist.length) * 100}%`,
+                        }}
                       />
                     </div>
                   </div>
 
                   {/* Submit */}
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     onClick={handleCertify}
                     disabled={certifying || !allChecksPassed}
                   >
                     {certifying ? (
                       'Certification en cours...'
                     ) : !allChecksPassed ? (
-                      `${checklist.filter(c => !c.checked).length} vérification(s) manquante(s)`
+                      `${checklist.filter((c) => !c.checked).length} vérification(s) manquante(s)`
                     ) : (
                       <>
                         <CheckCircle2 className="h-4 w-4 mr-2" />

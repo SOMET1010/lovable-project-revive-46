@@ -56,7 +56,9 @@ export const useAuthStore = create<AuthState>()(
 
         initialize: async () => {
           try {
-            const { data: { session } } = await supabase.auth.getSession();
+            const {
+              data: { session },
+            } = await supabase.auth.getSession();
 
             if (session?.user) {
               set({ session, user: session.user });
@@ -87,21 +89,27 @@ export const useAuthStore = create<AuthState>()(
           const BASE_RETRY_DELAY = 1500;
 
           try {
-            logger.debug('Loading profile', { userId, attempt: retryAttempt + 1, maxRetries: MAX_RETRIES + 1 });
+            logger.debug('Loading profile', {
+              userId,
+              attempt: retryAttempt + 1,
+              maxRetries: MAX_RETRIES + 1,
+            });
             set({ retryCount: retryAttempt });
 
             if (retryAttempt === 0) {
               const healthCheck = await testDatabaseConnection();
               if (!healthCheck.success) {
-                logger.error('Database connection failed', undefined, { message: healthCheck.message });
+                logger.error('Database connection failed', undefined, {
+                  message: healthCheck.message,
+                });
                 set({
                   profileError: {
                     type: 'network',
                     message: 'Connexion à la base de données impossible',
                     details: healthCheck.message,
-                    timestamp: new Date()
+                    timestamp: new Date(),
                   },
-                  loading: false
+                  loading: false,
                 });
                 return;
               }
@@ -114,7 +122,10 @@ export const useAuthStore = create<AuthState>()(
               .maybeSingle();
 
             if (error) {
-              logger.error('Supabase error loading profile', error as Error, { userId, code: error.code });
+              logger.error('Supabase error loading profile', error as Error, {
+                userId,
+                code: error.code,
+              });
 
               let errorType: ProfileLoadError['type'] = 'database';
               let errorMessage = 'Erreur lors du chargement du profil';
@@ -123,7 +134,7 @@ export const useAuthStore = create<AuthState>()(
               if (error.code === 'PGRST116') {
                 errorType = 'not_found';
                 errorMessage = 'Profil introuvable';
-                errorDetails = 'Le profil n\'a pas été trouvé dans la base de données.';
+                errorDetails = "Le profil n'a pas été trouvé dans la base de données.";
               } else if (error.message.includes('permission') || error.code === '42501') {
                 errorType = 'permission';
                 errorMessage = 'Accès refusé';
@@ -137,7 +148,7 @@ export const useAuthStore = create<AuthState>()(
               if (retryAttempt < MAX_RETRIES) {
                 const delay = BASE_RETRY_DELAY * Math.pow(1.5, retryAttempt);
                 logger.debug('Retrying profile load', { delay, attempt: retryAttempt + 1 });
-                await new Promise(resolve => setTimeout(resolve, delay));
+                await new Promise((resolve) => setTimeout(resolve, delay));
                 return get().loadProfile(userId, retryAttempt + 1);
               }
 
@@ -146,9 +157,9 @@ export const useAuthStore = create<AuthState>()(
                   type: errorType,
                   message: errorMessage,
                   details: errorDetails,
-                  timestamp: new Date()
+                  timestamp: new Date(),
                 },
-                loading: false
+                loading: false,
               });
               return;
             }
@@ -159,7 +170,7 @@ export const useAuthStore = create<AuthState>()(
               if (retryAttempt < MAX_RETRIES) {
                 const delay = BASE_RETRY_DELAY * Math.pow(1.5, retryAttempt);
                 logger.debug('Profile not found, retrying', { delay, attempt: retryAttempt + 1 });
-                await new Promise(resolve => setTimeout(resolve, delay));
+                await new Promise((resolve) => setTimeout(resolve, delay));
                 return get().loadProfile(userId, retryAttempt + 1);
               }
 
@@ -168,9 +179,9 @@ export const useAuthStore = create<AuthState>()(
                   type: 'not_found',
                   message: 'Profil introuvable',
                   details: 'Impossible de trouver votre profil après plusieurs tentatives.',
-                  timestamp: new Date()
+                  timestamp: new Date(),
                 },
-                loading: false
+                loading: false,
               });
               return;
             }
@@ -178,12 +189,16 @@ export const useAuthStore = create<AuthState>()(
             logger.info('Profile loaded successfully', { userId });
             set({ profile: data, loading: false, profileError: null, retryCount: 0 });
           } catch (error: unknown) {
-            logger.error('Unexpected error loading profile', error instanceof Error ? error : undefined, { userId });
+            logger.error(
+              'Unexpected error loading profile',
+              error instanceof Error ? error : undefined,
+              { userId }
+            );
 
             if (retryAttempt < MAX_RETRIES) {
               const delay = BASE_RETRY_DELAY * Math.pow(1.5, retryAttempt);
               logger.debug('Retrying after error', { delay, attempt: retryAttempt + 1 });
-              await new Promise(resolve => setTimeout(resolve, delay));
+              await new Promise((resolve) => setTimeout(resolve, delay));
               return get().loadProfile(userId, retryAttempt + 1);
             }
 
@@ -191,10 +206,11 @@ export const useAuthStore = create<AuthState>()(
               profileError: {
                 type: 'unknown',
                 message: 'Erreur inattendue',
-                details: error instanceof Error ? error.message : 'Une erreur inconnue s\'est produite.',
-                timestamp: new Date()
+                details:
+                  error instanceof Error ? error.message : "Une erreur inconnue s'est produite.",
+                timestamp: new Date(),
               },
-              loading: false
+              loading: false,
             });
           }
         },
@@ -259,10 +275,7 @@ export const useAuthStore = create<AuthState>()(
           set({ loading: true, error: null });
 
           try {
-            const { error } = await supabase
-              .from('profiles')
-              .update(updates)
-              .eq('id', user.id);
+            const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
 
             if (error) throw error;
             await get().loadProfile(user.id);

@@ -10,15 +10,12 @@ interface AuthModalProps {
 export default function AuthModal({ isOpen, onClose, message }: AuthModalProps) {
   if (!isOpen) return null;
 
-  const defaultMessage = "Pour accéder à cette fonctionnalité, vous devez être connecté";
+  const defaultMessage = 'Pour accéder à cette fonctionnalité, vous devez être connecté';
   const displayMessage = message || defaultMessage;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-scale-in">
         <button
@@ -33,12 +30,8 @@ export default function AuthModal({ isOpen, onClose, message }: AuthModalProps) 
           <div className="w-20 h-20 bg-gradient-to-br from-terracotta-500 to-coral-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-glow">
             <Shield className="h-10 w-10 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Connexion requise
-          </h2>
-          <p className="text-gray-600 leading-relaxed">
-            {displayMessage}
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Connexion requise</h2>
+          <p className="text-gray-600 leading-relaxed">{displayMessage}</p>
         </div>
 
         <div className="space-y-3">

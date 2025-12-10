@@ -14,7 +14,6 @@ import { cacheService } from '@/shared/services/cacheService';
 import type { Database } from '@/shared/lib/database.types';
 import type { PropertyWithOwnerScore } from '../types';
 
-
 type PropertyInsert = Database['public']['Tables']['properties']['Insert'];
 type PropertyUpdate = Database['public']['Tables']['properties']['Update'];
 
@@ -73,7 +72,7 @@ const fetchOwnerProfiles = async (ownerIds: string[]): Promise<Map<string, Publi
       is_verified: profile.is_verified,
       city: profile.city,
       oneci_verified: profile.oneci_verified,
-      cnam_verified: profile.cnam_verified
+      cnam_verified: profile.cnam_verified,
     });
   });
 
@@ -86,10 +85,10 @@ const fetchOwnerProfiles = async (ownerIds: string[]): Promise<Map<string, Publi
 const enrichPropertiesWithOwners = async (
   properties: Database['public']['Tables']['properties']['Row'][]
 ): Promise<PropertyWithOwnerScore[]> => {
-  const ownerIds = properties.map(p => p.owner_id).filter((id): id is string => id !== null);
+  const ownerIds = properties.map((p) => p.owner_id).filter((id): id is string => id !== null);
   const ownerProfiles = await fetchOwnerProfiles(ownerIds);
 
-  return properties.map(property => {
+  return properties.map((property) => {
     const owner = property.owner_id ? ownerProfiles.get(property.owner_id) : null;
     return {
       ...property,
@@ -162,10 +161,7 @@ export const propertyApi = {
       return { data: cached, error: null };
     }
 
-    let query = supabase
-      .from('properties')
-      .select('*')
-      .order('created_at', { ascending: false });
+    let query = supabase.from('properties').select('*').order('created_at', { ascending: false });
 
     if (filters?.city) {
       query = query.eq('city', filters.city);
@@ -227,11 +223,7 @@ export const propertyApi = {
       return { data: cached, error: null };
     }
 
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('properties').select('*').eq('id', id).single();
 
     if (error) throw error;
 
@@ -314,11 +306,7 @@ export const propertyApi = {
    * Crée une nouvelle propriété et invalide le cache
    */
   create: async (property: PropertyInsert) => {
-    const { data, error } = await supabase
-      .from('properties')
-      .insert(property)
-      .select()
-      .single();
+    const { data, error } = await supabase.from('properties').insert(property).select().single();
 
     if (error) throw error;
 
@@ -350,10 +338,7 @@ export const propertyApi = {
    * Supprime une propriété et invalide le cache
    */
   delete: async (id: string) => {
-    const { error } = await supabase
-      .from('properties')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('properties').delete().eq('id', id);
 
     if (error) throw error;
 
@@ -377,7 +362,9 @@ export const propertyApi = {
     const { data, error } = await supabase
       .from('properties')
       .select('*')
-      .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
+      .or(
+        `title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,address.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`
+      )
       .eq('status', 'disponible')
       .order('created_at', { ascending: false });
 
@@ -396,9 +383,7 @@ export const propertyApi = {
    * Compte le nombre de propriétés avec filtres
    */
   count: async (filters?: PropertyFilters) => {
-    let query = supabase
-      .from('properties')
-      .select('*', { count: 'exact', head: true });
+    let query = supabase.from('properties').select('*', { count: 'exact', head: true });
 
     if (filters?.city) {
       query = query.eq('city', filters.city);

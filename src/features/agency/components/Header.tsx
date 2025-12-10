@@ -1,7 +1,14 @@
 import React from 'react';
-import { 
-  Menu, Bell, Search, Settings, Download,
-  User, LogOut, HelpCircle, ChevronDown
+import {
+  Menu,
+  Bell,
+  Search,
+  Settings,
+  Download,
+  User,
+  LogOut,
+  HelpCircle,
+  ChevronDown,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -23,16 +30,16 @@ const timeRangeOptions = [
   { value: 'year', label: 'Cette année' },
 ];
 
-export default function Header({ 
-  onToggleSidebar, 
-  sidebarOpen: _sidebarOpen, 
+export default function Header({
+  onToggleSidebar,
+  sidebarOpen: _sidebarOpen,
   agencyName,
   agencyLogo,
   pendingNotifications = 0,
   userEmail,
   onExport,
   onTimeRangeChange,
-  selectedTimeRange = 'month'
+  selectedTimeRange = 'month',
 }: HeaderProps) {
   const [showUserMenu, setShowUserMenu] = React.useState(false);
   const [showTimeRangeDropdown, setShowTimeRangeDropdown] = React.useState(false);
@@ -41,7 +48,6 @@ export default function Header({
     <header className="bg-white/95 backdrop-blur-xl border-b border-neutral-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          
           {/* Logo et toggle sidebar */}
           <div className="flex items-center space-x-4">
             <button
@@ -51,13 +57,13 @@ export default function Header({
             >
               <Menu className="w-5 h-5" />
             </button>
-            
+
             <div className="flex items-center space-x-3">
               {agencyLogo ? (
-                <img 
-                  src={agencyLogo} 
-                  alt={agencyName} 
-                  className="w-10 h-10 rounded-xl shadow-sm object-cover" 
+                <img
+                  src={agencyLogo}
+                  alt={agencyName}
+                  className="w-10 h-10 rounded-xl shadow-sm object-cover"
                 />
               ) : (
                 <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-sm">
@@ -66,11 +72,9 @@ export default function Header({
                   </span>
                 </div>
               )}
-              
+
               <div className="hidden sm:block">
-                <h1 className="font-bold text-xl text-neutral-900 leading-tight">
-                  {agencyName}
-                </h1>
+                <h1 className="font-bold text-xl text-neutral-900 leading-tight">{agencyName}</h1>
                 <p className="text-xs text-neutral-500 font-medium">
                   Tableau de bord professionnel
                 </p>
@@ -92,7 +96,6 @@ export default function Header({
 
           {/* Actions header */}
           <div className="flex items-center space-x-3">
-            
             {/* Sélecteur de période */}
             <div className="relative hidden sm:block">
               <button
@@ -100,11 +103,12 @@ export default function Header({
                 className="flex items-center space-x-2 px-4 py-2 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 rounded-lg text-sm font-medium text-neutral-700 transition-colors"
               >
                 <span>
-                  {timeRangeOptions.find(option => option.value === selectedTimeRange)?.label || 'Ce mois'}
+                  {timeRangeOptions.find((option) => option.value === selectedTimeRange)?.label ||
+                    'Ce mois'}
                 </span>
                 <ChevronDown className="w-4 h-4" />
               </button>
-              
+
               {showTimeRangeDropdown && (
                 <div className="absolute right-0 mt-2 w-48 bg-white border border-neutral-200 rounded-lg shadow-lg z-50">
                   {timeRangeOptions.map((option) => (
@@ -115,8 +119,8 @@ export default function Header({
                         setShowTimeRangeDropdown(false);
                       }}
                       className={`w-full text-left px-4 py-2 text-sm hover:bg-neutral-50 transition-colors ${
-                        selectedTimeRange === option.value 
-                          ? 'text-primary-600 bg-primary-50' 
+                        selectedTimeRange === option.value
+                          ? 'text-primary-600 bg-primary-50'
                           : 'text-neutral-700'
                       }`}
                     >
@@ -128,7 +132,7 @@ export default function Header({
             </div>
 
             {/* Bouton exporter */}
-            <button 
+            <button
               onClick={onExport}
               className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
             >
@@ -137,7 +141,7 @@ export default function Header({
             </button>
 
             {/* Notifications */}
-            <button 
+            <button
               className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg relative transition-colors"
               aria-label="Notifications"
             >
@@ -150,7 +154,7 @@ export default function Header({
             </button>
 
             {/* Aide */}
-            <button 
+            <button
               className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
               aria-label="Aide"
             >
@@ -158,7 +162,7 @@ export default function Header({
             </button>
 
             {/* Paramètres */}
-            <button 
+            <button
               className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
               aria-label="Paramètres"
             >
@@ -185,11 +189,9 @@ export default function Header({
                     <p className="font-medium text-neutral-900 text-sm">
                       {userEmail || 'Utilisateur'}
                     </p>
-                    <p className="text-xs text-neutral-500">
-                      Administrateur
-                    </p>
+                    <p className="text-xs text-neutral-500">Administrateur</p>
                   </div>
-                  
+
                   <div className="p-1">
                     <a
                       href="/agence/profile"

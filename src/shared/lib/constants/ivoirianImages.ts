@@ -126,19 +126,19 @@ export const INTERIOR_IMAGES = {
 
 // Images de quartiers d'Abidjan
 export const NEIGHBORHOOD_IMAGES = {
-  'Cocody': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200',
-  'Plateau': 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200',
-  'Marcory': 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200',
-  'Yopougon': 'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=1200',
-  'Treichville': 'https://images.unsplash.com/photo-1600585152915-d208bec867e1?w=1200',
-  'Abobo': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200',
-  'Koumassi': 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=1200',
-  'Adjamé': 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200',
-  'Attécoubé': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200',
+  Cocody: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200',
+  Plateau: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=1200',
+  Marcory: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200',
+  Yopougon: 'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=1200',
+  Treichville: 'https://images.unsplash.com/photo-1600585152915-d208bec867e1?w=1200',
+  Abobo: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200',
+  Koumassi: 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=1200',
+  Adjamé: 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=1200',
+  Attécoubé: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200',
   'Port-Bouët': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200',
-  'Bingerville': 'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=1200',
-  'Anyama': 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200',
-  'Songon': 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=1200',
+  Bingerville: 'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=1200',
+  Anyama: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=1200',
+  Songon: 'https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=1200',
 };
 
 /**
@@ -152,26 +152,31 @@ export function getPropertyImages(
   const images: string[] = [];
 
   // Normaliser le nom du quartier
-  const normalizedNeighborhood = neighborhood.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const normalizedNeighborhood = neighborhood
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
   // Chercher les images du quartier
-  const neighborhoodKey = Object.keys(IVOIRIAN_PROPERTY_IMAGES).find(
-    key => normalizedNeighborhood.includes(key.toLowerCase())
+  const neighborhoodKey = Object.keys(IVOIRIAN_PROPERTY_IMAGES).find((key) =>
+    normalizedNeighborhood.includes(key.toLowerCase())
   );
 
   if (neighborhoodKey) {
-    const neighborhoodImages = IVOIRIAN_PROPERTY_IMAGES[neighborhoodKey as keyof typeof IVOIRIAN_PROPERTY_IMAGES];
+    const neighborhoodImages =
+      IVOIRIAN_PROPERTY_IMAGES[neighborhoodKey as keyof typeof IVOIRIAN_PROPERTY_IMAGES];
     images.push(...neighborhoodImages.slice(0, 2));
   }
 
   // Ajouter des images selon le type de propriété
   const typeKey = propertyType.toLowerCase();
-  const typeImages = Object.keys(PROPERTY_TYPE_IMAGES).find(key =>
-    typeKey.includes(key) || key.includes(typeKey)
+  const typeImages = Object.keys(PROPERTY_TYPE_IMAGES).find(
+    (key) => typeKey.includes(key) || key.includes(typeKey)
   );
 
   if (typeImages) {
-    const propertyTypeImages = PROPERTY_TYPE_IMAGES[typeImages as keyof typeof PROPERTY_TYPE_IMAGES];
+    const propertyTypeImages =
+      PROPERTY_TYPE_IMAGES[typeImages as keyof typeof PROPERTY_TYPE_IMAGES];
     images.push(...propertyTypeImages.slice(0, 2));
   }
 
@@ -189,8 +194,10 @@ export function getPropertyImages(
  * Récupère une image de fond pour un quartier
  */
 export function getNeighborhoodImage(neighborhood: string): string {
-  return NEIGHBORHOOD_IMAGES[neighborhood as keyof typeof NEIGHBORHOOD_IMAGES] ||
-         NEIGHBORHOOD_IMAGES['Cocody'];
+  return (
+    NEIGHBORHOOD_IMAGES[neighborhood as keyof typeof NEIGHBORHOOD_IMAGES] ||
+    NEIGHBORHOOD_IMAGES['Cocody']
+  );
 }
 
 /**

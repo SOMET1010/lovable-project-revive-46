@@ -5,14 +5,14 @@ export const getObligationsLocataire = () => [
   'Entretenir les lieux loués et effectuer les réparations locatives',
   'Ne pas transformer les lieux sans accord écrit du bailleur',
   'Souscrire une assurance habitation',
-  'Laisser visiter les lieux en cas de vente ou de relocation'
+  'Laisser visiter les lieux en cas de vente ou de relocation',
 ];
 
 export const getObligationsBailleur = () => [
   'Délivrer au locataire un logement décent',
   'Assurer au locataire la jouissance paisible du logement',
-  'Entretenir les locaux en état de servir à l\'usage prévu',
-  'Effectuer les grosses réparations'
+  "Entretenir les locaux en état de servir à l'usage prévu",
+  'Effectuer les grosses réparations',
 ];
 
 export const getArticle1Text = (address: string, city: string) =>
@@ -26,7 +26,8 @@ export const getArticle2Text = (startDate: string, endDate: string) => {
     duration: 'Le présent bail est conclu pour une durée de 12 mois',
     startDate: `Date de début: ${start}`,
     endDate: `Date de fin: ${end}`,
-    renewal: 'Le bail se renouvellera automatiquement par tacite reconduction pour des périodes de 12 mois.'
+    renewal:
+      'Le bail se renouvellera automatiquement par tacite reconduction pour des périodes de 12 mois.',
   };
 };
 

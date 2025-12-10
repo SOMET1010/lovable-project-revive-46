@@ -9,12 +9,12 @@ export default function SimpleLineChart({
   data,
   height = 200,
   color = '#B87333',
-  fillColor = 'rgba(184, 115, 51, 0.1)'
+  fillColor = 'rgba(184, 115, 51, 0.1)',
 }: SimpleLineChartProps) {
   if (data.length === 0) return null;
 
-  const max = Math.max(...data.map(d => d.value), 1);
-  const min = Math.min(...data.map(d => d.value), 0);
+  const max = Math.max(...data.map((d) => d.value), 1);
+  const min = Math.min(...data.map((d) => d.value), 0);
   const range = max - min || 1;
 
   const chartHeight = height - 40;
@@ -50,10 +50,7 @@ export default function SimpleLineChart({
           </linearGradient>
         </defs>
 
-        <path
-          d={areaPathD}
-          fill="url(#lineGradient)"
-        />
+        <path d={areaPathD} fill="url(#lineGradient)" />
 
         <path
           d={pathD}

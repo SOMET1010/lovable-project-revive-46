@@ -6,8 +6,12 @@ import { User, Key, Building2, Loader2, Home, PlusCircle, Search } from 'lucide-
 import { Link } from 'react-router-dom';
 
 // Lazy load tab content
-const TenantDashboardContent = lazy(() => import('@/features/tenant/components/TenantDashboardContent'));
-const OwnerDashboardContent = lazy(() => import('@/features/owner/components/OwnerDashboardContent'));
+const TenantDashboardContent = lazy(
+  () => import('@/features/tenant/components/TenantDashboardContent')
+);
+const OwnerDashboardContent = lazy(
+  () => import('@/features/owner/components/OwnerDashboardContent')
+);
 const ProfileContent = lazy(() => import('@/features/auth/components/ProfileContent'));
 
 type TabId = 'profile' | 'tenant' | 'owner';
@@ -30,12 +34,12 @@ export default function UnifiedDashboardPage() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { 
-    isOwner, 
-    isTenant, 
-    propertiesCount, 
+  const {
+    isOwner,
+    isTenant,
+    propertiesCount,
     activeLeasesAsTenantCount,
-    loading: rolesLoading 
+    loading: rolesLoading,
   } = useContextualRoles();
 
   // Determine initial tab from URL or defaults
@@ -125,12 +129,12 @@ export default function UnifiedDashboardPage() {
                   Bonjour, {profile?.full_name?.split(' ')[0] || 'Bienvenue'} 👋
                 </h1>
                 <p className="text-[#6B5A4E] mt-1">
-                  {isOwner && isTenant 
-                    ? 'Gérez vos locations et vos propriétés' 
-                    : isOwner 
-                      ? 'Gérez vos propriétés et locataires' 
-                      : isTenant 
-                        ? 'Gérez votre location et vos paiements' 
+                  {isOwner && isTenant
+                    ? 'Gérez vos locations et vos propriétés'
+                    : isOwner
+                      ? 'Gérez vos propriétés et locataires'
+                      : isTenant
+                        ? 'Gérez votre location et vos paiements'
                         : 'Bienvenue sur Mon Toit'}
                 </p>
               </div>
@@ -173,11 +177,13 @@ export default function UnifiedDashboardPage() {
                     <Icon className="h-4 w-4" />
                     <span>{tab.label}</span>
                     {tab.count !== undefined && tab.count > 0 && (
-                      <span className={`px-2 py-0.5 text-xs rounded-full ${
-                        isActive 
-                          ? 'bg-[#F16522]/10 text-[#F16522]' 
-                          : 'bg-[#FAF7F4] text-[#6B5A4E]'
-                      }`}>
+                      <span
+                        className={`px-2 py-0.5 text-xs rounded-full ${
+                          isActive
+                            ? 'bg-[#F16522]/10 text-[#F16522]'
+                            : 'bg-[#FAF7F4] text-[#6B5A4E]'
+                        }`}
+                      >
                         {tab.count}
                       </span>
                     )}
@@ -200,12 +206,10 @@ export default function UnifiedDashboardPage() {
                   <Home className="h-6 w-6 text-[#F16522]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[#2C1810]">
-                    Bienvenue sur Mon Toit !
-                  </h3>
+                  <h3 className="text-lg font-semibold text-[#2C1810]">Bienvenue sur Mon Toit !</h3>
                   <p className="text-[#6B5A4E] mt-1">
-                    Vous n'avez pas encore de location ni de propriété. 
-                    Commencez par rechercher un logement ou publiez votre première annonce.
+                    Vous n'avez pas encore de location ni de propriété. Commencez par rechercher un
+                    logement ou publiez votre première annonce.
                   </p>
                   <div className="flex flex-wrap gap-3 mt-4">
                     <Link

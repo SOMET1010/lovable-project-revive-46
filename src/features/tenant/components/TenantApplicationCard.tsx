@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom';
-import { 
-  MapPin, 
-  Calendar, 
-  Eye, 
-  MessageSquare, 
-  XCircle, 
-  Clock, 
+import {
+  MapPin,
+  Calendar,
+  Eye,
+  MessageSquare,
+  XCircle,
+  Clock,
   CheckCircle,
   AlertCircle,
   User,
-  Home
+  Home,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -21,50 +21,53 @@ interface TenantApplicationCardProps {
   isCanceling: boolean;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof Clock; bgColor: string }> = {
-  en_attente: { 
-    label: 'En attente', 
-    color: 'text-amber-700', 
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; color: string; icon: typeof Clock; bgColor: string }
+> = {
+  en_attente: {
+    label: 'En attente',
+    color: 'text-amber-700',
     icon: Clock,
-    bgColor: 'bg-amber-100'
+    bgColor: 'bg-amber-100',
   },
-  en_cours: { 
-    label: 'En cours', 
-    color: 'text-blue-700', 
+  en_cours: {
+    label: 'En cours',
+    color: 'text-blue-700',
     icon: Clock,
-    bgColor: 'bg-blue-100'
+    bgColor: 'bg-blue-100',
   },
-  acceptee: { 
-    label: 'Acceptée', 
-    color: 'text-green-700', 
+  acceptee: {
+    label: 'Acceptée',
+    color: 'text-green-700',
     icon: CheckCircle,
-    bgColor: 'bg-green-100'
+    bgColor: 'bg-green-100',
   },
-  refusee: { 
-    label: 'Refusée', 
-    color: 'text-red-700', 
+  refusee: {
+    label: 'Refusée',
+    color: 'text-red-700',
     icon: XCircle,
-    bgColor: 'bg-red-100'
+    bgColor: 'bg-red-100',
   },
-  annulee: { 
-    label: 'Annulée', 
-    color: 'text-neutral-500', 
+  annulee: {
+    label: 'Annulée',
+    color: 'text-neutral-500',
     icon: AlertCircle,
-    bgColor: 'bg-neutral-100'
+    bgColor: 'bg-neutral-100',
   },
 };
 
 const DEFAULT_STATUS = STATUS_CONFIG['en_attente']!;
 
-export default function TenantApplicationCard({ 
-  application, 
-  onCancel, 
-  isCanceling 
+export default function TenantApplicationCard({
+  application,
+  onCancel,
+  isCanceling,
 }: TenantApplicationCardProps) {
   const statusConfig = STATUS_CONFIG[application.status] ?? DEFAULT_STATUS;
   const StatusIcon = statusConfig.icon;
 
-  const formattedDate = application.created_at 
+  const formattedDate = application.created_at
     ? format(new Date(application.created_at), 'd MMMM yyyy', { locale: fr })
     : 'Date inconnue';
 
@@ -86,9 +89,11 @@ export default function TenantApplicationCard({
               <Home className="h-12 w-12 text-[var(--color-gris-neutre)]" />
             </div>
           )}
-          
+
           {/* Status Badge on Image */}
-          <div className={`absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 ${statusConfig.bgColor} ${statusConfig.color}`}>
+          <div
+            className={`absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 ${statusConfig.bgColor} ${statusConfig.color}`}
+          >
             <StatusIcon className="h-3.5 w-3.5" />
             {statusConfig.label}
           </div>
@@ -134,8 +139,8 @@ export default function TenantApplicationCard({
                 <div className="flex items-center gap-2 text-sm text-[var(--color-gris-texte)]">
                   <div className="w-7 h-7 rounded-full bg-[var(--color-sable-light)] overflow-hidden border border-[var(--color-border)]">
                     {application.owner.avatar_url ? (
-                      <img 
-                        src={application.owner.avatar_url} 
+                      <img
+                        src={application.owner.avatar_url}
                         alt={application.owner.full_name || 'Propriétaire'}
                         className="w-full h-full object-cover"
                       />

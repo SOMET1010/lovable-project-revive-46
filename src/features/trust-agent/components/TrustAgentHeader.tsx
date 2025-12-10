@@ -8,11 +8,11 @@ interface TrustAgentHeaderProps {
   showSettings?: boolean;
 }
 
-export default function TrustAgentHeader({ 
-  title, 
-  subtitle = "Agent tiers de confiance certifié",
+export default function TrustAgentHeader({
+  title,
+  subtitle = 'Agent tiers de confiance certifié',
   showStatus = true,
-  showSettings = true
+  showSettings = true,
 }: TrustAgentHeaderProps) {
   const { profile } = useAuth();
 
@@ -25,9 +25,7 @@ export default function TrustAgentHeader({
               <Shield className="w-9 h-9 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                {title}
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
               <div className="flex items-center gap-3">
                 <p className="text-gray-600">{subtitle}</p>
                 {showStatus && (
@@ -39,14 +37,14 @@ export default function TrustAgentHeader({
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             {showSettings && (
               <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
                 <Settings className="w-5 h-5" />
               </button>
             )}
-            
+
             <div className="text-right">
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center">
@@ -59,13 +57,11 @@ export default function TrustAgentHeader({
                   <p className="text-xs text-gray-600">Agent Certifié Niv. 3</p>
                 </div>
               </div>
-              
+
               {showStatus && (
                 <div className="flex items-center gap-1 mt-1">
                   <Clock className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs text-gray-500">
-                    Dernière activité: Maintenant
-                  </span>
+                  <span className="text-xs text-gray-500">Dernière activité: Maintenant</span>
                 </div>
               )}
             </div>

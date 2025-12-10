@@ -5,16 +5,16 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  FileText, 
-  Plus, 
-  Building2, 
-  Clock, 
-  CheckCircle, 
+import {
+  FileText,
+  Plus,
+  Building2,
+  Clock,
+  CheckCircle,
   XCircle,
   Filter,
   Search,
-  Home
+  Home,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -71,15 +71,15 @@ export default function MyMandatesPage() {
   useEffect(() => {
     const loadProperties = async () => {
       if (!user) return;
-      
+
       const { data } = await supabase
         .from('properties')
         .select('id, title, city')
         .eq('owner_id', user.id);
-      
+
       setMyProperties((data || []) as Property[]);
     };
-    
+
     loadProperties();
   }, [user]);
 
@@ -90,34 +90,34 @@ export default function MyMandatesPage() {
 
   // Filter mandates based on view mode and filters
   const baseMandates = viewMode === 'owner' ? ownerMandates : agencyMandates;
-  
-  const filteredMandates = baseMandates.filter(mandate => {
+
+  const filteredMandates = baseMandates.filter((mandate) => {
     // Status filter
     if (statusFilter !== 'all' && mandate.status !== statusFilter) {
       return false;
     }
-    
+
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       const matchesProperty = mandate.property?.title?.toLowerCase().includes(query);
       const matchesAgency = mandate.agency?.agency_name?.toLowerCase().includes(query);
       const matchesCity = mandate.property?.city?.toLowerCase().includes(query);
-      
+
       if (!matchesProperty && !matchesAgency && !matchesCity) {
         return false;
       }
     }
-    
+
     return true;
   });
 
   // Stats
   const stats = {
     total: baseMandates.length,
-    pending: baseMandates.filter(m => m.status === 'pending').length,
-    active: baseMandates.filter(m => m.status === 'active').length,
-    expired: baseMandates.filter(m => m.status === 'expired' || m.status === 'cancelled').length,
+    pending: baseMandates.filter((m) => m.status === 'pending').length,
+    active: baseMandates.filter((m) => m.status === 'active').length,
+    expired: baseMandates.filter((m) => m.status === 'expired' || m.status === 'cancelled').length,
   };
 
   const handleInvite = async (params: Parameters<typeof createMandate>[0]) => {
@@ -133,7 +133,9 @@ export default function MyMandatesPage() {
     navigate(`/mandat/signer/${mandate.id}`);
   };
 
-  const handleSavePermissions = async (permissions: Parameters<typeof updateMandatePermissions>[1]) => {
+  const handleSavePermissions = async (
+    permissions: Parameters<typeof updateMandatePermissions>[1]
+  ) => {
     if (!selectedMandate) return false;
     return await updateMandatePermissions(selectedMandate.id, permissions);
   };
@@ -150,14 +152,13 @@ export default function MyMandatesPage() {
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Mes Mandats</h1>
                 <p className="text-muted-foreground">
-                  {viewMode === 'owner' 
-                    ? 'Gérez vos mandats de gestion locative' 
-                    : 'Mandats de gestion qui vous sont confiés'
-                  }
+                  {viewMode === 'owner'
+                    ? 'Gérez vos mandats de gestion locative'
+                    : 'Mandats de gestion qui vous sont confiés'}
                 </p>
               </div>
             </div>
-            
+
             {viewMode === 'owner' && myProperties.length > 0 && (
               <button
                 onClick={() => setShowInviteDialog(true)}
@@ -241,7 +242,7 @@ export default function MyMandatesPage() {
               className="w-full pl-10 pr-4 py-3 bg-card border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
             />
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Filter className="h-5 w-5 text-muted-foreground" />
             <select
@@ -268,16 +269,12 @@ export default function MyMandatesPage() {
               <FileText className="h-10 w-10 text-muted-foreground" />
             </div>
             <h3 className="text-lg font-bold text-foreground mb-2">
-              {searchQuery || statusFilter !== 'all' 
-                ? 'Aucun mandat trouvé' 
-                : 'Aucun mandat'
-              }
+              {searchQuery || statusFilter !== 'all' ? 'Aucun mandat trouvé' : 'Aucun mandat'}
             </h3>
             <p className="text-muted-foreground mb-6">
               {viewMode === 'owner'
                 ? 'Invitez une agence pour gérer vos biens'
-                : 'Les propriétaires peuvent vous confier la gestion de leurs biens'
-              }
+                : 'Les propriétaires peuvent vous confier la gestion de leurs biens'}
             </p>
             {viewMode === 'owner' && myProperties.length > 0 && (
               <button
@@ -291,7 +288,7 @@ export default function MyMandatesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredMandates.map(mandate => (
+            {filteredMandates.map((mandate) => (
               <MandateCard
                 key={mandate.id}
                 mandate={mandate}

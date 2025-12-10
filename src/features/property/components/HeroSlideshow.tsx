@@ -8,7 +8,7 @@ const FALLBACK_SLIDES: HeroSlide[] = [
     id: '1',
     image_url: '/images/hero-villa-cocody.jpg',
     title: 'Votre villa à Cocody',
-    description: 'Le luxe et le confort dans le quartier le plus prisé d\'Abidjan',
+    description: "Le luxe et le confort dans le quartier le plus prisé d'Abidjan",
     display_order: 1,
   },
   {
@@ -21,7 +21,7 @@ const FALLBACK_SLIDES: HeroSlide[] = [
   {
     id: '3',
     image_url: '/images/hero-quartiers-abidjan.jpg',
-    title: 'Découvrez les quartiers d\'Abidjan',
+    title: "Découvrez les quartiers d'Abidjan",
     description: 'De Plateau à Marcory, trouvez votre quartier idéal',
     display_order: 3,
   },

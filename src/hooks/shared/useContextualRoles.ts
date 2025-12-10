@@ -4,19 +4,19 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface ContextualRoles {
   // Rôles contextuels déduits des données
-  isOwner: boolean;           // A au moins une propriété
-  isTenant: boolean;          // A au moins un bail actif en tant que locataire
-  isLandlord: boolean;        // A au moins un bail actif en tant que propriétaire
-  
+  isOwner: boolean; // A au moins une propriété
+  isTenant: boolean; // A au moins un bail actif en tant que locataire
+  isLandlord: boolean; // A au moins un bail actif en tant que propriétaire
+
   // Compteurs
   propertiesCount: number;
   activeLeasesAsTenantCount: number;
   activeLeasesAsLandlordCount: number;
-  
+
   // État
   loading: boolean;
   error: Error | null;
-  
+
   // Actions
   refresh: () => Promise<void>;
 }
@@ -24,7 +24,7 @@ export interface ContextualRoles {
 /**
  * Hook pour détecter dynamiquement les rôles contextuels d'un utilisateur
  * basés sur ses propriétés et ses baux, pas sur un attribut fixe du profil.
- * 
+ *
  * - isOwner: true si l'utilisateur a au moins une propriété (properties.owner_id)
  * - isTenant: true si l'utilisateur a au moins un bail actif en tant que locataire (lease_contracts.tenant_id)
  * - isLandlord: true si l'utilisateur a au moins un bail actif en tant que propriétaire (lease_contracts.owner_id)
@@ -54,13 +54,13 @@ export function useContextualRoles(): ContextualRoles {
           .from('properties')
           .select('id', { count: 'exact', head: true })
           .eq('owner_id', user.id),
-        
+
         // Count active leases where user is tenant
         supabase
           .from('lease_contracts')
           .select('id', { count: 'exact', head: true })
           .eq('tenant_id', user.id),
-        
+
         // Count active leases where user is landlord/owner
         supabase
           .from('lease_contracts')
@@ -96,25 +96,28 @@ export function useContextualRoles(): ContextualRoles {
   const isTenant = activeLeasesAsTenantCount > 0;
   const isLandlord = activeLeasesAsLandlordCount > 0;
 
-  return useMemo(() => ({
-    isOwner,
-    isTenant,
-    isLandlord,
-    propertiesCount,
-    activeLeasesAsTenantCount,
-    activeLeasesAsLandlordCount,
-    loading,
-    error,
-    refresh: fetchContextualRoles,
-  }), [
-    isOwner,
-    isTenant,
-    isLandlord,
-    propertiesCount,
-    activeLeasesAsTenantCount,
-    activeLeasesAsLandlordCount,
-    loading,
-    error,
-    fetchContextualRoles,
-  ]);
+  return useMemo(
+    () => ({
+      isOwner,
+      isTenant,
+      isLandlord,
+      propertiesCount,
+      activeLeasesAsTenantCount,
+      activeLeasesAsLandlordCount,
+      loading,
+      error,
+      refresh: fetchContextualRoles,
+    }),
+    [
+      isOwner,
+      isTenant,
+      isLandlord,
+      propertiesCount,
+      activeLeasesAsTenantCount,
+      activeLeasesAsLandlordCount,
+      loading,
+      error,
+      fetchContextualRoles,
+    ]
+  );
 }

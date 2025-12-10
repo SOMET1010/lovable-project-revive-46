@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Home, Building, Building2, Users, FileText, Wrench, MessageSquare, Plus, Eye, TrendingUp, Calendar, Handshake } from 'lucide-react';
+import {
+  Home,
+  Building,
+  Building2,
+  Users,
+  FileText,
+  Wrench,
+  MessageSquare,
+  Plus,
+  Eye,
+  TrendingUp,
+  Calendar,
+  Handshake,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
@@ -83,10 +96,13 @@ export default function OwnerDashboardPage() {
         .eq('status', 'actif');
 
       const activeLeases = leasesData || [];
-      const monthlyRevenue = activeLeases.reduce((sum, lease) => sum + (lease.monthly_rent || 0), 0);
+      const monthlyRevenue = activeLeases.reduce(
+        (sum, lease) => sum + (lease.monthly_rent || 0),
+        0
+      );
 
       // Load pending applications
-      const propertyIds = props.map(p => p.id);
+      const propertyIds = props.map((p) => p.id);
       let pendingApplications = 0;
       if (propertyIds.length > 0) {
         const { data: applicationsData } = await supabase
@@ -144,7 +160,7 @@ export default function OwnerDashboardPage() {
     <OwnerDashboardLayout title="Tableau de bord propriétaire">
       {/* Header */}
       <div className="bg-[#2C1810] dashboard-header-animate">
-      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-6">
+        <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center icon-pulse-premium">
@@ -152,7 +168,9 @@ export default function OwnerDashboardPage() {
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-white">Espace Propriétaire</h1>
-                <p className="text-[#E8D4C5] mt-1">Bienvenue, {profile?.full_name || 'Propriétaire'}</p>
+                <p className="text-[#E8D4C5] mt-1">
+                  Bienvenue, {profile?.full_name || 'Propriétaire'}
+                </p>
               </div>
             </div>
             <Link
@@ -207,7 +225,9 @@ export default function OwnerDashboardPage() {
               </div>
               <span className="text-sm text-[#6B5A4E]">Revenus/mois</span>
             </div>
-            <p className="text-2xl font-bold text-[#F16522]">{stats.monthlyRevenue.toLocaleString()} <span className="text-sm">FCFA</span></p>
+            <p className="text-2xl font-bold text-[#F16522]">
+              {stats.monthlyRevenue.toLocaleString()} <span className="text-sm">FCFA</span>
+            </p>
           </div>
         </div>
 
@@ -221,7 +241,10 @@ export default function OwnerDashboardPage() {
                   <Home className="h-6 w-6 text-[#F16522]" />
                   <span>Mes Propriétés</span>
                 </h2>
-                <Link to="/dashboard/ajouter-propriete" className="text-[#F16522] hover:underline text-sm font-medium">
+                <Link
+                  to="/dashboard/ajouter-propriete"
+                  className="text-[#F16522] hover:underline text-sm font-medium"
+                >
                   + Ajouter
                 </Link>
               </div>
@@ -229,10 +252,17 @@ export default function OwnerDashboardPage() {
               {properties.length > 0 ? (
                 <div className="space-y-4">
                   {properties.slice(0, 5).map((property) => (
-                    <div key={property.id} className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 flex items-center gap-4 hover:border-[#F16522] transition-colors">
+                    <div
+                      key={property.id}
+                      className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 flex items-center gap-4 hover:border-[#F16522] transition-colors"
+                    >
                       <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-[#EFEBE9]">
                         {property.main_image ? (
-                          <img src={property.main_image} alt={property.title} className="w-full h-full object-cover" />
+                          <img
+                            src={property.main_image}
+                            alt={property.title}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Home className="h-8 w-8 text-[#6B5A4E]" />
@@ -241,24 +271,36 @@ export default function OwnerDashboardPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-[#2C1810] truncate">{property.title}</h3>
-                        <p className="text-sm text-[#6B5A4E]">{property.city} {property.neighborhood && `• ${property.neighborhood}`}</p>
+                        <p className="text-sm text-[#6B5A4E]">
+                          {property.city} {property.neighborhood && `• ${property.neighborhood}`}
+                        </p>
                         <div className="flex items-center gap-4 mt-2">
-                          <span className="text-[#F16522] font-bold">{property.monthly_rent.toLocaleString()} FCFA</span>
+                          <span className="text-[#F16522] font-bold">
+                            {property.monthly_rent.toLocaleString()} FCFA
+                          </span>
                           <span className="flex items-center gap-1 text-xs text-[#6B5A4E]">
                             <Eye className="h-3 w-3" /> {property.view_count || 0} vues
                           </span>
                         </div>
                       </div>
                       <div className="flex flex-col gap-2 items-end">
-                        <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                          property.status === 'disponible' ? 'bg-green-100 text-green-700' :
-                          property.status === 'loue' ? 'bg-blue-100 text-blue-700' :
-                          'bg-[#EFEBE9] text-[#6B5A4E]'
-                        }`}>
-                          {property.status === 'disponible' ? 'Disponible' : property.status === 'loue' ? 'Loué' : property.status}
+                        <span
+                          className={`text-xs px-3 py-1 rounded-full font-medium ${
+                            property.status === 'disponible'
+                              ? 'bg-green-100 text-green-700'
+                              : property.status === 'loue'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-[#EFEBE9] text-[#6B5A4E]'
+                          }`}
+                        >
+                          {property.status === 'disponible'
+                            ? 'Disponible'
+                            : property.status === 'loue'
+                              ? 'Loué'
+                              : property.status}
                         </span>
                         <div className="flex gap-3">
-                          <Link 
+                          <Link
                             to={`/propriete/${property.id}`}
                             className="text-xs text-[#F16522] hover:underline font-medium"
                           >
@@ -288,7 +330,7 @@ export default function OwnerDashboardPage() {
                   </div>
                   <h3 className="text-lg font-bold text-[#2C1810] mb-2">Aucune propriété</h3>
                   <p className="text-[#6B5A4E] mb-4">Commencez à louer votre bien dès maintenant</p>
-                  <Link 
+                  <Link
                     to="/dashboard/ajouter-propriete"
                     className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
                   >
@@ -306,38 +348,40 @@ export default function OwnerDashboardPage() {
             <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-6">
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Actions Rapides</h3>
               <div className="space-y-3">
-                <Link 
+                <Link
                   to="/dashboard/ajouter-propriete"
                   className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Ajouter un bien
                 </Link>
-                <Link 
+                <Link
                   to="/dashboard/candidatures"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Users className="h-5 w-5 mr-2" />
                   Candidatures
                   {stats.pendingApplications > 0 && (
-                    <span className="ml-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">{stats.pendingApplications}</span>
+                    <span className="ml-2 bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      {stats.pendingApplications}
+                    </span>
                   )}
                 </Link>
-                <Link 
+                <Link
                   to="/dashboard/mes-contrats"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <FileText className="h-5 w-5 mr-2" />
                   Mes contrats
                 </Link>
-                <Link 
+                <Link
                   to="/mes-mandats"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Handshake className="h-5 w-5 mr-2" />
                   Mandats agence
                 </Link>
-                <button 
+                <button
                   onClick={() => {
                     setSelectedPropertyForInvite(undefined);
                     setShowInviteDialog(true);
@@ -347,7 +391,7 @@ export default function OwnerDashboardPage() {
                   <Building2 className="h-5 w-5 mr-2" />
                   Inviter une agence
                 </button>
-                <Link 
+                <Link
                   to="/messages"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
@@ -362,14 +406,16 @@ export default function OwnerDashboardPage() {
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Alertes</h3>
               <div className="space-y-3">
                 {stats.pendingApplications > 0 && (
-                  <Link 
+                  <Link
                     to="/dashboard/candidatures"
                     className="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3 hover:border-amber-400 transition-colors"
                   >
                     <Users className="h-5 w-5 text-amber-600" />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-[#2C1810]">Candidatures en attente</p>
-                      <p className="text-2xl font-bold text-amber-600">{stats.pendingApplications}</p>
+                      <p className="text-2xl font-bold text-amber-600">
+                        {stats.pendingApplications}
+                      </p>
                     </div>
                   </Link>
                 )}
@@ -378,7 +424,9 @@ export default function OwnerDashboardPage() {
                     <Wrench className="h-5 w-5 text-blue-600" />
                     <div className="flex-1">
                       <p className="text-sm font-medium text-[#2C1810]">Demandes maintenance</p>
-                      <p className="text-2xl font-bold text-blue-600">{stats.maintenanceRequests}</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {stats.maintenanceRequests}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -391,9 +439,11 @@ export default function OwnerDashboardPage() {
                     </div>
                   </div>
                 )}
-                {stats.pendingApplications === 0 && stats.maintenanceRequests === 0 && stats.unreadMessages === 0 && (
-                  <p className="text-sm text-[#6B5A4E] text-center py-4">Aucune alerte</p>
-                )}
+                {stats.pendingApplications === 0 &&
+                  stats.maintenanceRequests === 0 &&
+                  stats.unreadMessages === 0 && (
+                    <p className="text-sm text-[#6B5A4E] text-center py-4">Aucune alerte</p>
+                  )}
               </div>
             </div>
 
@@ -418,7 +468,7 @@ export default function OwnerDashboardPage() {
         }}
         onInvite={createMandate}
         onDownloadMandate={downloadMandate}
-        properties={properties.map(p => ({
+        properties={properties.map((p) => ({
           id: p.id,
           title: p.title,
           city: p.city,

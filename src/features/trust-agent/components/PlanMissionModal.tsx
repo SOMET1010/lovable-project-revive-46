@@ -7,13 +7,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import Modal from '@/shared/ui/Modal';
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 
 interface Property {
   id: string;
@@ -197,7 +191,9 @@ export default function PlanMissionModal({
           </label>
           <Select value={propertyId} onValueChange={setPropertyId}>
             <SelectTrigger className="w-full bg-background">
-              <SelectValue placeholder={loadingProperties ? "Chargement..." : "Sélectionner une propriété"} />
+              <SelectValue
+                placeholder={loadingProperties ? 'Chargement...' : 'Sélectionner une propriété'}
+              />
             </SelectTrigger>
             <SelectContent className="bg-background border shadow-lg z-50">
               {properties.map((property) => (

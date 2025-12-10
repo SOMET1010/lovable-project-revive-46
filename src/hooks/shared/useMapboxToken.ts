@@ -1,25 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export function useMapboxToken() {
   // Local/public fallback so we are resilient when the edge function is down
   const envToken = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN as string | undefined;
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["mapbox-token"],
+    queryKey: ['mapbox-token'],
     enabled: !envToken, // skip network call if we already have the token locally
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke("get-mapbox-token");
-      
+      const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+
       if (error) {
-        console.error("Failed to fetch Mapbox token:", error);
+        console.error('Failed to fetch Mapbox token:', error);
         throw error;
       }
-      
+
       if (!data?.token) {
-        throw new Error("No token returned");
+        throw new Error('No token returned');
       }
-      
+
       return data.token as string;
     },
     staleTime: Infinity, // Token stable, pas besoin de refetch
@@ -27,9 +27,9 @@ export function useMapboxToken() {
     retry: 2,
   });
 
-  return { 
-    token: envToken || data, 
-    isLoading: envToken ? false : isLoading, 
-    error: envToken ? null : (error as Error | null) 
+  return {
+    token: envToken || data,
+    isLoading: envToken ? false : isLoading,
+    error: envToken ? null : (error as Error | null),
   };
 }

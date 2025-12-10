@@ -35,7 +35,7 @@ export default function DashboardRouter() {
 
     // Redirect based on user_type from profile
     const userType = profile?.user_type || profile?.active_role;
-    
+
     switch (userType) {
       case 'owner':
       case 'proprietaire':

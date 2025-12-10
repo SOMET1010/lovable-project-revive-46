@@ -50,7 +50,7 @@
 
 /* ===== PAGE ACTUELLE ===== */
 
-.breadcrumb [aria-current="page"] {
+.breadcrumb [aria-current='page'] {
   color: #1f2937;
   font-weight: 600;
   padding: 4px 8px;
@@ -58,7 +58,7 @@
 
 /* ===== SÉPARATEUR ===== */
 
-.breadcrumb [aria-hidden="true"] {
+.breadcrumb [aria-hidden='true'] {
   color: #d1d5db;
   display: flex;
   align-items: center;
@@ -77,30 +77,30 @@
     padding: 8px 0;
     margin-bottom: 12px;
   }
-  
+
   .breadcrumb ol {
     gap: 6px;
     font-size: 14px;
   }
-  
+
   /* Masquer les items intermédiaires sur très petit écran */
   @media (max-width: 480px) {
     /* Garder seulement Accueil et page actuelle */
     .breadcrumb li:not(:first-child):not(:last-child):not(:nth-last-child(2)) {
       display: none;
     }
-    
+
     /* Afficher "..." pour indiquer les items cachés */
-    .breadcrumb li:first-child + li[aria-hidden="true"] + li::before {
-      content: "...";
+    .breadcrumb li:first-child + li[aria-hidden='true'] + li::before {
+      content: '...';
       margin: 0 4px;
       color: #9ca3af;
     }
   }
-  
+
   /* Réduire le padding des liens */
   .breadcrumb a,
-  .breadcrumb [aria-current="page"] {
+  .breadcrumb [aria-current='page'] {
     padding: 2px 6px;
   }
 }
@@ -143,13 +143,13 @@
     color: #374151;
     font-weight: 500;
   }
-  
+
   .breadcrumb a:hover {
     color: #1d4ed8;
     background-color: #dbeafe;
   }
-  
-  .breadcrumb [aria-current="page"] {
+
+  .breadcrumb [aria-current='page'] {
     color: #111827;
     font-weight: 700;
   }
@@ -161,21 +161,21 @@
   .breadcrumb {
     border-bottom-color: #374151;
   }
-  
+
   .breadcrumb a {
     color: #d1d5db;
   }
-  
+
   .breadcrumb a:hover {
     color: #60a5fa;
     background-color: #1e3a8a;
   }
-  
-  .breadcrumb [aria-current="page"] {
+
+  .breadcrumb [aria-current='page'] {
     color: #f9fafb;
   }
-  
-  .breadcrumb [aria-hidden="true"] {
+
+  .breadcrumb [aria-hidden='true'] {
     color: #6b7280;
   }
 }
@@ -227,13 +227,13 @@
     padding-bottom: 8px;
     margin-bottom: 16px;
   }
-  
+
   .breadcrumb a {
     color: #000;
     text-decoration: underline;
   }
-  
-  .breadcrumb [aria-current="page"] {
+
+  .breadcrumb [aria-current='page'] {
     font-weight: bold;
   }
 }
@@ -267,13 +267,13 @@
 }
 
 /* Breadcrumb avec séparateur personnalisé */
-.breadcrumb.breadcrumb-slash [aria-hidden="true"]::before {
-  content: "/";
+.breadcrumb.breadcrumb-slash [aria-hidden='true']::before {
+  content: '/';
   color: #d1d5db;
   margin: 0 4px;
 }
 
-.breadcrumb.breadcrumb-slash [aria-hidden="true"] svg {
+.breadcrumb.breadcrumb-slash [aria-hidden='true'] svg {
   display: none;
 }
 
@@ -293,7 +293,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

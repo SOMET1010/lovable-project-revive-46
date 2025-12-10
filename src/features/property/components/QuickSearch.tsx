@@ -1,7 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Home as HomeIcon, Coins, Plus, CheckCircle, Shield, Navigation, Building2 } from 'lucide-react';
+import {
+  Search,
+  MapPin,
+  Home as HomeIcon,
+  Coins,
+  Plus,
+  CheckCircle,
+  Shield,
+  Navigation,
+  Building2,
+} from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { CITIES, ABIDJAN_COMMUNES, RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, GEOLOCATION_SETTINGS } from '@/shared/lib/constants/app.constants';
+import {
+  CITIES,
+  ABIDJAN_COMMUNES,
+  RESIDENTIAL_PROPERTY_TYPES,
+  COMMERCIAL_PROPERTY_TYPES,
+  GEOLOCATION_SETTINGS,
+} from '@/shared/lib/constants/app.constants';
 import { FEATURES } from '@/shared/config/features.config';
 
 interface QuickSearchProps {
@@ -22,7 +38,9 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
   const [city, setCity] = useState('');
   const [commune, setCommune] = useState('');
   const [propertyType, setPropertyType] = useState('');
-  const [propertyCategory, setPropertyCategory] = useState<'residentiel' | 'commercial' | ''>('residentiel');
+  const [propertyCategory, setPropertyCategory] = useState<'residentiel' | 'commercial' | ''>(
+    'residentiel'
+  );
   const [maxBudget, setMaxBudget] = useState('');
   const [useGeolocation, setUseGeolocation] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
@@ -63,12 +81,18 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
     if (propertyCategory === 'commercial') {
       return [
         { value: '', label: 'Tous les types commerciaux' },
-        ...COMMERCIAL_PROPERTY_TYPES.map(pt => ({ value: pt.value, label: `${pt.icon} ${pt.label}` }))
+        ...COMMERCIAL_PROPERTY_TYPES.map((pt) => ({
+          value: pt.value,
+          label: `${pt.icon} ${pt.label}`,
+        })),
       ];
     }
     return [
       { value: '', label: 'Tous les types résidentiels' },
-      ...RESIDENTIAL_PROPERTY_TYPES.map(pt => ({ value: pt.value, label: `${pt.icon} ${pt.label}` }))
+      ...RESIDENTIAL_PROPERTY_TYPES.map((pt) => ({
+        value: pt.value,
+        label: `${pt.icon} ${pt.label}`,
+      })),
     ];
   };
 
@@ -86,7 +110,7 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
 
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
-      alert('La géolocalisation n\'est pas supportée par votre navigateur');
+      alert("La géolocalisation n'est pas supportée par votre navigateur");
       return;
     }
 
@@ -95,7 +119,7 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
       (position) => {
         const location = {
           lat: position.coords.latitude,
-          lng: position.coords.longitude
+          lng: position.coords.longitude,
         };
         setUserLocation(location);
         setUseGeolocation(true);
@@ -107,10 +131,11 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
       },
       (error) => {
         console.error('Geolocation error:', error);
-        let errorMessage = 'Impossible d\'obtenir votre position.';
+        let errorMessage = "Impossible d'obtenir votre position.";
 
         if (error.code === error.PERMISSION_DENIED) {
-          errorMessage = 'Accès à la localisation refusé. Veuillez autoriser l\'accès dans les paramètres de votre navigateur.';
+          errorMessage =
+            "Accès à la localisation refusé. Veuillez autoriser l'accès dans les paramètres de votre navigateur.";
         } else if (error.code === error.POSITION_UNAVAILABLE) {
           errorMessage = 'Position non disponible. Veuillez vérifier votre connexion GPS.';
         } else if (error.code === error.TIMEOUT) {
@@ -123,7 +148,7 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
       {
         enableHighAccuracy: true,
         timeout: GEOLOCATION_SETTINGS.TIMEOUT,
-        maximumAge: GEOLOCATION_SETTINGS.MAX_AGE
+        maximumAge: GEOLOCATION_SETTINGS.MAX_AGE,
       }
     );
   };
@@ -150,7 +175,7 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
         maxBudget,
         propertyCategory,
         useGeolocation,
-        searchRadius: useGeolocation ? searchRadius : undefined
+        searchRadius: useGeolocation ? searchRadius : undefined,
       });
     } else {
       const params = new URLSearchParams();
@@ -160,7 +185,11 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
         params.append('lat', userLocation.lat.toString());
         params.append('lng', userLocation.lng.toString());
         params.append('radius', searchRadius.toString());
-      } else if (searchLocation && searchLocation !== 'Toutes les villes' && searchLocation !== 'Ma position actuelle') {
+      } else if (
+        searchLocation &&
+        searchLocation !== 'Toutes les villes' &&
+        searchLocation !== 'Ma position actuelle'
+      ) {
         params.append('city', searchLocation);
       }
 
@@ -250,7 +279,9 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
                 title="Utiliser ma position actuelle"
               >
                 <Navigation className="w-5 h-5" />
-                <span className="hidden sm:inline">{gettingLocation ? 'Détection...' : 'Ma position'}</span>
+                <span className="hidden sm:inline">
+                  {gettingLocation ? 'Détection...' : 'Ma position'}
+                </span>
               </button>
             )}
           </div>
@@ -397,9 +428,7 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
                 </p>
               )}
               {maxBudget && parseInt(maxBudget) > 5000000 && (
-                <p className="mt-1 text-xs text-red-600">
-                  Budget maximum: 5 000 000 FCFA
-                </p>
+                <p className="mt-1 text-xs text-red-600">Budget maximum: 5 000 000 FCFA</p>
               )}
             </div>
 
@@ -427,9 +456,7 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
 
         <div className="mt-6 flex items-center justify-center space-x-2 text-sm">
           <CheckCircle className="w-4 h-4 text-green-600" />
-          <span className="text-gray-700 font-medium">
-            100% gratuit • Sécurisé
-          </span>
+          <span className="text-gray-700 font-medium">100% gratuit • Sécurisé</span>
           <Shield className="w-4 h-4 text-olive-600" />
         </div>
       </div>

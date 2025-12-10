@@ -68,10 +68,7 @@ export function useDebouncedCallback<T extends (...args: any[]) => any>(
  * @param delay - Le délai en millisecondes (défaut: 300ms pour la recherche)
  * @returns Un objet avec la requête débouncée et une fonction de recherche
  */
-export function useDebouncedSearch(
-  initialQuery: string = '',
-  delay: number = 300
-) {
+export function useDebouncedSearch(initialQuery: string = '', delay: number = 300) {
   const [query, setQuery] = useState(initialQuery);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const debouncedSearchQuery = useDebounce(searchQuery, delay);
@@ -107,7 +104,7 @@ export function useDebouncedFilters<T extends Record<string, any>>(
   }, [debouncedFiltersValue]);
 
   const updateFilters = (newFilters: Partial<T>) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
+    setFilters((prev) => ({ ...prev, ...newFilters }));
   };
 
   const resetFilters = () => {
@@ -147,7 +144,7 @@ export function useDebouncedAutoSave<T extends Record<string, any>>(
   }, [debouncedDataValue, initialData]);
 
   const updateData = (newData: Partial<T>) => {
-    setData(prev => ({ ...prev, ...newData }));
+    setData((prev) => ({ ...prev, ...newData }));
   };
 
   const saveData = async (callback: (data: T) => Promise<void>) => {
@@ -182,15 +179,15 @@ export function useDebouncedAutoSave<T extends Record<string, any>>(
  * Configuration des délais de debouncing recommandés pour MonToit
  */
 export const DEBOUNCE_DELAYS = {
-  SEARCH: 300,           // Recherche de propriétés
-  FILTERS: 500,          // Filtres de recherche avancés
-  AUTOSAVE: 1000,        // Auto-save de formulaires
-  TYPING: 500,           // Pendant la saisie de texte
-  NAVIGATION: 200,       // Navigation entre pages
-  API_RETRY: 1000,       // Retry d'API
+  SEARCH: 300, // Recherche de propriétés
+  FILTERS: 500, // Filtres de recherche avancés
+  AUTOSAVE: 1000, // Auto-save de formulaires
+  TYPING: 500, // Pendant la saisie de texte
+  NAVIGATION: 200, // Navigation entre pages
+  API_RETRY: 1000, // Retry d'API
 } as const;
 
 /**
  * Types pour les différents délais de debouncing
  */
-export type DebounceDelay = typeof DEBOUNCE_DELAYS[keyof typeof DEBOUNCE_DELAYS];
+export type DebounceDelay = (typeof DEBOUNCE_DELAYS)[keyof typeof DEBOUNCE_DELAYS];

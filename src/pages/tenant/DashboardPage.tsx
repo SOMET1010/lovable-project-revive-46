@@ -1,5 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Home, Coins, MessageSquare, Clock, Heart, Search, CheckCircle, FileText, Wrench, Award } from 'lucide-react';
+import {
+  Home,
+  Coins,
+  MessageSquare,
+  Clock,
+  Heart,
+  Search,
+  CheckCircle,
+  FileText,
+  Wrench,
+  Award,
+} from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
@@ -72,7 +83,7 @@ export default function TenantDashboard() {
 
       if (leaseData) {
         const lease = leaseData as unknown as LeaseContract;
-        
+
         // Load property data
         const { data: propertyData } = await supabase
           .from('properties')
@@ -89,7 +100,9 @@ export default function TenantDashboard() {
           nextPaymentDate.setMonth(nextPaymentDate.getMonth() + 1);
         }
 
-        const daysRemaining = Math.ceil((nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const daysRemaining = Math.ceil(
+          (nextPaymentDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+        );
 
         setNextPayment({
           amount: lease.monthly_rent,
@@ -108,9 +121,13 @@ export default function TenantDashboard() {
         setRecentPayments((paymentsData || []) as unknown as Payment[]);
 
         const lastPayment = (paymentsData as unknown as Payment[] | null)?.[0];
-        const isLate = lastPayment && lastPayment.created_at && new Date(lastPayment.created_at) < new Date(nextPaymentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const isLate =
+          lastPayment &&
+          lastPayment.created_at &&
+          new Date(lastPayment.created_at) <
+            new Date(nextPaymentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-        setStats(prev => ({
+        setStats((prev) => ({
           ...prev,
           paymentStatus: isLate ? 'late' : 'up_to_date',
         }));
@@ -123,7 +140,7 @@ export default function TenantDashboard() {
         .eq('receiver_id', user.id)
         .eq('is_read', false);
 
-      setStats(prev => ({ ...prev, unreadMessages: messagesData?.length || 0 }));
+      setStats((prev) => ({ ...prev, unreadMessages: messagesData?.length || 0 }));
 
       // Load maintenance requests count
       const { data: maintenanceData } = await supabase
@@ -132,7 +149,7 @@ export default function TenantDashboard() {
         .eq('tenant_id', user.id)
         .in('status', ['ouverte', 'en_cours']);
 
-      setStats(prev => ({ ...prev, maintenanceRequests: maintenanceData?.length || 0 }));
+      setStats((prev) => ({ ...prev, maintenanceRequests: maintenanceData?.length || 0 }));
 
       // Load favorites
       const { data: favoritesData } = await supabase
@@ -153,7 +170,6 @@ export default function TenantDashboard() {
         .limit(3);
 
       setSavedSearches((searchesData || []) as any[]);
-
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
@@ -182,7 +198,9 @@ export default function TenantDashboard() {
             </div>
             <span>Mon Tableau de Bord</span>
           </h1>
-          <p className="text-[#E8D4C5] mt-2 text-lg ml-15">Bienvenue, {profile?.full_name || 'Locataire'}</p>
+          <p className="text-[#E8D4C5] mt-2 text-lg ml-15">
+            Bienvenue, {profile?.full_name || 'Locataire'}
+          </p>
         </div>
 
         {/* Content */}
@@ -213,20 +231,25 @@ export default function TenantDashboard() {
                     <div>
                       <p className="text-sm text-[#6B5A4E]">Durée du bail</p>
                       <p className="text-2xl font-bold text-[#2C1810]">
-                        {Math.ceil((new Date(activeLease.end_date).getTime() - new Date(activeLease.start_date).getTime()) / (1000 * 60 * 60 * 24 * 30))} mois
+                        {Math.ceil(
+                          (new Date(activeLease.end_date).getTime() -
+                            new Date(activeLease.start_date).getTime()) /
+                            (1000 * 60 * 60 * 24 * 30)
+                        )}{' '}
+                        mois
                       </p>
                     </div>
                   </div>
                   <div className="mt-6 flex flex-wrap gap-3">
-                    <Link 
-                      to={`/contrat/${activeLease.id}`} 
+                    <Link
+                      to={`/contrat/${activeLease.id}`}
                       className="inline-flex items-center border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-2 px-4 rounded-xl transition-colors"
                     >
                       <FileText className="h-4 w-4 mr-2" />
                       Voir le bail
                     </Link>
-                    <Link 
-                      to={`/propriete/${activeLease.property_id}`} 
+                    <Link
+                      to={`/propriete/${activeLease.property_id}`}
                       className="inline-flex items-center border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-2 px-4 rounded-xl transition-colors"
                     >
                       <Home className="h-4 w-4 mr-2" />
@@ -244,8 +267,8 @@ export default function TenantDashboard() {
                 <p className="text-[#6B5A4E] mb-6">
                   Vous n'avez pas encore de bail actif. Commencez votre recherche dès maintenant!
                 </p>
-                <Link 
-                  to="/recherche" 
+                <Link
+                  to="/recherche"
                   className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
                 >
                   <Search className="h-5 w-5 mr-2" />
@@ -261,11 +284,13 @@ export default function TenantDashboard() {
                   <Coins className="h-6 w-6 text-[#F16522]" />
                   <span>Prochain Paiement</span>
                 </h2>
-                <div className={`rounded-xl p-6 border ${
-                  stats.paymentStatus === 'late'
-                    ? 'bg-red-50 border-red-200'
-                    : 'bg-green-50 border-green-200'
-                }`}>
+                <div
+                  className={`rounded-xl p-6 border ${
+                    stats.paymentStatus === 'late'
+                      ? 'bg-red-50 border-red-200'
+                      : 'bg-green-50 border-green-200'
+                  }`}
+                >
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-sm text-[#6B5A4E] mb-1">Montant dû</p>
@@ -285,16 +310,19 @@ export default function TenantDashboard() {
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Clock className={`h-5 w-5 ${stats.paymentStatus === 'late' ? 'text-red-600' : 'text-green-600'}`} />
-                      <span className={`font-semibold ${stats.paymentStatus === 'late' ? 'text-red-700' : 'text-green-700'}`}>
+                      <Clock
+                        className={`h-5 w-5 ${stats.paymentStatus === 'late' ? 'text-red-600' : 'text-green-600'}`}
+                      />
+                      <span
+                        className={`font-semibold ${stats.paymentStatus === 'late' ? 'text-red-700' : 'text-green-700'}`}
+                      >
                         {nextPayment.daysRemaining > 0
                           ? `${nextPayment.daysRemaining} jours restants`
-                          : 'Paiement en retard'
-                        }
+                          : 'Paiement en retard'}
                       </span>
                     </div>
-                    <Link 
-                      to="/effectuer-paiement" 
+                    <Link
+                      to="/effectuer-paiement"
                       className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-2 px-4 rounded-xl transition-colors"
                     >
                       Payer maintenant
@@ -309,13 +337,19 @@ export default function TenantDashboard() {
               <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium card-stagger-3">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-[#2C1810]">Historique des Paiements</h2>
-                  <Link to="/mes-paiements" className="text-[#F16522] hover:underline text-sm font-medium">
+                  <Link
+                    to="/mes-paiements"
+                    className="text-[#F16522] hover:underline text-sm font-medium"
+                  >
                     Voir tout →
                   </Link>
                 </div>
                 <div className="space-y-3">
                   {recentPayments.map((payment) => (
-                    <div key={payment.id} className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 flex items-center justify-between">
+                    <div
+                      key={payment.id}
+                      className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-3">
                         {payment.status === 'complete' ? (
                           <CheckCircle className="h-6 w-6 text-green-600" />
@@ -335,11 +369,13 @@ export default function TenantDashboard() {
                           </p>
                         </div>
                       </div>
-                      <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-                        payment.status === 'complete'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-amber-100 text-amber-700'
-                      }`}>
+                      <span
+                        className={`text-xs px-3 py-1 rounded-full font-medium ${
+                          payment.status === 'complete'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}
+                      >
                         {payment.status === 'complete' ? 'Payé' : 'En attente'}
                       </span>
                     </div>
@@ -357,22 +393,22 @@ export default function TenantDashboard() {
               <div className="space-y-3">
                 {activeLease && (
                   <>
-                    <Link 
-                      to="/effectuer-paiement" 
+                    <Link
+                      to="/effectuer-paiement"
                       className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <Coins className="h-5 w-5 mr-2" />
                       Payer mon loyer
                     </Link>
-                    <Link 
-                      to="/maintenance/nouvelle" 
+                    <Link
+                      to="/maintenance/nouvelle"
                       className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <Wrench className="h-5 w-5 mr-2" />
                       Demander une réparation
                     </Link>
-                    <Link 
-                      to={`/contrat/${activeLease.id}`} 
+                    <Link
+                      to={`/contrat/${activeLease.id}`}
                       className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <FileText className="h-5 w-5 mr-2" />
@@ -380,15 +416,15 @@ export default function TenantDashboard() {
                     </Link>
                   </>
                 )}
-                <Link 
-                  to="/mon-score" 
+                <Link
+                  to="/mon-score"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Award className="h-5 w-5 mr-2" />
                   Mon Trust Score
                 </Link>
-                <Link 
-                  to="/recherche" 
+                <Link
+                  to="/recherche"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Search className="h-5 w-5 mr-2" />
@@ -426,7 +462,10 @@ export default function TenantDashboard() {
                     <Heart className="h-5 w-5 text-[#F16522]" />
                     <span>Mes Favoris</span>
                   </h3>
-                  <Link to="/favoris" className="text-[#F16522] hover:underline text-sm font-medium">
+                  <Link
+                    to="/favoris"
+                    className="text-[#F16522] hover:underline text-sm font-medium"
+                  >
                     Voir tout →
                   </Link>
                 </div>

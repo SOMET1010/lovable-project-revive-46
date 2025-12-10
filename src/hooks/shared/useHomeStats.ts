@@ -50,7 +50,7 @@ export function useHomeStats(): HomeStats {
         });
       } catch (error) {
         console.error('Erreur chargement stats:', error);
-        setStats(prev => ({ ...prev, isLoading: false }));
+        setStats((prev) => ({ ...prev, isLoading: false }));
       }
     };
 

@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { 
-  History, 
-  UserCheck, 
-  Home, 
-  Calendar, 
+import {
+  History,
+  UserCheck,
+  Home,
+  Calendar,
   Filter,
   Download,
   Search,
-  FileText
+  FileText,
 } from 'lucide-react';
 import { Card, CardContent } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
@@ -51,7 +51,7 @@ export default function CertificationHistoryPage() {
 
   const loadCertificationHistory = async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('admin_audit_logs')
@@ -65,17 +65,17 @@ export default function CertificationHistoryPage() {
       setLogs((data || []) as AuditLog[]);
     } catch (error) {
       console.error('Error loading history:', error);
-      toast.error('Erreur lors du chargement de l\'historique');
+      toast.error("Erreur lors du chargement de l'historique");
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredLogs = logs.filter(log => {
+  const filteredLogs = logs.filter((log) => {
     // Tab filter
     if (activeTab === 'users' && log.action !== 'USER_CERTIFIED') return false;
     if (activeTab === 'properties' && log.action !== 'PROPERTY_CERTIFIED_ANSUT') return false;
-    
+
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -85,30 +85,32 @@ export default function CertificationHistoryPage() {
         log.user_email?.toLowerCase().includes(query)
       );
     }
-    
+
     return true;
   });
 
   const stats = {
     total: logs.length,
-    users: logs.filter(l => l.action === 'USER_CERTIFIED').length,
-    properties: logs.filter(l => l.action === 'PROPERTY_CERTIFIED_ANSUT').length,
-    thisMonth: logs.filter(l => {
+    users: logs.filter((l) => l.action === 'USER_CERTIFIED').length,
+    properties: logs.filter((l) => l.action === 'PROPERTY_CERTIFIED_ANSUT').length,
+    thisMonth: logs.filter((l) => {
       const logDate = new Date(l.created_at);
       const now = new Date();
       return logDate.getMonth() === now.getMonth() && logDate.getFullYear() === now.getFullYear();
-    }).length
+    }).length,
   };
 
   const handleExport = () => {
     const csvContent = [
       ['Date', 'Type', 'ID Entité', 'Détails'].join(','),
-      ...filteredLogs.map(log => [
-        format(new Date(log.created_at), 'dd/MM/yyyy HH:mm'),
-        log.action === 'USER_CERTIFIED' ? 'Utilisateur' : 'Propriété',
-        log.entity_id,
-        log.details?.notes || ''
-      ].join(','))
+      ...filteredLogs.map((log) =>
+        [
+          format(new Date(log.created_at), 'dd/MM/yyyy HH:mm'),
+          log.action === 'USER_CERTIFIED' ? 'Utilisateur' : 'Propriété',
+          log.entity_id,
+          log.details?.notes || '',
+        ].join(',')
+      ),
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -123,7 +125,7 @@ export default function CertificationHistoryPage() {
   return (
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Historique des Certifications" />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -221,7 +223,7 @@ export default function CertificationHistoryPage() {
           <TabsContent value={activeTab}>
             {loading ? (
               <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map(i => (
+                {[1, 2, 3, 4, 5].map((i) => (
                   <Card key={i} className="animate-pulse">
                     <CardContent className="h-20" />
                   </Card>
@@ -236,22 +238,28 @@ export default function CertificationHistoryPage() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {filteredLogs.map(log => {
+                {filteredLogs.map((log) => {
                   const isUserCert = log.action === 'USER_CERTIFIED';
                   const Icon = isUserCert ? UserCheck : Home;
-                  
+
                   return (
                     <Card key={log.id}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-4">
-                          <div className={`p-3 rounded-lg ${isUserCert ? 'bg-blue-100' : 'bg-green-100'}`}>
-                            <Icon className={`h-6 w-6 ${isUserCert ? 'text-blue-600' : 'text-green-600'}`} />
+                          <div
+                            className={`p-3 rounded-lg ${isUserCert ? 'bg-blue-100' : 'bg-green-100'}`}
+                          >
+                            <Icon
+                              className={`h-6 w-6 ${isUserCert ? 'text-blue-600' : 'text-green-600'}`}
+                            />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between">
                               <div>
                                 <h3 className="font-semibold">
-                                  {isUserCert ? 'Certification Utilisateur' : 'Certification Propriété ANSUT'}
+                                  {isUserCert
+                                    ? 'Certification Utilisateur'
+                                    : 'Certification Propriété ANSUT'}
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
                                   ID: {log.entity_id.slice(0, 8)}...
@@ -262,33 +270,44 @@ export default function CertificationHistoryPage() {
                                   {isUserCert ? 'Utilisateur' : 'Propriété'}
                                 </Badge>
                                 <span className="text-xs text-muted-foreground">
-                                  {format(new Date(log.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                                  {format(new Date(log.created_at), 'dd MMM yyyy à HH:mm', {
+                                    locale: fr,
+                                  })}
                                 </span>
                               </div>
                             </div>
-                            
+
                             {/* Details */}
                             <div className="mt-3 space-y-2">
                               {isUserCert && log.details && (
                                 <div className="flex flex-wrap gap-2">
-                                  <Badge variant={log.details.identity_verified ? 'default' : 'outline'} className="text-xs">
+                                  <Badge
+                                    variant={log.details.identity_verified ? 'default' : 'outline'}
+                                    className="text-xs"
+                                  >
                                     Identité {log.details.identity_verified ? '✓' : '✗'}
                                   </Badge>
-                                  <Badge variant={log.details.oneci_verified ? 'default' : 'outline'} className="text-xs">
+                                  <Badge
+                                    variant={log.details.oneci_verified ? 'default' : 'outline'}
+                                    className="text-xs"
+                                  >
                                     ONECI {log.details.oneci_verified ? '✓' : '✗'}
                                   </Badge>
-                                  <Badge variant={log.details.cnam_verified ? 'default' : 'outline'} className="text-xs">
+                                  <Badge
+                                    variant={log.details.cnam_verified ? 'default' : 'outline'}
+                                    className="text-xs"
+                                  >
                                     CNAM {log.details.cnam_verified ? '✓' : '✗'}
                                   </Badge>
                                 </div>
                               )}
-                              
+
                               {!isUserCert && log.details?.checklist_passed && (
                                 <div className="flex flex-wrap gap-2">
                                   {log.details.checklist_passed.map((item) => (
-                                    <Badge 
-                                      key={item.id} 
-                                      variant={item.passed ? 'default' : 'outline'} 
+                                    <Badge
+                                      key={item.id}
+                                      variant={item.passed ? 'default' : 'outline'}
                                       className="text-xs"
                                     >
                                       {item.label.slice(0, 20)}... {item.passed ? '✓' : '✗'}
@@ -296,7 +315,7 @@ export default function CertificationHistoryPage() {
                                   ))}
                                 </div>
                               )}
-                              
+
                               {log.details?.notes && (
                                 <p className="text-sm text-muted-foreground flex items-start gap-2">
                                   <FileText className="h-4 w-4 flex-shrink-0 mt-0.5" />

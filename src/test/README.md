@@ -90,6 +90,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 ### 1. Tests Null Checks (`regression-null-checks.test.ts`)
 
 **Composants testés:**
+
 - `ContractPreview.tsx` - Génération de PDF avec données sécurisées
 - `TrustAgentsPage.tsx` - Administration avec vérifications null
 - `ModernAuthPage.tsx` - Authentification robuste
@@ -100,6 +101,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 - `AgencyTransactionsSection.tsx` - Filtrage sécurisé
 
 **Tests incluent:**
+
 - ✅ Accès sécurisés aux propriétés imbriquées
 - ✅ Gestion des valeurs par défaut
 - ✅ Vérifications de tableaux et objets
@@ -109,6 +111,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 ### 2. Tests Optimisations React.memo (`regression-react-memo-optimizations.test.ts`)
 
 **Composants testés:**
+
 - `PropertyCard.optimized.tsx` - Réduction des re-renders
 - `SearchResults.optimized.tsx` - Filtrage optimisé
 - `PropertyMap.optimized.tsx` - Gestion des événements
@@ -117,6 +120,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 - `DashboardPage.optimized.tsx` - Performance du tableau de bord
 
 **Hooks optimisés testés:**
+
 - `useProperties` - Configuration React Query optimisée
 - `useNotifications` - Cache multi-niveau et audio optimisé
 - `useMessages` - Pagination infinie et recherche débouncée
@@ -124,6 +128,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 - `usePerformanceMonitoring` - Surveillance des performances
 
 **Tests incluent:**
+
 - ✅ Validation React.memo avec comparaisons personnalisées
 - ✅ Stabilité des callbacks avec useCallback
 - ✅ Memoization des calculs avec useMemo
@@ -133,6 +138,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 ### 3. Tests Cleanup Functions (`regression-cleanup-functions.test.ts`)
 
 **Composants testés:**
+
 - `useAsync` - AbortController avec cleanup automatique
 - `useHttp` - Requêtes avec timeouts et cleanup
 - `usePerformanceMonitoring` - PerformanceObserver et EventListeners
@@ -142,6 +148,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 - `useApplications` - Auto-refresh avec intervals
 
 **Tests incluent:**
+
 - ✅ Création sécurisée des AbortControllers
 - ✅ Gestion des timeouts avec cleanup automatique
 - ✅ Subscriptions temps réel avec unsubscribe
@@ -154,6 +161,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 ### 4. Tests Gestion d'Erreur (`regression-error-handling.test.ts`)
 
 **Composants testés:**
+
 - `ErrorBoundary` - Capture d'erreurs de rendu
 - Composants avec gestion synchrone et asynchrone
 - Formulaires avec validation et gestion d'erreur
@@ -161,6 +169,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 - Gestion des erreurs réseau avec recovery
 
 **Tests incluent:**
+
 - ✅ ErrorBoundary avec fallbacks personnalisés
 - ✅ Gestion des erreurs synchrones sans plantage
 - ✅ Gestion des erreurs asynchrones avec retry
@@ -173,6 +182,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 ### 5. Tests d'Intégration (`regression-integration.test.ts`)
 
 **Scénarios testés:**
+
 - Initialisation complète de l'application
 - Recherche de propriétés avec optimisations
 - Système de messages avec optimistic updates
@@ -182,6 +192,7 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 - Tests de charge et performance
 
 **Tests incluent:**
+
 - ✅ Initialisation avec toutes les corrections
 - ✅ Workflows complets avec optimisations
 - ✅ Intégration des null checks dans les composants
@@ -194,16 +205,16 @@ npx jest --testPathPattern=regression --coverage --coverageDirectory=coverage/re
 
 ### Objectifs de Performance
 
-| Métrique | Objectif | Validation |
-|----------|----------|------------|
-| Temps de rendu composants simples | < 5ms | ✅ |
-| Temps de rendu composants complexes | < 16ms | ✅ |
-| Réduction des re-renders PropertyCard | 70-80% | ✅ |
-| Réduction des re-renders Dashboard | 50-60% | ✅ |
-| Temps de chargement propriétés | -68% | ✅ |
-| Notifications temps réel | < 50ms | ✅ |
-| Memory leaks | 0 | ✅ |
-| Temps de gestion d'erreur | < 100ms | ✅ |
+| Métrique                              | Objectif | Validation |
+| ------------------------------------- | -------- | ---------- |
+| Temps de rendu composants simples     | < 5ms    | ✅         |
+| Temps de rendu composants complexes   | < 16ms   | ✅         |
+| Réduction des re-renders PropertyCard | 70-80%   | ✅         |
+| Réduction des re-renders Dashboard    | 50-60%   | ✅         |
+| Temps de chargement propriétés        | -68%     | ✅         |
+| Notifications temps réel              | < 50ms   | ✅         |
+| Memory leaks                          | 0        | ✅         |
+| Temps de gestion d'erreur             | < 100ms  | ✅         |
 
 ### Coverage Attendu
 

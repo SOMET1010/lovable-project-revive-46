@@ -12,24 +12,24 @@ export default function RoleSwitcher() {
 
   // Simplified: only use user_type from profile
   const activeRole = profile?.user_type || 'locataire';
-  
+
   // For now, only show the current role (no multi-role support without DB tables)
   const availableRoles = [activeRole];
 
   const switchRole = async (newRole: string) => {
     if (newRole === activeRole) return;
-    
+
     setSwitching(true);
     try {
       await updateProfile({ user_type: newRole });
 
       // Redirect to appropriate dashboard
       if (newRole === 'locataire') {
-        navigate('/');
+        navigate('/locataire/dashboard');
       } else if (newRole === 'proprietaire') {
-        navigate('/dashboard/proprietaire');
+        navigate('/proprietaire/dashboard/proprietaire');
       } else if (newRole === 'agence') {
-        navigate('/agence/dashboard');
+        navigate('/proprietaire/dashboard/agence');
       }
     } catch (err) {
       console.error('Erreur changement de rôle:', err);
@@ -89,9 +89,7 @@ export default function RoleSwitcher() {
     <div className="relative">
       <div className="bg-white rounded-xl shadow-lg border-2 border-gray-100 p-3">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-xs text-gray-600 font-medium">
-            Profil actif
-          </div>
+          <div className="text-xs text-gray-600 font-medium">Profil actif</div>
           <button
             onClick={() => setShowInfo(!showInfo)}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -142,8 +140,8 @@ export default function RoleSwitcher() {
                 <Info className="h-4 w-4 text-cyan-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-xs text-gray-700 leading-relaxed">
-                    Vous avez plusieurs profils. Cliquez pour basculer entre vos rôles
-                    et accéder aux fonctionnalités correspondantes.
+                    Vous avez plusieurs profils. Cliquez pour basculer entre vos rôles et accéder
+                    aux fonctionnalités correspondantes.
                   </p>
                 </div>
               </div>

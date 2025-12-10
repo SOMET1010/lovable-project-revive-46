@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { 
-  Search, 
-  MapPin, 
-  Home as HomeIcon, 
-  X, 
-  AlertCircle, 
-  Map as MapIcon, 
+import {
+  Search,
+  MapPin,
+  Home as HomeIcon,
+  X,
+  AlertCircle,
+  Map as MapIcon,
   List,
   Bed,
   Bath,
@@ -18,7 +18,7 @@ import {
   Loader2,
   Filter,
   Bookmark,
-  Layers
+  Layers,
 } from 'lucide-react';
 import Breadcrumb from '@/shared/components/navigation/Breadcrumb';
 import MapWrapper from '@/shared/ui/MapWrapper';
@@ -44,7 +44,7 @@ const COLORS = {
 export default function SearchPropertiesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   // State for view mode
   const [activeView, setActiveView] = useState<'list' | 'map'>('list');
   const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
@@ -165,11 +165,11 @@ export default function SearchPropertiesPage() {
   };
 
   const activeFiltersCount = [
-    appliedFilters.city, 
-    appliedFilters.propertyType, 
-    appliedFilters.minPrice, 
-    appliedFilters.maxPrice, 
-    appliedFilters.bedrooms
+    appliedFilters.city,
+    appliedFilters.propertyType,
+    appliedFilters.minPrice,
+    appliedFilters.maxPrice,
+    appliedFilters.bedrooms,
   ].filter(Boolean).length;
 
   const displayError = error || queryError;
@@ -179,32 +179,28 @@ export default function SearchPropertiesPage() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: COLORS.creme }}>
-      
       {/* ==================== HEADER AVEC DÉGRADÉ ALLÉGÉ ==================== */}
-      <header 
+      <header
         className="relative overflow-hidden pb-8 pt-20 md:pt-24 px-4"
-        style={{ 
-          background: `linear-gradient(to bottom, ${COLORS.chocolat} 0%, #3D2518 100%)` 
+        style={{
+          background: `linear-gradient(to bottom, ${COLORS.chocolat} 0%, #3D2518 100%)`,
         }}
       >
         {/* Texture de fond subtile plus légère */}
-        <div 
+        <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
           }}
         />
-        
+
         {/* Lueur d'ambiance orange */}
         <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#F16522]/5 rounded-full blur-[100px] pointer-events-none" />
-        
+
         <div className="relative z-10 max-w-7xl mx-auto">
           {/* Breadcrumb */}
           <div className="mb-4">
-            <Breadcrumb 
-              items={[{ label: 'Recherche' }]} 
-              className="text-white/60"
-            />
+            <Breadcrumb items={[{ label: 'Recherche' }]} className="text-white/60" />
           </div>
 
           {/* Header Content - Plus compact */}
@@ -212,13 +208,18 @@ export default function SearchPropertiesPage() {
             <div>
               <div className="flex items-center gap-2 mb-1" style={{ color: COLORS.orange }}>
                 <Search className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-widest">Moteur de recherche</span>
+                <span className="text-xs font-bold uppercase tracking-widest">
+                  Moteur de recherche
+                </span>
               </div>
               <h1 className="text-2xl md:text-3xl font-bold text-white">Trouver un bien</h1>
             </div>
-            
+
             {!loading && (
-              <div className="hidden md:flex items-center gap-2 text-sm" style={{ color: COLORS.sable }}>
+              <div
+                className="hidden md:flex items-center gap-2 text-sm"
+                style={{ color: COLORS.sable }}
+              >
                 <span className="font-bold text-white">{totalCount}</span> biens disponibles
               </div>
             )}
@@ -226,7 +227,7 @@ export default function SearchPropertiesPage() {
 
           {/* ==================== BARRE DE FILTRES CAPSULE ==================== */}
           <form onSubmit={handleSearch}>
-            <div 
+            <div
               className="bg-white p-2 rounded-[20px] shadow-lg flex flex-col md:flex-row items-stretch divide-y md:divide-y-0 md:divide-x"
               style={{ borderColor: COLORS.border }}
             >
@@ -234,7 +235,12 @@ export default function SearchPropertiesPage() {
               <div className="flex-1 px-4 py-3">
                 <div className="flex items-center gap-2 mb-1">
                   <MapPin className="w-3 h-3" style={{ color: COLORS.grisNeutre }} />
-                  <span className="text-[10px] font-bold uppercase" style={{ color: COLORS.grisNeutre }}>Localisation</span>
+                  <span
+                    className="text-[10px] font-bold uppercase"
+                    style={{ color: COLORS.grisNeutre }}
+                  >
+                    Localisation
+                  </span>
                 </div>
                 <select
                   value={city}
@@ -260,7 +266,12 @@ export default function SearchPropertiesPage() {
               <div className="flex-1 px-4 py-3">
                 <div className="flex items-center gap-2 mb-1">
                   <HomeIcon className="w-3 h-3" style={{ color: COLORS.grisNeutre }} />
-                  <span className="text-[10px] font-bold uppercase" style={{ color: COLORS.grisNeutre }}>Type de bien</span>
+                  <span
+                    className="text-[10px] font-bold uppercase"
+                    style={{ color: COLORS.grisNeutre }}
+                  >
+                    Type de bien
+                  </span>
                 </div>
                 <select
                   value={propertyType}
@@ -281,7 +292,12 @@ export default function SearchPropertiesPage() {
               <div className="flex-1 px-4 py-3">
                 <div className="flex items-center gap-2 mb-1">
                   <Banknote className="w-3 h-3" style={{ color: COLORS.grisNeutre }} />
-                  <span className="text-[10px] font-bold uppercase" style={{ color: COLORS.grisNeutre }}>Budget max</span>
+                  <span
+                    className="text-[10px] font-bold uppercase"
+                    style={{ color: COLORS.grisNeutre }}
+                  >
+                    Budget max
+                  </span>
                 </div>
                 <select
                   value={maxPrice}
@@ -320,14 +336,14 @@ export default function SearchPropertiesPage() {
               >
                 <SlidersHorizontal className="w-3 h-3" /> Plus de filtres
               </button>
-              
+
               <div className="h-4 w-px bg-white/20 hidden md:block" />
 
               {/* Tags dans un conteneur unifié */}
               <div className="flex flex-wrap gap-2 bg-white/5 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/10">
-                {quickFilters.map(tag => (
-                  <button 
-                    key={tag} 
+                {quickFilters.map((tag) => (
+                  <button
+                    key={tag}
                     type="button"
                     className="text-xs rounded-full px-3 py-1 hover:bg-white/20 hover:text-white transition-all font-medium"
                     style={{ color: COLORS.sable }}
@@ -365,11 +381,13 @@ export default function SearchPropertiesPage() {
 
       {/* ==================== CONTENU PRINCIPAL ==================== */}
       <main className="max-w-7xl mx-auto px-4 py-6">
-        
         {/* Barre d'outils (Tri & Vue) - Espacement réduit */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-5">
           <div className="flex items-center gap-2 text-sm" style={{ color: COLORS.grisTexte }}>
-            <span className="font-bold" style={{ color: COLORS.chocolat }}>{totalCount}</span> résultats trouvés
+            <span className="font-bold" style={{ color: COLORS.chocolat }}>
+              {totalCount}
+            </span>{' '}
+            résultats trouvés
           </div>
 
           <div className="flex items-center gap-3">
@@ -385,41 +403,40 @@ export default function SearchPropertiesPage() {
                 <option value="price_asc">Prix croissant</option>
                 <option value="price_desc">Prix décroissant</option>
               </select>
-              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: COLORS.grisNeutre }} />
+              <ArrowUpDown
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                style={{ color: COLORS.grisNeutre }}
+              />
             </div>
 
             {/* Toggle Vue - Amélioré avec labels */}
-            <div 
+            <div
               className="bg-white border rounded-full p-1.5 flex items-center gap-1"
               style={{ borderColor: COLORS.border }}
             >
-              <button 
+              <button
                 type="button"
                 onClick={() => setActiveView('list')}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-full transition-all text-sm font-medium ${
-                  activeView === 'list' 
-                    ? 'text-white shadow-md' 
-                    : 'hover:bg-gray-50'
+                  activeView === 'list' ? 'text-white shadow-md' : 'hover:bg-gray-50'
                 }`}
-                style={{ 
+                style={{
                   backgroundColor: activeView === 'list' ? COLORS.chocolat : 'transparent',
-                  color: activeView === 'list' ? 'white' : COLORS.grisNeutre
+                  color: activeView === 'list' ? 'white' : COLORS.grisNeutre,
                 }}
               >
                 <List className="w-4 h-4" />
                 <span className="hidden sm:inline">Liste</span>
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={() => setActiveView('map')}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-full transition-all text-sm font-medium ${
-                  activeView === 'map' 
-                    ? 'text-white shadow-md' 
-                    : 'hover:bg-gray-50'
+                  activeView === 'map' ? 'text-white shadow-md' : 'hover:bg-gray-50'
                 }`}
-                style={{ 
+                style={{
                   backgroundColor: activeView === 'map' ? COLORS.chocolat : 'transparent',
-                  color: activeView === 'map' ? 'white' : COLORS.grisNeutre
+                  color: activeView === 'map' ? 'white' : COLORS.grisNeutre,
                 }}
               >
                 <MapIcon className="w-4 h-4" />
@@ -451,7 +468,6 @@ export default function SearchPropertiesPage() {
 
         {/* CONTENU (Liste ou Carte) */}
         <div className="flex gap-8 items-start">
-          
           {/* GRILLE DES BIENS */}
           <div className={`flex-1 ${activeView === 'map' ? 'hidden lg:block' : ''}`}>
             <InfiniteScroll
@@ -462,12 +478,17 @@ export default function SearchPropertiesPage() {
               loader={
                 <div className="flex justify-center items-center py-8">
                   <Loader2 className="w-8 h-8 animate-spin" style={{ color: COLORS.orange }} />
-                  <span className="ml-3" style={{ color: COLORS.grisTexte }}>Chargement...</span>
+                  <span className="ml-3" style={{ color: COLORS.grisTexte }}>
+                    Chargement...
+                  </span>
                 </div>
               }
               endMessage={
                 properties.length > 0 ? (
-                  <div className="flex justify-center items-center py-8" style={{ color: COLORS.grisNeutre }}>
+                  <div
+                    className="flex justify-center items-center py-8"
+                    style={{ color: COLORS.grisNeutre }}
+                  >
                     <span>Vous avez vu toutes les propriétés disponibles</span>
                   </div>
                 ) : null
@@ -475,10 +496,12 @@ export default function SearchPropertiesPage() {
             >
               {loading ? (
                 /* Loading skeleton Premium */
-                <div className={`grid gap-6 ${activeView === 'map' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+                <div
+                  className={`grid gap-6 ${activeView === 'map' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+                >
                   {[...Array(6)].map((_, i) => (
-                    <div 
-                      key={i} 
+                    <div
+                      key={i}
                       className="bg-white rounded-[20px] h-[420px] animate-pulse border"
                       style={{ borderColor: COLORS.border }}
                     />
@@ -488,11 +511,11 @@ export default function SearchPropertiesPage() {
                 /* Empty state Premium avec détail des filtres */
                 <div className="text-center py-16 md:py-24">
                   <div className="relative inline-block mb-8">
-                    <div 
+                    <div
                       className="absolute inset-0 rounded-full blur-2xl animate-pulse"
                       style={{ backgroundColor: `${COLORS.orange}33` }}
                     />
-                    <div 
+                    <div
                       className="relative rounded-full w-28 h-28 flex items-center justify-center border"
                       style={{ backgroundColor: COLORS.creme, borderColor: COLORS.border }}
                     >
@@ -502,7 +525,7 @@ export default function SearchPropertiesPage() {
                   <h3 className="text-2xl font-bold mb-3" style={{ color: COLORS.chocolat }}>
                     Aucune propriété trouvée
                   </h3>
-                  
+
                   {/* Afficher les filtres actifs */}
                   {activeFiltersCount > 0 && (
                     <div className="mb-6 max-w-md mx-auto">
@@ -511,7 +534,7 @@ export default function SearchPropertiesPage() {
                       </p>
                       <div className="flex flex-wrap justify-center gap-2">
                         {appliedFilters.city && (
-                          <span 
+                          <span
                             className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
                             style={{ backgroundColor: `${COLORS.orange}15`, color: COLORS.orange }}
                           >
@@ -520,7 +543,7 @@ export default function SearchPropertiesPage() {
                           </span>
                         )}
                         {appliedFilters.propertyType && (
-                          <span 
+                          <span
                             className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
                             style={{ backgroundColor: `${COLORS.orange}15`, color: COLORS.orange }}
                           >
@@ -529,7 +552,7 @@ export default function SearchPropertiesPage() {
                           </span>
                         )}
                         {appliedFilters.maxPrice && (
-                          <span 
+                          <span
                             className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
                             style={{ backgroundColor: `${COLORS.orange}15`, color: COLORS.orange }}
                           >
@@ -538,7 +561,7 @@ export default function SearchPropertiesPage() {
                           </span>
                         )}
                         {appliedFilters.bedrooms && (
-                          <span 
+                          <span
                             className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
                             style={{ backgroundColor: `${COLORS.orange}15`, color: COLORS.orange }}
                           >
@@ -551,11 +574,11 @@ export default function SearchPropertiesPage() {
                   )}
 
                   <p className="mb-8 max-w-md mx-auto" style={{ color: COLORS.grisTexte }}>
-                    {activeFiltersCount > 0 
+                    {activeFiltersCount > 0
                       ? "Aucun bien ne correspond à ces critères. Essayez d'élargir votre recherche."
-                      : "Aucun bien disponible pour le moment. Revenez bientôt !"}
+                      : 'Aucun bien disponible pour le moment. Revenez bientôt !'}
                   </p>
-                  
+
                   {activeFiltersCount > 0 && (
                     <button
                       onClick={clearFilters}
@@ -569,13 +592,15 @@ export default function SearchPropertiesPage() {
                 </div>
               ) : (
                 /* Properties Grid Premium Ivorian */
-                <div className={`grid gap-6 ${activeView === 'map' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+                <div
+                  className={`grid gap-6 ${activeView === 'map' ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}
+                >
                   {properties.map((property, index) => (
                     <article
                       key={property.id}
                       onClick={() => navigate(`/proprietes/${property.id}`)}
                       className="group bg-white rounded-[20px] overflow-hidden border hover:shadow-[0_20px_40px_rgba(44,24,16,0.08)] transition-all duration-300 cursor-pointer"
-                      style={{ 
+                      style={{
                         borderColor: COLORS.border,
                       }}
                       onMouseEnter={(e) => {
@@ -588,27 +613,34 @@ export default function SearchPropertiesPage() {
                       {/* Image Container */}
                       <div className="relative h-64 overflow-hidden">
                         <img
-                          src={property.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800'}
+                          src={
+                            property.images?.[0] ||
+                            'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800'
+                          }
                           alt={property.title || 'Propriété'}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           loading="lazy"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800';
+                            target.src =
+                              'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800';
                           }}
                         />
-                        
+
                         {/* Badges Flottants */}
                         <div className="absolute top-3 left-3 flex gap-2">
                           {index < 3 && (
-                            <span 
+                            <span
                               className="text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase shadow-sm"
                               style={{ backgroundColor: COLORS.orange }}
                             >
                               Nouveau
                             </span>
                           )}
-                          <span className="bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-1 rounded-md uppercase shadow-sm" style={{ color: COLORS.chocolat }}>
+                          <span
+                            className="bg-white/90 backdrop-blur-sm text-[10px] font-bold px-2 py-1 rounded-md uppercase shadow-sm"
+                            style={{ color: COLORS.chocolat }}
+                          >
                             Disponible
                           </span>
                         </div>
@@ -627,7 +659,7 @@ export default function SearchPropertiesPage() {
 
                         {/* Prix Overlay */}
                         <div className="absolute bottom-3 left-3">
-                          <div 
+                          <div
                             className="backdrop-blur-sm text-white px-3 py-1.5 rounded-lg shadow-lg"
                             style={{ backgroundColor: `${COLORS.chocolat}E6` }}
                           >
@@ -641,13 +673,13 @@ export default function SearchPropertiesPage() {
                       <div className="p-5">
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <p 
+                            <p
                               className="text-[10px] font-bold uppercase mb-1"
                               style={{ color: COLORS.grisNeutre }}
                             >
                               {property.property_type || 'Bien immobilier'}
                             </p>
-                            <h3 
+                            <h3
                               className="font-bold text-lg leading-tight transition-colors line-clamp-1"
                               style={{ color: COLORS.chocolat }}
                             >
@@ -655,33 +687,44 @@ export default function SearchPropertiesPage() {
                             </h3>
                           </div>
                           {property.owner_trust_score != null && (
-                            <ScoreBadge score={property.owner_trust_score} size="sm" variant="compact" />
+                            <ScoreBadge
+                              score={property.owner_trust_score}
+                              size="sm"
+                              variant="compact"
+                            />
                           )}
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-sm mb-4" style={{ color: COLORS.grisTexte }}>
+                        <div
+                          className="flex items-center gap-1.5 text-sm mb-4"
+                          style={{ color: COLORS.grisTexte }}
+                        >
                           <MapPin className="w-3.5 h-3.5" style={{ color: COLORS.orange }} />
-                          {property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city || 'Non spécifié'}
+                          {property.neighborhood ? `${property.neighborhood}, ` : ''}
+                          {property.city || 'Non spécifié'}
                         </div>
 
                         {/* Features */}
-                        <div 
+                        <div
                           className="flex items-center gap-4 pt-4 border-t text-xs font-medium"
                           style={{ borderColor: COLORS.border, color: COLORS.grisNeutre }}
                         >
                           {property.bedrooms && (
                             <div className="flex items-center gap-1.5">
-                              <Bed className="w-4 h-4" style={{ color: COLORS.orange }} /> {property.bedrooms} ch.
+                              <Bed className="w-4 h-4" style={{ color: COLORS.orange }} />{' '}
+                              {property.bedrooms} ch.
                             </div>
                           )}
                           {property.bathrooms && (
                             <div className="flex items-center gap-1.5">
-                              <Bath className="w-4 h-4" style={{ color: COLORS.orange }} /> {property.bathrooms} sdb
+                              <Bath className="w-4 h-4" style={{ color: COLORS.orange }} />{' '}
+                              {property.bathrooms} sdb
                             </div>
                           )}
                           {property.surface_area && (
                             <div className="flex items-center gap-1.5">
-                              <Maximize className="w-4 h-4" style={{ color: COLORS.orange }} /> {property.surface_area} m²
+                              <Maximize className="w-4 h-4" style={{ color: COLORS.orange }} />{' '}
+                              {property.surface_area} m²
                             </div>
                           )}
                         </div>
@@ -698,30 +741,30 @@ export default function SearchPropertiesPage() {
             <div className="hidden lg:block w-[45%] h-[800px] sticky top-24">
               {/* Toggle Cluster/Marqueurs */}
               <div className="flex justify-end mb-3">
-                <div 
+                <div
                   className="bg-white border rounded-full p-1 flex items-center gap-1 shadow-sm"
                   style={{ borderColor: COLORS.border }}
                 >
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setUseClusterMode(true)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-medium`}
-                    style={{ 
+                    style={{
                       backgroundColor: useClusterMode ? COLORS.orange : 'transparent',
-                      color: useClusterMode ? 'white' : COLORS.grisNeutre
+                      color: useClusterMode ? 'white' : COLORS.grisNeutre,
                     }}
                     title="Regrouper les propriétés proches en clusters"
                   >
                     <Layers className="w-3.5 h-3.5" />
                     <span>Clusters</span>
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setUseClusterMode(false)}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-medium`}
-                    style={{ 
+                    style={{
                       backgroundColor: !useClusterMode ? COLORS.orange : 'transparent',
-                      color: !useClusterMode ? 'white' : COLORS.grisNeutre
+                      color: !useClusterMode ? 'white' : COLORS.grisNeutre,
                     }}
                     title="Afficher chaque propriété individuellement"
                   >
@@ -730,13 +773,16 @@ export default function SearchPropertiesPage() {
                   </button>
                 </div>
               </div>
-              <div 
+              <div
                 className="w-full h-[calc(100%-44px)] rounded-[24px] overflow-hidden shadow-inner border"
                 style={{ borderColor: COLORS.border }}
               >
-                {properties.filter(p => p.longitude !== null && p.latitude !== null).length > 0 ? (
+                {properties.filter((p) => p.longitude !== null && p.latitude !== null).length >
+                0 ? (
                   <MapWrapper
-                    properties={properties.filter(p => p.longitude !== null && p.latitude !== null) as any}
+                    properties={
+                      properties.filter((p) => p.longitude !== null && p.latitude !== null) as any
+                    }
                     height="100%"
                     fitBounds={properties.length > 0}
                     useClusterMode={useClusterMode}
@@ -745,18 +791,20 @@ export default function SearchPropertiesPage() {
                     }}
                   />
                 ) : (
-                  <div 
+                  <div
                     className="w-full h-full flex flex-col items-center justify-center"
                     style={{ backgroundColor: '#E5E5E5' }}
                   >
                     <div className="bg-white p-6 rounded-2xl shadow-xl text-center max-w-xs">
-                      <div 
+                      <div
                         className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
                         style={{ backgroundColor: `${COLORS.orange}1A` }}
                       >
                         <MapIcon className="w-6 h-6" style={{ color: COLORS.orange }} />
                       </div>
-                      <h3 className="font-bold mb-2" style={{ color: COLORS.chocolat }}>Carte Interactive</h3>
+                      <h3 className="font-bold mb-2" style={{ color: COLORS.chocolat }}>
+                        Carte Interactive
+                      </h3>
                       <p className="text-sm" style={{ color: COLORS.grisTexte }}>
                         Aucune propriété géolocalisée disponible pour le moment.
                       </p>
@@ -773,29 +821,29 @@ export default function SearchPropertiesPage() {
           <div className="lg:hidden space-y-6">
             {/* Toggle Cluster/Marqueurs Mobile */}
             <div className="flex justify-end">
-              <div 
+              <div
                 className="bg-white border rounded-full p-1 flex items-center gap-1 shadow-sm"
                 style={{ borderColor: COLORS.border }}
               >
-                <button 
+                <button
                   type="button"
                   onClick={() => setUseClusterMode(true)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-medium`}
-                  style={{ 
+                  style={{
                     backgroundColor: useClusterMode ? COLORS.orange : 'transparent',
-                    color: useClusterMode ? 'white' : COLORS.grisNeutre
+                    color: useClusterMode ? 'white' : COLORS.grisNeutre,
                   }}
                 >
                   <Layers className="w-3.5 h-3.5" />
                   <span>Clusters</span>
                 </button>
-                <button 
+                <button
                   type="button"
                   onClick={() => setUseClusterMode(false)}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all text-xs font-medium`}
-                  style={{ 
+                  style={{
                     backgroundColor: !useClusterMode ? COLORS.orange : 'transparent',
-                    color: !useClusterMode ? 'white' : COLORS.grisNeutre
+                    color: !useClusterMode ? 'white' : COLORS.grisNeutre,
                   }}
                 >
                   <MapPin className="w-3.5 h-3.5" />
@@ -803,13 +851,15 @@ export default function SearchPropertiesPage() {
                 </button>
               </div>
             </div>
-            <div 
+            <div
               className="h-[400px] rounded-2xl overflow-hidden shadow-lg border"
               style={{ borderColor: COLORS.border }}
             >
-              {properties.filter(p => p.longitude !== null && p.latitude !== null).length > 0 ? (
+              {properties.filter((p) => p.longitude !== null && p.latitude !== null).length > 0 ? (
                 <MapWrapper
-                  properties={properties.filter(p => p.longitude !== null && p.latitude !== null) as any}
+                  properties={
+                    properties.filter((p) => p.longitude !== null && p.latitude !== null) as any
+                  }
                   height="100%"
                   fitBounds={properties.length > 0}
                   useClusterMode={useClusterMode}
@@ -818,12 +868,15 @@ export default function SearchPropertiesPage() {
                   }}
                 />
               ) : (
-                <div 
+                <div
                   className="w-full h-full flex items-center justify-center"
                   style={{ backgroundColor: '#E5E5E5' }}
                 >
                   <div className="text-center">
-                    <MapIcon className="w-12 h-12 mx-auto mb-3" style={{ color: COLORS.grisNeutre }} />
+                    <MapIcon
+                      className="w-12 h-12 mx-auto mb-3"
+                      style={{ color: COLORS.grisNeutre }}
+                    />
                     <p style={{ color: COLORS.grisTexte }}>Aucune propriété géolocalisée</p>
                   </div>
                 </div>
@@ -833,7 +886,9 @@ export default function SearchPropertiesPage() {
             {/* Mobile property cards */}
             {!loading && properties.length > 0 && (
               <div>
-                <h3 className="text-lg font-bold mb-4" style={{ color: COLORS.chocolat }}>À proximité</h3>
+                <h3 className="text-lg font-bold mb-4" style={{ color: COLORS.chocolat }}>
+                  À proximité
+                </h3>
                 <div className="grid grid-cols-1 gap-4">
                   {properties.slice(0, 4).map((property) => (
                     <article
@@ -843,22 +898,31 @@ export default function SearchPropertiesPage() {
                       style={{ borderColor: COLORS.border }}
                     >
                       <img
-                        src={property.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'}
+                        src={
+                          property.images?.[0] ||
+                          'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400'
+                        }
                         alt={property.title || 'Propriété'}
                         className="w-24 h-24 object-cover rounded-lg flex-shrink-0"
                         loading="lazy"
                       />
                       <div className="flex-1 min-w-0">
-                        <span 
+                        <span
                           className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full mb-2 capitalize"
                           style={{ backgroundColor: `${COLORS.orange}1A`, color: COLORS.orange }}
                         >
                           {property.property_type}
                         </span>
-                        <h4 className="font-semibold text-sm mb-1 line-clamp-1" style={{ color: COLORS.chocolat }}>
+                        <h4
+                          className="font-semibold text-sm mb-1 line-clamp-1"
+                          style={{ color: COLORS.chocolat }}
+                        >
                           {property.title || 'Propriété'}
                         </h4>
-                        <p className="text-xs mb-2 flex items-center gap-1" style={{ color: COLORS.grisTexte }}>
+                        <p
+                          className="text-xs mb-2 flex items-center gap-1"
+                          style={{ color: COLORS.grisTexte }}
+                        >
                           <MapPin className="h-3 w-3" style={{ color: COLORS.orange }} />
                           {property.city} {property.neighborhood && `• ${property.neighborhood}`}
                         </p>

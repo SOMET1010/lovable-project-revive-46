@@ -28,11 +28,17 @@ export const routes: RouteObject[] = [
       // Authentication routes
       ...authRoutes,
 
-      // Tenant routes (dashboard, applications, visits, contracts, payments)
-      ...tenantRoutes,
+      // Tenant routes under /locataire prefix
+      {
+        path: 'locataire',
+        children: tenantRoutes,
+      },
 
-      // Owner & Agency routes (property management, contracts)
-      ...ownerRoutes,
+      // Owner & Agency routes under /proprietaire prefix
+      {
+        path: 'proprietaire',
+        children: ownerRoutes,
+      },
 
       // Trust Agent routes (nested with layout)
       trustAgentRoutes,

@@ -8,11 +8,11 @@ interface SafeAreaWrapperProps {
   includeBottom?: boolean;
 }
 
-export function SafeAreaWrapper({ 
-  children, 
+export function SafeAreaWrapper({
+  children,
   className = '',
   includeTop = true,
-  includeBottom = true 
+  includeBottom = true,
 }: SafeAreaWrapperProps) {
   const isNative = Capacitor.isNativePlatform();
 
@@ -24,7 +24,7 @@ export function SafeAreaWrapper({
     paddingTop: includeTop ? 'env(safe-area-inset-top)' : undefined,
     paddingBottom: includeBottom ? 'env(safe-area-inset-bottom)' : undefined,
     paddingLeft: 'env(safe-area-inset-left)',
-    paddingRight: 'env(safe-area-inset-right)'
+    paddingRight: 'env(safe-area-inset-right)',
   };
 
   return (

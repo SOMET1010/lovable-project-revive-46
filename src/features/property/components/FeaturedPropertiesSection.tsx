@@ -13,10 +13,5 @@ export default function FeaturedPropertiesSection() {
     return null;
   }
 
-  return (
-    <FeaturedProperties
-      properties={data || []}
-      loading={isLoading}
-    />
-  );
+  return <FeaturedProperties properties={data || []} loading={isLoading} />;
 }

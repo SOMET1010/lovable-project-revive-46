@@ -24,7 +24,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   autoFocus = true,
   disabled = false,
   error = false,
-  className = ''
+  className = '',
 }) => {
   const [otp, setOtp] = useState<string[]>(Array(length).fill(''));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -47,22 +47,20 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   useEffect(() => {
     const handleAutofill = () => {
       setTimeout(() => {
-        const filledValue = inputRefs.current
-          .map(ref => ref?.value || '')
-          .join('');
-        
+        const filledValue = inputRefs.current.map((ref) => ref?.value || '').join('');
+
         if (filledValue.length === length) {
           handleOTPChange(filledValue);
         }
       }, 100);
     };
 
-    inputRefs.current.forEach(ref => {
+    inputRefs.current.forEach((ref) => {
       ref?.addEventListener('input', handleAutofill);
     });
 
     return () => {
-      inputRefs.current.forEach(ref => {
+      inputRefs.current.forEach((ref) => {
         ref?.removeEventListener('input', handleAutofill);
       });
     };
@@ -70,7 +68,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
 
   const handleOTPChange = (newOtp: string) => {
     onChange(newOtp);
-    
+
     if (newOtp.length === length && onComplete) {
       onComplete(newOtp);
     }
@@ -79,7 +77,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   const handleChange = (index: number, newValue: string) => {
     // Accepter uniquement les chiffres
     const sanitized = newValue.replace(/\D/g, '');
-    
+
     if (sanitized.length === 0) {
       // Suppression
       const newOtp = [...otp];
@@ -116,7 +114,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Backspace') {
       e.preventDefault();
-      
+
       if (otp[index]) {
         // Supprimer le chiffre actuel
         const newOtp = [...otp];
@@ -144,7 +142,7 @@ export const OTPInput: React.FC<OTPInputProps> = ({
     e.preventDefault();
     const pastedData = e.clipboardData.getData('text');
     const sanitized = pastedData.replace(/\D/g, '').slice(0, length);
-    
+
     if (sanitized) {
       const digits = sanitized.split('');
       const newOtp = [...Array(length)].map((_, i) => digits[i] || '');
@@ -168,13 +166,13 @@ export const OTPInput: React.FC<OTPInputProps> = ({
         {otp.map((digit, index) => (
           <input
             key={index}
-            ref={el => inputRefs.current[index] = el}
+            ref={(el) => (inputRefs.current[index] = el)}
             type="text"
             inputMode="numeric"
             maxLength={1}
             value={digit}
-            onChange={e => handleChange(index, e.target.value)}
-            onKeyDown={e => handleKeyDown(index, e)}
+            onChange={(e) => handleChange(index, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(index, e)}
             onPaste={handlePaste}
             onFocus={() => handleFocus(index)}
             disabled={disabled}

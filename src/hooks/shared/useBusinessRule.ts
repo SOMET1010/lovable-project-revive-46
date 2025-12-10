@@ -1,11 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface BusinessRule {
   key: string;
   name: string;
   category: string;
-  type: "number" | "boolean" | "percentage" | "json";
+  type: 'number' | 'boolean' | 'percentage' | 'json';
   value: number | boolean | Record<string, unknown> | null;
   description: string | null;
   isEnabled: boolean;
@@ -18,21 +18,21 @@ export interface BusinessRule {
  */
 export function useBusinessRule(ruleKey: string) {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["business-rule", ruleKey],
+    queryKey: ['business-rule', ruleKey],
     queryFn: async (): Promise<BusinessRule | null> => {
       const response = await fetch(
         `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/get-business-rule?key=${ruleKey}`,
         {
           headers: {
-            "Content-Type": "application/json",
-            "apikey": import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
+            'Content-Type': 'application/json',
+            apikey: import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
           },
         }
       );
 
       if (!response.ok) {
         if (response.status === 404) return null;
-        throw new Error("Failed to fetch business rule");
+        throw new Error('Failed to fetch business rule');
       }
 
       return response.json();
@@ -62,20 +62,20 @@ export function useBusinessRule(ruleKey: string) {
  */
 export function useBusinessRulesByCategory(category: string) {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["business-rules", "category", category],
+    queryKey: ['business-rules', 'category', category],
     queryFn: async (): Promise<BusinessRule[]> => {
       const response = await fetch(
         `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/get-business-rule?category=${category}`,
         {
           headers: {
-            "Content-Type": "application/json",
-            "apikey": import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
+            'Content-Type': 'application/json',
+            apikey: import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
           },
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch business rules");
+        throw new Error('Failed to fetch business rules');
       }
 
       const result = await response.json();
@@ -97,25 +97,27 @@ export function useBusinessRulesByCategory(category: string) {
  */
 export function useAllBusinessRules() {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ["business-rules", "all"],
+    queryKey: ['business-rules', 'all'],
     queryFn: async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
       const response = await fetch(
         `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/manage-business-rules`,
         {
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.access_token}`,
-            "apikey": import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
           },
         }
       );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch business rules");
+        throw new Error(errorData.error || 'Failed to fetch business rules');
       }
 
       const result = await response.json();
@@ -139,26 +141,28 @@ export function useUpdateBusinessRule() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ 
-      key, 
-      value, 
-      isEnabled 
-    }: { 
-      key: string; 
-      value?: number | boolean | Record<string, unknown>; 
+    mutationFn: async ({
+      key,
+      value,
+      isEnabled,
+    }: {
+      key: string;
+      value?: number | boolean | Record<string, unknown>;
       isEnabled?: boolean;
     }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
       const response = await fetch(
         `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/manage-business-rules`,
         {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.access_token}`,
-            "apikey": import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
           },
           body: JSON.stringify({ key, value, is_enabled: isEnabled }),
         }
@@ -166,14 +170,14 @@ export function useUpdateBusinessRule() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update rule");
+        throw new Error(errorData.error || 'Failed to update rule');
       }
 
       return response.json();
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["business-rules"] });
-      queryClient.invalidateQueries({ queryKey: ["business-rule", variables.key] });
+      queryClient.invalidateQueries({ queryKey: ['business-rules'] });
+      queryClient.invalidateQueries({ queryKey: ['business-rule', variables.key] });
     },
   });
 }
@@ -186,17 +190,19 @@ export function useToggleBusinessRule() {
 
   return useMutation({
     mutationFn: async ({ key, isEnabled }: { key: string; isEnabled: boolean }) => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error("Not authenticated");
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
 
       const response = await fetch(
         `${import.meta.env['VITE_SUPABASE_URL']}/functions/v1/manage-business-rules`,
         {
-          method: "PATCH",
+          method: 'PATCH',
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.access_token}`,
-            "apikey": import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env['VITE_SUPABASE_PUBLISHABLE_KEY'],
           },
           body: JSON.stringify({ key, is_enabled: isEnabled }),
         }
@@ -204,14 +210,14 @@ export function useToggleBusinessRule() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to toggle rule");
+        throw new Error(errorData.error || 'Failed to toggle rule');
       }
 
       return response.json();
     },
     onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["business-rules"] });
-      queryClient.invalidateQueries({ queryKey: ["business-rule", variables.key] });
+      queryClient.invalidateQueries({ queryKey: ['business-rules'] });
+      queryClient.invalidateQueries({ queryKey: ['business-rule', variables.key] });
     },
   });
 }

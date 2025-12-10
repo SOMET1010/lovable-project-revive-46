@@ -35,15 +35,17 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const { error: resetError } = await resetPassword(email);
 
       if (resetError) {
         if (resetError.message?.includes('Aucun compte')) {
-          setError('Aucun compte associé à cette adresse email. Veuillez vérifier votre email ou créer un compte.');
+          setError(
+            'Aucun compte associé à cette adresse email. Veuillez vérifier votre email ou créer un compte.'
+          );
         } else {
-          setError('Erreur lors de l\'envoi du lien de réinitialisation. Veuillez réessayer.');
+          setError("Erreur lors de l'envoi du lien de réinitialisation. Veuillez réessayer.");
         }
         return;
       }
@@ -63,8 +65,14 @@ export default function ForgotPassword() {
 
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-20 left-20 w-64 h-64 bg-cyan-300 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-200 rounded-full blur-3xl animate-float" style={{ animationDelay: '0.5s' }} />
+        <div
+          className="absolute bottom-20 right-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: '1.5s' }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-200 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: '0.5s' }}
+        />
       </div>
 
       <div className="max-w-md w-full relative z-10">
@@ -131,7 +139,8 @@ export default function ForgotPassword() {
                   <div className="text-xs text-blue-800">
                     <p className="font-semibold mb-1">Sécurité :</p>
                     <p>
-                      Si un compte existe avec cette adresse email, vous recevrez un lien de réinitialisation valide pendant 30 minutes.
+                      Si un compte existe avec cette adresse email, vous recevrez un lien de
+                      réinitialisation valide pendant 30 minutes.
                     </p>
                   </div>
                 </div>
@@ -144,11 +153,10 @@ export default function ForgotPassword() {
               </div>
 
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  Email envoyé !
-                </h3>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Email envoyé !</h3>
                 <p className="text-gray-600">
-                  Si un compte est associé à <strong>{email}</strong>, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.
+                  Si un compte est associé à <strong>{email}</strong>, vous recevrez un email avec
+                  les instructions pour réinitialiser votre mot de passe.
                 </p>
               </div>
 

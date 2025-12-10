@@ -47,7 +47,7 @@ export default function MonArtisanRequestButton({
       alert('Demande envoyée à Mon Artisan avec succès!');
     } catch (error) {
       console.error('Erreur:', error);
-      alert(error instanceof Error ? error.message : 'Erreur lors de l\'envoi de la demande');
+      alert(error instanceof Error ? error.message : "Erreur lors de l'envoi de la demande");
     } finally {
       setLoading(false);
     }
@@ -73,9 +73,7 @@ export default function MonArtisanRequestButton({
                     <Wrench className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      Demander un artisan
-                    </h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Demander un artisan</h2>
                     <p className="text-sm text-gray-500">Via Mon Artisan</p>
                   </div>
                 </div>
@@ -125,9 +123,7 @@ export default function MonArtisanRequestButton({
                     <input
                       type="date"
                       value={formData.preferred_date}
-                      onChange={(e) =>
-                        setFormData({ ...formData, preferred_date: e.target.value })
-                      }
+                      onChange={(e) => setFormData({ ...formData, preferred_date: e.target.value })}
                       min={new Date().toISOString().split('T')[0]}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
@@ -161,9 +157,7 @@ export default function MonArtisanRequestButton({
                   <input
                     type="number"
                     value={formData.budget_max}
-                    onChange={(e) =>
-                      setFormData({ ...formData, budget_max: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, budget_max: e.target.value })}
                     placeholder="Ex: 50000"
                     min="0"
                     step="1000"
@@ -175,9 +169,7 @@ export default function MonArtisanRequestButton({
                 </div>
 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-900 mb-2">
-                    Comment ça marche ?
-                  </h4>
+                  <h4 className="font-semibold text-blue-900 mb-2">Comment ça marche ?</h4>
                   <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
                     <li>Votre demande est envoyée aux artisans qualifiés de Mon Artisan</li>
                     <li>Les artisans disponibles vous envoient leurs devis</li>

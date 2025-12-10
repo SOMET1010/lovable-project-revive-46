@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react';
 
 interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   onCheckedChange?: (checked: boolean | 'indeterminate') => void;
@@ -19,6 +19,6 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     );
   }
 );
-Checkbox.displayName = "Checkbox";
+Checkbox.displayName = 'Checkbox';
 
 export { Checkbox };

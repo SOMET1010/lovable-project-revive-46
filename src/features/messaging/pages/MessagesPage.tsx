@@ -12,15 +12,23 @@ import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayo
 export default function MessagesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
-  
-  const { conversations, loading: loadingConversations, getOrCreateConversation, refetch: refetchConversations } = useConversations();
-  
+
+  const {
+    conversations,
+    loading: loadingConversations,
+    getOrCreateConversation,
+    refetch: refetchConversations,
+  } = useConversations();
+
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [showMobileThread, setShowMobileThread] = useState(false);
-  
-  const { messages, loading: loadingMessages, sending, sendMessage } = useMessages(
-    selectedConversation?.id ?? null
-  );
+
+  const {
+    messages,
+    loading: loadingMessages,
+    sending,
+    sendMessage,
+  } = useMessages(selectedConversation?.id ?? null);
 
   // Handle URL parameters for creating new conversation
   useEffect(() => {

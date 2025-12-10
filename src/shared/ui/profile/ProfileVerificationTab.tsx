@@ -11,7 +11,11 @@ interface ProfileVerificationTabProps {
   onRefresh?: () => void;
 }
 
-export default function ProfileVerificationTab({ profile, verificationData, onRefresh }: ProfileVerificationTabProps) {
+export default function ProfileVerificationTab({
+  profile,
+  verificationData,
+  onRefresh,
+}: ProfileVerificationTabProps) {
   const [showBiometricFlow, setShowBiometricFlow] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -84,8 +88,13 @@ export default function ProfileVerificationTab({ profile, verificationData, onRe
     setShowBiometricFlow(false);
   };
 
-  const facialStatus = profile?.facial_verification_status || verificationData?.face_verification_status || 'non_verifie';
-  const oneciStatus = profile?.oneci_verified ? 'verified' : (verificationData?.oneci_status || 'non_verifie');
+  const facialStatus =
+    profile?.facial_verification_status ||
+    verificationData?.face_verification_status ||
+    'non_verifie';
+  const oneciStatus = profile?.oneci_verified
+    ? 'verified'
+    : verificationData?.oneci_status || 'non_verifie';
   const cniPhotoUrl = profile?.avatar_url || null;
 
   return (
@@ -111,7 +120,9 @@ export default function ProfileVerificationTab({ profile, verificationData, onRe
                   <p className="text-sm text-[#5D4037]/70">Vérification d'identité officielle</p>
                 </div>
               </div>
-              <span className="font-bold text-sm uppercase tracking-wide">{getStatusText(oneciStatus)}</span>
+              <span className="font-bold text-sm uppercase tracking-wide">
+                {getStatusText(oneciStatus)}
+              </span>
             </div>
           </div>
 
@@ -125,7 +136,9 @@ export default function ProfileVerificationTab({ profile, verificationData, onRe
                   <p className="text-sm text-[#5D4037]/70">Reconnaissance faciale NeoFace</p>
                 </div>
               </div>
-              <span className="font-bold text-sm uppercase tracking-wide">{getStatusText(facialStatus)}</span>
+              <span className="font-bold text-sm uppercase tracking-wide">
+                {getStatusText(facialStatus)}
+              </span>
             </div>
 
             {/* Show biometric action button if not verified */}
@@ -143,16 +156,24 @@ export default function ProfileVerificationTab({ profile, verificationData, onRe
           </div>
 
           {/* Mon Toit Badge */}
-          <div className={`p-5 rounded-xl border-2 transition-all ${profile?.is_verified ? 'bg-green-50 border-green-200 text-green-700' : 'bg-[#FDF6E3] border-[#3C2A1E]/10 text-[#5D4037]'}`}>
+          <div
+            className={`p-5 rounded-xl border-2 transition-all ${profile?.is_verified ? 'bg-green-50 border-green-200 text-green-700' : 'bg-[#FDF6E3] border-[#3C2A1E]/10 text-[#5D4037]'}`}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                {profile?.is_verified ? <CheckCircle className="h-5 w-5 text-green-600" /> : <XCircle className="h-5 w-5 text-gray-400" />}
+                {profile?.is_verified ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-gray-400" />
+                )}
                 <div>
                   <h3 className="font-bold text-[#3C2A1E]">Badge Mon Toit</h3>
                   <p className="text-sm text-[#5D4037]/70">Certification complète</p>
                 </div>
               </div>
-              <span className="font-bold text-sm uppercase tracking-wide">{profile?.is_verified ? 'Vérifié' : 'Non vérifié'}</span>
+              <span className="font-bold text-sm uppercase tracking-wide">
+                {profile?.is_verified ? 'Vérifié' : 'Non vérifié'}
+              </span>
             </div>
           </div>
         </div>
@@ -196,7 +217,8 @@ export default function ProfileVerificationTab({ profile, verificationData, onRe
           <div className="p-6 bg-gradient-to-r from-[#F16522]/10 to-[#F16522]/5 border-t border-[#F16522]/20">
             <h4 className="font-bold text-[#3C2A1E] mb-2">Complétez votre vérification</h4>
             <p className="text-[#5D4037] text-sm mb-4">
-              Pour bénéficier de toutes les fonctionnalités et obtenir le badge Mon Toit, complétez votre vérification d'identité.
+              Pour bénéficier de toutes les fonctionnalités et obtenir le badge Mon Toit, complétez
+              votre vérification d'identité.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link

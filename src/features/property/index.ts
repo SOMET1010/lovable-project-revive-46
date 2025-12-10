@@ -1,6 +1,6 @@
 /**
  * Feature: property
- * 
+ *
  * Exports publics de la feature property
  */
 
@@ -14,14 +14,14 @@ export { default as HeroSpectacular } from './components/HeroSpectacular';
 export { default as HeroSimplified } from './components/HeroSimplified';
 
 // Hooks
-export { 
+export {
   useProperties,
   useProperty,
   useOwnerProperties,
   useFeaturedProperties,
   useCreateProperty,
   useUpdateProperty,
-  useDeleteProperty
+  useDeleteProperty,
 } from './hooks/useProperties';
 
 // Services
@@ -39,5 +39,5 @@ export type {
   PropertyStatus,
   PropertyType,
   PropertyAmenity,
-  PropertyLocation
+  PropertyLocation,
 } from './types';

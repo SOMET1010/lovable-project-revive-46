@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { 
-  Search, 
-  UserCheck, 
-  Shield, 
-  FileText, 
+import {
+  Search,
+  UserCheck,
+  Shield,
+  FileText,
   CreditCard,
   CheckCircle2,
   XCircle,
   Upload,
-  Camera
+  Camera,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
@@ -41,7 +41,7 @@ export default function UserCertificationPage() {
   const [loading, setLoading] = useState(false);
   const [searchedUser, setSearchedUser] = useState<UserProfile | null>(null);
   const [certifying, setCertifying] = useState(false);
-  
+
   // Certification form
   const [certificationData, setCertificationData] = useState({
     identityVerified: false,
@@ -50,18 +50,20 @@ export default function UserCertificationPage() {
     cnamNumber: '',
     cnamVerified: false,
     notes: '',
-    photoVerified: false
+    photoVerified: false,
   });
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
-    
+
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .or(`email.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`)
+        .or(
+          `email.ilike.%${searchQuery}%,phone.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`
+        )
         .limit(1)
         .single();
 
@@ -75,12 +77,12 @@ export default function UserCertificationPage() {
       } else {
         setSearchedUser(data as UserProfile);
         // Pre-fill existing verification data
-        setCertificationData(prev => ({
+        setCertificationData((prev) => ({
           ...prev,
           identityVerified: data.is_verified || false,
           oneciVerified: data.oneci_verified || false,
           oneciNumber: data.oneci_number || '',
-          cnamVerified: data.cnam_verified || false
+          cnamVerified: data.cnam_verified || false,
         }));
       }
     } catch (error) {
@@ -93,7 +95,7 @@ export default function UserCertificationPage() {
 
   const handleCertify = async () => {
     if (!searchedUser || !user) return;
-    
+
     setCertifying(true);
     try {
       // Update profile with verification data
@@ -103,9 +105,11 @@ export default function UserCertificationPage() {
           is_verified: certificationData.identityVerified,
           oneci_verified: certificationData.oneciVerified,
           oneci_number: certificationData.oneciNumber || null,
-          oneci_verification_date: certificationData.oneciVerified ? new Date().toISOString() : null,
+          oneci_verification_date: certificationData.oneciVerified
+            ? new Date().toISOString()
+            : null,
           cnam_verified: certificationData.cnamVerified,
-          trust_score: calculateTrustScore()
+          trust_score: calculateTrustScore(),
         })
         .eq('user_id', searchedUser.user_id);
 
@@ -121,21 +125,24 @@ export default function UserCertificationPage() {
           identity_verified: certificationData.identityVerified,
           oneci_verified: certificationData.oneciVerified,
           cnam_verified: certificationData.cnamVerified,
-          notes: certificationData.notes
-        }
+          notes: certificationData.notes,
+        },
       });
 
       toast.success('Utilisateur certifié avec succès');
-      
+
       // Refresh user data
-      setSearchedUser(prev => prev ? {
-        ...prev,
-        is_verified: certificationData.identityVerified,
-        oneci_verified: certificationData.oneciVerified,
-        cnam_verified: certificationData.cnamVerified,
-        trust_score: calculateTrustScore()
-      } : null);
-      
+      setSearchedUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              is_verified: certificationData.identityVerified,
+              oneci_verified: certificationData.oneciVerified,
+              cnam_verified: certificationData.cnamVerified,
+              trust_score: calculateTrustScore(),
+            }
+          : null
+      );
     } catch (error) {
       console.error('Certification error:', error);
       toast.error('Erreur lors de la certification');
@@ -156,7 +163,7 @@ export default function UserCertificationPage() {
   return (
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Certification Utilisateurs" />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Search Section */}
         <Card className="mb-8">
@@ -171,8 +178,12 @@ export default function UserCertificationPage() {
               <Input
                 placeholder="Email, téléphone ou nom..."
                 value={searchQuery}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSearch()}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setSearchQuery(e.target.value)
+                }
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  e.key === 'Enter' && handleSearch()
+                }
                 className="flex-1"
               />
               <Button onClick={handleSearch} disabled={loading}>
@@ -196,9 +207,9 @@ export default function UserCertificationPage() {
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
                     {searchedUser.avatar_url ? (
-                      <img 
-                        src={searchedUser.avatar_url} 
-                        alt={searchedUser.full_name || ''} 
+                      <img
+                        src={searchedUser.avatar_url}
+                        alt={searchedUser.full_name || ''}
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
@@ -206,7 +217,9 @@ export default function UserCertificationPage() {
                     )}
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold">{searchedUser.full_name || 'Non renseigné'}</h3>
+                    <h3 className="text-lg font-semibold">
+                      {searchedUser.full_name || 'Non renseigné'}
+                    </h3>
                     <p className="text-sm text-muted-foreground">{searchedUser.email}</p>
                     <p className="text-sm text-muted-foreground">{searchedUser.phone}</p>
                   </div>
@@ -232,16 +245,37 @@ export default function UserCertificationPage() {
                 <div className="space-y-3">
                   <h4 className="font-medium">Vérifications actuelles</h4>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant={searchedUser.is_verified ? 'default' : 'outline'} className="gap-1">
-                      {searchedUser.is_verified ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                    <Badge
+                      variant={searchedUser.is_verified ? 'default' : 'outline'}
+                      className="gap-1"
+                    >
+                      {searchedUser.is_verified ? (
+                        <CheckCircle2 className="h-3 w-3" />
+                      ) : (
+                        <XCircle className="h-3 w-3" />
+                      )}
                       Identité
                     </Badge>
-                    <Badge variant={searchedUser.oneci_verified ? 'default' : 'outline'} className="gap-1">
-                      {searchedUser.oneci_verified ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                    <Badge
+                      variant={searchedUser.oneci_verified ? 'default' : 'outline'}
+                      className="gap-1"
+                    >
+                      {searchedUser.oneci_verified ? (
+                        <CheckCircle2 className="h-3 w-3" />
+                      ) : (
+                        <XCircle className="h-3 w-3" />
+                      )}
                       ONECI
                     </Badge>
-                    <Badge variant={searchedUser.cnam_verified ? 'default' : 'outline'} className="gap-1">
-                      {searchedUser.cnam_verified ? <CheckCircle2 className="h-3 w-3" /> : <XCircle className="h-3 w-3" />}
+                    <Badge
+                      variant={searchedUser.cnam_verified ? 'default' : 'outline'}
+                      className="gap-1"
+                    >
+                      {searchedUser.cnam_verified ? (
+                        <CheckCircle2 className="h-3 w-3" />
+                      ) : (
+                        <XCircle className="h-3 w-3" />
+                      )}
                       CNAM
                     </Badge>
                   </div>
@@ -268,10 +302,17 @@ export default function UserCertificationPage() {
                     <Button
                       variant={certificationData.identityVerified ? 'secondary' : 'outline'}
                       size="small"
-                      onClick={() => setCertificationData(prev => ({ ...prev, identityVerified: !prev.identityVerified }))}
+                      onClick={() =>
+                        setCertificationData((prev) => ({
+                          ...prev,
+                          identityVerified: !prev.identityVerified,
+                        }))
+                      }
                     >
                       {certificationData.identityVerified ? (
-                        <><CheckCircle2 className="h-4 w-4 mr-1" /> Vérifié</>
+                        <>
+                          <CheckCircle2 className="h-4 w-4 mr-1" /> Vérifié
+                        </>
                       ) : (
                         'Marquer vérifié'
                       )}
@@ -289,10 +330,17 @@ export default function UserCertificationPage() {
                     <Button
                       variant={certificationData.oneciVerified ? 'secondary' : 'outline'}
                       size="small"
-                      onClick={() => setCertificationData(prev => ({ ...prev, oneciVerified: !prev.oneciVerified }))}
+                      onClick={() =>
+                        setCertificationData((prev) => ({
+                          ...prev,
+                          oneciVerified: !prev.oneciVerified,
+                        }))
+                      }
                     >
                       {certificationData.oneciVerified ? (
-                        <><CheckCircle2 className="h-4 w-4 mr-1" /> Vérifié</>
+                        <>
+                          <CheckCircle2 className="h-4 w-4 mr-1" /> Vérifié
+                        </>
                       ) : (
                         'Marquer vérifié'
                       )}
@@ -301,7 +349,9 @@ export default function UserCertificationPage() {
                   <Input
                     placeholder="Numéro ONECI"
                     value={certificationData.oneciNumber}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCertificationData(prev => ({ ...prev, oneciNumber: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setCertificationData((prev) => ({ ...prev, oneciNumber: e.target.value }))
+                    }
                   />
                 </div>
 
@@ -315,10 +365,17 @@ export default function UserCertificationPage() {
                     <Button
                       variant={certificationData.cnamVerified ? 'secondary' : 'outline'}
                       size="small"
-                      onClick={() => setCertificationData(prev => ({ ...prev, cnamVerified: !prev.cnamVerified }))}
+                      onClick={() =>
+                        setCertificationData((prev) => ({
+                          ...prev,
+                          cnamVerified: !prev.cnamVerified,
+                        }))
+                      }
                     >
                       {certificationData.cnamVerified ? (
-                        <><CheckCircle2 className="h-4 w-4 mr-1" /> Vérifié</>
+                        <>
+                          <CheckCircle2 className="h-4 w-4 mr-1" /> Vérifié
+                        </>
                       ) : (
                         'Marquer vérifié'
                       )}
@@ -327,7 +384,9 @@ export default function UserCertificationPage() {
                   <Input
                     placeholder="Numéro CNAM"
                     value={certificationData.cnamNumber}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCertificationData(prev => ({ ...prev, cnamNumber: e.target.value }))}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setCertificationData((prev) => ({ ...prev, cnamNumber: e.target.value }))
+                    }
                   />
                 </div>
 
@@ -341,12 +400,21 @@ export default function UserCertificationPage() {
                     <Button
                       variant={certificationData.photoVerified ? 'secondary' : 'outline'}
                       size="small"
-                      onClick={() => setCertificationData(prev => ({ ...prev, photoVerified: !prev.photoVerified }))}
+                      onClick={() =>
+                        setCertificationData((prev) => ({
+                          ...prev,
+                          photoVerified: !prev.photoVerified,
+                        }))
+                      }
                     >
                       {certificationData.photoVerified ? (
-                        <><CheckCircle2 className="h-4 w-4 mr-1" /> Vérifié</>
+                        <>
+                          <CheckCircle2 className="h-4 w-4 mr-1" /> Vérifié
+                        </>
                       ) : (
-                        <><Upload className="h-4 w-4 mr-1" /> Vérifier</>
+                        <>
+                          <Upload className="h-4 w-4 mr-1" /> Vérifier
+                        </>
                       )}
                     </Button>
                   </div>
@@ -358,7 +426,9 @@ export default function UserCertificationPage() {
                   <Textarea
                     placeholder="Observations, remarques..."
                     value={certificationData.notes}
-                    onChange={(e) => setCertificationData(prev => ({ ...prev, notes: e.target.value }))}
+                    onChange={(e) =>
+                      setCertificationData((prev) => ({ ...prev, notes: e.target.value }))
+                    }
                     rows={3}
                   />
                 </div>
@@ -367,16 +437,14 @@ export default function UserCertificationPage() {
                 <div className="p-4 rounded-lg bg-primary/10">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Nouveau Trust Score estimé</span>
-                    <span className="text-2xl font-bold text-primary">{calculateTrustScore()}%</span>
+                    <span className="text-2xl font-bold text-primary">
+                      {calculateTrustScore()}%
+                    </span>
                   </div>
                 </div>
 
                 {/* Submit */}
-                <Button 
-                  className="w-full" 
-                  onClick={handleCertify}
-                  disabled={certifying}
-                >
+                <Button className="w-full" onClick={handleCertify} disabled={certifying}>
                   {certifying ? 'Certification en cours...' : 'Certifier cet utilisateur'}
                 </Button>
               </CardContent>
@@ -389,7 +457,8 @@ export default function UserCertificationPage() {
             <CardContent className="py-12 text-center">
               <UserCheck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">
-                Recherchez un utilisateur par email, téléphone ou nom pour commencer la certification
+                Recherchez un utilisateur par email, téléphone ou nom pour commencer la
+                certification
               </p>
             </CardContent>
           </Card>

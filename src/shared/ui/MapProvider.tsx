@@ -103,8 +103,8 @@ function MapFallback({ onRetry }: { onRetry: () => void }) {
         </div>
         <h3 className="text-lg font-semibold text-foreground mb-2">Carte non disponible</h3>
         <p className="text-muted-foreground mb-4 max-w-sm">
-          Le service de cartographie est temporairement indisponible. 
-          Les propriétés restent accessibles via la liste.
+          Le service de cartographie est temporairement indisponible. Les propriétés restent
+          accessibles via la liste.
         </p>
         <Button onClick={onRetry} variant="outline" size="small">
           <RefreshCw className="w-4 h-4 mr-2" />

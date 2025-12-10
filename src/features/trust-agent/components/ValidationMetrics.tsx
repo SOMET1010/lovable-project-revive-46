@@ -18,7 +18,7 @@ interface ValidationMetricsProps {
 export default function ValidationMetrics({ stats, period = 'month' }: ValidationMetricsProps) {
   const [hoveredMetric, setHoveredMetric] = useState<string | null>(null);
 
-const formatTime = (hours: number) => {
+  const formatTime = (hours: number) => {
     if (hours < 24) {
       return `${hours.toFixed(1)}h`;
     } else {
@@ -39,7 +39,7 @@ const formatTime = (hours: number) => {
       bgColor: 'bg-green-50',
       icon: TrendingUp,
       change: '+5%',
-      trend: 'up' as const
+      trend: 'up' as const,
     },
     {
       key: 'avgResolutionTime',
@@ -50,7 +50,7 @@ const formatTime = (hours: number) => {
       bgColor: 'bg-yellow-50',
       icon: Minus,
       change: '-0.3j',
-      trend: 'down' as const
+      trend: 'down' as const,
     },
     {
       key: 'satisfactionScore',
@@ -61,19 +61,19 @@ const formatTime = (hours: number) => {
       bgColor: 'bg-purple-50',
       icon: TrendingUp,
       change: '+0.2',
-      trend: 'up' as const
+      trend: 'up' as const,
     },
     {
       key: 'escalationRate',
-      label: 'Taux d\'escalade',
+      label: "Taux d'escalade",
       value: stats.escalationRate,
       unit: '%',
       color: '#ef4444',
       bgColor: 'bg-red-50',
       icon: TrendingDown,
       change: '+2%',
-      trend: 'up' as const
-    }
+      trend: 'up' as const,
+    },
   ];
 
   const getTrendIcon = (trend: 'up' | 'down') => {
@@ -154,20 +154,16 @@ const formatTime = (hours: number) => {
                     }
                     className="transition-all duration-1000 ease-out"
                     style={{
-                      strokeLinecap: 'round'
+                      strokeLinecap: 'round',
                     }}
                   />
                 </svg>
-                
+
                 {/* Valeur au centre */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center">
-                    <span className="text-xl font-bold text-gray-900">
-                      {metric.value}
-                    </span>
-                    <span className="text-sm text-gray-600">
-                      {metric.unit}
-                    </span>
+                    <span className="text-xl font-bold text-gray-900">{metric.value}</span>
+                    <span className="text-sm text-gray-600">{metric.unit}</span>
                   </div>
                 </div>
               </div>
@@ -176,7 +172,7 @@ const formatTime = (hours: number) => {
             <div className="text-center">
               <h3 className="font-medium text-gray-900 mb-1">{metric.label}</h3>
               <p className="text-sm text-gray-600">
-                {period === 'today' && 'Aujourd\'hui'}
+                {period === 'today' && "Aujourd'hui"}
                 {period === 'week' && 'Cette semaine'}
                 {period === 'month' && 'Ce mois'}
               </p>
@@ -187,7 +183,9 @@ const formatTime = (hours: number) => {
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <div className="text-center">
                   <p className="text-xs text-gray-500 mb-1">Comparé à la période précédente</p>
-                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${trendColor} ${metric.bgColor}`}>
+                  <div
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${trendColor} ${metric.bgColor}`}
+                  >
                     <TrendIcon className="w-3 h-3" />
                     {metric.change}
                   </div>
@@ -205,33 +203,33 @@ const formatTime = (hours: number) => {
 export function KeyMetricsCards({ stats }: { stats: any }) {
   const keyCards = [
     {
-      label: "Litiges actifs",
+      label: 'Litiges actifs',
       value: stats.activeDisputes,
-      icon: "📋",
-      color: "text-blue-600",
-      bgColor: "bg-blue-50"
+      icon: '📋',
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
     },
     {
-      label: "Litiges résolus",
+      label: 'Litiges résolus',
       value: stats.resolvedDisputes,
-      icon: "✅",
-      color: "text-green-600",
-      bgColor: "bg-green-50"
+      icon: '✅',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
     },
     {
-      label: "Validations en attente",
+      label: 'Validations en attente',
       value: stats.pendingValidations,
-      icon: "⏳",
-      color: "text-orange-600",
-      bgColor: "bg-orange-50"
+      icon: '⏳',
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
     },
     {
-      label: "En examen",
+      label: 'En examen',
       value: stats.underReview,
-      icon: "👁️",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50"
-    }
+      icon: '👁️',
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-50',
+    },
   ];
 
   return (
@@ -239,9 +237,7 @@ export function KeyMetricsCards({ stats }: { stats: any }) {
       {keyCards.map((card, index) => (
         <div key={index} className={`bg-white rounded-lg shadow-md p-6 ${card.bgColor}`}>
           <div className="flex items-center justify-between mb-3">
-            <div className={`text-2xl`}>
-              {card.icon}
-            </div>
+            <div className={`text-2xl`}>{card.icon}</div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-1">{card.value}</p>
           <p className="text-sm text-gray-600">{card.label}</p>

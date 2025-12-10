@@ -19,13 +19,8 @@ interface RoleTab {
 export default function ContextualRoleSwitcher() {
   const { user, profile } = useAuth();
   const location = useLocation();
-  const { 
-    isOwner, 
-    isTenant, 
-    propertiesCount, 
-    activeLeasesAsTenantCount,
-    loading 
-  } = useContextualRoles();
+  const { isOwner, isTenant, propertiesCount, activeLeasesAsTenantCount, loading } =
+    useContextualRoles();
 
   if (!user) return null;
 
@@ -37,7 +32,7 @@ export default function ContextualRoleSwitcher() {
     id: 'profile',
     label: 'Mon Profil',
     icon: User,
-    href: '/profil',
+    href: '/locataire/profil',
     description: 'Gérer mon profil',
   });
 
@@ -47,7 +42,7 @@ export default function ContextualRoleSwitcher() {
       id: 'tenant',
       label: 'Mes Locations',
       icon: Key,
-      href: '/tableau-de-bord',
+      href: '/locataire/dashboard',
       count: activeLeasesAsTenantCount,
       description: 'Mon logement actuel',
     });
@@ -59,7 +54,7 @@ export default function ContextualRoleSwitcher() {
       id: 'owner',
       label: 'Mes Propriétés',
       icon: Building2,
-      href: '/dashboard',
+      href: '/proprietaire/dashboard/proprietaire',
       count: propertiesCount,
       description: 'Gérer mes biens',
     });
@@ -69,9 +64,11 @@ export default function ContextualRoleSwitcher() {
   const hasNoRoles = !isTenant && !isOwner && !loading;
 
   const isActiveTab = (href: string) => {
-    if (href === '/profil') return location.pathname === '/profil';
-    if (href === '/tableau-de-bord') return location.pathname.startsWith('/tableau-de-bord');
-    if (href === '/dashboard') return location.pathname.startsWith('/dashboard');
+    if (href === '/locataire/profil') return location.pathname === '/locataire/profil';
+    if (href === '/locataire/dashboard')
+      return location.pathname.startsWith('/locataire/dashboard');
+    if (href === '/proprietaire/dashboard/proprietaire')
+      return location.pathname.startsWith('/proprietaire/dashboard/proprietaire');
     return false;
   };
 
@@ -96,12 +93,12 @@ export default function ContextualRoleSwitcher() {
               {profile?.full_name || 'Mon Espace'}
             </h3>
             <p className="text-xs text-[#A69B95]">
-              {isOwner && isTenant 
-                ? 'Locataire & Propriétaire' 
-                : isOwner 
-                  ? 'Propriétaire' 
-                  : isTenant 
-                    ? 'Locataire' 
+              {isOwner && isTenant
+                ? 'Locataire & Propriétaire'
+                : isOwner
+                  ? 'Propriétaire'
+                  : isTenant
+                    ? 'Locataire'
                     : 'Nouveau membre'}
             </p>
           </div>
@@ -126,11 +123,13 @@ export default function ContextualRoleSwitcher() {
               }`}
             >
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg transition-colors ${
-                  isActive 
-                    ? 'bg-[#F16522] text-white' 
-                    : 'bg-[#FAF7F4] text-[#A69B95] group-hover:bg-[#F16522]/10 group-hover:text-[#F16522]'
-                }`}>
+                <div
+                  className={`p-2 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-[#F16522] text-white'
+                      : 'bg-[#FAF7F4] text-[#A69B95] group-hover:bg-[#F16522]/10 group-hover:text-[#F16522]'
+                  }`}
+                >
                   <Icon className="h-4 w-4" />
                 </div>
                 <div>
@@ -142,11 +141,11 @@ export default function ContextualRoleSwitcher() {
               </div>
 
               {tab.count !== undefined && tab.count > 0 && (
-                <span className={`px-2 py-0.5 text-xs font-bold rounded-full ${
-                  isActive 
-                    ? 'bg-[#F16522] text-white' 
-                    : 'bg-[#FAF7F4] text-[#6B5A4E]'
-                }`}>
+                <span
+                  className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                    isActive ? 'bg-[#F16522] text-white' : 'bg-[#FAF7F4] text-[#6B5A4E]'
+                  }`}
+                >
                   {tab.count}
                 </span>
               )}
@@ -162,9 +161,7 @@ export default function ContextualRoleSwitcher() {
                 <FileText className="h-4 w-4 text-[#F16522]" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-[#2C1810]">
-                  Commencez votre parcours
-                </p>
+                <p className="text-sm font-medium text-[#2C1810]">Commencez votre parcours</p>
                 <p className="text-xs text-[#6B5A4E] mt-0.5">
                   Recherchez un logement ou publiez une annonce
                 </p>

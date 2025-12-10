@@ -64,7 +64,7 @@ export default function SavedSearches() {
         name: s.name,
         filters: (s.filters as SearchFilters) || {},
         notifications_enabled: s.notifications_enabled,
-        created_at: s.created_at
+        created_at: s.created_at,
       }));
 
       setSearches(formattedSearches);
@@ -94,8 +94,8 @@ export default function SavedSearches() {
 
       if (error) throw error;
 
-      setSearches(prev =>
-        prev.map(s => s.id === searchId ? { ...s, notifications_enabled: !currentStatus } : s)
+      setSearches((prev) =>
+        prev.map((s) => (s.id === searchId ? { ...s, notifications_enabled: !currentStatus } : s))
       );
     } catch (err) {
       console.error('Error toggling alert:', err);
@@ -106,14 +106,11 @@ export default function SavedSearches() {
     if (!confirm('Supprimer cette recherche sauvegardée ?')) return;
 
     try {
-      const { error } = await supabase
-        .from('saved_searches')
-        .delete()
-        .eq('id', searchId);
+      const { error } = await supabase.from('saved_searches').delete().eq('id', searchId);
 
       if (error) throw error;
 
-      setSearches(prev => prev.filter(s => s.id !== searchId));
+      setSearches((prev) => prev.filter((s) => s.id !== searchId));
     } catch (err) {
       console.error('Error deleting search:', err);
     }
@@ -128,7 +125,7 @@ export default function SavedSearches() {
 
       if (error) throw error;
 
-      setAlerts(prev => prev.filter(a => a.id !== alertId));
+      setAlerts((prev) => prev.filter((a) => a.id !== alertId));
     } catch (err) {
       console.error('Error deleting alert:', err);
     }
@@ -137,13 +134,14 @@ export default function SavedSearches() {
   const handleExecuteSearch = (search: SavedSearch) => {
     const params = new URLSearchParams();
     const filters = search.filters;
-    
+
     if (filters.city) params.set('city', filters.city);
     if (filters.property_type) params.set('type', filters.property_type);
     if (filters.min_price) params.set('minPrice', filters.min_price.toString());
     if (filters.max_price) params.set('maxPrice', filters.max_price.toString());
     if (filters.min_bedrooms) params.set('bedrooms', filters.min_bedrooms.toString());
-    if (filters.is_furnished !== undefined) params.set('furnished', filters.is_furnished.toString());
+    if (filters.is_furnished !== undefined)
+      params.set('furnished', filters.is_furnished.toString());
 
     navigate(`/recherche?${params.toString()}`);
   };
@@ -154,10 +152,10 @@ export default function SavedSearches() {
 
     if (filters.property_type) {
       const types: Record<string, string> = {
-        'appartement': 'Appartement',
-        'maison': 'Maison',
-        'studio': 'Studio',
-        'villa': 'Villa'
+        appartement: 'Appartement',
+        maison: 'Maison',
+        studio: 'Studio',
+        villa: 'Villa',
       };
       parts.push(types[filters.property_type] || filters.property_type);
     }
@@ -168,7 +166,9 @@ export default function SavedSearches() {
 
     if (filters.min_price || filters.max_price) {
       if (filters.min_price && filters.max_price) {
-        parts.push(`${filters.min_price.toLocaleString()} - ${filters.max_price.toLocaleString()} FCFA`);
+        parts.push(
+          `${filters.min_price.toLocaleString()} - ${filters.max_price.toLocaleString()} FCFA`
+        );
       } else if (filters.min_price) {
         parts.push(`À partir de ${filters.min_price.toLocaleString()} FCFA`);
       } else if (filters.max_price) {
@@ -183,13 +183,15 @@ export default function SavedSearches() {
 
   const getAlertSummary = (alert: PropertyAlert) => {
     const parts: string[] = [];
-    
+
     if (alert.property_type) parts.push(alert.property_type);
     if (alert.city) parts.push(alert.city);
     if (alert.min_bedrooms) parts.push(`${alert.min_bedrooms}+ ch.`);
     if (alert.min_price || alert.max_price) {
       if (alert.min_price && alert.max_price) {
-        parts.push(`${alert.min_price.toLocaleString()} - ${alert.max_price.toLocaleString()} FCFA`);
+        parts.push(
+          `${alert.min_price.toLocaleString()} - ${alert.max_price.toLocaleString()} FCFA`
+        );
       } else if (alert.min_price) {
         parts.push(`Min ${alert.min_price.toLocaleString()} FCFA`);
       } else if (alert.max_price) {
@@ -219,9 +221,7 @@ export default function SavedSearches() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-foreground">Recherches sauvegardées</h1>
-              <p className="text-muted-foreground">
-                Gérez vos recherches et recevez des alertes
-              </p>
+              <p className="text-muted-foreground">Gérez vos recherches et recevez des alertes</p>
             </div>
           </div>
         </div>
@@ -234,8 +234,11 @@ export default function SavedSearches() {
               <span>Alertes actives ({alerts.length})</span>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {alerts.map(alert => (
-                <div key={alert.id} className="bg-card border border-border rounded-[20px] p-4 relative hover:border-primary/30 transition-colors">
+              {alerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  className="bg-card border border-border rounded-[20px] p-4 relative hover:border-primary/30 transition-colors"
+                >
                   <button
                     onClick={() => handleDeleteAlert(alert.id)}
                     className="absolute top-3 right-3 p-1.5 text-muted-foreground hover:text-destructive rounded-full hover:bg-destructive/10 transition-colors"
@@ -251,7 +254,8 @@ export default function SavedSearches() {
                   <p className="text-sm text-muted-foreground mb-2">{getAlertSummary(alert)}</p>
                   {alert.last_notified_at && (
                     <p className="text-xs text-muted-foreground">
-                      Dernière notification: {new Date(alert.last_notified_at).toLocaleDateString('fr-FR')}
+                      Dernière notification:{' '}
+                      {new Date(alert.last_notified_at).toLocaleDateString('fr-FR')}
                     </p>
                   )}
                 </div>
@@ -263,8 +267,8 @@ export default function SavedSearches() {
         {/* Mes recherches */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-xl font-bold text-foreground">Mes recherches ({searches.length})</h2>
-          <Link 
-            to="/recherche" 
+          <Link
+            to="/recherche"
             className="inline-flex items-center gap-2 px-4 py-2 border border-border text-foreground rounded-full hover:bg-muted transition-colors"
           >
             <Search className="w-4 h-4" />
@@ -273,8 +277,11 @@ export default function SavedSearches() {
         </div>
 
         <div className="space-y-4">
-          {searches.map(search => (
-            <div key={search.id} className="bg-card border border-border rounded-[20px] p-6 hover:border-primary/30 transition-colors">
+          {searches.map((search) => (
+            <div
+              key={search.id}
+              className="bg-card border border-border rounded-[20px] p-6 hover:border-primary/30 transition-colors"
+            >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
                   <h3 className="text-lg font-bold text-foreground mb-1">{search.name}</h3>
@@ -282,7 +289,9 @@ export default function SavedSearches() {
                   {search.created_at && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
                       <Calendar className="w-4 h-4" />
-                      <span>Créée le {new Date(search.created_at).toLocaleDateString('fr-FR')}</span>
+                      <span>
+                        Créée le {new Date(search.created_at).toLocaleDateString('fr-FR')}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -295,7 +304,11 @@ export default function SavedSearches() {
                         ? 'bg-green-100 text-green-600 hover:bg-green-200'
                         : 'bg-muted text-muted-foreground hover:bg-muted/80'
                     }`}
-                    title={search.notifications_enabled ? 'Notifications activées' : 'Notifications désactivées'}
+                    title={
+                      search.notifications_enabled
+                        ? 'Notifications activées'
+                        : 'Notifications désactivées'
+                    }
                   >
                     {search.notifications_enabled ? (
                       <Bell className="w-5 h-5" />
@@ -315,9 +328,7 @@ export default function SavedSearches() {
               {search.notifications_enabled && (
                 <div className="p-3 bg-green-50 rounded-xl mb-4 flex items-center gap-2">
                   <Bell className="w-4 h-4 text-green-600" />
-                  <span className="text-sm text-green-800 font-medium">
-                    Notifications activées
-                  </span>
+                  <span className="text-sm text-green-800 font-medium">Notifications activées</span>
                 </div>
               )}
 
@@ -336,12 +347,14 @@ export default function SavedSearches() {
               <div className="w-20 h-20 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center">
                 <Bookmark className="w-10 h-10 text-muted-foreground" />
               </div>
-              <p className="text-xl font-semibold text-foreground mb-2">Aucune recherche sauvegardée</p>
+              <p className="text-xl font-semibold text-foreground mb-2">
+                Aucune recherche sauvegardée
+              </p>
               <p className="text-muted-foreground mb-6">
                 Sauvegardez vos recherches pour les retrouver facilement
               </p>
-              <Link 
-                to="/recherche" 
+              <Link
+                to="/recherche"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-colors"
               >
                 <Search className="w-4 h-4" />

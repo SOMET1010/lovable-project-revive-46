@@ -1,6 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams, useLocation } from 'react-router-dom';
-import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Award, ChevronRight } from 'lucide-react';
+import {
+  ArrowLeft,
+  FileText,
+  CheckCircle,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Shield,
+  Award,
+  ChevronRight,
+} from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService } from '@/services/scoringService';
@@ -49,10 +60,10 @@ export default function ApplicationForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [existingApplication, setExistingApplication] = useState(false);
-  
+
   // Form stepper
   const { step, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(1, 2);
-  
+
   // Form validation
   const { validateField, getFieldState, touched } = useFormValidation<ApplicationFormData>();
 
@@ -113,10 +124,10 @@ export default function ApplicationForm() {
     if (!user || !property) return;
 
     // Validate cover letter
-    const coverLetterValid = validateField('coverLetter', () => 
+    const coverLetterValid = validateField('coverLetter', () =>
       ValidationService.validateMinLength(coverLetter, 50, 'La lettre de motivation')
     );
-    
+
     if (!coverLetterValid) {
       return;
     }
@@ -169,7 +180,10 @@ export default function ApplicationForm() {
   if (loading) {
     return (
       <div className="form-page-container flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4" style={{ borderColor: 'var(--form-orange)' }}></div>
+        <div
+          className="animate-spin rounded-full h-16 w-16 border-b-4"
+          style={{ borderColor: 'var(--form-orange)' }}
+        ></div>
       </div>
     );
   }
@@ -193,14 +207,22 @@ export default function ApplicationForm() {
     return (
       <div className="form-page-container flex items-center justify-center p-4">
         <div className="form-section-premium max-w-md text-center animate-scale-in">
-          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}>
+          <div
+            className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}
+          >
             <CheckCircle className="h-12 w-12" style={{ color: 'var(--form-success)' }} />
           </div>
-          <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--form-chocolat)' }}>Candidature envoyée!</h2>
+          <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--form-chocolat)' }}>
+            Candidature envoyée!
+          </h2>
           <p className="text-lg mb-6" style={{ color: 'var(--form-sable)' }}>
-            Votre candidature a été envoyée avec succès au propriétaire. Vous serez notifié de sa réponse.
+            Votre candidature a été envoyée avec succès au propriétaire. Vous serez notifié de sa
+            réponse.
           </p>
-          <p className="text-sm font-medium animate-pulse" style={{ color: 'var(--form-orange)' }}>Redirection en cours...</p>
+          <p className="text-sm font-medium animate-pulse" style={{ color: 'var(--form-orange)' }}>
+            Redirection en cours...
+          </p>
         </div>
       </div>
     );
@@ -214,7 +236,10 @@ export default function ApplicationForm() {
   return (
     <div className="form-page-container">
       {/* Header */}
-      <div className="form-section-premium mb-6" style={{ borderRadius: 0, border: 'none', borderBottom: '1px solid var(--form-border)' }}>
+      <div
+        className="form-section-premium mb-6"
+        style={{ borderRadius: 0, border: 'none', borderBottom: '1px solid var(--form-border)' }}
+      >
         <div className="max-w-4xl mx-auto px-4 py-4">
           <button
             onClick={() => window.history.back()}
@@ -232,15 +257,28 @@ export default function ApplicationForm() {
         <div className="form-section-premium mb-6">
           <div className="flex items-center gap-3 mb-4">
             <FileText className="h-8 w-8" style={{ color: 'var(--form-orange)' }} />
-            <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--form-chocolat)' }}>
+            <h1
+              className="text-2xl md:text-3xl font-bold"
+              style={{ color: 'var(--form-chocolat)' }}
+            >
               Postuler pour cette propriété
             </h1>
           </div>
-          <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--form-ivoire)', border: '1px solid var(--form-border)' }}>
-            <p className="font-bold text-lg" style={{ color: 'var(--form-chocolat)' }}>{property.title}</p>
+          <div
+            className="p-4 rounded-xl"
+            style={{
+              backgroundColor: 'var(--form-ivoire)',
+              border: '1px solid var(--form-border)',
+            }}
+          >
+            <p className="font-bold text-lg" style={{ color: 'var(--form-chocolat)' }}>
+              {property.title}
+            </p>
             <p className="flex items-center gap-2 mt-1" style={{ color: 'var(--form-sable)' }}>
               <MapPin className="h-4 w-4" />
-              <span>{property.city}, {property.neighborhood}</span>
+              <span>
+                {property.city}, {property.neighborhood}
+              </span>
             </p>
             <p className="font-bold text-lg mt-2" style={{ color: 'var(--form-orange)' }}>
               {(property.monthly_rent ?? property.price) != null
@@ -273,10 +311,7 @@ export default function ApplicationForm() {
               <strong>Vérification d'identité OBLIGATOIRE</strong>
             </div>
             <p>Vous devez compléter la vérification de votre identité avant de postuler.</p>
-            <Link
-              to="/profil"
-              className="form-button-primary mt-2"
-            >
+            <Link to="/profil" className="form-button-primary mt-2">
               Compléter ma vérification →
             </Link>
           </div>
@@ -284,41 +319,66 @@ export default function ApplicationForm() {
 
         <form onSubmit={handleSubmit}>
           {/* STEP 1: Informations personnelles */}
-          <FormStepContent step={1} currentStep={step} slideDirection={slideDirection} className="space-y-6">
+          <FormStepContent
+            step={1}
+            currentStep={step}
+            slideDirection={slideDirection}
+            className="space-y-6"
+          >
             {/* Personal Info */}
             <div className="form-section-premium">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
+              <h2
+                className="text-xl font-bold mb-6 flex items-center gap-2"
+                style={{ color: 'var(--form-chocolat)' }}
+              >
                 <User className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
                 <span>Informations personnelles</span>
               </h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
+                <div
+                  className="flex items-center justify-between py-3 border-b"
+                  style={{ borderColor: 'var(--form-border)' }}
+                >
                   <div className="flex items-center gap-3">
                     <User className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
                     <span className="form-label-premium mb-0">Nom complet</span>
                   </div>
-                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.full_name || 'Non renseigné'}</span>
+                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>
+                    {profile?.full_name || 'Non renseigné'}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
+                <div
+                  className="flex items-center justify-between py-3 border-b"
+                  style={{ borderColor: 'var(--form-border)' }}
+                >
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
                     <span className="form-label-premium mb-0">Email</span>
                   </div>
-                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{user?.email}</span>
+                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>
+                    {user?.email}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
+                <div
+                  className="flex items-center justify-between py-3 border-b"
+                  style={{ borderColor: 'var(--form-border)' }}
+                >
                   <div className="flex items-center gap-3">
                     <Phone className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
                     <span className="form-label-premium mb-0">Téléphone</span>
                   </div>
-                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.phone || 'Non renseigné'}</span>
+                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>
+                    {profile?.phone || 'Non renseigné'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-3">
                   <div className="flex items-center gap-3">
                     <MapPin className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
                     <span className="form-label-premium mb-0">Ville</span>
                   </div>
-                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.city || 'Non renseignée'}</span>
+                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>
+                    {profile?.city || 'Non renseignée'}
+                  </span>
                 </div>
               </div>
               <Link
@@ -332,33 +392,47 @@ export default function ApplicationForm() {
 
             {/* Verification Status */}
             <div className="form-section-premium">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
+              <h2
+                className="text-xl font-bold mb-6 flex items-center gap-2"
+                style={{ color: 'var(--form-chocolat)' }}
+              >
                 <Shield className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
                 <span>Statut de vérification</span>
               </h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
+                <div
+                  className="flex items-center justify-between py-3 border-b"
+                  style={{ borderColor: 'var(--form-border)' }}
+                >
                   <div>
                     <span className="form-label-premium mb-0">Vérification d'identité</span>
-                    <span className="text-xs block" style={{ color: 'var(--form-sable)' }}>Document CNI authentifié via ONECI/CNAM</span>
+                    <span className="text-xs block" style={{ color: 'var(--form-sable)' }}>
+                      Document CNI authentifié via ONECI/CNAM
+                    </span>
                   </div>
-                  <span className={`font-bold px-4 py-2 rounded-full text-sm ${
-                    isVerified
-                      ? 'text-white'
-                      : ''
-                  }`} style={{ 
-                    backgroundColor: isVerified ? 'var(--form-success)' : 'var(--form-ivoire)',
-                    color: isVerified ? 'white' : 'var(--form-sable)'
-                  }}>
+                  <span
+                    className={`font-bold px-4 py-2 rounded-full text-sm ${
+                      isVerified ? 'text-white' : ''
+                    }`}
+                    style={{
+                      backgroundColor: isVerified ? 'var(--form-success)' : 'var(--form-ivoire)',
+                      color: isVerified ? 'white' : 'var(--form-sable)',
+                    }}
+                  >
                     {isVerified ? '✓ Vérifié' : '✗ Non vérifié'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-3">
                   <span className="form-label-premium mb-0">Profil complet</span>
-                  <span className={`font-bold px-4 py-2 rounded-full text-sm`} style={{
-                    backgroundColor: profile?.profile_setup_completed ? 'var(--form-success)' : 'var(--form-ivoire)',
-                    color: profile?.profile_setup_completed ? 'white' : 'var(--form-sable)'
-                  }}>
+                  <span
+                    className={`font-bold px-4 py-2 rounded-full text-sm`}
+                    style={{
+                      backgroundColor: profile?.profile_setup_completed
+                        ? 'var(--form-success)'
+                        : 'var(--form-ivoire)',
+                      color: profile?.profile_setup_completed ? 'white' : 'var(--form-sable)',
+                    }}
+                  >
                     {profile?.profile_setup_completed ? '✓ Complet' : '✗ Incomplet'}
                   </span>
                 </div>
@@ -368,11 +442,16 @@ export default function ApplicationForm() {
             {/* Score Preview */}
             <div className="form-section-premium" style={{ backgroundColor: 'var(--form-ivoire)' }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
+                <h3
+                  className="font-bold text-lg flex items-center gap-2"
+                  style={{ color: 'var(--form-chocolat)' }}
+                >
                   <Award className="h-6 w-6" style={{ color: 'var(--form-orange)' }} />
                   <span>Score de candidature</span>
                 </h3>
-                <span className="text-3xl font-bold" style={{ color: 'var(--form-orange)' }}>{applicationScore}/100</span>
+                <span className="text-3xl font-bold" style={{ color: 'var(--form-orange)' }}>
+                  {applicationScore}/100
+                </span>
               </div>
               <div className="bg-white rounded-full h-4 overflow-hidden shadow-inner">
                 <div
@@ -385,11 +464,7 @@ export default function ApplicationForm() {
             {/* Next Button */}
             <div className="form-actions">
               <div></div>
-              <button
-                type="button"
-                onClick={nextStep}
-                className="form-button-primary"
-              >
+              <button type="button" onClick={nextStep} className="form-button-primary">
                 <span>Continuer</span>
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -397,9 +472,17 @@ export default function ApplicationForm() {
           </FormStepContent>
 
           {/* STEP 2: Lettre de motivation */}
-          <FormStepContent step={2} currentStep={step} slideDirection={slideDirection} className="space-y-6">
+          <FormStepContent
+            step={2}
+            currentStep={step}
+            slideDirection={slideDirection}
+            className="space-y-6"
+          >
             <div className="form-section-premium">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
+              <h2
+                className="text-xl font-bold mb-6 flex items-center gap-2"
+                style={{ color: 'var(--form-chocolat)' }}
+              >
                 <FileText className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
                 <span>Lettre de motivation</span>
               </h2>
@@ -407,9 +490,11 @@ export default function ApplicationForm() {
                 name="coverLetter"
                 value={coverLetter}
                 onChange={(e) => setCoverLetter(e.target.value)}
-                onBlur={() => validateField('coverLetter', () => 
-                  ValidationService.validateMinLength(coverLetter, 50, 'La lettre de motivation')
-                )}
+                onBlur={() =>
+                  validateField('coverLetter', () =>
+                    ValidationService.validateMinLength(coverLetter, 50, 'La lettre de motivation')
+                  )
+                }
                 rows={10}
                 required
                 placeholder="Présentez-vous et expliquez pourquoi vous souhaitez louer cette propriété... (minimum 50 caractères)"
@@ -418,7 +503,11 @@ export default function ApplicationForm() {
                 isValid={getFieldState('coverLetter').isValid}
                 showCharCount
                 maxLength={2000}
-                helperText={coverLetter.length < 50 ? `${coverLetter.length}/50 caractères minimum` : undefined}
+                helperText={
+                  coverLetter.length < 50
+                    ? `${coverLetter.length}/50 caractères minimum`
+                    : undefined
+                }
               />
             </div>
 
@@ -432,22 +521,27 @@ export default function ApplicationForm() {
                   className="mt-1 w-5 h-5 rounded"
                   style={{ accentColor: 'var(--form-orange)' }}
                 />
-                <label htmlFor="terms" className="text-sm" style={{ color: 'var(--form-chocolat)' }}>
+                <label
+                  htmlFor="terms"
+                  className="text-sm"
+                  style={{ color: 'var(--form-chocolat)' }}
+                >
                   Je confirme que toutes les informations fournies sont exactes et j'accepte les{' '}
-                  <Link to="/conditions-utilisation" className="font-bold" style={{ color: 'var(--form-orange)' }}>
+                  <Link
+                    to="/conditions-utilisation"
+                    className="font-bold"
+                    style={{ color: 'var(--form-orange)' }}
+                  >
                     conditions d'utilisation
-                  </Link>.
+                  </Link>
+                  .
                 </label>
               </div>
             </div>
 
             {/* Actions */}
             <div className="form-actions">
-              <button
-                type="button"
-                onClick={prevStep}
-                className="form-button-secondary"
-              >
+              <button type="button" onClick={prevStep} className="form-button-secondary">
                 <ArrowLeft className="h-5 w-5" />
                 <span>Retour</span>
               </button>
@@ -461,8 +555,8 @@ export default function ApplicationForm() {
                   {!isVerified
                     ? 'Vérification requise'
                     : submitting
-                    ? 'Envoi en cours...'
-                    : 'Envoyer ma candidature'}
+                      ? 'Envoi en cours...'
+                      : 'Envoyer ma candidature'}
                 </span>
               </button>
             </div>

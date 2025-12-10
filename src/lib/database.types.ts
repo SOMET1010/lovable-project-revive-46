@@ -1,7 +1,17 @@
 export type UserType = 'locataire' | 'proprietaire' | 'agence' | 'admin';
 export type UserRole = 'admin' | 'user' | 'agent' | 'moderator';
 export type PropertyCategory = 'residentiel' | 'commercial';
-export type PropertyType = 'appartement' | 'maison' | 'villa' | 'studio' | 'duplex' | 'chambre' | 'bureau' | 'commerce' | 'entrepot' | 'terrain';
+export type PropertyType =
+  | 'appartement'
+  | 'maison'
+  | 'villa'
+  | 'studio'
+  | 'duplex'
+  | 'chambre'
+  | 'bureau'
+  | 'commerce'
+  | 'entrepot'
+  | 'terrain';
 export type PropertyStatus = 'disponible' | 'loue' | 'en_attente' | 'retire';
 export type ApplicationStatus = 'en_attente' | 'acceptee' | 'refusee' | 'annulee';
 export type VerificationStatus = 'en_attente' | 'verifie' | 'rejete';

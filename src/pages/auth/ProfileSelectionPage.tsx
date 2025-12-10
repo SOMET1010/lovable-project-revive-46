@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Building2, Home, UserCircle, Briefcase, CheckCircle, Sparkles, ArrowRight } from 'lucide-react';
+import {
+  Building2,
+  Home,
+  UserCircle,
+  Briefcase,
+  CheckCircle,
+  Sparkles,
+  ArrowRight,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeUserType, type UserTypeEn } from '@/shared/lib/utils';
 
@@ -22,12 +30,12 @@ export default function ProfileSelection() {
       benefits: [
         'Candidature 100% en ligne',
         'Visites planifiables en 1 clic',
-        'Signature électronique sécurisée'
+        'Signature électronique sécurisée',
       ],
       color: 'from-cyan-400 to-blue-500',
       bgColor: 'from-cyan-50 to-blue-50',
       borderColor: 'border-cyan-300',
-      hoverColor: 'hover:border-cyan-500'
+      hoverColor: 'hover:border-cyan-500',
     },
     {
       type: 'owner' as UserTypeEn,
@@ -38,12 +46,12 @@ export default function ProfileSelection() {
       benefits: [
         'Locataires vérifiés',
         'Contrats et signatures digitales',
-        'Suivi des paiements en temps réel'
+        'Suivi des paiements en temps réel',
       ],
       color: 'from-terracotta-400 to-coral-500',
       bgColor: 'from-terracotta-50 to-coral-50',
       borderColor: 'border-terracotta-300',
-      hoverColor: 'hover:border-terracotta-500'
+      hoverColor: 'hover:border-terracotta-500',
     },
     {
       type: 'agent' as UserTypeEn,
@@ -54,13 +62,13 @@ export default function ProfileSelection() {
       benefits: [
         'Portefeuille multi-biens',
         'Collaboration équipe & mandats',
-        'Reporting et commissions'
+        'Reporting et commissions',
       ],
       color: 'from-olive-400 to-green-500',
       bgColor: 'from-olive-50 to-green-50',
       borderColor: 'border-olive-300',
-      hoverColor: 'hover:border-olive-500'
-    }
+      hoverColor: 'hover:border-olive-500',
+    },
   ];
 
   const handleSubmit = async () => {
@@ -74,7 +82,7 @@ export default function ProfileSelection() {
         .from('profiles')
         .update({
           user_type: normalizeUserType(selectedType),
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
 
@@ -88,7 +96,8 @@ export default function ProfileSelection() {
         navigate('/agence/inscription');
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour du profil';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur lors de la mise à jour du profil';
       setError(errorMessage);
       setLoading(false);
     }
@@ -111,12 +120,22 @@ export default function ProfileSelection() {
 
       <div className="absolute inset-0 opacity-30">
         <div className="absolute top-20 left-20 w-64 h-64 bg-cyan-300 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-olive-300 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-200 rounded-full blur-3xl animate-float" style={{ animationDelay: '0.5s' }} />
+        <div
+          className="absolute bottom-20 right-20 w-80 h-80 bg-olive-300 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: '1.5s' }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-200 rounded-full blur-3xl animate-float"
+          style={{ animationDelay: '0.5s' }}
+        />
       </div>
 
-      <div className="absolute top-10 right-10 text-white/30 transform rotate-12 text-9xl font-bold animate-float">★</div>
-      <div className="absolute bottom-20 left-20 text-white/30 transform -rotate-12 text-7xl font-bold animate-bounce-subtle">♥</div>
+      <div className="absolute top-10 right-10 text-white/30 transform rotate-12 text-9xl font-bold animate-float">
+        ★
+      </div>
+      <div className="absolute bottom-20 left-20 text-white/30 transform -rotate-12 text-7xl font-bold animate-bounce-subtle">
+        ♥
+      </div>
 
       <div className="max-w-7xl w-full relative z-10">
         <div className="text-center mb-12 animate-slide-down">
@@ -127,7 +146,9 @@ export default function ProfileSelection() {
 
           <div className="inline-flex items-center space-x-2 mb-6 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full">
             <Sparkles className="h-5 w-5 text-amber-300" />
-            <span className="text-sm font-semibold text-white">Bienvenue {profile?.full_name || user.email}!</span>
+            <span className="text-sm font-semibold text-white">
+              Bienvenue {profile?.full_name || user.email}!
+            </span>
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
@@ -154,9 +175,7 @@ export default function ProfileSelection() {
                 key={profileType.type}
                 onClick={() => setSelectedType(profileType.type)}
                 className={`glass-card rounded-3xl p-8 cursor-pointer transition-all duration-300 transform hover:scale-105 ${
-                  isSelected
-                    ? 'ring-4 ring-white shadow-2xl scale-105'
-                    : 'hover:shadow-xl'
+                  isSelected ? 'ring-4 ring-white shadow-2xl scale-105' : 'hover:shadow-xl'
                 } animate-scale-in`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
@@ -167,19 +186,25 @@ export default function ProfileSelection() {
                     </div>
                   )}
 
-                  <div className={`w-20 h-20 bg-gradient-to-br ${profileType.color} rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg transform ${
-                    isSelected ? 'rotate-0' : index % 2 === 0 ? '-rotate-6' : 'rotate-6'
-                  } transition-transform duration-300`}>
+                  <div
+                    className={`w-20 h-20 bg-gradient-to-br ${profileType.color} rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg transform ${
+                      isSelected ? 'rotate-0' : index % 2 === 0 ? '-rotate-6' : 'rotate-6'
+                    } transition-transform duration-300`}
+                  >
                     <Icon className="h-8 w-8 text-white" />
                   </div>
 
                   <div className="text-center mb-6">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">{profileType.title}</h3>
-                    <p className="text-sm font-semibold text-gray-600 mb-4">{profileType.subtitle}</p>
+                    <p className="text-sm font-semibold text-gray-600 mb-4">
+                      {profileType.subtitle}
+                    </p>
                     <p className="text-gray-700 leading-relaxed">{profileType.description}</p>
                   </div>
 
-                  <div className={`bg-gradient-to-br ${profileType.bgColor} rounded-2xl p-4 border-2 ${profileType.borderColor}`}>
+                  <div
+                    className={`bg-gradient-to-br ${profileType.bgColor} rounded-2xl p-4 border-2 ${profileType.borderColor}`}
+                  >
                     <h4 className="font-bold text-gray-900 mb-3 flex items-center">
                       <Sparkles className="h-4 w-4 mr-2 text-amber-500" />
                       Avantages
@@ -228,7 +253,9 @@ export default function ProfileSelection() {
         <div className="mt-8 text-center">
           <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
             <UserCircle className="h-4 w-4 text-terracotta-600" />
-            <span className="text-gray-700 font-medium text-sm">Vous pourrez modifier ce choix plus tard depuis votre profil</span>
+            <span className="text-gray-700 font-medium text-sm">
+              Vous pourrez modifier ce choix plus tard depuis votre profil
+            </span>
           </div>
         </div>
       </div>

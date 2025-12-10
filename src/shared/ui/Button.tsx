@@ -31,7 +31,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       'disabled:opacity-50 disabled:cursor-not-allowed',
       'touch-manipulation',
       // Accessibilité WCAG AA - target tactile minimum
-      'min-h-[var(--button-primary-height, 48px)]'
+      'min-h-[var(--button-primary-height, 48px)]',
     ].join(' ');
 
     const variantClasses = {
@@ -45,7 +45,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'hover:shadow-md',
         'hover:-translate-y-0.5 hover:scale-[1.02]', // Transform selon spécifications
       ].join(' '),
-      
+
       secondary: [
         'bg-transparent',
         'border-2',
@@ -57,7 +57,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'active:bg-primary-100',
         'focus:ring-primary-500',
       ].join(' '),
-      
+
       outline: [
         'border-2',
         'border-neutral-200',
@@ -67,7 +67,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'hover:text-neutral-900',
         'focus:ring-neutral-500',
       ].join(' '),
-      
+
       ghost: [
         'text-neutral-700',
         'hover:bg-neutral-100',
@@ -75,7 +75,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'focus:ring-neutral-300',
         'active:bg-neutral-200',
       ].join(' '),
-      
+
       danger: [
         'bg-semantic-error',
         'text-white',
@@ -94,14 +94,14 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         'min-h-[40px]', // WCAG AA minimum touch target
         'font-size-sm',
       ].join(' '),
-      
+
       medium: [
         'px-6 py-3',
         'text-body',
         'min-h-[48px]', // Design system standard
         'font-size-body',
       ].join(' '),
-      
+
       large: [
         'px-8 py-4',
         'text-h3',
@@ -119,23 +119,21 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       sizeClasses[size],
       widthClass,
       loadingClass,
-      className
-    ].filter(Boolean).join(' ');
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
     return (
-      <button 
-        ref={ref} 
-        disabled={disabled || loading} 
+      <button
+        ref={ref}
+        disabled={disabled || loading}
         className={classes}
         aria-busy={loading}
         {...props}
       >
         {loading && (
-          <Loader 
-            className="mr-2 h-4 w-4 animate-spin" 
-            aria-hidden="true"
-            fill="currentColor"
-          />
+          <Loader className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" fill="currentColor" />
         )}
         <span className={loading ? 'opacity-70' : ''}>{children}</span>
       </button>

@@ -54,22 +54,23 @@ function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: strin
   }, [isVisible, value]);
 
   return (
-    <div 
-      ref={ref} 
+    <div
+      ref={ref}
       className="font-bold"
-      style={{ 
+      style={{
         fontSize: 'clamp(32px, 4vw, 48px)',
-        color: 'var(--color-primary-500)'
+        color: 'var(--color-primary-500)',
       }}
     >
-      {count.toLocaleString()}{suffix}
+      {count.toLocaleString()}
+      {suffix}
     </div>
   );
 }
 
 /**
  * StatsSection - Modern Minimalism Premium Design
- * 
+ *
  * Features:
  * - Clean white background
  * - 96px vertical padding
@@ -104,49 +105,50 @@ export default function StatsSection({ stats }: StatsSectionProps) {
       value: stats.citiesCount,
       suffix: '',
       label: 'Villes couvertes',
-      description: 'Partout en Côte d\'Ivoire',
+      description: "Partout en Côte d'Ivoire",
     },
   ];
 
   return (
-    <section 
+    <section
       className="relative overflow-hidden"
-      style={{ 
+      style={{
         backgroundColor: 'var(--color-background-page)',
         paddingTop: 'var(--spacing-24)',
-        paddingBottom: 'var(--spacing-24)'
+        paddingBottom: 'var(--spacing-24)',
       }}
     >
       <div className="container">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <span 
+          <span
             className="inline-block px-4 py-2 rounded-full text-sm font-semibold mb-4"
-            style={{ 
+            style={{
               backgroundColor: 'var(--color-primary-50)',
-              color: 'var(--color-primary-600)'
+              color: 'var(--color-primary-600)',
             }}
           >
             Nos Chiffres
           </span>
-          <h2 
+          <h2
             className="font-bold mb-4"
-            style={{ 
+            style={{
               fontSize: 'clamp(28px, 4vw, 40px)',
-              color: 'var(--color-neutral-900)'
+              color: 'var(--color-neutral-900)',
             }}
           >
             La confiance de milliers d'Ivoiriens
           </h2>
-          <p 
+          <p
             className="max-w-2xl mx-auto"
-            style={{ 
+            style={{
               fontSize: '18px',
               lineHeight: '1.6',
-              color: 'var(--color-neutral-700)'
+              color: 'var(--color-neutral-700)',
             }}
           >
-            Mon Toit connecte chaque jour propriétaires et locataires dans un environnement sécurisé et certifié
+            Mon Toit connecte chaque jour propriétaires et locataires dans un environnement sécurisé
+            et certifié
           </p>
         </div>
 
@@ -156,11 +158,11 @@ export default function StatsSection({ stats }: StatsSectionProps) {
             <div
               key={stat.label}
               className="group text-center transition-all duration-300"
-              style={{ 
+              style={{
                 backgroundColor: 'var(--color-background-surface)',
                 borderRadius: 'var(--border-radius-lg)',
                 padding: 'var(--spacing-8)',
-                boxShadow: 'var(--shadow-base)'
+                boxShadow: 'var(--shadow-base)',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.boxShadow = 'var(--shadow-md)';
@@ -172,30 +174,30 @@ export default function StatsSection({ stats }: StatsSectionProps) {
               }}
             >
               {/* Icon */}
-              <div 
+              <div
                 className="w-14 h-14 mx-auto mb-5 flex items-center justify-center transition-transform group-hover:scale-110"
-                style={{ 
+                style={{
                   backgroundColor: 'var(--color-primary-500)',
-                  borderRadius: 'var(--border-radius-md)'
+                  borderRadius: 'var(--border-radius-md)',
                 }}
               >
                 <stat.icon className="h-7 w-7 text-white" />
               </div>
-              
+
               {/* Counter */}
               <AnimatedCounter value={stat.value} suffix={stat.suffix} />
-              
+
               {/* Label */}
-              <h3 
+              <h3
                 className="font-semibold mt-2 mb-1"
-                style={{ 
+                style={{
                   fontSize: '18px',
-                  color: 'var(--color-neutral-900)'
+                  color: 'var(--color-neutral-900)',
                 }}
               >
                 {stat.label}
               </h3>
-              
+
               {/* Description */}
               <p style={{ fontSize: '14px', color: 'var(--color-neutral-700)' }}>
                 {stat.description}
@@ -205,7 +207,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
         </div>
 
         {/* Trust Badges */}
-        <div 
+        <div
           className="mt-16 flex flex-wrap items-center justify-center gap-8"
           style={{ color: 'var(--color-neutral-700)' }}
         >
@@ -213,7 +215,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
             <Shield className="h-6 w-6" style={{ color: 'var(--color-semantic-success)' }} />
             <span className="font-medium">Certifié ANSUT</span>
           </div>
-          <div 
+          <div
             className="w-px h-8 hidden sm:block"
             style={{ backgroundColor: 'var(--color-neutral-200)' }}
           />
@@ -221,7 +223,7 @@ export default function StatsSection({ stats }: StatsSectionProps) {
             <TrendingUp className="h-6 w-6" style={{ color: 'var(--color-primary-500)' }} />
             <span className="font-medium">98% Satisfaction</span>
           </div>
-          <div 
+          <div
             className="w-px h-8 hidden sm:block"
             style={{ backgroundColor: 'var(--color-neutral-200)' }}
           />

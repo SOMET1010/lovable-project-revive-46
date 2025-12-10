@@ -31,7 +31,7 @@ export async function performHealthCheck(): Promise<HealthCheckResult> {
     );
     const queryPromise = supabase.from('profiles').select('count').limit(1).maybeSingle();
 
-    const { error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+    const { error } = (await Promise.race([queryPromise, timeoutPromise])) as any;
 
     if (error) {
       result.errors.push(`Database: ${error.message}`);
@@ -88,13 +88,14 @@ export async function testDatabaseConnection(): Promise<{ success: boolean; mess
 
     const queryPromise = supabase.from('profiles').select('id').limit(1);
 
-    const { error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+    const { error } = (await Promise.race([queryPromise, timeoutPromise])) as any;
 
     if (error) {
       if (error.message.includes('schema cache') || error.message.includes('Could not find')) {
         return {
           success: false,
-          message: 'La table des profils n\'est pas accessible. Les migrations de base de données n\'ont peut-être pas été appliquées correctement.'
+          message:
+            "La table des profils n'est pas accessible. Les migrations de base de données n'ont peut-être pas été appliquées correctement.",
         };
       }
       return { success: false, message: error.message };
@@ -102,19 +103,25 @@ export async function testDatabaseConnection(): Promise<{ success: boolean; mess
     return { success: true, message: 'Database connection successful' };
   } catch (err: any) {
     if (err.message.includes('timeout')) {
-      return { success: false, message: 'La connexion a expiré. Vérifiez votre connexion Internet.' };
+      return {
+        success: false,
+        message: 'La connexion a expiré. Vérifiez votre connexion Internet.',
+      };
     }
     if (err.message.includes('schema cache') || err.message.includes('Could not find')) {
       return {
         success: false,
-        message: 'La table des profils n\'est pas accessible. Les migrations de base de données n\'ont peut-être pas été appliquées correctement.'
+        message:
+          "La table des profils n'est pas accessible. Les migrations de base de données n'ont peut-être pas été appliquées correctement.",
       };
     }
     return { success: false, message: err.message };
   }
 }
 
-export async function testProfileAccess(userId: string): Promise<{ success: boolean; message: string; hasProfile: boolean }> {
+export async function testProfileAccess(
+  userId: string
+): Promise<{ success: boolean; message: string; hasProfile: boolean }> {
   try {
     const { data, error } = await supabase
       .from('profiles')
@@ -154,7 +161,10 @@ export async function testStorageConnection(): Promise<{ success: boolean; messa
     if (error) {
       return { success: false, message: error.message };
     }
-    return { success: true, message: `Storage connection successful (${data.length} buckets found)` };
+    return {
+      success: true,
+      message: `Storage connection successful (${data.length} buckets found)`,
+    };
   } catch (err: any) {
     return { success: false, message: err.message };
   }
@@ -172,7 +182,7 @@ export async function diagnoseProfileIssue(userId: string): Promise<{
     hasPermission: false,
     profileExists: false,
     issues: [] as string[],
-    recommendations: [] as string[]
+    recommendations: [] as string[],
   };
 
   const dbTest = await testDatabaseConnection();
@@ -190,7 +200,7 @@ export async function diagnoseProfileIssue(userId: string): Promise<{
   result.profileExists = profileTest.hasProfile;
 
   if (!profileTest.success) {
-    result.issues.push('Erreur d\'accès au profil');
+    result.issues.push("Erreur d'accès au profil");
     result.recommendations.push('Vérifiez vos permissions');
     result.recommendations.push('Contactez le support si le problème persiste');
   } else if (!profileTest.hasProfile) {

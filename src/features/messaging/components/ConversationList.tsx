@@ -10,7 +10,12 @@ interface ConversationListProps {
   loading: boolean;
 }
 
-export function ConversationList({ conversations, selectedId, onSelect, loading }: ConversationListProps) {
+export function ConversationList({
+  conversations,
+  selectedId,
+  onSelect,
+  loading,
+}: ConversationListProps) {
   const [search, setSearch] = useState('');
 
   const filteredConversations = conversations.filter((conv) => {
@@ -30,11 +35,11 @@ export function ConversationList({ conversations, selectedId, onSelect, loading 
         <h1 className="text-2xl font-bold text-[#2C1810] mb-4">Messages</h1>
         <div className="relative">
           <Search className="absolute left-4 top-3.5 w-4 h-4 text-[#A69B95]" />
-          <input 
-            type="text" 
+          <input
+            type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher une conversation..." 
+            placeholder="Rechercher une conversation..."
             className="w-full pl-10 pr-4 py-3 rounded-xl bg-[#FAF7F4] border-transparent focus:bg-white focus:border-[#F16522] focus:ring-2 focus:ring-[#F16522]/10 transition-all text-sm font-medium text-[#2C1810] placeholder:text-[#A69B95] outline-none"
           />
         </div>

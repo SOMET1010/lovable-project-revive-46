@@ -5,47 +5,56 @@ import { Capacitor } from '@capacitor/core';
 export function useNativeStorage() {
   const isNative = Capacitor.isNativePlatform();
 
-  const setItem = useCallback(async (key: string, value: unknown): Promise<void> => {
-    const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
-    
-    if (isNative) {
-      await Preferences.set({ key, value: stringValue });
-    } else {
-      localStorage.setItem(key, stringValue);
-    }
-  }, [isNative]);
+  const setItem = useCallback(
+    async (key: string, value: unknown): Promise<void> => {
+      const stringValue = typeof value === 'string' ? value : JSON.stringify(value);
 
-  const getItem = useCallback(async <T = string>(key: string): Promise<T | null> => {
-    try {
-      let value: string | null;
-      
       if (isNative) {
-        const result = await Preferences.get({ key });
-        value = result.value;
+        await Preferences.set({ key, value: stringValue });
       } else {
-        value = localStorage.getItem(key);
+        localStorage.setItem(key, stringValue);
       }
+    },
+    [isNative]
+  );
 
-      if (value === null) return null;
-
-      // Try to parse as JSON, otherwise return as string
+  const getItem = useCallback(
+    async <T = string>(key: string): Promise<T | null> => {
       try {
-        return JSON.parse(value) as T;
-      } catch {
-        return value as unknown as T;
-      }
-    } catch {
-      return null;
-    }
-  }, [isNative]);
+        let value: string | null;
 
-  const removeItem = useCallback(async (key: string): Promise<void> => {
-    if (isNative) {
-      await Preferences.remove({ key });
-    } else {
-      localStorage.removeItem(key);
-    }
-  }, [isNative]);
+        if (isNative) {
+          const result = await Preferences.get({ key });
+          value = result.value;
+        } else {
+          value = localStorage.getItem(key);
+        }
+
+        if (value === null) return null;
+
+        // Try to parse as JSON, otherwise return as string
+        try {
+          return JSON.parse(value) as T;
+        } catch {
+          return value as unknown as T;
+        }
+      } catch {
+        return null;
+      }
+    },
+    [isNative]
+  );
+
+  const removeItem = useCallback(
+    async (key: string): Promise<void> => {
+      if (isNative) {
+        await Preferences.remove({ key });
+      } else {
+        localStorage.removeItem(key);
+      }
+    },
+    [isNative]
+  );
 
   const clear = useCallback(async (): Promise<void> => {
     if (isNative) {
@@ -70,6 +79,6 @@ export function useNativeStorage() {
     getItem,
     removeItem,
     clear,
-    keys
+    keys,
   };
 }

@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Building2, 
-  FileText, 
-  Users, 
-  TrendingUp, 
+import {
+  Building2,
+  FileText,
+  Users,
+  TrendingUp,
   ChevronRight,
   Loader2,
   Plus,
   Eye,
   Edit,
-  MoreHorizontal
+  MoreHorizontal,
 } from 'lucide-react';
 
 interface Property {
@@ -81,7 +81,7 @@ export default function OwnerDashboardContent() {
       }
 
       // Fetch pending applications count
-      const propertyIds = propertiesData?.map(p => p.id) || [];
+      const propertyIds = propertiesData?.map((p) => p.id) || [];
       if (propertyIds.length > 0) {
         const { count, error: appsError } = await supabase
           .from('rental_applications')
@@ -107,7 +107,10 @@ export default function OwnerDashboardContent() {
       indisponible: { label: 'Indisponible', className: 'bg-gray-100 text-gray-700' },
       en_attente: { label: 'En attente', className: 'bg-yellow-100 text-yellow-700' },
     };
-    const config = statusConfig[status || 'disponible'] || { label: status || 'Inconnu', className: 'bg-gray-100 text-gray-700' };
+    const config = statusConfig[status || 'disponible'] || {
+      label: status || 'Inconnu',
+      className: 'bg-gray-100 text-gray-700',
+    };
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.className}`}>
         {config.label}
@@ -151,8 +154,8 @@ export default function OwnerDashboardContent() {
           </div>
         </div>
 
-        <Link 
-          to="/dashboard/candidatures" 
+        <Link
+          to="/dashboard/candidatures"
           className="bg-white rounded-2xl p-5 border border-[#EFEBE9] hover:border-[#F16522] transition-colors group"
         >
           <div className="flex items-center justify-between">
@@ -189,8 +192,8 @@ export default function OwnerDashboardContent() {
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-[#2C1810]">Mes Propriétés</h2>
-          <Link 
-            to="/ajouter-propriete" 
+          <Link
+            to="/ajouter-propriete"
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F16522] text-white text-sm font-medium hover:bg-[#D95318] transition-colors"
           >
             <Plus className="h-4 w-4" />
@@ -202,8 +205,8 @@ export default function OwnerDashboardContent() {
           <div className="bg-white rounded-2xl border border-[#EFEBE9] p-8 text-center">
             <Building2 className="h-12 w-12 text-[#A69B95] mx-auto mb-3" />
             <p className="text-[#6B5A4E]">Aucune propriété</p>
-            <Link 
-              to="/ajouter-propriete" 
+            <Link
+              to="/ajouter-propriete"
               className="text-[#F16522] hover:underline text-sm font-medium mt-2 inline-block"
             >
               Publier votre première annonce
@@ -218,8 +221,8 @@ export default function OwnerDashboardContent() {
               >
                 <div className="flex">
                   {property.main_image ? (
-                    <img 
-                      src={property.main_image} 
+                    <img
+                      src={property.main_image}
                       alt={property.title}
                       className="w-32 h-32 object-cover"
                     />
@@ -237,7 +240,8 @@ export default function OwnerDashboardContent() {
                           {getStatusBadge(property.status)}
                         </div>
                         <p className="text-sm text-[#6B5A4E]">
-                          {property.city}{property.neighborhood ? `, ${property.neighborhood}` : ''}
+                          {property.city}
+                          {property.neighborhood ? `, ${property.neighborhood}` : ''}
                         </p>
                         <p className="text-lg font-bold text-[#F16522] mt-2">
                           {property.monthly_rent?.toLocaleString('fr-FR')} FCFA
@@ -284,8 +288,8 @@ export default function OwnerDashboardContent() {
 
         {properties.length > 0 && (
           <div className="flex justify-center mt-4">
-            <Link 
-              to="/dashboard/mes-proprietes" 
+            <Link
+              to="/dashboard/mes-proprietes"
               className="flex items-center gap-1 text-[#F16522] hover:underline font-medium"
             >
               Voir toutes les propriétés

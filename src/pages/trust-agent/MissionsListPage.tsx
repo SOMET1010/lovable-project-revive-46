@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ClipboardList, 
-  Camera, 
-  FileCheck, 
-  Home, 
-  Clock, 
+import {
+  ClipboardList,
+  Camera,
+  FileCheck,
+  Home,
+  Clock,
   CheckCircle2,
   AlertTriangle,
   Search,
-  Filter
+  Filter,
 } from 'lucide-react';
 import { Card, CardContent } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
@@ -37,19 +37,22 @@ interface Mission {
   };
 }
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+const statusConfig: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+> = {
   pending: { label: 'En attente', variant: 'secondary' },
   assigned: { label: 'Assignée', variant: 'outline' },
   in_progress: { label: 'En cours', variant: 'default' },
   completed: { label: 'Terminée', variant: 'secondary' },
-  cancelled: { label: 'Annulée', variant: 'destructive' }
+  cancelled: { label: 'Annulée', variant: 'destructive' },
 };
 
 const urgencyConfig: Record<string, { label: string; color: string }> = {
   low: { label: 'Basse', color: 'text-muted-foreground' },
   medium: { label: 'Moyenne', color: 'text-amber-600' },
   high: { label: 'Haute', color: 'text-orange-600' },
-  urgent: { label: 'Urgente', color: 'text-destructive' }
+  urgent: { label: 'Urgente', color: 'text-destructive' },
 };
 
 const missionTypeConfig: Record<string, { label: string; icon: React.ElementType }> = {
@@ -57,7 +60,7 @@ const missionTypeConfig: Record<string, { label: string; icon: React.ElementType
   photos: { label: 'Vérification Photos', icon: Camera },
   documents: { label: 'Validation Documents', icon: FileCheck },
   etat_lieux: { label: 'État des Lieux', icon: Home },
-  verification: { label: 'Vérification', icon: CheckCircle2 }
+  verification: { label: 'Vérification', icon: CheckCircle2 },
 };
 
 export default function MissionsListPage() {
@@ -79,10 +82,12 @@ export default function MissionsListPage() {
     try {
       const { data, error } = await supabase
         .from('cev_missions')
-        .select(`
+        .select(
+          `
           *,
           property:properties(title, address, city)
-        `)
+        `
+        )
         .eq('assigned_agent_id', user?.id ?? '')
         .order('urgency', { ascending: false })
         .order('scheduled_date', { ascending: true });
@@ -96,40 +101,43 @@ export default function MissionsListPage() {
     }
   };
 
-  const filteredMissions = missions.filter(mission => {
+  const filteredMissions = missions.filter((mission) => {
     // Status filter
     if (activeTab === 'pending' && !['pending', 'assigned'].includes(mission.status)) return false;
     if (activeTab === 'in_progress' && mission.status !== 'in_progress') return false;
     if (activeTab === 'completed' && mission.status !== 'completed') return false;
-    
+
     // Type filter
     if (typeFilter && mission.mission_type !== typeFilter) return false;
-    
+
     // Search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      const addressText = formatAddress(mission.property?.address, mission.property?.city).toLowerCase();
+      const addressText = formatAddress(
+        mission.property?.address,
+        mission.property?.city
+      ).toLowerCase();
       return (
         mission.property?.title?.toLowerCase().includes(query) ||
         mission.property?.city?.toLowerCase().includes(query) ||
         addressText.includes(query)
       );
     }
-    
+
     return true;
   });
 
   const stats = {
     all: missions.length,
-    pending: missions.filter(m => ['pending', 'assigned'].includes(m.status)).length,
-    in_progress: missions.filter(m => m.status === 'in_progress').length,
-    completed: missions.filter(m => m.status === 'completed').length
+    pending: missions.filter((m) => ['pending', 'assigned'].includes(m.status)).length,
+    in_progress: missions.filter((m) => m.status === 'in_progress').length,
+    completed: missions.filter((m) => m.status === 'completed').length,
   };
 
   return (
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Mes Missions" />
-      
+
       <main className="container mx-auto px-4 py-8">
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -170,26 +178,34 @@ export default function MissionsListPage() {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="all" className="relative">
               Toutes
-              <Badge variant="secondary" className="ml-2">{stats.all}</Badge>
+              <Badge variant="secondary" className="ml-2">
+                {stats.all}
+              </Badge>
             </TabsTrigger>
             <TabsTrigger value="pending">
               En attente
-              <Badge variant="secondary" className="ml-2">{stats.pending}</Badge>
+              <Badge variant="secondary" className="ml-2">
+                {stats.pending}
+              </Badge>
             </TabsTrigger>
             <TabsTrigger value="in_progress">
               En cours
-              <Badge variant="secondary" className="ml-2">{stats.in_progress}</Badge>
+              <Badge variant="secondary" className="ml-2">
+                {stats.in_progress}
+              </Badge>
             </TabsTrigger>
             <TabsTrigger value="completed">
               Terminées
-              <Badge variant="secondary" className="ml-2">{stats.completed}</Badge>
+              <Badge variant="secondary" className="ml-2">
+                {stats.completed}
+              </Badge>
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value={activeTab} className="mt-6">
             {loading ? (
               <div className="space-y-4">
-                {[1, 2, 3].map(i => (
+                {[1, 2, 3].map((i) => (
                   <Card key={i} className="animate-pulse">
                     <CardContent className="h-32" />
                   </Card>
@@ -204,24 +220,36 @@ export default function MissionsListPage() {
               </Card>
             ) : (
               <div className="space-y-4">
-                {filteredMissions.map(mission => {
-                  const MissionIcon = missionTypeConfig[mission.mission_type]?.icon || ClipboardList;
-                  const typeLabel = missionTypeConfig[mission.mission_type]?.label || mission.mission_type;
-                  const statusInfo = statusConfig[mission.status] ?? { label: mission.status, variant: 'secondary' as const };
-                  const urgencyInfo = urgencyConfig[mission.urgency] ?? { label: mission.urgency, color: 'text-muted-foreground' };
+                {filteredMissions.map((mission) => {
+                  const MissionIcon =
+                    missionTypeConfig[mission.mission_type]?.icon || ClipboardList;
+                  const typeLabel =
+                    missionTypeConfig[mission.mission_type]?.label || mission.mission_type;
+                  const statusInfo = statusConfig[mission.status] ?? {
+                    label: mission.status,
+                    variant: 'secondary' as const,
+                  };
+                  const urgencyInfo = urgencyConfig[mission.urgency] ?? {
+                    label: mission.urgency,
+                    color: 'text-muted-foreground',
+                  };
                   const isUrgent = mission.urgency === 'urgent' || mission.urgency === 'high';
 
                   return (
-                    <Card 
-                      key={mission.id} 
+                    <Card
+                      key={mission.id}
                       className={`cursor-pointer hover:shadow-md transition-shadow ${isUrgent ? 'border-l-4 border-l-destructive' : ''}`}
                       onClick={() => navigate(`/trust-agent/mission/${mission.id}`)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-4">
-                            <div className={`p-3 rounded-lg ${isUrgent ? 'bg-destructive/10' : 'bg-primary/10'}`}>
-                              <MissionIcon className={`h-6 w-6 ${isUrgent ? 'text-destructive' : 'text-primary'}`} />
+                            <div
+                              className={`p-3 rounded-lg ${isUrgent ? 'bg-destructive/10' : 'bg-primary/10'}`}
+                            >
+                              <MissionIcon
+                                className={`h-6 w-6 ${isUrgent ? 'text-destructive' : 'text-primary'}`}
+                              />
                             </div>
                             <div>
                               <h3 className="font-semibold flex items-center gap-2">
@@ -241,7 +269,8 @@ export default function MissionsListPage() {
                               {mission.scheduled_date && (
                                 <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                                   <Clock className="h-3 w-3" />
-                                  Planifiée le {new Date(mission.scheduled_date).toLocaleDateString('fr-FR')}
+                                  Planifiée le{' '}
+                                  {new Date(mission.scheduled_date).toLocaleDateString('fr-FR')}
                                 </p>
                               )}
                             </div>

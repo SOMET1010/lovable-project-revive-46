@@ -14,17 +14,17 @@ export interface ApiError {
 // Types de base pour les candidatures
 export type ApplicationStatus = 'en_attente' | 'en_cours' | 'acceptee' | 'refusee' | 'annulee';
 
-export type ApplicationStep = 
-  | 'informations_personnelles' 
-  | 'situation_financiere' 
-  | 'garanties' 
-  | 'documents' 
+export type ApplicationStep =
+  | 'informations_personnelles'
+  | 'situation_financiere'
+  | 'garanties'
+  | 'documents'
   | 'validation';
 
-export type DocumentType = 
-  | 'piece_identite' 
-  | 'bulletin_salaire' 
-  | 'avis_imposition' 
+export type DocumentType =
+  | 'piece_identite'
+  | 'bulletin_salaire'
+  | 'avis_imposition'
   | 'attestation_employeur'
   | 'garantie_bancaire'
   | 'autre';
@@ -264,6 +264,4 @@ export interface UseApplicationsReturn {
 }
 
 // Constants réexportées
-export type {
-  Database
-};
+export type { Database };

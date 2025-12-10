@@ -1,6 +1,6 @@
 /**
  * Feature: owner
- * 
+ *
  * Exports publics de la feature owner
  */
 

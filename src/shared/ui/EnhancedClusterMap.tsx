@@ -30,22 +30,22 @@ interface EnhancedClusterMapProps {
 
 // Coordonnées par défaut des villes ivoiriennes
 const CITY_CENTER_COORDS: Record<string, [number, number]> = {
-  'Abidjan': [-4.0083, 5.3600],
-  'Cocody': [-3.9878, 5.3545],
-  'Plateau': [-4.0213, 5.3235],
-  'Marcory': [-3.9989, 5.3010],
-  'Riviera': [-3.9700, 5.3600],
-  'Yopougon': [-4.0856, 5.3194],
-  'Bouaké': [-5.0306, 7.6936],
-  'Yamoussoukro': [-5.2767, 6.8277],
-  'Grand-Bassam': [-3.7400, 5.2100],
-  'Bingerville': [-3.8883, 5.3536],
+  Abidjan: [-4.0083, 5.36],
+  Cocody: [-3.9878, 5.3545],
+  Plateau: [-4.0213, 5.3235],
+  Marcory: [-3.9989, 5.301],
+  Riviera: [-3.97, 5.36],
+  Yopougon: [-4.0856, 5.3194],
+  Bouaké: [-5.0306, 7.6936],
+  Yamoussoukro: [-5.2767, 6.8277],
+  'Grand-Bassam': [-3.74, 5.21],
+  Bingerville: [-3.8883, 5.3536],
 };
 
 export default function EnhancedClusterMap({
   properties,
   onMarkerClick,
-  center = [-4.0083, 5.3600],
+  center = [-4.0083, 5.36],
   zoom = 11,
   height = '100%',
   fitBounds = true,
@@ -55,21 +55,21 @@ export default function EnhancedClusterMap({
   const userMarker = useRef<mapboxgl.Marker | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
-  
+
   const { token: mapboxToken, isLoading: tokenLoading, error: tokenError } = useMapboxToken();
 
   // Fonction de recentrage sur les propriétés
   const handleResetView = () => {
     if (!map.current || validProperties.length === 0) return;
-    
+
     const bounds = new mapboxgl.LngLatBounds();
-    validProperties.forEach(p => {
+    validProperties.forEach((p) => {
       bounds.extend([p.longitude, p.latitude]);
     });
     map.current.fitBounds(bounds, {
       padding: { top: 60, bottom: 60, left: 60, right: 60 },
       maxZoom: 15,
-      duration: 1500
+      duration: 1500,
     });
   };
 
@@ -79,19 +79,19 @@ export default function EnhancedClusterMap({
       alert('Géolocalisation non disponible sur votre appareil');
       return;
     }
-    
+
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        
+
         // Centrer la carte avec animation
         map.current?.flyTo({
           center: [coords.lng, coords.lat],
           zoom: 14,
-          duration: 1500
+          duration: 1500,
         });
-        
+
         // Créer ou déplacer le marqueur utilisateur
         if (userMarker.current) {
           userMarker.current.setLngLat([coords.lng, coords.lat]);
@@ -114,17 +114,17 @@ export default function EnhancedClusterMap({
               }
             </style>
           `;
-          
+
           userMarker.current = new mapboxgl.Marker({ element: el })
             .setLngLat([coords.lng, coords.lat])
             .addTo(map.current!);
         }
-        
+
         setIsLocating(false);
       },
       (err) => {
         console.error('Erreur géolocalisation:', err);
-        alert('Impossible d\'obtenir votre position. Vérifiez les permissions.');
+        alert("Impossible d'obtenir votre position. Vérifiez les permissions.");
         setIsLocating(false);
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -132,21 +132,23 @@ export default function EnhancedClusterMap({
   };
 
   // Filtrer et normaliser les propriétés avec coordonnées
-  const validProperties = properties.map(p => {
-    if (p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0) {
+  const validProperties = properties
+    .map((p) => {
+      if (p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0) {
+        return p;
+      }
+      const cityCoords = p.city ? CITY_CENTER_COORDS[p.city] : null;
+      if (cityCoords) {
+        const jitter = () => (Math.random() - 0.5) * 0.01;
+        return {
+          ...p,
+          longitude: cityCoords[0] + jitter(),
+          latitude: cityCoords[1] + jitter(),
+        };
+      }
       return p;
-    }
-    const cityCoords = p.city ? CITY_CENTER_COORDS[p.city] : null;
-    if (cityCoords) {
-      const jitter = () => (Math.random() - 0.5) * 0.01;
-      return {
-        ...p,
-        longitude: cityCoords[0] + jitter(),
-        latitude: cityCoords[1] + jitter(),
-      };
-    }
-    return p;
-  }).filter(p => p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0);
+    })
+    .filter((p) => p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0);
 
   // Initialiser la carte
   useEffect(() => {
@@ -205,20 +207,12 @@ export default function EnhancedClusterMap({
           10,
           '#F59E0B', // Amber 10-30
           30,
-          '#EF4444'  // Rouge > 30
+          '#EF4444', // Rouge > 30
         ],
-        'circle-radius': [
-          'step',
-          ['get', 'point_count'],
-          20,
-          10,
-          30,
-          30,
-          40
-        ],
+        'circle-radius': ['step', ['get', 'point_count'], 20, 10, 30, 30, 40],
         'circle-stroke-width': 3,
         'circle-stroke-color': '#ffffff',
-      }
+      },
     });
 
     // Couche du compteur dans les clusters
@@ -230,11 +224,11 @@ export default function EnhancedClusterMap({
       layout: {
         'text-field': ['get', 'point_count_abbreviated'],
         'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-        'text-size': 14
+        'text-size': 14,
       },
       paint: {
-        'text-color': '#ffffff'
-      }
+        'text-color': '#ffffff',
+      },
     });
 
     // Couche des points individuels
@@ -247,21 +241,21 @@ export default function EnhancedClusterMap({
         'circle-color': '#FF6C2F',
         'circle-radius': 10,
         'circle-stroke-width': 3,
-        'circle-stroke-color': '#fff'
-      }
+        'circle-stroke-color': '#fff',
+      },
     });
 
     // Clic sur un cluster : zoom
     map.current.on('click', 'clusters', (e) => {
       const features = map.current?.queryRenderedFeatures(e.point, {
-        layers: ['clusters']
+        layers: ['clusters'],
       });
-      
+
       if (!features || !features.length) return;
-      
+
       const feature = features[0];
       if (!feature?.properties) return;
-      
+
       const clusterId = feature.properties['cluster_id'];
       const source = map.current?.getSource('properties') as mapboxgl.GeoJSONSource;
 
@@ -273,7 +267,7 @@ export default function EnhancedClusterMap({
 
         map.current?.easeTo({
           center: geometry.coordinates as [number, number],
-          zoom: expansionZoom
+          zoom: expansionZoom,
         });
       });
     });
@@ -284,7 +278,7 @@ export default function EnhancedClusterMap({
 
       const feature = e.features[0];
       if (!feature?.geometry || !feature?.properties) return;
-      
+
       const geometry = feature.geometry as GeoJSON.Point;
       const coordinates = geometry.coordinates.slice() as [number, number];
       const props = feature.properties;
@@ -298,12 +292,14 @@ export default function EnhancedClusterMap({
       const bathrooms = props['bathrooms'];
       const area = props['area'];
       const id = props['id'];
-      
+
       const popupHtml = `
         <div style="padding: 12px; min-width: 220px; font-family: system-ui, -apple-system, sans-serif;">
-          ${image ? 
-            `<img src="${image}" alt="${title}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />` 
-            : ''}
+          ${
+            image
+              ? `<img src="${image}" alt="${title}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />`
+              : ''
+          }
           <h3 style="font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #2C1810;">${title}</h3>
           <p style="color: #FF6C2F; font-weight: 700; font-size: 16px; margin-bottom: 6px;">
             ${price.toLocaleString('fr-FR')} FCFA/mois
@@ -324,7 +320,7 @@ export default function EnhancedClusterMap({
 
       // Callback
       if (onMarkerClick) {
-        const selectedProperty = properties.find(p => p.id === id);
+        const selectedProperty = properties.find((p) => p.id === id);
         if (selectedProperty) {
           onMarkerClick(selectedProperty);
         }
@@ -332,7 +328,7 @@ export default function EnhancedClusterMap({
     });
 
     // Curseur pointer
-    ['clusters', 'unclustered-point'].forEach(layer => {
+    ['clusters', 'unclustered-point'].forEach((layer) => {
       map.current!.on('mouseenter', layer, () => {
         map.current!.getCanvas().style.cursor = 'pointer';
       });
@@ -347,11 +343,11 @@ export default function EnhancedClusterMap({
     if (!map.current || !isMapLoaded) return;
 
     const source = map.current.getSource('properties') as mapboxgl.GeoJSONSource;
-    
+
     if (source) {
       const geoJsonData: GeoJSON.FeatureCollection = {
         type: 'FeatureCollection',
-        features: validProperties.map(prop => ({
+        features: validProperties.map((prop) => ({
           type: 'Feature',
           properties: {
             id: prop.id,
@@ -361,13 +357,13 @@ export default function EnhancedClusterMap({
             bedrooms: prop.bedrooms,
             bathrooms: prop.bathrooms,
             area: prop.surface_area,
-            image: prop.images?.[0] || null
+            image: prop.images?.[0] || null,
           },
           geometry: {
             type: 'Point',
-            coordinates: [prop.longitude, prop.latitude]
-          }
-        }))
+            coordinates: [prop.longitude, prop.latitude],
+          },
+        })),
       };
 
       source.setData(geoJsonData);
@@ -375,7 +371,7 @@ export default function EnhancedClusterMap({
       // Ajuster les bounds si demandé
       if (fitBounds && validProperties.length > 0) {
         const bounds = new mapboxgl.LngLatBounds();
-        validProperties.forEach(p => {
+        validProperties.forEach((p) => {
           bounds.extend([p.longitude, p.latitude]);
         });
         map.current?.fitBounds(bounds, {
@@ -389,7 +385,10 @@ export default function EnhancedClusterMap({
   // États de chargement et erreur
   if (tokenLoading) {
     return (
-      <div style={{ width: '100%', height }} className="rounded-xl overflow-hidden bg-neutral-100 flex items-center justify-center">
+      <div
+        style={{ width: '100%', height }}
+        className="rounded-xl overflow-hidden bg-neutral-100 flex items-center justify-center"
+      >
         <div className="flex flex-col items-center gap-2 text-neutral-500">
           <Loader2 className="h-8 w-8 animate-spin" />
           <span className="text-sm">Chargement de la carte...</span>
@@ -400,7 +399,10 @@ export default function EnhancedClusterMap({
 
   if (tokenError || !mapboxToken) {
     return (
-      <div style={{ width: '100%', height }} className="rounded-xl overflow-hidden bg-neutral-100 flex items-center justify-center">
+      <div
+        style={{ width: '100%', height }}
+        className="rounded-xl overflow-hidden bg-neutral-100 flex items-center justify-center"
+      >
         <div className="flex flex-col items-center gap-2 text-neutral-500">
           <MapPin className="h-8 w-8" />
           <span className="text-sm">Carte non disponible</span>
@@ -412,7 +414,7 @@ export default function EnhancedClusterMap({
   return (
     <div className="relative w-full h-full rounded-xl overflow-hidden shadow-lg border border-neutral-200">
       <div ref={mapContainer} style={{ width: '100%', height }} />
-      
+
       {/* Boutons de contrôle carte */}
       <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
         {/* Bouton Recentrer sur propriétés */}
@@ -425,7 +427,7 @@ export default function EnhancedClusterMap({
         >
           <Focus className="w-5 h-5 text-primary" />
         </button>
-        
+
         {/* Bouton Géolocalisation */}
         <button
           onClick={handleLocateUser}
@@ -441,7 +443,7 @@ export default function EnhancedClusterMap({
           )}
         </button>
       </div>
-      
+
       {/* Légende Premium */}
       <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-neutral-100 z-10">
         <h4 className="font-semibold text-sm mb-3 text-neutral-800">Densité des biens</h4>

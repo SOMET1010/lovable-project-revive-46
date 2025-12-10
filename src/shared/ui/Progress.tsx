@@ -14,25 +14,20 @@ export interface ProgressProps extends HTMLAttributes<HTMLDivElement> {
   animated?: boolean;
 }
 
-export function Progress({ 
-  value, 
-  max = 100, 
-  variant = 'default', 
+export function Progress({
+  value,
+  max = 100,
+  variant = 'default',
   size = 'medium',
   showValue = false,
   label,
   animated = false,
   className = '',
-  ...props 
+  ...props
 }: ProgressProps) {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
 
-  const baseClasses = [
-    'w-full',
-    'bg-neutral-200',
-    'rounded-full',
-    'overflow-hidden',
-  ].join(' ');
+  const baseClasses = ['w-full', 'bg-neutral-200', 'rounded-full', 'overflow-hidden'].join(' ');
 
   const sizeClasses = {
     small: 'h-1.5',
@@ -53,7 +48,9 @@ export function Progress({
     'transition-all duration-300 ease-out',
     variantClasses[variant],
     animated ? 'animate-pulse' : '',
-  ].filter(Boolean).join(' ');
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const labelClasses = [
     'flex items-center justify-between',

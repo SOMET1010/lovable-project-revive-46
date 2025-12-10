@@ -11,7 +11,7 @@ export class CacheService {
     const item: CacheItem<T> = {
       data,
       timestamp: Date.now(),
-      expiresIn: expiresInMinutes * 60 * 1000
+      expiresIn: expiresInMinutes * 60 * 1000,
     };
 
     this.cache.set(key, item);
@@ -65,7 +65,7 @@ export class CacheService {
     const keys = Array.from(this.cache.keys());
     const regex = new RegExp(pattern);
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (regex.test(key)) {
         this.cache.delete(key);
       }
@@ -80,7 +80,7 @@ export class CacheService {
     const now = Date.now();
     const keys = Array.from(this.cache.keys());
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       const item = this.cache.get(key);
       if (item && now - item.timestamp > item.expiresIn) {
         this.cache.delete(key);
@@ -97,7 +97,7 @@ export class LocalStorageCache {
       const item = {
         data,
         timestamp: Date.now(),
-        expiresIn: expiresInMinutes * 60 * 1000
+        expiresIn: expiresInMinutes * 60 * 1000,
       };
 
       localStorage.setItem(this.prefix + key, JSON.stringify(item));
@@ -136,7 +136,7 @@ export class LocalStorageCache {
 
   static clear(): void {
     const keys = Object.keys(localStorage);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.startsWith(this.prefix)) {
         localStorage.removeItem(key);
       }

@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { 
-  Settings, 
-  Save, 
-  ToggleLeft, 
-  ToggleRight, 
+import { useState } from 'react';
+import {
+  Settings,
+  Save,
+  ToggleLeft,
+  ToggleRight,
   RefreshCw,
   AlertCircle,
   CheckCircle,
@@ -12,15 +12,15 @@ import {
   Clock,
   Shield,
   Lock,
-  Gauge
-} from "lucide-react";
-import { toast } from "sonner";
-import { 
-  useAllBusinessRules, 
-  useUpdateBusinessRule, 
-  useToggleBusinessRule 
-} from "@/shared/hooks/useBusinessRule";
-import { RULE_CATEGORIES, type RuleCategory } from "@/services/businessRulesService";
+  Gauge,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  useAllBusinessRules,
+  useUpdateBusinessRule,
+  useToggleBusinessRule,
+} from '@/hooks/shared/useBusinessRule';
+import { RULE_CATEGORIES, type RuleCategory } from '@/services/businessRulesService';
 
 // Map categories to icons
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
@@ -38,7 +38,7 @@ interface DbBusinessRule {
   rule_key: string;
   category: string;
   rule_name: string;
-  rule_type: "number" | "boolean" | "percentage" | "json";
+  rule_type: 'number' | 'boolean' | 'percentage' | 'json';
   value_number: number | null;
   value_boolean: boolean | null;
   value_json: Record<string, unknown> | null;
@@ -49,42 +49,45 @@ interface DbBusinessRule {
 }
 
 export default function BusinessRulesPage() {
-  const [activeCategory, setActiveCategory] = useState<RuleCategory>("payments");
+  const [activeCategory, setActiveCategory] = useState<RuleCategory>('payments');
   const [editingRule, setEditingRule] = useState<string | null>(null);
-  const [editValue, setEditValue] = useState<string>("");
-  
+  const [editValue, setEditValue] = useState<string>('');
+
   const { rules, isLoading, error, refetch } = useAllBusinessRules();
   const updateMutation = useUpdateBusinessRule();
   const toggleMutation = useToggleBusinessRule();
 
   // Group rules by category
-  const rulesByCategory = (rules as DbBusinessRule[]).reduce<Record<string, DbBusinessRule[]>>((acc, rule) => {
-    const category = rule.category;
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category]?.push(rule);
-    return acc;
-  }, {});
+  const rulesByCategory = (rules as DbBusinessRule[]).reduce<Record<string, DbBusinessRule[]>>(
+    (acc, rule) => {
+      const category = rule.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category]?.push(rule);
+      return acc;
+    },
+    {}
+  );
 
   const handleEditStart = (rule: DbBusinessRule) => {
     setEditingRule(rule.rule_key);
-    if (rule.rule_type === "boolean") {
-      setEditValue(rule.value_boolean === true ? "true" : "false");
+    if (rule.rule_type === 'boolean') {
+      setEditValue(rule.value_boolean === true ? 'true' : 'false');
     } else {
-      setEditValue(String(rule.value_number ?? "0"));
+      setEditValue(String(rule.value_number ?? '0'));
     }
   };
 
   const handleSave = async (rule: DbBusinessRule) => {
     try {
       let value: number | boolean;
-      
-      if (rule.rule_type === "boolean") {
-        value = editValue === "true";
+
+      if (rule.rule_type === 'boolean') {
+        value = editValue === 'true';
       } else {
         value = Number(editValue);
-        
+
         // Validate against min/max
         if (rule.min_value !== null && value < rule.min_value) {
           toast.error(`La valeur doit être au moins ${rule.min_value}`);
@@ -97,41 +100,41 @@ export default function BusinessRulesPage() {
       }
 
       await updateMutation.mutateAsync({ key: rule.rule_key, value });
-      toast.success("Règle mise à jour avec succès");
+      toast.success('Règle mise à jour avec succès');
       setEditingRule(null);
-    } catch (err) {
-      toast.error("Erreur lors de la mise à jour");
+    } catch {
+      toast.error('Erreur lors de la mise à jour');
     }
   };
 
   const handleToggle = async (rule: DbBusinessRule) => {
     try {
-      await toggleMutation.mutateAsync({ 
-        key: rule.rule_key, 
-        isEnabled: !rule.is_enabled 
+      await toggleMutation.mutateAsync({
+        key: rule.rule_key,
+        isEnabled: !rule.is_enabled,
       });
-      toast.success(rule.is_enabled ? "Règle désactivée" : "Règle activée");
-    } catch (err) {
-      toast.error("Erreur lors de la modification");
+      toast.success(rule.is_enabled ? 'Règle désactivée' : 'Règle activée');
+    } catch {
+      toast.error('Erreur lors de la modification');
     }
   };
 
   const formatValue = (rule: DbBusinessRule) => {
-    if (rule.rule_type === "boolean") {
-      return rule.value_boolean ? "Oui" : "Non";
+    if (rule.rule_type === 'boolean') {
+      return rule.value_boolean ? 'Oui' : 'Non';
     }
-    if (rule.rule_type === "percentage") {
+    if (rule.rule_type === 'percentage') {
       return `${rule.value_number}%`;
     }
-    if (rule.rule_type === "number") {
+    if (rule.rule_type === 'number') {
       // Check if it's a monetary value
-      if (rule.category === "payments" || rule.category === "limits") {
-        return `${rule.value_number?.toLocaleString("fr-FR")} FCFA`;
+      if (rule.category === 'payments' || rule.category === 'limits') {
+        return `${rule.value_number?.toLocaleString('fr-FR')} FCFA`;
       }
       // Check if it's a delay
-      if (rule.category === "delays") {
+      if (rule.category === 'delays') {
         const days = rule.value_number ?? 0;
-        return days === 0 ? "J-0" : days > 0 ? `J-${days}` : `J+${Math.abs(days)}`;
+        return days === 0 ? 'J-0' : days > 0 ? `J-${days}` : `J+${Math.abs(days)}`;
       }
       return String(rule.value_number);
     }
@@ -157,11 +160,9 @@ export default function BusinessRulesPage() {
         <div className="max-w-6xl mx-auto">
           <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 text-center">
             <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-destructive mb-2">
-              Erreur de chargement
-            </h2>
+            <h2 className="text-lg font-semibold text-destructive mb-2">Erreur de chargement</h2>
             <p className="text-muted-foreground mb-4">
-              {error instanceof Error ? error.message : "Impossible de charger les règles métier"}
+              {error instanceof Error ? error.message : 'Impossible de charger les règles métier'}
             </p>
             <button
               onClick={() => refetch()}
@@ -207,16 +208,14 @@ export default function BusinessRulesPage() {
               onClick={() => setActiveCategory(key as RuleCategory)}
               className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                 activeCategory === key
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
               {CATEGORY_ICONS[key]}
               {label}
               {rulesByCategory[key] && (
-                <span className="text-xs opacity-70">
-                  ({rulesByCategory[key].length})
-                </span>
+                <span className="text-xs opacity-70">({rulesByCategory[key].length})</span>
               )}
             </button>
           ))}
@@ -229,25 +228,21 @@ export default function BusinessRulesPage() {
               <div
                 key={rule.id}
                 className={`p-4 hover:bg-muted/30 transition-colors ${
-                  !rule.is_enabled ? "opacity-50" : ""
+                  !rule.is_enabled ? 'opacity-50' : ''
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   {/* Rule Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-foreground">
-                        {rule.rule_name}
-                      </h3>
+                      <h3 className="font-semibold text-foreground">{rule.rule_name}</h3>
                       {rule.is_enabled ? (
                         <CheckCircle className="w-4 h-4 text-green-500" />
                       ) : (
                         <AlertCircle className="w-4 h-4 text-muted-foreground" />
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {rule.description}
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">{rule.description}</p>
                     <p className="text-xs text-muted-foreground mt-2 font-mono">
                       Clé: {rule.rule_key}
                       {rule.min_value !== null && ` | Min: ${rule.min_value}`}
@@ -259,7 +254,7 @@ export default function BusinessRulesPage() {
                   <div className="flex items-center gap-3">
                     {editingRule === rule.rule_key ? (
                       <div className="flex items-center gap-2">
-                        {rule.rule_type === "boolean" ? (
+                        {rule.rule_type === 'boolean' ? (
                           <select
                             value={editValue}
                             onChange={(e) => setEditValue(e.target.value)}
@@ -307,10 +302,10 @@ export default function BusinessRulesPage() {
                       disabled={toggleMutation.isPending}
                       className={`p-2 rounded-lg transition-colors ${
                         rule.is_enabled
-                          ? "text-green-500 hover:bg-green-50"
-                          : "text-muted-foreground hover:bg-muted"
+                          ? 'text-green-500 hover:bg-green-50'
+                          : 'text-muted-foreground hover:bg-muted'
                       }`}
-                      title={rule.is_enabled ? "Désactiver" : "Activer"}
+                      title={rule.is_enabled ? 'Désactiver' : 'Activer'}
                     >
                       {rule.is_enabled ? (
                         <ToggleRight className="w-6 h-6" />
@@ -332,8 +327,7 @@ export default function BusinessRulesPage() {
         {/* Info Card */}
         <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
           <h3 className="font-semibold text-foreground flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-primary" />
-            À propos des règles métier
+            <AlertCircle className="w-5 h-5 text-primary" />À propos des règles métier
           </h3>
           <ul className="mt-2 text-sm text-muted-foreground space-y-1">
             <li>• Les modifications sont enregistrées immédiatement</li>

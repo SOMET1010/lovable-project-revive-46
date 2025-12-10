@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, FileCheck, Scan, CheckCircle, ChevronLeft, Upload, AlertCircle } from 'lucide-react';
+import {
+  Camera,
+  FileCheck,
+  Scan,
+  CheckCircle,
+  ChevronLeft,
+  Upload,
+  AlertCircle,
+} from 'lucide-react';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui/FormStepper';
 import NeofaceVerification from '@/shared/ui/NeofaceVerification';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -11,7 +19,7 @@ export default function BiometricVerificationPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { step, slideDirection, nextStep, prevStep, goToStep } = useFormStepper(3);
-  
+
   const [cniPhotoUrl, setCniPhotoUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [verificationResult, setVerificationResult] = useState<{
@@ -36,15 +44,11 @@ export default function BiometricVerificationPage() {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/cni-${Date.now()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file);
+      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
 
       setCniPhotoUrl(urlData.publicUrl);
       toast.success('Photo CNI téléchargée');
@@ -136,29 +140,43 @@ export default function BiometricVerificationPage() {
                   <FileCheck className="h-10 w-10 text-[#F16522]" />
                 </div>
                 <h2 className="text-2xl font-bold text-[#3C2A1E]">Préparez-vous</h2>
-                <p className="text-[#5D4037] mt-2">Suivez ces étapes pour une vérification réussie</p>
+                <p className="text-[#5D4037] mt-2">
+                  Suivez ces étapes pour une vérification réussie
+                </p>
               </div>
 
               <div className="space-y-4 mb-8">
                 <div className="flex items-start gap-4 p-4 bg-[#FDF6E3] rounded-xl">
-                  <div className="w-8 h-8 bg-[#F16522] text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">1</div>
+                  <div className="w-8 h-8 bg-[#F16522] text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                    1
+                  </div>
                   <div>
                     <h3 className="font-semibold text-[#3C2A1E]">Photo de votre CNI</h3>
-                    <p className="text-sm text-[#5D4037]">Prenez une photo claire de votre carte d'identité nationale</p>
+                    <p className="text-sm text-[#5D4037]">
+                      Prenez une photo claire de votre carte d'identité nationale
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-4 bg-[#FDF6E3] rounded-xl">
-                  <div className="w-8 h-8 bg-[#F16522] text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">2</div>
+                  <div className="w-8 h-8 bg-[#F16522] text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                    2
+                  </div>
                   <div>
                     <h3 className="font-semibold text-[#3C2A1E]">Capture du selfie</h3>
-                    <p className="text-sm text-[#5D4037]">Une fenêtre s'ouvrira pour capturer votre visage avec détection de vivacité</p>
+                    <p className="text-sm text-[#5D4037]">
+                      Une fenêtre s'ouvrira pour capturer votre visage avec détection de vivacité
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-4 bg-[#FDF6E3] rounded-xl">
-                  <div className="w-8 h-8 bg-[#F16522] text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
+                  <div className="w-8 h-8 bg-[#F16522] text-white rounded-full flex items-center justify-center font-bold flex-shrink-0">
+                    3
+                  </div>
                   <div>
                     <h3 className="font-semibold text-[#3C2A1E]">Vérification automatique</h3>
-                    <p className="text-sm text-[#5D4037]">Notre IA compare votre selfie avec la photo de votre CNI</p>
+                    <p className="text-sm text-[#5D4037]">
+                      Notre IA compare votre selfie avec la photo de votre CNI
+                    </p>
                   </div>
                 </div>
               </div>
@@ -194,7 +212,9 @@ export default function BiometricVerificationPage() {
               <div className="text-center mb-6">
                 <Camera className="h-12 w-12 text-[#F16522] mx-auto mb-3" />
                 <h2 className="text-2xl font-bold text-[#3C2A1E]">Photo de votre CNI</h2>
-                <p className="text-[#5D4037] mt-1">Téléchargez une photo claire de votre carte d'identité</p>
+                <p className="text-[#5D4037] mt-1">
+                  Téléchargez une photo claire de votre carte d'identité
+                </p>
               </div>
 
               {cniPhotoUrl ? (

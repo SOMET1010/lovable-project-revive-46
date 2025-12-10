@@ -2,7 +2,16 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import { Calendar, Clock, Video, MapPin, ArrowLeft, Check, ChevronRight, MessageSquare } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  Video,
+  MapPin,
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  MessageSquare,
+} from 'lucide-react';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
 
@@ -71,7 +80,7 @@ export default function ScheduleVisit() {
       setLoading(false);
       return;
     }
-    
+
     try {
       const { data, error } = await supabase
         .from('properties')
@@ -99,7 +108,7 @@ export default function ScheduleVisit() {
     const nextDay = new Date(selectedDate);
     nextDay.setDate(selectedDate.getDate() + 1);
     const nextStr = nextDay.toISOString().split('T')[0] ?? '';
-    
+
     try {
       const { data: existingVisits } = await supabase
         .from('visit_requests')
@@ -111,19 +120,19 @@ export default function ScheduleVisit() {
 
       const bookedTimes = new Set(
         (existingVisits || [])
-          .map(v => v.confirmed_date)
+          .map((v) => v.confirmed_date)
           .filter(Boolean)
           .map((d: string) => {
             const dt = new Date(d);
             return dt.toISOString().substring(11, 16); // HH:MM
           })
       );
-      
-      const slots = DEFAULT_TIME_SLOTS.map(slot => ({
+
+      const slots = DEFAULT_TIME_SLOTS.map((slot) => ({
         ...slot,
-        available: !bookedTimes.has(slot.time)
+        available: !bookedTimes.has(slot.time),
       }));
-      
+
       setAvailableSlots(slots);
     } catch (error) {
       console.error('Error loading slots:', error);
@@ -141,17 +150,15 @@ export default function ScheduleVisit() {
       const [hours, minutes] = selectedTime.split(':').map((v) => parseInt(v, 10));
       if (!isNaN(hours)) confirmedDate.setHours(hours, minutes || 0, 0, 0);
 
-      const { error } = await supabase
-        .from('visit_requests')
-        .insert({
-          property_id: property.id,
-          tenant_id: user.id,
-          owner_id: property.owner_id,
-          visit_type: visitType,
-          confirmed_date: confirmedDate.toISOString(),
-          notes: notes || null,
-          status: 'en_attente'
-        } as never);
+      const { error } = await supabase.from('visit_requests').insert({
+        property_id: property.id,
+        tenant_id: user.id,
+        owner_id: property.owner_id,
+        visit_type: visitType,
+        confirmed_date: confirmedDate.toISOString(),
+        notes: notes || null,
+        status: 'en_attente',
+      } as never);
 
       if (error) throw error;
 
@@ -184,7 +191,7 @@ export default function ScheduleVisit() {
     return date.toLocaleDateString('fr-FR', {
       weekday: 'short',
       day: 'numeric',
-      month: 'short'
+      month: 'short',
     });
   };
 
@@ -214,7 +221,10 @@ export default function ScheduleVisit() {
     return (
       <div className="form-page-container flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: 'var(--form-orange)' }}></div>
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+            style={{ borderColor: 'var(--form-orange)' }}
+          ></div>
           <p style={{ color: 'var(--form-sable)' }}>Chargement...</p>
         </div>
       </div>
@@ -225,18 +235,14 @@ export default function ScheduleVisit() {
     return (
       <div className="form-page-container flex items-center justify-center">
         <div className="form-section-premium text-center max-w-md">
-          <p className="mb-4" style={{ color: 'var(--form-sable)' }}>Propriété non trouvée ou inaccessible.</p>
+          <p className="mb-4" style={{ color: 'var(--form-sable)' }}>
+            Propriété non trouvée ou inaccessible.
+          </p>
           <div className="flex justify-center gap-3">
-            <button
-              onClick={() => navigate(-1)}
-              className="form-button-secondary"
-            >
+            <button onClick={() => navigate(-1)} className="form-button-secondary">
               Retour
             </button>
-            <button
-              onClick={() => navigate('/recherche')}
-              className="form-button-primary"
-            >
+            <button onClick={() => navigate('/recherche')} className="form-button-primary">
               Voir les biens
             </button>
           </div>
@@ -249,7 +255,10 @@ export default function ScheduleVisit() {
     return (
       <div className="form-page-container flex items-center justify-center">
         <div className="form-section-premium text-center max-w-md animate-scale-in">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}>
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}
+          >
             <Check className="w-10 h-10" style={{ color: 'var(--form-success)' }} />
           </div>
           <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--form-chocolat)' }}>
@@ -296,7 +305,9 @@ export default function ScheduleVisit() {
                 Planifier une visite
               </h1>
               <p style={{ color: 'var(--form-chocolat)' }}>{property.title}</p>
-              <p className="text-sm" style={{ color: 'var(--form-sable)' }}>{formatAddress(property.address, property.city)}</p>
+              <p className="text-sm" style={{ color: 'var(--form-sable)' }}>
+                {formatAddress(property.address, property.city)}
+              </p>
             </div>
           </div>
         </div>
@@ -313,7 +324,12 @@ export default function ScheduleVisit() {
 
         <form onSubmit={handleSubmit}>
           {/* STEP 1: Type de visite */}
-          <FormStepContent step={1} currentStep={step} slideDirection={slideDirection} className="space-y-6">
+          <FormStepContent
+            step={1}
+            currentStep={step}
+            slideDirection={slideDirection}
+            className="space-y-6"
+          >
             <div className="form-section-premium">
               <label className="form-label-premium mb-4 block">Type de visite</label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -322,18 +338,36 @@ export default function ScheduleVisit() {
                   onClick={() => setVisitType('physique')}
                   className={`form-card-selectable p-6 text-center ${visitType === 'physique' ? 'selected' : ''}`}
                 >
-                  <MapPin className={`w-10 h-10 mx-auto mb-3 ${visitType === 'physique' ? '' : ''}`} style={{ color: visitType === 'physique' ? 'var(--form-orange)' : 'var(--form-sable)' }} />
-                  <p className="font-semibold" style={{ color: 'var(--form-chocolat)' }}>Visite physique</p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--form-sable)' }}>Visitez le bien en personne</p>
+                  <MapPin
+                    className={`w-10 h-10 mx-auto mb-3 ${visitType === 'physique' ? '' : ''}`}
+                    style={{
+                      color: visitType === 'physique' ? 'var(--form-orange)' : 'var(--form-sable)',
+                    }}
+                  />
+                  <p className="font-semibold" style={{ color: 'var(--form-chocolat)' }}>
+                    Visite physique
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--form-sable)' }}>
+                    Visitez le bien en personne
+                  </p>
                 </button>
                 <button
                   type="button"
                   onClick={() => setVisitType('virtuelle')}
                   className={`form-card-selectable p-6 text-center ${visitType === 'virtuelle' ? 'selected' : ''}`}
                 >
-                  <Video className="w-10 h-10 mx-auto mb-3" style={{ color: visitType === 'virtuelle' ? 'var(--form-orange)' : 'var(--form-sable)' }} />
-                  <p className="font-semibold" style={{ color: 'var(--form-chocolat)' }}>Visite virtuelle</p>
-                  <p className="text-xs mt-1" style={{ color: 'var(--form-sable)' }}>Visitez par vidéo conférence</p>
+                  <Video
+                    className="w-10 h-10 mx-auto mb-3"
+                    style={{
+                      color: visitType === 'virtuelle' ? 'var(--form-orange)' : 'var(--form-sable)',
+                    }}
+                  />
+                  <p className="font-semibold" style={{ color: 'var(--form-chocolat)' }}>
+                    Visite virtuelle
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--form-sable)' }}>
+                    Visitez par vidéo conférence
+                  </p>
                 </button>
               </div>
             </div>
@@ -353,7 +387,12 @@ export default function ScheduleVisit() {
           </FormStepContent>
 
           {/* STEP 2: Date & Heure */}
-          <FormStepContent step={2} currentStep={step} slideDirection={slideDirection} className="space-y-6">
+          <FormStepContent
+            step={2}
+            currentStep={step}
+            slideDirection={slideDirection}
+            className="space-y-6"
+          >
             <div className="form-section-premium">
               <label className="form-label-premium mb-4 flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
@@ -370,7 +409,15 @@ export default function ScheduleVisit() {
                     }}
                     className={`form-card-selectable p-3 text-center ${selectedDate?.toDateString() === date.toDateString() ? 'selected' : ''}`}
                   >
-                    <p className="text-sm font-semibold" style={{ color: selectedDate?.toDateString() === date.toDateString() ? 'var(--form-orange)' : 'var(--form-chocolat)' }}>
+                    <p
+                      className="text-sm font-semibold"
+                      style={{
+                        color:
+                          selectedDate?.toDateString() === date.toDateString()
+                            ? 'var(--form-orange)'
+                            : 'var(--form-chocolat)',
+                      }}
+                    >
                       {formatDate(date)}
                     </p>
                   </button>
@@ -424,7 +471,12 @@ export default function ScheduleVisit() {
           </FormStepContent>
 
           {/* STEP 3: Notes & Confirmation */}
-          <FormStepContent step={3} currentStep={step} slideDirection={slideDirection} className="space-y-6">
+          <FormStepContent
+            step={3}
+            currentStep={step}
+            slideDirection={slideDirection}
+            className="space-y-6"
+          >
             {/* Summary */}
             <div className="form-section-premium" style={{ backgroundColor: 'var(--form-ivoire)' }}>
               <h3 className="form-label-premium mb-4">Récapitulatif</h3>
@@ -438,12 +490,18 @@ export default function ScheduleVisit() {
                 <div className="flex justify-between">
                   <span style={{ color: 'var(--form-sable)' }}>Date</span>
                   <span className="font-semibold" style={{ color: 'var(--form-chocolat)' }}>
-                    {selectedDate?.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                    {selectedDate?.toLocaleDateString('fr-FR', {
+                      weekday: 'long',
+                      day: 'numeric',
+                      month: 'long',
+                    })}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span style={{ color: 'var(--form-sable)' }}>Heure</span>
-                  <span className="font-semibold" style={{ color: 'var(--form-orange)' }}>{selectedTime}</span>
+                  <span className="font-semibold" style={{ color: 'var(--form-orange)' }}>
+                    {selectedTime}
+                  </span>
                 </div>
               </div>
             </div>

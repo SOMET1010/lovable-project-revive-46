@@ -17,7 +17,7 @@ let sonnerLoadAttempted = false;
 const loadSonner = async () => {
   if (sonnerLoadAttempted) return;
   sonnerLoadAttempted = true;
-  
+
   try {
     const sonnerModule = await import('sonner');
     sonnerToast = sonnerModule.toast;
@@ -37,11 +37,11 @@ const fallbackToast = (message: string, type: ToastType, options?: ToastOptions)
     info: 'ℹ️',
     warning: '⚠️',
   }[type];
-  
-  const fullMessage = options?.description 
+
+  const fullMessage = options?.description
     ? `${prefix} ${message}: ${options.description}`
     : `${prefix} ${message}`;
-  
+
   console.log(`[Toast ${type}]`, fullMessage);
 };
 

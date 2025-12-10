@@ -74,7 +74,11 @@ export function AuditLogsList({ logs, loading }: AuditLogsListProps) {
         {logs.map((log) => {
           const Icon = getActionIcon(log.action);
           const color = getActionColor(log.action);
-          const details = log.details as { role?: string; user_email?: string; user_name?: string } | null;
+          const details = log.details as {
+            role?: string;
+            user_email?: string;
+            user_name?: string;
+          } | null;
 
           return (
             <div key={log.id} className="p-4 hover:bg-gray-50 transition-colors">
@@ -88,7 +92,9 @@ export function AuditLogsList({ logs, loading }: AuditLogsListProps) {
                       {log.action === 'ROLE_ASSIGNED' ? 'Rôle attribué' : 'Rôle révoqué'}
                     </span>
                     {details?.role && (
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-${color}-100 text-${color}-700`}>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium bg-${color}-100 text-${color}-700`}
+                      >
                         {details.role}
                       </span>
                     )}
@@ -99,7 +105,9 @@ export function AuditLogsList({ logs, loading }: AuditLogsListProps) {
                   <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
                     <span>Par {log.user_email || 'Système'}</span>
                     <span>•</span>
-                    <span>{format(new Date(log.created_at), "dd MMM yyyy 'à' HH:mm", { locale: fr })}</span>
+                    <span>
+                      {format(new Date(log.created_at), "dd MMM yyyy 'à' HH:mm", { locale: fr })}
+                    </span>
                   </div>
                 </div>
               </div>

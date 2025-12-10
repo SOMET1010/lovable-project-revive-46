@@ -8,22 +8,22 @@ interface StatusBarControllerProps {
   overlay?: boolean;
 }
 
-export function StatusBarController({ 
+export function StatusBarController({
   style = 'dark',
   backgroundColor = '#ffffff',
-  overlay = false
+  overlay = false,
 }: StatusBarControllerProps) {
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
 
     const configureStatusBar = async () => {
       try {
-        await StatusBar.setStyle({ 
-          style: style === 'light' ? Style.Light : Style.Dark 
+        await StatusBar.setStyle({
+          style: style === 'light' ? Style.Light : Style.Dark,
         });
-        
+
         await StatusBar.setBackgroundColor({ color: backgroundColor });
-        
+
         if (overlay) {
           await StatusBar.setOverlaysWebView({ overlay: true });
         }
@@ -52,13 +52,13 @@ export const statusBarUtils = {
 
   async setStyle(style: 'light' | 'dark') {
     if (!Capacitor.isNativePlatform()) return;
-    await StatusBar.setStyle({ 
-      style: style === 'light' ? Style.Light : Style.Dark 
+    await StatusBar.setStyle({
+      style: style === 'light' ? Style.Light : Style.Dark,
     });
   },
 
   async setBackgroundColor(color: string) {
     if (!Capacitor.isNativePlatform()) return;
     await StatusBar.setBackgroundColor({ color });
-  }
+  },
 };

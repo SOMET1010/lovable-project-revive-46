@@ -17,10 +17,26 @@ const USER_TYPES = [
 ] as const;
 
 const IVORIAN_CITIES = [
-  'Abidjan', 'Bouaké', 'Yamoussoukro', 'San-Pédro', 'Korhogo',
-  'Man', 'Daloa', 'Gagnoa', 'Divo', 'Abengourou',
-  'Grand-Bassam', 'Assinie', 'Bingerville', 'Cocody', 'Marcory',
-  'Plateau', 'Treichville', 'Yopougon', 'Adjamé', 'Abobo',
+  'Abidjan',
+  'Bouaké',
+  'Yamoussoukro',
+  'San-Pédro',
+  'Korhogo',
+  'Man',
+  'Daloa',
+  'Gagnoa',
+  'Divo',
+  'Abengourou',
+  'Grand-Bassam',
+  'Assinie',
+  'Bingerville',
+  'Cocody',
+  'Marcory',
+  'Plateau',
+  'Treichville',
+  'Yopougon',
+  'Adjamé',
+  'Abobo',
 ];
 
 export default function ProfileCompletionPage() {
@@ -71,15 +87,17 @@ export default function ProfileCompletionPage() {
       });
 
       // Redirection selon le type d'utilisateur
-      const redirectPath = userType === 'tenant' 
-        ? '/recherche' 
-        : userType === 'owner' 
-          ? '/dashboard/ajouter-propriete'
-          : '/dashboard';
+      const redirectPath =
+        userType === 'tenant'
+          ? '/recherche'
+          : userType === 'owner'
+            ? '/dashboard/ajouter-propriete'
+            : '/dashboard';
 
       navigate(redirectPath);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la mise à jour du profil';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur lors de la mise à jour du profil';
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -116,7 +134,9 @@ export default function ProfileCompletionPage() {
             </span>
           </div>
           <h1 className="text-2xl font-bold text-[#2C1810] mb-2">Complétez votre profil</h1>
-          <p className="text-[#A69B95]">Quelques informations pour personnaliser votre expérience</p>
+          <p className="text-[#A69B95]">
+            Quelques informations pour personnaliser votre expérience
+          </p>
         </div>
 
         {/* Form Card */}
@@ -146,9 +166,7 @@ export default function ProfileCompletionPage() {
 
             {/* User Type Selection */}
             <div>
-              <label className="form-label-premium mb-3 block">
-                Vous êtes *
-              </label>
+              <label className="form-label-premium mb-3 block">Vous êtes *</label>
               <div className="space-y-3">
                 {USER_TYPES.map((type) => (
                   <button
@@ -162,7 +180,9 @@ export default function ProfileCompletionPage() {
                     }`}
                   >
                     <div>
-                      <p className={`font-semibold ${userType === type.value ? 'text-[#F16522]' : 'text-[#2C1810]'}`}>
+                      <p
+                        className={`font-semibold ${userType === type.value ? 'text-[#F16522]' : 'text-[#2C1810]'}`}
+                      >
                         {type.label}
                       </p>
                       <p className="text-sm text-[#A69B95]">{type.description}</p>
@@ -190,7 +210,9 @@ export default function ProfileCompletionPage() {
               >
                 <option value="">Sélectionnez une ville</option>
                 {IVORIAN_CITIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
                 ))}
               </select>
             </div>

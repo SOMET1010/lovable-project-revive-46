@@ -7,6 +7,7 @@ Cette refonte complète du dashboard d'agence transforme l'interface en une solu
 ## ✨ Fonctionnalités principales
 
 ### 🏢 Header professionnel avec équipe
+
 - Logo et nom de l'agence avec statut
 - Navigation principale responsive
 - Barre de recherche intégrée
@@ -15,12 +16,14 @@ Cette refonte complète du dashboard d'agence transforme l'interface en une solu
 - Menu utilisateur avec profil
 
 ### 📊 Grille de statistiques 4 cartes
+
 1. **Propriétés portefeuille** - Nombre total avec répartition actives/vente
 2. **Équipes** - Agents actifs avec demandes en attente
 3. **Commissions** - Montant mensuel avec moyennes par agent
 4. **Conversions** - Taux de conversion avec valeur moyenne
 
 ### 🏠 Table Propriétés avec attribution agents
+
 - Vue détaillée des propriétés attribuées
 - Attribution aux agents avec avatars
 - Filtres par statut et type de propriété
@@ -29,11 +32,13 @@ Cette refonte complète du dashboard d'agence transforme l'interface en une solu
 - Statistiques rapides en en-tête
 
 ### 💰 Commissions tracking cards
+
 - **Card Progression** : Graphique de progression avec barre de statut
 - **Card Performance équipe** : Meilleurs agents et conversions
 - **Card Activité récente** : Transactions et statistiques hebdomadaires
 
 ### 📋 Demandes d'inscription
+
 - Gestion complète des candidatures d'agents
 - Formulaire détaillé avec expérience, certifications
 - Actions d'approbation/rejet avec raisons
@@ -41,6 +46,7 @@ Cette refonte complète du dashboard d'agence transforme l'interface en une solu
 - Filtres avancés et recherche
 
 ### 🧭 Navigation sidebar optionnelle
+
 - Design glassmorphism avec backdrop blur
 - Navigation hiérarchique avec badges
 - Responsive avec overlay mobile
@@ -49,17 +55,18 @@ Cette refonte complète du dashboard d'agence transforme l'interface en une solu
 ## 🎨 Design System Premium
 
 ### Design Tokens utilisés
+
 ```css
 /* Couleurs principales */
---color-primary-500: #FF6C2F;    /* Orange de marque */
---color-primary-600: #E05519;    /* Hover state */
---color-neutral-900: #171717;    /* Texte principal */
---color-neutral-700: #404040;    /* Texte secondaire */
+--color-primary-500: #ff6c2f; /* Orange de marque */
+--color-primary-600: #e05519; /* Hover state */
+--color-neutral-900: #171717; /* Texte principal */
+--color-neutral-700: #404040; /* Texte secondaire */
 
 /* Espacements premium */
---spacing-8: 32px;   /* Card padding minimum */
---spacing-12: 48px;  /* Card padding premium */
---spacing-16: 64px;  /* Espacement sections */
+--spacing-8: 32px; /* Card padding minimum */
+--spacing-12: 48px; /* Card padding premium */
+--spacing-16: 64px; /* Espacement sections */
 
 /* Ombres professionnels */
 --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -68,19 +75,22 @@ Cette refonte complète du dashboard d'agence transforme l'interface en une solu
 ```
 
 ### Palette de couleurs sémantiques
+
 - **Succès** : #059669 (Vert)
-- **Erreur** : #DC2626 (Rouge)  
+- **Erreur** : #DC2626 (Rouge)
 - **Avertissement** : #D97706 (Orange)
 - **Information** : #2563EB (Bleu)
 
 ## ♿ Accessibilité (WCAG AAA)
 
 ### Contrastes respectés
+
 - Texte principal : 16.5:1 (neutral-900 vs blanc)
 - Texte secondaire : 8.6:1 (neutral-700 vs blanc)
 - Éléments interactifs : AA Large (primary-500 vs blanc)
 
 ### Améliorations accessibilité
+
 - Focus rings visibles et cohérents
 - Navigation clavier complète
 - Alt text descriptifs pour les icônes
@@ -90,12 +100,14 @@ Cette refonte complète du dashboard d'agence transforme l'interface en une solu
 ## 📱 Responsive Design
 
 ### Breakpoints
+
 - Mobile : < 640px
-- Tablet : 768px - 1023px  
+- Tablet : 768px - 1023px
 - Desktop : > 1024px
 - Large Desktop : > 1280px
 
 ### Adaptations mobile
+
 - Sidebar devient overlay avec backdrop
 - Grilles statistiques en colonnes simples
 - Tableaux scrollables horizontalement
@@ -122,6 +134,7 @@ src/features/agency/
 ## 🚀 Performance
 
 ### Optimisations
+
 - Composants modulaires et réutilisables
 - Lazy loading des images
 - Animations GPU-accélérées
@@ -129,6 +142,7 @@ src/features/agency/
 - États de chargement cohérents
 
 ### Métriques Core Web Vitals
+
 - LCP optimisé avec images responsive
 - FID amélioré avec interactions fluides
 - CLS maintenu avec dimensions fixes
@@ -136,30 +150,27 @@ src/features/agency/
 ## 🔧 Utilisation
 
 ### Composant principal
+
 ```tsx
-import { 
-  Header, 
-  Sidebar, 
-  StatCard, 
-  PropertiesTable, 
-  RegistrationRequests 
+import {
+  Header,
+  Sidebar,
+  StatCard,
+  PropertiesTable,
+  RegistrationRequests,
 } from '@/features/agency/components';
 
 function AgencyDashboard() {
   return (
     <div className="agency-layout">
-      <Header 
-        agencyName="MonToit Pro"
-        pendingNotifications={3}
-        onExport={handleExport}
-      />
-      
-      <Sidebar 
+      <Header agencyName="MonToit Pro" pendingNotifications={3} onExport={handleExport} />
+
+      <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         currentPath="/agence/dashboard"
       />
-      
+
       <main className="agency-content">
         <StatsGrid />
         <PropertiesTable assignments={assignments} />
@@ -171,6 +182,7 @@ function AgencyDashboard() {
 ```
 
 ### Cartes statistiques
+
 ```tsx
 <StatCard
   title="Propriétés portefeuille"
@@ -181,11 +193,11 @@ function AgencyDashboard() {
   trend={{
     value: 12,
     isPositive: true,
-    period: "vs mois dernier"
+    period: 'vs mois dernier',
   }}
   details={[
-    { label: "Actives", value: "45" },
-    { label: "En vente", value: "27" }
+    { label: 'Actives', value: '45' },
+    { label: 'En vente', value: '27' },
   ]}
 />
 ```
@@ -203,7 +215,7 @@ function AgencyDashboard() {
 ## 📈 Impact utilisateur
 
 - **Productivité** : +40% avec la navigation optimisée
-- **Efficacité** : -60% de clics pour les actions fréquentes  
+- **Efficacité** : -60% de clics pour les actions fréquentes
 - **Satisfaction** : Design premium et interactions fluides
 - **Accessibilité** : Utilisable par tous les utilisateurs
 

@@ -24,7 +24,7 @@ export const ICONS = {
   Menu: 'Menu',
   X: 'X',
   ChevronDown: 'ChevronDown',
-  
+
   // Utilisateur & Auth
   User: 'User',
   UserPlus: 'UserPlus',
@@ -32,7 +32,7 @@ export const ICONS = {
   LogIn: 'LogIn',
   Shield: 'Shield',
   CheckCircle: 'CheckCircle',
-  
+
   // Propriétés & Immobilier
   Building2: 'Building2',
   HomeIcon: 'Home',
@@ -40,14 +40,14 @@ export const ICONS = {
   Bath: 'Bath',
   Square: 'Square',
   MapPin: 'MapPin',
-  
+
   // Communication & Support
   Mail: 'Mail',
   Phone: 'Phone',
   MessageCircle: 'MessageCircle',
   Heart: 'Heart',
   Bell: 'Bell',
-  
+
   // Actions & Interface
   Plus: 'Plus',
   PlusCircle: 'PlusCircle',
@@ -55,19 +55,19 @@ export const ICONS = {
   Info: 'Info',
   HelpCircle: 'HelpCircle',
   AlertCircle: 'AlertCircle',
-  
+
   // Navigation & Structure
   Calendar: 'Calendar',
   FileText: 'FileText',
   BarChart: 'BarChart',
   Database: 'Database',
-  
+
   // Propriétés
   Coins: 'Coins',
   Award: 'Award',
   Key: 'Key',
   Activity: 'Activity',
-  
+
   // Composants
   Loader2: 'Loader2',
   Download: 'Download',
@@ -81,15 +81,15 @@ export const ICONS = {
 export const ICON_MAPPING = {
   // PropertyCard mappings
   bedrooms: 'Bed' as IconName,
-  bathrooms: 'Bath' as IconName, 
+  bathrooms: 'Bath' as IconName,
   surface: 'Square' as IconName,
-  
+
   // Navigation mappings
   logout: 'LogOut' as IconName,
   login: 'LogIn' as IconName,
   home: 'Home' as IconName,
   search: 'Search' as IconName,
-  
+
   // Communication mappings
   email: 'Mail' as IconName,
   phone: 'Phone' as IconName,
@@ -101,21 +101,21 @@ export const ICON_MAPPING = {
  * Composant Icon unifié
  * Garantit la cohérence du style outline et des tailles
  */
-export const Icon = ({ 
-  name, 
-  size = 20, 
-  className = '', 
+export const Icon = ({
+  name,
+  size = 20,
+  className = '',
   color = 'currentColor',
   strokeWidth = 1.5,
-  ...props 
+  ...props
 }: IconProps) => {
   const IconComponent = LucideIcons[name as IconName] as React.ComponentType<any>;
-  
+
   if (!IconComponent) {
     console.warn(`Icon "${name}" not found in Lucide React`);
     return null;
   }
-  
+
   return (
     <IconComponent
       size={size}
@@ -129,82 +129,44 @@ export const Icon = ({
 
 // Icônes spécialisées pour PropertyCard
 export const PropertyIcons = {
-  Bed: (props: Partial<IconProps>) => (
-    <Icon name="Bed" size={16} {...props} />
-  ),
-  Bath: (props: Partial<IconProps>) => (
-    <Icon name="Bath" size={16} {...props} />
-  ),
-  Square: (props: Partial<IconProps>) => (
-    <Icon name="Square" size={16} {...props} />
-  ),
-  Location: (props: Partial<IconProps>) => (
-    <Icon name="MapPin" size={14} {...props} />
-  ),
+  Bed: (props: Partial<IconProps>) => <Icon name="Bed" size={16} {...props} />,
+  Bath: (props: Partial<IconProps>) => <Icon name="Bath" size={16} {...props} />,
+  Square: (props: Partial<IconProps>) => <Icon name="Square" size={16} {...props} />,
+  Location: (props: Partial<IconProps>) => <Icon name="MapPin" size={14} {...props} />,
 };
 
 // Icônes pour navigation
 export const NavigationIcons = {
-  Home: (props: Partial<IconProps>) => (
-    <Icon name="Home" size={20} {...props} />
-  ),
-  Search: (props: Partial<IconProps>) => (
-    <Icon name="Search" size={20} {...props} />
-  ),
-  Menu: (props: Partial<IconProps>) => (
-    <Icon name="Menu" size={20} {...props} />
-  ),
-  Close: (props: Partial<IconProps>) => (
-    <Icon name="X" size={20} {...props} />
-  ),
+  Home: (props: Partial<IconProps>) => <Icon name="Home" size={20} {...props} />,
+  Search: (props: Partial<IconProps>) => <Icon name="Search" size={20} {...props} />,
+  Menu: (props: Partial<IconProps>) => <Icon name="Menu" size={20} {...props} />,
+  Close: (props: Partial<IconProps>) => <Icon name="X" size={20} {...props} />,
 };
 
 // Icônes pour actions
 export const ActionIcons = {
-  Plus: (props: Partial<IconProps>) => (
-    <Icon name="Plus" size={16} {...props} />
-  ),
-  Settings: (props: Partial<IconProps>) => (
-    <Icon name="Settings" size={18} {...props} />
-  ),
-  Help: (props: Partial<IconProps>) => (
-    <Icon name="HelpCircle" size={18} {...props} />
-  ),
-  Alert: (props: Partial<IconProps>) => (
-    <Icon name="AlertCircle" size={18} {...props} />
-  ),
+  Plus: (props: Partial<IconProps>) => <Icon name="Plus" size={16} {...props} />,
+  Settings: (props: Partial<IconProps>) => <Icon name="Settings" size={18} {...props} />,
+  Help: (props: Partial<IconProps>) => <Icon name="HelpCircle" size={18} {...props} />,
+  Alert: (props: Partial<IconProps>) => <Icon name="AlertCircle" size={18} {...props} />,
 };
 
 // Icônes pour communication
 export const CommunicationIcons = {
-  Mail: (props: Partial<IconProps>) => (
-    <Icon name="Mail" size={16} {...props} />
-  ),
-  Phone: (props: Partial<IconProps>) => (
-    <Icon name="Phone" size={16} {...props} />
-  ),
-  Heart: (props: Partial<IconProps>) => (
-    <Icon name="Heart" size={16} {...props} />
-  ),
-  Message: (props: Partial<IconProps>) => (
-    <Icon name="MessageCircle" size={16} {...props} />
-  ),
+  Mail: (props: Partial<IconProps>) => <Icon name="Mail" size={16} {...props} />,
+  Phone: (props: Partial<IconProps>) => <Icon name="Phone" size={16} {...props} />,
+  Heart: (props: Partial<IconProps>) => <Icon name="Heart" size={16} {...props} />,
+  Message: (props: Partial<IconProps>) => <Icon name="MessageCircle" size={16} {...props} />,
 };
 
 // Icônes pour statut
 export const StatusIcons = {
-  Success: (props: Partial<IconProps>) => (
-    <Icon name="CheckCircle" size={20} {...props} />
-  ),
+  Success: (props: Partial<IconProps>) => <Icon name="CheckCircle" size={20} {...props} />,
   Loading: (props: Partial<IconProps>) => (
     <Icon name="Loader2" size={20} className="animate-spin" {...props} />
   ),
-  User: (props: Partial<IconProps>) => (
-    <Icon name="User" size={20} {...props} />
-  ),
-  Shield: (props: Partial<IconProps>) => (
-    <Icon name="Shield" size={20} {...props} />
-  ),
+  User: (props: Partial<IconProps>) => <Icon name="User" size={20} {...props} />,
+  Shield: (props: Partial<IconProps>) => <Icon name="Shield" size={20} {...props} />,
 };
 
 // Classes CSS pour les icônes
@@ -215,13 +177,13 @@ export const ICON_CLASSES = {
   md: 'h-6 w-6',
   lg: 'h-8 w-8',
   xl: 'h-10 w-10',
-  
+
   // Colors
   primary: 'text-primary-500',
   secondary: 'text-neutral-500',
   muted: 'text-neutral-300',
   white: 'text-white',
-  
+
   // States
   hover: 'hover:text-primary-700 transition-colors duration-250 ease-out',
   active: 'active:text-primary-900',
@@ -234,10 +196,10 @@ export const getIconClass = (
   state?: keyof typeof ICON_CLASSES
 ): string => {
   let classes = ICON_CLASSES[size];
-  
+
   if (color) classes += ` ${ICON_CLASSES[color]}`;
   if (state) classes += ` ${ICON_CLASSES[state]}`;
-  
+
   return classes;
 };
 

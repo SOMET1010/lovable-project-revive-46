@@ -15,7 +15,7 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
   currentIndex,
   isOpen,
   onClose,
-  onNavigate
+  onNavigate,
 }) => {
   const canGoPrev = currentIndex > 0;
   const canGoNext = currentIndex < images.length - 1;
@@ -112,9 +112,10 @@ const ImageLightbox: React.FC<ImageLightboxProps> = ({
                 onClick={() => onNavigate(index)}
                 className={`
                   flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all
-                  ${index === currentIndex 
-                    ? 'border-primary ring-2 ring-primary/50 scale-110' 
-                    : 'border-white/30 hover:border-white/60 opacity-70 hover:opacity-100'
+                  ${
+                    index === currentIndex
+                      ? 'border-primary ring-2 ring-primary/50 scale-110'
+                      : 'border-white/30 hover:border-white/60 opacity-70 hover:opacity-100'
                   }
                 `}
               >

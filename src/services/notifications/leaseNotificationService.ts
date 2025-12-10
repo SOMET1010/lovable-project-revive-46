@@ -5,7 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-export type LeaseNotificationType = 
+export type LeaseNotificationType =
   | 'lease_created'
   | 'lease_pending_signature'
   | 'lease_signed_owner'
@@ -34,7 +34,7 @@ interface NotificationPayload {
 async function sendLeaseNotification(payload: NotificationPayload): Promise<void> {
   try {
     const { error } = await supabase.functions.invoke('send-lease-notifications', {
-      body: payload
+      body: payload,
     });
 
     if (error) {
@@ -52,7 +52,7 @@ async function sendLeaseNotification(payload: NotificationPayload): Promise<void
 export async function notifyLeaseCreated(leaseId: string): Promise<void> {
   await sendLeaseNotification({
     leaseId,
-    type: 'lease_created'
+    type: 'lease_created',
   });
 }
 
@@ -64,7 +64,7 @@ export async function notifyPendingSignature(leaseId: string, targetUserId: stri
   await sendLeaseNotification({
     leaseId,
     type: 'lease_pending_signature',
-    recipientId: targetUserId
+    recipientId: targetUserId,
   });
 }
 
@@ -73,14 +73,14 @@ export async function notifyPendingSignature(leaseId: string, targetUserId: stri
  * Envoyée à l'autre partie quand quelqu'un signe
  */
 export async function notifyLeaseSigned(
-  leaseId: string, 
+  leaseId: string,
   signerName: string,
   isOwner: boolean
 ): Promise<void> {
   await sendLeaseNotification({
     leaseId,
     type: isOwner ? 'lease_signed_owner' : 'lease_signed_tenant',
-    signerName
+    signerName,
   });
 }
 
@@ -91,7 +91,7 @@ export async function notifyLeaseSigned(
 export async function notifyLeaseActive(leaseId: string): Promise<void> {
   await sendLeaseNotification({
     leaseId,
-    type: 'lease_active'
+    type: 'lease_active',
   });
 }
 
@@ -99,11 +99,14 @@ export async function notifyLeaseActive(leaseId: string): Promise<void> {
  * Notification : Expiration proche
  * Envoyée aux deux parties X jours avant expiration
  */
-export async function notifyLeaseExpiringSoon(leaseId: string, daysRemaining: number): Promise<void> {
+export async function notifyLeaseExpiringSoon(
+  leaseId: string,
+  daysRemaining: number
+): Promise<void> {
   await sendLeaseNotification({
     leaseId,
     type: 'lease_expiring_soon',
-    daysRemaining
+    daysRemaining,
   });
 }
 
@@ -114,7 +117,7 @@ export async function notifyLeaseExpiringSoon(leaseId: string, daysRemaining: nu
 export async function notifyLeaseExpired(leaseId: string): Promise<void> {
   await sendLeaseNotification({
     leaseId,
-    type: 'lease_expired'
+    type: 'lease_expired',
   });
 }
 
@@ -125,7 +128,7 @@ export async function notifyLeaseExpired(leaseId: string): Promise<void> {
 export async function notifyLeaseTerminated(leaseId: string): Promise<void> {
   await sendLeaseNotification({
     leaseId,
-    type: 'lease_terminated'
+    type: 'lease_terminated',
   });
 }
 
@@ -137,6 +140,6 @@ export async function notifySignatureReminder(leaseId: string, recipientId: stri
   await sendLeaseNotification({
     leaseId,
     type: 'lease_signature_reminder',
-    recipientId
+    recipientId,
   });
 }

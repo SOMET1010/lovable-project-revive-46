@@ -16,9 +16,10 @@ export function EmptyConversation() {
       </div>
 
       <h2 className="text-2xl font-bold text-white mb-3">Vos discussions</h2>
-      
+
       <p className="text-[#E8D4C5]/70 text-center max-w-sm leading-relaxed mb-8">
-        Sélectionnez une conversation pour échanger avec les propriétaires, les agences ou notre support.
+        Sélectionnez une conversation pour échanger avec les propriétaires, les agences ou notre
+        support.
       </p>
 
       {/* Security notice */}

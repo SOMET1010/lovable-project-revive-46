@@ -32,7 +32,7 @@ export class ContractPdfGenerator {
     this.doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4'
+      format: 'a4',
     });
 
     this.pageWidth = this.doc.internal.pageSize.getWidth();

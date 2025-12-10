@@ -3,7 +3,17 @@
  */
 
 import { useState } from 'react';
-import { BarChart3, Users, Home, CreditCard, RefreshCw, Download, TrendingUp, Building, Wallet } from 'lucide-react';
+import {
+  BarChart3,
+  Users,
+  Home,
+  CreditCard,
+  RefreshCw,
+  Download,
+  TrendingUp,
+  Building,
+  Wallet,
+} from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import {
@@ -13,7 +23,7 @@ import {
   AnalyticsPieChart,
   AnalyticsAreaChart,
 } from '@/shared/ui/charts';
-import { useAnalytics } from '@/shared/hooks/useAnalytics';
+import { useAnalytics } from '@/hooks/shared/useAnalytics';
 import type { AnalyticsPeriod } from '@/types/analytics.types';
 
 const PERIOD_OPTIONS: { value: AnalyticsPeriod; label: string }[] = [
@@ -164,7 +174,9 @@ export default function AnalyticsPage() {
             </div>
             <div className="rounded-2xl border border-border bg-card p-6">
               <p className="text-sm text-muted-foreground">Taux de vérification</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{users?.verificationRate ?? 0}%</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {users?.verificationRate ?? 0}%
+              </p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-6">
               <p className="text-sm text-muted-foreground">Nouveaux ce mois</p>
@@ -183,10 +195,7 @@ export default function AnalyticsPage() {
               />
             </div>
             <div className="rounded-2xl border border-border bg-card p-6">
-              <AnalyticsPieChart
-                data={users?.byType ?? []}
-                title="Types d'utilisateurs"
-              />
+              <AnalyticsPieChart data={users?.byType ?? []} title="Types d'utilisateurs" />
             </div>
           </div>
         </TabsContent>
@@ -196,11 +205,15 @@ export default function AnalyticsPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-border bg-card p-6">
               <p className="text-sm text-muted-foreground">Total propriétés</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{overview?.totalProperties ?? 0}</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {overview?.totalProperties ?? 0}
+              </p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-6">
               <p className="text-sm text-muted-foreground">Taux d'occupation</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{properties?.occupancyRate ?? 0}%</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">
+                {properties?.occupancyRate ?? 0}%
+              </p>
             </div>
             <div className="rounded-2xl border border-border bg-card p-6">
               <p className="text-sm text-muted-foreground">Nouvelles ce mois</p>
@@ -229,16 +242,10 @@ export default function AnalyticsPage() {
 
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="rounded-2xl border border-border bg-card p-6">
-              <AnalyticsPieChart
-                data={properties?.byType ?? []}
-                title="Types de biens"
-              />
+              <AnalyticsPieChart data={properties?.byType ?? []} title="Types de biens" />
             </div>
             <div className="rounded-2xl border border-border bg-card p-6">
-              <AnalyticsPieChart
-                data={properties?.byStatus ?? []}
-                title="Statuts des propriétés"
-              />
+              <AnalyticsPieChart data={properties?.byStatus ?? []} title="Statuts des propriétés" />
             </div>
           </div>
         </TabsContent>
@@ -261,7 +268,9 @@ export default function AnalyticsPage() {
             <div className="rounded-2xl border border-border bg-card p-6">
               <p className="text-sm text-muted-foreground">Ce mois</p>
               <p className="mt-2 text-3xl font-bold text-foreground">
-                {formatCurrency(transactions?.monthlyRevenue?.[transactions.monthlyRevenue.length - 1]?.value ?? 0)}
+                {formatCurrency(
+                  transactions?.monthlyRevenue?.[transactions.monthlyRevenue.length - 1]?.value ?? 0
+                )}
               </p>
             </div>
           </div>

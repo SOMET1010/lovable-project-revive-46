@@ -41,7 +41,7 @@ export default function ProfileErrorDisplay() {
       case 'not_found':
         return 'Votre profil utilisateur semble manquant. Cela peut arriver lors de la création de compte. Nous pouvons tenter de le récupérer automatiquement.';
       default:
-        return 'Une erreur inattendue s\'est produite lors du chargement de votre profil.';
+        return "Une erreur inattendue s'est produite lors du chargement de votre profil.";
     }
   };
 
@@ -58,17 +58,11 @@ export default function ProfileErrorDisplay() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-terracotta-50 via-coral-50 to-amber-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6">
-        <div className="flex justify-center">
-          {getErrorIcon()}
-        </div>
+        <div className="flex justify-center">{getErrorIcon()}</div>
 
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900">
-            {getErrorTitle()}
-          </h2>
-          <p className="text-gray-600">
-            {getErrorDescription()}
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900">{getErrorTitle()}</h2>
+          <p className="text-gray-600">{getErrorDescription()}</p>
         </div>
 
         {profileError.details && (
@@ -101,9 +95,7 @@ export default function ProfileErrorDisplay() {
 
         <div className="pt-4 border-t border-gray-200">
           <div className="text-center space-y-2">
-            <p className="text-sm text-gray-600">
-              Besoin d'aide ? Contactez-nous
-            </p>
+            <p className="text-sm text-gray-600">Besoin d'aide ? Contactez-nous</p>
             <a
               href="mailto:support@montoit.ci"
               className="inline-flex items-center space-x-2 text-terracotta-600 hover:text-terracotta-700 font-medium text-sm"
@@ -115,9 +107,7 @@ export default function ProfileErrorDisplay() {
         </div>
 
         <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Code d'erreur: {profileError.type.toUpperCase()}
-          </p>
+          <p className="text-xs text-gray-500">Code d'erreur: {profileError.type.toUpperCase()}</p>
         </div>
       </div>
     </div>

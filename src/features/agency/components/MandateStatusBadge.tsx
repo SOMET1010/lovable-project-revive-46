@@ -11,13 +11,16 @@ interface MandateStatusBadgeProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-const statusConfig: Record<MandateStatus, {
-  label: string;
-  icon: typeof Clock;
-  bgColor: string;
-  textColor: string;
-  iconColor: string;
-}> = {
+const statusConfig: Record<
+  MandateStatus,
+  {
+    label: string;
+    icon: typeof Clock;
+    bgColor: string;
+    textColor: string;
+    iconColor: string;
+  }
+> = {
   pending: {
     label: 'En attente',
     icon: Clock,
@@ -72,7 +75,7 @@ export default function MandateStatusBadge({ status, size = 'md' }: MandateStatu
   const Icon = config.icon;
 
   return (
-    <span 
+    <span
       className={`inline-flex items-center gap-1.5 rounded-full font-medium ${config.bgColor} ${config.textColor} ${sizeConfig[size]}`}
     >
       <Icon className={`${iconSizeConfig[size]} ${config.iconColor}`} />

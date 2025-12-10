@@ -52,7 +52,8 @@ export function ConfirmRoleModal({
           title: 'Attribution Trust Agent',
           color: 'purple',
           icon: Shield,
-          warning: "Cette action permet à l'utilisateur de certifier et valider d'autres utilisateurs.",
+          warning:
+            "Cette action permet à l'utilisateur de certifier et valider d'autres utilisateurs.",
           consequences: [
             'Validation des identités',
             'Certification des propriétés',
@@ -105,14 +106,21 @@ export function ConfirmRoleModal({
           </div>
 
           {/* Warning */}
-          <div className={`p-4 bg-${roleInfo.color}-50 border border-${roleInfo.color}-200 rounded-lg`}>
+          <div
+            className={`p-4 bg-${roleInfo.color}-50 border border-${roleInfo.color}-200 rounded-lg`}
+          >
             <div className="flex items-start gap-3">
               <Icon className={`h-5 w-5 text-${roleInfo.color}-600 mt-0.5`} />
               <div>
-                <p className={`text-sm font-medium text-${roleInfo.color}-800`}>{roleInfo.warning}</p>
+                <p className={`text-sm font-medium text-${roleInfo.color}-800`}>
+                  {roleInfo.warning}
+                </p>
                 <ul className="mt-2 space-y-1">
                   {roleInfo.consequences.map((consequence, i) => (
-                    <li key={i} className={`text-xs text-${roleInfo.color}-700 flex items-center gap-1.5`}>
+                    <li
+                      key={i}
+                      className={`text-xs text-${roleInfo.color}-700 flex items-center gap-1.5`}
+                    >
                       <span className="w-1 h-1 rounded-full bg-current" />
                       {consequence}
                     </li>
@@ -124,8 +132,9 @@ export function ConfirmRoleModal({
 
           {/* Confirmation Text */}
           <p className="text-sm text-gray-600">
-            Êtes-vous sûr de vouloir attribuer le rôle <strong className="text-gray-900">{role}</strong> à cet
-            utilisateur ? Cette action sera enregistrée dans les logs d'audit.
+            Êtes-vous sûr de vouloir attribuer le rôle{' '}
+            <strong className="text-gray-900">{role}</strong> à cet utilisateur ? Cette action sera
+            enregistrée dans les logs d'audit.
           </p>
         </div>
 

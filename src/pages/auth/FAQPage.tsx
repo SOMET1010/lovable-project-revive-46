@@ -1,5 +1,16 @@
 import { useState } from 'react';
-import { ChevronDown, Search, HelpCircle, Shield, CreditCard, Home, User, MessageCircle, Phone, Mail } from 'lucide-react';
+import {
+  ChevronDown,
+  Search,
+  HelpCircle,
+  Shield,
+  CreditCard,
+  Home,
+  User,
+  MessageCircle,
+  Phone,
+  Mail,
+} from 'lucide-react';
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
 
@@ -12,74 +23,88 @@ interface FAQItem {
 const faqData: FAQItem[] = [
   {
     category: 'Général',
-    question: 'Qu\'est-ce que Mon Toit ?',
-    answer: 'Mon Toit est une plateforme immobilière en Côte d\'Ivoire qui facilite la mise en relation entre propriétaires et locataires. Nous offrons une solution sécurisée, transparente et certifiée ANSUT pour trouver et louer des logements.'
+    question: "Qu'est-ce que Mon Toit ?",
+    answer:
+      "Mon Toit est une plateforme immobilière en Côte d'Ivoire qui facilite la mise en relation entre propriétaires et locataires. Nous offrons une solution sécurisée, transparente et certifiée ANSUT pour trouver et louer des logements.",
   },
   {
     category: 'Général',
     question: 'Comment créer un compte ?',
-    answer: 'Cliquez sur "Inscription" en haut de la page, renseignez vos informations (email, téléphone, mot de passe) et choisissez votre profil (Locataire, Propriétaire, ou Agence). Validez votre compte via le code OTP envoyé par SMS ou email.'
+    answer:
+      'Cliquez sur "Inscription" en haut de la page, renseignez vos informations (email, téléphone, mot de passe) et choisissez votre profil (Locataire, Propriétaire, ou Agence). Validez votre compte via le code OTP envoyé par SMS ou email.',
   },
   {
     category: 'Locataires',
     question: 'Comment rechercher une propriété ?',
-    answer: 'Utilisez notre barre de recherche pour filtrer par ville, quartier, type de bien, prix et équipements. Vous pouvez sauvegarder vos recherches et activer des alertes pour être notifié des nouvelles annonces correspondant à vos critères.'
+    answer:
+      'Utilisez notre barre de recherche pour filtrer par ville, quartier, type de bien, prix et équipements. Vous pouvez sauvegarder vos recherches et activer des alertes pour être notifié des nouvelles annonces correspondant à vos critères.',
   },
   {
     category: 'Locataires',
     question: 'Comment réserver une visite ?',
-    answer: 'Sur la page d\'une propriété, cliquez sur "Planifier une visite". Choisissez une date et heure disponibles. Le propriétaire recevra votre demande et vous confirmera le rendez-vous. Un frais symbolique de 2 000 FCFA peut être requis.'
+    answer:
+      'Sur la page d\'une propriété, cliquez sur "Planifier une visite". Choisissez une date et heure disponibles. Le propriétaire recevra votre demande et vous confirmera le rendez-vous. Un frais symbolique de 2 000 FCFA peut être requis.',
   },
   {
     category: 'Locataires',
     question: 'Puis-je payer mon loyer via la plateforme ?',
-    answer: 'Oui ! Mon Toit intègre les paiements Mobile Money (Orange Money, MTN Mobile Money, Moov Money) et virements bancaires. Vos paiements sont sécurisés et un reçu électronique vous est envoyé automatiquement.'
+    answer:
+      'Oui ! Mon Toit intègre les paiements Mobile Money (Orange Money, MTN Mobile Money, Moov Money) et virements bancaires. Vos paiements sont sécurisés et un reçu électronique vous est envoyé automatiquement.',
   },
   {
     category: 'Propriétaires',
     question: 'Comment publier mon bien ?',
-    answer: 'Connectez-vous à votre compte propriétaire, allez dans "Ajouter une propriété", remplissez les informations détaillées (adresse, prix, photos, équipements), et publiez. Votre annonce sera visible instantanément après modération.'
+    answer:
+      'Connectez-vous à votre compte propriétaire, allez dans "Ajouter une propriété", remplissez les informations détaillées (adresse, prix, photos, équipements), et publiez. Votre annonce sera visible instantanément après modération.',
   },
   {
     category: 'Propriétaires',
     question: 'Y a-t-il des frais pour publier une annonce ?',
-    answer: 'La publication de votre première annonce est gratuite. Pour les propriétaires avec plusieurs biens ou les agences, des formules d\'abonnement sont disponibles pour gérer efficacement votre portefeuille.'
+    answer:
+      "La publication de votre première annonce est gratuite. Pour les propriétaires avec plusieurs biens ou les agences, des formules d'abonnement sont disponibles pour gérer efficacement votre portefeuille.",
   },
   {
     category: 'Propriétaires',
     question: 'Comment signer un contrat de bail ?',
-    answer: 'Mon Toit génère automatiquement des contrats conformes à la loi ivoirienne. Après accord avec votre locataire, le contrat peut être signé électroniquement via CryptoNeo pour une valeur juridique certifiée.'
+    answer:
+      'Mon Toit génère automatiquement des contrats conformes à la loi ivoirienne. Après accord avec votre locataire, le contrat peut être signé électroniquement via CryptoNeo pour une valeur juridique certifiée.',
   },
   {
     category: 'Paiements',
     question: 'Quels moyens de paiement sont acceptés ?',
-    answer: 'Nous acceptons : Mobile Money (Orange, MTN, Moov), virements bancaires (via InTouch), et paiements par carte bancaire. Tous les paiements sont sécurisés et tracés.'
+    answer:
+      'Nous acceptons : Mobile Money (Orange, MTN, Moov), virements bancaires (via InTouch), et paiements par carte bancaire. Tous les paiements sont sécurisés et tracés.',
   },
   {
     category: 'Paiements',
     question: 'Quand et comment je reçois mon loyer ?',
-    answer: 'Les propriétaires reçoivent leur loyer sous 48h après paiement du locataire. Le virement est effectué directement sur votre compte bancaire ou Mobile Money. Une commission de 5% est prélevée pour couvrir les frais de transaction et de plateforme.'
+    answer:
+      'Les propriétaires reçoivent leur loyer sous 48h après paiement du locataire. Le virement est effectué directement sur votre compte bancaire ou Mobile Money. Une commission de 5% est prélevée pour couvrir les frais de transaction et de plateforme.',
   },
   {
     category: 'Vérification',
     question: 'Pourquoi vérifier mon identité ?',
-    answer: 'La vérification d\'identité (via ONECI/CEV) renforce la confiance entre utilisateurs et réduit les fraudes. Les profils vérifiés reçoivent un badge spécial et sont prioritaires dans les résultats de recherche.'
+    answer:
+      "La vérification d'identité (via ONECI/CEV) renforce la confiance entre utilisateurs et réduit les fraudes. Les profils vérifiés reçoivent un badge spécial et sont prioritaires dans les résultats de recherche.",
   },
   {
     category: 'Vérification',
     question: 'Comment obtenir la certification ANSUT ?',
-    answer: 'ANSUT (Agence Nationale de Soutien à l\'Habitat) certifie les logements conformes aux normes ivoiriennes. Soumettez une demande depuis votre dashboard propriétaire, un agent viendra inspecter le bien. La certification est valable 3 ans.'
+    answer:
+      "ANSUT (Agence Nationale de Soutien à l'Habitat) certifie les logements conformes aux normes ivoiriennes. Soumettez une demande depuis votre dashboard propriétaire, un agent viendra inspecter le bien. La certification est valable 3 ans.",
   },
   {
     category: 'Sécurité',
     question: 'Mes données personnelles sont-elles protégées ?',
-    answer: 'Oui ! Nous utilisons un chiffrement SSL 256-bit, stockons vos données sur des serveurs sécurisés, et respectons la réglementation RGPD et les lois ivoiriennes sur la protection des données. Vos informations ne sont jamais vendues à des tiers.'
+    answer:
+      'Oui ! Nous utilisons un chiffrement SSL 256-bit, stockons vos données sur des serveurs sécurisés, et respectons la réglementation RGPD et les lois ivoiriennes sur la protection des données. Vos informations ne sont jamais vendues à des tiers.',
   },
   {
     category: 'Sécurité',
     question: 'Comment signaler une annonce frauduleuse ?',
-    answer: 'Sur la page d\'une propriété, cliquez sur "Signaler". Décrivez le problème rencontré. Notre équipe de modération examine chaque signalement sous 24h et prend les mesures appropriées.'
-  }
+    answer:
+      'Sur la page d\'une propriété, cliquez sur "Signaler". Décrivez le problème rencontré. Notre équipe de modération examine chaque signalement sous 24h et prend les mesures appropriées.',
+  },
 ];
 
 const categories = [
@@ -88,7 +113,7 @@ const categories = [
   { name: 'Propriétaires', icon: User },
   { name: 'Paiements', icon: CreditCard },
   { name: 'Vérification', icon: Shield },
-  { name: 'Sécurité', icon: Shield }
+  { name: 'Sécurité', icon: Shield },
 ];
 
 export default function FAQPage() {
@@ -106,8 +131,9 @@ export default function FAQPage() {
     setOpenItems(newOpenItems);
   };
 
-  const filteredFAQ = faqData.filter(item => {
-    const matchesSearch = searchQuery === '' ||
+  const filteredFAQ = faqData.filter((item) => {
+    const matchesSearch =
+      searchQuery === '' ||
       item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.answer.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -122,13 +148,10 @@ export default function FAQPage() {
         title="Questions Fréquentes (FAQ)"
         subtitle="Trouvez rapidement des réponses à toutes vos questions sur Mon Toit"
         icon={<HelpCircle className="h-8 w-8 text-white" />}
-        breadcrumbs={[
-          { label: 'FAQ', href: '/faq' }
-        ]}
+        breadcrumbs={[{ label: 'FAQ', href: '/faq' }]}
       />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-
         <div className="mb-12 animate-fade-in">
           <div className="relative max-w-2xl mx-auto">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-[#A69B95]" />
@@ -192,9 +215,7 @@ export default function FAQPage() {
                       <span className="inline-block px-3 py-1 bg-[#F16522]/10 text-[#F16522] text-xs font-semibold rounded-full mb-2">
                         {item.category}
                       </span>
-                      <h3 className="text-lg font-bold text-[#2C1810]">
-                        {item.question}
-                      </h3>
+                      <h3 className="text-lg font-bold text-[#2C1810]">{item.question}</h3>
                     </div>
                     <ChevronDown
                       className={`h-5 w-5 text-[#A69B95] transition-transform flex-shrink-0 ml-4 ${
@@ -204,9 +225,7 @@ export default function FAQPage() {
                   </button>
                   {openItems.has(index) && (
                     <div className="px-6 pb-5 pt-2 bg-[#FAF7F4]">
-                      <p className="text-[#6B5A4E] leading-relaxed">
-                        {item.answer}
-                      </p>
+                      <p className="text-[#6B5A4E] leading-relaxed">{item.answer}</p>
                     </div>
                   )}
                 </div>
@@ -214,7 +233,6 @@ export default function FAQPage() {
             </div>
           )}
         </div>
-
       </div>
 
       <FooterCTA
@@ -226,14 +244,14 @@ export default function FAQPage() {
             label: 'Contactez-nous',
             href: '/contact',
             icon: Mail,
-            variant: 'primary'
+            variant: 'primary',
           },
           {
             label: "Centre d'aide",
             href: '/aide',
             icon: Phone,
-            variant: 'secondary'
-          }
+            variant: 'secondary',
+          },
         ]}
       />
     </div>

@@ -38,20 +38,20 @@ interface MapboxMapProps {
 
 // Coordonnées par défaut des villes ivoiriennes pour fallback
 const CITY_CENTER_COORDS: Record<string, [number, number]> = {
-  'Abidjan': [-4.0083, 5.3600],
-  'Cocody': [-3.9878, 5.3545],
-  'Plateau': [-4.0213, 5.3235],
-  'Marcory': [-3.9989, 5.3010],
-  'Riviera': [-3.9700, 5.3600],
-  'Yopougon': [-4.0856, 5.3194],
-  'Bouaké': [-5.0306, 7.6936],
-  'Yamoussoukro': [-5.2767, 6.8277],
-  'Grand-Bassam': [-3.7400, 5.2100],
-  'Bingerville': [-3.8883, 5.3536],
+  Abidjan: [-4.0083, 5.36],
+  Cocody: [-3.9878, 5.3545],
+  Plateau: [-4.0213, 5.3235],
+  Marcory: [-3.9989, 5.301],
+  Riviera: [-3.97, 5.36],
+  Yopougon: [-4.0856, 5.3194],
+  Bouaké: [-5.0306, 7.6936],
+  Yamoussoukro: [-5.2767, 6.8277],
+  'Grand-Bassam': [-3.74, 5.21],
+  Bingerville: [-3.8883, 5.3536],
 };
 
 export default function MapboxMap({
-  center = [-4.0083, 5.3600],
+  center = [-4.0083, 5.36],
   zoom = 12,
   properties,
   highlightedPropertyId,
@@ -71,36 +71,39 @@ export default function MapboxMap({
   type MapStyle = 'streets' | 'satellite';
   const [mapStyle, setMapStyle] = useState<MapStyle>('streets');
   const [styleVersion, setStyleVersion] = useState(0); // bump to reapply layers after style change
-  const styleUrl = mapStyle === 'satellite'
-    ? 'mapbox://styles/mapbox/satellite-streets-v12'
-    : 'mapbox://styles/mapbox/streets-v12';
-  
+  const styleUrl =
+    mapStyle === 'satellite'
+      ? 'mapbox://styles/mapbox/satellite-streets-v12'
+      : 'mapbox://styles/mapbox/streets-v12';
+
   // Filtrer les propriétés avec coordonnées valides et ajouter fallback
-  const validProperties = properties.map(p => {
-    // Si la propriété a des coordonnées valides, les utiliser
-    if (p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0) {
+  const validProperties = properties
+    .map((p) => {
+      // Si la propriété a des coordonnées valides, les utiliser
+      if (p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0) {
+        return p;
+      }
+      // Sinon, essayer de récupérer les coordonnées de la ville
+      const cityCoords = p.city ? CITY_CENTER_COORDS[p.city] : null;
+      if (cityCoords) {
+        // Ajouter un léger décalage aléatoire pour éviter les superpositions
+        const jitter = () => (Math.random() - 0.5) * 0.01;
+        return {
+          ...p,
+          longitude: cityCoords[0] + jitter(),
+          latitude: cityCoords[1] + jitter(),
+        };
+      }
       return p;
-    }
-    // Sinon, essayer de récupérer les coordonnées de la ville
-    const cityCoords = p.city ? CITY_CENTER_COORDS[p.city] : null;
-    if (cityCoords) {
-      // Ajouter un léger décalage aléatoire pour éviter les superpositions
-      const jitter = () => (Math.random() - 0.5) * 0.01;
-      return {
-        ...p,
-        longitude: cityCoords[0] + jitter(),
-        latitude: cityCoords[1] + jitter(),
-      };
-    }
-    return p;
-  }).filter(p => p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0);
+    })
+    .filter((p) => p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0);
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<{ [key: string]: mapboxgl.Marker }>({});
   const userMarker = useRef<mapboxgl.Marker | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
-  
+
   const { token: mapboxToken, isLoading: tokenLoading, error: tokenError } = useMapboxToken();
 
   const getMarkerColor = (property: Property) => {
@@ -170,7 +173,7 @@ export default function MapboxMap({
   useEffect(() => {
     if (!map.current) return;
     map.current.setStyle(styleUrl);
-    map.current.once('style.load', () => setStyleVersion(v => v + 1));
+    map.current.once('style.load', () => setStyleVersion((v) => v + 1));
   }, [styleUrl]);
 
   useEffect(() => {
@@ -184,13 +187,13 @@ export default function MapboxMap({
     if (singleMarker && validProperties.length > 0) {
       const property = validProperties[0];
       if (!property) return;
-      
+
       const color = getMarkerColor(property);
 
       const marker = new mapboxgl.Marker({
         color: color,
         draggable: draggableMarker,
-        anchor: 'bottom'
+        anchor: 'bottom',
       })
         .setLngLat([property.longitude, property.latitude])
         .addTo(map.current!);
@@ -239,25 +242,32 @@ export default function MapboxMap({
           el.style.zIndex = '1';
         });
 
-        const formattedRent = property.monthly_rent != null
-          ? `${property.monthly_rent.toLocaleString()} FCFA/mois`
-          : 'Prix non renseigné';
+        const formattedRent =
+          property.monthly_rent != null
+            ? `${property.monthly_rent.toLocaleString()} FCFA/mois`
+            : 'Prix non renseigné';
 
         const popupContent = `
           <div style="padding: 12px; min-width: 200px;">
-            ${Array.isArray(property.images) && property.images.length > 0 ?
-              `<img src="${property.images[0]}" alt="${property.title}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />`
-              : ''}
+            ${
+              Array.isArray(property.images) && property.images.length > 0
+                ? `<img src="${property.images[0]}" alt="${property.title}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />`
+                : ''
+            }
             <h3 style="font-weight: bold; font-size: 16px; margin-bottom: 4px; color: #1f2937;">${property.title}</h3>
-            ${property.city || property.neighborhood ?
-              `<p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">${property.city || ''}${property.neighborhood ? ' • ' + property.neighborhood : ''}</p>`
-              : ''}
+            ${
+              property.city || property.neighborhood
+                ? `<p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">${property.city || ''}${property.neighborhood ? ' • ' + property.neighborhood : ''}</p>`
+                : ''
+            }
             <p style="color: #ff6b35; font-weight: bold; font-size: 18px; margin-bottom: 8px;">${formattedRent}</p>
-            ${property.status ?
-              `<span style="background: ${property.status === 'disponible' ? '#10B981' : '#EF4444'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
+            ${
+              property.status
+                ? `<span style="background: ${property.status === 'disponible' ? '#10B981' : '#EF4444'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
                 ${property.status === 'disponible' ? 'Disponible' : property.status === 'loue' ? 'Loué' : 'En attente'}
               </span>`
-              : ''}
+                : ''
+            }
           </div>
         `;
 
@@ -270,7 +280,7 @@ export default function MapboxMap({
 
         const marker = new mapboxgl.Marker({
           element: el,
-          anchor: 'bottom'
+          anchor: 'bottom',
         })
           .setLngLat([property.longitude, property.latitude])
           .setPopup(popup)
@@ -301,7 +311,7 @@ export default function MapboxMap({
     if (showRadius && validProperties.length > 0 && map.current) {
       const property = validProperties[0];
       if (!property) return;
-      
+
       const radiusInMeters = radiusKm * 1000;
 
       const circle = {
@@ -345,7 +355,16 @@ export default function MapboxMap({
         });
       }
     }
-  }, [properties, mapLoaded, singleMarker, draggableMarker, fitBounds, showRadius, radiusKm, styleVersion]);
+  }, [
+    properties,
+    mapLoaded,
+    singleMarker,
+    draggableMarker,
+    fitBounds,
+    showRadius,
+    radiusKm,
+    styleVersion,
+  ]);
 
   useEffect(() => {
     if (!highlightedPropertyId) {
@@ -374,8 +393,8 @@ export default function MapboxMap({
   // Loading state
   if (tokenLoading) {
     return (
-      <div 
-        style={{ width: '100%', height }} 
+      <div
+        style={{ width: '100%', height }}
         className="rounded-lg overflow-hidden bg-muted flex items-center justify-center"
       >
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -389,8 +408,8 @@ export default function MapboxMap({
   // Error state
   if (tokenError || !mapboxToken) {
     return (
-      <div 
-        style={{ width: '100%', height }} 
+      <div
+        style={{ width: '100%', height }}
         className="rounded-lg overflow-hidden bg-muted flex items-center justify-center"
       >
         <div className="flex flex-col items-center gap-2 text-muted-foreground">
@@ -404,15 +423,15 @@ export default function MapboxMap({
   // Fonction de recentrage sur les propriétés
   const handleResetView = () => {
     if (!map.current || validProperties.length === 0) return;
-    
+
     const bounds = new mapboxgl.LngLatBounds();
-    validProperties.forEach(p => {
+    validProperties.forEach((p) => {
       bounds.extend([p.longitude, p.latitude]);
     });
     map.current.fitBounds(bounds, {
       padding: { top: 60, bottom: 60, left: 60, right: 60 },
       maxZoom: 15,
-      duration: 1500
+      duration: 1500,
     });
   };
 
@@ -422,19 +441,19 @@ export default function MapboxMap({
       alert('Géolocalisation non disponible sur votre appareil');
       return;
     }
-    
+
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        
+
         // Centrer la carte avec animation
         map.current?.flyTo({
           center: [coords.lng, coords.lat],
           zoom: 14,
-          duration: 1500
+          duration: 1500,
         });
-        
+
         // Créer ou déplacer le marqueur utilisateur
         if (userMarker.current) {
           userMarker.current.setLngLat([coords.lng, coords.lat]);
@@ -457,17 +476,17 @@ export default function MapboxMap({
               }
             </style>
           `;
-          
+
           userMarker.current = new mapboxgl.Marker({ element: el })
             .setLngLat([coords.lng, coords.lat])
             .addTo(map.current!);
         }
-        
+
         setIsLocating(false);
       },
       (err) => {
         console.error('Erreur géolocalisation:', err);
-        alert('Impossible d\'obtenir votre position. Vérifiez les permissions.');
+        alert("Impossible d'obtenir votre position. Vérifiez les permissions.");
         setIsLocating(false);
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -483,7 +502,7 @@ export default function MapboxMap({
         role="application"
         aria-label="Carte interactive des propriétés"
       />
-      
+
       {/* Boutons de contrôle carte + toggle style */}
       <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-3">
         {styleToggleEnabled && (
@@ -491,7 +510,9 @@ export default function MapboxMap({
             <button
               onClick={() => setMapStyle('streets')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors ${
-                mapStyle === 'streets' ? 'bg-[#F16522] text-white' : 'text-neutral-700 hover:bg-neutral-50'
+                mapStyle === 'streets'
+                  ? 'bg-[#F16522] text-white'
+                  : 'text-neutral-700 hover:bg-neutral-50'
               }`}
             >
               <Map className="w-4 h-4" />
@@ -500,7 +521,9 @@ export default function MapboxMap({
             <button
               onClick={() => setMapStyle('satellite')}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors border-t border-neutral-100 ${
-                mapStyle === 'satellite' ? 'bg-[#F16522] text-white' : 'text-neutral-700 hover:bg-neutral-50'
+                mapStyle === 'satellite'
+                  ? 'bg-[#F16522] text-white'
+                  : 'text-neutral-700 hover:bg-neutral-50'
               }`}
             >
               <Globe2 className="w-4 h-4" />
@@ -520,7 +543,7 @@ export default function MapboxMap({
           >
             <Focus className="w-5 h-5 text-primary" />
           </button>
-          
+
           {/* Bouton Géolocalisation */}
           <button
             onClick={handleLocateUser}

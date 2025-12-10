@@ -7,14 +7,14 @@ interface LoadingSpinnerProps {
   message?: string;
 }
 
-const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  size = 'md', 
-  message = 'Chargement...' 
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = 'md',
+  message = 'Chargement...',
 }) => {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-8 h-8',
-    lg: 'w-12 h-12'
+    lg: 'w-12 h-12',
   };
 
   return (
@@ -32,17 +32,13 @@ interface LazyWrapperProps {
   errorFallback?: React.ReactNode;
 }
 
-export const LazyWrapper: React.FC<LazyWrapperProps> = ({ 
-  children, 
-  fallback, 
-  errorFallback: _errorFallback 
+export const LazyWrapper: React.FC<LazyWrapperProps> = ({
+  children,
+  fallback,
+  errorFallback: _errorFallback,
 }) => {
   return (
-    <Suspense 
-      fallback={
-        fallback || <LoadingSpinner message="Chargement du contenu..." />
-      }
-    >
+    <Suspense fallback={fallback || <LoadingSpinner message="Chargement du contenu..." />}>
       {children}
     </Suspense>
   );
@@ -54,18 +50,15 @@ interface LazyErrorBoundaryProps {
   fallback?: React.ReactNode;
 }
 
-export const LazyErrorBoundary: React.FC<LazyErrorBoundaryProps> = ({ 
-  children, 
-  fallback 
-}) => {
+export const LazyErrorBoundary: React.FC<LazyErrorBoundaryProps> = ({ children, fallback }) => {
   const [hasError, setHasError] = React.useState(false);
 
   React.useEffect(() => {
     const handleError = () => setHasError(true);
-    
+
     // Écouter les erreurs de chargement des modules
     window.addEventListener('error', handleError);
-    
+
     return () => {
       window.removeEventListener('error', handleError);
     };
@@ -76,23 +69,21 @@ export const LazyErrorBoundary: React.FC<LazyErrorBoundaryProps> = ({
       fallback || (
         <div className="flex flex-col items-center justify-center p-8 text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
-            <svg 
-              className="w-8 h-8 text-red-600" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-8 h-8 text-red-600"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
               />
             </svg>
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Erreur de chargement
-          </h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Erreur de chargement</h3>
           <p className="text-sm text-gray-600 mb-4">
             Une erreur s'est produite lors du chargement de ce contenu.
           </p>
@@ -117,7 +108,7 @@ export const createLazyComponent = (
   errorFallback?: React.ReactNode
 ) => {
   const LazyComponent = lazy(importFunc);
-  
+
   return (props: any) => (
     <LazyErrorBoundary fallback={errorFallback}>
       <LazyWrapper fallback={fallback}>
@@ -171,7 +162,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   className = '',
   placeholder = '/placeholder-image.jpg',
   onLoad,
-  onError
+  onError,
 }) => {
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [hasError, setHasError] = React.useState(false);
@@ -195,7 +186,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         });
       },
       {
-        rootMargin: '50px' // Commencer à charger 50px avant que l'image soit visible
+        rootMargin: '50px', // Commencer à charger 50px avant que l'image soit visible
       }
     );
 
@@ -225,21 +216,21 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
           <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
         </div>
       )}
-      
+
       {hasError ? (
         <div className="absolute inset-0 bg-gray-100 flex items-center justify-center text-gray-500">
           <div className="text-center">
-            <svg 
-              className="w-12 h-12 mx-auto mb-2" 
-              fill="none" 
-              stroke="currentColor" 
+            <svg
+              className="w-12 h-12 mx-auto mb-2"
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
             <p className="text-sm">Image non disponible</p>

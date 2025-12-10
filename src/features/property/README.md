@@ -279,8 +279,8 @@ describe('usePropertyForm', () => {
   test('validation des étapes', () => {
     // Tests de validation
   });
-  
-  test('upload d\'images', () => {
+
+  test("upload d'images", () => {
     // Tests d'upload
   });
 });

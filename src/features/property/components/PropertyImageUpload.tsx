@@ -21,7 +21,7 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
   onMainImageSet,
   onImagesReorder,
   disabled = false,
-  maxImages = 20
+  maxImages = 20,
 }) => {
   const [dragOver, setDragOver] = useState(false);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -30,79 +30,91 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
   // Générer les URLs de prévisualisation quand les images changent
   useEffect(() => {
     // Nettoyer les anciennes URLs
-    previewUrls.forEach(url => {
+    previewUrls.forEach((url) => {
       if (url.startsWith('blob:')) {
         URL.revokeObjectURL(url);
       }
     });
 
     // Générer les nouvelles URLs
-    const newUrls = images.map(file => URL.createObjectURL(file));
+    const newUrls = images.map((file) => URL.createObjectURL(file));
     setPreviewUrls(newUrls);
 
     // Cleanup au démontage
     return () => {
-      newUrls.forEach(url => URL.revokeObjectURL(url));
+      newUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [images]);
 
   // Gestion du drag & drop pour la zone d'upload principale
-  const handleMainDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    if (!disabled) {
-      setDragOver(true);
-    }
-  }, [disabled]);
+  const handleMainDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!disabled) {
+        setDragOver(true);
+      }
+    },
+    [disabled]
+  );
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
   }, []);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
-    
-    if (disabled) return;
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
 
-    const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
-  }, [disabled]);
+      if (disabled) return;
+
+      const files = Array.from(e.dataTransfer.files);
+      handleFiles(files);
+    },
+    [disabled]
+  );
 
   // Gestion des fichiers
-  const handleFiles = useCallback((files: File[]) => {
-    const validFiles = files.filter(file => {
-      // Vérifier le type
-      if (!file.type.startsWith('image/')) {
-        alert(`Le fichier ${file.name} n'est pas une image valide`);
-        return false;
+  const handleFiles = useCallback(
+    (files: File[]) => {
+      const validFiles = files.filter((file) => {
+        // Vérifier le type
+        if (!file.type.startsWith('image/')) {
+          alert(`Le fichier ${file.name} n'est pas une image valide`);
+          return false;
+        }
+
+        // Vérifier la taille (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          alert(`L'image ${file.name} dépasse la taille maximale de 5MB`);
+          return false;
+        }
+
+        return true;
+      });
+
+      if (images.length + validFiles.length > maxImages) {
+        alert(`Vous ne pouvez pas ajouter plus de ${maxImages} images`);
+        return;
       }
-      
-      // Vérifier la taille (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`L'image ${file.name} dépasse la taille maximale de 5MB`);
-        return false;
+
+      onImagesAdd(validFiles);
+    },
+    [images.length, maxImages, onImagesAdd]
+  );
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files ? Array.from(e.target.files) : [];
+      handleFiles(files);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
-      
-      return true;
-    });
-
-    if (images.length + validFiles.length > maxImages) {
-      alert(`Vous ne pouvez pas ajouter plus de ${maxImages} images`);
-      return;
-    }
-
-    onImagesAdd(validFiles);
-  }, [images.length, maxImages, onImagesAdd]);
-
-  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    handleFiles(files);
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  }, [handleFiles]);
+    },
+    [handleFiles]
+  );
 
   // Gestion du clic sur le bouton d'upload
   const handleUploadClick = useCallback(() => {
@@ -117,9 +129,10 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
       <div
         className={`
           relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-300
-          ${dragOver && !disabled
-            ? 'border-primary bg-primary/5 scale-[1.01]' 
-            : 'border-border hover:border-primary/50 hover:bg-muted/30'
+          ${
+            dragOver && !disabled
+              ? 'border-primary bg-primary/5 scale-[1.01]'
+              : 'border-border hover:border-primary/50 hover:bg-muted/30'
           }
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
@@ -142,7 +155,7 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
           <div className="mx-auto w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center">
             <Camera className="w-7 h-7 text-primary" />
           </div>
-          
+
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-2">
               Ajoutez des photos de votre propriété
@@ -188,7 +201,8 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
               Photos importantes
             </h4>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              Les propriétés avec des photos obtiennent 5x plus de vues. Ajoutez au minimum 3 photos de qualité.
+              Les propriétés avec des photos obtiennent 5x plus de vues. Ajoutez au minimum 3 photos
+              de qualité.
             </p>
           </div>
         </div>
@@ -198,18 +212,17 @@ const PropertyImageUpload: React.FC<PropertyImageUploadProps> = ({
       {images.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h4 className="text-lg font-semibold text-foreground">
-              Photos de votre propriété
-            </h4>
+            <h4 className="text-lg font-semibold text-foreground">Photos de votre propriété</h4>
             <span className="text-sm text-muted-foreground bg-muted px-3 py-1 rounded-full">
               {images.length}/{maxImages}
             </span>
           </div>
 
           <p className="text-sm text-muted-foreground mb-4">
-            ✨ Glissez les images pour les réorganiser. Cliquez sur l'étoile pour définir l'image principale.
+            ✨ Glissez les images pour les réorganiser. Cliquez sur l'étoile pour définir l'image
+            principale.
           </p>
-          
+
           <DraggableImageGrid
             images={images}
             previewUrls={previewUrls}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
   ClipboardList,
   Menu,
   X,
@@ -10,11 +10,13 @@ import {
   UserCheck,
   Home,
   History,
-  Calendar
+  Calendar,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/badge';
 import { cn } from '@/shared/lib/utils';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 const navItems = [
   { path: '/trust-agent/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -28,8 +30,20 @@ const navItems = [
 export default function TrustAgentLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
-  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(path + '/');
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -37,8 +51,8 @@ export default function TrustAgentLayout() {
       <header className="lg:hidden bg-card border-b sticky top-0 z-50">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="small"
               className="p-2 h-auto w-auto"
               onClick={() => setSidebarOpen(true)}
@@ -72,7 +86,7 @@ export default function TrustAgentLayout() {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1">
-            {navItems.map(item => {
+            {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
@@ -93,7 +107,7 @@ export default function TrustAgentLayout() {
           </nav>
 
           {/* Footer */}
-          <div className="px-4 py-4 border-t">
+          <div className="px-4 py-4 border-t space-y-4">
             <div className="flex items-center gap-3 px-4 py-3 bg-muted rounded-lg">
               <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                 <Shield className="h-4 w-4 text-primary" />
@@ -106,30 +120,40 @@ export default function TrustAgentLayout() {
                 En ligne
               </Badge>
             </div>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-4 w-4" />
+              Déconnexion
+            </Button>
           </div>
         </aside>
 
         {/* Mobile Sidebar Overlay */}
         {sidebarOpen && (
-          <div 
+          <div
             className="lg:hidden fixed inset-0 z-50 bg-black/50"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Mobile Sidebar */}
-        <aside className={cn(
-          'lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-card transform transition-transform duration-200',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        )}>
+        <aside
+          className={cn(
+            'lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-card transform transition-transform duration-200',
+            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          )}
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-4 border-b">
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
               <span className="font-semibold">Trust Agent</span>
             </div>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="small"
               className="p-2 h-auto w-auto"
               onClick={() => setSidebarOpen(false)}
@@ -140,7 +164,7 @@ export default function TrustAgentLayout() {
 
           {/* Navigation */}
           <nav className="px-4 py-6 space-y-1">
-            {navItems.map(item => {
+            {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink
@@ -160,6 +184,18 @@ export default function TrustAgentLayout() {
               );
             })}
           </nav>
+
+          {/* Mobile Footer */}
+          <div className="px-4 py-4 border-t">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-3 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={handleSignOut}
+            >
+              <LogOut className="h-4 w-4" />
+              Déconnexion
+            </Button>
+          </div>
         </aside>
 
         {/* Main Content */}

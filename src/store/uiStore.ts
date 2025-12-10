@@ -66,10 +66,10 @@ export const useUIStore = create<UIState>()(
           return {
             modals: {
               ...state.modals,
-              [id]: { 
-                id, 
-                isOpen: false, 
-                data: existingModal?.data 
+              [id]: {
+                id,
+                isOpen: false,
+                data: existingModal?.data,
               },
             },
           };

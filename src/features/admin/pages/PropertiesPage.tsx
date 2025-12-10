@@ -33,10 +33,10 @@ export default function PropertiesPage() {
           Module Propriétés en Développement
         </h2>
         <p className="text-gray-600 max-w-md mx-auto mb-8">
-          Cette page permettra de modérer les annonces, approuver ou rejeter les propriétés,
-          et gérer le contenu de la plateforme.
+          Cette page permettra de modérer les annonces, approuver ou rejeter les propriétés, et
+          gérer le contenu de la plateforme.
         </p>
-        
+
         {/* Preview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">

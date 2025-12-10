@@ -26,7 +26,13 @@ const userTypeLabels: Record<string, { label: string; color: string }> = {
   agent: { label: 'Agent', color: 'green' },
 };
 
-const systemRoles: { value: SystemRole; label: string; icon: typeof Shield; color: string; description: string }[] = [
+const systemRoles: {
+  value: SystemRole;
+  label: string;
+  icon: typeof Shield;
+  color: string;
+  description: string;
+}[] = [
   {
     value: 'admin',
     label: 'Administrateur',
@@ -50,7 +56,11 @@ const systemRoles: { value: SystemRole; label: string; icon: typeof Shield; colo
   },
 ];
 
-export function AssignRoleForm({ onRoleAssigned, onShowConfirmAdmin, currentUserId }: AssignRoleFormProps) {
+export function AssignRoleForm({
+  onRoleAssigned,
+  onShowConfirmAdmin,
+  currentUserId,
+}: AssignRoleFormProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [searching, setSearching] = useState(false);
   const [foundUser, setFoundUser] = useState<FoundUser | null>(null);
@@ -68,7 +78,7 @@ export function AssignRoleForm({ onRoleAssigned, onShowConfirmAdmin, currentUser
 
     try {
       const query = searchQuery.trim().toLowerCase();
-      
+
       // Search by email, name, or phone
       const { data, error } = await supabase
         .from('profiles')
@@ -153,7 +163,7 @@ export function AssignRoleForm({ onRoleAssigned, onShowConfirmAdmin, currentUser
       });
 
       toast.success(`Rôle ${role} attribué à ${user.full_name || user.email}`);
-      
+
       // Reset form
       setFoundUser(null);
       setSelectedRole(null);
@@ -244,7 +254,9 @@ export function AssignRoleForm({ onRoleAssigned, onShowConfirmAdmin, currentUser
 
           {/* Role Selection */}
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-3">Sélectionner un rôle à attribuer</p>
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Sélectionner un rôle à attribuer
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {systemRoles.map(({ value, label, icon: Icon, color, description }) => (
                 <button

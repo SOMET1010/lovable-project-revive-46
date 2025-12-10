@@ -10,7 +10,7 @@ interface AppState {
 export function useAppLifecycle() {
   const [appState, setAppState] = useState<AppState>({
     isActive: true,
-    lastActiveTime: null
+    lastActiveTime: null,
   });
   const [deepLinkUrl, setDeepLinkUrl] = useState<string | null>(null);
 
@@ -28,7 +28,7 @@ export function useAppLifecycle() {
         name: 'Mon Toit',
         id: 'app.lovable.4d8f59374e734af7a740286b13067a1d',
         build: '1',
-        version: '1.0.0'
+        version: '1.0.0',
       };
     }
 
@@ -50,18 +50,18 @@ export function useAppLifecycle() {
     const stateListener = App.addListener('appStateChange', ({ isActive }) => {
       setAppState({
         isActive,
-        lastActiveTime: isActive ? null : Date.now()
+        lastActiveTime: isActive ? null : Date.now(),
       });
     });
 
     // Deep link listener
     const urlListener = App.addListener('appUrlOpen', (event: URLOpenListenerEvent) => {
       setDeepLinkUrl(event.url);
-      
+
       // Handle deep link navigation
       const url = new URL(event.url);
       const path = url.pathname;
-      
+
       // Navigate to the path (you may want to use your router here)
       if (path && path !== '/') {
         window.location.href = path;
@@ -79,14 +79,14 @@ export function useAppLifecycle() {
     });
 
     // Check for launch URL on startup
-    getLaunchUrl().then(url => {
+    getLaunchUrl().then((url) => {
       if (url) setDeepLinkUrl(url);
     });
 
     return () => {
-      stateListener.then(l => l.remove());
-      urlListener.then(l => l.remove());
-      backButtonListener.then(l => l.remove());
+      stateListener.then((l) => l.remove());
+      urlListener.then((l) => l.remove());
+      backButtonListener.then((l) => l.remove());
     };
   }, [isNative, getLaunchUrl]);
 
@@ -97,6 +97,6 @@ export function useAppLifecycle() {
     deepLinkUrl,
     exitApp,
     getAppInfo,
-    getLaunchUrl
+    getLaunchUrl,
   };
 }

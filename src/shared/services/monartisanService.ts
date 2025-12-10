@@ -29,10 +29,10 @@ export const monartisanService = {
    */
   createJobRequest: async (data: CreateJobRequestData): Promise<JobRequest> => {
     if (import.meta.env.DEV) console.log('[MonArtisan Service] Creating job request:', data);
-    
+
     // Simulation - à remplacer par l'appel API réel
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     return {
       id: `job-${Date.now()}`,
       maintenance_request_id: data.maintenance_request_id,
@@ -48,11 +48,15 @@ export const monartisanService = {
    * Récupère les demandes d'artisans pour une maintenance
    */
   getJobRequestsByMaintenance: async (maintenanceRequestId: string): Promise<JobRequest[]> => {
-    if (import.meta.env.DEV) console.log('[MonArtisan Service] Fetching job requests for maintenance:', maintenanceRequestId);
-    
+    if (import.meta.env.DEV)
+      console.log(
+        '[MonArtisan Service] Fetching job requests for maintenance:',
+        maintenanceRequestId
+      );
+
     // Simulation - à remplacer par l'appel API réel
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     return [];
   },
 
@@ -60,10 +64,11 @@ export const monartisanService = {
    * Annule une demande d'artisan
    */
   cancelJobRequest: async (jobRequestId: string): Promise<void> => {
-    if (import.meta.env.DEV) console.log('[MonArtisan Service] Cancelling job request:', jobRequestId);
-    
+    if (import.meta.env.DEV)
+      console.log('[MonArtisan Service] Cancelling job request:', jobRequestId);
+
     // Simulation - à remplacer par l'appel API réel
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   },
 };
 

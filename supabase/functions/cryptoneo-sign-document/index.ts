@@ -116,7 +116,7 @@ serve(async (req) => {
 
     // 3. Download PDF from storage
     let pdfBlob;
-    let pdfPath = lease.document_url;
+    const pdfPath = lease.document_url;
 
     // Handle both full URLs and relative paths
     if (pdfPath.includes('http')) {

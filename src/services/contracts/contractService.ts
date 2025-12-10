@@ -37,7 +37,8 @@ export async function generateAndUploadContract(leaseId: string): Promise<string
   // 1. Récupérer le contrat avec la propriété
   const { data: contractData, error: contractError } = await supabase
     .from('lease_contracts')
-    .select(`
+    .select(
+      `
       id,
       contract_number,
       property_id,
@@ -55,12 +56,15 @@ export async function generateAndUploadContract(leaseId: string): Promise<string
         address,
         city
       )
-    `)
+    `
+    )
     .eq('id', leaseId)
     .single();
 
   if (contractError || !contractData) {
-    throw new Error(`Erreur lors de la récupération du contrat: ${contractError?.message || 'Contrat introuvable'}`);
+    throw new Error(
+      `Erreur lors de la récupération du contrat: ${contractError?.message || 'Contrat introuvable'}`
+    );
   }
 
   const contract = contractData as unknown as ContractWithDetails;
@@ -100,7 +104,7 @@ export async function generateAndUploadContract(leaseId: string): Promise<string
     startDate: contract.start_date,
     endDate: contract.end_date,
     paymentDay: contract.payment_day || 5,
-    customClauses: contract.custom_clauses || undefined
+    customClauses: contract.custom_clauses || undefined,
   };
 
   // 4. Générer le PDF
@@ -114,7 +118,7 @@ export async function generateAndUploadContract(leaseId: string): Promise<string
     .from('lease-documents')
     .upload(filePath, pdfBlob, {
       contentType: 'application/pdf',
-      upsert: true
+      upsert: true,
     });
 
   if (uploadError) {
@@ -157,10 +161,8 @@ export async function regenerateContract(leaseId: string): Promise<string> {
   if (contract) {
     const fileName = `contrat-${contract.contract_number.replace(/[^a-zA-Z0-9-]/g, '')}.pdf`;
     const filePath = `${leaseId}/${fileName}`;
-    
-    await supabase.storage
-      .from('lease-documents')
-      .remove([filePath]);
+
+    await supabase.storage.from('lease-documents').remove([filePath]);
   }
 
   return generateAndUploadContract(leaseId);
@@ -172,13 +174,13 @@ export async function regenerateContract(leaseId: string): Promise<string> {
 export async function downloadContract(documentUrl: string, filename: string): Promise<void> {
   const response = await fetch(documentUrl);
   const blob = await response.blob();
-  
+
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
   link.click();
-  
+
   URL.revokeObjectURL(url);
 }
 
@@ -204,16 +206,11 @@ export async function deleteContract(leaseId: string): Promise<void> {
   // Supprimer les fichiers du storage
   const fileName = `contrat-${contract.contract_number.replace(/[^a-zA-Z0-9-]/g, '')}.pdf`;
   const filePath = `${leaseId}/${fileName}`;
-  
-  await supabase.storage
-    .from('lease-documents')
-    .remove([filePath]);
+
+  await supabase.storage.from('lease-documents').remove([filePath]);
 
   // Supprimer le contrat
-  const { error: deleteError } = await supabase
-    .from('lease_contracts')
-    .delete()
-    .eq('id', leaseId);
+  const { error: deleteError } = await supabase.from('lease_contracts').delete().eq('id', leaseId);
 
   if (deleteError) {
     throw new Error(`Erreur lors de la suppression: ${deleteError.message}`);
@@ -225,16 +222,14 @@ export async function deleteContract(leaseId: string): Promise<void> {
  */
 export async function sendSignatureReminder(leaseId: string, tenantId: string): Promise<void> {
   // Créer une notification pour le locataire
-  const { error } = await supabase
-    .from('notifications')
-    .insert({
-      user_id: tenantId,
-      title: 'Rappel de signature',
-      message: 'Vous avez un contrat de bail en attente de votre signature.',
-      type: 'info',
-      action_url: `/signer-bail/${leaseId}`,
-      channel: 'in_app'
-    });
+  const { error } = await supabase.from('notifications').insert({
+    user_id: tenantId,
+    title: 'Rappel de signature',
+    message: 'Vous avez un contrat de bail en attente de votre signature.',
+    type: 'info',
+    action_url: `/signer-bail/${leaseId}`,
+    channel: 'in_app',
+  });
 
   if (error) {
     throw new Error(`Erreur lors de l'envoi du rappel: ${error.message}`);
@@ -254,9 +249,9 @@ export async function terminateContract(leaseId: string, _reason: string): Promi
 
   const { error } = await supabase
     .from('lease_contracts')
-    .update({ 
+    .update({
       status: 'resilie',
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .eq('id', leaseId);
 
@@ -266,15 +261,13 @@ export async function terminateContract(leaseId: string, _reason: string): Promi
 
   // Update property status back to available
   if (lease?.property_id) {
-    await supabase
-      .from('properties')
-      .update({ status: 'disponible' })
-      .eq('id', lease.property_id);
+    await supabase.from('properties').update({ status: 'disponible' }).eq('id', lease.property_id);
   }
 
   // Send termination notification
   try {
-    const { notifyLeaseTerminated } = await import('@/services/notifications/leaseNotificationService');
+    const { notifyLeaseTerminated } =
+      await import('@/services/notifications/leaseNotificationService');
     await notifyLeaseTerminated(leaseId);
   } catch (notifError) {
     console.error('Error sending termination notification:', notifError);

@@ -21,7 +21,7 @@ export function useNativeGeolocation(options: UseNativeGeolocationOptions = {}) 
     latitude: null,
     longitude: null,
     accuracy: null,
-    timestamp: null
+    timestamp: null,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,12 +32,12 @@ export function useNativeGeolocation(options: UseNativeGeolocationOptions = {}) 
   const checkPermissions = useCallback(async (): Promise<boolean> => {
     try {
       const status: PermissionStatus = await Geolocation.checkPermissions();
-      
+
       if (status.location === 'denied') {
         const request = await Geolocation.requestPermissions();
         return request.location === 'granted';
       }
-      
+
       return status.location === 'granted' || status.location === 'prompt';
     } catch {
       return false;
@@ -57,14 +57,14 @@ export function useNativeGeolocation(options: UseNativeGeolocationOptions = {}) 
       const pos: Position = await Geolocation.getCurrentPosition({
         enableHighAccuracy: options.enableHighAccuracy ?? true,
         timeout: options.timeout ?? 10000,
-        maximumAge: options.maximumAge ?? 0
+        maximumAge: options.maximumAge ?? 0,
       });
 
       const newPosition: GeolocationState = {
         latitude: pos.coords.latitude,
         longitude: pos.coords.longitude,
         accuracy: pos.coords.accuracy,
-        timestamp: pos.timestamp
+        timestamp: pos.timestamp,
       };
 
       setPosition(newPosition);
@@ -91,7 +91,7 @@ export function useNativeGeolocation(options: UseNativeGeolocationOptions = {}) 
         {
           enableHighAccuracy: options.enableHighAccuracy ?? true,
           timeout: options.timeout ?? 10000,
-          maximumAge: options.maximumAge ?? 0
+          maximumAge: options.maximumAge ?? 0,
         },
         (pos, err) => {
           if (err) {
@@ -104,7 +104,7 @@ export function useNativeGeolocation(options: UseNativeGeolocationOptions = {}) 
               latitude: pos.coords.latitude,
               longitude: pos.coords.longitude,
               accuracy: pos.coords.accuracy,
-              timestamp: pos.timestamp
+              timestamp: pos.timestamp,
             });
           }
         }
@@ -161,6 +161,6 @@ export function useNativeGeolocation(options: UseNativeGeolocationOptions = {}) 
     stopWatching,
     isWatching: !!watchId,
     calculateDistance,
-    checkPermissions
+    checkPermissions,
   };
 }

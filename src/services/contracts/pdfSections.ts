@@ -5,7 +5,7 @@ import {
   getObligationsBailleur,
   getArticle1Text,
   getArticle2Text,
-  getArticle4Text
+  getArticle4Text,
 } from './contractTemplates';
 
 export class PdfSectionWriter {
@@ -39,11 +39,11 @@ export class PdfSectionWriter {
     this.doc.setTextColor(78, 70, 55);
     this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('RÉPUBLIQUE DE CÔTE D\'IVOIRE', this.pageWidth / 2, 15, { align: 'center' });
+    this.doc.text("RÉPUBLIQUE DE CÔTE D'IVOIRE", this.pageWidth / 2, 15, { align: 'center' });
     this.doc.text('Union - Discipline - Travail', this.pageWidth / 2, 22, { align: 'center' });
 
     this.doc.setFontSize(18);
-    this.doc.text('CONTRAT DE BAIL D\'HABITATION', this.pageWidth / 2, 35, { align: 'center' });
+    this.doc.text("CONTRAT DE BAIL D'HABITATION", this.pageWidth / 2, 35, { align: 'center' });
 
     this.yPosition = 55;
     this.doc.setDrawColor(78, 70, 55);
@@ -126,13 +126,29 @@ export class PdfSectionWriter {
     this.yPosition += 7;
 
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(`Loyer mensuel: ${data.monthlyRent.toLocaleString('fr-FR')} FCFA`, this.margin, this.yPosition);
+    this.doc.text(
+      `Loyer mensuel: ${data.monthlyRent.toLocaleString('fr-FR')} FCFA`,
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 5;
-    this.doc.text(`Charges mensuelles: ${data.chargesAmount.toLocaleString('fr-FR')} FCFA`, this.margin, this.yPosition);
+    this.doc.text(
+      `Charges mensuelles: ${data.chargesAmount.toLocaleString('fr-FR')} FCFA`,
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 5;
-    this.doc.text(`Total mensuel: ${(data.monthlyRent + data.chargesAmount).toLocaleString('fr-FR')} FCFA`, this.margin, this.yPosition);
+    this.doc.text(
+      `Total mensuel: ${(data.monthlyRent + data.chargesAmount).toLocaleString('fr-FR')} FCFA`,
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 5;
-    this.doc.text(`Le loyer est payable le ${data.paymentDay} de chaque mois par virement bancaire ou mobile money.`, this.margin, this.yPosition);
+    this.doc.text(
+      `Le loyer est payable le ${data.paymentDay} de chaque mois par virement bancaire ou mobile money.`,
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 10;
   }
 
@@ -143,7 +159,11 @@ export class PdfSectionWriter {
     this.yPosition += 7;
 
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(`Montant du dépôt de garantie: ${data.depositAmount.toLocaleString('fr-FR')} FCFA`, this.margin, this.yPosition);
+    this.doc.text(
+      `Montant du dépôt de garantie: ${data.depositAmount.toLocaleString('fr-FR')} FCFA`,
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 5;
 
     const text = getArticle4Text();
@@ -200,9 +220,17 @@ export class PdfSectionWriter {
     this.yPosition += 7;
 
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text('Le présent contrat est signé électroniquement conformément à la réglementation en vigueur', this.margin, this.yPosition);
+    this.doc.text(
+      'Le présent contrat est signé électroniquement conformément à la réglementation en vigueur',
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 5;
-    this.doc.text('en République de Côte d\'Ivoire sur la plateforme Mon Toit certifiée ANSUT.', this.margin, this.yPosition);
+    this.doc.text(
+      "en République de Côte d'Ivoire sur la plateforme Mon Toit certifiée ANSUT.",
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 10;
 
     this.doc.setFont('helvetica', 'bold');
@@ -216,20 +244,37 @@ export class PdfSectionWriter {
     this.doc.setLineWidth(0.3);
 
     this.doc.rect(this.margin, this.yPosition, boxWidth, boxHeight);
-    this.doc.text('Signature du Bailleur', this.margin + boxWidth / 2, this.yPosition + boxHeight / 2, {
-      align: 'center'
-    });
+    this.doc.text(
+      'Signature du Bailleur',
+      this.margin + boxWidth / 2,
+      this.yPosition + boxHeight / 2,
+      {
+        align: 'center',
+      }
+    );
 
     this.doc.rect(this.pageWidth - this.margin - boxWidth, this.yPosition, boxWidth, boxHeight);
-    this.doc.text('Signature du Locataire', this.pageWidth - this.margin - boxWidth / 2, this.yPosition + boxHeight / 2, {
-      align: 'center'
-    });
+    this.doc.text(
+      'Signature du Locataire',
+      this.pageWidth - this.margin - boxWidth / 2,
+      this.yPosition + boxHeight / 2,
+      {
+        align: 'center',
+      }
+    );
   }
 
   writeFooter(leaseId: string): void {
     this.doc.setFontSize(8);
     this.doc.setTextColor(100, 100, 100);
-    this.doc.text(`Contrat ID: ${leaseId}`, this.pageWidth / 2, this.pageHeight - 10, { align: 'center' });
-    this.doc.text('Généré par Mon Toit - Plateforme certifiée ANSUT', this.pageWidth / 2, this.pageHeight - 6, { align: 'center' });
+    this.doc.text(`Contrat ID: ${leaseId}`, this.pageWidth / 2, this.pageHeight - 10, {
+      align: 'center',
+    });
+    this.doc.text(
+      'Généré par Mon Toit - Plateforme certifiée ANSUT',
+      this.pageWidth / 2,
+      this.pageHeight - 6,
+      { align: 'center' }
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Home,
@@ -11,10 +11,12 @@ import {
   MessageSquare,
   Briefcase,
   Search,
-  X
+  X,
+  LogOut,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 const cn = (...inputs: (string | undefined | null | false)[]) => twMerge(clsx(inputs));
 
@@ -25,30 +27,39 @@ interface OwnerSidebarProps {
 }
 
 const navItems = [
-  { label: 'Tableau de bord', href: '/dashboard/proprietaire', icon: LayoutDashboard },
-  { label: 'Mon profil', href: '/profil', icon: UserCircle2 },
-  { label: 'Mon espace', href: '/mon-espace', icon: LayoutGrid },
-  { label: 'Mes mandats', href: '/dashboard/mes-mandats', icon: Briefcase },
-  { label: 'Mes candidatures', href: '/dashboard/mes-candidatures', icon: Users },
-  { label: 'Mes contrats', href: '/dashboard/mes-contrats', icon: FileText },
-  { label: 'Créer un contrat', href: '/dashboard/creer-contrat', icon: FilePlus2 },
-  { label: 'Ajouter un bien', href: '/dashboard/ajouter-propriete', icon: PlusCircle },
-  { label: 'Messages', href: '/messages', icon: MessageSquare, hasBadge: true },
+  { label: 'Tableau de bord', href: '/proprietaire/dashboard/proprietaire', icon: LayoutDashboard },
+  { label: 'Mon profil', href: '/proprietaire/profil', icon: UserCircle2 },
+  { label: 'Mon espace', href: '/proprietaire/mon-espace', icon: LayoutGrid },
+  { label: 'Mes mandats', href: '/proprietaire/dashboard/mes-mandats', icon: Briefcase },
+  { label: 'Mes candidatures', href: '/proprietaire/dashboard/mes-candidatures', icon: Users },
+  { label: 'Mes contrats', href: '/proprietaire/dashboard/mes-contrats', icon: FileText },
+  { label: 'Créer un contrat', href: '/proprietaire/dashboard/creer-contrat', icon: FilePlus2 },
+  { label: 'Ajouter un bien', href: '/proprietaire/dashboard/ajouter-propriete', icon: PlusCircle },
+  { label: 'Messages', href: '/proprietaire/messages', icon: MessageSquare, hasBadge: true },
 ];
 
-const bottomItems = [
-  { label: 'Rechercher', href: '/recherche', icon: Search },
-];
+const bottomItems = [{ label: 'Rechercher', href: '/recherche', icon: Search }];
 
 export function OwnerSidebar({ isOpen, onClose, unreadMessages = 0 }: OwnerSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const currentPath = location.pathname;
 
   const isActive = (href: string) => {
-    if (href === '/dashboard/proprietaire') {
-      return currentPath === '/dashboard/proprietaire';
+    if (href === '/proprietaire/dashboard/proprietaire') {
+      return currentPath === '/proprietaire/dashboard/proprietaire';
     }
     return currentPath.startsWith(href);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion', error);
+    }
   };
 
   return (
@@ -138,7 +149,7 @@ export function OwnerSidebar({ isOpen, onClose, unreadMessages = 0 }: OwnerSideb
         </nav>
 
         <div className="p-4 border-t border-neutral-100">
-          <div className="bg-primary-50 rounded-xl p-4">
+          <div className="bg-primary-50 rounded-xl p-4 mb-4">
             <p className="text-sm font-medium text-primary-700 mb-1">Besoin d'aide ?</p>
             <p className="text-xs text-primary-600 mb-3">Notre équipe est là pour vous</p>
             <Link
@@ -148,6 +159,13 @@ export function OwnerSidebar({ isOpen, onClose, unreadMessages = 0 }: OwnerSideb
               Nous contacter
             </Link>
           </div>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center justify-center gap-2 w-full text-sm font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 py-2 px-4 rounded-lg transition-colors border border-red-200"
+          >
+            <LogOut className="h-4 w-4" />
+            Déconnexion
+          </button>
         </div>
       </aside>
     </>

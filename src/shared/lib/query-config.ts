@@ -1,6 +1,6 @@
 /**
  * Configuration optimisée pour React Query
- * 
+ *
  * Cette configuration améliore les performances en :
  * - Augmentant le temps de cache (staleTime)
  * - Réduisant les refetch automatiques
@@ -14,15 +14,15 @@ export const queryConfig = {
     queries: {
       // Données considérées comme fraîches pendant 5 minutes
       staleTime: 5 * 60 * 1000, // 5 minutes
-      
+
       // Garder les données en cache pendant 10 minutes
       gcTime: 10 * 60 * 1000, // 10 minutes (anciennement cacheTime)
-      
+
       // Refetch automatique désactivé pour économiser les requêtes
       refetchOnWindowFocus: false,
       refetchOnReconnect: true,
       refetchOnMount: true,
-      
+
       // Retry configuration
       retry: 1,
       retryDelay: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
@@ -129,4 +129,3 @@ export const queryKeys = {
     pending: () => [...queryKeys.payments.all, 'pending'] as const,
   },
 } as const;
-

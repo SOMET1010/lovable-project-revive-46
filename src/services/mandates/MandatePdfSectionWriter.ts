@@ -144,9 +144,17 @@ export class MandatePdfSectionWriter {
       this.doc.setFont('helvetica', 'normal');
       this.doc.text(`• ${data.property.title}`, this.margin + 10, this.yPosition);
       this.yPosition += 5;
-      this.doc.text(`  ${data.property.city}${data.property.neighborhood ? ', ' + data.property.neighborhood : ''}`, this.margin + 10, this.yPosition);
+      this.doc.text(
+        `  ${data.property.city}${data.property.neighborhood ? ', ' + data.property.neighborhood : ''}`,
+        this.margin + 10,
+        this.yPosition
+      );
       this.yPosition += 5;
-      this.doc.text(`  Loyer mensuel : ${formatCurrency(data.property.monthlyRent)}`, this.margin + 10, this.yPosition);
+      this.doc.text(
+        `  Loyer mensuel : ${formatCurrency(data.property.monthlyRent)}`,
+        this.margin + 10,
+        this.yPosition
+      );
       this.yPosition += 8;
     }
     this.yPosition += 5;
@@ -169,14 +177,22 @@ export class MandatePdfSectionWriter {
     if (data.endDate) {
       this.doc.text(articles.article2.definite, this.margin, this.yPosition);
       this.yPosition += 5;
-      this.doc.text(`Date de début : ${formatDate(data.startDate)}`, this.margin + 5, this.yPosition);
+      this.doc.text(
+        `Date de début : ${formatDate(data.startDate)}`,
+        this.margin + 5,
+        this.yPosition
+      );
       this.yPosition += 5;
       this.doc.text(`Date de fin : ${formatDate(data.endDate)}`, this.margin + 5, this.yPosition);
       this.yPosition += 5;
     } else {
       this.doc.text(articles.article2.indefinite, this.margin, this.yPosition);
       this.yPosition += 5;
-      this.doc.text(`Date de prise d'effet : ${formatDate(data.startDate)}`, this.margin + 5, this.yPosition);
+      this.doc.text(
+        `Date de prise d'effet : ${formatDate(data.startDate)}`,
+        this.margin + 5,
+        this.yPosition
+      );
       this.yPosition += 5;
     }
 
@@ -202,7 +218,9 @@ export class MandatePdfSectionWriter {
 
     this.doc.setFontSize(14);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text(`${data.commissionRate}%`, this.pageWidth / 2, this.yPosition, { align: 'center' });
+    this.doc.text(`${data.commissionRate}%`, this.pageWidth / 2, this.yPosition, {
+      align: 'center',
+    });
     this.yPosition += 8;
 
     this.doc.setFontSize(10);
@@ -303,7 +321,10 @@ export class MandatePdfSectionWriter {
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(10);
 
-    const lines = this.doc.splitTextToSize(articles.article7.content, this.pageWidth - 2 * this.margin);
+    const lines = this.doc.splitTextToSize(
+      articles.article7.content,
+      this.pageWidth - 2 * this.margin
+    );
     this.doc.text(lines, this.margin, this.yPosition);
     this.yPosition += lines.length * 5 + 10;
   }
@@ -337,9 +358,17 @@ export class MandatePdfSectionWriter {
     this.doc.setTextColor(0, 0, 0);
     this.doc.setFont('helvetica', 'normal');
     this.doc.setFontSize(9);
-    this.doc.text('Le présent mandat est établi en deux exemplaires originaux.', this.margin, this.yPosition);
+    this.doc.text(
+      'Le présent mandat est établi en deux exemplaires originaux.',
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 5;
-    this.doc.text(`Fait à Abidjan, le ${formatDate(new Date().toISOString())}`, this.margin, this.yPosition);
+    this.doc.text(
+      `Fait à Abidjan, le ${formatDate(new Date().toISOString())}`,
+      this.margin,
+      this.yPosition
+    );
     this.yPosition += 12;
 
     const boxWidth = 75;
@@ -351,14 +380,23 @@ export class MandatePdfSectionWriter {
     this.doc.rect(this.margin, this.yPosition, boxWidth, boxHeight);
     this.doc.setFontSize(9);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('Le Mandant', this.margin + boxWidth / 2, this.yPosition + 6, { align: 'center' });
+    this.doc.text('Le Mandant', this.margin + boxWidth / 2, this.yPosition + 6, {
+      align: 'center',
+    });
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(data.ownerName, this.margin + boxWidth / 2, this.yPosition + 12, { align: 'center' });
+    this.doc.text(data.ownerName, this.margin + boxWidth / 2, this.yPosition + 12, {
+      align: 'center',
+    });
 
     if (data.signedAt) {
       this.doc.setFontSize(8);
       this.doc.setTextColor(0, 128, 0);
-      this.doc.text('✓ Signé électroniquement', this.margin + boxWidth / 2, this.yPosition + boxHeight - 5, { align: 'center' });
+      this.doc.text(
+        '✓ Signé électroniquement',
+        this.margin + boxWidth / 2,
+        this.yPosition + boxHeight - 5,
+        { align: 'center' }
+      );
     }
 
     // Box mandataire
@@ -366,14 +404,29 @@ export class MandatePdfSectionWriter {
     this.doc.rect(this.pageWidth - this.margin - boxWidth, this.yPosition, boxWidth, boxHeight);
     this.doc.setFontSize(9);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.text('Le Mandataire', this.pageWidth - this.margin - boxWidth / 2, this.yPosition + 6, { align: 'center' });
+    this.doc.text(
+      'Le Mandataire',
+      this.pageWidth - this.margin - boxWidth / 2,
+      this.yPosition + 6,
+      { align: 'center' }
+    );
     this.doc.setFont('helvetica', 'normal');
-    this.doc.text(data.agencyName, this.pageWidth - this.margin - boxWidth / 2, this.yPosition + 12, { align: 'center' });
+    this.doc.text(
+      data.agencyName,
+      this.pageWidth - this.margin - boxWidth / 2,
+      this.yPosition + 12,
+      { align: 'center' }
+    );
 
     if (data.signedAt) {
       this.doc.setFontSize(8);
       this.doc.setTextColor(0, 128, 0);
-      this.doc.text('✓ Signé électroniquement', this.pageWidth - this.margin - boxWidth / 2, this.yPosition + boxHeight - 5, { align: 'center' });
+      this.doc.text(
+        '✓ Signé électroniquement',
+        this.pageWidth - this.margin - boxWidth / 2,
+        this.yPosition + boxHeight - 5,
+        { align: 'center' }
+      );
     }
 
     this.yPosition += boxHeight + 10;
@@ -382,7 +435,14 @@ export class MandatePdfSectionWriter {
   writeFooter(mandateId: string): void {
     this.doc.setFontSize(8);
     this.doc.setTextColor(150, 150, 150);
-    this.doc.text(`Mandat ID: ${mandateId}`, this.pageWidth / 2, this.pageHeight - 12, { align: 'center' });
-    this.doc.text('Document généré par Mon Toit - Plateforme certifiée ANSUT', this.pageWidth / 2, this.pageHeight - 7, { align: 'center' });
+    this.doc.text(`Mandat ID: ${mandateId}`, this.pageWidth / 2, this.pageHeight - 12, {
+      align: 'center',
+    });
+    this.doc.text(
+      'Document généré par Mon Toit - Plateforme certifiée ANSUT',
+      this.pageWidth / 2,
+      this.pageHeight - 7,
+      { align: 'center' }
+    );
   }
 }

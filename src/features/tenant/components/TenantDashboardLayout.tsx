@@ -22,14 +22,14 @@ export default function TenantDashboardLayout({ children, title }: TenantDashboa
 
   const loadUnreadMessages = async () => {
     if (!user) return;
-    
+
     try {
       const { data } = await supabase
         .from('messages')
         .select('id')
         .eq('receiver_id', user.id)
         .eq('is_read', false);
-      
+
       setUnreadMessages(data?.length || 0);
     } catch (error) {
       console.error('Error loading unread messages:', error);
@@ -39,8 +39,8 @@ export default function TenantDashboardLayout({ children, title }: TenantDashboa
   return (
     <div className="flex min-h-screen bg-neutral-50">
       {/* Sidebar */}
-      <TenantSidebar 
-        isOpen={sidebarOpen} 
+      <TenantSidebar
+        isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         unreadMessages={unreadMessages}
       />
@@ -50,24 +50,20 @@ export default function TenantDashboardLayout({ children, title }: TenantDashboa
         {/* Mobile Header */}
         <header className="lg:hidden sticky top-0 z-30 bg-white border-b border-neutral-200 px-4 py-3">
           <div className="flex items-center gap-3">
-            <button 
+            <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
               aria-label="Ouvrir le menu"
             >
               <Menu className="h-6 w-6 text-neutral-700" />
             </button>
-            {title && (
-              <h1 className="text-lg font-semibold text-neutral-900 truncate">{title}</h1>
-            )}
+            {title && <h1 className="text-lg font-semibold text-neutral-900 truncate">{title}</h1>}
           </div>
         </header>
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto w-full">
-          <div className="w-full px-4 lg:px-8 py-6">
-            {children}
-          </div>
+          <div className="w-full px-4 lg:px-8 py-6">{children}</div>
         </main>
       </div>
     </div>

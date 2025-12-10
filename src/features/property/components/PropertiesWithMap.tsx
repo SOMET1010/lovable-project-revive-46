@@ -38,17 +38,20 @@ function handleImageError(e: React.SyntheticEvent<HTMLImageElement>) {
 }
 
 // Property Card with modal trigger
-function PropertyCard({ 
-  property, 
-  index, 
-  onSelect 
-}: { 
-  property: PropertyWithOwnerScore; 
-  index: number; 
+function PropertyCard({
+  property,
+  index,
+  onSelect,
+}: {
+  property: PropertyWithOwnerScore;
+  index: number;
   onSelect: () => void;
 }) {
-  const displayImage = property.images?.[0] || property.main_image || FALLBACK_PROPERTY_IMAGES[index % FALLBACK_PROPERTY_IMAGES.length];
-  
+  const displayImage =
+    property.images?.[0] ||
+    property.main_image ||
+    FALLBACK_PROPERTY_IMAGES[index % FALLBACK_PROPERTY_IMAGES.length];
+
   return (
     <div
       onClick={onSelect}
@@ -65,7 +68,7 @@ function PropertyCard({
           onError={handleImageError}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
-        
+
         {/* Badge */}
         <div className="absolute top-4 left-4">
           <span className="px-3 py-1.5 bg-white/95 backdrop-blur-md text-foreground text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm">
@@ -73,13 +76,13 @@ function PropertyCard({
           </span>
         </div>
 
-        <button 
+        <button
           onClick={(e) => e.stopPropagation()}
           className="absolute top-4 right-4 p-2.5 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white hover:text-primary transition-all transform hover:scale-110 active:scale-95"
         >
           <Heart className="h-5 w-5 fill-transparent hover:fill-current transition-colors" />
         </button>
-        
+
         {/* Price */}
         <div className="absolute bottom-4 left-4">
           <div className="flex items-baseline gap-1 bg-foreground/90 backdrop-blur-md px-4 py-2 rounded-xl text-background shadow-lg border border-white/10">
@@ -106,14 +109,24 @@ function PropertyCard({
         <div className="flex items-center gap-2 text-muted-foreground mb-4 text-sm">
           <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
           <span className="line-clamp-1">
-            {property.neighborhood ? `${property.neighborhood}, ` : ''}{property.city || 'Abidjan'}
+            {property.neighborhood ? `${property.neighborhood}, ` : ''}
+            {property.city || 'Abidjan'}
           </span>
         </div>
-        
+
         <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground pt-4 border-t border-border">
-          <div className="flex items-center gap-1.5"><Bed className="h-4 w-4" /><span>{property.bedrooms || '-'} ch.</span></div>
-          <div className="flex items-center gap-1.5"><Bath className="h-4 w-4" /><span>{property.bathrooms || '-'} sdb</span></div>
-          <div className="flex items-center gap-1.5"><Maximize className="h-4 w-4" /><span>{property.surface_area || '-'} m²</span></div>
+          <div className="flex items-center gap-1.5">
+            <Bed className="h-4 w-4" />
+            <span>{property.bedrooms || '-'} ch.</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Bath className="h-4 w-4" />
+            <span>{property.bathrooms || '-'} sdb</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Maximize className="h-4 w-4" />
+            <span>{property.surface_area || '-'} m²</span>
+          </div>
         </div>
       </div>
     </div>
@@ -134,12 +147,12 @@ function MapSkeleton() {
   );
 }
 
-export default function PropertiesWithMap({ 
-  properties, 
+export default function PropertiesWithMap({
+  properties,
   isLoading = false,
   isVisible = true,
   filters,
-  onResetFilters
+  onResetFilters,
 }: PropertiesWithMapProps) {
   const [selectedProperty, setSelectedProperty] = useState<PropertyWithOwnerScore | null>(null);
   const [highlightedPropertyId, setHighlightedPropertyId] = useState<string | undefined>();
@@ -147,19 +160,24 @@ export default function PropertiesWithMap({
   // Apply filters with useMemo for performance
   const filteredProperties = useMemo(() => {
     if (!filters) return properties;
-    
+
     return properties.filter((property) => {
       // Filter by type
-      const matchType = !filters.type || filters.type === 'all' || 
+      const matchType =
+        !filters.type ||
+        filters.type === 'all' ||
         property.property_type?.toLowerCase().includes(filters.type.toLowerCase());
 
       // Filter by location (city or neighborhood)
-      const matchLocation = !filters.location ||
+      const matchLocation =
+        !filters.location ||
         property.city?.toLowerCase().includes(filters.location.toLowerCase()) ||
         property.neighborhood?.toLowerCase().includes(filters.location.toLowerCase());
 
       // Filter by max price
-      const matchPrice = !filters.maxPrice || filters.maxPrice === 0 ||
+      const matchPrice =
+        !filters.maxPrice ||
+        filters.maxPrice === 0 ||
         (property.monthly_rent || 0) <= filters.maxPrice;
 
       return matchType && matchLocation && matchPrice;
@@ -186,7 +204,9 @@ export default function PropertiesWithMap({
     <section className="py-20 bg-secondary">
       <div className="container mx-auto px-4">
         {/* Header */}
-        <div className={`flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+        <div
+          className={`flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+        >
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
               Pépites du moment 🔥
@@ -194,8 +214,9 @@ export default function PropertiesWithMap({
             <p className="text-lg text-muted-foreground">
               {hasActiveFilters ? (
                 <>
-                  <span className="font-bold text-primary">{filteredProperties.length}</span>
-                  {' '}bien{filteredProperties.length > 1 ? 's' : ''} sur {properties.length} correspondent à vos critères
+                  <span className="font-bold text-primary">{filteredProperties.length}</span> bien
+                  {filteredProperties.length > 1 ? 's' : ''} sur {properties.length} correspondent à
+                  vos critères
                 </>
               ) : (
                 <>Les dernières annonces vérifiées, prêtes à habiter.</>
@@ -212,8 +233,8 @@ export default function PropertiesWithMap({
                 Réinitialiser
               </button>
             )}
-            <Link 
-              to="/recherche" 
+            <Link
+              to="/recherche"
               className="group inline-flex items-center gap-2 text-primary font-bold hover:text-primary/80 transition-colors"
             >
               <span>Voir tout le catalogue</span>
@@ -231,8 +252,8 @@ export default function PropertiesWithMap({
             {isLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {[1, 2, 3, 4].map((i) => (
-                  <div 
-                    key={i} 
+                  <div
+                    key={i}
                     className="bg-background rounded-[24px] h-[380px] animate-pulse border border-border"
                   />
                 ))}
@@ -245,10 +266,10 @@ export default function PropertiesWithMap({
                     onMouseEnter={() => setHighlightedPropertyId(property.id)}
                     onMouseLeave={() => setHighlightedPropertyId(undefined)}
                   >
-                    <PropertyCard 
-                      property={property} 
-                      index={index} 
-                      onSelect={() => setSelectedProperty(property)} 
+                    <PropertyCard
+                      property={property}
+                      index={index}
+                      onSelect={() => setSelectedProperty(property)}
                     />
                   </div>
                 ))}
@@ -306,9 +327,7 @@ export default function PropertiesWithMap({
                   <div className="w-16 h-16 bg-primary/10 rounded-2xl mx-auto flex items-center justify-center">
                     <MapPin className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="text-muted-foreground font-medium">
-                    Aucune propriété géolocalisée
-                  </p>
+                  <p className="text-muted-foreground font-medium">Aucune propriété géolocalisée</p>
                   <p className="text-sm text-muted-foreground/70">
                     Les propriétés avec coordonnées GPS apparaîtront ici.
                   </p>
@@ -321,10 +340,7 @@ export default function PropertiesWithMap({
 
       {/* Property Modal */}
       {selectedProperty && (
-        <PropertyModal 
-          property={selectedProperty} 
-          onClose={() => setSelectedProperty(null)} 
-        />
+        <PropertyModal property={selectedProperty} onClose={() => setSelectedProperty(null)} />
       )}
     </section>
   );

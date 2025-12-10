@@ -16,7 +16,7 @@ export default function FileUpload({
   maxSizeMB = 5,
   preview,
   onChange,
-  onPreviewChange
+  onPreviewChange,
 }: FileUploadProps) {
   const [error, setError] = useState('');
 
@@ -85,9 +85,7 @@ export default function FileUpload({
         </div>
       )}
 
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   );
 }

@@ -7,16 +7,17 @@
 /* ===== VARIABLES AGENCY-SPECIFIC ===== */
 :root {
   /* Couleurs spécifiques à l'agence */
-  --agency-gradient-primary: linear-gradient(135deg, #FF6C2F 0%, #E05519 100%);
+  --agency-gradient-primary: linear-gradient(135deg, #ff6c2f 0%, #e05519 100%);
   --agency-gradient-success: linear-gradient(135deg, #059669 0%, #047857 100%);
-  --agency-gradient-warning: linear-gradient(135deg, #D97706 0%, #B45309 100%);
-  --agency-gradient-info: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-  
+  --agency-gradient-warning: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  --agency-gradient-info: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+
   /* Ombres premium pour l'agence */
   --agency-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --agency-shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --agency-shadow-card-hover:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --agency-shadow-header: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
-  
+
   /* Espacement spécifique */
   --agency-spacing-section: 2rem;
   --agency-spacing-card-padding: 1.5rem;
@@ -87,7 +88,7 @@
 
 .agency-search-input:focus {
   background: rgba(255, 255, 255, 0.95);
-  border-color: #FF6C2F;
+  border-color: #ff6c2f;
   box-shadow: 0 0 0 3px rgba(255, 108, 47, 0.1);
 }
 
@@ -228,12 +229,12 @@
   .agency-stat-card {
     @apply p-4;
   }
-  
+
   .agency-table th,
   .agency-table td {
     @apply py-2 px-2;
   }
-  
+
   .agency-request-card {
     @apply p-4;
   }
@@ -243,7 +244,7 @@
   .agency-header {
     @apply px-4;
   }
-  
+
   .agency-sidebar {
     @apply w-full;
   }
@@ -276,7 +277,7 @@
   .agency-header {
     display: none !important;
   }
-  
+
   .agency-stat-card,
   .agency-request-card {
     box-shadow: none !important;
@@ -290,7 +291,7 @@
   .agency-request-card {
     border: 2px solid #000;
   }
-  
+
   .agency-nav-item.active {
     border: 2px solid #000;
   }
@@ -304,7 +305,7 @@
   .agency-table tr {
     transition: none;
   }
-  
+
   .agency-animate-slide-in,
   .agency-animate-fade-in-up,
   .agency-animate-scale-in {

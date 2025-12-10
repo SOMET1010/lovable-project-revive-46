@@ -196,7 +196,7 @@ export interface UserActivity {
 /**
  * Types d'actions utilisateur
  */
-export type UserActionType = 
+export type UserActionType =
   | 'view_property'
   | 'favorite_property'
   | 'search_properties'
@@ -213,7 +213,7 @@ export type UserActionType =
 /**
  * Types de cibles d'activité
  */
-export type ActivityTargetType = 
+export type ActivityTargetType =
   | 'property'
   | 'application'
   | 'message'
@@ -272,7 +272,7 @@ export type VerificationStatus = 'pending' | 'verified' | 'rejected' | 'expired'
 /**
  * Types de propriétés
  */
-export type PropertyType = 
+export type PropertyType =
   | 'studio'
   | 'appartement_1p'
   | 'appartement_2p'
@@ -316,7 +316,7 @@ export interface PropertyFilters {
 /**
  * Caractéristiques de propriété
  */
-export type PropertyFeature = 
+export type PropertyFeature =
   | 'parking'
   | 'air_conditioning'
   | 'furnished'
@@ -418,7 +418,11 @@ export type ChatConversationStatus = 'active' | 'archived' | 'closed';
 /**
  * Types de conversation
  */
-export type ChatConversationType = 'support' | 'ai_assistant' | 'property_inquiry' | 'application_help';
+export type ChatConversationType =
+  | 'support'
+  | 'ai_assistant'
+  | 'property_inquiry'
+  | 'application_help';
 
 /**
  * Métadonnées de conversation
@@ -457,7 +461,7 @@ export interface ActivityData {
 /**
  * Types d'activité
  */
-export type ActivityType = 
+export type ActivityType =
   | 'property_view'
   | 'property_search'
   | 'property_favorite'
@@ -507,7 +511,7 @@ export interface RecommendationFactor {
 /**
  * Algorithmes de recommandation
  */
-export type RecommendationAlgorithm = 
+export type RecommendationAlgorithm =
   | 'collaborative_filtering'
   | 'content_based'
   | 'hybrid'
@@ -598,7 +602,7 @@ export interface SystemNotification {
 /**
  * Types de notifications
  */
-export type NotificationType = 
+export type NotificationType =
   | 'system_maintenance'
   | 'security_alert'
   | 'feature_update'
@@ -643,12 +647,18 @@ export interface ApplicationData {
 /**
  * Types de statut de candidature
  */
-export type ApplicationStatus = 'draft' | 'submitted' | 'under_review' | 'approved' | 'rejected' | 'withdrawn';
+export type ApplicationStatus =
+  | 'draft'
+  | 'submitted'
+  | 'under_review'
+  | 'approved'
+  | 'rejected'
+  | 'withdrawn';
 
 /**
  * Types d'étapes de candidature
  */
-export type ApplicationStep = 
+export type ApplicationStep =
   | 'personal_info'
   | 'financial_info'
   | 'guarantees'
@@ -758,7 +768,7 @@ export interface Document {
 /**
  * Types de documents
  */
-export type DocumentType = 
+export type DocumentType =
   | 'piece_identite'
   | 'bulletin_salaire'
   | 'avis_imposition'
@@ -846,8 +856,6 @@ export function isActivityData(obj: unknown): obj is ActivityData {
   if (typeof obj !== 'object' || obj === null) return false;
   const data = obj as ActivityData;
   return (
-    typeof data.id === 'string' &&
-    typeof data.userId === 'string' &&
-    typeof data.type === 'string'
+    typeof data.id === 'string' && typeof data.userId === 'string' && typeof data.type === 'string'
   );
 }

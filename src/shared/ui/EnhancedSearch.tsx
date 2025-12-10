@@ -16,14 +16,18 @@ interface EnhancedSearchProps {
   compact?: boolean;
 }
 
-export default function EnhancedSearch({ onSearch, showQuickFilters = true, compact = false }: EnhancedSearchProps) {
+export default function EnhancedSearch({
+  onSearch,
+  showQuickFilters = true,
+  compact = false,
+}: EnhancedSearchProps) {
   const { profile } = useAuth();
   const [filters, setFilters] = useState<SearchFilters>({
     city: '',
     propertyType: '',
     minPrice: '',
     maxPrice: '',
-    bedrooms: ''
+    bedrooms: '',
   });
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
@@ -37,7 +41,10 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
 
   const handleSearch = () => {
     if (filters.city) {
-      const searches = [filters.city, ...recentSearches.filter(s => s !== filters.city)].slice(0, 5);
+      const searches = [filters.city, ...recentSearches.filter((s) => s !== filters.city)].slice(
+        0,
+        5
+      );
       localStorage.setItem('recentSearches', JSON.stringify(searches));
       setRecentSearches(searches);
     }
@@ -60,7 +67,7 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
     { label: '< 100k', min: '0', max: '100000' },
     { label: '100k - 250k', min: '100000', max: '250000' },
     { label: '250k - 500k', min: '250000', max: '500000' },
-    { label: '> 500k', min: '500000', max: '10000000' }
+    { label: '> 500k', min: '500000', max: '10000000' },
   ];
 
   const quickCities = ['Abidjan', 'Cocody', 'Plateau', 'Marcory', 'Yopougon', 'Abobo'];
@@ -80,10 +87,7 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             />
           </div>
-          <button
-            onClick={handleSearch}
-            className="btn-primary px-6 py-3 flex items-center gap-2"
-          >
+          <button onClick={handleSearch} className="btn-primary px-6 py-3 flex items-center gap-2">
             <Search className="h-5 w-5" />
           </button>
         </div>
@@ -146,9 +150,7 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
           <div className="mt-6 pt-6 border-t border-white/40">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="space-y-3">
-                <label className="block text-sm font-bold text-gray-800 mb-2">
-                  Type de bien
-                </label>
+                <label className="block text-sm font-bold text-gray-800 mb-2">Type de bien</label>
                 <select
                   value={filters.propertyType}
                   onChange={(e) => setFilters({ ...filters, propertyType: e.target.value })}

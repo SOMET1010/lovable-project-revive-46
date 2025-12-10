@@ -12,12 +12,25 @@ import type {
   AnalyticsPeriod,
 } from '@/types/analytics.types';
 
-const MONTHS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+const MONTHS_FR = [
+  'Jan',
+  'Fév',
+  'Mar',
+  'Avr',
+  'Mai',
+  'Juin',
+  'Juil',
+  'Août',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Déc',
+];
 
 function getDateRange(period: AnalyticsPeriod): { start: Date; end: Date } {
   const end = new Date();
   const start = new Date();
-  
+
   switch (period) {
     case '7d':
       start.setDate(end.getDate() - 7);
@@ -32,14 +45,14 @@ function getDateRange(period: AnalyticsPeriod): { start: Date; end: Date } {
       start.setFullYear(end.getFullYear() - 1);
       break;
   }
-  
+
   return { start, end };
 }
 
 function getPreviousPeriodRange(period: AnalyticsPeriod): { start: Date; end: Date } {
   const { start: currentStart, end: currentEnd } = getDateRange(period);
   const duration = currentEnd.getTime() - currentStart.getTime();
-  
+
   return {
     start: new Date(currentStart.getTime() - duration),
     end: new Date(currentStart.getTime()),
@@ -54,7 +67,7 @@ function calculateGrowth(current: number, previous: number): number {
 export async function getOverviewStats(period: AnalyticsPeriod = '30d'): Promise<OverviewStats> {
   const { start, end } = getDateRange(period);
   const { start: prevStart, end: prevEnd } = getPreviousPeriodRange(period);
-  
+
   // Current period counts
   const [usersResult, propertiesResult, contractsResult, paymentsResult] = await Promise.all([
     supabase
@@ -81,29 +94,30 @@ export async function getOverviewStats(period: AnalyticsPeriod = '30d'): Promise
   ]);
 
   // Previous period counts
-  const [prevUsersResult, prevPropertiesResult, prevContractsResult, prevPaymentsResult] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', prevStart.toISOString())
-      .lte('created_at', prevEnd.toISOString()),
-    supabase
-      .from('properties')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', prevStart.toISOString())
-      .lte('created_at', prevEnd.toISOString()),
-    supabase
-      .from('lease_contracts')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', prevStart.toISOString())
-      .lte('created_at', prevEnd.toISOString()),
-    supabase
-      .from('payments')
-      .select('amount')
-      .eq('status', 'completed')
-      .gte('created_at', prevStart.toISOString())
-      .lte('created_at', prevEnd.toISOString()),
-  ]);
+  const [prevUsersResult, prevPropertiesResult, prevContractsResult, prevPaymentsResult] =
+    await Promise.all([
+      supabase
+        .from('profiles')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', prevStart.toISOString())
+        .lte('created_at', prevEnd.toISOString()),
+      supabase
+        .from('properties')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', prevStart.toISOString())
+        .lte('created_at', prevEnd.toISOString()),
+      supabase
+        .from('lease_contracts')
+        .select('id', { count: 'exact', head: true })
+        .gte('created_at', prevStart.toISOString())
+        .lte('created_at', prevEnd.toISOString()),
+      supabase
+        .from('payments')
+        .select('amount')
+        .eq('status', 'completed')
+        .gte('created_at', prevStart.toISOString())
+        .lte('created_at', prevEnd.toISOString()),
+    ]);
 
   // Total counts (all time)
   const [totalUsersResult, totalPropertiesResult, totalContractsResult] = await Promise.all([
@@ -195,7 +209,8 @@ export async function getPropertyStats(_period: AnalyticsPeriod = '30d'): Promis
 
   (properties ?? []).forEach((prop) => {
     if (prop.city) cityCount[prop.city] = (cityCount[prop.city] ?? 0) + 1;
-    if (prop.property_type) typeCount[prop.property_type] = (typeCount[prop.property_type] ?? 0) + 1;
+    if (prop.property_type)
+      typeCount[prop.property_type] = (typeCount[prop.property_type] ?? 0) + 1;
     if (prop.status) statusCount[prop.status] = (statusCount[prop.status] ?? 0) + 1;
 
     if (prop.created_at) {
@@ -262,7 +277,9 @@ export async function getPropertyStats(_period: AnalyticsPeriod = '30d'): Promis
   };
 }
 
-export async function getTransactionStats(_period: AnalyticsPeriod = '30d'): Promise<TransactionStats> {
+export async function getTransactionStats(
+  _period: AnalyticsPeriod = '30d'
+): Promise<TransactionStats> {
   const { data: payments } = await supabase
     .from('payments')
     .select('amount, payment_method, status, created_at');

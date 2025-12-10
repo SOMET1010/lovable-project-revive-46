@@ -13,11 +13,7 @@ class Logger {
   private isProduction = import.meta.env.PROD;
 
   private formatMessage(entry: LogEntry): string {
-    const parts = [
-      `[${entry.timestamp}]`,
-      `[${entry.level.toUpperCase()}]`,
-      entry.message,
-    ];
+    const parts = [`[${entry.timestamp}]`, `[${entry.level.toUpperCase()}]`, entry.message];
 
     if (entry.context) {
       parts.push(JSON.stringify(entry.context));

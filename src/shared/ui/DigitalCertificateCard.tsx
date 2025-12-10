@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Shield, Loader, CheckCircle, AlertCircle, RefreshCw, Calendar, FileCheck } from 'lucide-react';
+import {
+  Shield,
+  Loader,
+  CheckCircle,
+  AlertCircle,
+  RefreshCw,
+  Calendar,
+  FileCheck,
+} from 'lucide-react';
 
 interface DigitalCertificate {
   id: string;
@@ -17,9 +25,9 @@ interface DigitalCertificateCardProps {
   className?: string;
 }
 
-export default function DigitalCertificateCard({ 
+export default function DigitalCertificateCard({
   onCertificateGenerated,
-  className = '' 
+  className = '',
 }: DigitalCertificateCardProps) {
   const { user } = useAuth();
   const [certificate, setCertificate] = useState<DigitalCertificate | null>(null);
@@ -35,7 +43,7 @@ export default function DigitalCertificateCard({
 
   const loadCertificate = async () => {
     if (!user) return;
-    
+
     try {
       const { data, error: fetchError } = await supabase
         .from('digital_certificates')
@@ -56,14 +64,17 @@ export default function DigitalCertificateCard({
 
   const handleGenerateCertificate = async () => {
     if (!user) return;
-    
+
     setGenerating(true);
     setError('');
 
     try {
-      const { data, error: genError } = await supabase.functions.invoke('cryptoneo-generate-certificate', {
-        body: {}
-      });
+      const { data, error: genError } = await supabase.functions.invoke(
+        'cryptoneo-generate-certificate',
+        {
+          body: {},
+        }
+      );
 
       if (genError) throw genError;
 
@@ -81,9 +92,7 @@ export default function DigitalCertificateCard({
     }
   };
 
-  const isExpired = certificate?.expires_at 
-    ? new Date(certificate.expires_at) < new Date() 
-    : false;
+  const isExpired = certificate?.expires_at ? new Date(certificate.expires_at) < new Date() : false;
 
   const isActive = certificate && !isExpired;
 
@@ -92,7 +101,7 @@ export default function DigitalCertificateCard({
     return new Date(dateString).toLocaleDateString('fr-FR', {
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -110,11 +119,13 @@ export default function DigitalCertificateCard({
     <div className={`form-section-premium ${className}`}>
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className={`p-3 rounded-xl shadow-lg ${
-          isActive 
-            ? 'bg-gradient-to-br from-green-500 to-green-600' 
-            : 'bg-gradient-to-br from-[#8B7355] to-[#6B5644]'
-        }`}>
+        <div
+          className={`p-3 rounded-xl shadow-lg ${
+            isActive
+              ? 'bg-gradient-to-br from-green-500 to-green-600'
+              : 'bg-gradient-to-br from-[#8B7355] to-[#6B5644]'
+          }`}
+        >
           <Shield className="w-6 h-6 text-white" />
         </div>
         <div>
@@ -127,11 +138,11 @@ export default function DigitalCertificateCard({
       {certificate ? (
         <div className="space-y-4">
           {/* Status Badge */}
-          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
-            isActive
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
-          }`}>
+          <div
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+              isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            }`}
+          >
             {isActive ? (
               <>
                 <CheckCircle className="w-4 h-4" />
@@ -152,7 +163,7 @@ export default function DigitalCertificateCard({
               <span className="text-sm text-[#8B7355]">ID:</span>
               <span className="text-sm font-mono text-[#4A2C17]">{certificate.certificate_id}</span>
             </div>
-            
+
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4 text-[#8B7355]" />
               <span className="text-sm text-[#8B7355]">Créé le:</span>
@@ -163,7 +174,9 @@ export default function DigitalCertificateCard({
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-[#8B7355]" />
                 <span className="text-sm text-[#8B7355]">Expire le:</span>
-                <span className={`text-sm font-medium ${isExpired ? 'text-red-600' : 'text-[#4A2C17]'}`}>
+                <span
+                  className={`text-sm font-medium ${isExpired ? 'text-red-600' : 'text-[#4A2C17]'}`}
+                >
                   {formatDate(certificate.expires_at)}
                 </span>
               </div>
@@ -194,7 +207,8 @@ export default function DigitalCertificateCard({
       ) : (
         <div className="space-y-4">
           <p className="text-[#5D4E37]">
-            Vous n'avez pas encore de certificat numérique. Générez-en un pour pouvoir effectuer des signatures électroniques certifiées.
+            Vous n'avez pas encore de certificat numérique. Générez-en un pour pouvoir effectuer des
+            signatures électroniques certifiées.
           </p>
 
           <div className="bg-[#F9F6F1] rounded-xl p-4 border border-[#E8DFD5]">

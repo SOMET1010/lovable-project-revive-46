@@ -12,20 +12,20 @@ export default function AnsutBadge({
   certified,
   size = 'medium',
   showTooltip = true,
-  className = ''
+  className = '',
 }: AnsutBadgeProps) {
   const [showInfo, setShowInfo] = useState(false);
 
   const sizeClasses = {
     small: 'px-2 py-1 text-xs',
     medium: 'px-3 py-1.5 text-sm',
-    large: 'px-4 py-2 text-base'
+    large: 'px-4 py-2 text-base',
   };
 
   const iconSizes = {
     small: 'w-3 h-3',
     medium: 'w-4 h-4',
-    large: 'w-5 h-5'
+    large: 'w-5 h-5',
   };
 
   if (!certified) {
@@ -58,8 +58,8 @@ export default function AnsutBadge({
               <div>
                 <p className="font-bold text-green-400 mb-1">Utilisateur vérifié</p>
                 <p className="text-gray-300 leading-relaxed">
-                  Identité confirmée via ONECI (CNI) et vérification biométrique.
-                  Badge de confiance Mon Toit.
+                  Identité confirmée via ONECI (CNI) et vérification biométrique. Badge de confiance
+                  Mon Toit.
                 </p>
               </div>
             </div>

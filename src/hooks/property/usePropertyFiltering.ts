@@ -23,14 +23,14 @@ export function usePropertyFiltering(properties: PropertyWithOwnerScore[]) {
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
       // Filter by type
-      const matchType = 
-        filters.type === 'all' || 
+      const matchType =
+        filters.type === 'all' ||
         property.property_type?.toLowerCase() === filters.type.toLowerCase();
 
       // Filter by location (city, neighborhood, address)
       const searchTerm = filters.location.toLowerCase().trim();
       const addressText = formatAddress(property.address as any, property.city).toLowerCase();
-      const matchLocation = 
+      const matchLocation =
         !searchTerm ||
         property.city?.toLowerCase().includes(searchTerm) ||
         property.neighborhood?.toLowerCase().includes(searchTerm) ||
@@ -38,21 +38,20 @@ export function usePropertyFiltering(properties: PropertyWithOwnerScore[]) {
 
       // Filter by price range
       const price = property.monthly_rent || 0;
-      const matchPrice = 
-        price >= filters.minPrice && 
-        (filters.maxPrice === 0 || price <= filters.maxPrice);
+      const matchPrice =
+        price >= filters.minPrice && (filters.maxPrice === 0 || price <= filters.maxPrice);
 
       return matchType && matchLocation && matchPrice;
     });
   }, [properties, filters]);
 
   // Update a single filter
-  const updateFilter = useCallback(<K extends keyof PropertyFilters>(
-    key: K, 
-    value: PropertyFilters[K]
-  ) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  const updateFilter = useCallback(
+    <K extends keyof PropertyFilters>(key: K, value: PropertyFilters[K]) => {
+      setFilters((prev) => ({ ...prev, [key]: value }));
+    },
+    []
+  );
 
   // Reset all filters
   const resetFilters = useCallback(() => {

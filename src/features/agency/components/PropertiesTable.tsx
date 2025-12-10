@@ -1,7 +1,14 @@
 import { useState } from 'react';
-import { 
-  Home, Eye, Settings, Search, MoreHorizontal,
-  MapPin, Calendar, DollarSign, Tag
+import {
+  Home,
+  Eye,
+  Settings,
+  Search,
+  MoreHorizontal,
+  MapPin,
+  Calendar,
+  DollarSign,
+  Tag,
 } from 'lucide-react';
 
 interface PropertyAssignment {
@@ -34,22 +41,22 @@ interface PropertiesTableProps {
 }
 
 const statusConfig = {
-  active: { 
-    label: 'Actif', 
-    className: 'bg-green-100 text-green-800 border-green-200' 
+  active: {
+    label: 'Actif',
+    className: 'bg-green-100 text-green-800 border-green-200',
   },
-  pending: { 
-    label: 'En attente', 
-    className: 'bg-yellow-100 text-yellow-800 border-yellow-200' 
+  pending: {
+    label: 'En attente',
+    className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
   },
-  sold: { 
-    label: 'Vendu', 
-    className: 'bg-blue-100 text-blue-800 border-blue-200' 
+  sold: {
+    label: 'Vendu',
+    className: 'bg-blue-100 text-blue-800 border-blue-200',
   },
-  rented: { 
-    label: 'Loué', 
-    className: 'bg-purple-100 text-purple-800 border-purple-200' 
-  }
+  rented: {
+    label: 'Loué',
+    className: 'bg-purple-100 text-purple-800 border-purple-200',
+  },
 };
 
 const propertyTypes = {
@@ -59,14 +66,14 @@ const propertyTypes = {
   studio: 'Studio',
   office: 'Bureau',
   commercial: 'Commercial',
-  land: 'Terrain'
+  land: 'Terrain',
 };
 
-export default function PropertiesTable({ 
-  assignments, 
-  onViewProperty, 
-  onEditAssignment, 
-  onAssignAgent 
+export default function PropertiesTable({
+  assignments,
+  onViewProperty,
+  onEditAssignment,
+  onAssignAgent,
 }: PropertiesTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -76,25 +83,20 @@ export default function PropertiesTable({
 
   // Filtrer et trier les données
   const filteredAssignments = assignments
-    .filter(assignment => {
-      const matchesSearch = assignment.properties.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-        assignment.profiles.full_name
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase());
-      
-      const matchesStatus = statusFilter === 'all' || 
-        assignment.properties.status === statusFilter;
-      
-      const matchesType = typeFilter === 'all' || 
-        assignment.properties.type === typeFilter;
-      
+    .filter((assignment) => {
+      const matchesSearch =
+        assignment.properties.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        assignment.profiles.full_name.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus = statusFilter === 'all' || assignment.properties.status === statusFilter;
+
+      const matchesType = typeFilter === 'all' || assignment.properties.type === typeFilter;
+
       return matchesSearch && matchesStatus && matchesType;
     })
     .sort((a, b) => {
       let aValue, bValue;
-      
+
       switch (sortBy) {
         case 'title':
           aValue = a.properties.title;
@@ -111,7 +113,7 @@ export default function PropertiesTable({
         default:
           return 0;
       }
-      
+
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1;
       } else {
@@ -138,7 +140,7 @@ export default function PropertiesTable({
             Gestion des propriétés et attribution aux agents
           </p>
         </div>
-        
+
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Barre de recherche */}
           <div className="relative">
@@ -151,7 +153,7 @@ export default function PropertiesTable({
               className="pl-10 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 w-full sm:w-64"
             />
           </div>
-          
+
           {/* Filtres */}
           <select
             value={statusFilter}
@@ -164,7 +166,7 @@ export default function PropertiesTable({
             <option value="sold">Vendu</option>
             <option value="rented">Loué</option>
           </select>
-          
+
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
@@ -172,7 +174,9 @@ export default function PropertiesTable({
           >
             <option value="all">Tous les types</option>
             {Object.entries(propertyTypes).map(([key, label]) => (
-              <option key={key} value={key}>{label}</option>
+              <option key={key} value={key}>
+                {label}
+              </option>
             ))}
           </select>
         </div>
@@ -189,13 +193,13 @@ export default function PropertiesTable({
             <Home className="w-8 h-8 text-blue-500" />
           </div>
         </div>
-        
+
         <div className="bg-green-50 p-4 rounded-lg border border-green-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-green-600 font-medium">Actives</p>
               <p className="text-2xl font-bold text-green-900">
-                {assignments.filter(a => a.properties.status === 'active').length}
+                {assignments.filter((a) => a.properties.status === 'active').length}
               </p>
             </div>
             <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
@@ -203,13 +207,13 @@ export default function PropertiesTable({
             </div>
           </div>
         </div>
-        
+
         <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-yellow-600 font-medium">En attente</p>
               <p className="text-2xl font-bold text-yellow-900">
-                {assignments.filter(a => a.properties.status === 'pending').length}
+                {assignments.filter((a) => a.properties.status === 'pending').length}
               </p>
             </div>
             <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
@@ -217,13 +221,13 @@ export default function PropertiesTable({
             </div>
           </div>
         </div>
-        
+
         <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-purple-600 font-medium">Vendues</p>
               <p className="text-2xl font-bold text-purple-900">
-                {assignments.filter(a => a.properties.status === 'sold').length}
+                {assignments.filter((a) => a.properties.status === 'sold').length}
               </p>
             </div>
             <DollarSign className="w-8 h-8 text-purple-500" />
@@ -236,45 +240,39 @@ export default function PropertiesTable({
         <table className="w-full">
           <thead>
             <tr className="border-b-2 border-neutral-200">
-              <th 
+              <th
                 className="text-left py-4 px-4 font-semibold text-neutral-700 cursor-pointer hover:text-primary-600 transition-colors"
                 onClick={() => handleSort('title')}
               >
                 <div className="flex items-center space-x-2">
                   <span>Propriété</span>
                   {sortBy === 'title' && (
-                    <span className="text-primary-500">
-                      {sortOrder === 'asc' ? '↑' : '↓'}
-                    </span>
+                    <span className="text-primary-500">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </div>
               </th>
               <th className="text-left py-4 px-4 font-semibold text-neutral-700">Agent assigné</th>
-              <th 
+              <th
                 className="text-left py-4 px-4 font-semibold text-neutral-700 cursor-pointer hover:text-primary-600 transition-colors"
                 onClick={() => handleSort('price')}
               >
                 <div className="flex items-center space-x-2">
                   <span>Prix</span>
                   {sortBy === 'price' && (
-                    <span className="text-primary-500">
-                      {sortOrder === 'asc' ? '↑' : '↓'}
-                    </span>
+                    <span className="text-primary-500">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </div>
               </th>
               <th className="text-left py-4 px-4 font-semibold text-neutral-700">Type</th>
               <th className="text-left py-4 px-4 font-semibold text-neutral-700">Statut</th>
-              <th 
+              <th
                 className="text-left py-4 px-4 font-semibold text-neutral-700 cursor-pointer hover:text-primary-600 transition-colors"
                 onClick={() => handleSort('assigned_at')}
               >
                 <div className="flex items-center space-x-2">
                   <span>Attribuée le</span>
                   {sortBy === 'assigned_at' && (
-                    <span className="text-primary-500">
-                      {sortOrder === 'asc' ? '↑' : '↓'}
-                    </span>
+                    <span className="text-primary-500">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                   )}
                 </div>
               </th>
@@ -283,10 +281,15 @@ export default function PropertiesTable({
           </thead>
           <tbody>
             {filteredAssignments.map((assignment) => {
-              const statusInfo = statusConfig[assignment.properties.status as keyof typeof statusConfig] || statusConfig.pending;
-              
+              const statusInfo =
+                statusConfig[assignment.properties.status as keyof typeof statusConfig] ||
+                statusConfig.pending;
+
               return (
-                <tr key={assignment.id} className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors">
+                <tr
+                  key={assignment.id}
+                  className="border-b border-neutral-100 hover:bg-neutral-50 transition-colors"
+                >
                   {/* Propriété */}
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-3">
@@ -313,7 +316,9 @@ export default function PropertiesTable({
                             </>
                           )}
                         </div>
-                        {(assignment.properties.bedrooms || assignment.properties.bathrooms || assignment.properties.area) && (
+                        {(assignment.properties.bedrooms ||
+                          assignment.properties.bathrooms ||
+                          assignment.properties.area) && (
                           <div className="flex items-center space-x-3 mt-1 text-xs text-neutral-500">
                             {assignment.properties.bedrooms && (
                               <span>{assignment.properties.bedrooms} chambres</span>
@@ -329,7 +334,7 @@ export default function PropertiesTable({
                       </div>
                     </div>
                   </td>
-                  
+
                   {/* Agent */}
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-3">
@@ -343,57 +348,56 @@ export default function PropertiesTable({
                           {assignment.profiles.full_name}
                         </p>
                         {assignment.profiles.email && (
-                          <p className="text-xs text-neutral-500">
-                            {assignment.profiles.email}
-                          </p>
+                          <p className="text-xs text-neutral-500">{assignment.profiles.email}</p>
                         )}
                       </div>
                     </div>
                   </td>
-                  
+
                   {/* Prix */}
                   <td className="py-4 px-4">
                     <div className="font-semibold text-neutral-900">
                       {(assignment.properties.price / 1000000).toFixed(1)}M FCFA
                     </div>
                   </td>
-                  
+
                   {/* Type */}
                   <td className="py-4 px-4">
                     <span className="inline-flex items-center px-2 py-1 bg-neutral-100 text-neutral-800 text-xs font-medium rounded-full">
                       <Tag className="w-3 h-3 mr-1" />
-                      {propertyTypes[assignment.properties.type as keyof typeof propertyTypes] || assignment.properties.type}
+                      {propertyTypes[assignment.properties.type as keyof typeof propertyTypes] ||
+                        assignment.properties.type}
                     </span>
                   </td>
-                  
+
                   {/* Statut */}
                   <td className="py-4 px-4">
-                    <span className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${statusInfo.className}`}>
+                    <span
+                      className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${statusInfo.className}`}
+                    >
                       {statusInfo.label}
                     </span>
                   </td>
-                  
+
                   {/* Date d'attribution */}
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2 text-sm text-neutral-600">
                       <Calendar className="w-4 h-4" />
-                      <span>
-                        {new Date(assignment.assigned_at).toLocaleDateString('fr-FR')}
-                      </span>
+                      <span>{new Date(assignment.assigned_at).toLocaleDateString('fr-FR')}</span>
                     </div>
                   </td>
-                  
+
                   {/* Actions */}
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
-                      <button 
+                      <button
                         onClick={() => onViewProperty?.(assignment.property_id)}
                         className="p-2 text-neutral-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
                         title="Voir détails"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => onEditAssignment?.(assignment.id)}
                         className="p-2 text-neutral-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all"
                         title="Modifier attribution"
@@ -416,8 +420,8 @@ export default function PropertiesTable({
           <div className="text-center py-16">
             <Home className="w-20 h-20 text-neutral-300 mx-auto mb-4" />
             <p className="text-xl text-neutral-600 mb-2">
-              {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' 
-                ? 'Aucune propriété trouvée' 
+              {searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
+                ? 'Aucune propriété trouvée'
                 : 'Aucune propriété attribuée'}
             </p>
             <p className="text-neutral-500 mb-6">
@@ -426,17 +430,14 @@ export default function PropertiesTable({
                 : 'Commencez par attribuer des propriétés à vos agents'}
             </p>
             {!searchTerm && statusFilter === 'all' && typeFilter === 'all' && (
-              <button 
-                onClick={() => onAssignAgent?.('new')}
-                className="btn-primary"
-              >
+              <button onClick={() => onAssignAgent?.('new')} className="btn-primary">
                 Attribuer une propriété
               </button>
             )}
           </div>
         )}
       </div>
-      
+
       {/* Informations de pagination */}
       {filteredAssignments.length > 0 && (
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-neutral-200">
@@ -444,7 +445,8 @@ export default function PropertiesTable({
             Affichage de {filteredAssignments.length} sur {assignments.length} propriétés
           </p>
           <div className="text-sm text-neutral-500">
-            Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')} à {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+            Dernière mise à jour: {new Date().toLocaleDateString('fr-FR')} à{' '}
+            {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
       )}

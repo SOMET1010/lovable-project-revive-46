@@ -27,9 +27,7 @@ export function useOwnerProperties(ownerId: string | undefined) {
   return useQuery({
     queryKey: ['properties', 'owner', ownerId],
     queryFn: () =>
-      ownerId
-        ? propertyApi.getByOwnerId(ownerId)
-        : Promise.resolve({ data: [], error: null }),
+      ownerId ? propertyApi.getByOwnerId(ownerId) : Promise.resolve({ data: [], error: null }),
     enabled: !!ownerId,
   });
 }

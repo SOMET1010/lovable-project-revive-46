@@ -29,7 +29,7 @@ export function useProfileGuard() {
     if (!user) return;
 
     // Ne pas rediriger si on est sur une page exclue
-    if (EXCLUDED_PATHS.some(path => location.pathname.startsWith(path))) return;
+    if (EXCLUDED_PATHS.some((path) => location.pathname.startsWith(path))) return;
 
     // Vérifier si le profil existe et est complet
     const needsCompletion = profile && profile.profile_setup_completed === false;

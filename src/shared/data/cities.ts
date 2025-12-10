@@ -28,14 +28,14 @@ export const ABIDJAN_NEIGHBORHOODS = [
   'Blockhaus',
   'Zone 4',
   'Vridi',
-  'Gonzagueville'
+  'Gonzagueville',
 ];
 
 // VILLES PRINCIPALES (sans les quartiers d'Abidjan)
 export const CITIES: City[] = [
   {
     name: 'Abidjan',
-    neighborhoods: ABIDJAN_NEIGHBORHOODS
+    neighborhoods: ABIDJAN_NEIGHBORHOODS,
   },
   { name: 'Yamoussoukro' },
   { name: 'Bouaké' },
@@ -50,18 +50,18 @@ export const CITIES: City[] = [
   { name: 'Sassandra' },
   { name: 'Soubré' },
   { name: 'Agboville' },
-  { name: 'Bondoukou' }
+  { name: 'Bondoukou' },
 ];
 
 // IMPORTANT: Ne PAS mélanger villes et quartiers !
 // Les quartiers d'Abidjan sont dans ABIDJAN_NEIGHBORHOODS
 
-export const CITY_NAMES = CITIES.map(city => city.name);
+export const CITY_NAMES = CITIES.map((city) => city.name);
 
 /**
  * Obtenir les quartiers d'une ville
  */
 export function getNeighborhoods(cityName: string): string[] {
-  const city = CITIES.find(c => c.name === cityName);
+  const city = CITIES.find((c) => c.name === cityName);
   return city?.neighborhoods || [];
 }

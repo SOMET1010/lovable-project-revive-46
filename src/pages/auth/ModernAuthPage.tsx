@@ -1,19 +1,29 @@
 /**
  * ModernAuthPage - Split Screen Premium Ivorian
- * 
+ *
  * FLUX TÉLÉPHONE UNIFIÉ:
  * 1. Entrer numéro → 2. Vérifier OTP → 3. Auto-détection:
  *    - Si compte existe → Connexion directe
  *    - Si nouveau → Demander nom → Créer compte
- * 
+ *
  * EMAIL: Garde les tabs Connexion/Inscription classiques
  */
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { 
-  Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft, 
-  Smartphone, Star, Home, Shield, MessageCircle 
+import {
+  Mail,
+  Lock,
+  User,
+  Phone,
+  Loader2,
+  ArrowRight,
+  ArrowLeft,
+  Smartphone,
+  Star,
+  Home,
+  Shield,
+  MessageCircle,
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
 import { InputWithIcon } from '@/shared/ui';
@@ -35,20 +45,23 @@ const shouldDefaultToEmail = (path: string): boolean =>
 // Slides pour le côté gauche (témoignages)
 const AUTH_SLIDES = [
   {
-    image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
-    quote: "Grâce à Mon Toit, nous avons trouvé notre cocon en 48h.",
-    author: "Sarah & Marc, Cocody"
+    image:
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
+    quote: 'Grâce à Mon Toit, nous avons trouvé notre cocon en 48h.',
+    author: 'Sarah & Marc, Cocody',
   },
   {
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
+    image:
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
     quote: "La signature électronique du bail m'a fait gagner un temps fou.",
-    author: "Aïcha K., Plateau"
+    author: 'Aïcha K., Plateau',
   },
   {
-    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&auto=format&fit=crop&q=80',
-    quote: "Un service fiable et sécurisé pour les propriétaires.",
-    author: "Konan D., Marcory"
-  }
+    image:
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&auto=format&fit=crop&q=80',
+    quote: 'Un service fiable et sécurisé pour les propriétaires.',
+    author: 'Konan D., Marcory',
+  },
 ];
 
 export default function ModernAuthPage() {
@@ -72,7 +85,9 @@ export default function ModernAuthPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [profileType, setProfileType] = useState<'locataire' | 'proprietaire' | 'agence'>('locataire');
+  const [profileType, setProfileType] = useState<'locataire' | 'proprietaire' | 'agence'>(
+    'locataire'
+  );
   const [emailOtp, setEmailOtp] = useState('');
   const [pendingEmail, setPendingEmail] = useState('');
   const [pendingPassword, setPendingPassword] = useState('');
@@ -91,7 +106,7 @@ export default function ModernAuthPage() {
 
   // Rotation automatique des slides
   useEffect(() => {
-    const timer = setInterval(() => setSlideIndex(p => (p + 1) % AUTH_SLIDES.length), 5000);
+    const timer = setInterval(() => setSlideIndex((p) => (p + 1) % AUTH_SLIDES.length), 5000);
     return () => clearInterval(timer);
   }, []);
 
@@ -169,7 +184,7 @@ export default function ModernAuthPage() {
 
       if (error) {
         console.error('Error sending OTP email:', error);
-        throw new Error(error.message || "Envoi du code impossible");
+        throw new Error(error.message || 'Envoi du code impossible');
       }
 
       return code;
@@ -238,7 +253,7 @@ export default function ModernAuthPage() {
       setEmailStep('otp');
       setEmailOtp('');
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
+      const errorMessage = err instanceof Error ? err.message : "Erreur lors de l'inscription";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -263,7 +278,7 @@ export default function ModernAuthPage() {
         return;
       }
 
-      if (invokeError) throw new Error(invokeError.message || 'Erreur lors de l\'envoi du code');
+      if (invokeError) throw new Error(invokeError.message || "Erreur lors de l'envoi du code");
       if (data?.error) throw new Error(data.error);
 
       if (data?.otp) {
@@ -272,11 +287,11 @@ export default function ModernAuthPage() {
       } else {
         setSuccess(`Code envoyé par ${sendMethod === 'sms' ? 'SMS' : 'WhatsApp'} !`);
       }
-      
+
       setPhoneStep('verify');
       setResendTimer(60);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'envoi';
+      const errorMessage = err instanceof Error ? err.message : "Erreur lors de l'envoi";
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -400,15 +415,13 @@ export default function ModernAuthPage() {
       const userId = data.user?.id || pendingUserId;
       if (!userId) throw new Error('Utilisateur non trouvé après vérification');
 
-      await supabase
-        .from('profiles')
-        .update({ user_type: role })
-        .eq('id', userId);
+      await supabase.from('profiles').update({ user_type: role }).eq('id', userId);
 
       // Redirection demandée
       navigate('/dashboard/locataire');
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la sélection du rôle';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Erreur lors de la sélection du rôle';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -418,18 +431,17 @@ export default function ModernAuthPage() {
   // ===================== RENDER =====================
   return (
     <div className="min-h-screen flex bg-white font-sans selection:bg-[#F16522] selection:text-white">
-      
       {/* --- COLONNE GAUCHE : VISUEL IMMERSIF (Hidden on Mobile) --- */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-[#2C1810]">
         {AUTH_SLIDES.map((slide, index) => (
-          <div 
+          <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-1000 ${index === slideIndex ? 'opacity-100' : 'opacity-0'}`}
           >
-            <img 
-              src={slide.image} 
-              alt="Lifestyle" 
-              className="w-full h-full object-cover opacity-60" 
+            <img
+              src={slide.image}
+              alt="Lifestyle"
+              className="w-full h-full object-cover opacity-60"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#2C1810] via-[#2C1810]/50 to-transparent" />
           </div>
@@ -459,7 +471,9 @@ export default function ModernAuthPage() {
         {/* Témoignage */}
         <div className="absolute bottom-16 left-12 right-12 z-10">
           <div className="flex gap-1 mb-4">
-            {[1,2,3,4,5].map(i => <Star key={i} className="w-5 h-5 text-[#F16522] fill-current" />)}
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Star key={i} className="w-5 h-5 text-[#F16522] fill-current" />
+            ))}
           </div>
           <h2 className="text-3xl font-bold text-white mb-4 leading-tight">
             "{AUTH_SLIDES[slideIndex]?.quote}"
@@ -485,13 +499,11 @@ export default function ModernAuthPage() {
 
       {/* --- COLONNE DROITE : FORMULAIRE --- */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 lg:p-12 bg-[#FAF7F4] relative">
-        
         {/* Déco de fond */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#F16522]/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#2C1810]/5 rounded-full blur-3xl pointer-events-none" />
-        
+
         <div className="w-full max-w-md space-y-6 relative z-10">
-          
           {/* Header Mobile Only */}
           <div className="lg:hidden flex items-center justify-center gap-2 mb-6">
             <div className="w-10 h-10 bg-[#F16522] rounded-xl flex items-center justify-center">
@@ -503,14 +515,18 @@ export default function ModernAuthPage() {
           {/* Titre */}
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-extrabold text-[#2C1810]">
-              {phoneStep === 'name' ? 'Bienvenue !' : 
-               phoneStep === 'verify' ? 'Vérification' : 
-               'Bienvenue chez vous'}
+              {phoneStep === 'name'
+                ? 'Bienvenue !'
+                : phoneStep === 'verify'
+                  ? 'Vérification'
+                  : 'Bienvenue chez vous'}
             </h1>
             <p className="text-[#6B5A4E]">
-              {phoneStep === 'name' ? 'Entrez votre nom pour finaliser' :
-               phoneStep === 'verify' ? `Entrez le code envoyé au ${phoneNumber}` :
-               'Connectez-vous pour accéder à votre espace'}
+              {phoneStep === 'name'
+                ? 'Entrez votre nom pour finaliser'
+                : phoneStep === 'verify'
+                  ? `Entrez le code envoyé au ${phoneNumber}`
+                  : 'Connectez-vous pour accéder à votre espace'}
             </p>
           </div>
 
@@ -520,21 +536,23 @@ export default function ModernAuthPage() {
               <button
                 onClick={() => handleMethodChange('phone')}
                 className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
-                  authMethod === 'phone' 
-                    ? 'bg-[#2C1810] text-white shadow-md' 
+                  authMethod === 'phone'
+                    ? 'bg-[#2C1810] text-white shadow-md'
                     : 'text-[#A69B95] hover:bg-[#FAF7F4]'
                 }`}
               >
                 <Smartphone className="w-4 h-4 shrink-0" /> Téléphone
                 {authMethod === 'phone' && (
-                  <span className="text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded-full">Rapide</span>
+                  <span className="text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded-full">
+                    Rapide
+                  </span>
                 )}
               </button>
               <button
                 onClick={() => handleMethodChange('email')}
                 className={`flex-1 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
-                  authMethod === 'email' 
-                    ? 'bg-[#2C1810] text-white shadow-md' 
+                  authMethod === 'email'
+                    ? 'bg-[#2C1810] text-white shadow-md'
                     : 'text-[#A69B95] hover:bg-[#FAF7F4]'
                 }`}
               >
@@ -558,7 +576,6 @@ export default function ModernAuthPage() {
           {/* ==================== PHONE AUTH ==================== */}
           {authMethod === 'phone' && (
             <div className="space-y-5">
-              
               {/* STEP 1: Enter Phone */}
               {phoneStep === 'enter' && (
                 <div className="space-y-4 animate-fade-in">
@@ -604,7 +621,8 @@ export default function ModernAuthPage() {
                   <div className="p-3 bg-[#F16522]/5 border border-[#F16522]/20 rounded-xl">
                     <p className="text-sm text-[#2C1810]">
                       💡 Un code à 6 chiffres sera envoyé à votre numéro.
-                      <span className="font-medium"> Nouveau ?</span> Votre compte sera créé automatiquement.
+                      <span className="font-medium"> Nouveau ?</span> Votre compte sera créé
+                      automatiquement.
                     </p>
                   </div>
 
@@ -616,7 +634,9 @@ export default function ModernAuthPage() {
                     {loading ? (
                       <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                      <>Recevoir mon code <ArrowRight className="w-5 h-5" /></>
+                      <>
+                        Recevoir mon code <ArrowRight className="w-5 h-5" />
+                      </>
                     )}
                   </button>
                 </div>
@@ -658,7 +678,8 @@ export default function ModernAuthPage() {
                         }}
                         onKeyDown={(e) => {
                           if (e.key === 'Backspace' && !otp[idx] && idx > 0) {
-                            const prev = (e.target as HTMLElement).previousElementSibling as HTMLInputElement | null;
+                            const prev = (e.target as HTMLElement)
+                              .previousElementSibling as HTMLInputElement | null;
                             prev?.focus();
                           }
                         }}
@@ -669,8 +690,8 @@ export default function ModernAuthPage() {
                   </div>
 
                   <div className="text-center">
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={handleSendOTP}
                       disabled={resendTimer > 0}
                       className="text-sm text-[#F16522] font-semibold hover:underline disabled:text-[#A69B95] disabled:no-underline"
@@ -687,7 +708,9 @@ export default function ModernAuthPage() {
                     {loading ? (
                       <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                      <>Confirmer <ArrowRight className="w-5 h-5" /></>
+                      <>
+                        Confirmer <ArrowRight className="w-5 h-5" />
+                      </>
                     )}
                   </button>
                 </div>
@@ -709,7 +732,8 @@ export default function ModernAuthPage() {
                       <span className="text-3xl">🎉</span>
                     </div>
                     <p className="text-[#6B5A4E] text-sm">
-                      Votre numéro est vérifié. <span className="font-medium">Comment vous appelez-vous ?</span>
+                      Votre numéro est vérifié.{' '}
+                      <span className="font-medium">Comment vous appelez-vous ?</span>
                     </p>
                   </div>
 
@@ -735,7 +759,9 @@ export default function ModernAuthPage() {
                     {loading ? (
                       <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                      <>Créer mon compte <ArrowRight className="w-5 h-5" /></>
+                      <>
+                        Créer mon compte <ArrowRight className="w-5 h-5" />
+                      </>
                     )}
                   </button>
                 </div>
@@ -746,7 +772,6 @@ export default function ModernAuthPage() {
           {/* ==================== EMAIL AUTH ==================== */}
           {authMethod === 'email' && phoneStep === 'enter' && (
             <div className="space-y-5 animate-fade-in">
-              
               {/* Email Mode Tabs - Affiché uniquement en mode connexion */}
               {emailMode === 'login' && (
                 <div className="bg-white p-4 rounded-xl border border-[#EFEBE9] text-center">
@@ -777,12 +802,7 @@ export default function ModernAuthPage() {
                     Entrez le code reçu sur {pendingEmail || email}
                   </p>
 
-                  <OTPInput
-                    value={emailOtp}
-                    onChange={setEmailOtp}
-                    length={6}
-                    autoFocus
-                  />
+                  <OTPInput value={emailOtp} onChange={setEmailOtp} length={6} autoFocus />
 
                   <div className="flex items-center justify-between text-sm text-[#6B5A4E]">
                     <button
@@ -811,19 +831,38 @@ export default function ModernAuthPage() {
                     <p className="text-[#2C1810] font-semibold text-lg">
                       Profil activé — choisissez votre rôle
                     </p>
-                    <p className="text-xs text-[#6B5A4E]">Vous pourrez le modifier plus tard depuis votre compte.</p>
+                    <p className="text-xs text-[#6B5A4E]">
+                      Vous pourrez le modifier plus tard depuis votre compte.
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {[
-                      { value: 'locataire', label: 'Locataire', icon: Home, bullets: ['Recherche & alertes', 'Candidature en 1 clic'] },
-                      { value: 'proprietaire', label: 'Propriétaire', icon: Star, bullets: ['Publier un bien', 'Contrats digitaux'] },
-                      { value: 'agence', label: 'Agence', icon: Shield, bullets: ['Mandats & équipe', 'Reporting & commissions'] },
+                      {
+                        value: 'locataire',
+                        label: 'Locataire',
+                        icon: Home,
+                        bullets: ['Recherche & alertes', 'Candidature en 1 clic'],
+                      },
+                      {
+                        value: 'proprietaire',
+                        label: 'Propriétaire',
+                        icon: Star,
+                        bullets: ['Publier un bien', 'Contrats digitaux'],
+                      },
+                      {
+                        value: 'agence',
+                        label: 'Agence',
+                        icon: Shield,
+                        bullets: ['Mandats & équipe', 'Reporting & commissions'],
+                      },
                     ].map((opt) => (
                       <button
                         key={opt.value}
                         type="button"
-                        onClick={() => handleSelectRole(opt.value as 'locataire' | 'proprietaire' | 'agence')}
+                        onClick={() =>
+                          handleSelectRole(opt.value as 'locataire' | 'proprietaire' | 'agence')
+                        }
                         className={`flex items-start gap-3 px-4 py-4 rounded-2xl border transition text-left ${
                           profileType === opt.value
                             ? 'border-[#F16522] bg-[#F16522]/10 text-[#F16522] shadow-lg'
@@ -854,8 +893,10 @@ export default function ModernAuthPage() {
 
               {/* EMAIL FORM (login or register form step) */}
               {(emailMode === 'login' || emailStep === 'form') && (
-                <form onSubmit={emailMode === 'login' ? handleEmailLogin : handleEmailRegister} className="space-y-4">
-                  
+                <form
+                  onSubmit={emailMode === 'login' ? handleEmailLogin : handleEmailRegister}
+                  className="space-y-4"
+                >
                   {emailMode === 'register' && (
                     <InputWithIcon
                       icon={User}
@@ -890,8 +931,8 @@ export default function ModernAuthPage() {
 
                   {emailMode === 'login' && (
                     <div className="text-right">
-                      <Link 
-                        to="/mot-de-passe-oublie" 
+                      <Link
+                        to="/mot-de-passe-oublie"
                         className="text-sm text-[#F16522] hover:text-[#D95318] font-medium hover:underline transition-colors"
                       >
                         Mot de passe oublié ?
@@ -919,7 +960,10 @@ export default function ModernAuthPage() {
                     {loading ? (
                       <Loader2 className="w-6 h-6 animate-spin" />
                     ) : (
-                      <>{emailMode === 'login' ? 'Se connecter' : 'Créer mon compte'} <ArrowRight className="w-5 h-5" /></>
+                      <>
+                        {emailMode === 'login' ? 'Se connecter' : 'Créer mon compte'}{' '}
+                        <ArrowRight className="w-5 h-5" />
+                      </>
                     )}
                   </button>
                 </form>
@@ -934,11 +978,16 @@ export default function ModernAuthPage() {
             </p>
             <p>
               En continuant, vous acceptez nos{' '}
-              <a href="#" className="underline hover:text-[#2C1810]">Conditions</a> et notre{' '}
-              <a href="#" className="underline hover:text-[#2C1810]">Politique de confidentialité</a>.
+              <a href="#" className="underline hover:text-[#2C1810]">
+                Conditions
+              </a>{' '}
+              et notre{' '}
+              <a href="#" className="underline hover:text-[#2C1810]">
+                Politique de confidentialité
+              </a>
+              .
             </p>
           </div>
-
         </div>
       </div>
     </div>

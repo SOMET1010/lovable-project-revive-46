@@ -182,12 +182,7 @@ export interface PaymentError {
   retryable: boolean;
 }
 
-export type InTouchStatus =
-  | 'PENDING'
-  | 'SUCCESS'
-  | 'FAILED'
-  | 'PROCESSING'
-  | 'CANCELLED';
+export type InTouchStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'PROCESSING' | 'CANCELLED';
 
 export const INTOUCH_STATUS_MAPPING: Record<InTouchStatus, PaymentStatus> = {
   PENDING: 'processing',

@@ -24,7 +24,7 @@ export default function AchievementBadges({
   faceVerified,
   tenantScore,
   paymentCount = 0,
-  className = ''
+  className = '',
 }: AchievementBadgesProps) {
   const achievements: Achievement[] = [
     {
@@ -33,7 +33,7 @@ export default function AchievementBadges({
       description: 'CNI validée par ONECI',
       icon: Shield,
       earned: oneciVerified,
-      color: 'from-green-400 to-emerald-500'
+      color: 'from-green-400 to-emerald-500',
     },
     {
       id: 'cnam_member',
@@ -41,7 +41,7 @@ export default function AchievementBadges({
       description: 'Affiliation CNAM active',
       icon: Heart,
       earned: cnamVerified,
-      color: 'from-blue-400 to-cyan-500'
+      color: 'from-blue-400 to-cyan-500',
     },
     {
       id: 'face_confirmed',
@@ -49,7 +49,7 @@ export default function AchievementBadges({
       description: 'Vérification biométrique réussie',
       icon: CheckCircle,
       earned: faceVerified,
-      color: 'from-purple-400 to-pink-500'
+      color: 'from-purple-400 to-pink-500',
     },
     {
       id: 'trusted_tenant',
@@ -57,7 +57,7 @@ export default function AchievementBadges({
       description: 'Score supérieur à 70',
       icon: Star,
       earned: tenantScore >= 70,
-      color: 'from-yellow-400 to-orange-500'
+      color: 'from-yellow-400 to-orange-500',
     },
     {
       id: 'reliable_payer',
@@ -65,7 +65,7 @@ export default function AchievementBadges({
       description: '5+ paiements à temps',
       icon: TrendingUp,
       earned: paymentCount >= 5,
-      color: 'from-teal-400 to-green-500'
+      color: 'from-teal-400 to-green-500',
     },
     {
       id: 'five_stars',
@@ -73,11 +73,11 @@ export default function AchievementBadges({
       description: 'Excellente réputation',
       icon: Award,
       earned: tenantScore >= 90,
-      color: 'from-amber-400 to-yellow-500'
-    }
+      color: 'from-amber-400 to-yellow-500',
+    },
   ];
 
-  const earnedCount = achievements.filter(a => a.earned).length;
+  const earnedCount = achievements.filter((a) => a.earned).length;
 
   return (
     <div className={`bg-white rounded-2xl shadow-lg p-6 ${className}`}>
@@ -97,22 +97,23 @@ export default function AchievementBadges({
               key={achievement.id}
               className={`
                 relative group rounded-xl p-4 text-center transition-all duration-200
-                ${achievement.earned
-                  ? 'bg-gradient-to-br ' + achievement.color + ' text-white shadow-md hover:shadow-xl transform hover:-translate-y-1'
-                  : 'bg-gray-100 text-gray-400'
+                ${
+                  achievement.earned
+                    ? 'bg-gradient-to-br ' +
+                      achievement.color +
+                      ' text-white shadow-md hover:shadow-xl transform hover:-translate-y-1'
+                    : 'bg-gray-100 text-gray-400'
                 }
               `}
             >
               <div className="flex flex-col items-center space-y-2">
-                <div className={`
+                <div
+                  className={`
                   w-12 h-12 rounded-full flex items-center justify-center
                   ${achievement.earned ? 'bg-white/20' : 'bg-gray-200'}
-                `}>
-                  {achievement.earned ? (
-                    <Icon className="w-6 h-6" />
-                  ) : (
-                    <Lock className="w-6 h-6" />
-                  )}
+                `}
+                >
+                  {achievement.earned ? <Icon className="w-6 h-6" /> : <Lock className="w-6 h-6" />}
                 </div>
                 <div>
                   <p className="font-bold text-sm">{achievement.title}</p>

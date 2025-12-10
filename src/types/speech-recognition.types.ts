@@ -30,7 +30,7 @@ export interface SpeechRecognitionEvent extends Event {
   resultIndex: number;
 }
 
-export type SpeechRecognitionErrorCode = 
+export type SpeechRecognitionErrorCode =
   | 'no-speech'
   | 'audio-capture'
   | 'not-allowed'
@@ -66,7 +66,7 @@ export interface SpeechRecognitionInstance {
 }
 
 export interface SpeechRecognitionConstructor {
-  new(): SpeechRecognitionInstance;
+  new (): SpeechRecognitionInstance;
 }
 
 // =====================================================

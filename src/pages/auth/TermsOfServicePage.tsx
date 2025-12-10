@@ -18,26 +18,36 @@ export default function TermsOfServicePage() {
             <section>
               <h2 className="text-xl font-bold text-[#2C1810] mb-4">1. Objet</h2>
               <p className="text-[#6B5A4E] leading-relaxed">
-                Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation de la plateforme Mon Toit,
-                service en ligne de mise en relation entre propriétaires et locataires de biens immobiliers en Côte d'Ivoire.
+                Les présentes Conditions Générales d'Utilisation (CGU) régissent l'utilisation de la
+                plateforme Mon Toit, service en ligne de mise en relation entre propriétaires et
+                locataires de biens immobiliers en Côte d'Ivoire.
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-[#2C1810] mb-4">2. Acceptation des Conditions</h2>
+              <h2 className="text-xl font-bold text-[#2C1810] mb-4">
+                2. Acceptation des Conditions
+              </h2>
               <p className="text-[#6B5A4E] leading-relaxed">
-                L'utilisation de la plateforme Mon Toit implique l'acceptation pleine et entière des présentes CGU.
-                Tout utilisateur qui ne souhaite pas être lié par ces conditions doit s'abstenir d'utiliser les services proposés.
+                L'utilisation de la plateforme Mon Toit implique l'acceptation pleine et entière des
+                présentes CGU. Tout utilisateur qui ne souhaite pas être lié par ces conditions doit
+                s'abstenir d'utiliser les services proposés.
               </p>
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-[#2C1810] mb-4">3. Inscription et Compte Utilisateur</h2>
+              <h2 className="text-xl font-bold text-[#2C1810] mb-4">
+                3. Inscription et Compte Utilisateur
+              </h2>
               <ul className="list-disc pl-6 space-y-2 text-[#6B5A4E]">
                 <li>L'inscription est gratuite et réservée aux personnes majeures</li>
                 <li>Les informations fournies doivent être exactes et à jour</li>
-                <li>Chaque utilisateur est responsable de la confidentialité de son mot de passe</li>
-                <li>La vérification d'identité via ONECI est obligatoire pour certaines transactions</li>
+                <li>
+                  Chaque utilisateur est responsable de la confidentialité de son mot de passe
+                </li>
+                <li>
+                  La vérification d'identité via ONECI est obligatoire pour certaines transactions
+                </li>
               </ul>
             </section>
 
@@ -56,7 +66,9 @@ export default function TermsOfServicePage() {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold text-[#2C1810] mb-4">5. Obligations des Utilisateurs</h2>
+              <h2 className="text-xl font-bold text-[#2C1810] mb-4">
+                5. Obligations des Utilisateurs
+              </h2>
               <ul className="list-disc pl-6 space-y-2 text-[#6B5A4E]">
                 <li>Fournir des informations véridiques et complètes</li>
                 <li>Ne publier que des annonces authentiques</li>
@@ -69,8 +81,9 @@ export default function TermsOfServicePage() {
             <section>
               <h2 className="text-xl font-bold text-[#2C1810] mb-4">6. Propriété Intellectuelle</h2>
               <p className="text-[#6B5A4E] leading-relaxed">
-                Tous les éléments de la plateforme Mon Toit (logos, textes, graphiques, logiciels) sont protégés par le droit
-                de la propriété intellectuelle. Toute reproduction non autorisée est strictement interdite.
+                Tous les éléments de la plateforme Mon Toit (logos, textes, graphiques, logiciels)
+                sont protégés par le droit de la propriété intellectuelle. Toute reproduction non
+                autorisée est strictement interdite.
               </p>
             </section>
 
@@ -90,23 +103,26 @@ export default function TermsOfServicePage() {
             <section>
               <h2 className="text-xl font-bold text-[#2C1810] mb-4">8. Protection des Données</h2>
               <p className="text-[#6B5A4E] leading-relaxed">
-                Les données personnelles collectées sont traitées conformément à notre Politique de Confidentialité
-                et aux dispositions de la loi ivoirienne sur la protection des données personnelles.
+                Les données personnelles collectées sont traitées conformément à notre Politique de
+                Confidentialité et aux dispositions de la loi ivoirienne sur la protection des
+                données personnelles.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-[#2C1810] mb-4">9. Modification des CGU</h2>
               <p className="text-[#6B5A4E] leading-relaxed">
-                Mon Toit se réserve le droit de modifier les présentes CGU à tout moment. Les utilisateurs seront informés
-                de toute modification substantielle par email ou notification sur la plateforme.
+                Mon Toit se réserve le droit de modifier les présentes CGU à tout moment. Les
+                utilisateurs seront informés de toute modification substantielle par email ou
+                notification sur la plateforme.
               </p>
             </section>
 
             <section>
               <h2 className="text-xl font-bold text-[#2C1810] mb-4">10. Droit Applicable</h2>
               <p className="text-[#6B5A4E] leading-relaxed">
-                Les présentes CGU sont régies par le droit ivoirien. Tout litige sera soumis aux tribunaux compétents de Côte d'Ivoire.
+                Les présentes CGU sont régies par le droit ivoirien. Tout litige sera soumis aux
+                tribunaux compétents de Côte d'Ivoire.
               </p>
             </section>
 
@@ -116,8 +132,14 @@ export default function TermsOfServicePage() {
                 <span className="font-semibold">Une question ?</span>
               </div>
               <p className="text-[#E8D4C5]">
-                Pour toute question concernant ces conditions d'utilisation, veuillez nous contacter à :
-                <a href="mailto:contact@mon-toit.ci" className="text-[#F16522] hover:underline ml-1 font-medium">contact@mon-toit.ci</a>
+                Pour toute question concernant ces conditions d'utilisation, veuillez nous contacter
+                à :
+                <a
+                  href="mailto:contact@mon-toit.ci"
+                  className="text-[#F16522] hover:underline ml-1 font-medium"
+                >
+                  contact@mon-toit.ci
+                </a>
               </p>
             </div>
           </div>
@@ -129,7 +151,7 @@ export default function TermsOfServicePage() {
         subtitle="Rejoignez des milliers d'utilisateurs qui font confiance à Mon Toit"
         buttons={[
           { label: 'Créer un compte', href: '/inscription', icon: UserPlus, variant: 'primary' },
-          { label: 'Voir les propriétés', href: '/recherche', icon: Search, variant: 'secondary' }
+          { label: 'Voir les propriétés', href: '/recherche', icon: Search, variant: 'secondary' },
         ]}
       />
     </div>

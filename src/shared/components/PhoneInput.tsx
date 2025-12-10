@@ -1,7 +1,7 @@
 /**
  * PhoneInput Component - Ergonomique et Intuitif
  * Mon Toit - UX Améliorée
- * 
+ *
  * Objectif: Rendre la saisie du numéro de téléphone claire et sans confusion
  * - Indicatif pays séparé et visible
  * - Format automatique pendant la saisie
@@ -30,13 +30,13 @@ interface PhoneInputProps {
 const formatPhoneNumber = (value: string): string => {
   // Retirer tous les caractères non-numériques
   const numbers = value.replace(/\D/g, '');
-  
+
   // Limiter à 10 chiffres
   const limited = numbers.slice(0, 10);
-  
+
   // Formater par paires
   const formatted = limited.match(/.{1,2}/g)?.join(' ') || limited;
-  
+
   return formatted;
 };
 
@@ -45,27 +45,27 @@ const formatPhoneNumber = (value: string): string => {
  */
 const validateIvorianPhone = (phone: string): { valid: boolean; message: string } => {
   const numbers = phone.replace(/\D/g, '');
-  
+
   if (numbers.length === 0) {
     return { valid: false, message: '' };
   }
-  
+
   if (numbers.length < 10) {
     return { valid: false, message: `${10 - numbers.length} chiffre(s) manquant(s)` };
   }
-  
+
   if (numbers.length > 10) {
     return { valid: false, message: 'Trop de chiffres' };
   }
-  
+
   // Vérifier les préfixes valides (opérateurs ivoiriens)
   const validPrefixes = ['01', '05', '07', '27'];
   const prefix = numbers.slice(0, 2);
-  
+
   if (!validPrefixes.includes(prefix)) {
     return { valid: false, message: 'Préfixe invalide (01, 05, 07, 27)' };
   }
-  
+
   return { valid: true, message: 'Numéro valide' };
 };
 
@@ -80,11 +80,14 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
   placeholder = '01 23 45 67 89',
   error,
   className = '',
-  autoValidate = true
+  autoValidate = true,
 }) => {
   const [localValue, setLocalValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const [validation, setValidation] = useState<{ valid: boolean; message: string }>({ valid: true, message: '' });
+  const [validation, setValidation] = useState<{ valid: boolean; message: string }>({
+    valid: true,
+    message: '',
+  });
   const [hasInteracted, setHasInteracted] = useState(false);
 
   // Synchroniser avec la valeur externe
@@ -119,7 +122,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
     const formatted = formatPhoneNumber(input);
     setLocalValue(formatted);
     setHasInteracted(true);
-    
+
     // Retourner le numéro complet avec indicatif
     const numbers = formatted.replace(/\D/g, '');
     const fullNumber = numbers ? `+225 ${formatted}` : '';
@@ -150,22 +153,29 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
       )}
 
       {/* Input Container */}
-      <div className={`
+      <div
+        className={`
         relative flex items-center
         border-2 rounded-2xl transition-all
         ${isFocused ? 'ring-4 ring-blue-200 border-blue-500' : 'border-gray-200'}
         ${showError ? 'border-red-500 ring-4 ring-red-100' : ''}
         ${showSuccess ? 'border-green-500 ring-4 ring-green-100' : ''}
         bg-white
-      `}>
+      `}
+      >
         {/* Icône Téléphone */}
         <div className="pl-4 pr-3 flex items-center border-r-2 border-gray-200">
-          <Phone className={`h-5 w-5 ${
-            isFocused ? 'text-blue-600' : 
-            showError ? 'text-red-500' : 
-            showSuccess ? 'text-green-500' : 
-            'text-gray-400'
-          }`} />
+          <Phone
+            className={`h-5 w-5 ${
+              isFocused
+                ? 'text-blue-600'
+                : showError
+                  ? 'text-red-500'
+                  : showSuccess
+                    ? 'text-green-500'
+                    : 'text-gray-400'
+            }`}
+          />
         </div>
 
         {/* Indicatif Pays (Fixe) */}
@@ -209,11 +219,15 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
             <span>{error}</span>
           </p>
         ) : showValidation ? (
-          <p className={`text-sm flex items-center gap-1 ${
-            validation.valid ? 'text-green-600' : 
-            localValue.length >= 10 ? 'text-red-600' : 
-            'text-amber-600'
-          }`}>
+          <p
+            className={`text-sm flex items-center gap-1 ${
+              validation.valid
+                ? 'text-green-600'
+                : localValue.length >= 10
+                  ? 'text-red-600'
+                  : 'text-amber-600'
+            }`}
+          >
             {validation.valid ? (
               <>
                 <Check className="h-4 w-4" />
@@ -227,9 +241,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
             )}
           </p>
         ) : (
-          <p className="text-sm text-gray-500">
-            Format: 01 23 45 67 89 (10 chiffres)
-          </p>
+          <p className="text-sm text-gray-500">Format: 01 23 45 67 89 (10 chiffres)</p>
         )}
       </div>
 
@@ -261,12 +273,7 @@ export const PhoneInput: React.FC<PhoneInputProps> = ({
  * Composant PhoneInput Compact (pour formulaires serrés)
  */
 export const PhoneInputCompact: React.FC<PhoneInputProps> = (props) => {
-  return (
-    <PhoneInput
-      {...props}
-      className={`phone-input-compact ${props.className || ''}`}
-    />
-  );
+  return <PhoneInput {...props} className={`phone-input-compact ${props.className || ''}`} />;
 };
 
 /**
@@ -287,7 +294,7 @@ export const usePhoneInput = (initialValue: string = '') => {
     setPhone,
     isValid,
     formatted: phone,
-    numbers: phone.replace(/\D/g, '').replace(/^225/, '')
+    numbers: phone.replace(/\D/g, '').replace(/^225/, ''),
   };
 };
 

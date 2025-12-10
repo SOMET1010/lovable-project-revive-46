@@ -1,11 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { 
-  ROLES, 
-  OWNER_ROLES, 
-  AGENCY_ROLES, 
-  PROPERTY_MANAGER_ROLES,
-  type AppRole 
-} from '../roles';
+import { ROLES, OWNER_ROLES, AGENCY_ROLES, PROPERTY_MANAGER_ROLES, type AppRole } from '../roles';
 
 describe('ROLES constants', () => {
   describe('Individual roles', () => {

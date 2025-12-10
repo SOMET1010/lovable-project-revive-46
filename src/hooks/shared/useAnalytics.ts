@@ -42,10 +42,7 @@ export function useAnalytics(period: AnalyticsPeriod = '30d') {
       propertiesQuery.isLoading ||
       transactionsQuery.isLoading,
     error:
-      overviewQuery.error ||
-      usersQuery.error ||
-      propertiesQuery.error ||
-      transactionsQuery.error,
+      overviewQuery.error || usersQuery.error || propertiesQuery.error || transactionsQuery.error,
     refetch: () => {
       overviewQuery.refetch();
       usersQuery.refetch();

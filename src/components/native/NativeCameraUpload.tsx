@@ -36,42 +36,53 @@ export function NativeCameraUpload({
   label = 'Ajouter une photo',
   variant = 'card',
   disabled = false,
-  className
+  className,
 }: NativeCameraUploadProps) {
   const [previews, setPreviews] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSourceMenu, setShowSourceMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const { isNative, takePhoto, pickFromGallery, pickMultiple, isLoading, error } = useNativeCamera({
     quality: 90,
-    resultType: CameraResultType.DataUrl
+    resultType: CameraResultType.DataUrl,
   });
 
-  const processAndAddImage = useCallback(async (dataUrl: string) => {
-    setIsProcessing(true);
-    try {
-      const { file, preview } = await processNativeImage(dataUrl, {
-        maxWidth: compressionMaxWidth,
-        quality: compressionQuality
-      });
-      
-      if (multiple) {
-        const newFiles = [...files, file];
-        const newPreviews = [...previews, preview];
-        setFiles(newFiles);
-        setPreviews(newPreviews);
-        onMultipleImages?.(newFiles, newPreviews);
-      } else {
-        setFiles([file]);
-        setPreviews([preview]);
-        onImageCaptured(file, preview);
+  const processAndAddImage = useCallback(
+    async (dataUrl: string) => {
+      setIsProcessing(true);
+      try {
+        const { file, preview } = await processNativeImage(dataUrl, {
+          maxWidth: compressionMaxWidth,
+          quality: compressionQuality,
+        });
+
+        if (multiple) {
+          const newFiles = [...files, file];
+          const newPreviews = [...previews, preview];
+          setFiles(newFiles);
+          setPreviews(newPreviews);
+          onMultipleImages?.(newFiles, newPreviews);
+        } else {
+          setFiles([file]);
+          setPreviews([preview]);
+          onImageCaptured(file, preview);
+        }
+      } finally {
+        setIsProcessing(false);
       }
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [files, previews, multiple, compressionMaxWidth, compressionQuality, onImageCaptured, onMultipleImages]);
+    },
+    [
+      files,
+      previews,
+      multiple,
+      compressionMaxWidth,
+      compressionQuality,
+      onImageCaptured,
+      onMultipleImages,
+    ]
+  );
 
   const handleTakePhoto = async () => {
     setShowSourceMenu(false);
@@ -125,8 +136,8 @@ export function NativeCameraUpload({
         const preview = await fileToDataUrl(compressedFile);
 
         if (multiple) {
-          setFiles(prev => [...prev, compressedFile]);
-          setPreviews(prev => [...prev, preview]);
+          setFiles((prev) => [...prev, compressedFile]);
+          setPreviews((prev) => [...prev, preview]);
         } else {
           setFiles([compressedFile]);
           setPreviews([preview]);
@@ -167,7 +178,11 @@ export function NativeCameraUpload({
       <div className="grid grid-cols-3 gap-2 mt-3">
         {previews.map((preview, index) => (
           <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
-            <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+            <img
+              src={preview}
+              alt={`Preview ${index + 1}`}
+              className="w-full h-full object-cover"
+            />
             <button
               type="button"
               onClick={() => removeImage(index)}
@@ -210,7 +225,7 @@ export function NativeCameraUpload({
   // Button variant
   if (variant === 'button') {
     return (
-      <div className={cn("relative", className)}>
+      <div className={cn('relative', className)}>
         {isNative ? (
           <>
             <Button
@@ -263,7 +278,7 @@ export function NativeCameraUpload({
   // Inline variant
   if (variant === 'inline') {
     return (
-      <div className={cn("relative", className)}>
+      <div className={cn('relative', className)}>
         {isNative ? (
           <>
             <Button
@@ -315,16 +330,16 @@ export function NativeCameraUpload({
 
   // Card variant (default)
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn('relative', className)}>
       {isNative ? (
         <>
           <div
             onClick={() => !isDisabled && canAddMore && setShowSourceMenu(!showSourceMenu)}
             className={cn(
-              "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors",
+              'border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors',
               isDisabled || !canAddMore
-                ? "border-muted bg-muted/50 cursor-not-allowed"
-                : "border-primary/30 hover:border-primary hover:bg-primary/5"
+                ? 'border-muted bg-muted/50 cursor-not-allowed'
+                : 'border-primary/30 hover:border-primary hover:bg-primary/5'
             )}
           >
             <div className="flex flex-col items-center gap-3">
@@ -353,10 +368,10 @@ export function NativeCameraUpload({
           <div
             onClick={() => !isDisabled && canAddMore && fileInputRef.current?.click()}
             className={cn(
-              "border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors",
+              'border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors',
               isDisabled || !canAddMore
-                ? "border-muted bg-muted/50 cursor-not-allowed"
-                : "border-primary/30 hover:border-primary hover:bg-primary/5"
+                ? 'border-muted bg-muted/50 cursor-not-allowed'
+                : 'border-primary/30 hover:border-primary hover:bg-primary/5'
             )}
           >
             <div className="flex flex-col items-center gap-3">
@@ -388,9 +403,7 @@ export function NativeCameraUpload({
           />
         </>
       )}
-      {error && (
-        <p className="text-sm text-destructive mt-2">{error}</p>
-      )}
+      {error && <p className="text-sm text-destructive mt-2">{error}</p>}
       {renderPreviews()}
     </div>
   );

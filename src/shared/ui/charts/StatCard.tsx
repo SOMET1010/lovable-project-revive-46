@@ -30,7 +30,8 @@ export function StatCard({ title, value, icon: Icon, growth, suffix, className }
     return 'text-muted-foreground bg-muted';
   };
 
-  const GrowthIcon = growth && growth > 0 ? TrendingUp : growth && growth < 0 ? TrendingDown : Minus;
+  const GrowthIcon =
+    growth && growth > 0 ? TrendingUp : growth && growth < 0 ? TrendingDown : Minus;
 
   return (
     <div className={cn('bg-card rounded-2xl border border-border p-6 shadow-sm', className)}>
@@ -39,7 +40,9 @@ export function StatCard({ title, value, icon: Icon, growth, suffix, className }
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="mt-2 text-3xl font-bold text-foreground">
             {formatValue(value)}
-            {suffix && <span className="ml-1 text-lg font-normal text-muted-foreground">{suffix}</span>}
+            {suffix && (
+              <span className="ml-1 text-lg font-normal text-muted-foreground">{suffix}</span>
+            )}
           </p>
         </div>
         <div className="rounded-xl bg-primary/10 p-3">
@@ -49,9 +52,15 @@ export function StatCard({ title, value, icon: Icon, growth, suffix, className }
 
       {growth !== undefined && (
         <div className="mt-4 flex items-center gap-2">
-          <span className={cn('inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium', getGrowthColor(growth))}>
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium',
+              getGrowthColor(growth)
+            )}
+          >
             <GrowthIcon className="h-3 w-3" />
-            {growth > 0 ? '+' : ''}{growth}%
+            {growth > 0 ? '+' : ''}
+            {growth}%
           </span>
           <span className="text-xs text-muted-foreground">vs période précédente</span>
         </div>

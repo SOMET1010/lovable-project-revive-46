@@ -5,12 +5,14 @@ Ce dossier contient tous les services, types et utilitaires pour le système de 
 ## 📁 Structure des Fichiers
 
 ### Types TypeScript
+
 - **`src/types/application.ts`** - Types et interfaces principales pour les candidatures
   - Interface `Application` principale
   - Types pour les statuts, étapes, documents
   - Types pour les formulaires et validations
 
 ### Services
+
 - **`src/services/applicationService.ts`** - Service API et logique métier
   - CRUD des candidatures
   - Gestion des documents (upload/suppression)
@@ -18,6 +20,7 @@ Ce dossier contient tous les services, types et utilitaires pour le système de 
   - Statistiques et rapports
 
 ### Utilitaires
+
 - **`src/utils/applicationHelpers.ts`** - Fonctions utilitaires et helpers
   - Validation des formulaires
   - Calculs de progression
@@ -25,6 +28,7 @@ Ce dossier contient tous les services, types et utilitaires pour le système de 
   - Export/import des candidatures
 
 ### Hooks Personnalisés
+
 - **`src/hooks/useApplications.ts`** - Hooks React pour la gestion d'état
   - `useApplications()` - Hook principal avec filtres/pagination
   - `useApplication()` - Gestion d'une candidature spécifique
@@ -32,12 +36,14 @@ Ce dossier contient tous les services, types et utilitaires pour le système de 
   - `useApplicationForm()` - Gestion des formulaires
 
 ### Constantes
+
 - **`src/constants/applicationStatuses.ts`** - Constantes pour les statuts
 - **`src/constants/applicationSteps.ts`** - Constantes pour les étapes du formulaire
 
 ## 🚀 Fonctionnalités Principales
 
 ### 1. Gestion des Candidatures
+
 ```typescript
 // Créer une candidature
 const { createApplication } = useApplications();
@@ -46,11 +52,12 @@ await createApplication(propertyId, applicantId, formData);
 // Récupérer les candidatures avec filtres
 const { applications, loading } = useApplications({
   filters: { status: ['en_attente', 'en_cours'] },
-  pagination: { page: 1, pageSize: 10 }
+  pagination: { page: 1, pageSize: 10 },
 });
 ```
 
 ### 2. Système de Scoring Automatique
+
 - Score financier (40%)
 - Score de stabilité professionnelle (30%)
 - Score des garanties (20%)
@@ -58,6 +65,7 @@ const { applications, loading } = useApplications({
 - Niveaux: faible, moyen, bon, excellent
 
 ### 3. Workflow par Étapes
+
 1. **Informations personnelles** (10 min)
 2. **Situation financière** (15 min)
 3. **Garanties** (5 min)
@@ -65,6 +73,7 @@ const { applications, loading } = useApplications({
 5. **Validation** (3 min)
 
 ### 4. Gestion des Documents
+
 - Upload sécurisé vers Supabase Storage
 - Validation des formats (JPG, PNG, WEBP, PDF)
 - Taille maximum: 5MB par fichier
@@ -72,17 +81,18 @@ const { applications, loading } = useApplications({
 
 ## 📊 Statuts de Candidature
 
-| Statut | Description | Couleur | Actions |
-|--------|-------------|---------|---------|
-| `en_attente` | En attente de traitement | Jaune | Éditer, Supprimer |
-| `en_cours` | En cours d'examen | Bleu | Aucune |
-| `acceptee` | Acceptée | Vert | Aucune |
-| `refusee` | Refusée | Rouge | Supprimer |
-| `annulee` | Annulée | Gris | Supprimer |
+| Statut       | Description              | Couleur | Actions           |
+| ------------ | ------------------------ | ------- | ----------------- |
+| `en_attente` | En attente de traitement | Jaune   | Éditer, Supprimer |
+| `en_cours`   | En cours d'examen        | Bleu    | Aucune            |
+| `acceptee`   | Acceptée                 | Vert    | Aucune            |
+| `refusee`    | Refusée                  | Rouge   | Supprimer         |
+| `annulee`    | Annulée                  | Gris    | Supprimer         |
 
 ## 🔧 Utilisation
 
 ### Validation des Formulaires
+
 ```typescript
 import { validateApplicationForm } from '@/utils/applicationHelpers';
 
@@ -93,6 +103,7 @@ if (Object.keys(errors).length === 0) {
 ```
 
 ### Calcul de Score
+
 ```typescript
 import { calculateApplicationScore } from '@/utils/applicationHelpers';
 
@@ -101,12 +112,14 @@ console.log(`Score global: ${score.globalScore}/100`);
 ```
 
 ### Upload de Documents
+
 ```typescript
 const { uploadDocument } = useDocumentUpload();
 const document = await uploadDocument(applicationId, file, 'piece_identite');
 ```
 
 ### Statistiques
+
 ```typescript
 const { stats, loading } = useApplicationStats();
 console.log(`Taux de conversion: ${stats?.conversionRate}%`);
@@ -115,21 +128,25 @@ console.log(`Taux de conversion: ${stats?.conversionRate}%`);
 ## 🏗️ Architecture
 
 ### Service Layer
+
 - Isolation de la logique métier
 - Gestion des erreurs centralisée
 - Intégration avec Supabase
 
 ### Hook Layer
+
 - Gestion d'état avec React Query
 - Mutations optimisées
 - Cache intelligent
 
 ### Helper Layer
+
 - Fonctions réutilisables
 - Validation côté client
 - Formatage et conversions
 
 ### Constants Layer
+
 - Configuration centralisée
 - Éviter les magic numbers
 - Faciliter la maintenance
@@ -137,16 +154,19 @@ console.log(`Taux de conversion: ${stats?.conversionRate}%`);
 ## 🔒 Validation et Sécurité
 
 ### Validation Côté Client
+
 - Schemas Yup/Zod (à implémenter)
 - Messages d'erreur localisés
 - Feedback utilisateur en temps réel
 
 ### Validation Côté Serveur
+
 - Validation dans les services
 - Vérification des permissions
 - Sanitisation des données
 
 ### Sécurité des Documents
+
 - Upload sécurisé
 - Validation des types MIME
 - Scan antivirus (à configurer)
@@ -155,6 +175,7 @@ console.log(`Taux de conversion: ${stats?.conversionRate}%`);
 ## 📈 Métriques et Analytics
 
 ### Statistiques Disponibles
+
 - Total des candidatures
 - Répartition par statut
 - Score moyen
@@ -162,6 +183,7 @@ console.log(`Taux de conversion: ${stats?.conversionRate}%`);
 - Temps de traitement moyen
 
 ### Dashboards
+
 - Vue d'ensemble des candidatures
 - Analyse des tendances
 - Performance des agents
@@ -170,17 +192,20 @@ console.log(`Taux de conversion: ${stats?.conversionRate}%`);
 ## 🚀 Prochaines Étapes
 
 ### Phase 1 - Intégration
+
 - [ ] Créer les tables Supabase
 - [ ] Configurer les politiques RLS
 - [ ] Intégrer les hooks dans les composants
 
 ### Phase 2 - Fonctionnalités Avancées
+
 - [ ] Workflow d'approbation
 - [ ] Notifications en temps réel
 - [ ] Scoring avancé avec IA
 - [ ] Génération automatique de contrats
 
 ### Phase 3 - Optimisation
+
 - [ ] Cache intelligent
 - [ ] Compression d'images
 - [ ] Préchargement des données
@@ -189,14 +214,9 @@ console.log(`Taux de conversion: ${stats?.conversionRate}%`);
 ## 📚 Exemples d'Utilisation
 
 ### Formulaire Complet
+
 ```typescript
-const { 
-  formData, 
-  currentStep, 
-  updatePersonalInfo,
-  nextStep,
-  isFormValid 
-} = useApplicationForm();
+const { formData, currentStep, updatePersonalInfo, nextStep, isFormValid } = useApplicationForm();
 
 useEffect(() => {
   if (isFormValid()) {
@@ -206,12 +226,9 @@ useEffect(() => {
 ```
 
 ### Gestion des Documents
+
 ```typescript
-const { 
-  uploadDocument, 
-  isUploading,
-  uploadError 
-} = useDocumentUpload();
+const { uploadDocument, isUploading, uploadError } = useDocumentUpload();
 
 const handleFileUpload = async (file: File) => {
   try {
@@ -223,14 +240,9 @@ const handleFileUpload = async (file: File) => {
 ```
 
 ### Filtrage et Recherche
+
 ```typescript
-const { 
-  applications, 
-  filters, 
-  updateFilters,
-  pagination,
-  updatePagination 
-} = useApplications();
+const { applications, filters, updateFilters, pagination, updatePagination } = useApplications();
 
 const handleSearch = (query: string) => {
   updateFilters({ searchQuery: query });
@@ -244,6 +256,7 @@ const handleStatusFilter = (statuses: ApplicationStatus[]) => {
 ## 🔧 Configuration
 
 ### Variables d'Environnement
+
 ```bash
 # Supabase
 VITE_SUPABASE_URL=your_supabase_url
@@ -255,6 +268,7 @@ VITE_ALLOWED_FILE_TYPES=image/jpeg,image/png,image/webp,application/pdf
 ```
 
 ### Configuration Supabase
+
 ```sql
 -- Tables nécessaires
 CREATE TABLE applications (...);

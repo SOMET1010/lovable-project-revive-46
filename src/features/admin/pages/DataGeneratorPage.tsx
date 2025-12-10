@@ -1,5 +1,18 @@
 import { useState } from 'react';
-import { Eye, ArrowLeft, Home, FileText, RefreshCw, CreditCard, CheckCircle, AlertCircle, Loader2, Database, Trash2, ShieldCheck } from 'lucide-react';
+import {
+  Eye,
+  ArrowLeft,
+  Home,
+  FileText,
+  RefreshCw,
+  CreditCard,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Database,
+  Trash2,
+  ShieldCheck,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/shared/ui';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,7 +30,7 @@ export default function DataGeneratorPage() {
   const [results, setResults] = useState<Record<string, GenerationResult>>({});
 
   const addResult = (key: string, result: GenerationResult) => {
-    setResults(prev => ({ ...prev, [key]: result }));
+    setResults((prev) => ({ ...prev, [key]: result }));
   };
 
   // Générer des propriétés de test
@@ -31,43 +44,141 @@ export default function DataGeneratorPage() {
       }
 
       const properties = [
-        { title: 'Villa Moderne 4 Chambres', city: 'Abidjan', neighborhood: 'Cocody Angré', property_type: 'house', monthly_rent: 450000, bedrooms: 4, bathrooms: 3, surface_area: 250, status: 'disponible' },
-        { title: 'Appartement 3 Pièces Vue Lagune', city: 'Abidjan', neighborhood: 'Marcory Zone 4', property_type: 'apartment', monthly_rent: 280000, bedrooms: 2, bathrooms: 2, surface_area: 95, status: 'disponible' },
-        { title: 'Studio Meublé Centre-Ville', city: 'Abidjan', neighborhood: 'Plateau', property_type: 'studio', monthly_rent: 150000, bedrooms: 1, bathrooms: 1, surface_area: 35, status: 'disponible' },
-        { title: 'Duplex Luxueux Riviera', city: 'Abidjan', neighborhood: 'Riviera Palmeraie', property_type: 'apartment', monthly_rent: 650000, bedrooms: 5, bathrooms: 4, surface_area: 320, status: 'disponible' },
-        { title: 'Villa Familiale Bingerville', city: 'Bingerville', neighborhood: 'Centre', property_type: 'house', monthly_rent: 350000, bedrooms: 4, bathrooms: 2, surface_area: 200, status: 'disponible' },
-        { title: 'Appartement Économique Yopougon', city: 'Abidjan', neighborhood: 'Yopougon Niangon', property_type: 'apartment', monthly_rent: 85000, bedrooms: 2, bathrooms: 1, surface_area: 55, status: 'disponible' },
-        { title: 'Penthouse Premium II Plateaux', city: 'Abidjan', neighborhood: 'Cocody II Plateaux', property_type: 'apartment', monthly_rent: 950000, bedrooms: 4, bathrooms: 3, surface_area: 280, status: 'disponible' },
-        { title: 'Maison Traditionnelle Rénovée', city: 'Yamoussoukro', neighborhood: 'Centre', property_type: 'house', monthly_rent: 180000, bedrooms: 3, bathrooms: 2, surface_area: 150, status: 'disponible' },
-        { title: 'Appartement Standing Deux Plateaux', city: 'Abidjan', neighborhood: 'Deux Plateaux Vallon', property_type: 'apartment', monthly_rent: 420000, bedrooms: 3, bathrooms: 2, surface_area: 120, status: 'loue' },
-        { title: 'Villa avec Piscine Riviera 3', city: 'Abidjan', neighborhood: 'Riviera 3', property_type: 'house', monthly_rent: 800000, bedrooms: 5, bathrooms: 4, surface_area: 400, status: 'disponible' },
+        {
+          title: 'Villa Moderne 4 Chambres',
+          city: 'Abidjan',
+          neighborhood: 'Cocody Angré',
+          property_type: 'house',
+          monthly_rent: 450000,
+          bedrooms: 4,
+          bathrooms: 3,
+          surface_area: 250,
+          status: 'disponible',
+        },
+        {
+          title: 'Appartement 3 Pièces Vue Lagune',
+          city: 'Abidjan',
+          neighborhood: 'Marcory Zone 4',
+          property_type: 'apartment',
+          monthly_rent: 280000,
+          bedrooms: 2,
+          bathrooms: 2,
+          surface_area: 95,
+          status: 'disponible',
+        },
+        {
+          title: 'Studio Meublé Centre-Ville',
+          city: 'Abidjan',
+          neighborhood: 'Plateau',
+          property_type: 'studio',
+          monthly_rent: 150000,
+          bedrooms: 1,
+          bathrooms: 1,
+          surface_area: 35,
+          status: 'disponible',
+        },
+        {
+          title: 'Duplex Luxueux Riviera',
+          city: 'Abidjan',
+          neighborhood: 'Riviera Palmeraie',
+          property_type: 'apartment',
+          monthly_rent: 650000,
+          bedrooms: 5,
+          bathrooms: 4,
+          surface_area: 320,
+          status: 'disponible',
+        },
+        {
+          title: 'Villa Familiale Bingerville',
+          city: 'Bingerville',
+          neighborhood: 'Centre',
+          property_type: 'house',
+          monthly_rent: 350000,
+          bedrooms: 4,
+          bathrooms: 2,
+          surface_area: 200,
+          status: 'disponible',
+        },
+        {
+          title: 'Appartement Économique Yopougon',
+          city: 'Abidjan',
+          neighborhood: 'Yopougon Niangon',
+          property_type: 'apartment',
+          monthly_rent: 85000,
+          bedrooms: 2,
+          bathrooms: 1,
+          surface_area: 55,
+          status: 'disponible',
+        },
+        {
+          title: 'Penthouse Premium II Plateaux',
+          city: 'Abidjan',
+          neighborhood: 'Cocody II Plateaux',
+          property_type: 'apartment',
+          monthly_rent: 950000,
+          bedrooms: 4,
+          bathrooms: 3,
+          surface_area: 280,
+          status: 'disponible',
+        },
+        {
+          title: 'Maison Traditionnelle Rénovée',
+          city: 'Yamoussoukro',
+          neighborhood: 'Centre',
+          property_type: 'house',
+          monthly_rent: 180000,
+          bedrooms: 3,
+          bathrooms: 2,
+          surface_area: 150,
+          status: 'disponible',
+        },
+        {
+          title: 'Appartement Standing Deux Plateaux',
+          city: 'Abidjan',
+          neighborhood: 'Deux Plateaux Vallon',
+          property_type: 'apartment',
+          monthly_rent: 420000,
+          bedrooms: 3,
+          bathrooms: 2,
+          surface_area: 120,
+          status: 'loue',
+        },
+        {
+          title: 'Villa avec Piscine Riviera 3',
+          city: 'Abidjan',
+          neighborhood: 'Riviera 3',
+          property_type: 'house',
+          monthly_rent: 800000,
+          bedrooms: 5,
+          bathrooms: 4,
+          surface_area: 400,
+          status: 'disponible',
+        },
       ];
 
       let count = 0;
       for (const prop of properties) {
-        const { error } = await supabase
-          .from('properties')
-          .insert({
-            owner_id: user.id,
-            title: prop.title,
-            city: prop.city,
-            neighborhood: prop.neighborhood,
-            property_type: prop.property_type,
-            monthly_rent: prop.monthly_rent,
-            bedrooms: prop.bedrooms,
-            bathrooms: prop.bathrooms,
-            surface_area: prop.surface_area,
-            status: prop.status,
-            address: `${prop.neighborhood}, ${prop.city}`,
-            deposit_amount: prop.monthly_rent * 2,
-            is_furnished: Math.random() > 0.5,
-            has_parking: Math.random() > 0.3,
-            has_garden: prop.property_type === 'house' && Math.random() > 0.5,
-            has_ac: Math.random() > 0.4,
-            latitude: 5.3364 + (Math.random() - 0.5) * 0.1,
-            longitude: -4.0266 + (Math.random() - 0.5) * 0.1,
-            description: `Magnifique ${prop.property_type === 'house' ? 'villa' : prop.property_type} situé(e) à ${prop.neighborhood}. Idéal pour ${prop.bedrooms > 2 ? 'famille' : 'couple ou professionnel'}. Proche des commodités.`,
-          });
+        const { error } = await supabase.from('properties').insert({
+          owner_id: user.id,
+          title: prop.title,
+          city: prop.city,
+          neighborhood: prop.neighborhood,
+          property_type: prop.property_type,
+          monthly_rent: prop.monthly_rent,
+          bedrooms: prop.bedrooms,
+          bathrooms: prop.bathrooms,
+          surface_area: prop.surface_area,
+          status: prop.status,
+          address: `${prop.neighborhood}, ${prop.city}`,
+          deposit_amount: prop.monthly_rent * 2,
+          is_furnished: Math.random() > 0.5,
+          has_parking: Math.random() > 0.3,
+          has_garden: prop.property_type === 'house' && Math.random() > 0.5,
+          has_ac: Math.random() > 0.4,
+          latitude: 5.3364 + (Math.random() - 0.5) * 0.1,
+          longitude: -4.0266 + (Math.random() - 0.5) * 0.1,
+          description: `Magnifique ${prop.property_type === 'house' ? 'villa' : prop.property_type} situé(e) à ${prop.neighborhood}. Idéal pour ${prop.bedrooms > 2 ? 'famille' : 'couple ou professionnel'}. Proche des commodités.`,
+        });
 
         if (!error) count++;
       }
@@ -98,7 +209,10 @@ export default function DataGeneratorPage() {
         .limit(5);
 
       if (!properties || properties.length === 0) {
-        addResult('leases', { success: false, message: 'Aucune propriété disponible. Créez d\'abord des propriétés.' });
+        addResult('leases', {
+          success: false,
+          message: "Aucune propriété disponible. Créez d'abord des propriétés.",
+        });
         return;
       }
 
@@ -118,7 +232,7 @@ export default function DataGeneratorPage() {
       for (let i = 0; i < Math.min(properties.length, leaseStatuses.length); i++) {
         const prop = properties[i];
         const leaseStatus = leaseStatuses[i];
-        
+
         if (!prop || !leaseStatus) continue;
 
         const contractNumber = `MT-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(count + 1).padStart(5, '0')}`;
@@ -149,14 +263,16 @@ export default function DataGeneratorPage() {
           insertData['cryptoneo_operation_id'] = `CRYPTO-TEST-${Date.now()}`;
         }
 
-        const { error } = await supabase
-          .from('lease_contracts')
-          .insert(insertData as never);
+        const { error } = await supabase.from('lease_contracts').insert(insertData as never);
 
         if (!error) count++;
       }
 
-      addResult('leases', { success: true, message: `${count} contrats créés avec différents statuts de signature`, count });
+      addResult('leases', {
+        success: true,
+        message: `${count} contrats créés avec différents statuts de signature`,
+        count,
+      });
     } catch (error) {
       addResult('leases', { success: false, message: `Erreur: ${error}` });
     } finally {
@@ -180,7 +296,10 @@ export default function DataGeneratorPage() {
         .limit(3);
 
       if (!leases || leases.length === 0) {
-        addResult('payments', { success: false, message: 'Aucun contrat actif. Créez d\'abord des contrats.' });
+        addResult('payments', {
+          success: false,
+          message: "Aucun contrat actif. Créez d'abord des contrats.",
+        });
         return;
       }
 
@@ -192,23 +311,22 @@ export default function DataGeneratorPage() {
           const dueDate = new Date();
           dueDate.setMonth(dueDate.getMonth() - month);
 
-          const status = month === 0 ? 'pending' : paymentStatuses[Math.floor(Math.random() * 2)] ?? 'pending';
+          const status =
+            month === 0 ? 'pending' : (paymentStatuses[Math.floor(Math.random() * 2)] ?? 'pending');
 
-          const { error } = await supabase
-            .from('payments')
-            .insert({
-              contract_id: lease.id,
-              property_id: lease.property_id,
-              payer_id: lease.tenant_id,
-              receiver_id: lease.owner_id,
-              amount: lease.monthly_rent,
-              payment_type: 'loyer',
-              status,
-              due_date: dueDate.toISOString().split('T')[0],
-              paid_date: status === 'completed' ? dueDate.toISOString() : null,
-              payment_method: status === 'completed' ? 'mobile_money' : null,
-              transaction_ref: status === 'completed' ? `TXN-${Date.now()}-${count}` : null,
-            });
+          const { error } = await supabase.from('payments').insert({
+            contract_id: lease.id,
+            property_id: lease.property_id,
+            payer_id: lease.tenant_id,
+            receiver_id: lease.owner_id,
+            amount: lease.monthly_rent,
+            payment_type: 'loyer',
+            status,
+            due_date: dueDate.toISOString().split('T')[0],
+            paid_date: status === 'completed' ? dueDate.toISOString() : null,
+            payment_method: status === 'completed' ? 'mobile_money' : null,
+            transaction_ref: status === 'completed' ? `TXN-${Date.now()}-${count}` : null,
+          });
 
           if (!error) count++;
         }
@@ -232,7 +350,7 @@ export default function DataGeneratorPage() {
       }
 
       const updates: Record<string, unknown> = {};
-      
+
       switch (level) {
         case 'none':
           updates['oneci_verified'] = false;
@@ -264,10 +382,7 @@ export default function DataGeneratorPage() {
           break;
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('user_id', user.id);
+      const { error } = await supabase.from('profiles').update(updates).eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -275,10 +390,13 @@ export default function DataGeneratorPage() {
         none: 'Non vérifié',
         oneci: 'ONECI seulement',
         oneci_cnam: 'ONECI + CNAM',
-        full: 'Complètement vérifié'
+        full: 'Complètement vérifié',
       };
 
-      addResult(`profile_${level}`, { success: true, message: `Profil mis à jour: ${labels[level]}` });
+      addResult(`profile_${level}`, {
+        success: true,
+        message: `Profil mis à jour: ${labels[level]}`,
+      });
     } catch (error) {
       addResult(`profile_${level}`, { success: false, message: `Erreur: ${error}` });
     } finally {
@@ -291,9 +409,9 @@ export default function DataGeneratorPage() {
     setGenerating('full');
     try {
       await generateProperties();
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
       await generateLeases();
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500));
       await generatePayments();
 
       addResult('full', { success: true, message: 'Scénario complet généré avec succès!' });
@@ -306,8 +424,13 @@ export default function DataGeneratorPage() {
 
   // Nettoyer les données de test
   const cleanupTestData = async () => {
-    if (!confirm('⚠️ Supprimer TOUTES vos données de test (propriétés, contrats, paiements)? Cette action est irréversible.')) return;
-    
+    if (
+      !confirm(
+        '⚠️ Supprimer TOUTES vos données de test (propriétés, contrats, paiements)? Cette action est irréversible.'
+      )
+    )
+      return;
+
     setGenerating('cleanup');
     try {
       if (!user?.id) {
@@ -331,7 +454,9 @@ export default function DataGeneratorPage() {
   const ResultBadge = ({ result }: { result?: GenerationResult }) => {
     if (!result) return null;
     return (
-      <div className={`flex items-center gap-2 text-sm mt-2 ${result.success ? 'text-green-600' : 'text-red-600'}`}>
+      <div
+        className={`flex items-center gap-2 text-sm mt-2 ${result.success ? 'text-green-600' : 'text-red-600'}`}
+      >
         {result.success ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
         <span>{result.message}</span>
       </div>
@@ -356,7 +481,9 @@ export default function DataGeneratorPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Data Generator</h1>
-            <p className="text-muted-foreground">Génération de données de test pour tester les fonctionnalités métier</p>
+            <p className="text-muted-foreground">
+              Génération de données de test pour tester les fonctionnalités métier
+            </p>
           </div>
         </div>
         <Link to="/admin/tableau-de-bord">
@@ -372,7 +499,9 @@ export default function DataGeneratorPage() {
         <div className="flex items-center gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600" />
           <p className="text-amber-800 font-medium">
-            ⚠️ Outil de développement - Les données générées permettent de tester : Signature électronique (CryptoNeo), Vérification faciale (NeoFace), Parcours complet locataire/propriétaire
+            ⚠️ Outil de développement - Les données générées permettent de tester : Signature
+            électronique (CryptoNeo), Vérification faciale (NeoFace), Parcours complet
+            locataire/propriétaire
           </p>
         </div>
       </div>
@@ -393,12 +522,12 @@ export default function DataGeneratorPage() {
           <p className="text-sm text-muted-foreground mb-4">
             Villas, appartements, studios dans différentes villes et quartiers.
           </p>
-          <Button 
-            onClick={generateProperties} 
-            disabled={generating !== null}
-            className="w-full"
-          >
-            {generating === 'properties' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Home className="w-4 h-4 mr-2" />}
+          <Button onClick={generateProperties} disabled={generating !== null} className="w-full">
+            {generating === 'properties' ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <Home className="w-4 h-4 mr-2" />
+            )}
             Générer Propriétés
           </Button>
           <ResultBadge result={results['properties']} />
@@ -418,12 +547,12 @@ export default function DataGeneratorPage() {
           <p className="text-sm text-muted-foreground mb-4">
             Brouillon, en attente, partiellement signé, actif, signature CryptoNeo pending.
           </p>
-          <Button 
-            onClick={generateLeases} 
-            disabled={generating !== null}
-            className="w-full"
-          >
-            {generating === 'leases' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileText className="w-4 h-4 mr-2" />}
+          <Button onClick={generateLeases} disabled={generating !== null} className="w-full">
+            {generating === 'leases' ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <FileText className="w-4 h-4 mr-2" />
+            )}
             Générer Contrats
           </Button>
           <ResultBadge result={results['leases']} />
@@ -443,12 +572,12 @@ export default function DataGeneratorPage() {
           <p className="text-sm text-muted-foreground mb-4">
             Paiements effectués, en attente et échoués pour chaque contrat actif.
           </p>
-          <Button 
-            onClick={generatePayments} 
-            disabled={generating !== null}
-            className="w-full"
-          >
-            {generating === 'payments' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <CreditCard className="w-4 h-4 mr-2" />}
+          <Button onClick={generatePayments} disabled={generating !== null} className="w-full">
+            {generating === 'payments' ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <CreditCard className="w-4 h-4 mr-2" />
+            )}
             Générer Paiements
           </Button>
           <ResultBadge result={results['payments']} />
@@ -468,12 +597,16 @@ export default function DataGeneratorPage() {
           <p className="text-sm text-muted-foreground mb-4">
             Génère propriétés, contrats et paiements en séquence.
           </p>
-          <Button 
-            onClick={generateFullScenario} 
+          <Button
+            onClick={generateFullScenario}
             disabled={generating !== null}
             className="w-full bg-primary hover:bg-primary/90"
           >
-            {generating === 'full' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <RefreshCw className="w-4 h-4 mr-2" />}
+            {generating === 'full' ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <RefreshCw className="w-4 h-4 mr-2" />
+            )}
             Générer Tout
           </Button>
           <ResultBadge result={results['full']} />
@@ -488,12 +621,14 @@ export default function DataGeneratorPage() {
           </div>
           <div>
             <h3 className="font-semibold text-foreground">Niveau de vérification du profil</h3>
-            <p className="text-sm text-muted-foreground">Modifier votre niveau de vérification pour tester différents scénarios</p>
+            <p className="text-sm text-muted-foreground">
+              Modifier votre niveau de vérification pour tester différents scénarios
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Button 
-            onClick={() => updateProfileVerification('none')} 
+          <Button
+            onClick={() => updateProfileVerification('none')}
             disabled={generating !== null}
             variant="outline"
             className="flex-col h-auto py-3"
@@ -502,8 +637,8 @@ export default function DataGeneratorPage() {
             <span className="text-xs">Non vérifié</span>
             <span className="text-xs text-muted-foreground">Score: 20</span>
           </Button>
-          <Button 
-            onClick={() => updateProfileVerification('oneci')} 
+          <Button
+            onClick={() => updateProfileVerification('oneci')}
             disabled={generating !== null}
             variant="outline"
             className="flex-col h-auto py-3"
@@ -512,18 +647,20 @@ export default function DataGeneratorPage() {
             <span className="text-xs">ONECI seulement</span>
             <span className="text-xs text-muted-foreground">Score: 45</span>
           </Button>
-          <Button 
-            onClick={() => updateProfileVerification('oneci_cnam')} 
+          <Button
+            onClick={() => updateProfileVerification('oneci_cnam')}
             disabled={generating !== null}
             variant="outline"
             className="flex-col h-auto py-3"
           >
-            {generating === 'profile_oneci_cnam' && <Loader2 className="w-4 h-4 animate-spin mb-1" />}
+            {generating === 'profile_oneci_cnam' && (
+              <Loader2 className="w-4 h-4 animate-spin mb-1" />
+            )}
             <span className="text-xs">ONECI + CNAM</span>
             <span className="text-xs text-muted-foreground">Score: 65</span>
           </Button>
-          <Button 
-            onClick={() => updateProfileVerification('full')} 
+          <Button
+            onClick={() => updateProfileVerification('full')}
             disabled={generating !== null}
             variant="outline"
             className="flex-col h-auto py-3 border-green-300 text-green-700"
@@ -533,7 +670,7 @@ export default function DataGeneratorPage() {
             <span className="text-xs text-muted-foreground">Score: 92</span>
           </Button>
         </div>
-        {['none', 'oneci', 'oneci_cnam', 'full'].map(level => (
+        {['none', 'oneci', 'oneci_cnam', 'full'].map((level) => (
           <ResultBadge key={level} result={results[`profile_${level}`]} />
         ))}
       </div>
@@ -547,16 +684,22 @@ export default function DataGeneratorPage() {
             </div>
             <div>
               <h3 className="font-semibold text-red-900">Nettoyer les données de test</h3>
-              <p className="text-sm text-red-700">Supprime toutes vos propriétés, contrats et paiements</p>
+              <p className="text-sm text-red-700">
+                Supprime toutes vos propriétés, contrats et paiements
+              </p>
             </div>
           </div>
-          <Button 
-            onClick={cleanupTestData} 
+          <Button
+            onClick={cleanupTestData}
             disabled={generating !== null}
             variant="outline"
             className="border-red-300 text-red-700 hover:bg-red-100"
           >
-            {generating === 'cleanup' ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+            {generating === 'cleanup' ? (
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+            ) : (
+              <Trash2 className="w-4 h-4 mr-2" />
+            )}
             Nettoyer
           </Button>
         </div>
@@ -571,7 +714,9 @@ export default function DataGeneratorPage() {
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           <div>
-            <h4 className="font-medium text-foreground mb-2">🔐 Signature Électronique (CryptoNeo)</h4>
+            <h4 className="font-medium text-foreground mb-2">
+              🔐 Signature Électronique (CryptoNeo)
+            </h4>
             <ol className="list-decimal list-inside space-y-1 text-muted-foreground">
               <li>Générer des contrats avec le bouton ci-dessus</li>
               <li>Aller sur un contrat "en_attente_signature"</li>

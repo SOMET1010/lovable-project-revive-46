@@ -4,7 +4,7 @@ const legendItems = [
   { label: 'Urgente', color: 'bg-red-500' },
   { label: 'Haute', color: 'bg-orange-500' },
   { label: 'Moyenne', color: 'bg-amber-500' },
-  { label: 'Basse', color: 'bg-green-500' }
+  { label: 'Basse', color: 'bg-green-500' },
 ];
 
 export default function CalendarLegend() {

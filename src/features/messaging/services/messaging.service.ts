@@ -59,10 +59,12 @@ class MessagingService {
   async getConversations(userId: string): Promise<Conversation[]> {
     const { data, error } = await supabase
       .from('conversations')
-      .select(`
+      .select(
+        `
         *,
         property:properties!conversations_property_id_fkey(id, title)
-      `)
+      `
+      )
       .or(`participant1_id.eq.${userId},participant2_id.eq.${userId}`)
       .order('last_message_at', { ascending: false });
 
@@ -81,19 +83,15 @@ class MessagingService {
     );
 
     const { data: propertiesData } = propertyIds.length
-      ? await supabase
-          .from('properties')
-          .select('id, title')
-          .in('id', propertyIds)
+      ? await supabase.from('properties').select('id, title').in('id', propertyIds)
       : { data: [] as any };
 
     const propertiesMap = new Map((propertiesData ?? []).map((p: any) => [p.id, p]));
 
     const conversationsWithDetails = await Promise.all(
       (data ?? []).map(async (conv) => {
-        const otherParticipantId = conv.participant1_id === userId 
-          ? conv.participant2_id 
-          : conv.participant1_id;
+        const otherParticipantId =
+          conv.participant1_id === userId ? conv.participant2_id : conv.participant1_id;
 
         // Get other participant profile
         const { data: profile } = await supabase
@@ -112,7 +110,11 @@ class MessagingService {
 
         return {
           ...conv,
-          other_participant: profile ?? { id: otherParticipantId, full_name: null, avatar_url: null },
+          other_participant: profile ?? {
+            id: otherParticipantId,
+            full_name: null,
+            avatar_url: null,
+          },
           property: propertiesMap.get(conv.property_id) ?? null,
           unread_count: count ?? 0,
         } as Conversation;
@@ -134,14 +136,16 @@ class MessagingService {
     let query = supabase
       .from('conversations')
       .select('*')
-      .or(`and(participant1_id.eq.${userId},participant2_id.eq.${otherUserId}),and(participant1_id.eq.${otherUserId},participant2_id.eq.${userId})`);
-    
+      .or(
+        `and(participant1_id.eq.${userId},participant2_id.eq.${otherUserId}),and(participant1_id.eq.${otherUserId},participant2_id.eq.${userId})`
+      );
+
     if (validPropertyId) {
       query = query.eq('property_id', validPropertyId);
     } else {
       query = query.is('property_id', null);
     }
-    
+
     const { data: existing } = await query.maybeSingle();
 
     if (existing) {
@@ -215,7 +219,14 @@ class MessagingService {
         content,
         is_read: false,
         attachments: attachment
-          ? [{ url: attachment.url, type: attachment.type, name: attachment.name, size: attachment.size }]
+          ? [
+              {
+                url: attachment.url,
+                type: attachment.type,
+                name: attachment.name,
+                size: attachment.size,
+              },
+            ]
           : [],
         attachment_metadata: attachment
           ? { name: attachment.name, type: attachment.type, size: attachment.size }
@@ -235,7 +246,7 @@ class MessagingService {
   async uploadAttachment(file: File, conversationId: string): Promise<Attachment | null> {
     const fileExt = file.name.split('.').pop();
     const fileName = `${conversationId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    
+
     const { error: uploadError } = await supabase.storage
       .from('message-attachments')
       .upload(fileName, file);
@@ -245,9 +256,9 @@ class MessagingService {
       return null;
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('message-attachments')
-      .getPublicUrl(fileName);
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from('message-attachments').getPublicUrl(fileName);
 
     const type: 'image' | 'document' = file.type.startsWith('image/') ? 'image' : 'document';
 

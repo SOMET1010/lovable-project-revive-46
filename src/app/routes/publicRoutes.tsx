@@ -43,7 +43,14 @@ export const publicRoutes: RouteObject[] = [
   { path: 'louer-mon-bien', element: <AddPropertyLanding /> },
 
   // Property search & details
-  { path: 'recherche', element: <SearchErrorBoundary><SearchProperties /></SearchErrorBoundary> },
+  {
+    path: 'recherche',
+    element: (
+      <SearchErrorBoundary>
+        <SearchProperties />
+      </SearchErrorBoundary>
+    ),
+  },
   { path: 'propriete/:id', element: <PropertyDetail /> },
   { path: 'properties/:id', element: <PropertyDetail /> },
   { path: 'proprietes/:id', element: <PropertyDetail /> },

@@ -26,11 +26,11 @@ const propertyTypes = [
 ];
 
 const budgets = [
-  { value: '100000', label: 'Jusqu\'à 100 000 FCFA' },
-  { value: '200000', label: 'Jusqu\'à 200 000 FCFA' },
-  { value: '350000', label: 'Jusqu\'à 350 000 FCFA' },
-  { value: '500000', label: 'Jusqu\'à 500 000 FCFA' },
-  { value: '750000', label: 'Jusqu\'à 750 000 FCFA' },
+  { value: '100000', label: "Jusqu'à 100 000 FCFA" },
+  { value: '200000', label: "Jusqu'à 200 000 FCFA" },
+  { value: '350000', label: "Jusqu'à 350 000 FCFA" },
+  { value: '500000', label: "Jusqu'à 500 000 FCFA" },
+  { value: '750000', label: "Jusqu'à 750 000 FCFA" },
   { value: '1000000', label: 'Plus de 750 000 FCFA' },
 ];
 
@@ -59,14 +59,15 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
           }}
         />
         {/* Gradient Overlay - Warm terracotta tones */}
-        <div 
+        <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(135deg, rgba(62, 39, 35, 0.85) 0%, rgba(194, 112, 59, 0.6) 50%, rgba(139, 69, 19, 0.7) 100%)'
+            background:
+              'linear-gradient(135deg, rgba(62, 39, 35, 0.85) 0%, rgba(194, 112, 59, 0.6) 50%, rgba(139, 69, 19, 0.7) 100%)',
           }}
         />
         {/* Subtle Pattern Overlay */}
-        <div 
+        <div
           className="absolute inset-0 opacity-10"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
@@ -78,10 +79,11 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
       <div className="container relative z-10 py-20">
         <div className="max-w-4xl mx-auto text-center">
           {/* Badge */}
-          <div 
+          <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 animate-fade-in-up"
             style={{
-              background: 'linear-gradient(135deg, rgba(212, 165, 116, 0.3), rgba(184, 134, 11, 0.3))',
+              background:
+                'linear-gradient(135deg, rgba(212, 165, 116, 0.3), rgba(184, 134, 11, 0.3))',
               border: '1px solid rgba(212, 165, 116, 0.5)',
               backdropFilter: 'blur(10px)',
             }}
@@ -93,12 +95,12 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
           </div>
 
           {/* Main Title */}
-          <h1 
+          <h1
             className="font-display text-hero text-white mb-6 animate-fade-in-up delay-100"
             style={{ textShadow: '0 4px 20px rgba(0,0,0,0.3)' }}
           >
             Trouvez votre{' '}
-            <span 
+            <span
               className="relative inline-block"
               style={{
                 background: 'linear-gradient(135deg, #d4a574, #f5deb3)',
@@ -115,12 +117,12 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
 
           {/* Subtitle */}
           <p className="text-body-lg text-white/90 mb-12 max-w-2xl mx-auto animate-fade-in-up delay-200">
-            Plus de 1 500 logements vérifiés vous attendent. 
-            Appartements, villas et studios dans les meilleurs quartiers d'Abidjan et partout en CI.
+            Plus de 1 500 logements vérifiés vous attendent. Appartements, villas et studios dans
+            les meilleurs quartiers d'Abidjan et partout en CI.
           </p>
 
           {/* Search Form */}
-          <form 
+          <form
             onSubmit={handleSearch}
             className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 md:p-8 shadow-xl animate-fade-in-up delay-300"
           >
@@ -135,7 +137,9 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
                 >
                   <option value="">Toutes les villes</option>
                   {cities.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--earth-700)] pointer-events-none" />
@@ -151,7 +155,9 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
                 >
                   <option value="">Type de bien</option>
                   {propertyTypes.map((type) => (
-                    <option key={type.value} value={type.value}>{type.label}</option>
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--earth-700)] pointer-events-none" />
@@ -159,7 +165,9 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
 
               {/* Budget */}
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--terracotta-500)] font-bold">₣</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--terracotta-500)] font-bold">
+                  ₣
+                </span>
                 <select
                   value={maxBudget}
                   onChange={(e) => setMaxBudget(e.target.value)}
@@ -167,7 +175,9 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
                 >
                   <option value="">Budget max</option>
                   {budgets.map((b) => (
-                    <option key={b.value} value={b.value}>{b.label}</option>
+                    <option key={b.value} value={b.value}>
+                      {b.label}
+                    </option>
                   ))}
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--earth-700)] pointer-events-none" />
@@ -206,13 +216,13 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
 
       {/* Decorative Elements */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[var(--sand-50)] to-transparent" />
-      
+
       {/* Floating decorative shapes */}
-      <div 
+      <div
         className="absolute top-20 right-10 w-20 h-20 rounded-full opacity-20 animate-float"
         style={{ background: 'linear-gradient(135deg, #d4a574, #f5deb3)' }}
       />
-      <div 
+      <div
         className="absolute bottom-40 left-10 w-16 h-16 rounded-full opacity-15 animate-float delay-200"
         style={{ background: 'linear-gradient(135deg, #c2703b, #a85d30)' }}
       />

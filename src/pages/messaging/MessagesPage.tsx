@@ -11,15 +11,22 @@ import { Conversation } from '../../features/messaging/services/messaging.servic
 export default function MessagesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
-  
-  const { conversations, loading: loadingConversations, getOrCreateConversation } = useConversations();
-  
+
+  const {
+    conversations,
+    loading: loadingConversations,
+    getOrCreateConversation,
+  } = useConversations();
+
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [showMobileThread, setShowMobileThread] = useState(false);
-  
-  const { messages, loading: loadingMessages, sending, sendMessage } = useMessages(
-    selectedConversation?.id ?? null
-  );
+
+  const {
+    messages,
+    loading: loadingMessages,
+    sending,
+    sendMessage,
+  } = useMessages(selectedConversation?.id ?? null);
 
   // Handle URL parameters for creating new conversation
   useEffect(() => {
@@ -75,7 +82,6 @@ export default function MessagesPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F4] pt-20 pb-4 px-4 flex gap-6">
-      
       {/* --- SIDEBAR : LISTE DES CONVERSATIONS --- */}
       <div
         className={`w-full md:w-80 lg:w-96 bg-white rounded-[24px] border border-[#EFEBE9] shadow-sm flex flex-col overflow-hidden ${

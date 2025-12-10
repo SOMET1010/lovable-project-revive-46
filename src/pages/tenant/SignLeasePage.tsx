@@ -2,20 +2,23 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { notifyLeaseSigned, notifyLeaseActive } from '@/services/notifications/leaseNotificationService';
+import {
+  notifyLeaseSigned,
+  notifyLeaseActive,
+} from '@/services/notifications/leaseNotificationService';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui/FormStepper';
 import CryptoNeoSignature from '@/shared/ui/CryptoNeoSignature';
 import DigitalCertificateCard from '@/shared/ui/DigitalCertificateCard';
 import { useConfetti } from '@/hooks/shared/useConfetti';
-import { 
-  FileText, 
-  Shield, 
-  CheckCircle, 
-  AlertCircle, 
-  Lock, 
-  Loader, 
+import {
+  FileText,
+  Shield,
+  CheckCircle,
+  AlertCircle,
+  Lock,
+  Loader,
   Download,
   User,
   Calendar,
@@ -24,7 +27,7 @@ import {
   Clock,
   ArrowRight,
   ArrowLeft,
-  Home
+  Home,
 } from 'lucide-react';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
 
@@ -72,7 +75,7 @@ export default function SignLeasePage() {
   const { id: leaseId } = useParams<{ id: string }>();
   const { step, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(3);
   const { triggerCertifiedSignatureConfetti } = useConfetti();
-  
+
   const [lease, setLease] = useState<LeaseContract | null>(null);
   const [property, setProperty] = useState<Property | null>(null);
   const [ownerProfile, setOwnerProfile] = useState<UserProfile | null>(null);
@@ -91,7 +94,7 @@ export default function SignLeasePage() {
 
   const loadLeaseData = async () => {
     if (!leaseId) return;
-    
+
     try {
       const { data: leaseData, error: leaseError } = await supabase
         .from('lease_contracts')
@@ -102,7 +105,7 @@ export default function SignLeasePage() {
       if (leaseError) throw leaseError;
 
       if (leaseData.owner_id !== user?.id && leaseData.tenant_id !== user?.id) {
-        setError('Vous n\'êtes pas autorisé à accéder à ce bail');
+        setError("Vous n'êtes pas autorisé à accéder à ce bail");
         setLoading(false);
         return;
       }
@@ -124,13 +127,12 @@ export default function SignLeasePage() {
           .from('profiles')
           .select('full_name, email, phone, is_verified, oneci_verified')
           .eq('user_id', leaseData.tenant_id)
-          .single()
+          .single(),
       ]);
 
       if (propertyRes.data) setProperty(propertyRes.data as Property);
       if (ownerRes.data) setOwnerProfile(ownerRes.data as UserProfile);
       if (tenantRes.data) setTenantProfile(tenantRes.data as UserProfile);
-
     } catch (err: unknown) {
       console.error('Error loading lease:', err);
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement du bail');
@@ -148,9 +150,9 @@ export default function SignLeasePage() {
     try {
       const isOwner = lease.owner_id === user.id;
       const updateField = isOwner ? 'landlord_signed_at' : 'tenant_signed_at';
-      
+
       const updateData: Record<string, unknown> = {
-        [updateField]: new Date().toISOString()
+        [updateField]: new Date().toISOString(),
       };
 
       const otherSigned = isOwner ? lease.tenant_signed_at : lease.landlord_signed_at;
@@ -181,7 +183,6 @@ export default function SignLeasePage() {
       if (otherSigned) {
         setTimeout(() => goToStep(2), 1500);
       }
-
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la signature');
     } finally {
@@ -193,7 +194,9 @@ export default function SignLeasePage() {
     triggerCertifiedSignatureConfetti();
     setSuccess('🎉 Signature certifiée CryptoNeo réussie!');
     if (signedUrl) {
-      setLease(prev => prev ? { ...prev, signed_document_url: signedUrl, status: 'active' } : null);
+      setLease((prev) =>
+        prev ? { ...prev, signed_document_url: signedUrl, status: 'active' } : null
+      );
     }
     loadLeaseData();
   };
@@ -238,7 +241,7 @@ export default function SignLeasePage() {
           <div className="text-center form-section-premium p-12">
             <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-bold text-[#4A2C17] mb-2">Bail introuvable</h2>
-            <p className="text-[#8B7355]">{error || 'Le bail demandé n\'existe pas'}</p>
+            <p className="text-[#8B7355]">{error || "Le bail demandé n'existe pas"}</p>
           </div>
         </div>
         <Footer />
@@ -303,14 +306,16 @@ export default function SignLeasePage() {
                   <Stamp className="w-4 h-4 text-[#F16522]" />
                   État des signatures
                 </h2>
-                
+
                 <div className="grid md:grid-cols-2 gap-4">
                   {/* Owner Signature */}
-                  <div className={`p-4 rounded-xl border-2 ${
-                    lease.landlord_signed_at 
-                      ? 'border-green-500 bg-green-50' 
-                      : 'border-[#E8DFD5] bg-[#F9F6F1]'
-                  }`}>
+                  <div
+                    className={`p-4 rounded-xl border-2 ${
+                      lease.landlord_signed_at
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-[#E8DFD5] bg-[#F9F6F1]'
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
                       {lease.landlord_signed_at ? (
                         <CheckCircle className="w-6 h-6 text-green-600" />
@@ -319,10 +324,13 @@ export default function SignLeasePage() {
                       )}
                       <div>
                         <p className="font-semibold text-[#4A2C17]">Propriétaire</p>
-                        <p className="text-sm text-[#8B7355]">{ownerProfile?.full_name || 'Non renseigné'}</p>
+                        <p className="text-sm text-[#8B7355]">
+                          {ownerProfile?.full_name || 'Non renseigné'}
+                        </p>
                         {lease.landlord_signed_at && (
                           <p className="text-xs text-green-600 mt-1">
-                            Signé le {new Date(lease.landlord_signed_at).toLocaleDateString('fr-FR')}
+                            Signé le{' '}
+                            {new Date(lease.landlord_signed_at).toLocaleDateString('fr-FR')}
                           </p>
                         )}
                       </div>
@@ -330,11 +338,13 @@ export default function SignLeasePage() {
                   </div>
 
                   {/* Tenant Signature */}
-                  <div className={`p-4 rounded-xl border-2 ${
-                    lease.tenant_signed_at 
-                      ? 'border-green-500 bg-green-50' 
-                      : 'border-[#E8DFD5] bg-[#F9F6F1]'
-                  }`}>
+                  <div
+                    className={`p-4 rounded-xl border-2 ${
+                      lease.tenant_signed_at
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-[#E8DFD5] bg-[#F9F6F1]'
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
                       {lease.tenant_signed_at ? (
                         <CheckCircle className="w-6 h-6 text-green-600" />
@@ -343,7 +353,9 @@ export default function SignLeasePage() {
                       )}
                       <div>
                         <p className="font-semibold text-[#4A2C17]">Locataire</p>
-                        <p className="text-sm text-[#8B7355]">{tenantProfile?.full_name || 'Non renseigné'}</p>
+                        <p className="text-sm text-[#8B7355]">
+                          {tenantProfile?.full_name || 'Non renseigné'}
+                        </p>
                         {lease.tenant_signed_at && (
                           <p className="text-xs text-green-600 mt-1">
                             Signé le {new Date(lease.tenant_signed_at).toLocaleDateString('fr-FR')}
@@ -356,11 +368,13 @@ export default function SignLeasePage() {
 
                 {/* Certified Status */}
                 {bothSigned && (
-                  <div className={`mt-4 p-4 rounded-xl border-2 ${
-                    isCertifiedSigned 
-                      ? 'border-[#F16522] bg-[#F16522]/10' 
-                      : 'border-dashed border-[#8B7355] bg-[#F9F6F1]'
-                  }`}>
+                  <div
+                    className={`mt-4 p-4 rounded-xl border-2 ${
+                      isCertifiedSigned
+                        ? 'border-[#F16522] bg-[#F16522]/10'
+                        : 'border-dashed border-[#8B7355] bg-[#F9F6F1]'
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
                       {isCertifiedSigned ? (
                         <Shield className="w-6 h-6 text-[#F16522]" />
@@ -369,10 +383,14 @@ export default function SignLeasePage() {
                       )}
                       <div>
                         <p className="font-semibold text-[#4A2C17]">
-                          {isCertifiedSigned ? 'Signature certifiée CryptoNeo ✓' : 'Signature certifiée (étape 3)'}
+                          {isCertifiedSigned
+                            ? 'Signature certifiée CryptoNeo ✓'
+                            : 'Signature certifiée (étape 3)'}
                         </p>
                         <p className="text-sm text-[#8B7355]">
-                          {isCertifiedSigned ? 'Ce bail a valeur légale certifiée' : 'Valeur légale équivalente à une signature notariée'}
+                          {isCertifiedSigned
+                            ? 'Ce bail a valeur légale certifiée'
+                            : 'Valeur légale équivalente à une signature notariée'}
                         </p>
                       </div>
                     </div>
@@ -390,7 +408,9 @@ export default function SignLeasePage() {
                     <div>
                       <p className="text-sm text-[#8B7355]">Propriété</p>
                       <p className="font-medium text-[#4A2C17]">{property.title}</p>
-                      <p className="text-sm text-[#8B7355]">{formatAddress(property.address, property.city)}</p>
+                      <p className="text-sm text-[#8B7355]">
+                        {formatAddress(property.address, property.city)}
+                      </p>
                     </div>
                   </div>
 
@@ -411,7 +431,9 @@ export default function SignLeasePage() {
                     <User className="w-5 h-5 text-[#F16522] mt-0.5" />
                     <div>
                       <p className="text-sm text-[#8B7355]">Propriétaire</p>
-                      <p className="font-medium text-[#4A2C17]">{ownerProfile?.full_name || 'Non renseigné'}</p>
+                      <p className="font-medium text-[#4A2C17]">
+                        {ownerProfile?.full_name || 'Non renseigné'}
+                      </p>
                       <p className="text-sm text-[#8B7355]">{ownerProfile?.email || ''}</p>
                     </div>
                   </div>
@@ -420,7 +442,9 @@ export default function SignLeasePage() {
                     <User className="w-5 h-5 text-[#F16522] mt-0.5" />
                     <div>
                       <p className="text-sm text-[#8B7355]">Locataire</p>
-                      <p className="font-medium text-[#4A2C17]">{tenantProfile?.full_name || 'Non renseigné'}</p>
+                      <p className="font-medium text-[#4A2C17]">
+                        {tenantProfile?.full_name || 'Non renseigné'}
+                      </p>
                       <p className="text-sm text-[#8B7355]">{tenantProfile?.email || ''}</p>
                     </div>
                   </div>
@@ -459,10 +483,7 @@ export default function SignLeasePage() {
 
               {/* Navigation */}
               <div className="flex justify-end">
-                <button
-                  onClick={nextStep}
-                  className="form-button-primary flex items-center gap-2"
-                >
+                <button onClick={nextStep} className="form-button-primary flex items-center gap-2">
                   <span>Suivant</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
@@ -481,10 +502,9 @@ export default function SignLeasePage() {
                     <div>
                       <h3 className="text-xl font-bold text-green-700">Vous avez signé!</h3>
                       <p className="text-green-600">
-                        {hasOtherSigned 
+                        {hasOtherSigned
                           ? 'Les deux parties ont signé. Vous pouvez procéder à la signature certifiée.'
-                          : `En attente de la signature ${isOwner ? 'du locataire' : 'du propriétaire'}.`
-                        }
+                          : `En attente de la signature ${isOwner ? 'du locataire' : 'du propriétaire'}.`}
                       </p>
                     </div>
                   </div>
@@ -499,7 +519,8 @@ export default function SignLeasePage() {
                     Signature simple
                   </h2>
                   <p className="text-[#5D4E37] mb-6">
-                    Signez pour valider les termes du contrat. Les deux parties doivent signer avant de pouvoir procéder à la signature certifiée.
+                    Signez pour valider les termes du contrat. Les deux parties doivent signer avant
+                    de pouvoir procéder à la signature certifiée.
                   </p>
 
                   <label className="flex items-start gap-3 cursor-pointer mb-6 p-4 bg-[#F9F6F1] rounded-xl border border-[#E8DFD5] hover:border-[#F16522] transition">
@@ -510,8 +531,9 @@ export default function SignLeasePage() {
                       className="mt-1 h-5 w-5 text-[#F16522] focus:ring-[#F16522] border-[#E8DFD5] rounded"
                     />
                     <span className="text-[#4A2C17] text-sm">
-                      J'ai lu et j'accepte les termes et conditions du contrat de bail. 
-                      Je comprends que cette signature électronique a la même valeur juridique qu'une signature manuscrite.
+                      J'ai lu et j'accepte les termes et conditions du contrat de bail. Je comprends
+                      que cette signature électronique a la même valeur juridique qu'une signature
+                      manuscrite.
                     </span>
                   </label>
 
@@ -543,10 +565,11 @@ export default function SignLeasePage() {
                     <div>
                       <h3 className="font-bold text-amber-800 mb-2">Vérification recommandée</h3>
                       <p className="text-amber-700 mb-4">
-                        La vérification de votre profil renforce la confiance et permet la signature certifiée.
+                        La vérification de votre profil renforce la confiance et permet la signature
+                        certifiée.
                       </p>
-                      <Link 
-                        to="/profil?tab=verification" 
+                      <Link
+                        to="/profil?tab=verification"
                         className="text-[#F16522] font-medium hover:underline"
                       >
                         Vérifier mon profil →
@@ -565,7 +588,7 @@ export default function SignLeasePage() {
                   <ArrowLeft className="w-5 h-5" />
                   <span>Précédent</span>
                 </button>
-                
+
                 {bothSigned && (
                   <button
                     onClick={nextStep}
@@ -587,7 +610,9 @@ export default function SignLeasePage() {
                 <div className="form-section-premium border-2 border-green-500 text-center py-8">
                   <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
                   <h2 className="text-2xl font-bold text-green-700 mb-2">Bail signé et certifié</h2>
-                  <p className="text-green-600 mb-6">Ce contrat a été signé électroniquement et a valeur légale.</p>
+                  <p className="text-green-600 mb-6">
+                    Ce contrat a été signé électroniquement et a valeur légale.
+                  </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
                       to={`/contrat/${lease.id}`}
@@ -617,9 +642,12 @@ export default function SignLeasePage() {
                   <div className="flex items-center gap-4">
                     <Clock className="w-12 h-12 text-amber-600" />
                     <div>
-                      <h3 className="text-xl font-bold text-amber-800">Signatures simples requises</h3>
+                      <h3 className="text-xl font-bold text-amber-800">
+                        Signatures simples requises
+                      </h3>
                       <p className="text-amber-700">
-                        Les deux parties doivent d'abord effectuer leur signature simple avant de pouvoir procéder à la signature certifiée CryptoNeo.
+                        Les deux parties doivent d'abord effectuer leur signature simple avant de
+                        pouvoir procéder à la signature certifiée CryptoNeo.
                       </p>
                     </div>
                   </div>

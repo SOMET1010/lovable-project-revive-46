@@ -22,4 +22,3 @@ const TrustVerifiedBadge: React.FC<TrustVerifiedBadgeProps> = ({ verified, class
 };
 
 export default TrustVerifiedBadge;
-

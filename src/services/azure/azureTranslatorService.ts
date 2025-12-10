@@ -32,7 +32,7 @@ export const azureTranslatorService = {
    */
   getPreferredLanguage: (): string => {
     return localStorage.getItem('preferred_language') || 'fr';
-  }
+  },
 };
 
 export default azureTranslatorService;

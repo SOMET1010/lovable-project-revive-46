@@ -18,13 +18,19 @@ const AdminTransactions = lazyWithRetry(() => import('@/pages/admin/Transactions
 const AdminServiceMonitoring = lazyWithRetry(() => import('@/pages/admin/ServiceMonitoringPage'));
 const AdminLogs = lazyWithRetry(() => import('@/pages/admin/LogsPage'));
 const AdminServiceProviders = lazyWithRetry(() => import('@/pages/admin/ServiceProvidersPage'));
-const AdminServiceConfiguration = lazyWithRetry(() => import('@/pages/admin/ServiceConfigurationPage'));
+const AdminServiceConfiguration = lazyWithRetry(
+  () => import('@/pages/admin/ServiceConfigurationPage')
+);
 const AdminDataGenerator = lazyWithRetry(() => import('@/pages/admin/DataGeneratorPage'));
 const AdminFeatureFlags = lazyWithRetry(() => import('@/pages/admin/FeatureFlagsPage'));
 
 export const adminRoutes: RouteObject = {
   path: 'admin',
-  element: <ProtectedRoute allowedRoles={[ROLES.ADMIN]}><AdminLayout /></ProtectedRoute>,
+  element: (
+    <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+      <AdminLayout />
+    </ProtectedRoute>
+  ),
   children: [
     { index: true, element: <Navigate to="/admin/tableau-de-bord" replace /> },
     { path: 'tableau-de-bord', element: <AdminDashboard /> },
@@ -44,5 +50,5 @@ export const adminRoutes: RouteObject = {
     { path: 'service-configuration', element: <AdminServiceConfiguration /> },
     { path: 'test-data-generator', element: <AdminDataGenerator /> },
     { path: 'feature-flags', element: <AdminFeatureFlags /> },
-  ]
+  ],
 };

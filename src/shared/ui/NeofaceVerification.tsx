@@ -35,7 +35,9 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   onFailed,
 }) => {
   const [isVerifying, setIsVerifying] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'uploading' | 'waiting' | 'polling' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'uploading' | 'waiting' | 'polling' | 'success' | 'error'
+  >('idle');
   const [error, setError] = useState<string | null>(null);
   const [_documentId, setDocumentId] = useState<string | null>(null);
   const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
@@ -69,7 +71,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseKey}`,
+        Authorization: `Bearer ${supabaseKey}`,
       },
       body: JSON.stringify({
         action: 'upload_document',
@@ -97,7 +99,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabaseKey}`,
+        Authorization: `Bearer ${supabaseKey}`,
       },
       body: JSON.stringify({
         action: 'check_status',
@@ -115,16 +117,21 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     let pollAttempts = 0;
     const maxAttempts = 100;
 
-    timeoutRef.current = setTimeout(() => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
-      setStatus('error');
-      setError('Timeout: La vérification n\'a pas été complétée dans les délais. Veuillez réessayer.');
-      if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
-        selfieWindowRef.current.close();
-      }
-    }, 5 * 60 * 1000);
+    timeoutRef.current = setTimeout(
+      () => {
+        if (pollingIntervalRef.current) {
+          clearInterval(pollingIntervalRef.current);
+        }
+        setStatus('error');
+        setError(
+          "Timeout: La vérification n'a pas été complétée dans les délais. Veuillez réessayer."
+        );
+        if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
+          selfieWindowRef.current.close();
+        }
+      },
+      5 * 60 * 1000
+    );
 
     pollingIntervalRef.current = setInterval(async () => {
       pollAttempts++;
@@ -201,11 +208,12 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       );
 
       if (!selfieWindowRef.current) {
-        throw new Error('Impossible d\'ouvrir la fenêtre de vérification. Veuillez autoriser les popups.');
+        throw new Error(
+          "Impossible d'ouvrir la fenêtre de vérification. Veuillez autoriser les popups."
+        );
       }
 
       startPolling(uploadData.document_id, uploadData.verification_id);
-
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la vérification';
       setStatus('error');
@@ -273,9 +281,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
               <div className="flex-1">
                 <p className="text-sm font-medium text-[#3C2A1E]">{progress}</p>
                 {attempts > 0 && (
-                  <p className="text-xs text-[#F16522] mt-1">
-                    Tentative {attempts}
-                  </p>
+                  <p className="text-xs text-[#F16522] mt-1">Tentative {attempts}</p>
                 )}
               </div>
             </div>

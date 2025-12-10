@@ -5,18 +5,18 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  FileSignature, 
-  CheckCircle2, 
-  Building2, 
-  User, 
+import {
+  FileSignature,
+  CheckCircle2,
+  Building2,
+  User,
   Calendar,
   Percent,
   FileText,
   AlertCircle,
   ArrowLeft,
   Loader2,
-  PenTool
+  PenTool,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +38,7 @@ export default function SignMandatePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { mandates, refresh } = useAgencyMandates();
-  
+
   const [mandate, setMandate] = useState<AgencyMandate | null>(null);
   const [loading, setLoading] = useState(true);
   const [signing, setSigning] = useState(false);
@@ -47,29 +47,23 @@ export default function SignMandatePage() {
   const [signerType, setSignerType] = useState<'owner' | 'agency' | null>(null);
   const [_signatureComplete, setSignatureComplete] = useState(false);
 
-  const {
-    step: currentStep,
-    slideDirection,
-    goToStep,
-    nextStep,
-    prevStep,
-  } = useFormStepper(3);
+  const { step: currentStep, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(3);
 
   // Fetch mandate data
   useEffect(() => {
     if (!id) return;
 
-    const foundMandate = mandates.find(m => m.id === id);
+    const foundMandate = mandates.find((m) => m.id === id);
     if (foundMandate) {
       setMandate(foundMandate);
-      
+
       // Determine signer type
       if (foundMandate.owner_id === user?.id) {
         setSignerType('owner');
       } else if (foundMandate.agency?.user_id === user?.id) {
         setSignerType('agency');
       }
-      
+
       setLoading(false);
     } else if (mandates.length > 0) {
       // Mandate not found in list
@@ -79,17 +73,18 @@ export default function SignMandatePage() {
   }, [id, mandates, user, navigate]);
 
   // Check if already signed by current user
-  const alreadySigned = mandate && (
-    (signerType === 'owner' && mandate.owner_signed_at) ||
-    (signerType === 'agency' && mandate.agency_signed_at)
-  );
+  const alreadySigned =
+    mandate &&
+    ((signerType === 'owner' && mandate.owner_signed_at) ||
+      (signerType === 'agency' && mandate.agency_signed_at));
 
-  const canSign = mandate && !alreadySigned && (
-    mandate.status === 'pending' || 
-    mandate.status === 'active' ||
-    mandate.cryptoneo_signature_status === 'owner_signed' ||
-    mandate.cryptoneo_signature_status === 'agency_signed'
-  );
+  const canSign =
+    mandate &&
+    !alreadySigned &&
+    (mandate.status === 'pending' ||
+      mandate.status === 'active' ||
+      mandate.cryptoneo_signature_status === 'owner_signed' ||
+      mandate.cryptoneo_signature_status === 'agency_signed');
 
   const handleSignMandate = async () => {
     if (!mandate || !signerType || !acceptedTerms || !acceptedResponsibilities) {
@@ -104,8 +99,8 @@ export default function SignMandatePage() {
         body: {
           mandateId: mandate.id,
           signerType,
-          signatureMethod: 'simple'
-        }
+          signatureMethod: 'simple',
+        },
       });
 
       if (error) {
@@ -128,7 +123,6 @@ export default function SignMandatePage() {
       } else {
         toast.success('Signature enregistrée avec succès');
       }
-
     } catch (err) {
       console.error('Sign mandate error:', err);
       toast.error('Erreur lors de la signature du mandat');
@@ -168,9 +162,7 @@ export default function SignMandatePage() {
         <Card className="p-8 text-center">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <h2 className="text-xl font-semibold mb-2">Mandat introuvable</h2>
-          <Button onClick={() => navigate('/mes-mandats')}>
-            Retour aux mandats
-          </Button>
+          <Button onClick={() => navigate('/mes-mandats')}>Retour aux mandats</Button>
         </Card>
       </div>
     );
@@ -181,11 +173,7 @@ export default function SignMandatePage() {
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/mes-mandats')}
-            className="mb-4"
-          >
+          <Button variant="ghost" onClick={() => navigate('/mes-mandats')} className="mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour aux mandats
           </Button>
@@ -195,10 +183,9 @@ export default function SignMandatePage() {
             <h1 className="text-2xl font-bold">Signature du Mandat</h1>
           </div>
           <p className="text-muted-foreground">
-            {signerType === 'owner' 
-              ? 'Signez le mandat pour autoriser l\'agence à gérer vos biens'
-              : 'Signez le mandat pour accepter la gestion des biens'
-            }
+            {signerType === 'owner'
+              ? "Signez le mandat pour autoriser l'agence à gérer vos biens"
+              : 'Signez le mandat pour accepter la gestion des biens'}
           </p>
         </div>
 
@@ -211,9 +198,16 @@ export default function SignMandatePage() {
                 <div>
                   <p className="font-medium text-green-800">Vous avez déjà signé ce mandat</p>
                   <p className="text-sm text-green-600">
-                    Signé le {format(new Date(
-                      signerType === 'owner' ? mandate.owner_signed_at! : mandate.agency_signed_at!
-                    ), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                    Signé le{' '}
+                    {format(
+                      new Date(
+                        signerType === 'owner'
+                          ? mandate.owner_signed_at!
+                          : mandate.agency_signed_at!
+                      ),
+                      'dd MMMM yyyy à HH:mm',
+                      { locale: fr }
+                    )}
                   </p>
                 </div>
               </div>
@@ -241,9 +235,7 @@ export default function SignMandatePage() {
                 <FileText className="h-5 w-5" />
                 Détails du Mandat
               </CardTitle>
-              <CardDescription>
-                Vérifiez les informations avant de signer
-              </CardDescription>
+              <CardDescription>Vérifiez les informations avant de signer</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Parties */}
@@ -253,7 +245,9 @@ export default function SignMandatePage() {
                     <User className="h-4 w-4 text-primary" />
                     <span className="font-medium">Propriétaire</span>
                     {signerType === 'owner' && (
-                      <Badge variant="secondary" className="text-xs">Vous</Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        Vous
+                      </Badge>
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -272,7 +266,9 @@ export default function SignMandatePage() {
                     <Building2 className="h-4 w-4 text-primary" />
                     <span className="font-medium">Agence</span>
                     {signerType === 'agency' && (
-                      <Badge variant="secondary" className="text-xs">Vous</Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        Vous
+                      </Badge>
                     )}
                   </div>
                   <p className="text-sm">{mandate.agency?.agency_name || 'Agence'}</p>
@@ -390,9 +386,7 @@ export default function SignMandatePage() {
                 <PenTool className="h-5 w-5" />
                 Acceptation des conditions
               </CardTitle>
-              <CardDescription>
-                Lisez et acceptez les conditions du mandat
-              </CardDescription>
+              <CardDescription>Lisez et acceptez les conditions du mandat</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Terms */}
@@ -400,17 +394,18 @@ export default function SignMandatePage() {
                 <h4 className="font-medium mb-3">Conditions générales du mandat</h4>
                 <div className="text-sm text-muted-foreground space-y-2 max-h-48 overflow-y-auto">
                   <p>
-                    En signant ce mandat, {signerType === 'owner' 
-                      ? 'vous autorisez l\'agence à gérer vos biens selon les permissions définies ci-dessus.'
-                      : 'vous acceptez de gérer les biens du propriétaire selon les permissions définies.'
-                    }
+                    En signant ce mandat,{' '}
+                    {signerType === 'owner'
+                      ? "vous autorisez l'agence à gérer vos biens selon les permissions définies ci-dessus."
+                      : 'vous acceptez de gérer les biens du propriétaire selon les permissions définies.'}
                   </p>
-                  <p>
-                    Les parties s'engagent à respecter les termes de ce mandat, notamment :
-                  </p>
+                  <p>Les parties s'engagent à respecter les termes de ce mandat, notamment :</p>
                   <ul className="list-disc list-inside space-y-1 ml-2">
                     <li>La commission de {mandate.commission_rate}% sur les loyers perçus</li>
-                    <li>La durée du mandat à partir du {format(new Date(mandate.start_date), 'dd/MM/yyyy')}</li>
+                    <li>
+                      La durée du mandat à partir du{' '}
+                      {format(new Date(mandate.start_date), 'dd/MM/yyyy')}
+                    </li>
                     <li>Les permissions et restrictions définies dans le mandat</li>
                     <li>L'obligation de transparence sur la gestion des biens</li>
                     <li>La possibilité de résilier avec un préavis de 30 jours</li>
@@ -437,11 +432,13 @@ export default function SignMandatePage() {
                     checked={acceptedResponsibilities}
                     onCheckedChange={(checked) => setAcceptedResponsibilities(checked === true)}
                   />
-                  <Label htmlFor="responsibilities" className="text-sm leading-relaxed cursor-pointer">
-                    {signerType === 'owner' 
+                  <Label
+                    htmlFor="responsibilities"
+                    className="text-sm leading-relaxed cursor-pointer"
+                  >
+                    {signerType === 'owner'
                       ? 'Je confirme être le propriétaire légitime des biens concernés et autorise cette agence à les gérer en mon nom'
-                      : 'Je confirme représenter l\'agence et m\'engage à gérer les biens du propriétaire avec diligence'
-                    }
+                      : "Je confirme représenter l'agence et m'engage à gérer les biens du propriétaire avec diligence"}
                   </Label>
                 </div>
               </div>
@@ -452,8 +449,9 @@ export default function SignMandatePage() {
                   <span className="font-medium">Signature électronique</span>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Votre signature sera enregistrée de manière sécurisée. 
-                  Cette signature a valeur légale conformément aux dispositions de la loi ivoirienne sur les transactions électroniques.
+                  Votre signature sera enregistrée de manière sécurisée. Cette signature a valeur
+                  légale conformément aux dispositions de la loi ivoirienne sur les transactions
+                  électroniques.
                 </p>
               </div>
             </CardContent>
@@ -463,7 +461,7 @@ export default function SignMandatePage() {
             <Button variant="outline" onClick={prevStep}>
               Retour
             </Button>
-            <Button 
+            <Button
               onClick={handleSignMandate}
               disabled={!acceptedTerms || !acceptedResponsibilities || signing}
               size="large"
@@ -491,34 +489,34 @@ export default function SignMandatePage() {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle2 className="h-8 w-8 text-green-600" />
               </div>
-              
-              <h2 className="text-2xl font-bold text-green-800 mb-2">
-                Signature enregistrée !
-              </h2>
-              
+
+              <h2 className="text-2xl font-bold text-green-800 mb-2">Signature enregistrée !</h2>
+
               <p className="text-green-700 mb-6 max-w-md mx-auto">
-                {mandate.cryptoneo_signature_status === 'completed' ? (
-                  'Le mandat est maintenant actif. Les deux parties ont signé.'
-                ) : (
-                  signerType === 'owner' 
-                    ? 'Votre signature a été enregistrée. En attente de la signature de l\'agence.'
-                    : 'Votre signature a été enregistrée. En attente de la signature du propriétaire.'
-                )}
+                {mandate.cryptoneo_signature_status === 'completed'
+                  ? 'Le mandat est maintenant actif. Les deux parties ont signé.'
+                  : signerType === 'owner'
+                    ? "Votre signature a été enregistrée. En attente de la signature de l'agence."
+                    : 'Votre signature a été enregistrée. En attente de la signature du propriétaire.'}
               </p>
 
               {/* Status summary */}
               <div className="inline-flex items-center gap-4 p-4 bg-white rounded-lg border mb-6">
                 <div className="text-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-1 ${
-                    mandate.owner_signed_at || signerType === 'owner' 
-                      ? 'bg-green-100' 
-                      : 'bg-muted'
-                  }`}>
-                    <User className={`h-5 w-5 ${
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-1 ${
                       mandate.owner_signed_at || signerType === 'owner'
-                        ? 'text-green-600' 
-                        : 'text-muted-foreground'
-                    }`} />
+                        ? 'bg-green-100'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    <User
+                      className={`h-5 w-5 ${
+                        mandate.owner_signed_at || signerType === 'owner'
+                          ? 'text-green-600'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
                   </div>
                   <span className="text-xs">Propriétaire</span>
                   {(mandate.owner_signed_at || signerType === 'owner') && (
@@ -529,16 +527,20 @@ export default function SignMandatePage() {
                 <div className="w-12 h-0.5 bg-muted" />
 
                 <div className="text-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-1 ${
-                    mandate.agency_signed_at || signerType === 'agency'
-                      ? 'bg-green-100' 
-                      : 'bg-muted'
-                  }`}>
-                    <Building2 className={`h-5 w-5 ${
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-1 ${
                       mandate.agency_signed_at || signerType === 'agency'
-                        ? 'text-green-600' 
-                        : 'text-muted-foreground'
-                    }`} />
+                        ? 'bg-green-100'
+                        : 'bg-muted'
+                    }`}
+                  >
+                    <Building2
+                      className={`h-5 w-5 ${
+                        mandate.agency_signed_at || signerType === 'agency'
+                          ? 'text-green-600'
+                          : 'text-muted-foreground'
+                      }`}
+                    />
                   </div>
                   <span className="text-xs">Agence</span>
                   {(mandate.agency_signed_at || signerType === 'agency') && (

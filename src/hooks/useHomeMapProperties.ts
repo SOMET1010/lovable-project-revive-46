@@ -41,7 +41,9 @@ export function useHomeMapProperties() {
     try {
       let query = supabase
         .from('properties')
-        .select('id, title, latitude, longitude, monthly_rent:price, property_type, city, neighborhood, main_image, bedrooms:bedrooms_count, surface_area, status')
+        .select(
+          'id, title, latitude, longitude, monthly_rent:price, property_type, city, neighborhood, main_image, bedrooms:bedrooms_count, surface_area, status'
+        )
         .eq('status', 'disponible')
         .not('latitude', 'is', null) // `not.is.null` is the PostgREST form
         .not('longitude', 'is', null)
@@ -64,8 +66,8 @@ export function useHomeMapProperties() {
       if (fetchError) throw fetchError;
 
       const validProperties: MapProperty[] = (data || [])
-        .filter(p => p.latitude !== null && p.longitude !== null)
-        .map(p => ({
+        .filter((p) => p.latitude !== null && p.longitude !== null)
+        .map((p) => ({
           id: p.id,
           title: p.title,
           latitude: p.latitude as number,
@@ -97,7 +99,9 @@ export function useHomeMapProperties() {
     try {
       let query = supabase
         .from('properties')
-        .select('id, title, latitude, longitude, monthly_rent:price, property_type, city, neighborhood, main_image, bedrooms:bedrooms_count, surface_area, status')
+        .select(
+          'id, title, latitude, longitude, monthly_rent:price, property_type, city, neighborhood, main_image, bedrooms:bedrooms_count, surface_area, status'
+        )
         .eq('status', 'disponible')
         .not('latitude', 'is', null) // `not.is.null` is the PostgREST form
         .not('longitude', 'is', null)
@@ -115,8 +119,8 @@ export function useHomeMapProperties() {
       if (fetchError) throw fetchError;
 
       const validProperties: MapProperty[] = (data || [])
-        .filter(p => p.latitude !== null && p.longitude !== null)
-        .map(p => ({
+        .filter((p) => p.latitude !== null && p.longitude !== null)
+        .map((p) => ({
           id: p.id,
           title: p.title,
           latitude: p.latitude as number,

@@ -50,10 +50,12 @@ export default function CalendarPage() {
     try {
       const { data, error } = await supabase
         .from('cev_missions')
-        .select(`
+        .select(
+          `
           *,
           property:properties(title, address, city)
-        `)
+        `
+        )
         .not('scheduled_date', 'is', null)
         .order('scheduled_date', { ascending: true });
 
@@ -66,7 +68,7 @@ export default function CalendarPage() {
     }
   };
 
-  const missionsForSelectedDate = missions.filter(mission => {
+  const missionsForSelectedDate = missions.filter((mission) => {
     if (!mission.scheduled_date) return false;
     return isSameDay(new Date(mission.scheduled_date), selectedDate);
   });
@@ -74,20 +76,20 @@ export default function CalendarPage() {
   // Stats for the header
   const stats = {
     total: missions.length,
-    thisWeek: missions.filter(m => {
+    thisWeek: missions.filter((m) => {
       if (!m.scheduled_date) return false;
       const missionDate = new Date(m.scheduled_date);
       const now = new Date();
       const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
       return missionDate >= now && missionDate <= weekFromNow;
     }).length,
-    urgent: missions.filter(m => m.urgency === 'urgent' || m.urgency === 'high').length
+    urgent: missions.filter((m) => m.urgency === 'urgent' || m.urgency === 'high').length,
   };
 
   return (
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Calendrier des Missions" />
-      
+
       <main className="container mx-auto px-4 py-6">
         {/* Header with back link and add button */}
         <div className="flex items-center justify-between mb-4">
@@ -147,10 +149,7 @@ export default function CalendarPage() {
 
             {/* Sidebar */}
             <div className="space-y-4">
-              <DayMissionsList
-                date={selectedDate}
-                missions={missionsForSelectedDate}
-              />
+              <DayMissionsList date={selectedDate} missions={missionsForSelectedDate} />
               <CalendarLegend />
             </div>
           </div>

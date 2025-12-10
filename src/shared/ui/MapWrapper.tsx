@@ -107,8 +107,14 @@ function MapLoadingSkeleton({ height = '500px' }: { height?: string }) {
         </div>
         <div className="flex items-center justify-center space-x-2">
           <MapPin className="h-4 w-4 text-primary animate-pulse" />
-          <MapPin className="h-4 w-4 text-primary/70 animate-pulse" style={{ animationDelay: '0.2s' }} />
-          <MapPin className="h-4 w-4 text-primary/50 animate-pulse" style={{ animationDelay: '0.4s' }} />
+          <MapPin
+            className="h-4 w-4 text-primary/70 animate-pulse"
+            style={{ animationDelay: '0.2s' }}
+          />
+          <MapPin
+            className="h-4 w-4 text-primary/50 animate-pulse"
+            style={{ animationDelay: '0.4s' }}
+          />
         </div>
       </div>
     </div>
@@ -142,9 +148,7 @@ function AzureMapsComponent({
             <div className="bg-primary rounded-full p-4 w-20 h-20 mx-auto mb-4 flex items-center justify-center">
               <Map className="h-10 w-10 text-primary-foreground" />
             </div>
-            <h3 className="text-2xl font-bold text-foreground mb-3">
-              Carte non disponible
-            </h3>
+            <h3 className="text-2xl font-bold text-foreground mb-3">Carte non disponible</h3>
             <p className="text-muted-foreground mb-4">
               Le service de cartographie n'est pas accessible pour le moment.
             </p>
@@ -157,7 +161,8 @@ function AzureMapsComponent({
           {properties.length > 0 && (
             <div className="bg-card rounded-2xl shadow-lg p-6">
               <h4 className="font-bold text-lg mb-4 text-foreground">
-                {properties.length} propriété{properties.length > 1 ? 's' : ''} disponible{properties.length > 1 ? 's' : ''}
+                {properties.length} propriété{properties.length > 1 ? 's' : ''} disponible
+                {properties.length > 1 ? 's' : ''}
               </h4>
               <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
                 {properties.slice(0, 5).map((property) => (
@@ -192,7 +197,8 @@ function AzureMapsComponent({
               </div>
               {properties.length > 5 && (
                 <p className="text-sm text-muted-foreground mt-4 text-center">
-                  + {properties.length - 5} autre{properties.length - 5 > 1 ? 's' : ''} propriété{properties.length - 5 > 1 ? 's' : ''}
+                  + {properties.length - 5} autre{properties.length - 5 > 1 ? 's' : ''} propriété
+                  {properties.length - 5 > 1 ? 's' : ''}
                 </p>
               )}
             </div>

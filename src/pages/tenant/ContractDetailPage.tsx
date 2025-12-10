@@ -4,7 +4,17 @@ import { supabase } from '@/integrations/supabase/client';
 import { downloadContract, regenerateContract } from '@/services/contracts/contractService';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
-import { ArrowLeft, FileText, Edit, CheckCircle, X, Download, RefreshCw, Loader, ExternalLink } from 'lucide-react';
+import {
+  ArrowLeft,
+  FileText,
+  Edit,
+  CheckCircle,
+  X,
+  Download,
+  RefreshCw,
+  Loader,
+  ExternalLink,
+} from 'lucide-react';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface LeaseContract {
@@ -65,7 +75,7 @@ export default function ContractDetail() {
 
   const loadContract = async () => {
     if (!contractId) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('lease_contracts')
@@ -74,11 +84,14 @@ export default function ContractDetail() {
         .single();
 
       if (error) throw error;
-      
+
       const contractData = data as unknown as LeaseContract;
 
-      if (!contractData || (contractData.owner_id !== user?.id && contractData.tenant_id !== user?.id)) {
-        alert('Vous n\'avez pas accès à ce contrat');
+      if (
+        !contractData ||
+        (contractData.owner_id !== user?.id && contractData.tenant_id !== user?.id)
+      ) {
+        alert("Vous n'avez pas accès à ce contrat");
         window.location.href = '/mes-contrats';
         return;
       }
@@ -91,7 +104,7 @@ export default function ContractDetail() {
         .select('title, address, city, property_type, surface_area, bedrooms, bathrooms')
         .eq('id', contractData.property_id)
         .single();
-      
+
       if (propData) setProperty(propData);
 
       // Load owner profile
@@ -100,7 +113,7 @@ export default function ContractDetail() {
         .select('full_name, email, phone')
         .eq('user_id', contractData.owner_id)
         .single();
-      
+
       if (ownerData) setOwner(ownerData);
 
       // Load tenant profile
@@ -109,9 +122,8 @@ export default function ContractDetail() {
         .select('full_name, email, phone')
         .eq('user_id', contractData.tenant_id)
         .single();
-      
-      if (tenantData) setTenant(tenantData);
 
+      if (tenantData) setTenant(tenantData);
     } catch (error) {
       console.error('Error loading contract:', error);
     } finally {
@@ -163,7 +175,9 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
     `.trim();
   };
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+  const startDrawing = (
+    e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>
+  ) => {
     setIsDrawing(true);
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -217,9 +231,9 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
     try {
       const { error } = await supabase
         .from('lease_contracts' as any)
-        .update({ 
+        .update({
           signed_at: new Date().toISOString(),
-          status: 'actif'
+          status: 'actif',
         } as any)
         .eq('id', contract.id);
 
@@ -238,7 +252,9 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
 
   const canSign = () => {
     if (!contract) return false;
-    return !contract.signed_at && (contract.owner_id === user?.id || contract.tenant_id === user?.id);
+    return (
+      !contract.signed_at && (contract.owner_id === user?.id || contract.tenant_id === user?.id)
+    );
   };
 
   const handleDownloadPdf = async () => {
@@ -338,7 +354,11 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
                       disabled={downloading}
                       className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition flex items-center space-x-2 disabled:opacity-50"
                     >
-                      {downloading ? <Loader className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                      {downloading ? (
+                        <Loader className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
                       <span>PDF</span>
                     </button>
                     <a
@@ -358,7 +378,11 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
                     disabled={regenerating}
                     className="px-3 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition flex items-center space-x-2 disabled:opacity-50"
                   >
-                    {regenerating ? <Loader className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                    {regenerating ? (
+                      <Loader className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
                     <span>Regénérer</span>
                   </button>
                 )}
@@ -391,11 +415,13 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
                 )}
               </div>
               <div className="flex items-center space-x-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  contract.status === 'actif' 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    contract.status === 'actif'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
                   {contract.status === 'actif' ? 'Actif' : contract.status}
                 </span>
               </div>

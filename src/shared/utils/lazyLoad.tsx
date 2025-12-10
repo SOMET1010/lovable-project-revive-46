@@ -5,7 +5,7 @@ import LoadingFallback from '@/shared/ui/GlobalLoadingSkeleton';
  * Lazy loading with retry for chunk loading errors
  * Retries the import on failure to handle network issues
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const lazyWithRetry = (
   componentImport: () => Promise<{ default: ComponentType<any> }>,
   retries = 3,
@@ -13,7 +13,7 @@ export const lazyWithRetry = (
 ) => {
   return lazy(async () => {
     let lastError: Error | null = null;
-    
+
     for (let i = 0; i < retries; i++) {
       try {
         console.log(`🔄 Lazy load attempt ${i + 1}/${retries}`);
@@ -23,14 +23,14 @@ export const lazyWithRetry = (
       } catch (error) {
         console.error(`❌ Lazy load attempt ${i + 1} failed:`, error);
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         if (i < retries - 1) {
           // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
-    
+
     // All retries failed - throw error instead of hard refresh
     console.error('❌ All lazy load retries failed:', lastError);
     throw lastError || new Error('Failed to load component after multiple retries');
@@ -48,8 +48,8 @@ export const Loadable = <P extends Record<string, any>>(Component: ComponentType
       <Component {...props} />
     </Suspense>
   );
-  
+
   LoadableComponent.displayName = `Loadable(${Component.displayName || Component.name || 'Component'})`;
-  
+
   return LoadableComponent;
 };

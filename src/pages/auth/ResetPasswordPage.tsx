@@ -38,28 +38,32 @@ const ResetPasswordPage = () => {
   }, [token]);
 
   // Validation des critères du mot de passe
-  const criteria: PasswordCriteria = useMemo(() => ({
-    minLength: password.length >= 8,
-    hasUppercase: /[A-Z]/.test(password),
-    hasLowercase: /[a-z]/.test(password),
-    hasNumber: /[0-9]/.test(password),
-    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
-  }), [password]);
+  const criteria: PasswordCriteria = useMemo(
+    () => ({
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    }),
+    [password]
+  );
 
-  const isPasswordValid = criteria.minLength && criteria.hasUppercase && criteria.hasLowercase && criteria.hasNumber;
+  const isPasswordValid =
+    criteria.minLength && criteria.hasUppercase && criteria.hasLowercase && criteria.hasNumber;
   const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
   const canSubmit = isPasswordValid && passwordsMatch && !loading && token;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!canSubmit || !token) return;
 
     setLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('verify-reset-token', {
-        body: { token, newPassword: password }
+        body: { token, newPassword: password },
       });
 
       if (error) {
@@ -81,8 +85,10 @@ const ResetPasswordPage = () => {
       }
 
       toast.success('Mot de passe mis à jour avec succès !');
-      navigate('/connexion', { 
-        state: { message: 'Votre mot de passe a été réinitialisé. Vous pouvez maintenant vous connecter.' }
+      navigate('/connexion', {
+        state: {
+          message: 'Votre mot de passe a été réinitialisé. Vous pouvez maintenant vous connecter.',
+        },
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
@@ -93,7 +99,9 @@ const ResetPasswordPage = () => {
   };
 
   const CriteriaItem = ({ met, label }: { met: boolean; label: string }) => (
-    <div className={`flex items-center gap-2 text-sm transition-colors ${met ? 'text-green-600' : 'text-muted-foreground'}`}>
+    <div
+      className={`flex items-center gap-2 text-sm transition-colors ${met ? 'text-green-600' : 'text-muted-foreground'}`}
+    >
       {met ? (
         <Check className="w-4 h-4 text-green-600" />
       ) : (
@@ -114,12 +122,10 @@ const ResetPasswordPage = () => {
           <h1 className="text-xl font-semibold text-foreground mb-2">Lien invalide</h1>
           <p className="text-muted-foreground mb-6">{tokenError}</p>
           <Link to="/mot-de-passe-oublie">
-            <Button className="w-full">
-              Demander un nouveau lien
-            </Button>
+            <Button className="w-full">Demander un nouveau lien</Button>
           </Link>
-          <Link 
-            to="/connexion" 
+          <Link
+            to="/connexion"
             className="mt-4 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -159,8 +165,8 @@ const ResetPasswordPage = () => {
                   password.length === 0
                     ? 'border-neutral-200 focus:ring-primary-500/20 focus:border-primary-500'
                     : isPasswordValid
-                    ? 'border-green-500 focus:ring-green-500/20 focus:border-green-500'
-                    : 'border-red-500 focus:ring-red-500/20 focus:border-red-500'
+                      ? 'border-green-500 focus:ring-green-500/20 focus:border-green-500'
+                      : 'border-red-500 focus:ring-red-500/20 focus:border-red-500'
                 }`}
               />
               <button
@@ -200,8 +206,8 @@ const ResetPasswordPage = () => {
                   confirmPassword.length === 0
                     ? 'border-neutral-200 focus:ring-primary-500/20 focus:border-primary-500'
                     : passwordsMatch
-                    ? 'border-green-500 focus:ring-green-500/20 focus:border-green-500'
-                    : 'border-red-500 focus:ring-red-500/20 focus:border-red-500'
+                      ? 'border-green-500 focus:ring-green-500/20 focus:border-green-500'
+                      : 'border-red-500 focus:ring-red-500/20 focus:border-red-500'
                 }`}
               />
               <button
@@ -218,11 +224,7 @@ const ResetPasswordPage = () => {
           </div>
 
           {/* Submit button */}
-          <Button
-            type="submit"
-            disabled={!canSubmit}
-            className="w-full py-3 text-base font-medium"
-          >
+          <Button type="submit" disabled={!canSubmit} className="w-full py-3 text-base font-medium">
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -239,8 +241,8 @@ const ResetPasswordPage = () => {
 
         {/* Retour connexion */}
         <div className="mt-6 text-center">
-          <Link 
-            to="/connexion" 
+          <Link
+            to="/connexion"
             className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />

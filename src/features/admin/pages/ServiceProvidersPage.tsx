@@ -33,10 +33,10 @@ export default function ServiceProvidersPage() {
           Module Providers en Développement
         </h2>
         <p className="text-gray-600 max-w-md mx-auto mb-8">
-          Cette page permettra de configurer les fournisseurs de services :
-          SMS/WhatsApp, paiements, cartes, signature électronique.
+          Cette page permettra de configurer les fournisseurs de services : SMS/WhatsApp, paiements,
+          cartes, signature électronique.
         </p>
-        
+
         {/* Preview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">

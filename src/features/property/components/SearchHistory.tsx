@@ -29,7 +29,7 @@ export default function SearchHistory({ onApplySearch, className = '' }: SearchH
 
   const removeItem = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    setHistory(history.filter(item => item.id !== id));
+    setHistory(history.filter((item) => item.id !== id));
   };
 
   const clearAll = () => {
@@ -43,7 +43,7 @@ export default function SearchHistory({ onApplySearch, className = '' }: SearchH
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return 'À l\'instant';
+    if (minutes < 1) return "À l'instant";
     if (minutes < 60) return `Il y a ${minutes} min`;
     if (hours < 24) return `Il y a ${hours}h`;
     if (days < 7) return `Il y a ${days}j`;
@@ -123,7 +123,9 @@ export default function SearchHistory({ onApplySearch, className = '' }: SearchH
                   {item.resultsCount !== undefined && (
                     <span className="flex items-center space-x-1">
                       <TrendingUp className="h-3 w-3" />
-                      <span>{item.resultsCount} résultat{item.resultsCount > 1 ? 's' : ''}</span>
+                      <span>
+                        {item.resultsCount} résultat{item.resultsCount > 1 ? 's' : ''}
+                      </span>
                     </span>
                   )}
                 </div>
@@ -161,10 +163,7 @@ export default function SearchHistory({ onApplySearch, className = '' }: SearchH
 export function useSearchHistory() {
   const [history, setHistory] = useLocalStorage<SearchHistoryItem[]>('search_history', []);
 
-  const addToHistory = (
-    filters: SearchHistoryItem['filters'],
-    resultsCount?: number
-  ) => {
+  const addToHistory = (filters: SearchHistoryItem['filters'], resultsCount?: number) => {
     const newItem: SearchHistoryItem = {
       id: Date.now().toString(),
       query: '', // Peut être calculé depuis les filtres
@@ -175,7 +174,7 @@ export function useSearchHistory() {
 
     // Éviter les doublons récents (même filtres dans les 5 minutes)
     const recentDuplicate = history.find(
-      item =>
+      (item) =>
         Date.now() - item.timestamp < 300000 && // 5 minutes
         JSON.stringify(item.filters) === JSON.stringify(filters)
     );

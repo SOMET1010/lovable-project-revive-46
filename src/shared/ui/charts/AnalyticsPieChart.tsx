@@ -54,7 +54,10 @@ export function AnalyticsPieChart({
             nameKey="label"
           >
             {chartData.map((entry, index) => (
-              <Cell key={`cell-${entry.label}`} fill={entry.fill ?? COLORS[index % COLORS.length]} />
+              <Cell
+                key={`cell-${entry.label}`}
+                fill={entry.fill ?? COLORS[index % COLORS.length]}
+              />
             ))}
           </Pie>
           <Tooltip

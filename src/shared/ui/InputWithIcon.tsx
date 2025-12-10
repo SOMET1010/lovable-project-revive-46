@@ -33,7 +33,8 @@ export interface InputWithIconProps extends Omit<InputHTMLAttributes<HTMLInputEl
 const variantStyles = {
   default: {
     border: 'border border-[var(--color-neutral-200)]',
-    focus: 'focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)]',
+    focus:
+      'focus:ring-2 focus:ring-[var(--color-primary-500)] focus:border-[var(--color-primary-500)]',
     icon: 'text-[var(--color-neutral-400)]',
     label: 'text-[var(--color-neutral-700)]',
     bg: 'bg-white',
@@ -93,25 +94,14 @@ const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(
     return (
       <div className={containerClassName}>
         {label && (
-          <label
-            htmlFor={inputId}
-            className={cn(
-              'block text-sm font-semibold mb-2',
-              styles.label
-            )}
-          >
+          <label htmlFor={inputId} className={cn('block text-sm font-semibold mb-2', styles.label)}>
             {label}
           </label>
         )}
         <div className="relative">
           {/* Left Icon */}
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10 w-12">
-            <Icon
-              className={cn(
-                'h-5 w-5',
-                iconColor || styles.icon
-              )}
-            />
+            <Icon className={cn('h-5 w-5', iconColor || styles.icon)} />
           </div>
 
           {/* Input */}
@@ -153,31 +143,28 @@ const InputWithIcon = forwardRef<HTMLInputElement, InputWithIconProps>(
               )}
               tabIndex={-1}
             >
-              {showPassword ? (
-                <EyeOff className="h-5 w-5" />
-              ) : (
-                <Eye className="h-5 w-5" />
-              )}
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
           )}
         </div>
 
         {/* Helper Text */}
         {helperText && !error && (
-          <p className={cn(
-            'mt-1 text-xs',
-            variant === 'glass' ? 'text-white/60' : 'text-gray-500'
-          )}>
+          <p
+            className={cn('mt-1 text-xs', variant === 'glass' ? 'text-white/60' : 'text-gray-500')}
+          >
             {helperText}
           </p>
         )}
 
         {/* Error Message */}
         {error && (
-          <p className={cn(
-            'mt-1.5 text-sm flex items-center gap-1',
-            variant === 'glass' ? 'text-red-300' : 'text-red-600'
-          )}>
+          <p
+            className={cn(
+              'mt-1.5 text-sm flex items-center gap-1',
+              variant === 'glass' ? 'text-red-300' : 'text-red-600'
+            )}
+          >
             <AlertCircle className="h-4 w-4" />
             {error}
           </p>

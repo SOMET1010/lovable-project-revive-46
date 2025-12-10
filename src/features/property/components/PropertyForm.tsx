@@ -6,12 +6,12 @@ import CitySelector from './CitySelector';
 import { propertyService } from '../services/propertyService';
 import { useNotifications, NotificationContainer } from '../../../shared/components/Notification';
 import { PropertyData } from '../services/propertyService';
-import { 
-  Home, 
-  MapPin, 
-  DollarSign, 
-  CheckCircle, 
-  ArrowRight, 
+import {
+  Home,
+  MapPin,
+  DollarSign,
+  CheckCircle,
+  ArrowRight,
   ArrowLeft,
   AlertTriangle,
   User,
@@ -22,7 +22,7 @@ import {
   Bath,
   Car,
   Shield,
-  Trees
+  Trees,
 } from 'lucide-react';
 
 const PropertyForm: React.FC = () => {
@@ -44,7 +44,7 @@ const PropertyForm: React.FC = () => {
     addImages,
     removeImage,
     setMainImage,
-    reorderImages
+    reorderImages,
   } = usePropertyForm();
 
   const { success, error: showError, notifications, removeNotification } = useNotifications();
@@ -78,15 +78,12 @@ const PropertyForm: React.FC = () => {
         console.error('Erreur lors de la soumission:', result.error);
         showError(
           'Erreur lors de la soumission',
-          result.error || 'Une erreur inattendue s\'est produite'
+          result.error || "Une erreur inattendue s'est produite"
         );
       }
     } catch (err) {
       console.error('Erreur inattendue lors de la soumission:', err);
-      showError(
-        'Erreur technique',
-        'Une erreur technique s\'est produite. Veuillez réessayer.'
-      );
+      showError('Erreur technique', "Une erreur technique s'est produite. Veuillez réessayer.");
     }
   };
 
@@ -126,7 +123,7 @@ const PropertyForm: React.FC = () => {
     return (
       <div className="space-y-6">
         {/* Titre et description */}
-      <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
               <Home className="inline w-4 h-4 mr-2" />
@@ -139,16 +136,18 @@ const PropertyForm: React.FC = () => {
               onBlur={() => handleBlur('title')}
               placeholder="Ex: Magnifique appartement 3 pièces vue mer"
               className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-                errors.title 
-                  ? 'border-destructive bg-destructive/5' 
-                  : formData.title.length >= 5 
-                    ? 'border-green-500 bg-green-50' 
+                errors.title
+                  ? 'border-destructive bg-destructive/5'
+                  : formData.title.length >= 5
+                    ? 'border-green-500 bg-green-50'
                     : 'border-input'
               } focus:ring-2 focus:ring-primary/20 focus:border-primary`}
               maxLength={100}
             />
             {errors.title && <p className="text-destructive text-xs mt-1">{errors.title}</p>}
-            <p className="text-xs text-muted-foreground mt-1">{formData.title.length}/100 caractères</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {formData.title.length}/100 caractères
+            </p>
           </div>
 
           <div>
@@ -160,11 +159,15 @@ const PropertyForm: React.FC = () => {
               onChange={(e) => updateField('propertyType', e.target.value)}
               className={`w-full px-3 py-2 border rounded-lg transition-colors ${errors.propertyType ? 'border-destructive' : 'border-input'} focus:ring-2 focus:ring-primary/20 focus:border-primary`}
             >
-              {propertyTypes.map(type => (
-                <option key={type.value} value={type.value}>{type.label}</option>
+              {propertyTypes.map((type) => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
               ))}
             </select>
-            {errors.propertyType && <p className="text-destructive text-xs mt-1">{errors.propertyType}</p>}
+            {errors.propertyType && (
+              <p className="text-destructive text-xs mt-1">{errors.propertyType}</p>
+            )}
           </div>
         </div>
 
@@ -180,16 +183,20 @@ const PropertyForm: React.FC = () => {
             placeholder="Décrivez votre propriété, son environnement, ses avantages..."
             rows={4}
             className={`w-full px-3 py-2 border rounded-lg transition-colors ${
-              errors.description 
-                ? 'border-destructive bg-destructive/5' 
-                : formData.description.length >= 20 
-                  ? 'border-green-500 bg-green-50' 
+              errors.description
+                ? 'border-destructive bg-destructive/5'
+                : formData.description.length >= 20
+                  ? 'border-green-500 bg-green-50'
                   : 'border-input'
             } focus:ring-2 focus:ring-primary/20 focus:border-primary`}
             maxLength={2000}
           />
-          {errors.description && <p className="text-destructive text-xs mt-1">{errors.description}</p>}
-          <p className="text-xs text-muted-foreground mt-1">{formData.description.length}/2000 caractères</p>
+          {errors.description && (
+            <p className="text-destructive text-xs mt-1">{errors.description}</p>
+          )}
+          <p className="text-xs text-muted-foreground mt-1">
+            {formData.description.length}/2000 caractères
+          </p>
         </div>
 
         {/* Caractéristiques */}
@@ -268,7 +275,7 @@ const PropertyForm: React.FC = () => {
               { key: 'garden', label: 'Jardin', icon: <Trees className="w-4 h-4" /> },
               { key: 'terrace', label: 'Terrasse', icon: <Home className="w-4 h-4" /> },
               { key: 'elevator', label: 'Ascenseur', icon: <Home className="w-4 h-4" /> },
-              { key: 'security', label: 'Sécurité', icon: <Shield className="w-4 h-4" /> }
+              { key: 'security', label: 'Sécurité', icon: <Shield className="w-4 h-4" /> },
             ].map((amenity) => (
               <label key={amenity.key} className="flex items-center space-x-2 cursor-pointer">
                 <input
@@ -382,12 +389,10 @@ const PropertyForm: React.FC = () => {
             <User className="w-5 h-5 mr-2" />
             Vos informations de contact
           </h3>
-          
+
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nom complet *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
               <input
                 type="text"
                 value={formData.ownerName}
@@ -410,7 +415,9 @@ const PropertyForm: React.FC = () => {
                 placeholder="votre@email.com"
                 className={`w-full px-3 py-2 border rounded-md ${errors.ownerEmail ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.ownerEmail && <p className="text-red-500 text-xs mt-1">{errors.ownerEmail}</p>}
+              {errors.ownerEmail && (
+                <p className="text-red-500 text-xs mt-1">{errors.ownerEmail}</p>
+              )}
             </div>
 
             <div className="md:col-span-2">
@@ -425,7 +432,9 @@ const PropertyForm: React.FC = () => {
                 placeholder="+225 XX XX XX XX"
                 className={`w-full px-3 py-2 border rounded-md ${errors.ownerPhone ? 'border-red-500' : 'border-gray-300'}`}
               />
-              {errors.ownerPhone && <p className="text-red-500 text-xs mt-1">{errors.ownerPhone}</p>}
+              {errors.ownerPhone && (
+                <p className="text-red-500 text-xs mt-1">{errors.ownerPhone}</p>
+              )}
               <p className="text-xs text-gray-500 mt-1">
                 Format accepté: +225 XX XX XX XX ou 0X XX XX XX XX
               </p>
@@ -440,14 +449,12 @@ const PropertyForm: React.FC = () => {
   const renderValidationStep = () => {
     const mainImageIndex = formData.mainImageIndex ?? 0;
     const mainImage = formData.images[mainImageIndex];
-    
+
     return (
       <div className="space-y-6">
         <div className="text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">
-            Vérification finale
-          </h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">Vérification finale</h3>
           <p className="text-gray-600">
             Vérifiez tous les détails de votre propriété avant la publication.
           </p>
@@ -456,27 +463,28 @@ const PropertyForm: React.FC = () => {
         {/* Récapitulatif */}
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <h4 className="text-lg font-semibold mb-4">Récapitulatif de votre propriété</h4>
-          
+
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
                 <h5 className="font-medium text-gray-900">{formData.title}</h5>
                 <p className="text-sm text-gray-600 capitalize">{formData.propertyType}</p>
               </div>
-              
+
               <div className="flex items-center space-x-4 text-sm text-gray-600">
                 <span>{formData.bedrooms} chambres</span>
                 <span>{formData.bathrooms} SDB</span>
                 <span>{formData.area} m²</span>
               </div>
-              
+
               <div className="flex items-center text-sm text-gray-600">
                 <MapPin className="w-4 h-4 mr-1" />
                 {formData.city}, {formData.district}
               </div>
-              
+
               <div className="text-lg font-bold text-blue-600">
-                {formData.price.toLocaleString()} FCFA {formData.priceType === 'location' && '/ mois'}
+                {formData.price.toLocaleString()} FCFA{' '}
+                {formData.priceType === 'location' && '/ mois'}
               </div>
             </div>
 
@@ -506,7 +514,7 @@ const PropertyForm: React.FC = () => {
                 {uploadProgress > 0 && (
                   <div className="mt-2">
                     <div className="bg-blue-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${uploadProgress}%` }}
                       />
@@ -524,14 +532,11 @@ const PropertyForm: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <NotificationContainer 
-        notifications={notifications} 
-        onClose={removeNotification}
-      />
-      
+      <NotificationContainer notifications={notifications} onClose={removeNotification} />
+
       {/* Indicateur de progression */}
-      <PropertySteps 
-        currentStep={currentStep} 
+      <PropertySteps
+        currentStep={currentStep}
         completedSteps={Array.from({ length: currentStep }, (_, i) => i < currentStep)}
         stepValidations={Array.from({ length: 5 }, (_, i) => i < currentStep)}
       />

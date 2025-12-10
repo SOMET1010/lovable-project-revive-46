@@ -1,8 +1,14 @@
 import { useState, useEffect } from 'react';
 import {
-  Shield, Search, Download, CheckCircle, XCircle, Clock, AlertCircle,
-  Eye, Coins, FileText, Calendar, CreditCard,
-  RefreshCw, Plus, BarChart3, ArrowUpRight, Globe
+  Search,
+  Download,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Eye,
+  Coins,
+  FileText,
+  RefreshCw,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -22,7 +28,14 @@ interface CEVRequest {
     title: string;
     address: string;
   };
-  status: 'pending_documents' | 'submitted' | 'under_review' | 'documents_requested' | 'approved' | 'issued' | 'rejected';
+  status:
+    | 'pending_documents'
+    | 'submitted'
+    | 'under_review'
+    | 'documents_requested'
+    | 'approved'
+    | 'issued'
+    | 'rejected';
   created_at: string;
   cev_fee_amount: number;
   cev_fee_paid: boolean;
@@ -48,7 +61,6 @@ export default function AdminCEVManagement() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('30d');
   const [stats, setStats] = useState<CEVStats | null>(null);
-  const [selectedRequests, setSelectedRequests] = useState<string[]>([]);
 
   useEffect(() => {
     loadData();
@@ -63,14 +75,17 @@ export default function AdminCEVManagement() {
       setLoading(true);
 
       // Fetch real CEV requests from database
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: cevRequests, error } = await supabase
-        .from('cev_requests')
-        .select(`
+        .from('cev_requests' as any)
+        .select(
+          `
           *,
           landlord:landlord_id(full_name, email),
           tenant:tenant_id(full_name, email),
           property:property_id(title, address)
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -84,37 +99,39 @@ export default function AdminCEVManagement() {
           rejected: 0,
           total_revenue: 0,
           avg_processing_time: 0,
-          approval_rate: 0
+          approval_rate: 0,
         });
         return;
       }
 
       // Transform the data to match the CEVRequest interface
-      const transformedRequests: CEVRequest[] = (cevRequests || []).map(req => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const transformedRequests: CEVRequest[] = ((cevRequests as any[]) || []).map((req: any) => ({
         id: req.id,
         cev_number: req.cev_number || '',
         oneci_reference_number: req.oneci_reference_number || '',
         landlord: {
           full_name: req.landlord?.full_name || 'N/A',
-          email: req.landlord?.email || ''
+          email: req.landlord?.email || '',
         },
         tenant: {
           full_name: req.tenant?.full_name || 'N/A',
-          email: req.tenant?.email || ''
+          email: req.tenant?.email || '',
         },
         property: {
           title: req.property?.title || 'N/A',
-          address: typeof req.property?.address === 'string'
-            ? req.property.address
-            : req.property?.address
-              ? `${req.property.address.street || ''}, ${req.property.address.city || ''}`
-              : 'N/A'
+          address:
+            typeof req.property?.address === 'string'
+              ? req.property.address
+              : req.property?.address
+                ? `${req.property.address.street || ''}, ${req.property.address.city || ''}`
+                : 'N/A',
         },
         status: req.status,
         created_at: req.created_at,
         cev_fee_amount: req.cev_fee_amount || 0,
         cev_fee_paid: req.cev_fee_paid || false,
-        processing_time: req.processing_time
+        processing_time: req.processing_time,
       }));
 
       setRequests(transformedRequests);
@@ -122,20 +139,29 @@ export default function AdminCEVManagement() {
       // Calculate real statistics
       const calculatedStats: CEVStats = {
         total: transformedRequests.length,
-        pending: transformedRequests.filter(r => ['pending_documents'].includes(r.status)).length,
-        in_progress: transformedRequests.filter(r => ['submitted', 'under_review', 'documents_requested', 'approved'].includes(r.status)).length,
-        issued: transformedRequests.filter(r => r.status === 'issued').length,
-        rejected: transformedRequests.filter(r => r.status === 'rejected').length,
-        total_revenue: transformedRequests.filter(r => r.cev_fee_paid).reduce((sum, r) => sum + r.cev_fee_amount, 0),
-        avg_processing_time: transformedRequests.filter(r => r.processing_time && r.processing_time > 0)
+        pending: transformedRequests.filter((r) => ['pending_documents'].includes(r.status)).length,
+        in_progress: transformedRequests.filter((r) =>
+          ['submitted', 'under_review', 'documents_requested', 'approved'].includes(r.status)
+        ).length,
+        issued: transformedRequests.filter((r) => r.status === 'issued').length,
+        rejected: transformedRequests.filter((r) => r.status === 'rejected').length,
+        total_revenue: transformedRequests
+          .filter((r) => r.cev_fee_paid)
+          .reduce((sum, r) => sum + r.cev_fee_amount, 0),
+        avg_processing_time: transformedRequests
+          .filter((r) => r.processing_time && r.processing_time > 0)
           .reduce((sum, r, _, arr) => sum + (r.processing_time || 0) / arr.length, 0),
-        approval_rate: (transformedRequests.filter(r => ['issued', 'rejected'].includes(r.status)).length > 0)
-          ? (transformedRequests.filter(r => r.status === 'issued').length / transformedRequests.filter(r => ['issued', 'rejected'].includes(r.status)).length) * 100
-          : 0
+        approval_rate:
+          transformedRequests.filter((r) => ['issued', 'rejected'].includes(r.status)).length > 0
+            ? (transformedRequests.filter((r) => r.status === 'issued').length /
+                transformedRequests.filter((r) => ['issued', 'rejected'].includes(r.status))
+                  .length) *
+              100
+            : 0,
       };
 
       setStats(calculatedStats);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erreur lors du chargement:', error);
       setRequests([]);
       setStats({
@@ -146,7 +172,7 @@ export default function AdminCEVManagement() {
         rejected: 0,
         total_revenue: 0,
         avg_processing_time: 0,
-        approval_rate: 0
+        approval_rate: 0,
       });
     } finally {
       setLoading(false);
@@ -393,30 +419,24 @@ export default function AdminCEVManagement() {
                       <div className="text-sm font-medium text-gray-900">
                         {request.landlord.full_name}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {request.landlord.email}
-                      </div>
+                      <div className="text-sm text-gray-500">{request.landlord.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {request.tenant.full_name}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {request.tenant.email}
-                      </div>
+                      <div className="text-sm text-gray-500">{request.tenant.email}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
                         {request.property.title}
                       </div>
-                      <div className="text-sm text-gray-500">
-                        {typeof request.property.address === 'string'
-                          ? request.property.address
-                          : `${request.property.address?.street || ''}, ${request.property.address?.city || ''}`}
-                      </div>
+                      <div className="text-sm text-gray-500">{request.property.address}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(request.status)}`}>
+                      <span
+                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(request.status)}`}
+                      >
                         {getStatusLabel(request.status)}
                       </span>
                     </td>

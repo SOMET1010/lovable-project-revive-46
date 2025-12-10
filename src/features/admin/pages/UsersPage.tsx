@@ -2,9 +2,22 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
-  Users, Search, Filter, Shield, Eye, Edit, Trash2,
-  UserCheck, RefreshCw, Download, Upload,
-  ChevronDown, ChevronUp, User, Building, Phone
+  Users,
+  Search,
+  Filter,
+  Shield,
+  Eye,
+  Edit,
+  Trash2,
+  UserCheck,
+  RefreshCw,
+  Download,
+  Upload,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Building,
+  Phone,
 } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
 
@@ -31,7 +44,7 @@ const USER_TYPES = [
   { value: 'locataire', label: 'Locataire' },
   { value: 'proprietaire', label: 'Propriétaire' },
   { value: 'agence', label: 'Agence' },
-  { value: 'admin', label: 'Administrateur' }
+  { value: 'admin', label: 'Administrateur' },
 ];
 
 const CITIES = [
@@ -39,7 +52,7 @@ const CITIES = [
   { value: 'Abidjan', label: 'Abidjan' },
   { value: 'Bouaké', label: 'Bouaké' },
   { value: 'Yamoussoukro', label: 'Yamoussoukro' },
-  { value: 'Korhogo', label: 'Korhogo' }
+  { value: 'Korhogo', label: 'Korhogo' },
 ];
 
 export default function AdminUsers() {
@@ -56,7 +69,7 @@ export default function AdminUsers() {
     search: '',
     user_type: '',
     city: '',
-    dateRange: '30d'
+    dateRange: '30d',
   });
 
   const [sortConfig, setSortConfig] = useState<{
@@ -71,10 +84,12 @@ export default function AdminUsers() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      
+
       let query = supabase
         .from('profiles')
-        .select('id, email, full_name, phone, user_type, city, created_at, updated_at', { count: 'exact' });
+        .select('id, email, full_name, phone, user_type, city, created_at, updated_at', {
+          count: 'exact',
+        });
 
       if (filters.search) {
         query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
@@ -112,34 +127,26 @@ export default function AdminUsers() {
   const handleSort = (key: keyof UserProfile) => {
     setSortConfig({
       key,
-      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc',
     });
   };
 
   const handleSelectUser = (userId: string) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
+    setSelectedUsers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
     );
   };
 
   const handleSelectAll = () => {
-    setSelectedUsers(prev => 
-      prev.length === users.length ? [] : users.map(u => u.id)
-    );
+    setSelectedUsers((prev) => (prev.length === users.length ? [] : users.map((u) => u.id)));
   };
-
 
   const handleBulkAction = async (action: string) => {
     if (selectedUsers.length === 0) return;
 
     try {
       if (action === 'delete') {
-        const { error } = await supabase
-          .from('profiles')
-          .delete()
-          .in('id', selectedUsers);
+        const { error } = await supabase.from('profiles').delete().in('id', selectedUsers);
 
         if (error) throw error;
       } else {
@@ -160,20 +167,29 @@ export default function AdminUsers() {
 
   const getUserTypeColor = (userType: string | null) => {
     switch (userType) {
-      case 'admin': return 'bg-purple-100 text-purple-800';
-      case 'proprietaire': return 'bg-blue-100 text-blue-800';
-      case 'agence': return 'bg-green-100 text-green-800';
-      case 'locataire': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'admin':
+        return 'bg-purple-100 text-purple-800';
+      case 'proprietaire':
+        return 'bg-blue-100 text-blue-800';
+      case 'agence':
+        return 'bg-green-100 text-green-800';
+      case 'locataire':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getUserTypeIcon = (userType: string | null) => {
     switch (userType) {
-      case 'admin': return Shield;
-      case 'proprietaire': return Building;
-      case 'trust_agent': return UserCheck;
-      default: return User;
+      case 'admin':
+        return Shield;
+      case 'proprietaire':
+        return Building;
+      case 'trust_agent':
+        return UserCheck;
+      default:
+        return User;
     }
   };
 
@@ -185,7 +201,8 @@ export default function AdminUsers() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Gérez tous les utilisateurs de la plateforme ({totalUsers.toLocaleString('fr-FR')} total)
+            Gérez tous les utilisateurs de la plateforme ({totalUsers.toLocaleString('fr-FR')}{' '}
+            total)
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -218,7 +235,7 @@ export default function AdminUsers() {
                   type="text"
                   placeholder="Nom, email..."
                   value={filters.search}
-                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                  onChange={(e) => setFilters((prev) => ({ ...prev, search: e.target.value }))}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
@@ -228,11 +245,13 @@ export default function AdminUsers() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
               <select
                 value={filters.user_type}
-                onChange={(e) => setFilters(prev => ({ ...prev, user_type: e.target.value }))}
+                onChange={(e) => setFilters((prev) => ({ ...prev, user_type: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
-                {USER_TYPES.map(type => (
-                  <option key={type.value} value={type.value}>{type.label}</option>
+                {USER_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -241,11 +260,13 @@ export default function AdminUsers() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
               <select
                 value={filters.city}
-                onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
+                onChange={(e) => setFilters((prev) => ({ ...prev, city: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
-                {CITIES.map(city => (
-                  <option key={city.value} value={city.value}>{city.label}</option>
+                {CITIES.map((city) => (
+                  <option key={city.value} value={city.value}>
+                    {city.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -254,7 +275,7 @@ export default function AdminUsers() {
               <label className="block text-sm font-medium text-gray-700 mb-2">Période</label>
               <select
                 value={filters.dateRange}
-                onChange={(e) => setFilters(prev => ({ ...prev, dateRange: e.target.value }))}
+                onChange={(e) => setFilters((prev) => ({ ...prev, dateRange: e.target.value }))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               >
                 <option value="7d">7 derniers jours</option>
@@ -310,17 +331,18 @@ export default function AdminUsers() {
                     className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
                   />
                 </th>
-                <th 
+                <th
                   className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('email')}
                 >
                   <div className="flex items-center space-x-1">
                     <span>Utilisateur</span>
-                    {sortConfig.key === 'email' && (
-                      sortConfig.direction === 'asc' ? 
-                        <ChevronUp className="w-4 h-4" /> : 
+                    {sortConfig.key === 'email' &&
+                      (sortConfig.direction === 'asc' ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
                         <ChevronDown className="w-4 h-4" />
-                    )}
+                      ))}
                   </div>
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -329,17 +351,18 @@ export default function AdminUsers() {
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ville
                 </th>
-                <th 
+                <th
                   className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('created_at')}
                 >
                   <div className="flex items-center space-x-1">
                     <span>Inscrit le</span>
-                    {sortConfig.key === 'created_at' && (
-                      sortConfig.direction === 'asc' ? 
-                        <ChevronUp className="w-4 h-4" /> : 
+                    {sortConfig.key === 'created_at' &&
+                      (sortConfig.direction === 'asc' ? (
+                        <ChevronUp className="w-4 h-4" />
+                      ) : (
                         <ChevronDown className="w-4 h-4" />
-                    )}
+                      ))}
                   </div>
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -365,7 +388,7 @@ export default function AdminUsers() {
                   </td>
                 </tr>
               ) : (
-                users.map(userProfile => {
+                users.map((userProfile) => {
                   const TypeIcon = getUserTypeIcon(userProfile.user_type);
                   return (
                     <tr key={userProfile.id} className="hover:bg-gray-50">
@@ -383,7 +406,9 @@ export default function AdminUsers() {
                             <TypeIcon className="w-5 h-5 text-gray-600" />
                           </div>
                           <div>
-                            <p className="font-medium text-gray-900">{userProfile.full_name || 'Non renseigné'}</p>
+                            <p className="font-medium text-gray-900">
+                              {userProfile.full_name || 'Non renseigné'}
+                            </p>
                             <p className="text-sm text-gray-500">{userProfile.email}</p>
                             {userProfile.phone && (
                               <p className="text-xs text-gray-400 flex items-center space-x-1">
@@ -395,15 +420,17 @@ export default function AdminUsers() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getUserTypeColor(userProfile.user_type)}`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getUserTypeColor(userProfile.user_type)}`}
+                        >
                           {userProfile.user_type || 'locataire'}
                         </span>
                       </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{userProfile.city || '-'}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">
-                        {userProfile.city || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {userProfile.created_at ? FormatService.formatRelativeTime(userProfile.created_at) : '-'}
+                        {userProfile.created_at
+                          ? FormatService.formatRelativeTime(userProfile.created_at)
+                          : '-'}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end space-x-2">
@@ -433,14 +460,14 @@ export default function AdminUsers() {
             </p>
             <div className="flex items-center space-x-2">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
                 className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Précédent
               </button>
               <button
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
                 className="px-3 py-1 border border-gray-300 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >

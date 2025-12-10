@@ -12,7 +12,7 @@ export default function ThemeToggle() {
     { value: 'system' as const, label: 'Système', icon: Monitor },
   ];
 
-  const currentThemeIcon = themes.find(t => t.value === theme)?.icon || Sun;
+  const currentThemeIcon = themes.find((t) => t.value === theme)?.icon || Sun;
   const Icon = currentThemeIcon;
 
   return (
@@ -23,7 +23,9 @@ export default function ThemeToggle() {
         className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         aria-label="Changer le thème"
       >
-        <Icon className={`h-5 w-5 ${actualTheme === 'dark' ? 'text-yellow-400' : 'text-gray-700'}`} />
+        <Icon
+          className={`h-5 w-5 ${actualTheme === 'dark' ? 'text-yellow-400' : 'text-gray-700'}`}
+        />
       </button>
 
       {showMenu && (
@@ -47,9 +49,7 @@ export default function ThemeToggle() {
               >
                 <ThemeIcon className="h-4 w-4" />
                 <span>{themeOption.label}</span>
-                {isActive && (
-                  <span className="ml-auto text-blue-600 dark:text-blue-400">✓</span>
-                )}
+                {isActive && <span className="ml-auto text-blue-600 dark:text-blue-400">✓</span>}
               </button>
             );
           })}

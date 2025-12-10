@@ -39,8 +39,12 @@ export default function SaveSearchDialog({
       parts.push(types[currentFilters.propertyType] || currentFilters.propertyType);
     }
     if (currentFilters.minPrice || currentFilters.maxPrice) {
-      const min = currentFilters.minPrice ? `${parseInt(currentFilters.minPrice).toLocaleString()}` : '';
-      const max = currentFilters.maxPrice ? `${parseInt(currentFilters.maxPrice).toLocaleString()}` : '';
+      const min = currentFilters.minPrice
+        ? `${parseInt(currentFilters.minPrice).toLocaleString()}`
+        : '';
+      const max = currentFilters.maxPrice
+        ? `${parseInt(currentFilters.maxPrice).toLocaleString()}`
+        : '';
       if (min && max) parts.push(`${min} - ${max} FCFA`);
       else if (min) parts.push(`Min ${min} FCFA`);
       else if (max) parts.push(`Max ${max} FCFA`);
@@ -67,10 +71,7 @@ export default function SaveSearchDialog({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative bg-background rounded-[20px] shadow-xl w-full max-w-md p-6 animate-in fade-in zoom-in-95 duration-200">

@@ -18,16 +18,16 @@ export class ChunkLoadErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): Partial<State> | null {
-    const isChunkError = 
+    const isChunkError =
       error.message.includes('Failed to fetch dynamically imported module') ||
       error.message.includes('Loading chunk') ||
       error.message.includes('Loading CSS chunk') ||
       error.message.includes('Unable to preload CSS');
-    
+
     if (isChunkError) {
       return { hasError: true, error };
     }
-    
+
     throw error;
   }
 
@@ -50,9 +50,7 @@ export class ChunkLoadErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center">
           <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
-          <p className="text-muted-foreground mb-4">
-            Rechargement automatique...
-          </p>
+          <p className="text-muted-foreground mb-4">Rechargement automatique...</p>
           <Button onClick={this.handleManualReload} variant="outline" className="gap-2">
             <RefreshCw className="h-4 w-4" />
             Recharger manuellement

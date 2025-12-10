@@ -6,38 +6,38 @@
 
 :root {
   /* === PALETTE PREMIUM IVORIAN === */
-  
+
   /* Chocolat - Headers, accents sombres */
-  --color-chocolat: #2C1810;
-  --color-chocolat-light: #3D2A20;
-  --color-chocolat-dark: #1A0F0A;
-  
+  --color-chocolat: #2c1810;
+  --color-chocolat-light: #3d2a20;
+  --color-chocolat-dark: #1a0f0a;
+
   /* Sable - Texte clair sur fond sombre */
-  --color-sable: #E8D4C5;
-  --color-sable-light: #F5EDE6;
-  --color-sable-dark: #D4B8A5;
-  
+  --color-sable: #e8d4c5;
+  --color-sable-light: #f5ede6;
+  --color-sable-dark: #d4b8a5;
+
   /* Orange - CTAs, badges, accents */
-  --color-orange: #F16522;
-  --color-orange-light: #FF8A50;
-  --color-orange-dark: #D95518;
-  --color-orange-50: #FFF5F0;
-  --color-orange-100: #FFE5D6;
-  
+  --color-orange: #f16522;
+  --color-orange-light: #ff8a50;
+  --color-orange-dark: #d95518;
+  --color-orange-50: #fff5f0;
+  --color-orange-100: #ffe5d6;
+
   /* Crème - Fond de page principal */
-  --color-creme: #FAF7F4;
-  --color-creme-dark: #F5EDE6;
-  
+  --color-creme: #faf7f4;
+  --color-creme-dark: #f5ede6;
+
   /* Gris Texte - Texte secondaire */
-  --color-gris-texte: #6B5A4E;
-  
+  --color-gris-texte: #6b5a4e;
+
   /* Gris Neutre - Labels, icônes inactives */
-  --color-gris-neutre: #A69B95;
-  
+  --color-gris-neutre: #a69b95;
+
   /* Bordures subtiles */
-  --color-border: #EFEBE9;
-  --color-border-hover: #E8D4C5;
-  
+  --color-border: #efebe9;
+  --color-border-hover: #e8d4c5;
+
   /* Aliases pour compatibilité */
   --premium-chocolat: var(--color-chocolat);
   --premium-sable: var(--color-sable);
@@ -60,8 +60,9 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 20%, rgba(241, 101, 34, 0.08) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(232, 212, 197, 0.05) 0%, transparent 50%);
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(241, 101, 34, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(232, 212, 197, 0.05) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -241,7 +242,7 @@
   border-color: var(--color-orange);
 }
 
-.accordion-premium-header[data-open="true"] {
+.accordion-premium-header[data-open='true'] {
   border-color: var(--color-orange);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
@@ -307,7 +308,8 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -321,12 +323,24 @@
 }
 
 /* Stagger pour grilles de cards */
-.card-stagger-1 { animation-delay: 0.05s; }
-.card-stagger-2 { animation-delay: 0.1s; }
-.card-stagger-3 { animation-delay: 0.15s; }
-.card-stagger-4 { animation-delay: 0.2s; }
-.card-stagger-5 { animation-delay: 0.25s; }
-.card-stagger-6 { animation-delay: 0.3s; }
+.card-stagger-1 {
+  animation-delay: 0.05s;
+}
+.card-stagger-2 {
+  animation-delay: 0.1s;
+}
+.card-stagger-3 {
+  animation-delay: 0.15s;
+}
+.card-stagger-4 {
+  animation-delay: 0.2s;
+}
+.card-stagger-5 {
+  animation-delay: 0.25s;
+}
+.card-stagger-6 {
+  animation-delay: 0.3s;
+}
 
 /* Hover Premium avec lift + glow orange */
 .card-hover-premium {
@@ -356,7 +370,7 @@
   .icon-pulse-premium {
     animation: none !important;
   }
-  
+
   .card-hover-premium:hover {
     transform: none;
   }

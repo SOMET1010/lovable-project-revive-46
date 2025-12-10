@@ -31,7 +31,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
     const helperId = `${inputId}-helper`;
     const errorId = `${inputId}-error`;
-    
+
     const widthClass = fullWidth ? 'w-full' : '';
 
     // Déterminer l'état de validation
@@ -78,19 +78,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       'peer',
       // Classes de validation
       getValidationClasses(),
-      className
-    ].filter(Boolean).join(' ');
+      className,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
-    const containerClasses = [
-      'relative',
-      widthClass
-    ].filter(Boolean).join(' ');
+    const containerClasses = ['relative', widthClass].filter(Boolean).join(' ');
 
-    const inputWrapperClasses = [
-      'relative',
-      'flex',
-      'items-center'
-    ].filter(Boolean).join(' ');
+    const inputWrapperClasses = ['relative', 'flex', 'items-center'].filter(Boolean).join(' ');
 
     // Variables for potential future icon padding adjustments (currently handled inline)
 
@@ -105,57 +100,48 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               'font-semibold',
               'text-neutral-700',
               'mb-2',
-              'leading-relaxed'
+              'leading-relaxed',
             ].join(' ')}
           >
             {label}
             {required && (
-              <span 
-                className="text-semantic-error ml-1" 
-                aria-label="obligatoire"
-              >
+              <span className="text-semantic-error ml-1" aria-label="obligatoire">
                 *
               </span>
             )}
           </label>
         )}
-        
+
         <div className={inputWrapperClasses}>
           {leftIcon && (
-            <div className="absolute left-3 text-neutral-500 pointer-events-none">
-              {leftIcon}
-            </div>
+            <div className="absolute left-3 text-neutral-500 pointer-events-none">{leftIcon}</div>
           )}
-          
+
           <input
             ref={ref}
             id={inputId}
             type={type}
-            className={[
-              inputClasses,
-              leftIcon ? 'pl-10' : '',
-              rightIcon ? 'pr-10' : '',
-            ].filter(Boolean).join(' ')}
+            className={[inputClasses, leftIcon ? 'pl-10' : '', rightIcon ? 'pr-10' : '']
+              .filter(Boolean)
+              .join(' ')}
             aria-invalid={!!error || validationState === 'error'}
-            aria-describedby={[
-              error ? errorId : null,
-              helperText ? helperId : null
-            ].filter(Boolean).join(' ') || undefined}
+            aria-describedby={
+              [error ? errorId : null, helperText ? helperId : null].filter(Boolean).join(' ') ||
+              undefined
+            }
             required={required}
             {...props}
           />
-          
+
           {rightIcon && (
-            <div className="absolute right-3 text-neutral-500 pointer-events-none">
-              {rightIcon}
-            </div>
+            <div className="absolute right-3 text-neutral-500 pointer-events-none">{rightIcon}</div>
           )}
         </div>
-        
+
         {/* Messages d'aide et d'erreur */}
         <div className="mt-2 min-h-[1.25rem]">
           {error && (
-            <p 
+            <p
               id={errorId}
               className={[
                 'text-small',
@@ -164,35 +150,32 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 'leading-relaxed',
                 'flex',
                 'items-center',
-                'gap-1'
+                'gap-1',
               ].join(' ')}
               role="alert"
             >
-              <svg 
-                className="h-4 w-4 flex-shrink-0" 
-                fill="currentColor" 
+              <svg
+                className="h-4 w-4 flex-shrink-0"
+                fill="currentColor"
                 viewBox="0 0 20 20"
                 aria-hidden="true"
               >
-                <path 
-                  fillRule="evenodd" 
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" 
-                  clipRule="evenodd" 
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
                 />
               </svg>
               {error}
             </p>
           )}
-          
+
           {!error && helperText && (
-            <p 
+            <p
               id={helperId}
-              className={[
-                'text-small',
-                'font-regular',
-                'text-neutral-500',
-                'leading-relaxed'
-              ].join(' ')}
+              className={['text-small', 'font-regular', 'text-neutral-500', 'leading-relaxed'].join(
+                ' '
+              )}
             >
               {helperText}
             </p>

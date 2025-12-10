@@ -67,17 +67,15 @@ export function MessageThread({
             <ArrowLeft className="h-5 w-5 text-[#6B5A4E]" />
           </button>
         )}
-        
+
         <img
           src={conversation.other_participant?.avatar_url ?? getDefaultAvatar(participantName)}
           alt={participantName}
           className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
         />
-        
+
         <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-[#2C1810] truncate">
-            {participantName}
-          </h3>
+          <h3 className="font-bold text-[#2C1810] truncate">{participantName}</h3>
           <span className="text-xs text-[#F16522] font-medium bg-[#F16522]/10 px-2 py-0.5 rounded-full inline-block">
             Contact
           </span>
@@ -110,9 +108,7 @@ export function MessageThread({
               <Home className="h-8 w-8 text-[#F16522]" />
             </div>
             <p className="text-[#6B5A4E] font-medium">Aucun message</p>
-            <p className="text-[#A69B95] text-sm mt-1">
-              Commencez la conversation !
-            </p>
+            <p className="text-[#A69B95] text-sm mt-1">Commencez la conversation !</p>
           </div>
         ) : (
           <>
@@ -130,12 +126,14 @@ export function MessageThread({
                   <Home className="h-6 w-6 text-[#F16522]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#2C1810] truncate">{conversation.property.title}</p>
+                  <p className="text-sm font-medium text-[#2C1810] truncate">
+                    {conversation.property.title}
+                  </p>
                   <p className="text-xs text-[#6B5A4E]">Bien immobilier</p>
                 </div>
               </div>
             )}
-            
+
             {messages.map((message) => (
               <MessageBubble
                 key={message.id}

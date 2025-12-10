@@ -4,7 +4,17 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Building2, Search, Calendar, Percent, Check, Download, CheckCircle2, FileSignature } from 'lucide-react';
+import {
+  X,
+  Building2,
+  Search,
+  Calendar,
+  Percent,
+  Check,
+  Download,
+  CheckCircle2,
+  FileSignature,
+} from 'lucide-react';
 import { format, addMonths } from 'date-fns';
 import type { Agency, MandatePermissions, AgencyMandate } from '@/hooks/useAgencyMandates';
 
@@ -33,52 +43,53 @@ interface InviteAgencyDialogProps {
   selectedPropertyId?: string;
 }
 
-const PERMISSION_LABELS: Record<keyof MandatePermissions, { label: string; description: string }> = {
-  can_view_properties: { 
-    label: 'Voir les biens', 
-    description: 'Accéder aux détails du bien' 
-  },
-  can_edit_properties: { 
-    label: 'Modifier les biens', 
-    description: 'Mettre à jour les informations' 
-  },
-  can_create_properties: { 
-    label: 'Créer des biens', 
-    description: 'Ajouter de nouveaux biens' 
-  },
-  can_delete_properties: { 
-    label: 'Supprimer des biens', 
-    description: 'Retirer des biens' 
-  },
-  can_view_applications: { 
-    label: 'Voir les candidatures', 
-    description: 'Consulter les demandes' 
-  },
-  can_manage_applications: { 
-    label: 'Gérer les candidatures', 
-    description: 'Accepter/refuser les demandes' 
-  },
-  can_create_leases: { 
-    label: 'Créer des baux', 
-    description: 'Rédiger et signer des contrats' 
-  },
-  can_view_financials: { 
-    label: 'Voir les finances', 
-    description: 'Accéder aux paiements' 
-  },
-  can_manage_maintenance: { 
-    label: 'Gérer la maintenance', 
-    description: 'Traiter les demandes de travaux' 
-  },
-  can_communicate_tenants: { 
-    label: 'Communiquer avec locataires', 
-    description: 'Envoyer des messages' 
-  },
-  can_manage_documents: { 
-    label: 'Gérer les documents', 
-    description: 'Ajouter/supprimer des fichiers' 
-  },
-};
+const PERMISSION_LABELS: Record<keyof MandatePermissions, { label: string; description: string }> =
+  {
+    can_view_properties: {
+      label: 'Voir les biens',
+      description: 'Accéder aux détails du bien',
+    },
+    can_edit_properties: {
+      label: 'Modifier les biens',
+      description: 'Mettre à jour les informations',
+    },
+    can_create_properties: {
+      label: 'Créer des biens',
+      description: 'Ajouter de nouveaux biens',
+    },
+    can_delete_properties: {
+      label: 'Supprimer des biens',
+      description: 'Retirer des biens',
+    },
+    can_view_applications: {
+      label: 'Voir les candidatures',
+      description: 'Consulter les demandes',
+    },
+    can_manage_applications: {
+      label: 'Gérer les candidatures',
+      description: 'Accepter/refuser les demandes',
+    },
+    can_create_leases: {
+      label: 'Créer des baux',
+      description: 'Rédiger et signer des contrats',
+    },
+    can_view_financials: {
+      label: 'Voir les finances',
+      description: 'Accéder aux paiements',
+    },
+    can_manage_maintenance: {
+      label: 'Gérer la maintenance',
+      description: 'Traiter les demandes de travaux',
+    },
+    can_communicate_tenants: {
+      label: 'Communiquer avec locataires',
+      description: 'Envoyer des messages',
+    },
+    can_manage_documents: {
+      label: 'Gérer les documents',
+      description: 'Ajouter/supprimer des fichiers',
+    },
+  };
 
 const DEFAULT_PERMISSIONS: MandatePermissions = {
   can_view_properties: true,
@@ -106,7 +117,9 @@ export default function InviteAgencyDialog({
   const navigate = useNavigate();
   const [step, setStep] = useState<'select' | 'configure' | 'success'>('select');
   const [createdMandateId, setCreatedMandateId] = useState<string | null>(null);
-  const [mandateScope, setMandateScope] = useState<'single_property' | 'all_properties'>('single_property');
+  const [mandateScope, setMandateScope] = useState<'single_property' | 'all_properties'>(
+    'single_property'
+  );
   const [selectedProperty, setSelectedProperty] = useState<string>(selectedPropertyId || '');
   const [selectedAgency, setSelectedAgency] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,17 +136,19 @@ export default function InviteAgencyDialog({
     }
   }, [selectedPropertyId]);
 
-  const filteredAgencies = agencies.filter(agency =>
-    agency.agency_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    agency.city?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAgencies = agencies.filter(
+    (agency) =>
+      agency.agency_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agency.city?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleContinue = () => {
     // Pour all_properties, on n'a pas besoin de selectedProperty
-    const canProceed = mandateScope === 'all_properties' 
-      ? selectedAgency !== ''
-      : selectedProperty !== '' && selectedAgency !== '';
-    
+    const canProceed =
+      mandateScope === 'all_properties'
+        ? selectedAgency !== ''
+        : selectedProperty !== '' && selectedAgency !== '';
+
     if (canProceed) {
       setStep('configure');
     }
@@ -151,7 +166,7 @@ export default function InviteAgencyDialog({
       permissions,
     });
     setLoading(false);
-    
+
     if (mandate) {
       setCreatedMandateId(mandate.id);
       setStep('success');
@@ -178,33 +193,36 @@ export default function InviteAgencyDialog({
   };
 
   const togglePermission = (key: keyof MandatePermissions) => {
-    setPermissions(prev => ({ ...prev, [key]: !prev[key] }));
+    setPermissions((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   if (!isOpen) return null;
 
-  const selectedAgencyData = agencies.find(a => a.id === selectedAgency);
-  const selectedPropertyData = properties.find(p => p.id === selectedProperty);
+  const selectedAgencyData = agencies.find((a) => a.id === selectedAgency);
+  const selectedPropertyData = properties.find((p) => p.id === selectedProperty);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-full items-center justify-center p-4">
         <div className="fixed inset-0 bg-black/50" onClick={handleClose} />
-        
+
         <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-neutral-200">
             <div>
               <h2 className="text-lg font-bold text-neutral-900">
-                {step === 'select' ? 'Inviter une agence' : step === 'configure' ? 'Configurer le mandat' : 'Mandat créé'}
+                {step === 'select'
+                  ? 'Inviter une agence'
+                  : step === 'configure'
+                    ? 'Configurer le mandat'
+                    : 'Mandat créé'}
               </h2>
               <p className="text-sm text-neutral-500">
-                {step === 'select' 
+                {step === 'select'
                   ? 'Sélectionnez une agence pour gérer votre bien'
                   : step === 'configure'
-                  ? 'Définissez les termes et permissions'
-                  : 'L\'invitation a été envoyée avec succès'
-                }
+                    ? 'Définissez les termes et permissions'
+                    : "L'invitation a été envoyée avec succès"}
               </p>
             </div>
             <button
@@ -305,9 +323,10 @@ export default function InviteAgencyDialog({
                       className="w-full px-4 py-3 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary"
                     >
                       <option value="">Choisir un bien...</option>
-                      {properties.map(property => (
+                      {properties.map((property) => (
                         <option key={property.id} value={property.id}>
-                          {property.title} - {property.city} ({property.monthly_rent.toLocaleString()} FCFA)
+                          {property.title} - {property.city} (
+                          {property.monthly_rent.toLocaleString()} FCFA)
                         </option>
                       ))}
                     </select>
@@ -334,11 +353,9 @@ export default function InviteAgencyDialog({
                 {/* Agencies List */}
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {filteredAgencies.length === 0 ? (
-                    <p className="text-center py-8 text-neutral-500">
-                      Aucune agence trouvée
-                    </p>
+                    <p className="text-center py-8 text-neutral-500">Aucune agence trouvée</p>
                   ) : (
-                    filteredAgencies.map(agency => (
+                    filteredAgencies.map((agency) => (
                       <button
                         key={agency.id}
                         onClick={() => setSelectedAgency(agency.id)}
@@ -350,14 +367,20 @@ export default function InviteAgencyDialog({
                       >
                         <div className="w-12 h-12 rounded-xl bg-neutral-100 flex items-center justify-center flex-shrink-0">
                           {agency.logo_url ? (
-                            <img src={agency.logo_url} alt={agency.agency_name} className="w-full h-full object-cover rounded-xl" />
+                            <img
+                              src={agency.logo_url}
+                              alt={agency.agency_name}
+                              className="w-full h-full object-cover rounded-xl"
+                            />
                           ) : (
                             <Building2 className="h-6 w-6 text-neutral-400" />
                           )}
                         </div>
                         <div className="flex-1 text-left">
                           <p className="font-medium text-neutral-900">{agency.agency_name}</p>
-                          <p className="text-sm text-neutral-500">{agency.city || 'Côte d\'Ivoire'}</p>
+                          <p className="text-sm text-neutral-500">
+                            {agency.city || "Côte d'Ivoire"}
+                          </p>
                         </div>
                         {selectedAgency === agency.id && (
                           <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
@@ -378,10 +401,9 @@ export default function InviteAgencyDialog({
                     <span className="font-medium">{selectedAgencyData?.agency_name}</span>
                   </div>
                   <p className="text-sm text-neutral-600">
-                    {mandateScope === 'all_properties' 
+                    {mandateScope === 'all_properties'
                       ? `Gestion de tous vos biens (${properties.length} propriétés)`
-                      : `Gestion de : ${selectedPropertyData?.title}`
-                    }
+                      : `Gestion de : ${selectedPropertyData?.title}`}
                   </p>
                 </div>
 
@@ -434,7 +456,11 @@ export default function InviteAgencyDialog({
                   </div>
                   {mandateScope === 'single_property' && selectedPropertyData && (
                     <p className="text-sm text-neutral-500 mt-1">
-                      Soit {Math.round(selectedPropertyData.monthly_rent * commissionRate / 100).toLocaleString()} FCFA/mois
+                      Soit{' '}
+                      {Math.round(
+                        (selectedPropertyData.monthly_rent * commissionRate) / 100
+                      ).toLocaleString()}{' '}
+                      FCFA/mois
                     </p>
                   )}
                 </div>
@@ -445,27 +471,29 @@ export default function InviteAgencyDialog({
                     Permissions accordées
                   </label>
                   <div className="space-y-2">
-                    {(Object.keys(PERMISSION_LABELS) as Array<keyof MandatePermissions>).map(key => (
-                      <label 
-                        key={key}
-                        className="flex items-start gap-3 p-3 rounded-lg hover:bg-neutral-50 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={permissions[key]}
-                          onChange={() => togglePermission(key)}
-                          className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
-                        />
-                        <div>
-                          <p className="text-sm font-medium text-neutral-900">
-                            {PERMISSION_LABELS[key].label}
-                          </p>
-                          <p className="text-xs text-neutral-500">
-                            {PERMISSION_LABELS[key].description}
-                          </p>
-                        </div>
-                      </label>
-                    ))}
+                    {(Object.keys(PERMISSION_LABELS) as Array<keyof MandatePermissions>).map(
+                      (key) => (
+                        <label
+                          key={key}
+                          className="flex items-start gap-3 p-3 rounded-lg hover:bg-neutral-50 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={permissions[key]}
+                            onChange={() => togglePermission(key)}
+                            className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-primary focus:ring-primary"
+                          />
+                          <div>
+                            <p className="text-sm font-medium text-neutral-900">
+                              {PERMISSION_LABELS[key].label}
+                            </p>
+                            <p className="text-xs text-neutral-500">
+                              {PERMISSION_LABELS[key].description}
+                            </p>
+                          </div>
+                        </label>
+                      )
+                    )}
                   </div>
                 </div>
               </>
@@ -484,12 +512,12 @@ export default function InviteAgencyDialog({
             ) : (
               <>
                 {step === 'configure' && (
-                <button
-                  onClick={() => setStep('select')}
-                  className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
-                >
-                  Retour
-                </button>
+                  <button
+                    onClick={() => setStep('select')}
+                    className="px-4 py-2 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
+                  >
+                    Retour
+                  </button>
                 )}
                 <button
                   onClick={handleClose}
@@ -500,7 +528,11 @@ export default function InviteAgencyDialog({
                 {step === 'select' ? (
                   <button
                     onClick={handleContinue}
-                    disabled={mandateScope === 'single_property' ? (!selectedProperty || !selectedAgency) : !selectedAgency}
+                    disabled={
+                      mandateScope === 'single_property'
+                        ? !selectedProperty || !selectedAgency
+                        : !selectedAgency
+                    }
                     className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     Continuer
@@ -511,7 +543,7 @@ export default function InviteAgencyDialog({
                     disabled={loading}
                     className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg font-medium disabled:opacity-50 transition-colors"
                   >
-                    {loading ? 'Envoi...' : 'Envoyer l\'invitation'}
+                    {loading ? 'Envoi...' : "Envoyer l'invitation"}
                   </button>
                 )}
               </>
@@ -522,4 +554,3 @@ export default function InviteAgencyDialog({
     </div>
   );
 }
-

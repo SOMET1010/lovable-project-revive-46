@@ -15,7 +15,7 @@ export default function AuthCallback() {
       const errorDescription = hashParams.get('error_description');
 
       if (errorParam) {
-        setError(errorDescription || 'Erreur lors de l\'authentification');
+        setError(errorDescription || "Erreur lors de l'authentification");
         setTimeout(() => {
           navigate('/connexion');
         }, 3000);
@@ -25,7 +25,7 @@ export default function AuthCallback() {
       if (user && !loading) {
         // Vérifier si c'est un nouvel utilisateur nécessitant la complétion du profil
         const needsProfileCompletion = sessionStorage.getItem('needsProfileCompletion');
-        
+
         if (needsProfileCompletion === 'true') {
           sessionStorage.removeItem('needsProfileCompletion');
           navigate('/completer-profil');

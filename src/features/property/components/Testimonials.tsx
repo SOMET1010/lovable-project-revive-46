@@ -18,46 +18,56 @@ const testimonials: Testimonial[] = [
     name: 'Kouamé Yao',
     role: 'Locataire',
     city: 'Cocody',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+    avatar:
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
     rating: 5,
-    content: "J'ai trouvé mon appartement en moins d'une semaine grâce à Mon Toit. La vérification des propriétés m'a vraiment rassuré. Je recommande vivement !"
+    content:
+      "J'ai trouvé mon appartement en moins d'une semaine grâce à Mon Toit. La vérification des propriétés m'a vraiment rassuré. Je recommande vivement !",
   },
   {
     id: 2,
     name: 'Aminata Diallo',
     role: 'Propriétaire',
     city: 'Plateau',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
+    avatar:
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face',
     rating: 5,
-    content: "En tant que propriétaire, je suis impressionnée par le sérieux de la plateforme. Les locataires sont vérifiés et les paiements sont sécurisés."
+    content:
+      'En tant que propriétaire, je suis impressionnée par le sérieux de la plateforme. Les locataires sont vérifiés et les paiements sont sécurisés.',
   },
   {
     id: 3,
     name: 'Jean-Baptiste Konan',
     role: 'Locataire',
     city: 'Marcory',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
+    avatar:
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
     rating: 4,
-    content: "La signature électronique du bail a été un vrai plus. Tout s'est fait rapidement et de manière transparente. Excellente expérience !"
+    content:
+      "La signature électronique du bail a été un vrai plus. Tout s'est fait rapidement et de manière transparente. Excellente expérience !",
   },
   {
     id: 4,
     name: 'Marie-Claire Touré',
     role: 'Propriétaire',
     city: 'Riviera',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
+    avatar:
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
     rating: 5,
-    content: "Le système de score de confiance est génial. Je sais exactement à qui je loue mon bien. Mon Toit a changé ma façon de gérer mes propriétés."
+    content:
+      'Le système de score de confiance est génial. Je sais exactement à qui je loue mon bien. Mon Toit a changé ma façon de gérer mes propriétés.',
   },
   {
     id: 5,
     name: 'Ousmane Koné',
     role: 'Locataire',
     city: 'Yopougon',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
+    avatar:
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
     rating: 5,
-    content: "Enfin une plateforme qui comprend les réalités ivoiriennes ! Le paiement via Mobile Money est super pratique. Merci Mon Toit !"
-  }
+    content:
+      'Enfin une plateforme qui comprend les réalités ivoiriennes ! Le paiement via Mobile Money est super pratique. Merci Mon Toit !',
+  },
 ];
 
 export default function Testimonials() {
@@ -66,7 +76,7 @@ export default function Testimonials() {
 
   useEffect(() => {
     if (!isAutoPlaying) return;
-    
+
     const interval = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % testimonials.length);
     }, 5000);
@@ -122,8 +132,8 @@ export default function Testimonials() {
                   <Star
                     key={i}
                     className={`h-5 w-5 ${
-                      i < currentTestimonial.rating 
-                        ? 'text-yellow-400 fill-yellow-400' 
+                      i < currentTestimonial.rating
+                        ? 'text-yellow-400 fill-yellow-400'
                         : 'text-muted'
                     }`}
                   />
@@ -138,9 +148,7 @@ export default function Testimonials() {
                   className="w-12 h-12 rounded-full object-cover border-2 border-[#FF6C2F]"
                 />
                 <div className="text-left">
-                  <p className="font-semibold text-foreground">
-                    {currentTestimonial.name}
-                  </p>
+                  <p className="font-semibold text-foreground">{currentTestimonial.name}</p>
                   <p className="text-sm text-muted-foreground">
                     {currentTestimonial.role} • {currentTestimonial.city}
                   </p>
@@ -176,8 +184,8 @@ export default function Testimonials() {
                 key={index}
                 onClick={() => goTo(index)}
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === activeIndex 
-                    ? 'w-8 bg-[#FF6C2F]' 
+                  index === activeIndex
+                    ? 'w-8 bg-[#FF6C2F]'
                     : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
                 }`}
               />

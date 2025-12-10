@@ -1,9 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Building2, Home, Loader2, ArrowRight, RefreshCw, Warehouse, Tent } from 'lucide-react';
+import {
+  MapPin,
+  Building2,
+  Home,
+  Loader2,
+  ArrowRight,
+  RefreshCw,
+  Warehouse,
+  Tent,
+} from 'lucide-react';
 import type { LngLatBounds } from 'mapbox-gl';
 import MapboxMap from '@/shared/ui/MapboxMap';
-import { useHomeMapProperties } from "../../../hooks/useHomeMapProperties"
+import { useHomeMapProperties } from '../../../hooks/useHomeMapProperties';
 
 // --- CONFIGURATION PREMIUM ---
 
@@ -25,8 +34,9 @@ const BUDGET_OPTIONS = [
 
 export default function HomeMapSection() {
   const navigate = useNavigate();
-  const { properties, loading, totalCount, fetchInitialProperties, fetchPropertiesInBounds } = useHomeMapProperties();
-  
+  const { properties, loading, totalCount, fetchInitialProperties, fetchPropertiesInBounds } =
+    useHomeMapProperties();
+
   const [filters, setFilters] = useState({
     propertyType: 'all',
     maxPrice: 0,
@@ -72,12 +82,15 @@ export default function HomeMapSection() {
   }, [pendingBounds, fetchPropertiesInBounds, filters]);
 
   // Gérer le clic sur un marqueur
-  const handleMarkerClick = useCallback((property: { id: string }) => {
-    navigate(`/proprietes/${property.id}`);
-  }, [navigate]);
+  const handleMarkerClick = useCallback(
+    (property: { id: string }) => {
+      navigate(`/proprietes/${property.id}`);
+    },
+    [navigate]
+  );
 
   // Transformer les propriétés pour MapboxMap
-  const mapProperties = properties.map(p => ({
+  const mapProperties = properties.map((p) => ({
     id: p.id,
     title: p.title,
     latitude: p.latitude,
@@ -94,13 +107,11 @@ export default function HomeMapSection() {
 
   return (
     <section className="py-20 bg-[#FAF7F4] relative overflow-hidden">
-      
       {/* Background Decor - Blob Orange */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#F16522]/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#2C1810]/5 rounded-full blur-[80px] pointer-events-none" />
 
       <div className="container mx-auto px-4 relative z-10">
-        
         {/* --- HEADER SECTION PREMIUM --- */}
         <div className="text-center mb-10 space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#2C1810]/5 text-[#2C1810] text-xs font-bold uppercase tracking-wider border border-[#2C1810]/10">
@@ -117,7 +128,6 @@ export default function HomeMapSection() {
 
         {/* --- BARRE DE FILTRES PREMIUM --- */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 bg-white p-2 rounded-[20px] shadow-sm border border-[#EFEBE9] max-w-5xl mx-auto">
-          
           {/* Types (Chips Scrollables) */}
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar w-full md:w-auto px-2 py-1">
             {PROPERTY_TYPES.map((type) => {
@@ -126,7 +136,7 @@ export default function HomeMapSection() {
               return (
                 <button
                   key={type.value}
-                  onClick={() => setFilters(f => ({ ...f, propertyType: type.value }))}
+                  onClick={() => setFilters((f) => ({ ...f, propertyType: type.value }))}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all duration-300 ${
                     isActive
                       ? 'bg-[#2C1810] text-white shadow-lg shadow-[#2C1810]/20'
@@ -146,7 +156,7 @@ export default function HomeMapSection() {
           <div className="w-full md:w-auto px-2">
             <select
               value={filters.maxPrice}
-              onChange={(e) => setFilters(f => ({ ...f, maxPrice: Number(e.target.value) }))}
+              onChange={(e) => setFilters((f) => ({ ...f, maxPrice: Number(e.target.value) }))}
               className="w-full md:w-48 px-4 py-3 bg-[#FAF7F4] border-transparent rounded-xl text-sm font-bold text-[#2C1810] focus:ring-2 focus:ring-[#F16522]/20 focus:bg-white transition-all outline-none cursor-pointer"
             >
               {BUDGET_OPTIONS.map((option) => (
@@ -160,13 +170,14 @@ export default function HomeMapSection() {
 
         {/* --- CARTE PREMIUM --- */}
         <div className="relative h-[600px] rounded-[32px] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-[#EFEBE9]">
-          
           {/* Bouton Flottant "Chercher ici" - Style Airbnb */}
-          <div className={`absolute top-6 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 transform ${
-            showSearchButton 
-              ? 'translate-y-0 opacity-100' 
-              : '-translate-y-10 opacity-0 pointer-events-none'
-          }`}>
+          <div
+            className={`absolute top-6 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 transform ${
+              showSearchButton
+                ? 'translate-y-0 opacity-100'
+                : '-translate-y-10 opacity-0 pointer-events-none'
+            }`}
+          >
             <button
               onClick={handleSearchInZone}
               disabled={loading}
@@ -183,7 +194,7 @@ export default function HomeMapSection() {
 
           {/* Map Component */}
           <MapboxMap
-            center={[-3.9962, 5.3600]}
+            center={[-3.9962, 5.36]}
             zoom={11}
             properties={mapProperties}
             height="600px"
@@ -208,16 +219,17 @@ export default function HomeMapSection() {
         <div className="mt-8 flex flex-col md:flex-row items-center justify-center gap-6 text-sm text-[#6B5A4E]">
           <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-[#EFEBE9]">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span><strong className="text-[#2C1810]">{totalCount}</strong> biens visibles sur la carte</span>
+            <span>
+              <strong className="text-[#2C1810]">{totalCount}</strong> biens visibles sur la carte
+            </span>
           </div>
-          <button 
+          <button
             onClick={() => navigate('/recherche')}
             className="flex items-center gap-2 font-bold text-[#F16522] hover:text-[#D95318] hover:underline transition-colors"
           >
             Voir la liste complète <ArrowRight className="w-4 h-4" />
           </button>
         </div>
-
       </div>
     </section>
   );

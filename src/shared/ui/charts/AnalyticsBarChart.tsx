@@ -97,7 +97,7 @@ export function AnalyticsBarChart({
             {data.map((entry, index) => (
               <Cell
                 key={`cell-${entry.label}`}
-                fill={colorful ? entry.color ?? COLORS[index % COLORS.length] : color}
+                fill={colorful ? (entry.color ?? COLORS[index % COLORS.length]) : color}
               />
             ))}
           </Bar>

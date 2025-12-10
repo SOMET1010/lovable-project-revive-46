@@ -81,9 +81,7 @@ export function AttachmentPreview({
           {getFileExtension(name)} • {formatFileSize(size)}
         </p>
       </div>
-      {onClick && !onRemove && (
-        <Download className="h-5 w-5 text-[#8696A0]" />
-      )}
+      {onClick && !onRemove && <Download className="h-5 w-5 text-[#8696A0]" />}
       {onRemove && (
         <button
           onClick={(e) => {

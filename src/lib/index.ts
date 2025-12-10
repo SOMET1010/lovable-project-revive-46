@@ -16,7 +16,7 @@ export {
   trackConversion,
   setUserProperties,
   usePageTracking,
-  AnalyticsEvents
+  AnalyticsEvents,
 } from './analytics';
 
 // Sentry

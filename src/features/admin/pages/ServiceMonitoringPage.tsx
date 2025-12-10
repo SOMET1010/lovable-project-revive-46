@@ -33,10 +33,10 @@ export default function ServiceMonitoringPage() {
           Module Monitoring en Développement
         </h2>
         <p className="text-gray-600 max-w-md mx-auto mb-8">
-          Cette page affichera l'état en temps réel des services : 
-          Brevo, InTouch, Mapbox, Supabase, et autres intégrations.
+          Cette page affichera l'état en temps réel des services : Brevo, InTouch, Mapbox, Supabase,
+          et autres intégrations.
         </p>
-        
+
         {/* Preview Services */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">

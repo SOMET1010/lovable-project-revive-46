@@ -14,12 +14,12 @@ export function useConfetti() {
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#F16522', '#4A2C17', '#22C55E', '#FFD700']
+      colors: ['#F16522', '#4A2C17', '#22C55E', '#FFD700'],
     };
 
     confetti({
       ...defaultOptions,
-      ...options
+      ...options,
     });
   };
 
@@ -34,14 +34,14 @@ export function useConfetti() {
         angle: 60,
         spread: 55,
         origin: { x: 0 },
-        colors: colors
+        colors: colors,
       });
       confetti({
         particleCount: 4,
         angle: 120,
         spread: 55,
         origin: { x: 1 },
-        colors: colors
+        colors: colors,
       });
 
       if (Date.now() < end) {

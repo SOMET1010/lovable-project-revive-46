@@ -1,15 +1,24 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Users, Clock, CheckCircle, XCircle, Search, Filter, FileText, AlertCircle } from 'lucide-react';
+import {
+  Users,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Search,
+  Filter,
+  FileText,
+  AlertCircle,
+} from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useNavigate, Link } from 'react-router-dom';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
 import TenantApplicationCard from '../../features/tenant/components/TenantApplicationCard';
-import { 
-  getTenantApplications, 
-  getTenantApplicationStats, 
+import {
+  getTenantApplications,
+  getTenantApplicationStats,
   cancelApplication,
   type TenantApplicationWithDetails,
-  type ApplicationStats 
+  type ApplicationStats,
 } from '@/services/applications/applicationService';
 import { toast } from 'sonner';
 
@@ -18,9 +27,15 @@ type StatusFilter = 'all' | 'en_attente' | 'en_cours' | 'acceptee' | 'refusee' |
 export default function MyApplicationsPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  
+
   const [applications, setApplications] = useState<TenantApplicationWithDetails[]>([]);
-  const [stats, setStats] = useState<ApplicationStats>({ total: 0, pending: 0, inProgress: 0, accepted: 0, rejected: 0 });
+  const [stats, setStats] = useState<ApplicationStats>({
+    total: 0,
+    pending: 0,
+    inProgress: 0,
+    accepted: 0,
+    rejected: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +43,7 @@ export default function MyApplicationsPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user) {
       navigate('/connexion');
       return;
@@ -39,12 +54,12 @@ export default function MyApplicationsPage() {
 
   const loadData = async () => {
     if (!user) return;
-    
+
     try {
       setLoading(true);
       const [applicationsData, statsData] = await Promise.all([
         getTenantApplications(user.id),
-        getTenantApplicationStats(user.id)
+        getTenantApplicationStats(user.id),
       ]);
       setApplications(applicationsData);
       setStats(statsData);
@@ -64,7 +79,7 @@ export default function MyApplicationsPage() {
       await loadData();
     } catch (error) {
       console.error('Error canceling application:', error);
-      toast.error('Erreur lors de l\'annulation');
+      toast.error("Erreur lors de l'annulation");
     } finally {
       setCancelingId(null);
     }
@@ -72,12 +87,12 @@ export default function MyApplicationsPage() {
 
   // Filtrage des candidatures
   const filteredApplications = useMemo(() => {
-    return applications.filter(app => {
+    return applications.filter((app) => {
       // Filtre par statut
       if (statusFilter !== 'all' && app.status !== statusFilter) {
         return false;
       }
-      
+
       // Filtre par recherche
       if (searchTerm) {
         const term = searchTerm.toLowerCase();
@@ -87,7 +102,7 @@ export default function MyApplicationsPage() {
           app.owner?.full_name?.toLowerCase().includes(term)
         );
       }
-      
+
       return true;
     });
   }, [applications, statusFilter, searchTerm]);
@@ -126,10 +141,12 @@ export default function MyApplicationsPage() {
 
         {/* Statistics */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div 
+          <div
             onClick={() => setStatusFilter('all')}
             className={`bg-white rounded-xl p-4 border cursor-pointer transition-all hover:border-primary-300 ${
-              statusFilter === 'all' ? 'border-primary-500 ring-2 ring-primary-100' : 'border-neutral-200'
+              statusFilter === 'all'
+                ? 'border-primary-500 ring-2 ring-primary-100'
+                : 'border-neutral-200'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -143,10 +160,12 @@ export default function MyApplicationsPage() {
             </div>
           </div>
 
-          <div 
+          <div
             onClick={() => setStatusFilter('en_attente')}
             className={`bg-white rounded-xl p-4 border cursor-pointer transition-all hover:border-amber-300 ${
-              statusFilter === 'en_attente' ? 'border-amber-500 ring-2 ring-amber-100' : 'border-neutral-200'
+              statusFilter === 'en_attente'
+                ? 'border-amber-500 ring-2 ring-amber-100'
+                : 'border-neutral-200'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -160,10 +179,12 @@ export default function MyApplicationsPage() {
             </div>
           </div>
 
-          <div 
+          <div
             onClick={() => setStatusFilter('acceptee')}
             className={`bg-white rounded-xl p-4 border cursor-pointer transition-all hover:border-green-300 ${
-              statusFilter === 'acceptee' ? 'border-green-500 ring-2 ring-green-100' : 'border-neutral-200'
+              statusFilter === 'acceptee'
+                ? 'border-green-500 ring-2 ring-green-100'
+                : 'border-neutral-200'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -177,10 +198,12 @@ export default function MyApplicationsPage() {
             </div>
           </div>
 
-          <div 
+          <div
             onClick={() => setStatusFilter('refusee')}
             className={`bg-white rounded-xl p-4 border cursor-pointer transition-all hover:border-red-300 ${
-              statusFilter === 'refusee' ? 'border-red-500 ring-2 ring-red-100' : 'border-neutral-200'
+              statusFilter === 'refusee'
+                ? 'border-red-500 ring-2 ring-red-100'
+                : 'border-neutral-200'
             }`}
           >
             <div className="flex items-center gap-3">
@@ -242,7 +265,7 @@ export default function MyApplicationsPage() {
                 <p className="text-neutral-500 mb-6">
                   Vous n'avez pas encore postulé à un logement. Commencez votre recherche !
                 </p>
-                <Link 
+                <Link
                   to="/recherche"
                   className="inline-flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
                 >
@@ -257,7 +280,10 @@ export default function MyApplicationsPage() {
                   Aucune candidature ne correspond à vos critères de recherche.
                 </p>
                 <button
-                  onClick={() => { setStatusFilter('all'); setSearchTerm(''); }}
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setSearchTerm('');
+                  }}
                   className="mt-4 text-primary-600 hover:text-primary-700 font-medium"
                 >
                   Réinitialiser les filtres

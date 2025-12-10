@@ -3,11 +3,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
 import {
-  Users, Home, FileText, AlertTriangle, CheckCircle,
-  Activity, BarChart3, Shield,
-  ArrowUpRight, ArrowDownRight,
-  AlertCircle, Info, DollarSign, UserPlus,
-  RefreshCw, Download
+  Users,
+  Home,
+  FileText,
+  AlertTriangle,
+  CheckCircle,
+  Activity,
+  BarChart3,
+  Shield,
+  ArrowUpRight,
+  ArrowDownRight,
+  AlertCircle,
+  Info,
+  DollarSign,
+  UserPlus,
+  RefreshCw,
+  Download,
 } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
 
@@ -77,11 +88,10 @@ export default function AdminDashboard() {
 
   const checkAdminAccess = async () => {
     try {
-      const { data: hasAdminRole, error } = await supabase
-        .rpc('has_role', { 
-          _user_id: user?.id ?? '', 
-          _role: 'admin' 
-        });
+      const { data: hasAdminRole, error } = await supabase.rpc('has_role', {
+        _user_id: user?.id ?? '',
+        _role: 'admin',
+      });
 
       if (error) throw error;
 
@@ -100,8 +110,7 @@ export default function AdminDashboard() {
 
   const loadDashboardData = async () => {
     try {
-      const { data: statsData, error: statsError } = await supabase
-        .rpc('get_platform_stats');
+      const { data: statsData, error: statsError } = await supabase.rpc('get_platform_stats');
 
       if (statsError) throw statsError;
 
@@ -126,7 +135,7 @@ export default function AdminDashboard() {
           title: 'Pic de charge détecté',
           message: 'Temps de réponse moyen > 2s sur les 15 dernières minutes',
           timestamp: new Date().toISOString(),
-          resolved: false
+          resolved: false,
         },
         {
           id: '2',
@@ -134,7 +143,7 @@ export default function AdminDashboard() {
           title: 'Échec de paiement Stripe',
           message: '3 échecs de paiement dans les 10 dernières minutes',
           timestamp: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-          resolved: false
+          resolved: false,
         },
         {
           id: '3',
@@ -142,8 +151,8 @@ export default function AdminDashboard() {
           title: 'Nouvelle version déployée',
           message: 'Version 2.1.3 déployée avec succès',
           timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-          resolved: true
-        }
+          resolved: true,
+        },
       ]);
     } catch (err) {
       console.error('Error loading dashboard:', err);
@@ -177,7 +186,7 @@ export default function AdminDashboard() {
       changeType: 'increase',
       icon: Users,
       color: 'text-[#F16522]',
-      bgColor: 'bg-[#FFF5F0]'
+      bgColor: 'bg-[#FFF5F0]',
     },
     {
       title: 'Propriétés Totales',
@@ -186,7 +195,7 @@ export default function AdminDashboard() {
       changeType: 'increase',
       icon: Home,
       color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      bgColor: 'bg-green-50',
     },
     {
       title: 'Transactions (30j)',
@@ -195,7 +204,7 @@ export default function AdminDashboard() {
       changeType: 'decrease',
       icon: FileText,
       color: 'text-[#2C1810]',
-      bgColor: 'bg-[#E8D4C5]/30'
+      bgColor: 'bg-[#E8D4C5]/30',
     },
     {
       title: 'Revenus Mensuels',
@@ -205,7 +214,7 @@ export default function AdminDashboard() {
       icon: DollarSign,
       color: 'text-[#F16522]',
       bgColor: 'bg-[#FFF5F0]',
-      isFormatted: true
+      isFormatted: true,
     },
     {
       title: 'Erreurs Système',
@@ -214,7 +223,7 @@ export default function AdminDashboard() {
       changeType: 'decrease',
       icon: AlertTriangle,
       color: 'text-red-600',
-      bgColor: 'bg-red-50'
+      bgColor: 'bg-red-50',
     },
     {
       title: 'Uptime Platform',
@@ -223,7 +232,7 @@ export default function AdminDashboard() {
       changeType: 'increase',
       icon: Activity,
       color: 'text-green-600',
-      bgColor: 'bg-green-50'
+      bgColor: 'bg-green-50',
     },
     {
       title: 'Vérifications En Attente',
@@ -232,7 +241,7 @@ export default function AdminDashboard() {
       changeType: 'increase',
       icon: CheckCircle,
       color: 'text-amber-600',
-      bgColor: 'bg-amber-50'
+      bgColor: 'bg-amber-50',
     },
     {
       title: 'Nouveaux Comptes (24h)',
@@ -241,25 +250,33 @@ export default function AdminDashboard() {
       changeType: 'increase',
       icon: UserPlus,
       color: 'text-[#F16522]',
-      bgColor: 'bg-[#FFF5F0]'
-    }
+      bgColor: 'bg-[#FFF5F0]',
+    },
   ];
 
   const getAlertIcon = (type: string) => {
     switch (type) {
-      case 'error': return AlertCircle;
-      case 'warning': return AlertTriangle;
-      case 'info': return Info;
-      default: return Info;
+      case 'error':
+        return AlertCircle;
+      case 'warning':
+        return AlertTriangle;
+      case 'info':
+        return Info;
+      default:
+        return Info;
     }
   };
 
   const getAlertColor = (type: string) => {
     switch (type) {
-      case 'error': return 'text-red-600 bg-red-50 border-red-200';
-      case 'warning': return 'text-amber-600 bg-amber-50 border-amber-200';
-      case 'info': return 'text-blue-600 bg-blue-50 border-blue-200';
-      default: return 'text-[#6B5A4E] bg-[#FAF7F4] border-[#EFEBE9]';
+      case 'error':
+        return 'text-red-600 bg-red-50 border-red-200';
+      case 'warning':
+        return 'text-amber-600 bg-amber-50 border-amber-200';
+      case 'info':
+        return 'text-blue-600 bg-blue-50 border-blue-200';
+      default:
+        return 'text-[#6B5A4E] bg-[#FAF7F4] border-[#EFEBE9]';
     }
   };
 
@@ -284,10 +301,18 @@ export default function AdminDashboard() {
                 onChange={(e) => setSelectedTimeRange(e.target.value)}
                 className="px-4 py-2 bg-white/10 border border-white/20 text-white rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-[#F16522]"
               >
-                <option value="1h" className="text-[#2C1810]">Dernière heure</option>
-                <option value="24h" className="text-[#2C1810]">24 heures</option>
-                <option value="7d" className="text-[#2C1810]">7 jours</option>
-                <option value="30d" className="text-[#2C1810]">30 jours</option>
+                <option value="1h" className="text-[#2C1810]">
+                  Dernière heure
+                </option>
+                <option value="24h" className="text-[#2C1810]">
+                  24 heures
+                </option>
+                <option value="7d" className="text-[#2C1810]">
+                  7 jours
+                </option>
+                <option value="30d" className="text-[#2C1810]">
+                  30 jours
+                </option>
               </select>
               <button
                 onClick={handleRefresh}
@@ -313,16 +338,21 @@ export default function AdminDashboard() {
             const Icon = card.icon;
             const isPositive = card.changeType === 'increase';
             const isNegative = card.changeType === 'decrease';
-            
+
             return (
-              <div key={index} className={`bg-white rounded-[20px] border border-[#EFEBE9] p-6 card-animate-in card-hover-premium card-stagger-${Math.min(index + 1, 6)}`}>
+              <div
+                key={index}
+                className={`bg-white rounded-[20px] border border-[#EFEBE9] p-6 card-animate-in card-hover-premium card-stagger-${Math.min(index + 1, 6)}`}
+              >
                 <div className="flex items-center justify-between mb-4">
                   <div className={`p-3 rounded-xl ${card.bgColor}`}>
                     <Icon className={`w-6 h-6 ${card.color}`} />
                   </div>
-                  <div className={`flex items-center gap-1 text-sm font-medium ${
-                    isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-[#6B5A4E]'
-                  }`}>
+                  <div
+                    className={`flex items-center gap-1 text-sm font-medium ${
+                      isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-[#6B5A4E]'
+                    }`}
+                  >
                     {isPositive ? (
                       <ArrowUpRight className="w-4 h-4" />
                     ) : isNegative ? (
@@ -334,7 +364,11 @@ export default function AdminDashboard() {
                 <div>
                   <p className="text-sm text-[#6B5A4E] mb-1">{card.title}</p>
                   <p className="text-2xl font-bold text-[#2C1810]">
-                    {card.isFormatted ? card.value : typeof card.value === 'number' ? card.value.toLocaleString('fr-FR') : card.value}
+                    {card.isFormatted
+                      ? card.value
+                      : typeof card.value === 'number'
+                        ? card.value.toLocaleString('fr-FR')
+                        : card.value}
                   </p>
                 </div>
               </div>
@@ -367,7 +401,9 @@ export default function AdminDashboard() {
                 <div className="text-center">
                   <BarChart3 className="w-12 h-12 text-[#6B5A4E] mx-auto mb-2" />
                   <p className="text-[#6B5A4E]">Graphique de performance en temps réel</p>
-                  <p className="text-sm text-[#6B5A4E]/70">CPU: 23% | Mémoire: 67% | Réseau: 145 Mbps</p>
+                  <p className="text-sm text-[#6B5A4E]/70">
+                    CPU: 23% | Mémoire: 67% | Réseau: 145 Mbps
+                  </p>
                 </div>
               </div>
             </div>
@@ -381,18 +417,27 @@ export default function AdminDashboard() {
                 </button>
               </div>
               <div className="space-y-4 max-h-80 overflow-y-auto">
-                {activities.length > 0 ? activities.map(activity => (
-                  <div key={activity.id} className="flex items-start gap-3 p-3 bg-[#FAF7F4] rounded-xl">
-                    <div className="w-2 h-2 bg-[#F16522] rounded-full mt-2 flex-shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[#2C1810]">{activity.action}</p>
-                      <p className="text-xs text-[#6B5A4E]">{activity.entity_type} • {activity.user_email || 'Système'}</p>
-                      <p className="text-xs text-[#6B5A4E]/70 mt-1">
-                        {activity.created_at ? FormatService.formatRelativeTime(activity.created_at) : 'Récemment'}
-                      </p>
+                {activities.length > 0 ? (
+                  activities.map((activity) => (
+                    <div
+                      key={activity.id}
+                      className="flex items-start gap-3 p-3 bg-[#FAF7F4] rounded-xl"
+                    >
+                      <div className="w-2 h-2 bg-[#F16522] rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[#2C1810]">{activity.action}</p>
+                        <p className="text-xs text-[#6B5A4E]">
+                          {activity.entity_type} • {activity.user_email || 'Système'}
+                        </p>
+                        <p className="text-xs text-[#6B5A4E]/70 mt-1">
+                          {activity.created_at
+                            ? FormatService.formatRelativeTime(activity.created_at)
+                            : 'Récemment'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )) : (
+                  ))
+                ) : (
                   <div className="text-center py-8">
                     <Activity className="w-8 h-8 text-[#6B5A4E] mx-auto mb-2" />
                     <p className="text-[#6B5A4E]">Aucune activité récente</p>
@@ -408,14 +453,17 @@ export default function AdminDashboard() {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-bold text-[#2C1810]">Alertes Système</h2>
                 <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
-                  {alerts.filter(a => !a.resolved).length} actifs
+                  {alerts.filter((a) => !a.resolved).length} actifs
                 </span>
               </div>
               <div className="space-y-4">
-                {alerts.map(alert => {
+                {alerts.map((alert) => {
                   const AlertIcon = getAlertIcon(alert.type);
                   return (
-                    <div key={alert.id} className={`p-4 rounded-xl border ${getAlertColor(alert.type)} ${alert.resolved ? 'opacity-60' : ''}`}>
+                    <div
+                      key={alert.id}
+                      className={`p-4 rounded-xl border ${getAlertColor(alert.type)} ${alert.resolved ? 'opacity-60' : ''}`}
+                    >
                       <div className="flex items-start gap-3">
                         <AlertIcon className="w-5 h-5 mt-0.5 flex-shrink-0" />
                         <div className="flex-1 min-w-0">
@@ -437,9 +485,24 @@ export default function AdminDashboard() {
               <h2 className="text-lg font-bold text-[#2C1810] mb-6">Actions Rapides</h2>
               <div className="space-y-3">
                 {[
-                  { name: 'Gérer Utilisateurs', icon: Users, href: '/admin/utilisateurs', color: 'bg-[#FFF5F0] text-[#F16522]' },
-                  { name: 'Voir Propriétés', icon: Home, href: '/recherche', color: 'bg-green-50 text-green-700' },
-                  { name: 'Gestion CEV', icon: CheckCircle, href: '/admin/cev-management', color: 'bg-[#E8D4C5]/30 text-[#2C1810]' },
+                  {
+                    name: 'Gérer Utilisateurs',
+                    icon: Users,
+                    href: '/admin/utilisateurs',
+                    color: 'bg-[#FFF5F0] text-[#F16522]',
+                  },
+                  {
+                    name: 'Voir Propriétés',
+                    icon: Home,
+                    href: '/recherche',
+                    color: 'bg-green-50 text-green-700',
+                  },
+                  {
+                    name: 'Gestion CEV',
+                    icon: CheckCircle,
+                    href: '/admin/cev-management',
+                    color: 'bg-[#E8D4C5]/30 text-[#2C1810]',
+                  },
                 ].map((action, index) => (
                   <Link
                     key={index}

@@ -44,8 +44,12 @@ export const handleSupabaseError = (error: any, context?: string): SupabaseError
   if (isJWTError(error)) {
     // Clean invalid tokens
     try {
-      const keysToRemove = ['supabase.auth.token', 'supabase.auth.refreshToken', 'supabase.auth.expiresAt'];
-      keysToRemove.forEach(key => localStorage.removeItem(key));
+      const keysToRemove = [
+        'supabase.auth.token',
+        'supabase.auth.refreshToken',
+        'supabase.auth.expiresAt',
+      ];
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
     } catch (cleanupError) {
       console.warn('Could not clean auth tokens:', cleanupError);
     }

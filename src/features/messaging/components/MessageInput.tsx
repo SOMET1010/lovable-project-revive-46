@@ -11,7 +11,11 @@ interface MessageInputProps {
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const ACCEPTED_DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+const ACCEPTED_DOC_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
 
 export function MessageInput({ onSend, disabled, sending }: MessageInputProps) {
   const [content, setContent] = useState('');
@@ -53,9 +57,8 @@ export function MessageInput({ onSend, disabled, sending }: MessageInputProps) {
 
   const openFilePicker = (type: 'image' | 'document') => {
     if (fileInputRef.current) {
-      fileInputRef.current.accept = type === 'image' 
-        ? ACCEPTED_IMAGE_TYPES.join(',')
-        : ACCEPTED_DOC_TYPES.join(',');
+      fileInputRef.current.accept =
+        type === 'image' ? ACCEPTED_IMAGE_TYPES.join(',') : ACCEPTED_DOC_TYPES.join(',');
       fileInputRef.current.click();
     }
   };
@@ -107,12 +110,7 @@ export function MessageInput({ onSend, disabled, sending }: MessageInputProps) {
 
       <form onSubmit={handleSubmit} className="p-4">
         {/* Hidden file input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="hidden"
-          onChange={handleFileSelect}
-        />
+        <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileSelect} />
 
         <div className="flex items-end gap-3 bg-[#FAF7F4] p-2 rounded-[20px] border border-[#EFEBE9] focus-within:border-[#F16522]/30 focus-within:ring-4 focus-within:ring-[#F16522]/5 transition-all">
           {/* Emoji button */}
@@ -166,7 +164,7 @@ export function MessageInput({ onSend, disabled, sending }: MessageInputProps) {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={selectedFile ? "Ajouter un commentaire..." : "Écrivez votre message..."}
+              placeholder={selectedFile ? 'Ajouter un commentaire...' : 'Écrivez votre message...'}
               disabled={disabled || sending}
               rows={1}
               className="w-full px-2 py-3 bg-transparent text-sm text-[#2C1810] placeholder-[#A69B95] focus:outline-none resize-none max-h-32 font-medium"

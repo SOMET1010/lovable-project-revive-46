@@ -40,7 +40,9 @@ export default function EnhancedAnsutBadge({
 
   if (!verified) {
     return (
-      <div className={`inline-flex items-center ${classes.badge} bg-gray-100 text-gray-600 rounded-full font-medium border-2 border-gray-200`}>
+      <div
+        className={`inline-flex items-center ${classes.badge} bg-gray-100 text-gray-600 rounded-full font-medium border-2 border-gray-200`}
+      >
         <Shield className={`${classes.icon} mr-1.5`} />
         <span>Non vérifié</span>
       </div>
@@ -75,8 +77,9 @@ export default function EnhancedAnsutBadge({
             </div>
 
             <p className="text-sm text-gray-600 leading-relaxed">
-              {userName ? `${userName} a été vérifié` : 'Cette personne a été vérifiée'} par l'Agence
-              Nationale de Soutien au Développement de l'Habitat Social (ANSUT) avec validation ONECI.
+              {userName ? `${userName} a été vérifié` : 'Cette personne a été vérifiée'} par
+              l'Agence Nationale de Soutien au Développement de l'Habitat Social (ANSUT) avec
+              validation ONECI.
             </p>
 
             <div className="space-y-2">

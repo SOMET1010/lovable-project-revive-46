@@ -78,16 +78,24 @@ function PropertyCard({
       <div className="p-6">
         {/* Title */}
         <h3 className="text-h4 font-semibold text-[var(--earth-900)] mb-3 group-hover:text-[var(--terracotta-500)] transition-colors line-clamp-1">
-          {property.title && property.title.trim() !== '' ? property.title : (
+          {property.title && property.title.trim() !== '' ? (
+            property.title
+          ) : (
             <>
-              {property.property_type === 'apartment' ? 'Appartement' :
-               property.property_type === 'house' ? 'Maison' :
-               property.property_type === 'studio' ? 'Studio' :
-               property.property_type === 'villa' ? 'Villa' :
-               property.property_type === 'land' ? 'Terrain' :
-               property.property_type === 'commercial' ? 'Local commercial' :
-               'Propriété'}
-              {' '}à {property.city || 'Abidjan'}
+              {property.property_type === 'apartment'
+                ? 'Appartement'
+                : property.property_type === 'house'
+                  ? 'Maison'
+                  : property.property_type === 'studio'
+                    ? 'Studio'
+                    : property.property_type === 'villa'
+                      ? 'Villa'
+                      : property.property_type === 'land'
+                        ? 'Terrain'
+                        : property.property_type === 'commercial'
+                          ? 'Local commercial'
+                          : 'Propriété'}{' '}
+              à {property.city || 'Abidjan'}
               {property.neighborhood && ` - ${property.neighborhood}`}
             </>
           )}

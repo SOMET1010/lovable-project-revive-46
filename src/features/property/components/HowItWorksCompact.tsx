@@ -7,7 +7,7 @@ const steps = [
     icon: Search,
     number: '01',
     title: 'Recherchez',
-    description: 'Parcourez notre catalogue de logements vérifiés dans toute la Côte d\'Ivoire',
+    description: "Parcourez notre catalogue de logements vérifiés dans toute la Côte d'Ivoire",
   },
   {
     icon: Shield,
@@ -33,7 +33,7 @@ export default function HowItWorksCompact() {
   const { ref, isVisible } = useScrollAnimation<HTMLElement>({ threshold: 0.1 });
 
   return (
-    <section 
+    <section
       ref={ref}
       className="py-10 md:py-14 relative overflow-hidden bg-gradient-to-b from-[#FAF7F4] via-white to-neutral-50"
     >
@@ -45,10 +45,11 @@ export default function HowItWorksCompact() {
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
         {/* Header */}
-        <div className={`text-center mb-10 md:mb-12 ${getAnimationClasses(isVisible, 'fadeUp', 0)}`}>
+        <div
+          className={`text-center mb-10 md:mb-12 ${getAnimationClasses(isVisible, 'fadeUp', 0)}`}
+        >
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF6C2F]/10 text-[#FF6C2F] text-sm font-medium mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6C2F]" />
-            4 étapes simples
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6C2F]" />4 étapes simples
           </span>
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3">
             Comment ça marche ?
@@ -66,8 +67,8 @@ export default function HowItWorksCompact() {
         {/* Steps Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-5">
           {steps.map((step, index) => (
-            <div 
-              key={step.title} 
+            <div
+              key={step.title}
               className={`relative ${getAnimationClasses(isVisible, 'fadeUp', index * 150)}`}
             >
               {/* Mobile/Tablet connector line */}
@@ -88,21 +89,19 @@ export default function HowItWorksCompact() {
                 </div>
 
                 {/* Text content */}
-                <h3 className="text-lg font-semibold text-foreground mb-1.5">
-                  {step.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {step.description}
-                </p>
+                <h3 className="text-lg font-semibold text-foreground mb-1.5">{step.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{step.description}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* CTA */}
-        <div className={`text-center mt-8 md:mt-10 ${getAnimationClasses(isVisible, 'fadeUp', 600)}`}>
-          <Link 
-            to="/recherche" 
+        <div
+          className={`text-center mt-8 md:mt-10 ${getAnimationClasses(isVisible, 'fadeUp', 600)}`}
+        >
+          <Link
+            to="/recherche"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#FF6C2F] text-white rounded-xl font-medium hover:bg-[#e05519] transition-colors duration-200 shadow-lg shadow-[#FF6C2F]/25"
           >
             <Search className="h-5 w-5" />

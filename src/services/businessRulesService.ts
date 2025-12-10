@@ -10,7 +10,7 @@ export interface BusinessRule {
   key: string;
   name: string;
   category: string;
-  type: "number" | "boolean" | "percentage" | "json";
+  type: 'number' | 'boolean' | 'percentage' | 'json';
   value: number | boolean | Record<string, unknown> | null;
   description: string | null;
   isEnabled: boolean;
@@ -33,26 +33,23 @@ export async function getBusinessRule(ruleKey: string): Promise<BusinessRule | n
   }
 
   try {
-    const response = await fetch(
-      `${SUPABASE_URL}/functions/v1/get-business-rule?key=${ruleKey}`,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
-        },
-      }
-    );
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/get-business-rule?key=${ruleKey}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_KEY,
+      },
+    });
 
     if (!response.ok) {
       if (response.status === 404) return null;
-      throw new Error("Failed to fetch business rule");
+      throw new Error('Failed to fetch business rule');
     }
 
     const rule = await response.json();
-    
+
     // Update cache
     rulesCache.set(ruleKey, { rule, timestamp: Date.now() });
-    
+
     return rule;
   } catch (error) {
     console.error(`[businessRulesService] Error fetching rule ${ruleKey}:`, error);
@@ -69,14 +66,14 @@ export async function getBusinessRulesByCategory(category: string): Promise<Busi
       `${SUPABASE_URL}/functions/v1/get-business-rule?category=${category}`,
       {
         headers: {
-          "Content-Type": "application/json",
-          "apikey": SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          apikey: SUPABASE_KEY,
         },
       }
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch business rules");
+      throw new Error('Failed to fetch business rules');
     }
 
     const result = await response.json();
@@ -93,16 +90,19 @@ export async function getBusinessRulesByCategory(category: string): Promise<Busi
 export async function getNumericRule(ruleKey: string, defaultValue: number = 0): Promise<number> {
   const rule = await getBusinessRule(ruleKey);
   if (!rule || !rule.isEnabled) return defaultValue;
-  return typeof rule.value === "number" ? rule.value : defaultValue;
+  return typeof rule.value === 'number' ? rule.value : defaultValue;
 }
 
 /**
  * Récupère la valeur booléenne d'une règle
  */
-export async function getBooleanRule(ruleKey: string, defaultValue: boolean = false): Promise<boolean> {
+export async function getBooleanRule(
+  ruleKey: string,
+  defaultValue: boolean = false
+): Promise<boolean> {
   const rule = await getBusinessRule(ruleKey);
   if (!rule || !rule.isEnabled) return defaultValue;
-  return typeof rule.value === "boolean" ? rule.value : defaultValue;
+  return typeof rule.value === 'boolean' ? rule.value : defaultValue;
 }
 
 /**
@@ -115,12 +115,12 @@ export async function calculatePaymentFees(amount: number): Promise<{
   totalAmount: number;
 }> {
   const [montoitRate, intouchRate] = await Promise.all([
-    getNumericRule("fee_rate_montoit", 1),
-    getNumericRule("fee_rate_intouch", 1.5),
+    getNumericRule('fee_rate_montoit', 1),
+    getNumericRule('fee_rate_intouch', 1.5),
   ]);
 
-  const montoitFee = Math.round(amount * montoitRate / 100);
-  const intouchFee = Math.round(amount * intouchRate / 100);
+  const montoitFee = Math.round((amount * montoitRate) / 100);
+  const intouchFee = Math.round((amount * intouchRate) / 100);
   const totalFees = montoitFee + intouchFee;
 
   return {
@@ -141,18 +141,18 @@ export async function calculateCommissions(amount: number): Promise<{
   landlordAmount: number;
 }> {
   const [ansutRate, maelysRate, montoitRate] = await Promise.all([
-    getNumericRule("commission_ansut", 30),
-    getNumericRule("commission_maelys", 20),
-    getNumericRule("commission_montoit", 50),
+    getNumericRule('commission_ansut', 30),
+    getNumericRule('commission_maelys', 20),
+    getNumericRule('commission_montoit', 50),
   ]);
 
   // Les commissions sont prélevées sur un pourcentage du loyer (ex: 5%)
   const commissionBase = Math.round(amount * 0.05); // 5% du loyer en commission
-  
-  const ansut = Math.round(commissionBase * ansutRate / 100);
-  const maelys = Math.round(commissionBase * maelysRate / 100);
-  const montoit = Math.round(commissionBase * montoitRate / 100);
-  
+
+  const ansut = Math.round((commissionBase * ansutRate) / 100);
+  const maelys = Math.round((commissionBase * maelysRate) / 100);
+  const montoit = Math.round((commissionBase * montoitRate) / 100);
+
   const landlordAmount = amount - commissionBase;
 
   return {
@@ -172,9 +172,9 @@ export async function getMandatoryFees(): Promise<{
   leaseSigning: number;
 }> {
   const [registration, publication, leaseSigning] = await Promise.all([
-    getNumericRule("registration_fee", 2000),
-    getNumericRule("publication_fee", 1000),
-    getNumericRule("lease_signing_fee", 6000),
+    getNumericRule('registration_fee', 2000),
+    getNumericRule('publication_fee', 1000),
+    getNumericRule('lease_signing_fee', 6000),
   ]);
 
   return { registration, publication, leaseSigning };
@@ -189,9 +189,9 @@ export async function getDelays(): Promise<{
   landlordTransfer: number;
 }> {
   const [firstReminder, finalReminder, landlordTransfer] = await Promise.all([
-    getNumericRule("reminder_delay_first", 7),
-    getNumericRule("reminder_delay_final", 0),
-    getNumericRule("landlord_transfer_delay", 2),
+    getNumericRule('reminder_delay_first', 7),
+    getNumericRule('reminder_delay_final', 0),
+    getNumericRule('landlord_transfer_delay', 2),
   ]);
 
   return { firstReminder, finalReminder, landlordTransfer };
@@ -213,9 +213,9 @@ export async function getVerificationRequirements(): Promise<{
   cnam: boolean;
 }> {
   const [nni, face, cnam] = await Promise.all([
-    getBooleanRule("require_nni_verification", true),
-    getBooleanRule("require_face_verification", true),
-    getBooleanRule("require_cnam_verification", false),
+    getBooleanRule('require_nni_verification', true),
+    getBooleanRule('require_face_verification', true),
+    getBooleanRule('require_cnam_verification', false),
   ]);
 
   return { nni, face, cnam };
@@ -231,10 +231,10 @@ export async function getLimits(): Promise<{
   minTrustScore: number;
 }> {
   const [minRent, maxRent, maxPhotos, minTrustScore] = await Promise.all([
-    getNumericRule("min_rent_amount", 25000),
-    getNumericRule("max_rent_amount", 5000000),
-    getNumericRule("max_photos_per_property", 10),
-    getNumericRule("trust_score_minimum", 50),
+    getNumericRule('min_rent_amount', 25000),
+    getNumericRule('max_rent_amount', 5000000),
+    getNumericRule('max_photos_per_property', 10),
+    getNumericRule('trust_score_minimum', 50),
   ]);
 
   return { minRent, maxRent, maxPhotos, minTrustScore };
@@ -251,13 +251,13 @@ export function clearRulesCache(): void {
  * Catégories disponibles
  */
 export const RULE_CATEGORIES = {
-  payments: "Paiements obligatoires",
-  commissions: "Commissions",
-  fees: "Frais de paiement",
-  delays: "Délais",
-  verification: "Vérification identité",
-  gates: "Portes de validation",
-  limits: "Limites et seuils",
+  payments: 'Paiements obligatoires',
+  commissions: 'Commissions',
+  fees: 'Frais de paiement',
+  delays: 'Délais',
+  verification: 'Vérification identité',
+  gates: 'Portes de validation',
+  limits: 'Limites et seuils',
 } as const;
 
 export type RuleCategory = keyof typeof RULE_CATEGORIES;

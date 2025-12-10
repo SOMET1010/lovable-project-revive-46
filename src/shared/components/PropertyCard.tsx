@@ -57,7 +57,9 @@ export default function PropertyCard({
 
         {/* Prix en Overlay - Bottom Left */}
         <div className="absolute bottom-3 left-3 px-4 py-2 bg-[var(--color-chocolat)]/90 backdrop-blur-sm rounded-xl text-white shadow-lg">
-          <span className="text-lg font-bold">{FormatService.formatCurrency(property.monthly_rent)}</span>
+          <span className="text-lg font-bold">
+            {FormatService.formatCurrency(property.monthly_rent)}
+          </span>
           <span className="text-xs opacity-80 ml-1">/mois</span>
         </div>
 
@@ -88,7 +90,8 @@ export default function PropertyCard({
       <div className="p-4">
         {/* Location */}
         <h3 className="font-bold text-[var(--color-chocolat)] text-base sm:text-lg truncate mb-1">
-          {property.city}{property.neighborhood && `, ${property.neighborhood}`}
+          {property.city}
+          {property.neighborhood && `, ${property.neighborhood}`}
         </h3>
 
         {/* Title */}

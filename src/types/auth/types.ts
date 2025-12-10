@@ -32,12 +32,12 @@ export interface OTPVerificationData {
 
 export type OTPMethod = 'email' | 'sms' | 'whatsapp';
 
-export type UserRole = 
-  | 'tenant'        // Locataire
-  | 'owner'         // Propriétaire
-  | 'admin'         // Administrateur
-  | 'trust_agent'   // Agent de confiance
-  | 'agency';       // Agence
+export type UserRole =
+  | 'tenant' // Locataire
+  | 'owner' // Propriétaire
+  | 'admin' // Administrateur
+  | 'trust_agent' // Agent de confiance
+  | 'agency'; // Agence
 
 // Types étendus pour l'application
 export interface AuthUser extends User {
@@ -130,4 +130,3 @@ export interface UserPreferences {
   };
   theme: 'light' | 'dark' | 'auto';
 }
-

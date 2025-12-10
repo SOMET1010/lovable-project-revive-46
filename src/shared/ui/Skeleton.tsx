@@ -56,11 +56,7 @@ export function SkeletonText({
   return (
     <div className={`space-y-2 ${className}`}>
       {Array.from({ length: lines }).map((_, i) => (
-        <Skeleton
-          key={i}
-          variant="text"
-          width={i === lines - 1 ? '60%' : '100%'}
-        />
+        <Skeleton key={i} variant="text" width={i === lines - 1 ? '60%' : '100%'} />
       ))}
     </div>
   );
@@ -121,7 +117,13 @@ export function PropertyDetailSkeleton({ className = '' }: { className?: string 
   );
 }
 
-export function FormSkeleton({ fields = 4, className = '' }: { fields?: number; className?: string }) {
+export function FormSkeleton({
+  fields = 4,
+  className = '',
+}: {
+  fields?: number;
+  className?: string;
+}) {
   return (
     <div className={`space-y-4 ${className}`}>
       {Array.from({ length: fields }).map((_, i) => (

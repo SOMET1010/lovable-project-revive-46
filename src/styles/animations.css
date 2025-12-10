@@ -169,7 +169,8 @@
 }
 
 @keyframes goldenFloat {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0) translateX(0) rotate(0deg);
     opacity: 0.6;
   }
@@ -210,11 +211,16 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 5px rgba(232, 98, 68, 0.3), 0 0 10px rgba(232, 98, 68, 0.2);
+  0%,
+  100% {
+    box-shadow:
+      0 0 5px rgba(232, 98, 68, 0.3),
+      0 0 10px rgba(232, 98, 68, 0.2);
   }
   50% {
-    box-shadow: 0 0 20px rgba(232, 98, 68, 0.5), 0 0 40px rgba(232, 98, 68, 0.3);
+    box-shadow:
+      0 0 20px rgba(232, 98, 68, 0.5),
+      0 0 40px rgba(232, 98, 68, 0.3);
   }
 }
 
@@ -244,7 +250,8 @@
 }
 
 @keyframes badgePulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
   }
@@ -277,7 +284,8 @@
 }
 
 @keyframes scrollBounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -286,7 +294,8 @@
 }
 
 @keyframes gradientBreathe {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -316,7 +325,9 @@
     box-shadow: 0 0 5px var(--color-primary-500);
   }
   to {
-    box-shadow: 0 0 20px var(--color-primary-500), 0 0 30px var(--color-primary-500);
+    box-shadow:
+      0 0 20px var(--color-primary-500),
+      0 0 30px var(--color-primary-500);
   }
 }
 
@@ -346,7 +357,8 @@
 
 /* WhatsApp Badge Pulse Animation */
 @keyframes whatsapp-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.4);
   }
@@ -427,12 +439,7 @@
 }
 
 .animate-shimmer-gold {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 215, 0, 0.3) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 215, 0, 0.3) 50%, transparent 100%);
   background-size: 200% 100%;
   animation: shimmerGold 2s infinite;
 }
@@ -504,13 +511,23 @@
 }
 
 /* Stagger delays alternatifs */
-.stagger-delay-1 { animation-delay: 0.1s; }
-.stagger-delay-2 { animation-delay: 0.2s; }
+.stagger-delay-1 {
+  animation-delay: 0.1s;
+}
+.stagger-delay-2 {
+  animation-delay: 0.2s;
+}
 
 /* Animation delays fixes */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
+.delay-100 {
+  animation-delay: 100ms;
+}
+.delay-200 {
+  animation-delay: 200ms;
+}
+.delay-300 {
+  animation-delay: 300ms;
+}
 
 .animation-delay-200 {
   animation-delay: 0.2s;
@@ -533,7 +550,9 @@
 /* ===== 5. HOVER EFFECTS ===== */
 
 .hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .hover-lift:hover {
@@ -584,7 +603,9 @@
   background: rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease;
+  transition:
+    width 0.6s ease,
+    height 0.6s ease;
 }
 
 .btn-ripple:active::before {
@@ -638,7 +659,6 @@
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
 }
 
-
 /* Gradients */
 .gradient-terracotta-gold {
   background: linear-gradient(135deg, #e86244 0%, #d4a574 50%, #f5d9c3 100%);
@@ -656,7 +676,7 @@
 }
 
 .gradient-text-orange {
-  background: linear-gradient(135deg, #FF6B35 0%, #EF4444 100%);
+  background: linear-gradient(135deg, #ff6b35 0%, #ef4444 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -664,15 +684,18 @@
 
 /* African patterns */
 .pattern-kente {
-  background-image: 
+  background-image:
     linear-gradient(45deg, rgba(232, 98, 68, 0.05) 25%, transparent 25%),
     linear-gradient(-45deg, rgba(212, 165, 116, 0.05) 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, rgba(232, 98, 68, 0.05) 75%),
     linear-gradient(-45deg, transparent 75%, rgba(212, 165, 116, 0.05) 75%);
   background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0px;
 }
-
 
 /* 3D tilt effect */
 .tilt-3d {
@@ -706,7 +729,8 @@
 
 /* Badge notification pulse */
 @keyframes badgeNotificationPulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
   }
@@ -728,36 +752,35 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-
 /* Premium shadows */
 .shadow-premium-hover {
-  box-shadow: 
+  box-shadow:
     0 4px 8px rgba(0, 0, 0, 0.08),
     0 8px 16px rgba(0, 0, 0, 0.08),
     0 16px 32px rgba(0, 0, 0, 0.08);
 }
 
 .shadow-orange {
-  box-shadow: 
+  box-shadow:
     0 4px 12px rgba(255, 107, 53, 0.15),
     0 8px 24px rgba(255, 107, 53, 0.1);
 }
 
 .shadow-orange-hover {
-  box-shadow: 
+  box-shadow:
     0 8px 16px rgba(255, 107, 53, 0.2),
     0 16px 32px rgba(255, 107, 53, 0.15);
 }
 
 /* Gradients */
 .gradient-orange {
-  background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+  background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%);
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .gradient-orange-soft {
-  background: linear-gradient(135deg, #FFF5F2 0%, #FFE8E0 100%);
+  background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
 }
 
 /* Additional hover effects */
@@ -768,7 +791,6 @@
 .hover-glow:hover {
   box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
 }
-
 
 /* Premium button */
 .btn-premium {
@@ -787,7 +809,9 @@
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease;
+  transition:
+    width 0.6s ease,
+    height 0.6s ease;
 }
 
 .btn-premium:active::before {
@@ -865,7 +889,8 @@
 
 /* Float animation */
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -886,7 +911,7 @@ html {
 
 /* Focus states */
 *:focus-visible {
-  outline: 2px solid #FF6B35;
+  outline: 2px solid #ff6b35;
   outline-offset: 2px;
 }
 
@@ -901,22 +926,22 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #FF6B35;
+  background: #ff6b35;
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #E55A2B;
+  background: #e55a2b;
 }
 
 /* Selection */
 ::selection {
-  background: #FF6B35;
+  background: #ff6b35;
   color: white;
 }
 
 ::-moz-selection {
-  background: #FF6B35;
+  background: #ff6b35;
   color: white;
 }
 
@@ -931,12 +956,12 @@ html {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   .parallax-image {
     transform: none !important;
     will-change: auto;
   }
-  
+
   .animate-fade-in,
   .animate-fade-out,
   .animate-fade-in-up,
@@ -964,7 +989,7 @@ html {
   .shimmer {
     animation: none !important;
   }
-  
+
   .hover-lift:hover,
   .hover-lift-premium:hover,
   .hover-glow-terracotta:hover,

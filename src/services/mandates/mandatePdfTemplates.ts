@@ -5,7 +5,7 @@
 import { MandatePermissions } from '@/hooks/useAgencyMandates';
 
 export const getMandateHeaderText = () => ({
-  republic: 'RÉPUBLIQUE DE CÔTE D\'IVOIRE',
+  republic: "RÉPUBLIQUE DE CÔTE D'IVOIRE",
   motto: 'Union - Discipline - Travail',
   title: 'MANDAT DE GESTION IMMOBILIÈRE',
 });
@@ -29,13 +29,14 @@ export const getMandateArticles = () => ({
     title: 'ARTICLE 1 : OBJET DU MANDAT',
     intro: 'Le mandant confie au mandataire, qui accepte, la gestion de :',
     singleProperty: 'Un bien immobilier désigné ci-après.',
-    allProperties: 'L\'ensemble de ses biens immobiliers, actuels et futurs, tant que le mandat est actif.',
+    allProperties:
+      "L'ensemble de ses biens immobiliers, actuels et futurs, tant que le mandat est actif.",
   },
   article2: {
     title: 'ARTICLE 2 : DURÉE DU MANDAT',
     indefinite: 'Le présent mandat est conclu pour une durée indéterminée.',
     definite: 'Le présent mandat est conclu pour une durée déterminée.',
-    renewal: 'Il peut être résilié par l\'une ou l\'autre des parties avec un préavis de 30 jours.',
+    renewal: "Il peut être résilié par l'une ou l'autre des parties avec un préavis de 30 jours.",
   },
   article3: {
     title: 'ARTICLE 3 : RÉMUNÉRATION',
@@ -67,7 +68,8 @@ export const getMandateArticles = () => ({
   },
   article7: {
     title: 'ARTICLE 7 : RÉSILIATION',
-    content: 'Chaque partie peut résilier le présent mandat moyennant un préavis de 30 jours par lettre recommandée ou notification électronique sur la plateforme Mon Toit.',
+    content:
+      'Chaque partie peut résilier le présent mandat moyennant un préavis de 30 jours par lettre recommandée ou notification électronique sur la plateforme Mon Toit.',
   },
 });
 

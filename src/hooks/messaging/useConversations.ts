@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { messagingService, Conversation } from '../../features/messaging/services/messaging.service';
+import {
+  messagingService,
+  Conversation,
+} from '../../features/messaging/services/messaging.service';
 import { useAuth } from '../../contexts';
 import { supabase } from '../../lib';
 
@@ -11,7 +14,7 @@ export function useConversations() {
 
   const fetchConversations = useCallback(async () => {
     if (!user?.id) return;
-    
+
     setLoading(true);
     try {
       const data = await messagingService.getConversations(user.id);

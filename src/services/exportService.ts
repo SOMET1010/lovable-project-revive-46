@@ -31,7 +31,7 @@ export interface PDFReportData {
 
 export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf'): void {
   const doc = new jsPDF();
-  
+
   // Configuration couleurs MONTOIT
   const primaryColor: [number, number, number] = [255, 108, 47]; // #FF6C2F
   const secondaryColor: [number, number, number] = [51, 51, 51];
@@ -43,7 +43,7 @@ export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf
   doc.setFontSize(22);
   doc.setTextColor(...primaryColor);
   doc.text(data.title, 105, yPosition, { align: 'center' });
-  
+
   yPosition += 10;
 
   if (data.subtitle) {
@@ -58,14 +58,14 @@ export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf
   doc.setTextColor(100, 100, 100);
   const periodText = `Période: ${formatDate(data.period.startDate)} - ${formatDate(data.period.endDate)}`;
   doc.text(periodText, 105, yPosition, { align: 'center' });
-  
+
   yPosition += 15;
 
   // Résumé (KPIs)
   doc.setFontSize(14);
   doc.setTextColor(...primaryColor);
   doc.text('Résumé', 20, yPosition);
-  
+
   yPosition += 8;
 
   // Grille de KPIs
@@ -77,7 +77,7 @@ export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf
   data.summary.forEach((kpi, index) => {
     const row = Math.floor(index / kpisPerRow);
     const col = index % kpisPerRow;
-    
+
     const x = 20 + col * (kpiWidth + kpiSpacing);
     const y = yPosition + row * (kpiHeight + 5);
 
@@ -146,9 +146,9 @@ export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf
         doc.addImage(chart.imageData, 'PNG', 20, yPosition, 170, 100);
         yPosition += 110;
       } catch (error) {
-        logger.warn('Failed to add chart image to PDF', { 
+        logger.warn('Failed to add chart image to PDF', {
           chartTitle: chart.title,
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
         });
       }
     });
@@ -160,12 +160,9 @@ export function exportToPDF(data: PDFReportData, filename: string = 'rapport.pdf
     doc.setPage(i);
     doc.setFontSize(9);
     doc.setTextColor(150, 150, 150);
-    doc.text(
-      `MONTOIT - Rapport généré le ${formatDate(new Date().toISOString())}`,
-      105,
-      285,
-      { align: 'center' }
-    );
+    doc.text(`MONTOIT - Rapport généré le ${formatDate(new Date().toISOString())}`, 105, 285, {
+      align: 'center',
+    });
     doc.text(`Page ${i} / ${pageCount}`, 185, 285);
   }
 
@@ -191,9 +188,7 @@ export function exportToExcel(data: ExcelReportData): void {
 
   data.sheets.forEach((sheet) => {
     // Préparer les données avec headers
-    const wsData = sheet.headers
-      ? [sheet.headers, ...sheet.data]
-      : sheet.data;
+    const wsData = sheet.headers ? [sheet.headers, ...sheet.data] : sheet.data;
 
     const worksheet = XLSX.utils.aoa_to_sheet(wsData);
 
@@ -277,7 +272,7 @@ export function canvasToBase64(canvas: HTMLCanvasElement): string {
 export async function captureElementAsImage(element: HTMLElement): Promise<string> {
   // Trouver le canvas dans l'élément (pour Recharts)
   const canvas = element.querySelector('canvas');
-  
+
   if (canvas) {
     return canvasToBase64(canvas);
   }
@@ -285,7 +280,7 @@ export async function captureElementAsImage(element: HTMLElement): Promise<strin
   // Fallback: utiliser html2canvas si disponible
   logger.warn('No canvas found in element, image capture may not work', {
     elementId: element.id,
-    elementClass: element.className
+    elementClass: element.className,
   });
   return '';
 }

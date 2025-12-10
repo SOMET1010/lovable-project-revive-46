@@ -1,14 +1,24 @@
 import { useState, Component, ReactNode, FormEvent, ErrorInfo } from 'react';
 import { Link } from 'react-router-dom';
 import { APP_CONFIG } from '@/shared/config/app.config';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin, ArrowRight, AlertTriangle } from 'lucide-react';
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+  Mail,
+  Phone,
+  MapPin,
+  ArrowRight,
+  AlertTriangle,
+} from 'lucide-react';
 
 // Configuration de sécurité pour les contacts (évite les crashs si l'import échoue)
 const SAFE_CONTACT = {
   PHONE: '+2250700000000',
   PHONE_DISPLAY: '+225 07 00 00 00 00',
   EMAIL: 'contact@montoit.ci',
-  ADDRESS: 'Abidjan, Côte d\'Ivoire',
+  ADDRESS: "Abidjan, Côte d'Ivoire",
 };
 
 // ErrorBoundary pour capturer les erreurs de rendu
@@ -35,7 +45,9 @@ class FooterErrorBoundary extends Component<{ children: ReactNode }, { hasError:
               <AlertTriangle className="w-5 h-5" />
               <span>Erreur d'affichage du footer</span>
             </div>
-            <p className="text-sm text-[#E8D4C5]/60">© {new Date().getFullYear()} Mon Toit. Tous droits réservés.</p>
+            <p className="text-sm text-[#E8D4C5]/60">
+              © {new Date().getFullYear()} Mon Toit. Tous droits réservés.
+            </p>
           </div>
         </footer>
       );
@@ -60,18 +72,15 @@ function FooterContent() {
 
   return (
     <footer className="relative bg-[#2C1810] text-[#E8D4C5] overflow-hidden pt-20 pb-10">
-      
       {/* Texture de fond Premium */}
       <div className="absolute inset-0 opacity-[0.03] bg-[url('/images/pattern-topo.svg')] bg-repeat pointer-events-none" />
-      
+
       {/* Lueur d'ambiance Orange */}
       <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[#F16522]/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
         {/* Grille 4 colonnes */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-          
           {/* Logo & Description */}
           <div className="space-y-6">
             <Link to="/" className="inline-block group">
@@ -93,10 +102,10 @@ function FooterContent() {
               </div>
             </Link>
             <p className="text-[#E8D4C5]/70 text-sm leading-relaxed max-w-xs">
-              La première plateforme immobilière certifiée en Côte d'Ivoire. 
-              Accès universel, transparent et sécurisé au logement.
+              La première plateforme immobilière certifiée en Côte d'Ivoire. Accès universel,
+              transparent et sécurisé au logement.
             </p>
-            
+
             {/* Réseaux Sociaux */}
             <div className="flex gap-4">
               {[
@@ -105,7 +114,7 @@ function FooterContent() {
                 { Icon: Instagram, href: '#', label: 'Instagram' },
                 { Icon: Linkedin, href: '#', label: 'LinkedIn' },
               ].map(({ Icon, href, label }) => (
-                <a 
+                <a
                   key={label}
                   href={href}
                   target="_blank"
@@ -132,12 +141,14 @@ function FooterContent() {
                 { label: 'Contact', href: '/contact' },
               ].map((link) => (
                 <li key={link.label}>
-                  <Link 
-                    to={link.href} 
+                  <Link
+                    to={link.href}
                     className="text-[#E8D4C5]/70 hover:text-[#F16522] transition-colors text-sm flex items-center gap-2 group"
                   >
                     <span className="w-1.5 h-1.5 rounded-full bg-transparent group-hover:bg-[#F16522] transition-all duration-300" />
-                    <span className="group-hover:translate-x-1 transition-transform duration-300">{link.label}</span>
+                    <span className="group-hover:translate-x-1 transition-transform duration-300">
+                      {link.label}
+                    </span>
                   </Link>
                 </li>
               ))}
@@ -155,8 +166,8 @@ function FooterContent() {
                 { label: 'CGV', href: '/cgv' },
               ].map((link) => (
                 <li key={link.label}>
-                  <Link 
-                    to={link.href} 
+                  <Link
+                    to={link.href}
                     className="text-[#E8D4C5]/70 hover:text-[#F16522] transition-colors text-sm"
                   >
                     {link.label}
@@ -172,7 +183,7 @@ function FooterContent() {
             <p className="text-[#E8D4C5]/70 text-sm mb-4">
               Recevez nos dernières offres exclusives.
             </p>
-            
+
             <form onSubmit={handleNewsletterSubmit} className="space-y-3 mb-8">
               <div className="relative">
                 <Mail className="absolute left-4 top-3.5 w-4 h-4 text-[#E8D4C5]/50" />
@@ -188,25 +199,27 @@ function FooterContent() {
               <button
                 type="submit"
                 className={`w-full rounded-xl py-3 font-semibold flex items-center justify-center gap-2 transition-all duration-300 group ${
-                  subscribed 
-                    ? 'bg-green-500 text-white' 
+                  subscribed
+                    ? 'bg-green-500 text-white'
                     : 'bg-[#F16522] hover:bg-[#d95a1d] text-white shadow-lg shadow-[#F16522]/20 hover:shadow-[#F16522]/40'
                 }`}
               >
                 <span>{subscribed ? 'Inscrit !' : "S'inscrire"}</span>
-                {!subscribed && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+                {!subscribed && (
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                )}
               </button>
             </form>
 
             <div className="space-y-3 pt-6 border-t border-white/10">
-              <a 
+              <a
                 href={`tel:${SAFE_CONTACT.PHONE}`}
                 className="flex items-center gap-3 text-[#E8D4C5]/80 hover:text-white transition-colors text-sm"
               >
                 <Phone className="w-4 h-4 text-[#F16522]" />
                 {SAFE_CONTACT.PHONE_DISPLAY}
               </a>
-              <a 
+              <a
                 href={`mailto:${SAFE_CONTACT.EMAIL}`}
                 className="flex items-center gap-3 text-[#E8D4C5]/80 hover:text-white transition-colors text-sm"
               >
@@ -224,16 +237,16 @@ function FooterContent() {
         {/* Copyright */}
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#E8D4C5]/40">
           <p>© {currentYear} Mon Toit. Tous droits réservés.</p>
-          
+
           <div className="flex items-center gap-6">
             {[
               { label: 'Aide', href: '/aide' },
               { label: 'FAQ', href: '/faq' },
               { label: 'Blog', href: '/blog' },
             ].map((link) => (
-              <Link 
+              <Link
                 key={link.label}
-                to={link.href} 
+                to={link.href}
                 className="hover:text-[#F16522] transition-colors"
               >
                 {link.label}

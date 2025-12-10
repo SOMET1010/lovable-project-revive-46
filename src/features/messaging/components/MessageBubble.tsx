@@ -22,7 +22,7 @@ const getFileExtension = (name: string): string => {
 
 export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
   const [showLightbox, setShowLightbox] = useState(false);
-  
+
   const hasAttachment = message.attachment_url && message.attachment_type;
   const isImage = message.attachment_type === 'image';
 
@@ -67,17 +67,18 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
                   }`}
                   onClick={handleDownload}
                 >
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                    isOwn ? 'bg-white/20' : 'bg-[#F16522]/10'
-                  }`}>
+                  <div
+                    className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
+                      isOwn ? 'bg-white/20' : 'bg-[#F16522]/10'
+                    }`}
+                  >
                     <FileText className={`h-5 w-5 ${isOwn ? 'text-white' : 'text-[#F16522]'}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {message.attachment_name}
-                    </p>
+                    <p className="text-sm font-medium truncate">{message.attachment_name}</p>
                     <p className={`text-xs ${isOwn ? 'text-white/70' : 'text-[#A69B95]'}`}>
-                      {getFileExtension(message.attachment_name || '')} • {formatFileSize(message.attachment_size || 0)}
+                      {getFileExtension(message.attachment_name || '')} •{' '}
+                      {formatFileSize(message.attachment_size || 0)}
                     </p>
                   </div>
                   <Download className={`h-5 w-5 ${isOwn ? 'text-white/70' : 'text-[#A69B95]'}`} />
@@ -88,23 +89,26 @@ export function MessageBubble({ message, isOwn }: MessageBubbleProps) {
 
           {/* Message content */}
           {message.content && (
-            <p className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${hasAttachment ? 'px-2 pt-1' : ''}`}>
+            <p
+              className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${hasAttachment ? 'px-2 pt-1' : ''}`}
+            >
               {message.content}
             </p>
           )}
-          
+
           {/* Time and read status */}
-          <div className={`flex items-center justify-end gap-1 mt-1 ${hasAttachment ? 'px-2 pb-1' : ''}`}>
+          <div
+            className={`flex items-center justify-end gap-1 mt-1 ${hasAttachment ? 'px-2 pb-1' : ''}`}
+          >
             <span className={`text-[11px] ${isOwn ? 'text-white/70' : 'text-[#A69B95]'}`}>
               {format(new Date(message.created_at), 'HH:mm', { locale: fr })}
             </span>
-            {isOwn && (
-              message.is_read ? (
+            {isOwn &&
+              (message.is_read ? (
                 <CheckCheck className="h-4 w-4 text-[#34B7F1]" />
               ) : (
                 <Check className="h-4 w-4 text-white/70" />
-              )
-            )}
+              ))}
           </div>
         </div>
       </div>

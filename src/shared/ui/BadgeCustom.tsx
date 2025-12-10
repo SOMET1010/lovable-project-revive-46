@@ -10,12 +10,12 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   children: ReactNode;
 }
 
-export function Badge({ 
-  variant = 'default', 
-  size = 'medium', 
-  children, 
+export function Badge({
+  variant = 'default',
+  size = 'medium',
+  children,
   className = '',
-  ...props 
+  ...props
 }: BadgeProps) {
   const baseClasses = [
     'inline-flex items-center justify-center',
@@ -39,12 +39,9 @@ export function Badge({
     large: 'px-3 py-1.5 text-base',
   };
 
-  const classes = [
-    baseClasses,
-    variantClasses[variant],
-    sizeClasses[size],
-    className,
-  ].filter(Boolean).join(' ');
+  const classes = [baseClasses, variantClasses[variant], sizeClasses[size], className]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <span className={classes} {...props}>

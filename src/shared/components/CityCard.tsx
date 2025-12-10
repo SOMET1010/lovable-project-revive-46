@@ -31,9 +31,7 @@ export default function CityCard({ name, propertyCount, image }: CityCardProps) 
       <div className="relative h-full flex flex-col justify-end p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-2">
           <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-          <h3 className="text-xl sm:text-2xl font-bold text-white">
-            {name}
-          </h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-white">{name}</h3>
         </div>
         <p className="text-sm sm:text-base text-white/90">
           {propertyCount} {propertyCount > 1 ? 'propriétés' : 'propriété'}

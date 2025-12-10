@@ -7,11 +7,11 @@ interface UrgencyIndicatorProps {
   className?: string;
 }
 
-export default function UrgencyIndicator({ 
-  urgency, 
-  size = 'md', 
+export default function UrgencyIndicator({
+  urgency,
+  size = 'md',
   showLabel = true,
-  className = ''
+  className = '',
 }: UrgencyIndicatorProps) {
   const getUrgencyConfig = () => {
     switch (urgency) {
@@ -22,7 +22,7 @@ export default function UrgencyIndicator({
           bgColor: 'bg-green-50',
           textColor: 'text-green-700',
           borderColor: 'border-green-200',
-          icon: Clock
+          icon: Clock,
         };
       case 'medium':
         return {
@@ -31,7 +31,7 @@ export default function UrgencyIndicator({
           bgColor: 'bg-yellow-50',
           textColor: 'text-yellow-700',
           borderColor: 'border-yellow-200',
-          icon: Clock
+          icon: Clock,
         };
       case 'high':
         return {
@@ -40,7 +40,7 @@ export default function UrgencyIndicator({
           bgColor: 'bg-orange-50',
           textColor: 'text-orange-700',
           borderColor: 'border-orange-200',
-          icon: AlertTriangle
+          icon: AlertTriangle,
         };
       case 'urgent':
         return {
@@ -49,7 +49,7 @@ export default function UrgencyIndicator({
           bgColor: 'bg-red-50',
           textColor: 'text-red-700',
           borderColor: 'border-red-200',
-          icon: AlertTriangle
+          icon: AlertTriangle,
         };
       default:
         return {
@@ -58,7 +58,7 @@ export default function UrgencyIndicator({
           bgColor: 'bg-gray-50',
           textColor: 'text-gray-700',
           borderColor: 'border-gray-200',
-          icon: Clock
+          icon: Clock,
         };
     }
   };
@@ -72,34 +72,36 @@ export default function UrgencyIndicator({
       dot: 'w-2 h-2',
       icon: 'w-3 h-3',
       text: 'text-xs',
-      padding: 'px-2 py-1'
+      padding: 'px-2 py-1',
     },
     md: {
       container: 'p-2',
       dot: 'w-3 h-3',
       icon: 'w-4 h-4',
       text: 'text-sm',
-      padding: 'px-3 py-1.5'
+      padding: 'px-3 py-1.5',
     },
     lg: {
       container: 'p-3',
       dot: 'w-4 h-4',
       icon: 'w-5 h-5',
       text: 'text-base',
-      padding: 'px-4 py-2'
-    }
+      padding: 'px-4 py-2',
+    },
   };
 
   const currentSize = sizeClasses[size];
 
   return (
-    <div className={`inline-flex items-center gap-2 ${config.bgColor} ${config.borderColor} border rounded-lg ${currentSize.padding} ${className}`}>
+    <div
+      className={`inline-flex items-center gap-2 ${config.bgColor} ${config.borderColor} border rounded-lg ${currentSize.padding} ${className}`}
+    >
       {/* Indicateur visuel de l'urgence */}
       <div className={`${currentSize.dot} ${config.color} rounded-full animate-pulse`}></div>
-      
+
       {/* Icône */}
       <Icon className={`${currentSize.icon} ${config.textColor}`} />
-      
+
       {/* Label si demandé */}
       {showLabel && (
         <span className={`font-medium ${config.textColor} ${currentSize.text}`}>
@@ -113,7 +115,9 @@ export default function UrgencyIndicator({
 // Composant spécialisé pour les badges urgents
 export function UrgentBadge({ className = '' }: { className?: string }) {
   return (
-    <div className={`inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold ${className}`}>
+    <div
+      className={`inline-flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold ${className}`}
+    >
       <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
       🔴 URGENT
     </div>

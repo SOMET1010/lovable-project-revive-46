@@ -10,14 +10,10 @@ export default function ProfileCard({ icon, title, features, ctaText, ctaLink }:
   return (
     <div className="bg-white border-2 border-gray-200 rounded-2xl p-6 sm:p-8 text-center hover:border-orange-500 shadow-premium hover:shadow-orange transition-all duration-300 card-premium animate-slide-up">
       {/* Icon */}
-      <div className="text-4xl sm:text-5xl mb-4">
-        {icon}
-      </div>
+      <div className="text-4xl sm:text-5xl mb-4">{icon}</div>
 
       {/* Title */}
-      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-        {title}
-      </h3>
+      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">{title}</h3>
 
       {/* Features List */}
       <ul className="text-left mb-6 space-y-2">

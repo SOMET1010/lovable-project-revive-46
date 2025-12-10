@@ -78,7 +78,7 @@ export default function AdminTrustAgents() {
     total: agents.length,
     active: agents.filter((a) => (a as { user_type?: string }).user_type === 'admin').length,
     onLeave: 0,
-    avgSatisfaction: 0
+    avgSatisfaction: 0,
   };
 
   return (
@@ -109,7 +109,12 @@ export default function AdminTrustAgents() {
           <StatCard icon={Shield} label="Total agents" value={stats.total} color="indigo" />
           <StatCard icon={Play} label="Actifs" value={stats.active} color="green" />
           <StatCard icon={Pause} label="En congé" value={stats.onLeave} color="orange" />
-          <StatCard icon={Award} label="Satisfaction moy." value={`${stats.avgSatisfaction.toFixed(1)}/5`} color="yellow" />
+          <StatCard
+            icon={Award}
+            label="Satisfaction moy."
+            value={`${stats.avgSatisfaction.toFixed(1)}/5`}
+            color="yellow"
+          />
         </div>
 
         <div className="bg-white rounded-lg shadow-lg">
@@ -148,17 +153,29 @@ export default function AdminTrustAgents() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, color }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string | number; color: 'indigo' | 'green' | 'orange' | 'yellow' }) {
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string | number;
+  color: 'indigo' | 'green' | 'orange' | 'yellow';
+}) {
   const colors: Record<string, string> = {
     indigo: 'from-indigo-500 to-indigo-600',
     green: 'from-green-500 to-green-600',
     orange: 'from-orange-500 to-orange-600',
-    yellow: 'from-yellow-500 to-yellow-600'
+    yellow: 'from-yellow-500 to-yellow-600',
   };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <Icon className={`w-8 h-8 bg-gradient-to-r ${colors[color]} text-white p-1.5 rounded-lg mb-3`} />
+      <Icon
+        className={`w-8 h-8 bg-gradient-to-r ${colors[color]} text-white p-1.5 rounded-lg mb-3`}
+      />
       <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
       <p className="text-sm text-gray-600">{label}</p>
     </div>
@@ -178,7 +195,9 @@ function AgentCard({ agent, onClick }: { agent: Record<string, unknown>; onClick
               <Shield className="w-6 h-6 text-indigo-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">{(agent as { full_name?: string }).full_name || 'Agent'}</h3>
+              <h3 className="font-semibold text-gray-900">
+                {(agent as { full_name?: string }).full_name || 'Agent'}
+              </h3>
               <p className="text-sm text-gray-600">{(agent as { email?: string }).email}</p>
             </div>
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
@@ -245,9 +264,7 @@ function CreateAgentForm({ onBack, onSuccess }: { onBack: () => void; onSuccess:
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email *
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                 <input
                   type="email"
                   value={formData.email}
@@ -259,9 +276,7 @@ function CreateAgentForm({ onBack, onSuccess }: { onBack: () => void; onSuccess:
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Téléphone *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label>
               <input
                 type="tel"
                 value={formData.phone}
@@ -284,7 +299,7 @@ function CreateAgentForm({ onBack, onSuccess }: { onBack: () => void; onSuccess:
                 disabled={submitting}
                 className="flex-1 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 font-semibold"
               >
-                {submitting ? 'Création...' : 'Créer l\'agent'}
+                {submitting ? 'Création...' : "Créer l'agent"}
               </button>
             </div>
           </form>
@@ -294,7 +309,15 @@ function CreateAgentForm({ onBack, onSuccess }: { onBack: () => void; onSuccess:
   );
 }
 
-function AgentDetail({ agent, onBack, onUpdate: _onUpdate }: { agent: Record<string, unknown>; onBack: () => void; onUpdate: () => void }) {
+function AgentDetail({
+  agent,
+  onBack,
+  onUpdate: _onUpdate,
+}: {
+  agent: Record<string, unknown>;
+  onBack: () => void;
+  onUpdate: () => void;
+}) {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -304,7 +327,7 @@ function AgentDetail({ agent, onBack, onUpdate: _onUpdate }: { agent: Record<str
 
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {(agent as { full_name?: string }).full_name || 'Détails de l\'agent'}
+            {(agent as { full_name?: string }).full_name || "Détails de l'agent"}
           </h2>
           <p className="text-gray-600">{(agent as { email?: string }).email}</p>
         </div>

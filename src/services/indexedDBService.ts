@@ -132,7 +132,10 @@ class IndexedDBService {
     return favorites.map((f) => f.propertyData);
   }
 
-  async updateFavoriteStatus(propertyId: string, status: 'synced' | 'pending' | 'error'): Promise<void> {
+  async updateFavoriteStatus(
+    propertyId: string,
+    status: 'synced' | 'pending' | 'error'
+  ): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -153,7 +156,11 @@ class IndexedDBService {
 
   // === HISTORIQUE RECHERCHES ===
 
-  async addSearchHistory(query: string, filters: any, location?: { lat: number; lng: number }): Promise<void> {
+  async addSearchHistory(
+    query: string,
+    filters: any,
+    location?: { lat: number; lng: number }
+  ): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -214,7 +221,11 @@ class IndexedDBService {
     return await this.db.getAllFromIndex('syncQueue', 'by-status', 'pending');
   }
 
-  async updateSyncQueueItem(id: number, status: 'pending' | 'processing' | 'failed', retryCount?: number): Promise<void> {
+  async updateSyncQueueItem(
+    id: number,
+    status: 'pending' | 'processing' | 'failed',
+    retryCount?: number
+  ): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 

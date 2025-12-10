@@ -6,14 +6,15 @@
 const originalConsoleError = console.error;
 
 // Intercept all console errors
-console.error = function(...args) {
+console.error = function (...args) {
   const errorMessage = args.join(' ').toString();
 
   // Check for JWT-related errors
-  if (errorMessage.includes('Expected 3 parts in JWT') ||
-      errorMessage.includes('JWT') ||
-      errorMessage.includes('Invalid token')) {
-
+  if (
+    errorMessage.includes('Expected 3 parts in JWT') ||
+    errorMessage.includes('JWT') ||
+    errorMessage.includes('Invalid token')
+  ) {
     // Clean up auth data immediately
     try {
       const keysToRemove = [];
@@ -23,7 +24,7 @@ console.error = function(...args) {
           keysToRemove.push(key);
         }
       }
-      keysToRemove.forEach(key => {
+      keysToRemove.forEach((key) => {
         try {
           localStorage.removeItem(key);
         } catch (e) {
@@ -38,7 +39,6 @@ console.error = function(...args) {
 
       // Optionally show notification to user
       showAuthErrorNotification();
-
     } catch (error) {
       // Fallback - at least log it
     }
@@ -97,10 +97,11 @@ function showAuthErrorNotification() {
 window.addEventListener('unhandledrejection', (event) => {
   if (event.reason && typeof event.reason === 'object') {
     const errorMessage = event.reason.message || '';
-    if (errorMessage.includes('Expected 3 parts in JWT') ||
-        errorMessage.includes('JWT') ||
-        errorMessage.includes('Invalid token')) {
-
+    if (
+      errorMessage.includes('Expected 3 parts in JWT') ||
+      errorMessage.includes('JWT') ||
+      errorMessage.includes('Invalid token')
+    ) {
       // Prevent the default error handling
       event.preventDefault();
 
@@ -113,7 +114,7 @@ window.addEventListener('unhandledrejection', (event) => {
             keysToRemove.push(key);
           }
         }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
         showAuthErrorNotification();
       } catch (error) {
         // Fallback
@@ -131,7 +132,7 @@ export function cleanupAuthData() {
         keysToRemove.push(key);
       }
     }
-    keysToRemove.forEach(key => {
+    keysToRemove.forEach((key) => {
       try {
         localStorage.removeItem(key);
       } catch (e) {

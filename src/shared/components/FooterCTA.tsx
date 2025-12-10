@@ -25,13 +25,9 @@ export default function FooterCTA({ title, subtitle, buttons, icon: Icon }: Foot
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         {Icon && <Icon className="h-12 w-12 mx-auto mb-4 text-[#F16522]" />}
 
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
-          {title}
-        </h2>
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">{title}</h2>
 
-        <p className="text-lg md:text-xl text-[#E8D4C5] mb-10 max-w-2xl mx-auto">
-          {subtitle}
-        </p>
+        <p className="text-lg md:text-xl text-[#E8D4C5] mb-10 max-w-2xl mx-auto">{subtitle}</p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {buttons.map((button, index) => {

@@ -9,13 +9,10 @@ export default function ContactPage() {
         title="Contactez-nous"
         subtitle="Une question ? Besoin d'aide ? Notre équipe est là pour vous accompagner."
         icon={<Mail className="h-8 w-8 text-white" />}
-        breadcrumbs={[
-          { label: 'Contact', href: '/contact' }
-        ]}
+        breadcrumbs={[{ label: 'Contact', href: '/contact' }]}
       />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-
         <div className="grid md:grid-cols-3 gap-6 mb-16 animate-fade-in">
           <a
             href="mailto:contact@mon-toit.ci"
@@ -47,7 +44,11 @@ export default function ContactPage() {
             </div>
             <h3 className="text-lg font-bold text-[#2C1810] mb-2">Adresse</h3>
             <p className="text-[#A69B95] text-sm mb-3">Bureau principal</p>
-            <p className="text-[#6B5A4E]">Abidjan, Cocody<br />Côte d'Ivoire</p>
+            <p className="text-[#6B5A4E]">
+              Abidjan, Cocody
+              <br />
+              Côte d'Ivoire
+            </p>
           </div>
         </div>
 
@@ -55,10 +56,10 @@ export default function ContactPage() {
           <h2 className="text-2xl font-bold text-[#2C1810] mb-6 text-center">
             Comment pouvons-nous vous aider ?
           </h2>
-          
+
           <p className="text-[#6B5A4E] text-center mb-8 max-w-2xl mx-auto">
-            Pour toute demande, envoyez-nous un email à l'adresse ci-dessous. 
-            Notre équipe vous répondra dans les plus brefs délais.
+            Pour toute demande, envoyez-nous un email à l'adresse ci-dessous. Notre équipe vous
+            répondra dans les plus brefs délais.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -70,7 +71,7 @@ export default function ContactPage() {
               <span>Envoyer un email</span>
               <ExternalLink className="h-4 w-4" />
             </a>
-            
+
             <a
               href="tel:+2250700000000"
               className="inline-flex items-center gap-2 px-8 py-4 bg-white border-2 border-[#2C1810] text-[#2C1810] font-bold rounded-xl hover:bg-[#2C1810] hover:text-white transition-all duration-300"
@@ -91,14 +92,14 @@ export default function ContactPage() {
             label: 'Voir la FAQ',
             href: '/faq',
             icon: HelpCircle,
-            variant: 'primary'
+            variant: 'primary',
           },
           {
             label: "Centre d'aide",
             href: '/aide',
             icon: Phone,
-            variant: 'secondary'
-          }
+            variant: 'secondary',
+          },
         ]}
       />
     </div>

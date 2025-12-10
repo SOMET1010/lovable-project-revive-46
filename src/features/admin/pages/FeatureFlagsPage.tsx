@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  Flag, 
-  ToggleLeft, 
-  ToggleRight, 
-  RefreshCw, 
-  Shield, 
-  Map, 
+import {
+  Flag,
+  ToggleLeft,
+  ToggleRight,
+  RefreshCw,
+  Shield,
+  Map,
   CreditCard,
   Bot,
   Bell,
-  LucideIcon
+  LucideIcon,
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
-import { toast } from '@/shared/hooks/useSafeToast';
+import { toast } from '@/hooks/shared/useSafeToast';
 
 interface FeatureFlag {
   id: string;
@@ -61,8 +61,8 @@ export default function FeatureFlagsPage() {
         .order('feature_name');
 
       if (error) throw error;
-      
-      const mappedFlags: FeatureFlag[] = (data || []).map(d => ({
+
+      const mappedFlags: FeatureFlag[] = (data || []).map((d) => ({
         id: d.id,
         feature_name: d.feature_name,
         is_enabled: d.is_enabled ?? false,
@@ -71,7 +71,7 @@ export default function FeatureFlagsPage() {
         created_at: d.created_at ?? '',
         updated_at: d.updated_at ?? '',
       }));
-      
+
       setFlags(mappedFlags);
     } catch (err) {
       console.error('Error loading feature flags:', err);
@@ -90,7 +90,7 @@ export default function FeatureFlagsPage() {
         .eq('id', flag.id);
 
       if (error) throw error;
-      
+
       toast.success(`${flag.feature_name} ${!flag.is_enabled ? 'activé' : 'désactivé'}`);
       loadFlags();
     } catch (err) {
@@ -106,12 +106,15 @@ export default function FeatureFlagsPage() {
     return (config?.['category'] as string) || 'default';
   };
 
-  const groupedFlags = flags.reduce((acc, flag) => {
-    const category = getCategory(flag);
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(flag);
-    return acc;
-  }, {} as Record<string, FeatureFlag[]>);
+  const groupedFlags = flags.reduce(
+    (acc, flag) => {
+      const category = getCategory(flag);
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(flag);
+      return acc;
+    },
+    {} as Record<string, FeatureFlag[]>
+  );
 
   if (loading) {
     return (
@@ -150,11 +153,15 @@ export default function FeatureFlagsPage() {
         </div>
         <div className="bg-card rounded-xl p-4 shadow-card">
           <p className="text-sm text-muted-foreground">Activés</p>
-          <p className="text-2xl font-bold text-green-600">{flags.filter(f => f.is_enabled).length}</p>
+          <p className="text-2xl font-bold text-green-600">
+            {flags.filter((f) => f.is_enabled).length}
+          </p>
         </div>
         <div className="bg-card rounded-xl p-4 shadow-card">
           <p className="text-sm text-muted-foreground">Désactivés</p>
-          <p className="text-2xl font-bold text-amber-600">{flags.filter(f => !f.is_enabled).length}</p>
+          <p className="text-2xl font-bold text-amber-600">
+            {flags.filter((f) => !f.is_enabled).length}
+          </p>
         </div>
         <div className="bg-card rounded-xl p-4 shadow-card">
           <p className="text-sm text-muted-foreground">Catégories</p>
@@ -174,7 +181,7 @@ export default function FeatureFlagsPage() {
                   {categoryLabels[category] || category}
                 </h2>
                 <span className="ml-auto text-sm text-muted-foreground">
-                  {categoryFlags.filter(f => f.is_enabled).length}/{categoryFlags.length} actifs
+                  {categoryFlags.filter((f) => f.is_enabled).length}/{categoryFlags.length} actifs
                 </span>
               </div>
               <div className="divide-y divide-border">
@@ -195,12 +202,12 @@ export default function FeatureFlagsPage() {
   );
 }
 
-function FlagRow({ 
-  flag, 
-  toggling, 
-  onToggle 
-}: { 
-  flag: FeatureFlag; 
+function FlagRow({
+  flag,
+  toggling,
+  onToggle,
+}: {
+  flag: FeatureFlag;
   toggling: boolean;
   onToggle: () => void;
 }) {
@@ -220,7 +227,7 @@ function FlagRow({
         </div>
         <p className="text-sm text-muted-foreground mt-0.5">{flag.description}</p>
       </div>
-      
+
       <button
         onClick={onToggle}
         disabled={toggling}
@@ -237,9 +244,7 @@ function FlagRow({
         ) : (
           <ToggleLeft className="w-5 h-5" />
         )}
-        <span className="font-medium">
-          {flag.is_enabled ? 'Actif' : 'Inactif'}
-        </span>
+        <span className="font-medium">{flag.is_enabled ? 'Actif' : 'Inactif'}</span>
       </button>
     </div>
   );

@@ -5,7 +5,7 @@ interface LoadingFallbackProps {
 
 export default function LoadingFallback({
   message = 'Chargement...',
-  fullScreen = true
+  fullScreen = true,
 }: LoadingFallbackProps) {
   const containerClass = fullScreen
     ? 'flex items-center justify-center min-h-screen bg-background'
@@ -36,7 +36,9 @@ export function LoadingSpinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
     <div className="flex items-center justify-center py-6">
       <div className="relative">
         <div className={`rounded-full border-muted animate-pulse ${sizeClasses[size]}`}></div>
-        <div className={`absolute inset-0 rounded-full border-transparent border-t-primary animate-spin ${sizeClasses[size]}`}></div>
+        <div
+          className={`absolute inset-0 rounded-full border-transparent border-t-primary animate-spin ${sizeClasses[size]}`}
+        ></div>
       </div>
     </div>
   );

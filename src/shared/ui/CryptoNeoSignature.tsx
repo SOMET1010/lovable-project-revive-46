@@ -19,9 +19,11 @@ export default function CryptoNeoSignature({
   userEmail,
   onSuccess,
   onError,
-  className = ''
+  className = '',
 }: CryptoNeoSignatureProps) {
-  const [step, setStep] = useState<'idle' | 'sending' | 'otp' | 'signing' | 'success' | 'error'>('idle');
+  const [step, setStep] = useState<'idle' | 'sending' | 'otp' | 'signing' | 'success' | 'error'>(
+    'idle'
+  );
   const [otpCode, setOtpCode] = useState('');
   const [error, setError] = useState('');
   const [countdown, setCountdown] = useState(0);
@@ -52,10 +54,10 @@ export default function CryptoNeoSignature({
 
     try {
       const { data, error: sendError } = await supabase.functions.invoke('cryptoneo-send-otp', {
-        body: { 
+        body: {
           phone: userPhone,
-          email: userEmail 
-        }
+          email: userEmail,
+        },
       });
 
       if (sendError) throw sendError;
@@ -65,13 +67,13 @@ export default function CryptoNeoSignature({
         setCountdown(60);
         setExpiresIn(data.expiresIn || 300);
       } else {
-        throw new Error(data.error || 'Échec de l\'envoi du code');
+        throw new Error(data.error || "Échec de l'envoi du code");
       }
     } catch (err) {
       console.error('Error sending OTP:', err);
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'envoi du code');
+      setError(err instanceof Error ? err.message : "Erreur lors de l'envoi du code");
       setStep('error');
-      onError(err instanceof Error ? err.message : 'Erreur lors de l\'envoi du code');
+      onError(err instanceof Error ? err.message : "Erreur lors de l'envoi du code");
     }
   };
 
@@ -82,12 +84,15 @@ export default function CryptoNeoSignature({
     setError('');
 
     try {
-      const { data, error: signError } = await supabase.functions.invoke('cryptoneo-sign-document', {
-        body: { 
-          leaseId,
-          otpCode 
+      const { data, error: signError } = await supabase.functions.invoke(
+        'cryptoneo-sign-document',
+        {
+          body: {
+            leaseId,
+            otpCode,
+          },
         }
-      });
+      );
 
       if (signError) throw signError;
 
@@ -121,7 +126,9 @@ export default function CryptoNeoSignature({
         </div>
         <div>
           <h3 className="text-lg font-bold text-[#4A2C17]">Signature Certifiée CryptoNeo</h3>
-          <p className="text-sm text-[#8B7355]">Valeur légale équivalente à une signature notariée</p>
+          <p className="text-sm text-[#8B7355]">
+            Valeur légale équivalente à une signature notariée
+          </p>
         </div>
       </div>
 
@@ -132,12 +139,8 @@ export default function CryptoNeoSignature({
             Pour procéder à la signature certifiée, un code de vérification sera envoyé à :
           </p>
           <div className="bg-[#F9F6F1] rounded-xl p-4 border border-[#E8DFD5]">
-            {userPhone && (
-              <p className="text-[#4A2C17] font-medium">📱 {userPhone}</p>
-            )}
-            {userEmail && (
-              <p className="text-[#4A2C17] font-medium">✉️ {userEmail}</p>
-            )}
+            {userPhone && <p className="text-[#4A2C17] font-medium">📱 {userPhone}</p>}
+            {userEmail && <p className="text-[#4A2C17] font-medium">✉️ {userEmail}</p>}
           </div>
           <button
             onClick={handleSendOTP}
@@ -189,9 +192,7 @@ export default function CryptoNeoSignature({
           {/* Resend button */}
           <div className="text-center">
             {countdown > 0 ? (
-              <p className="text-sm text-[#8B7355]">
-                Renvoyer dans {countdown}s
-              </p>
+              <p className="text-sm text-[#8B7355]">Renvoyer dans {countdown}s</p>
             ) : (
               <button
                 onClick={handleSendOTP}
@@ -210,7 +211,9 @@ export default function CryptoNeoSignature({
         <div className="text-center py-8">
           <Loader className="w-12 h-12 text-[#F16522] animate-spin mx-auto mb-4" />
           <p className="text-[#5D4E37] font-medium">Signature en cours...</p>
-          <p className="text-sm text-[#8B7355] mt-2">Veuillez patienter, cela peut prendre quelques secondes</p>
+          <p className="text-sm text-[#8B7355] mt-2">
+            Veuillez patienter, cela peut prendre quelques secondes
+          </p>
         </div>
       )}
 

@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link } from 'react-router-dom';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Shield, 
-  CheckCircle, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Shield,
+  CheckCircle,
   AlertCircle,
   Edit,
   Star,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 
 /**
@@ -58,8 +58,8 @@ export default function ProfileContent() {
             {/* Avatar */}
             <div className="relative">
               {profile?.avatar_url ? (
-                <img 
-                  src={profile.avatar_url} 
+                <img
+                  src={profile.avatar_url}
                   alt={profile.full_name || 'Avatar'}
                   className="w-20 h-20 rounded-2xl object-cover"
                 />
@@ -82,9 +82,7 @@ export default function ProfileContent() {
                   <h2 className="text-xl font-bold text-[#2C1810]">
                     {profile?.full_name || 'Utilisateur'}
                   </h2>
-                  <p className="text-[#6B5A4E] text-sm mt-0.5">
-                    {profile?.bio || 'Aucune bio'}
-                  </p>
+                  <p className="text-[#6B5A4E] text-sm mt-0.5">{profile?.bio || 'Aucune bio'}</p>
                 </div>
 
                 <button
@@ -97,13 +95,15 @@ export default function ProfileContent() {
 
               {/* Trust Score */}
               <div className="flex items-center gap-3 mt-4">
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${getTrustScoreColor()}`}>
+                <div
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${getTrustScoreColor()}`}
+                >
                   <Star className="h-4 w-4" />
                   <span className="font-bold">{trustScore}</span>
                   <span className="text-sm">/100</span>
                 </div>
-                <Link 
-                  to="/mon-score" 
+                <Link
+                  to="/mon-score"
                   className="text-sm text-[#F16522] hover:underline font-medium"
                 >
                   Voir mon score
@@ -120,9 +120,7 @@ export default function ProfileContent() {
               </div>
               <div>
                 <p className="text-xs text-[#A69B95]">Email</p>
-                <p className="text-sm text-[#2C1810] font-medium">
-                  {profile?.email || '—'}
-                </p>
+                <p className="text-sm text-[#2C1810] font-medium">{profile?.email || '—'}</p>
               </div>
             </div>
 
@@ -132,9 +130,7 @@ export default function ProfileContent() {
               </div>
               <div>
                 <p className="text-xs text-[#A69B95]">Téléphone</p>
-                <p className="text-sm text-[#2C1810] font-medium">
-                  {profile?.phone || '—'}
-                </p>
+                <p className="text-sm text-[#2C1810] font-medium">{profile?.phone || '—'}</p>
               </div>
             </div>
 
@@ -144,9 +140,7 @@ export default function ProfileContent() {
               </div>
               <div>
                 <p className="text-xs text-[#A69B95]">Ville</p>
-                <p className="text-sm text-[#2C1810] font-medium">
-                  {profile?.city || '—'}
-                </p>
+                <p className="text-sm text-[#2C1810] font-medium">{profile?.city || '—'}</p>
               </div>
             </div>
           </div>
@@ -160,8 +154,8 @@ export default function ProfileContent() {
             <Shield className="h-5 w-5 text-[#F16522]" />
             <h3 className="font-semibold text-[#2C1810]">Vérifications</h3>
           </div>
-          <Link 
-            to="/profil?tab=verification" 
+          <Link
+            to="/profil?tab=verification"
             className="text-sm text-[#F16522] hover:underline font-medium"
           >
             Gérer
@@ -174,8 +168,8 @@ export default function ProfileContent() {
               key={item.id}
               to={item.href}
               className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
-                item.verified 
-                  ? 'border-green-200 bg-green-50' 
+                item.verified
+                  ? 'border-green-200 bg-green-50'
                   : 'border-[#EFEBE9] hover:border-[#F16522] hover:bg-[#FAF7F4]'
               }`}
             >
@@ -185,13 +179,13 @@ export default function ProfileContent() {
                 ) : (
                   <AlertCircle className="h-5 w-5 text-[#A69B95]" />
                 )}
-                <span className={`font-medium ${item.verified ? 'text-green-700' : 'text-[#6B5A4E]'}`}>
+                <span
+                  className={`font-medium ${item.verified ? 'text-green-700' : 'text-[#6B5A4E]'}`}
+                >
                   {item.label}
                 </span>
               </div>
-              {!item.verified && (
-                <ChevronRight className="h-4 w-4 text-[#A69B95]" />
-              )}
+              {!item.verified && <ChevronRight className="h-4 w-4 text-[#A69B95]" />}
             </Link>
           ))}
         </div>
@@ -199,7 +193,8 @@ export default function ProfileContent() {
         {!profile?.is_verified && (
           <div className="mt-4 p-4 bg-[#F16522]/5 rounded-xl border border-[#F16522]/20">
             <p className="text-sm text-[#6B5A4E]">
-              <span className="font-medium text-[#F16522]">Astuce :</span> Vérifiez votre identité pour augmenter votre score de confiance et accéder à plus de fonctionnalités.
+              <span className="font-medium text-[#F16522]">Astuce :</span> Vérifiez votre identité
+              pour augmenter votre score de confiance et accéder à plus de fonctionnalités.
             </p>
           </div>
         )}

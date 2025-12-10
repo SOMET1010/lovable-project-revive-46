@@ -33,10 +33,10 @@ export default function TransactionsPage() {
           Module Transactions en Développement
         </h2>
         <p className="text-gray-600 max-w-md mx-auto mb-8">
-          Cette page affichera l'historique des paiements, les remboursements,
-          les commissions et les rapports financiers.
+          Cette page affichera l'historique des paiements, les remboursements, les commissions et
+          les rapports financiers.
         </p>
-        
+
         {/* Preview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">

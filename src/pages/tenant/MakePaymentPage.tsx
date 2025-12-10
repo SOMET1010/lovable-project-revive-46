@@ -5,15 +5,15 @@ import { supabase } from '@/services/supabase/client';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
-import { 
-  CreditCard, 
-  Smartphone, 
-  Building, 
-  Coins, 
-  AlertCircle, 
-  CheckCircle, 
+import {
+  CreditCard,
+  Smartphone,
+  Building,
+  Coins,
+  AlertCircle,
+  CheckCircle,
   ArrowLeft,
-  ChevronRight
+  ChevronRight,
 } from 'lucide-react';
 import '@/styles/form-premium.css';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
@@ -47,7 +47,7 @@ export default function MakePayment() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { step, slideDirection, nextStep, prevStep } = useFormStepper(1, 2);
-  
+
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -73,7 +73,7 @@ export default function MakePayment() {
 
   const loadUserContracts = async () => {
     if (!user) return;
-    
+
     try {
       const { data: contractsData, error: contractsError } = await supabase
         .from('lease_contracts')
@@ -94,7 +94,7 @@ export default function MakePayment() {
         property_address: null,
         property_city: '',
         property_main_image: null,
-        owner_name: 'Propriétaire'
+        owner_name: 'Propriétaire',
       }));
 
       for (const contract of formattedContracts) {
@@ -103,7 +103,7 @@ export default function MakePayment() {
           .select('title, address, city, main_image')
           .eq('id', contract.property_id)
           .single();
-        
+
         if (propertyData) {
           contract.property_title = propertyData.title;
           contract.property_address = propertyData.address;
@@ -182,12 +182,16 @@ export default function MakePayment() {
 
       if (paymentError) throw paymentError;
 
-      if (formData.payment_method === 'mobile_money' && formData.mobile_money_provider && formData.mobile_money_number) {
+      if (
+        formData.payment_method === 'mobile_money' &&
+        formData.mobile_money_provider &&
+        formData.mobile_money_number
+      ) {
         await supabase
           .from('payments')
           .update({
             status: 'en_cours',
-            transaction_ref: `MM_${payment.id.substring(0, 8)}`
+            transaction_ref: `MM_${payment.id.substring(0, 8)}`,
           })
           .eq('id', payment.id);
       }
@@ -211,12 +215,8 @@ export default function MakePayment() {
         <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
           <div className="text-center">
             <Coins className="w-16 h-16 text-[#A69B95] mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-[#2C1810] mb-2">
-              Connexion requise
-            </h2>
-            <p className="text-[#A69B95]">
-              Veuillez vous connecter pour effectuer un paiement
-            </p>
+            <h2 className="text-xl font-semibold text-[#2C1810] mb-2">Connexion requise</h2>
+            <p className="text-[#A69B95]">Veuillez vous connecter pour effectuer un paiement</p>
           </div>
         </div>
         <Footer />
@@ -232,7 +232,7 @@ export default function MakePayment() {
           {/* Header Premium Ivorian */}
           <div className="mb-8">
             <button
-              onClick={() => step > 1 ? prevStep() : navigate(-1)}
+              onClick={() => (step > 1 ? prevStep() : navigate(-1))}
               className="flex items-center space-x-2 text-[#2C1810] hover:text-[#F16522] mb-6 transition-all duration-300 font-medium"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -268,7 +268,9 @@ export default function MakePayment() {
               <p className="text-[#A69B95] mb-4">
                 Votre paiement est en cours de traitement. Vous recevrez une confirmation par email.
               </p>
-              <p className="text-sm text-[#A69B95]">Redirection vers l'historique des paiements...</p>
+              <p className="text-sm text-[#A69B95]">
+                Redirection vers l'historique des paiements...
+              </p>
             </div>
           ) : (
             <>
@@ -301,7 +303,9 @@ export default function MakePayment() {
                         >
                           <div className="flex items-start space-x-4">
                             <img
-                              src={contract.property_main_image || 'https://via.placeholder.com/100'}
+                              src={
+                                contract.property_main_image || 'https://via.placeholder.com/100'
+                              }
                               alt={contract.property_title}
                               className="w-20 h-20 rounded-lg object-cover"
                             />
@@ -348,16 +352,26 @@ export default function MakePayment() {
                       <div className="mb-6 p-4 bg-[#F16522]/5 border border-[#F16522]/20 rounded-xl">
                         <div className="flex items-start space-x-3">
                           <img
-                            src={selectedContract.property_main_image || 'https://via.placeholder.com/80'}
+                            src={
+                              selectedContract.property_main_image ||
+                              'https://via.placeholder.com/80'
+                            }
                             alt={selectedContract.property_title}
                             className="w-16 h-16 rounded-lg object-cover"
                           />
                           <div>
-                            <h3 className="font-bold text-[#2C1810]">{selectedContract.property_title}</h3>
+                            <h3 className="font-bold text-[#2C1810]">
+                              {selectedContract.property_title}
+                            </h3>
                             <p className="text-sm text-[#A69B95]">
-                              {formatAddress(selectedContract.property_address, selectedContract.property_city)}
+                              {formatAddress(
+                                selectedContract.property_address,
+                                selectedContract.property_city
+                              )}
                             </p>
-                            <p className="text-sm text-[#A69B95]">À: {selectedContract.owner_name}</p>
+                            <p className="text-sm text-[#A69B95]">
+                              À: {selectedContract.owner_name}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -369,10 +383,18 @@ export default function MakePayment() {
                         <label className="form-label-premium">Type de paiement</label>
                         <div className="grid grid-cols-2 gap-4 mt-3">
                           {[
-                            { value: 'loyer', label: 'Loyer mensuel', amount: selectedContract?.monthly_rent || 0 },
-                            { value: 'depot_garantie', label: 'Dépôt de garantie', amount: selectedContract?.deposit_amount || 0 },
+                            {
+                              value: 'loyer',
+                              label: 'Loyer mensuel',
+                              amount: selectedContract?.monthly_rent || 0,
+                            },
+                            {
+                              value: 'depot_garantie',
+                              label: 'Dépôt de garantie',
+                              amount: selectedContract?.deposit_amount || 0,
+                            },
                             { value: 'charges', label: 'Charges', amount: 0 },
-                            { value: 'frais_agence', label: 'Frais d\'agence', amount: 0 },
+                            { value: 'frais_agence', label: "Frais d'agence", amount: 0 },
                           ].map((type) => (
                             <button
                               key={type.value}
@@ -384,7 +406,9 @@ export default function MakePayment() {
                                   : 'border-[#A69B95]/30 hover:border-[#F16522]/50'
                               }`}
                             >
-                              <p className={`font-semibold ${formData.payment_type === type.value ? 'text-[#F16522]' : 'text-[#2C1810]'}`}>
+                              <p
+                                className={`font-semibold ${formData.payment_type === type.value ? 'text-[#F16522]' : 'text-[#2C1810]'}`}
+                              >
                                 {type.label}
                               </p>
                               {type.amount > 0 && (
@@ -403,7 +427,9 @@ export default function MakePayment() {
                         <input
                           type="number"
                           value={formData.amount}
-                          onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                          onChange={(e) =>
+                            setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })
+                          }
                           className="form-input-premium mt-2 font-bold text-lg"
                           required
                         />
@@ -415,29 +441,41 @@ export default function MakePayment() {
                         <div className="grid grid-cols-2 gap-4 mt-3">
                           <button
                             type="button"
-                            onClick={() => setFormData({ ...formData, payment_method: 'mobile_money' })}
+                            onClick={() =>
+                              setFormData({ ...formData, payment_method: 'mobile_money' })
+                            }
                             className={`p-4 border-2 rounded-xl flex items-center space-x-3 transition-all ${
                               formData.payment_method === 'mobile_money'
                                 ? 'border-[#F16522] bg-[#F16522]/10'
                                 : 'border-[#A69B95]/30 hover:border-[#F16522]/50'
                             }`}
                           >
-                            <Smartphone className={`w-6 h-6 ${formData.payment_method === 'mobile_money' ? 'text-[#F16522]' : 'text-[#A69B95]'}`} />
-                            <span className={`font-semibold ${formData.payment_method === 'mobile_money' ? 'text-[#F16522]' : 'text-[#2C1810]'}`}>
+                            <Smartphone
+                              className={`w-6 h-6 ${formData.payment_method === 'mobile_money' ? 'text-[#F16522]' : 'text-[#A69B95]'}`}
+                            />
+                            <span
+                              className={`font-semibold ${formData.payment_method === 'mobile_money' ? 'text-[#F16522]' : 'text-[#2C1810]'}`}
+                            >
                               Mobile Money
                             </span>
                           </button>
                           <button
                             type="button"
-                            onClick={() => setFormData({ ...formData, payment_method: 'carte_bancaire' })}
+                            onClick={() =>
+                              setFormData({ ...formData, payment_method: 'carte_bancaire' })
+                            }
                             className={`p-4 border-2 rounded-xl flex items-center space-x-3 transition-all ${
                               formData.payment_method === 'carte_bancaire'
                                 ? 'border-[#F16522] bg-[#F16522]/10'
                                 : 'border-[#A69B95]/30 hover:border-[#F16522]/50'
                             }`}
                           >
-                            <CreditCard className={`w-6 h-6 ${formData.payment_method === 'carte_bancaire' ? 'text-[#F16522]' : 'text-[#A69B95]'}`} />
-                            <span className={`font-semibold ${formData.payment_method === 'carte_bancaire' ? 'text-[#F16522]' : 'text-[#2C1810]'}`}>
+                            <CreditCard
+                              className={`w-6 h-6 ${formData.payment_method === 'carte_bancaire' ? 'text-[#F16522]' : 'text-[#A69B95]'}`}
+                            />
+                            <span
+                              className={`font-semibold ${formData.payment_method === 'carte_bancaire' ? 'text-[#F16522]' : 'text-[#2C1810]'}`}
+                            >
                               Carte bancaire
                             </span>
                           </button>
@@ -451,7 +489,12 @@ export default function MakePayment() {
                             <label className="form-label-premium">Opérateur Mobile Money</label>
                             <select
                               value={formData.mobile_money_provider}
-                              onChange={(e) => setFormData({ ...formData, mobile_money_provider: e.target.value as any })}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  mobile_money_provider: e.target.value as any,
+                                })
+                              }
                               className="form-input-premium mt-2"
                               required
                             >
@@ -466,7 +509,9 @@ export default function MakePayment() {
                             <input
                               type="tel"
                               value={formData.mobile_money_number}
-                              onChange={(e) => setFormData({ ...formData, mobile_money_number: e.target.value })}
+                              onChange={(e) =>
+                                setFormData({ ...formData, mobile_money_number: e.target.value })
+                              }
                               className="form-input-premium mt-2"
                               placeholder="07 XX XX XX XX"
                               required
@@ -487,7 +532,7 @@ export default function MakePayment() {
                       <ArrowLeft className="w-5 h-5" />
                       <span>Précédent</span>
                     </button>
-                    
+
                     <button
                       type="submit"
                       disabled={submitting}

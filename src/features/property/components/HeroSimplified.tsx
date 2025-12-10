@@ -17,9 +17,9 @@ interface SearchFilters {
 
 export default function HeroSimplified({
   onSearch,
-  title = "Trouvez votre logement idéal",
+  title = 'Trouvez votre logement idéal',
   subtitle = "Des milliers de propriétés vous attendent dans toute la Côte d'Ivoire",
-  backgroundImage = "/images/hero-residence-moderne.jpg"
+  backgroundImage = '/images/hero-residence-moderne.jpg',
 }: HeroSimplifiedProps) {
   const [city, setCity] = useState('');
   const [propertyType, setPropertyType] = useState('');
@@ -31,13 +31,21 @@ export default function HeroSimplified({
     onSearch({
       city,
       propertyType,
-      maxBudget
+      maxBudget,
     });
   };
 
   const cities = [
-    'Abidjan', 'Bouaké', 'Yamoussoukro', 'San-Pédro', 'Korhogo', 
-    'Man', 'Gagnoa', 'Abengourou', 'Agboville', 'Grand-Bassam'
+    'Abidjan',
+    'Bouaké',
+    'Yamoussoukro',
+    'San-Pédro',
+    'Korhogo',
+    'Man',
+    'Gagnoa',
+    'Abengourou',
+    'Agboville',
+    'Grand-Bassam',
   ];
 
   const propertyTypes = [
@@ -45,11 +53,11 @@ export default function HeroSimplified({
     { value: 'appartement', label: 'Appartement' },
     { value: 'villa', label: 'Villa' },
     { value: 'maison', label: 'Maison' },
-    { value: 'studio', label: 'Studio' }
+    { value: 'studio', label: 'Studio' },
   ];
 
   return (
-    <section 
+    <section
       className="relative h-[400px] md:h-[500px] overflow-hidden"
       role="banner"
       aria-label="Section de recherche de propriétés"
@@ -74,7 +82,6 @@ export default function HeroSimplified({
       {/* Contenu principal */}
       <div className="relative h-full flex items-center justify-center px-4 z-10">
         <div className="w-full max-w-6xl mx-auto">
-          
           {/* Titre et sous-titre */}
           <div className="text-center mb-8">
             <h1 className="text-hero-title font-bold text-white leading-heading tracking-tight mb-4">
@@ -93,11 +100,10 @@ export default function HeroSimplified({
             aria-label="Formulaire de recherche de propriétés"
           >
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              
               {/* Ville/Quartier */}
               <div className="relative">
-                <label 
-                  htmlFor="search-city" 
+                <label
+                  htmlFor="search-city"
                   className="block text-sm font-medium text-white/90 mb-2"
                 >
                   <MapPin className="w-4 h-4 inline mr-2" aria-hidden="true" />
@@ -113,15 +119,17 @@ export default function HeroSimplified({
                 >
                   <option value="">Choisir une localisation</option>
                   {cities.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
                   ))}
                 </select>
               </div>
 
               {/* Type de propriété */}
               <div className="relative">
-                <label 
-                  htmlFor="search-type" 
+                <label
+                  htmlFor="search-type"
                   className="block text-sm font-medium text-white/90 mb-2"
                 >
                   <Home className="w-4 h-4 inline mr-2" aria-hidden="true" />
@@ -144,8 +152,8 @@ export default function HeroSimplified({
 
               {/* Budget maximum */}
               <div className="relative">
-                <label 
-                  htmlFor="search-price" 
+                <label
+                  htmlFor="search-price"
                   className="block text-sm font-medium text-white/90 mb-2"
                 >
                   <Coins className="w-4 h-4 inline mr-2" aria-hidden="true" />

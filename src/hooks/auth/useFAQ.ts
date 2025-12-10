@@ -23,7 +23,7 @@ export function useFAQ(faqData: FAQItem[]): UseFAQReturn {
   const [openItems, setOpenItems] = useState<Set<number>>(new Set());
 
   const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(faqData.map(item => item.category)));
+    const uniqueCategories = Array.from(new Set(faqData.map((item) => item.category)));
     return ['Tous', ...uniqueCategories];
   }, [faqData]);
 
@@ -38,8 +38,9 @@ export function useFAQ(faqData: FAQItem[]): UseFAQReturn {
   };
 
   const filteredFAQ = useMemo(() => {
-    return faqData.filter(item => {
-      const matchesSearch = searchQuery === '' ||
+    return faqData.filter((item) => {
+      const matchesSearch =
+        searchQuery === '' ||
         item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.answer.toLowerCase().includes(searchQuery.toLowerCase());
 

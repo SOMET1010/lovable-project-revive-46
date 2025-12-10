@@ -24,7 +24,7 @@ class CacheService {
   private maxSize = 5 * 1024 * 1024; // 5MB
   private stats = {
     hits: 0,
-    misses: 0
+    misses: 0,
   };
 
   /**
@@ -35,10 +35,10 @@ class CacheService {
       const entry: CacheEntry<T> = {
         data,
         timestamp: Date.now(),
-        expiresAt: Date.now() + (ttlMinutes * 60 * 1000),
+        expiresAt: Date.now() + ttlMinutes * 60 * 1000,
         accessCount: 0,
         lastAccessed: Date.now(),
-        size: this.calculateSize(data)
+        size: this.calculateSize(data),
       };
 
       const serialized = JSON.stringify(entry);
@@ -63,14 +63,17 @@ class CacheService {
       if (error instanceof DOMException && error.name === 'QuotaExceededError') {
         this.clear();
         try {
-          localStorage.setItem(this.prefix + key, JSON.stringify({
-            data,
-            timestamp: Date.now(),
-            expiresAt: Date.now() + (ttlMinutes * 60 * 1000),
-            accessCount: 0,
-            lastAccessed: Date.now(),
-            size: this.calculateSize(data)
-          }));
+          localStorage.setItem(
+            this.prefix + key,
+            JSON.stringify({
+              data,
+              timestamp: Date.now(),
+              expiresAt: Date.now() + ttlMinutes * 60 * 1000,
+              accessCount: 0,
+              lastAccessed: Date.now(),
+              size: this.calculateSize(data),
+            })
+          );
           return true;
         } catch {
           return false;
@@ -136,7 +139,7 @@ class CacheService {
    */
   clear(): void {
     const keys = Object.keys(localStorage);
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.startsWith(this.prefix)) {
         localStorage.removeItem(key);
       }
@@ -150,7 +153,7 @@ class CacheService {
     let cleaned = 0;
     const keys = Object.keys(localStorage);
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.startsWith(this.prefix)) {
         try {
           const serialized = localStorage.getItem(key);
@@ -184,7 +187,7 @@ class CacheService {
    */
   private hasSpace(requiredSize: number): boolean {
     const stats = this.getStats();
-    return (stats.totalSize + requiredSize) < this.maxSize;
+    return stats.totalSize + requiredSize < this.maxSize;
   }
 
   /**
@@ -194,7 +197,7 @@ class CacheService {
     const keys = Object.keys(localStorage);
     const entries: Array<{ key: string; entry: CacheEntry }> = [];
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.startsWith(this.prefix)) {
         try {
           const serialized = localStorage.getItem(key);
@@ -229,7 +232,7 @@ class CacheService {
     let totalSize = 0;
     let itemCount = 0;
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.startsWith(this.prefix)) {
         const serialized = localStorage.getItem(key);
         if (serialized) {
@@ -247,7 +250,7 @@ class CacheService {
       itemCount,
       hitRate,
       hits: this.stats.hits,
-      misses: this.stats.misses
+      misses: this.stats.misses,
     };
   }
 
@@ -270,7 +273,9 @@ class CacheService {
     const stats = this.getStats();
     console.log('📊 Cache Statistics:');
     console.log(`   Items: ${stats.itemCount}`);
-    console.log(`   Size: ${this.formatBytes(stats.totalSize)} / ${this.formatBytes(this.maxSize)}`);
+    console.log(
+      `   Size: ${this.formatBytes(stats.totalSize)} / ${this.formatBytes(this.maxSize)}`
+    );
     console.log(`   Hit Rate: ${stats.hitRate.toFixed(2)}%`);
     console.log(`   Hits: ${stats.hits}`);
     console.log(`   Misses: ${stats.misses}`);
@@ -283,7 +288,7 @@ class CacheService {
     let invalidated = 0;
     const keys = Object.keys(localStorage);
 
-    keys.forEach(key => {
+    keys.forEach((key) => {
       if (key.startsWith(this.prefix) && key.includes(pattern)) {
         localStorage.removeItem(key);
         invalidated++;
@@ -302,7 +307,10 @@ cacheService.cleanup();
 
 // Nettoyage automatique toutes les 5 minutes
 if (typeof window !== 'undefined') {
-  setInterval(() => {
-    cacheService.cleanup();
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      cacheService.cleanup();
+    },
+    5 * 60 * 1000
+  );
 }

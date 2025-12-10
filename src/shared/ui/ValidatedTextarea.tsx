@@ -2,7 +2,10 @@ import { forwardRef, TextareaHTMLAttributes } from 'react';
 import { CheckCircle, AlertCircle } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 
-interface ValidatedTextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'className'> {
+interface ValidatedTextareaProps extends Omit<
+  TextareaHTMLAttributes<HTMLTextAreaElement>,
+  'className'
+> {
   label?: string;
   error?: string;
   touched?: boolean;
@@ -47,18 +50,17 @@ export const ValidatedTextarea = forwardRef<HTMLTextAreaElement, ValidatedTextar
       <div className={cn('space-y-1.5', containerClassName)}>
         {label && (
           <div className="flex items-center justify-between">
-            <label
-              htmlFor={textareaId}
-              className="block text-sm font-semibold text-foreground"
-            >
+            <label htmlFor={textareaId} className="block text-sm font-semibold text-foreground">
               {label}
               {required && <span className="text-destructive ml-1">*</span>}
             </label>
             {showCharCount && maxLength && (
-              <span className={cn(
-                'text-xs',
-                charCount > maxLength ? 'text-destructive' : 'text-muted-foreground'
-              )}>
+              <span
+                className={cn(
+                  'text-xs',
+                  charCount > maxLength ? 'text-destructive' : 'text-muted-foreground'
+                )}
+              >
                 {charCount}/{maxLength}
               </span>
             )}
@@ -71,7 +73,9 @@ export const ValidatedTextarea = forwardRef<HTMLTextAreaElement, ValidatedTextar
             id={textareaId}
             value={value}
             aria-invalid={showError ? 'true' : 'false'}
-            aria-describedby={showError ? `${textareaId}-error` : helperText ? `${textareaId}-helper` : undefined}
+            aria-describedby={
+              showError ? `${textareaId}-error` : helperText ? `${textareaId}-helper` : undefined
+            }
             className={cn(
               'w-full px-4 py-3 border rounded-xl bg-background text-foreground transition-all duration-200 resize-y',
               'focus:ring-2 focus:outline-none',
@@ -89,17 +93,16 @@ export const ValidatedTextarea = forwardRef<HTMLTextAreaElement, ValidatedTextar
           />
 
           {/* Icône de validation (coin supérieur droit) */}
-          {showSuccess && (
-            <CheckCircle className="absolute right-3 top-3 w-5 h-5 text-green-500" />
-          )}
-          {showError && (
-            <AlertCircle className="absolute right-3 top-3 w-5 h-5 text-destructive" />
-          )}
+          {showSuccess && <CheckCircle className="absolute right-3 top-3 w-5 h-5 text-green-500" />}
+          {showError && <AlertCircle className="absolute right-3 top-3 w-5 h-5 text-destructive" />}
         </div>
 
         {/* Message d'erreur */}
         {showError && (
-          <p id={`${textareaId}-error`} className="text-sm text-destructive flex items-center gap-1">
+          <p
+            id={`${textareaId}-error`}
+            className="text-sm text-destructive flex items-center gap-1"
+          >
             {error}
           </p>
         )}

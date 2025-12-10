@@ -22,7 +22,8 @@ export class AuthErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(error: Error): AuthErrorBoundaryState {
     // Check if error is related to authentication/JWT
-    const isAuthError = error.message.includes('JWT') ||
+    const isAuthError =
+      error.message.includes('JWT') ||
       error.message.includes('Invalid token') ||
       error.message.includes('Expected 3 parts in JWT') ||
       error.message.includes('Unauthorized') ||
@@ -37,14 +38,18 @@ export class AuthErrorBoundary extends React.Component<
     return { hasError: false, error: null };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('AuthErrorBoundary caught an error:', error, errorInfo);
 
     // Clean up potentially corrupted auth data
     if (this.state.hasError) {
       try {
-        const keysToRemove = ['supabase.auth.token', 'supabase.auth.refreshToken', 'supabase.auth.expiresAt'];
-        keysToRemove.forEach(key => localStorage.removeItem(key));
+        const keysToRemove = [
+          'supabase.auth.token',
+          'supabase.auth.refreshToken',
+          'supabase.auth.expiresAt',
+        ];
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
       } catch (cleanupError) {
         console.warn('Could not clean auth tokens:', cleanupError);
       }
@@ -55,7 +60,7 @@ export class AuthErrorBoundary extends React.Component<
     this.setState({ hasError: false, error: null });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError && this.state.error) {
       if (this.props.fallback) {
         const FallbackComponent = this.props.fallback;
@@ -74,7 +79,7 @@ interface AuthErrorFallbackProps {
   reset: () => void;
 }
 
-function AuthErrorFallback({ error, reset }: AuthErrorFallbackProps) {
+function AuthErrorFallback({ error }: AuthErrorFallbackProps) {
   const handleReload = () => {
     window.location.reload();
   };
@@ -82,8 +87,12 @@ function AuthErrorFallback({ error, reset }: AuthErrorFallbackProps) {
   const handleSignIn = () => {
     // Clear any remaining auth data and redirect to sign in
     try {
-      const keysToRemove = ['supabase.auth.token', 'supabase.auth.refreshToken', 'supabase.auth.expiresAt'];
-      keysToRemove.forEach(key => localStorage.removeItem(key));
+      const keysToRemove = [
+        'supabase.auth.token',
+        'supabase.auth.refreshToken',
+        'supabase.auth.expiresAt',
+      ];
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
     } catch (cleanupError) {
       console.warn('Could not clean auth tokens:', cleanupError);
     }
@@ -99,9 +108,7 @@ function AuthErrorFallback({ error, reset }: AuthErrorFallbackProps) {
           <AlertCircle className="w-6 h-6 text-red-600" />
         </div>
 
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Session expirée
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Session expirée</h2>
 
         <p className="text-gray-600 mb-6 text-center">
           Votre session a expiré ou est invalide. Veuillez vous reconnecter pour continuer.
@@ -125,14 +132,12 @@ function AuthErrorFallback({ error, reset }: AuthErrorFallbackProps) {
           </button>
         </div>
 
-        {process.env.NODE_ENV === 'development' && (
+        {process.env['NODE_ENV'] === 'development' && (
           <details className="mt-4 p-3 bg-gray-50 rounded text-sm">
             <summary className="cursor-pointer font-medium text-gray-700">
               Détails de l'erreur (développement)
             </summary>
-            <pre className="mt-2 text-xs text-gray-600 overflow-auto">
-              {error.message}
-            </pre>
+            <pre className="mt-2 text-xs text-gray-600 overflow-auto">{error.message}</pre>
           </details>
         )}
       </div>

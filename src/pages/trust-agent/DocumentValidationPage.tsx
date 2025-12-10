@@ -1,25 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  FileCheck, 
-  FileX,
-  Check,
-  X,
-  AlertCircle,
-  FileText
-} from 'lucide-react';
+import { ArrowLeft, FileCheck, FileX, Check, X, AlertCircle, FileText } from 'lucide-react';
 import { Card, CardContent } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/badge';
 import { Textarea } from '@/shared/ui/textarea';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from '@/shared/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/shared/useSafeToast';
 import type { Json } from '@/integrations/supabase/types';
@@ -36,17 +22,41 @@ interface DocumentItem {
 
 const defaultDocuments: DocumentItem[] = [
   { id: '1', name: 'Titre de propriété', type: 'titre', required: true, status: 'pending' },
-  { id: '2', name: 'Pièce d\'identité propriétaire', type: 'identite', required: true, status: 'pending' },
+  {
+    id: '2',
+    name: "Pièce d'identité propriétaire",
+    type: 'identite',
+    required: true,
+    status: 'pending',
+  },
   { id: '3', name: 'Plan cadastral', type: 'cadastre', required: true, status: 'pending' },
-  { id: '4', name: 'Certificat de conformité', type: 'conformite', required: false, status: 'pending' },
-  { id: '5', name: 'Attestation d\'assurance', type: 'assurance', required: false, status: 'pending' },
-  { id: '6', name: 'Dernière quittance de charges', type: 'quittance', required: false, status: 'pending' }
+  {
+    id: '4',
+    name: 'Certificat de conformité',
+    type: 'conformite',
+    required: false,
+    status: 'pending',
+  },
+  {
+    id: '5',
+    name: "Attestation d'assurance",
+    type: 'assurance',
+    required: false,
+    status: 'pending',
+  },
+  {
+    id: '6',
+    name: 'Dernière quittance de charges',
+    type: 'quittance',
+    required: false,
+    status: 'pending',
+  },
 ];
 
 export default function DocumentValidationPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [documents, setDocuments] = useState<DocumentItem[]>(defaultDocuments);
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState<DocumentItem | null>(null);
@@ -81,13 +91,13 @@ export default function DocumentValidationPage() {
     }
   };
 
-  const updateDocumentStatus = (docId: string, status: 'approved' | 'rejected', reason?: string) => {
-    setDocuments(prev => 
-      prev.map(doc => 
-        doc.id === docId 
-          ? { ...doc, status, rejectionReason: reason }
-          : doc
-      )
+  const updateDocumentStatus = (
+    docId: string,
+    status: 'approved' | 'rejected',
+    reason?: string
+  ) => {
+    setDocuments((prev) =>
+      prev.map((doc) => (doc.id === docId ? { ...doc, status, rejectionReason: reason } : doc))
     );
   };
 
@@ -118,7 +128,7 @@ export default function DocumentValidationPage() {
         .from('cev_missions')
         .update({
           documents: documents as unknown as Json,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', missionId);
 
@@ -132,14 +142,14 @@ export default function DocumentValidationPage() {
 
   const stats = {
     total: documents.length,
-    pending: documents.filter(d => d.status === 'pending').length,
-    approved: documents.filter(d => d.status === 'approved').length,
-    rejected: documents.filter(d => d.status === 'rejected').length
+    pending: documents.filter((d) => d.status === 'pending').length,
+    approved: documents.filter((d) => d.status === 'approved').length,
+    rejected: documents.filter((d) => d.status === 'rejected').length,
   };
 
   const allRequiredApproved = documents
-    .filter(d => d.required)
-    .every(d => d.status === 'approved');
+    .filter((d) => d.required)
+    .every((d) => d.status === 'approved');
 
   if (loading) {
     return (
@@ -156,12 +166,19 @@ export default function DocumentValidationPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="small" className="p-2 h-auto w-auto" onClick={() => navigate(`/trust-agent/mission/${missionId}`)}>
+              <Button
+                variant="ghost"
+                size="small"
+                className="p-2 h-auto w-auto"
+                onClick={() => navigate(`/trust-agent/mission/${missionId}`)}
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
                 <h1 className="font-semibold">Validation Documents</h1>
-                <p className="text-sm text-muted-foreground">{stats.approved}/{stats.total} validés</p>
+                <p className="text-sm text-muted-foreground">
+                  {stats.approved}/{stats.total} validés
+                </p>
               </div>
             </div>
             <Button onClick={saveDocuments}>
@@ -216,20 +233,29 @@ export default function DocumentValidationPage() {
 
         {/* Documents List */}
         <div className="space-y-4">
-          {documents.map(doc => (
-            <Card key={doc.id} className={
-              doc.status === 'approved' ? 'border-green-200 bg-green-50/50' :
-              doc.status === 'rejected' ? 'border-red-200 bg-red-50/50' :
-              ''
-            }>
+          {documents.map((doc) => (
+            <Card
+              key={doc.id}
+              className={
+                doc.status === 'approved'
+                  ? 'border-green-200 bg-green-50/50'
+                  : doc.status === 'rejected'
+                    ? 'border-red-200 bg-red-50/50'
+                    : ''
+              }
+            >
               <CardContent className="py-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className={`p-2 rounded-lg ${
-                      doc.status === 'approved' ? 'bg-green-100' :
-                      doc.status === 'rejected' ? 'bg-red-100' :
-                      'bg-muted'
-                    }`}>
+                    <div
+                      className={`p-2 rounded-lg ${
+                        doc.status === 'approved'
+                          ? 'bg-green-100'
+                          : doc.status === 'rejected'
+                            ? 'bg-red-100'
+                            : 'bg-muted'
+                      }`}
+                    >
                       {doc.status === 'approved' ? (
                         <FileCheck className="h-5 w-5 text-green-600" />
                       ) : doc.status === 'rejected' ? (
@@ -242,7 +268,9 @@ export default function DocumentValidationPage() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-medium">{doc.name}</h3>
                         {doc.required && (
-                          <Badge variant="outline" className="text-xs">Requis</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            Requis
+                          </Badge>
                         )}
                       </div>
                       {doc.status === 'rejected' && doc.rejectionReason && (
@@ -252,20 +280,16 @@ export default function DocumentValidationPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
                     {doc.status === 'pending' ? (
                       <>
-                        <Button 
-                          size="small" 
-                          variant="outline"
-                          onClick={() => handleApprove(doc)}
-                        >
+                        <Button size="small" variant="outline" onClick={() => handleApprove(doc)}>
                           <Check className="h-4 w-4 mr-1" />
                           Approuver
                         </Button>
-                        <Button 
-                          size="small" 
+                        <Button
+                          size="small"
                           variant="danger"
                           onClick={() => handleRejectClick(doc)}
                         >
@@ -307,8 +331,8 @@ export default function DocumentValidationPage() {
             <Button variant="outline" onClick={() => setShowRejectDialog(false)}>
               Annuler
             </Button>
-            <Button 
-              variant="danger" 
+            <Button
+              variant="danger"
               onClick={handleRejectConfirm}
               disabled={!rejectionReason.trim()}
             >

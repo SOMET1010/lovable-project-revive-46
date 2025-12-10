@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Camera, 
-  FileCheck, 
-  Home, 
+import {
+  ArrowLeft,
+  Camera,
+  FileCheck,
+  Home,
   CheckCircle2,
   Clock,
   MapPin,
   User,
   AlertTriangle,
-  Save
+  Save,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
@@ -48,14 +48,14 @@ interface Mission {
 }
 
 const defaultChecklist: ChecklistItem[] = [
-  { id: '1', label: 'Vérifier l\'identité du propriétaire', checked: false },
-  { id: '2', label: 'Confirmer l\'adresse du bien', checked: false },
+  { id: '1', label: "Vérifier l'identité du propriétaire", checked: false },
+  { id: '2', label: "Confirmer l'adresse du bien", checked: false },
   { id: '3', label: 'Vérifier les documents de propriété', checked: false },
-  { id: '4', label: 'Inspecter l\'état général du bien', checked: false },
+  { id: '4', label: "Inspecter l'état général du bien", checked: false },
   { id: '5', label: 'Prendre les photos requises', checked: false },
   { id: '6', label: 'Vérifier les équipements', checked: false },
-  { id: '7', label: 'Compléter l\'état des lieux', checked: false },
-  { id: '8', label: 'Recueillir la signature du propriétaire', checked: false }
+  { id: '7', label: "Compléter l'état des lieux", checked: false },
+  { id: '8', label: 'Recueillir la signature du propriétaire', checked: false },
 ];
 
 export default function MissionDetailPage() {
@@ -77,10 +77,12 @@ export default function MissionDetailPage() {
     try {
       const { data, error } = await supabase
         .from('cev_missions')
-        .select(`
+        .select(
+          `
           *,
           property:properties(title, address, city, owner_id)
-        `)
+        `
+        )
         .eq('id', missionId)
         .single();
 
@@ -89,9 +91,13 @@ export default function MissionDetailPage() {
       const missionData = data as Mission;
       setMission(missionData);
       setNotes(missionData.notes || '');
-      
+
       // Load saved checklist or use default
-      if (missionData.verification_checklist && Array.isArray(missionData.verification_checklist) && missionData.verification_checklist.length > 0) {
+      if (
+        missionData.verification_checklist &&
+        Array.isArray(missionData.verification_checklist) &&
+        missionData.verification_checklist.length > 0
+      ) {
         setChecklist(missionData.verification_checklist as unknown as ChecklistItem[]);
       }
     } catch (error) {
@@ -103,16 +109,12 @@ export default function MissionDetailPage() {
   };
 
   const handleChecklistChange = (itemId: string, checked: boolean) => {
-    setChecklist(prev => 
-      prev.map(item => 
-        item.id === itemId ? { ...item, checked } : item
-      )
-    );
+    setChecklist((prev) => prev.map((item) => (item.id === itemId ? { ...item, checked } : item)));
   };
 
   const saveMission = async () => {
     if (!mission) return;
-    
+
     setSaving(true);
     try {
       const { error } = await supabase
@@ -120,7 +122,7 @@ export default function MissionDetailPage() {
         .update({
           verification_checklist: checklist as unknown as Json,
           notes,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', mission.id);
 
@@ -136,25 +138,22 @@ export default function MissionDetailPage() {
 
   const updateStatus = async (newStatus: string) => {
     if (!mission) return;
-    
+
     try {
       const updateData: Record<string, unknown> = {
         status: newStatus,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
 
       if (newStatus === 'completed') {
         updateData['completed_at'] = new Date().toISOString();
       }
 
-      const { error } = await supabase
-        .from('cev_missions')
-        .update(updateData)
-        .eq('id', mission.id);
+      const { error } = await supabase.from('cev_missions').update(updateData).eq('id', mission.id);
 
       if (error) throw error;
-      
-      setMission(prev => prev ? { ...prev, status: newStatus } : null);
+
+      setMission((prev) => (prev ? { ...prev, status: newStatus } : null));
       toast.success(`Statut mis à jour: ${newStatus}`);
     } catch (error) {
       console.error('Error updating status:', error);
@@ -162,7 +161,7 @@ export default function MissionDetailPage() {
     }
   };
 
-  const completedCount = checklist.filter(item => item.checked).length;
+  const completedCount = checklist.filter((item) => item.checked).length;
   const progress = Math.round((completedCount / checklist.length) * 100);
 
   if (loading) {
@@ -188,7 +187,12 @@ export default function MissionDetailPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="small" className="p-2 h-auto w-auto" onClick={() => navigate('/trust-agent/dashboard')}>
+              <Button
+                variant="ghost"
+                size="small"
+                className="p-2 h-auto w-auto"
+                onClick={() => navigate('/trust-agent/dashboard')}
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -243,7 +247,7 @@ export default function MissionDetailPage() {
                           weekday: 'long',
                           year: 'numeric',
                           month: 'long',
-                          day: 'numeric'
+                          day: 'numeric',
                         })}
                       </p>
                     </div>
@@ -264,7 +268,7 @@ export default function MissionDetailPage() {
                 </div>
                 {/* Progress bar */}
                 <div className="w-full bg-muted rounded-full h-2 mt-2">
-                  <div 
+                  <div
                     className="bg-primary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
@@ -272,8 +276,11 @@ export default function MissionDetailPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {checklist.map(item => (
-                    <div key={item.id} className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50">
+                  {checklist.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50"
+                    >
                       <input
                         type="checkbox"
                         id={item.id}
@@ -281,7 +288,7 @@ export default function MissionDetailPage() {
                         onChange={(e) => handleChecklistChange(item.id, e.target.checked)}
                         className="h-4 w-4 rounded border-gray-300"
                       />
-                      <label 
+                      <label
                         htmlFor={item.id}
                         className={`flex-1 cursor-pointer ${item.checked ? 'line-through text-muted-foreground' : ''}`}
                       >
@@ -319,9 +326,7 @@ export default function MissionDetailPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Statut actuel</span>
-                  <Badge 
-                    variant={mission.status === 'completed' ? 'default' : 'secondary'}
-                  >
+                  <Badge variant={mission.status === 'completed' ? 'default' : 'secondary'}>
                     {mission.status === 'pending' && 'En attente'}
                     {mission.status === 'assigned' && 'Assignée'}
                     {mission.status === 'in_progress' && 'En cours'}
@@ -329,18 +334,15 @@ export default function MissionDetailPage() {
                     {mission.status === 'cancelled' && 'Annulée'}
                   </Badge>
                 </div>
-                
+
                 <div className="space-y-2">
                   {mission.status === 'pending' && (
-                    <Button 
-                      className="w-full" 
-                      onClick={() => updateStatus('in_progress')}
-                    >
+                    <Button className="w-full" onClick={() => updateStatus('in_progress')}>
                       Commencer la mission
                     </Button>
                   )}
                   {mission.status === 'in_progress' && (
-                    <Button 
+                    <Button
                       className="w-full"
                       onClick={() => updateStatus('completed')}
                       disabled={progress < 100}
@@ -364,24 +366,24 @@ export default function MissionDetailPage() {
                 <CardTitle>Actions Rapides</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start"
                   onClick={() => navigate(`/trust-agent/photos/${mission.id}`)}
                 >
                   <Camera className="h-4 w-4 mr-2" />
                   Capturer des Photos
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start"
                   onClick={() => navigate(`/trust-agent/documents/${mission.id}`)}
                 >
                   <FileCheck className="h-4 w-4 mr-2" />
                   Valider Documents
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start"
                   onClick={() => navigate(`/trust-agent/etat-des-lieux/${mission.id}`)}
                 >

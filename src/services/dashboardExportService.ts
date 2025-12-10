@@ -8,7 +8,7 @@ import type {
   PropertyExportData,
   ApplicationExportData,
   PaymentExportData,
-  OwnerReportData
+  OwnerReportData,
 } from '@/types/export.types';
 
 interface DashboardData {
@@ -26,7 +26,7 @@ export const dashboardExportService = {
   exportToCSV(data: { headers: string[]; rows: string[][] }, filename: string = 'export.csv') {
     const csvContent = [
       data.headers.join(','),
-      ...data.rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ...data.rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -69,7 +69,7 @@ export const dashboardExportService = {
     yPosition += 10;
 
     doc.setFontSize(10);
-    data.stats.forEach(stat => {
+    data.stats.forEach((stat) => {
       doc.setFont('helvetica', 'bold');
       doc.text(`${stat.label}:`, margin + 5, yPosition);
       doc.setFont('helvetica', 'normal');
@@ -80,7 +80,7 @@ export const dashboardExportService = {
     yPosition += 10;
 
     if (data.tables && data.tables.length > 0) {
-      data.tables.forEach(table => {
+      data.tables.forEach((table) => {
         if (yPosition > 250) {
           doc.addPage();
           yPosition = margin;
@@ -101,7 +101,7 @@ export const dashboardExportService = {
         yPosition += 6;
 
         doc.setFont('helvetica', 'normal');
-        table.rows.forEach(row => {
+        table.rows.forEach((row) => {
           if (yPosition > 270) {
             doc.addPage();
             yPosition = margin;
@@ -127,14 +127,14 @@ export const dashboardExportService = {
 
   exportPropertiesReport(properties: PropertyExportData[]) {
     const headers = ['Titre', 'Ville', 'Prix', 'Statut', 'Vues', 'Favoris', 'Date'];
-    const rows = properties.map(p => [
+    const rows = properties.map((p) => [
       p.title || '',
       p.city || '',
       `${p.price?.toLocaleString('fr-FR') || 0} FCFA`,
       p.status || '',
       String(p.view_count || 0),
       String(p.favorites_count || 0),
-      new Date(p.created_at).toLocaleDateString('fr-FR')
+      new Date(p.created_at).toLocaleDateString('fr-FR'),
     ]);
 
     this.exportToCSV({ headers, rows }, 'proprietes.csv');
@@ -142,12 +142,12 @@ export const dashboardExportService = {
 
   exportApplicationsReport(applications: ApplicationExportData[]) {
     const headers = ['Locataire', 'Propriété', 'Score', 'Statut', 'Date'];
-    const rows = applications.map(app => [
+    const rows = applications.map((app) => [
       app.tenant_name || 'N/A',
       app.property_title || 'N/A',
       String(app.application_score || 0),
       app.status || '',
-      new Date(app.created_at).toLocaleDateString('fr-FR')
+      new Date(app.created_at).toLocaleDateString('fr-FR'),
     ]);
 
     this.exportToCSV({ headers, rows }, 'candidatures.csv');
@@ -155,12 +155,12 @@ export const dashboardExportService = {
 
   exportPaymentsReport(payments: PaymentExportData[]) {
     const headers = ['Date', 'Montant', 'Méthode', 'Statut', 'Référence'];
-    const rows = payments.map(p => [
+    const rows = payments.map((p) => [
       new Date(p.created_at).toLocaleDateString('fr-FR'),
       `${p.amount?.toLocaleString('fr-FR') || 0} FCFA`,
       p.payment_method || '',
       p.status || '',
-      p.reference || ''
+      p.reference || '',
     ]);
 
     this.exportToCSV({ headers, rows }, 'paiements.csv');
@@ -174,7 +174,7 @@ export const dashboardExportService = {
         month: 'long',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       }),
       stats: [
         { label: 'Propriétés totales', value: data.stats.totalProperties },
@@ -182,22 +182,25 @@ export const dashboardExportService = {
         { label: 'Propriétés louées', value: data.stats.rentedProperties },
         { label: 'Vues totales', value: data.stats.totalViews },
         { label: 'Candidatures en attente', value: data.stats.pendingApplications },
-        { label: 'Revenu mensuel', value: `${data.stats.monthlyRevenue.toLocaleString('fr-FR')} FCFA` }
+        {
+          label: 'Revenu mensuel',
+          value: `${data.stats.monthlyRevenue.toLocaleString('fr-FR')} FCFA`,
+        },
       ],
       tables: [
         {
           title: 'Mes Propriétés',
           headers: ['Titre', 'Ville', 'Prix', 'Statut'],
-          rows: data.properties.map(p => [
+          rows: data.properties.map((p) => [
             p.title || '',
             p.city || '',
             `${p.price?.toLocaleString('fr-FR') || 0} FCFA`,
-            p.status || ''
-          ])
-        }
-      ]
+            p.status || '',
+          ]),
+        },
+      ],
     };
 
     this.exportToPDF(reportData, 'rapport-proprietaire.pdf');
-  }
+  },
 };

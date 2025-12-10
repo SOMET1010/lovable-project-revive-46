@@ -12,14 +12,14 @@ const statusStyles: Record<string, string> = {
   en_attente: 'bg-yellow-100 text-yellow-800',
   confirmee: 'bg-green-100 text-green-800',
   annulee: 'bg-red-100 text-red-800',
-  terminee: 'bg-blue-100 text-blue-800'
+  terminee: 'bg-blue-100 text-blue-800',
 };
 
 const statusLabels: Record<string, string> = {
   en_attente: 'En attente',
   confirmee: 'Confirmée',
   annulee: 'Annulée',
-  terminee: 'Terminée'
+  terminee: 'Terminée',
 };
 
 export default function MyVisits() {
@@ -41,11 +41,12 @@ export default function MyVisits() {
 
   const loadVisits = async () => {
     if (!user) return;
-    
+
     try {
       let query = supabase
         .from('visit_requests')
-        .select(`
+        .select(
+          `
           id,
           property_id,
           visit_type,
@@ -55,7 +56,8 @@ export default function MyVisits() {
           tenant_feedback,
           tenant_rating,
           properties!inner(id, title, address, city, main_image)
-        `)
+        `
+        )
         .eq('tenant_id', user.id)
         .order('confirmed_date', { ascending: false });
 
@@ -81,14 +83,14 @@ export default function MyVisits() {
         notes: visit.notes,
         feedback: visit.tenant_feedback,
         rating: visit.tenant_rating,
-        property: visit.properties
+        property: visit.properties,
       }));
 
       setVisits(formattedVisits);
     } catch (error) {
       logger.error('Failed to load visits', error instanceof Error ? error : undefined, {
         userId: user.id,
-        filter
+        filter,
       });
     } finally {
       setLoading(false);
@@ -104,7 +106,7 @@ export default function MyVisits() {
         .update({
           status: 'annulee',
           cancelled_at: new Date().toISOString(),
-          cancellation_reason: 'Annulée par le visiteur'
+          cancellation_reason: 'Annulée par le visiteur',
         })
         .eq('id', visitId);
 
@@ -112,9 +114,9 @@ export default function MyVisits() {
       loadVisits();
     } catch (error) {
       logger.error('Failed to cancel visit', error instanceof Error ? error : undefined, {
-        visitId
+        visitId,
       });
-      alert('Erreur lors de l\'annulation de la visite');
+      alert("Erreur lors de l'annulation de la visite");
     }
   };
 
@@ -135,7 +137,7 @@ export default function MyVisits() {
         .update({
           feedback,
           rating,
-          status: 'terminee'
+          status: 'terminee',
         })
         .eq('id', selectedVisit.id);
 
@@ -146,9 +148,9 @@ export default function MyVisits() {
     } catch (error) {
       logger.error('Failed to submit feedback', error instanceof Error ? error : undefined, {
         visitId: selectedVisit.id,
-        rating
+        rating,
       });
-      alert('Erreur lors de l\'envoi du feedback');
+      alert("Erreur lors de l'envoi du feedback");
     } finally {
       setSubmittingFeedback(false);
     }
@@ -156,7 +158,9 @@ export default function MyVisits() {
 
   const getStatusBadge = (status: string) => {
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}
+      >
         {statusLabels[status] || status}
       </span>
     );
@@ -167,7 +171,7 @@ export default function MyVisits() {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
+      year: 'numeric',
     });
   };
 
@@ -182,12 +186,8 @@ export default function MyVisits() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <Calendar className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Connexion requise
-            </h2>
-            <p className="text-muted-foreground">
-              Veuillez vous connecter pour voir vos visites
-            </p>
+            <h2 className="text-xl font-semibold text-foreground mb-2">Connexion requise</h2>
+            <p className="text-muted-foreground">Veuillez vous connecter pour voir vos visites</p>
           </div>
         </div>
       </TenantDashboardLayout>
@@ -201,170 +201,166 @@ export default function MyVisits() {
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Mes visites</h1>
 
           <div className="flex space-x-2">
-              <button
-                onClick={() => setFilter('upcoming')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
-                  filter === 'upcoming'
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                À venir
-              </button>
-              <button
-                onClick={() => setFilter('past')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
-                  filter === 'past'
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Passées
-              </button>
-              <button
-                onClick={() => setFilter('all')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
-                  filter === 'all'
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                Toutes
-              </button>
-            </div>
+            <button
+              onClick={() => setFilter('upcoming')}
+              className={`px-4 py-2 rounded-lg font-semibold transition ${
+                filter === 'upcoming'
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              À venir
+            </button>
+            <button
+              onClick={() => setFilter('past')}
+              className={`px-4 py-2 rounded-lg font-semibold transition ${
+                filter === 'past'
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Passées
+            </button>
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-4 py-2 rounded-lg font-semibold transition ${
+                filter === 'all'
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              Toutes
+            </button>
           </div>
+        </div>
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-            </div>
-          ) : visits.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-lg p-12 text-center">
-              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Aucune visite
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Vous n'avez pas encore planifié de visite
-              </p>
-              <Link to="/recherche" className="btn-primary inline-block">
-                Rechercher des biens
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {visits.map((visit) => (
-                <div key={visit.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-                  <div className="flex flex-col md:flex-row">
-                    <div className="md:w-1/3">
-                      <img
-                        src={visit.property.main_image || 'https://via.placeholder.com/400x300'}
-                        alt={visit.property.title}
-                        className="w-full h-48 md:h-full object-cover"
-                      />
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
+          </div>
+        ) : visits.length === 0 ? (
+          <div className="bg-white rounded-lg shadow-lg p-12 text-center">
+            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucune visite</h3>
+            <p className="text-gray-600 mb-6">Vous n'avez pas encore planifié de visite</p>
+            <Link to="/recherche" className="btn-primary inline-block">
+              Rechercher des biens
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {visits.map((visit) => (
+              <div key={visit.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div className="flex flex-col md:flex-row">
+                  <div className="md:w-1/3">
+                    <img
+                      src={visit.property.main_image || 'https://via.placeholder.com/400x300'}
+                      alt={visit.property.title}
+                      className="w-full h-48 md:h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900 mb-2">
+                          {visit.property.title}
+                        </h3>
+                        <p className="text-gray-600 mb-2">
+                          {formatAddress(visit.property.address, visit.property.city)}
+                        </p>
+                      </div>
+                      {getStatusBadge(visit.status)}
                     </div>
-                    <div className="flex-1 p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-xl font-bold text-gray-900 mb-2">
-                            {visit.property.title}
-                          </h3>
-                          <p className="text-gray-600 mb-2">
-                            {formatAddress(visit.property.address, visit.property.city)}
-                          </p>
-                        </div>
-                        {getStatusBadge(visit.status)}
+
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="flex items-center space-x-2 text-gray-700">
+                        <Calendar className="w-5 h-5 text-orange-500" />
+                        <span>{formatDate(visit.visit_date)}</span>
                       </div>
-
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="flex items-center space-x-2 text-gray-700">
-                          <Calendar className="w-5 h-5 text-orange-500" />
-                          <span>{formatDate(visit.visit_date)}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-gray-700">
-                          <Clock className="w-5 h-5 text-orange-500" />
-                          <span>{formatTime(visit.visit_time)}</span>
-                        </div>
-                        <div className="flex items-center space-x-2 text-gray-700">
-                          {visit.visit_type === 'physique' ? (
-                            <>
-                              <MapPin className="w-5 h-5 text-orange-500" />
-                              <span>Visite physique</span>
-                            </>
-                          ) : (
-                            <>
-                              <Video className="w-5 h-5 text-orange-500" />
-                              <span>Visite virtuelle</span>
-                            </>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2 text-gray-700">
-                          <MessageCircle className="w-5 h-5 text-orange-500" />
-                          <span>Contact propriétaire</span>
-                        </div>
+                      <div className="flex items-center space-x-2 text-gray-700">
+                        <Clock className="w-5 h-5 text-orange-500" />
+                        <span>{formatTime(visit.visit_time)}</span>
                       </div>
+                      <div className="flex items-center space-x-2 text-gray-700">
+                        {visit.visit_type === 'physique' ? (
+                          <>
+                            <MapPin className="w-5 h-5 text-orange-500" />
+                            <span>Visite physique</span>
+                          </>
+                        ) : (
+                          <>
+                            <Video className="w-5 h-5 text-orange-500" />
+                            <span>Visite virtuelle</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-2 text-gray-700">
+                        <MessageCircle className="w-5 h-5 text-orange-500" />
+                        <span>Contact propriétaire</span>
+                      </div>
+                    </div>
 
-                      {visit.notes && (
-                        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                          <p className="text-sm font-semibold text-gray-700 mb-1">Mes notes :</p>
-                          <p className="text-sm text-gray-600">{visit.notes}</p>
-                        </div>
-                      )}
+                    {visit.notes && (
+                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm font-semibold text-gray-700 mb-1">Mes notes :</p>
+                        <p className="text-sm text-gray-600">{visit.notes}</p>
+                      </div>
+                    )}
 
-                      {visit.feedback && (
-                        <div className="mb-4 p-3 bg-green-50 rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <p className="text-sm font-semibold text-green-700">Mon avis :</p>
-                            <div className="flex items-center space-x-1">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star
-                                  key={star}
-                                  className={`w-4 h-4 ${
-                                    star <= (visit.rating || 0)
-                                      ? 'fill-yellow-400 text-yellow-400'
-                                      : 'text-gray-300'
-                                  }`}
-                                />
-                              ))}
-                            </div>
+                    {visit.feedback && (
+                      <div className="mb-4 p-3 bg-green-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-sm font-semibold text-green-700">Mon avis :</p>
+                          <div className="flex items-center space-x-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <Star
+                                key={star}
+                                className={`w-4 h-4 ${
+                                  star <= (visit.rating || 0)
+                                    ? 'fill-yellow-400 text-yellow-400'
+                                    : 'text-gray-300'
+                                }`}
+                              />
+                            ))}
                           </div>
-                          <p className="text-sm text-green-600">{visit.feedback}</p>
                         </div>
+                        <p className="text-sm text-green-600">{visit.feedback}</p>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-3">
+                      <Link
+                        to={`/propriete/${visit.property_id}`}
+                        className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                      >
+                        Voir le bien
+                      </Link>
+
+                      {(visit.status === 'en_attente' || visit.status === 'confirmee') && (
+                        <button
+                          onClick={() => cancelVisit(visit.id)}
+                          className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                        >
+                          Annuler
+                        </button>
                       )}
 
-                      <div className="flex flex-wrap gap-3">
-                        <Link
-                          to={`/propriete/${visit.property_id}`}
-                          className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                      {visit.status === 'confirmee' && !visit.feedback && (
+                        <button
+                          onClick={() => openFeedbackModal(visit)}
+                          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
                         >
-                          Voir le bien
-                        </Link>
-
-                        {(visit.status === 'en_attente' || visit.status === 'confirmee') && (
-                          <button
-                            onClick={() => cancelVisit(visit.id)}
-                            className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
-                          >
-                            Annuler
-                          </button>
-                        )}
-
-                        {visit.status === 'confirmee' && !visit.feedback && (
-                          <button
-                            onClick={() => openFeedbackModal(visit)}
-                            className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
-                          >
-                            Laisser un avis
-                          </button>
-                        )}
-                      </div>
+                          Laisser un avis
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {showFeedbackModal && selectedVisit && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -380,9 +376,7 @@ export default function MyVisits() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Note
-              </label>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">Note</label>
               <div className="flex items-center space-x-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -404,9 +398,7 @@ export default function MyVisits() {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Commentaire
-              </label>
+              <label className="block text-sm font-semibold text-gray-900 mb-2">Commentaire</label>
               <textarea
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}

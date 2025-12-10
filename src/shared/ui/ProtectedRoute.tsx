@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  /** 
+  /**
    * Allowed roles - can be:
    * - Business types from profiles.user_type: 'tenant', 'owner', 'agent', 'locataire', 'proprietaire', 'agence'
    * - System roles from user_roles table: 'admin', 'moderator', 'trust_agent', 'user'
@@ -18,11 +18,11 @@ interface ProtectedRouteProps {
   requireTrustAgent?: boolean;
 }
 
-export default function ProtectedRoute({ 
-  children, 
+export default function ProtectedRoute({
+  children,
   allowedRoles,
   requireAdmin,
-  requireTrustAgent 
+  requireTrustAgent,
 }: ProtectedRouteProps) {
   const navigate = useNavigate();
   const { user, loading: authLoading, profile } = useAuth();
@@ -55,17 +55,17 @@ export default function ProtectedRoute({
     // Check role-based access
     if (allowedRoles && allowedRoles.length > 0) {
       const userType = profile?.user_type || profile?.active_role;
-      
+
       // Check if user has any of the allowed roles
       // First check business type (from profile)
       const hasBusinessType = userType && allowedRoles.includes(userType);
-      
+
       // Then check system roles (from user_roles table)
-      const hasSystemRole = roles.some(role => allowedRoles.includes(role));
-      
+      const hasSystemRole = roles.some((role) => allowedRoles.includes(role));
+
       // Admin always has access
       const adminOverride = isAdmin;
-      
+
       if (!hasBusinessType && !hasSystemRole && !adminOverride) {
         navigate('/', { replace: true });
         return;
@@ -73,7 +73,18 @@ export default function ProtectedRoute({
     }
 
     setAccessChecked(true);
-  }, [user, isLoading, profile, allowedRoles, requireAdmin, requireTrustAgent, isAdmin, isTrustAgent, roles, navigate]);
+  }, [
+    user,
+    isLoading,
+    profile,
+    allowedRoles,
+    requireAdmin,
+    requireTrustAgent,
+    isAdmin,
+    isTrustAgent,
+    roles,
+    navigate,
+  ]);
 
   if (isLoading) {
     return (

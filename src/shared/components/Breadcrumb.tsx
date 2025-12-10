@@ -1,7 +1,7 @@
 /**
  * Breadcrumb Component (Fil d'Ariane)
  * Mon Toit - Amélioration Navigation Cognitive
- * 
+ *
  * Objectif: Améliorer la navigation et réduire la charge cognitive
  * - Montrer où l'utilisateur se trouve dans la hiérarchie
  * - Permettre de remonter facilement
@@ -41,25 +41,25 @@ const ROUTE_LABELS: Record<string, string> = {
   '/messagerie': 'Messagerie',
   '/profil': 'Mon Profil',
   '/compte': 'Mon Compte',
-  
+
   // Authentification
   '/connexion': 'Connexion',
   '/inscription': 'Inscription',
   '/verification-otp': 'Vérification',
   '/mot-de-passe-oublie': 'Mot de passe oublié',
-  
+
   // Propriétés
   '/proprietes': 'Propriétés',
   '/propriete': 'Détail de la propriété',
   '/mes-proprietes': 'Mes Propriétés',
-  
+
   // Propriétaire
   '/proprietaire': 'Espace Propriétaire',
   '/proprietaire/dashboard': 'Tableau de bord',
   '/proprietaire/mes-proprietes': 'Mes Propriétés',
   '/proprietaire/candidatures': 'Candidatures',
   '/proprietaire/contrats': 'Contrats',
-  
+
   // Locataire
   '/locataire': 'Espace Locataire',
   '/locataire/dashboard': 'Tableau de bord',
@@ -67,43 +67,43 @@ const ROUTE_LABELS: Record<string, string> = {
   '/locataire/candidatures': 'Mes Candidatures',
   '/locataire/contrats': 'Mes Contrats',
   '/locataire/favoris': 'Mes Favoris',
-  
+
   // Candidatures
   '/candidature': 'Candidature',
   '/candidatures': 'Candidatures',
   '/mes-candidatures': 'Mes Candidatures',
-  
+
   // Visites
   '/visiter': 'Planifier une visite',
   '/visites': 'Mes Visites',
   '/mes-visites': 'Mes Visites',
-  
+
   // Contrats
   '/contrats': 'Contrats',
   '/contrat': 'Contrat',
   '/mes-contrats': 'Mes Contrats',
   '/signer-bail': 'Signer le bail',
-  
+
   // Paiements
   '/paiements': 'Paiements',
   '/paiement': 'Effectuer un paiement',
   '/mes-paiements': 'Mes Paiements',
-  
+
   // Vérification
-  '/verification': 'Vérification d\'identité',
-  '/verification-identite': 'Vérification d\'identité',
-  
+  '/verification': "Vérification d'identité",
+  '/verification-identite': "Vérification d'identité",
+
   // Support
   '/aide': 'Aide',
   '/faq': 'FAQ',
   '/contact': 'Contact',
   '/support': 'Support',
-  
+
   // Légal
   '/mentions-legales': 'Mentions Légales',
   '/confidentialite': 'Confidentialité',
   '/cgu': 'Conditions Générales',
-  
+
   // Admin
   '/admin': 'Administration',
   '/admin/dashboard': 'Tableau de bord Admin',
@@ -118,15 +118,15 @@ const ROUTE_LABELS: Record<string, string> = {
 const generateBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
   const paths = pathname.split('/').filter(Boolean);
   const breadcrumbs: BreadcrumbItem[] = [];
-  
+
   let currentPath = '';
-  
+
   paths.forEach((segment, index) => {
     currentPath += `/${segment}`;
-    
+
     // Essayer de trouver un label personnalisé
     let label = ROUTE_LABELS[currentPath];
-    
+
     // Si pas de label, utiliser le segment avec première lettre en majuscule
     if (!label) {
       // Remplacer les tirets par des espaces
@@ -134,18 +134,18 @@ const generateBreadcrumbs = (pathname: string): BreadcrumbItem[] => {
         .replace(/-/g, ' ')
         .replace(/_/g, ' ')
         // Première lettre en majuscule
-        .replace(/\b\w/g, char => char.toUpperCase());
+        .replace(/\b\w/g, (char) => char.toUpperCase());
     }
-    
+
     // Le dernier élément n'a pas de lien (page actuelle)
     const isLast = index === paths.length - 1;
-    
+
     breadcrumbs.push({
       label,
-      href: isLast ? undefined : currentPath
+      href: isLast ? undefined : currentPath,
     });
   });
-  
+
   return breadcrumbs;
 };
 
@@ -157,28 +157,25 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   autoGenerate = true,
   homeLabel = 'Accueil',
   separator = <ChevronRight className="w-4 h-4 text-gray-400" />,
-  className = ''
+  className = '',
 }) => {
   const location = useLocation();
-  
+
   // Générer automatiquement les breadcrumbs si non fournis
   const breadcrumbItems = items || (autoGenerate ? generateBreadcrumbs(location.pathname) : []);
-  
+
   // Ne rien afficher sur la page d'accueil
   if (location.pathname === '/' && !items) {
     return null;
   }
-  
+
   // Ne rien afficher si pas d'items
   if (breadcrumbItems.length === 0) {
     return null;
   }
-  
+
   return (
-    <nav
-      aria-label="Fil d'Ariane"
-      className={`breadcrumb ${className}`}
-    >
+    <nav aria-label="Fil d'Ariane" className={`breadcrumb ${className}`}>
       <ol
         className="flex items-center flex-wrap gap-2 text-sm"
         itemScope
@@ -197,21 +194,21 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             itemProp="item"
           >
             <Home className="w-4 h-4" />
-            <span className="hidden sm:inline" itemProp="name">{homeLabel}</span>
+            <span className="hidden sm:inline" itemProp="name">
+              {homeLabel}
+            </span>
             <meta itemProp="position" content="1" />
           </Link>
         </li>
-        
+
         {/* Séparateur après Accueil */}
-        {breadcrumbItems.length > 0 && (
-          <li aria-hidden="true">{separator}</li>
-        )}
-        
+        {breadcrumbItems.length > 0 && <li aria-hidden="true">{separator}</li>}
+
         {/* Items du breadcrumb */}
         {breadcrumbItems.map((item, index) => {
           const position = index + 2; // +2 car Accueil est position 1
           const isLast = index === breadcrumbItems.length - 1;
-          
+
           return (
             <React.Fragment key={index}>
               <li
@@ -240,11 +237,9 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                   </span>
                 )}
               </li>
-              
+
               {/* Séparateur (sauf pour le dernier) */}
-              {!isLast && (
-                <li aria-hidden="true">{separator}</li>
-              )}
+              {!isLast && <li aria-hidden="true">{separator}</li>}
             </React.Fragment>
           );
         })}
@@ -266,24 +261,21 @@ export const useBreadcrumbs = (items: BreadcrumbItem[]) => {
 export const BreadcrumbCompact: React.FC<BreadcrumbProps> = (props) => {
   const location = useLocation();
   const breadcrumbItems = props.items || generateBreadcrumbs(location.pathname);
-  
+
   if (breadcrumbItems.length === 0 || location.pathname === '/') {
     return null;
   }
-  
+
   // Sur mobile, afficher seulement le dernier item avec un bouton retour
   const lastItem = breadcrumbItems[breadcrumbItems.length - 1];
   const previousItem = breadcrumbItems[breadcrumbItems.length - 2];
-  
+
   if (!lastItem) {
     return null;
   }
-  
+
   return (
-    <nav
-      aria-label="Fil d'Ariane"
-      className={`breadcrumb-compact ${props.className || ''}`}
-    >
+    <nav aria-label="Fil d'Ariane" className={`breadcrumb-compact ${props.className || ''}`}>
       <div className="flex items-center gap-2 text-sm">
         {previousItem?.href && (
           <Link

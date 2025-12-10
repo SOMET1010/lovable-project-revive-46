@@ -18,26 +18,27 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Eye
+  Eye,
 } from 'lucide-react';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 const navigationItems = [
   {
-    section: 'Vue d\'ensemble',
+    section: "Vue d'ensemble",
     items: [
       {
         name: 'Dashboard',
         href: '/admin/tableau-de-bord',
         icon: LayoutDashboard,
-        color: 'text-blue-600'
+        color: 'text-blue-600',
       },
       {
         name: 'Analytics',
         href: '/admin/analytics',
         icon: BarChart3,
-        color: 'text-purple-600'
-      }
-    ]
+        color: 'text-purple-600',
+      },
+    ],
   },
   {
     section: 'Gestion Utilisateurs',
@@ -46,21 +47,21 @@ const navigationItems = [
         name: 'Utilisateurs',
         href: '/admin/utilisateurs',
         icon: Users,
-        color: 'text-green-600'
+        color: 'text-green-600',
       },
       {
         name: 'Rôles & Permissions',
         href: '/admin/gestion-roles',
         icon: Shield,
-        color: 'text-orange-600'
+        color: 'text-orange-600',
       },
       {
         name: 'Trust Agents',
         href: '/admin/trust-agents',
         icon: UserCheck,
-        color: 'text-cyan-600'
-      }
-    ]
+        color: 'text-cyan-600',
+      },
+    ],
   },
   {
     section: 'Gestion Contenu',
@@ -69,21 +70,21 @@ const navigationItems = [
         name: 'Propriétés',
         href: '/admin/properties',
         icon: Home,
-        color: 'text-emerald-600'
+        color: 'text-emerald-600',
       },
       {
         name: 'Transactions',
         href: '/admin/transactions',
         icon: FileText,
-        color: 'text-indigo-600'
+        color: 'text-indigo-600',
       },
       {
         name: 'CEV Management',
         href: '/admin/cev-management',
         icon: CheckCircle,
-        color: 'text-teal-600'
-      }
-    ]
+        color: 'text-teal-600',
+      },
+    ],
   },
   {
     section: 'Monitoring Système',
@@ -92,21 +93,21 @@ const navigationItems = [
         name: 'Service Monitoring',
         href: '/admin/service-monitoring',
         icon: Activity,
-        color: 'text-red-600'
+        color: 'text-red-600',
       },
       {
         name: 'API Keys',
         href: '/admin/api-keys',
         icon: Key,
-        color: 'text-yellow-600'
+        color: 'text-yellow-600',
       },
       {
         name: 'Logs & Erreurs',
         href: '/admin/logs',
         icon: AlertTriangle,
-        color: 'text-red-500'
-      }
-    ]
+        color: 'text-red-500',
+      },
+    ],
   },
   {
     section: 'Configuration',
@@ -115,44 +116,51 @@ const navigationItems = [
         name: 'Règles Métier',
         href: '/admin/regles-metier',
         icon: Settings,
-        color: 'text-orange-600'
+        color: 'text-orange-600',
       },
       {
         name: 'Service Providers',
         href: '/admin/service-providers',
         icon: TrendingUp,
-        color: 'text-blue-500'
+        color: 'text-blue-500',
       },
       {
         name: 'Service Configuration',
         href: '/admin/service-configuration',
         icon: Settings,
-        color: 'text-gray-600'
+        color: 'text-gray-600',
       },
       {
         name: 'Data Generator',
         href: '/admin/test-data-generator',
         icon: Eye,
-        color: 'text-purple-500'
-      }
-    ]
-  }
+        color: 'text-purple-500',
+      },
+    ],
+  },
 ];
 
 export default function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const handleLogout = () => {
-    // Logique de déconnexion
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate('/');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion', error);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className={`${sidebarCollapsed ? 'w-20' : 'w-72'} bg-white shadow-xl border-r border-gray-200 transition-all duration-300 flex flex-col`}>
+      <div
+        className={`${sidebarCollapsed ? 'w-20' : 'w-72'} bg-white shadow-xl border-r border-gray-200 transition-all duration-300 flex flex-col`}
+      >
         {/* Header Admin */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
@@ -193,7 +201,7 @@ export default function AdminLayout() {
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.href;
-                  
+
                   return (
                     <button
                       key={item.name}
@@ -205,10 +213,10 @@ export default function AdminLayout() {
                       }`}
                       title={sidebarCollapsed ? item.name : undefined}
                     >
-                      <Icon className={`w-5 h-5 ${isActive ? 'text-orange-600' : item.color} flex-shrink-0`} />
-                      {!sidebarCollapsed && (
-                        <span className="ml-3 font-medium">{item.name}</span>
-                      )}
+                      <Icon
+                        className={`w-5 h-5 ${isActive ? 'text-orange-600' : item.color} flex-shrink-0`}
+                      />
+                      {!sidebarCollapsed && <span className="ml-3 font-medium">{item.name}</span>}
                     </button>
                   );
                 })}
@@ -259,7 +267,7 @@ export default function AdminLayout() {
                 <Bell className="w-5 h-5 text-gray-600" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
               </button>
-              
+
               {/* Quick Stats */}
               <div className="flex items-center space-x-4 text-sm">
                 <div className="text-center">

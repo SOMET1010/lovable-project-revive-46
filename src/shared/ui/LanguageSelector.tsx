@@ -27,7 +27,7 @@ interface LanguageSelectorProps {
 
 export default function LanguageSelector({
   onLanguageChange,
-  defaultLanguage = 'fr'
+  defaultLanguage = 'fr',
 }: LanguageSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(defaultLanguage);
@@ -60,7 +60,8 @@ export default function LanguageSelector({
       await azureTranslatorService.setTargetLanguage(languageCode);
 
       const notification = document.createElement('div');
-      notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-xl z-50 flex items-center space-x-2 animate-slide-down';
+      notification.className =
+        'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-xl z-50 flex items-center space-x-2 animate-slide-down';
       notification.innerHTML = `
         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -84,7 +85,8 @@ export default function LanguageSelector({
     } catch (error) {
       console.error('Error changing language:', error);
       const errorNotif = document.createElement('div');
-      errorNotif.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-xl shadow-xl z-50';
+      errorNotif.className =
+        'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-xl shadow-xl z-50';
       errorNotif.textContent = 'Erreur lors du changement de langue';
       document.body.appendChild(errorNotif);
       setTimeout(() => errorNotif.remove(), 3000);
@@ -95,7 +97,7 @@ export default function LanguageSelector({
   };
 
   const defaultLang: Language = SUPPORTED_LANGUAGES[0]!;
-  const currentLang = SUPPORTED_LANGUAGES.find(l => l.code === currentLanguage) ?? defaultLang;
+  const currentLang = SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage) ?? defaultLang;
 
   return (
     <div className="relative">
@@ -108,10 +110,12 @@ export default function LanguageSelector({
         aria-haspopup="listbox"
       >
         <Globe className="h-5 w-5 text-terracotta-600" aria-hidden="true" />
-        <span className="text-2xl" aria-hidden="true">{currentLang.flag}</span>
+        <span className="text-2xl" aria-hidden="true">
+          {currentLang.flag}
+        </span>
         <span className="font-medium text-gray-700">{currentLang.nativeName}</span>
         {translating && (
-          <div 
+          <div
             className="animate-spin h-4 w-4 border-2 border-terracotta-500 border-t-transparent rounded-full"
             aria-label="Changement de langue en cours"
             role="status"
@@ -150,19 +154,12 @@ export default function LanguageSelector({
           </div>
 
           <div className="p-3 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-            <p className="text-xs text-gray-500 text-center">
-              Traduction propulsée par Azure AI
-            </p>
+            <p className="text-xs text-gray-500 text-center">Traduction propulsée par Azure AI</p>
           </div>
         </div>
       )}
 
-      {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        ></div>
-      )}
+      {isOpen && <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>}
     </div>
   );
 }

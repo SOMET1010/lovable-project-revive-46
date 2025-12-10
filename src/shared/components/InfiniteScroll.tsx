@@ -61,7 +61,7 @@ export default function InfiniteScroll({
   threshold = 200,
   endMessage,
   loader,
-  className = ''
+  className = '',
 }: InfiniteScrollProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
@@ -93,7 +93,7 @@ export default function InfiniteScroll({
       {
         root: null, // viewport
         rootMargin: `${threshold}px`, // Déclencher avant d'atteindre le bas
-        threshold: 0
+        threshold: 0,
       }
     );
 

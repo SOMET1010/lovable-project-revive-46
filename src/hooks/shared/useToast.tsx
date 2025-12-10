@@ -24,7 +24,10 @@ function notify(listenerSet: Set<(toasts: Toast[]) => void>, toastList: Toast[])
   listenerSet.forEach((listener) => listener([...toastList]));
 }
 
-export function toast(message: string, options?: { type?: ToastType; description?: string; duration?: number; action?: ToastAction }) {
+export function toast(
+  message: string,
+  options?: { type?: ToastType; description?: string; duration?: number; action?: ToastAction }
+) {
   const id = `toast-${++toastCount}`;
   const newToast: Toast = {
     id,
@@ -117,9 +120,7 @@ export function ToastContainer() {
           <div className="flex-shrink-0">{icons[t.type]}</div>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 text-sm">{t.message}</p>
-            {t.description && (
-              <p className="text-sm text-gray-600 mt-1">{t.description}</p>
-            )}
+            {t.description && <p className="text-sm text-gray-600 mt-1">{t.description}</p>}
           </div>
           <button
             onClick={() => dismiss(t.id)}

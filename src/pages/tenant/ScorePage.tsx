@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Shield, 
-  User, 
-  FileCheck, 
-  History, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Shield,
+  User,
+  FileCheck,
+  History,
+  CheckCircle,
+  XCircle,
   ArrowRight,
   TrendingUp,
   Award,
-  AlertCircle
+  AlertCircle,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService, ScoreBreakdown } from '@/services/scoringService';
@@ -30,7 +30,7 @@ const ScorePage: React.FC = () => {
   useEffect(() => {
     const loadScore = async () => {
       if (!user?.id) return;
-      
+
       try {
         const breakdown = await ScoringService.calculateGlobalTrustScore(user.id);
         setScoreBreakdown(breakdown);
@@ -84,8 +84,18 @@ const ScorePage: React.FC = () => {
 
   const verificationItems = [
     { key: 'oneci', label: 'Vérification ONECI', points: 30, description: 'Identité nationale' },
-    { key: 'facial', label: 'Vérification faciale', points: 25, description: 'Reconnaissance faciale' },
-    { key: 'ansut', label: 'Certification ANSUT', points: 20, description: 'Certification officielle' },
+    {
+      key: 'facial',
+      label: 'Vérification faciale',
+      points: 25,
+      description: 'Reconnaissance faciale',
+    },
+    {
+      key: 'ansut',
+      label: 'Certification ANSUT',
+      points: 20,
+      description: 'Certification officielle',
+    },
   ];
 
   return (
@@ -103,225 +113,227 @@ const ScorePage: React.FC = () => {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-        {/* Carte du score principal */}
-        <TrustScoreCard scoreBreakdown={scoreBreakdown} showDetails={true} />
+          {/* Carte du score principal */}
+          <TrustScoreCard scoreBreakdown={scoreBreakdown} showDetails={true} />
 
-        {/* Actions recommandées */}
-        <Card>
+          {/* Actions recommandées */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Améliorez votre score
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {scoreBreakdown.globalScore < 100 && (
+                <>
+                  {/* Profil incomplet */}
+                  {scoreBreakdown.profileScore < 100 && (
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">Compléter le profil</span>
+                        </div>
+                        <Badge variant="secondary">+{100 - scoreBreakdown.profileScore} pts</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Ajoutez les informations manquantes à votre profil
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="small"
+                        onClick={() => navigate('/profil')}
+                        className="w-full"
+                      >
+                        Modifier le profil
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Vérifications manquantes */}
+                  {scoreBreakdown.verificationScore < 100 && (
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <FileCheck className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">Ajouter des vérifications</span>
+                        </div>
+                        <Badge variant="secondary">
+                          +{100 - scoreBreakdown.verificationScore} pts
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Vérifiez votre identité pour gagner la confiance des propriétaires
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="small"
+                        onClick={() => navigate('/verification')}
+                        className="w-full"
+                      >
+                        Lancer une vérification
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Historique */}
+                  {scoreBreakdown.historyScore < 70 && (
+                    <div className="p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <History className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">
+                            Déclarer vos locations passées
+                          </span>
+                        </div>
+                        <Badge variant="secondary">+5 à +50 pts</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Ajoutez vos locations passées pour améliorer votre score d'historique
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="small"
+                        onClick={() => navigate('/profil/historique-locations')}
+                        className="w-full"
+                      >
+                        Ajouter mon historique
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {scoreBreakdown.globalScore >= 70 && (
+                <div className="text-center py-4">
+                  <Award className="h-12 w-12 mx-auto text-green-500 mb-2" />
+                  <p className="font-medium text-green-600">Excellent score !</p>
+                  <p className="text-sm text-muted-foreground">
+                    Vous avez un profil de confiance élevé
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Détail du score de profil */}
+        <Card className="mt-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Améliorez votre score
+              <User className="h-5 w-5 text-primary" />
+              Score de Profil - Détail
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {scoreBreakdown.globalScore < 100 && (
-              <>
-                {/* Profil incomplet */}
-                {scoreBreakdown.profileScore < 100 && (
-                  <div className="p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">Compléter le profil</span>
-                      </div>
-                      <Badge variant="secondary">
-                        +{100 - scoreBreakdown.profileScore} pts
-                      </Badge>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {profileItems.map((item) => {
+                const isComplete = details.profile[item.key as keyof typeof details.profile];
+                return (
+                  <div
+                    key={item.key}
+                    className={`p-3 rounded-lg border ${
+                      isComplete ? 'bg-green-50 border-green-200' : 'bg-muted/30 border-muted'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">{item.label}</span>
+                      {isComplete ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Ajoutez les informations manquantes à votre profil
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {isComplete ? `+${item.points} points` : `${item.points} points disponibles`}
                     </p>
-                    <Button 
-                      variant="outline" 
-                      size="small"
-                      onClick={() => navigate('/profil')}
-                      className="w-full"
-                    >
-                      Modifier le profil
-                      
-                    </Button>
                   </div>
-                )}
-
-                {/* Vérifications manquantes */}
-                {scoreBreakdown.verificationScore < 100 && (
-                  <div className="p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <FileCheck className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">Ajouter des vérifications</span>
-                      </div>
-                      <Badge variant="secondary">
-                        +{100 - scoreBreakdown.verificationScore} pts
-                      </Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Vérifiez votre identité pour gagner la confiance des propriétaires
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      size="small"
-                      onClick={() => navigate('/verification')}
-                      className="w-full"
-                    >
-                      Lancer une vérification
-                    </Button>
-                  </div>
-                )}
-
-                {/* Historique */}
-                {scoreBreakdown.historyScore < 70 && (
-                  <div className="p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <History className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">Déclarer vos locations passées</span>
-                      </div>
-                      <Badge variant="secondary">+5 à +50 pts</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Ajoutez vos locations passées pour améliorer votre score d'historique
-                    </p>
-                    <Button 
-                      variant="outline" 
-                      size="small"
-                      onClick={() => navigate('/profil/historique-locations')}
-                      className="w-full"
-                    >
-                      Ajouter mon historique
-                    </Button>
-                  </div>
-                )}
-              </>
-            )}
-
-            {scoreBreakdown.globalScore >= 70 && (
-              <div className="text-center py-4">
-                <Award className="h-12 w-12 mx-auto text-green-500 mb-2" />
-                <p className="font-medium text-green-600">Excellent score !</p>
-                <p className="text-sm text-muted-foreground">
-                  Vous avez un profil de confiance élevé
-                </p>
-              </div>
-            )}
+                );
+              })}
+            </div>
           </CardContent>
         </Card>
-      </div>
 
-      {/* Détail du score de profil */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <User className="h-5 w-5 text-primary" />
-            Score de Profil - Détail
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {profileItems.map((item) => {
-              const isComplete = details.profile[item.key as keyof typeof details.profile];
-              return (
-                <div 
-                  key={item.key}
-                  className={`p-3 rounded-lg border ${
-                    isComplete ? 'bg-green-50 border-green-200' : 'bg-muted/30 border-muted'
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">{item.label}</span>
-                    {isComplete ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <XCircle className="h-4 w-4 text-muted-foreground" />
-                    )}
+        {/* Détail du score de vérification */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <FileCheck className="h-5 w-5 text-primary" />
+              Score de Vérification - Détail
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {verificationItems.map((item) => {
+                const isVerified =
+                  details.verification[item.key as keyof typeof details.verification];
+                return (
+                  <div
+                    key={item.key}
+                    className={`p-4 rounded-lg border ${
+                      isVerified ? 'bg-green-50 border-green-200' : 'bg-muted/30 border-muted'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium">{item.label}</span>
+                      {isVerified ? (
+                        <Badge variant="success">Vérifié</Badge>
+                      ) : (
+                        <Badge variant="secondary">Non vérifié</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                    <p className="text-xs mt-2">
+                      {isVerified ? (
+                        <span className="text-green-600">+{item.points} points obtenus</span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          {item.points} points disponibles
+                        </span>
+                      )}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {isComplete ? `+${item.points} points` : `${item.points} points disponibles`}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Détail du score de vérification */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <FileCheck className="h-5 w-5 text-primary" />
-            Score de Vérification - Détail
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {verificationItems.map((item) => {
-              const isVerified = details.verification[item.key as keyof typeof details.verification];
-              return (
-                <div 
-                  key={item.key}
-                  className={`p-4 rounded-lg border ${
-                    isVerified ? 'bg-green-50 border-green-200' : 'bg-muted/30 border-muted'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium">{item.label}</span>
-                    {isVerified ? (
-                      <Badge variant="success">Vérifié</Badge>
-                    ) : (
-                      <Badge variant="secondary">Non vérifié</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                  <p className="text-xs mt-2">
-                    {isVerified ? (
-                      <span className="text-green-600">+{item.points} points obtenus</span>
-                    ) : (
-                      <span className="text-muted-foreground">{item.points} points disponibles</span>
-                    )}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Explication du système */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <AlertCircle className="h-5 w-5 text-primary" />
-            Comment fonctionne le Trust Score ?
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="prose prose-sm max-w-none">
-          <p className="text-muted-foreground">
-            Le Trust Score est calculé à partir de trois composantes pondérées :
-          </p>
-          <ul className="text-sm text-muted-foreground space-y-2 mt-3">
-            <li>
-              <strong>Score de Profil (20%)</strong> : Basé sur la complétude de votre profil 
-              (nom, téléphone, adresse, photo, etc.)
-            </li>
-            <li>
-              <strong>Score de Vérification (40%)</strong> : Basé sur les vérifications officielles 
-              (ONECI, CNAM, reconnaissance faciale, ANSUT)
-            </li>
-            <li>
-              <strong>Score d'Historique (40%)</strong> : Basé sur vos locations précédentes et 
-              les évaluations des propriétaires
-            </li>
-          </ul>
-          <div className="mt-4 p-3 bg-primary/5 rounded-lg">
-            <p className="text-sm">
-              <strong>Recommandation :</strong> Un score de 70+ vous donne le statut "Approuvé", 
-              50-69 "Sous conditions", et moins de 50 "Non recommandé".
+        {/* Explication du système */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <AlertCircle className="h-5 w-5 text-primary" />
+              Comment fonctionne le Trust Score ?
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="prose prose-sm max-w-none">
+            <p className="text-muted-foreground">
+              Le Trust Score est calculé à partir de trois composantes pondérées :
             </p>
-          </div>
-        </CardContent>
-      </Card>
+            <ul className="text-sm text-muted-foreground space-y-2 mt-3">
+              <li>
+                <strong>Score de Profil (20%)</strong> : Basé sur la complétude de votre profil
+                (nom, téléphone, adresse, photo, etc.)
+              </li>
+              <li>
+                <strong>Score de Vérification (40%)</strong> : Basé sur les vérifications
+                officielles (ONECI, CNAM, reconnaissance faciale, ANSUT)
+              </li>
+              <li>
+                <strong>Score d'Historique (40%)</strong> : Basé sur vos locations précédentes et
+                les évaluations des propriétaires
+              </li>
+            </ul>
+            <div className="mt-4 p-3 bg-primary/5 rounded-lg">
+              <p className="text-sm">
+                <strong>Recommandation :</strong> Un score de 70+ vous donne le statut "Approuvé",
+                50-69 "Sous conditions", et moins de 50 "Non recommandé".
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </TenantDashboardLayout>
   );

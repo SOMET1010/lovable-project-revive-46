@@ -21,15 +21,15 @@ interface UseParallaxReturn {
 /**
  * Hook pour créer un effet de parallax sur le scroll
  * Respecte prefers-reduced-motion pour l'accessibilité
- * 
+ *
  * @example
  * const { style, offset, isEnabled } = useParallax({ factor: 0.25 });
- * 
- * <img 
- *   style={{ 
- *     ...style, 
- *     transform: `translateY(${offset}px) scale(1.15)` 
- *   }} 
+ *
+ * <img
+ *   style={{
+ *     ...style,
+ *     transform: `translateY(${offset}px) scale(1.15)`
+ *   }}
  * />
  */
 export function useParallax(options: UseParallaxOptions = {}): UseParallaxReturn {
@@ -46,10 +46,10 @@ export function useParallax(options: UseParallaxOptions = {}): UseParallaxReturn
 
   const handleScroll = useCallback(() => {
     if (!isEnabled) return;
-    
+
     const scrollY = window.scrollY;
     const newOffset = Math.min(scrollY * factor, maxOffset);
-    
+
     // Utiliser requestAnimationFrame pour des performances optimales
     requestAnimationFrame(() => {
       setOffset(newOffset);
@@ -61,23 +61,26 @@ export function useParallax(options: UseParallaxOptions = {}): UseParallaxReturn
       setOffset(0);
       return;
     }
-    
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     // Appel initial pour définir la position correcte
     handleScroll();
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll, isEnabled]);
 
-  const style: React.CSSProperties = useMemo(() => ({
-    transform: isEnabled ? `translateY(${offset}px)` : 'none',
-    willChange: isEnabled ? 'transform' : 'auto',
-  }), [offset, isEnabled]);
+  const style: React.CSSProperties = useMemo(
+    () => ({
+      transform: isEnabled ? `translateY(${offset}px)` : 'none',
+      willChange: isEnabled ? 'transform' : 'auto',
+    }),
+    [offset, isEnabled]
+  );
 
   return {
     offset,
     style,
-    isEnabled
+    isEnabled,
   };
 }
 

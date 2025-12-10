@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, MapPin, Wallet, Search, Star, Check } from 'lucide-react';
-import { RESIDENTIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES } from '@/lib/constants/app.constants';
+import {
+  RESIDENTIAL_PROPERTY_TYPES,
+  CITIES,
+  ABIDJAN_COMMUNES,
+} from '@/lib/constants/app.constants';
 import { useHomeStats } from '@/hooks/shared/useHomeStats';
 
 // Animated counter component
@@ -18,18 +22,18 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
           hasAnimated.current = true;
           const duration = 2000;
           const startTime = performance.now();
-          
+
           const animate = (currentTime: number) => {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
             const easeOut = 1 - Math.pow(1 - progress, 3);
             setCount(Math.floor(target * easeOut));
-            
+
             if (progress < 1) {
               requestAnimationFrame(animate);
             }
           };
-          
+
           requestAnimationFrame(animate);
         }
       },
@@ -45,7 +49,8 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
 
   return (
     <span ref={ref} className="tabular-nums">
-      {count.toLocaleString('fr-FR')}{suffix}
+      {count.toLocaleString('fr-FR')}
+      {suffix}
     </span>
   );
 }
@@ -53,7 +58,7 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
 export default function HeroPremium() {
   const navigate = useNavigate();
   const { propertiesCount } = useHomeStats();
-  
+
   // Search form state
   const [propertyType, setPropertyType] = useState('');
   const [city, setCity] = useState('');
@@ -67,7 +72,7 @@ export default function HeroPremium() {
     if (propertyType) params.set('type', propertyType);
     if (city) params.set('city', city);
     if (maxBudget) params.set('maxPrice', maxBudget);
-    
+
     navigate(`/recherche${params.toString() ? `?${params.toString()}` : ''}`);
   };
 
@@ -84,7 +89,7 @@ export default function HeroPremium() {
   return (
     <section className="relative bg-gradient-to-br from-[#2C1810] via-[#1a0f0a] to-[#0f0805] overflow-hidden">
       {/* Mobile background image */}
-      <div 
+      <div
         className="absolute inset-0 lg:hidden"
         style={{
           backgroundImage: `url('https://images.unsplash.com/photo-1560185893-a55cbc8c57e8?auto=format&fit=crop&w=800&q=80')`,
@@ -96,20 +101,19 @@ export default function HeroPremium() {
       </div>
 
       {/* Subtle grid pattern */}
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)`,
-          backgroundSize: '32px 32px'
+          backgroundSize: '32px 32px',
         }}
       />
-      
+
       {/* Orange glow effect */}
       <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-[#FF6C2F]/20 rounded-full blur-[150px] pointer-events-none transform translate-x-1/2 -translate-y-1/2" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-16 items-center">
-          
           {/* Left column - Text & Search */}
           <div className="space-y-4 sm:space-y-6">
             {/* Trust badge - hidden on mobile */}
@@ -131,8 +135,8 @@ export default function HeroPremium() {
               <p className="text-sm sm:text-lg text-white/70 max-w-lg leading-relaxed">
                 <span className="sm:hidden">Logements vérifiés et 100% sécurisés.</span>
                 <span className="hidden sm:inline">
-                  Des milliers d'appartements et villas vérifiés physiquement. 
-                  Une expérience humaine, simple et 100% sécurisée.
+                  Des milliers d'appartements et villas vérifiés physiquement. Une expérience
+                  humaine, simple et 100% sécurisée.
                 </span>
               </p>
             </div>
@@ -224,9 +228,9 @@ export default function HeroPremium() {
                   <div className="text-xs sm:text-sm text-white/60">Logements</div>
                 </div>
               </div>
-              
+
               <div className="h-8 sm:h-12 w-px bg-white/20" />
-              
+
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="hidden sm:flex w-12 h-12 rounded-full bg-green-500/20 items-center justify-center">
                   <Check className="w-6 h-6 text-green-400" />
@@ -287,8 +291,13 @@ export default function HeroPremium() {
 
       {/* Wave transition to next section */}
       <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 60" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-          <path d="M0 60V30C240 50 480 60 720 50C960 40 1200 20 1440 30V60H0Z" fill="#FAF7F4"/>
+        <svg
+          viewBox="0 0 1440 60"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="w-full h-auto"
+        >
+          <path d="M0 60V30C240 50 480 60 720 50C960 40 1200 20 1440 30V60H0Z" fill="#FAF7F4" />
         </svg>
       </div>
     </section>

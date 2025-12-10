@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { 
-  startOfMonth, 
-  endOfMonth, 
-  startOfWeek, 
-  endOfWeek, 
-  eachDayOfInterval, 
-  format, 
-  isSameMonth, 
-  isSameDay, 
-  addMonths, 
+import {
+  startOfMonth,
+  endOfMonth,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  format,
+  isSameMonth,
+  isSameDay,
+  addMonths,
   subMonths,
-  isToday
+  isToday,
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Button } from '@/shared/ui/Button';
@@ -38,15 +38,15 @@ const urgencyColors: Record<string, string> = {
   urgent: 'bg-red-500',
   high: 'bg-orange-500',
   medium: 'bg-amber-500',
-  low: 'bg-green-500'
+  low: 'bg-green-500',
 };
 
-export default function MissionCalendar({ 
-  missions, 
-  selectedDate, 
+export default function MissionCalendar({
+  missions,
+  selectedDate,
   onSelectDate,
   onPlanMission,
-  compact = false
+  compact = false,
 }: MissionCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -54,11 +54,11 @@ export default function MissionCalendar({
   const monthEnd = endOfMonth(currentMonth);
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
   const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
-  
+
   const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
   const getMissionsForDate = (date: Date): Mission[] => {
-    return missions.filter(mission => {
+    return missions.filter((mission) => {
       if (!mission.scheduled_date) return false;
       return isSameDay(new Date(mission.scheduled_date), date);
     });
@@ -68,7 +68,7 @@ export default function MissionCalendar({
     if (dayMissions.length === 0) return null;
     const urgencyOrder = ['urgent', 'high', 'medium', 'low'];
     for (const urgency of urgencyOrder) {
-      if (dayMissions.some(m => m.urgency === urgency)) {
+      if (dayMissions.some((m) => m.urgency === urgency)) {
         return urgency;
       }
     }
@@ -115,12 +115,12 @@ export default function MissionCalendar({
       <CardContent className="pt-0">
         {/* Week days header */}
         <div className="grid grid-cols-7 gap-1 mb-2">
-          {weekDays.map(day => (
-            <div 
-              key={day} 
+          {weekDays.map((day) => (
+            <div
+              key={day}
               className={cn(
-                "text-center font-medium text-muted-foreground",
-                compact ? "text-xs py-1" : "text-sm py-2"
+                'text-center font-medium text-muted-foreground',
+                compact ? 'text-xs py-1' : 'text-sm py-2'
               )}
             >
               {compact ? day.charAt(0) : day}
@@ -138,51 +138,47 @@ export default function MissionCalendar({
             const isTodayDate = isToday(day);
 
             return (
-              <div
-                key={day.toISOString()}
-                className="relative group"
-              >
+              <div key={day.toISOString()} className="relative group">
                 <button
                   onClick={() => onSelectDate(day)}
                   className={cn(
-                    "relative flex flex-col items-center justify-center rounded-lg transition-colors w-full",
-                    compact ? "h-8" : "h-12",
-                    !isCurrentMonth && "text-muted-foreground/40",
-                    isCurrentMonth && "hover:bg-muted",
-                    isSelected && "bg-primary text-primary-foreground hover:bg-primary",
-                    isTodayDate && !isSelected && "bg-accent text-accent-foreground font-bold"
+                    'relative flex flex-col items-center justify-center rounded-lg transition-colors w-full',
+                    compact ? 'h-8' : 'h-12',
+                    !isCurrentMonth && 'text-muted-foreground/40',
+                    isCurrentMonth && 'hover:bg-muted',
+                    isSelected && 'bg-primary text-primary-foreground hover:bg-primary',
+                    isTodayDate && !isSelected && 'bg-accent text-accent-foreground font-bold'
                   )}
                 >
-                  <span className={cn("text-sm", compact && "text-xs")}>
-                    {format(day, 'd')}
-                  </span>
-                  
+                  <span className={cn('text-sm', compact && 'text-xs')}>{format(day, 'd')}</span>
+
                   {/* Mission indicators */}
                   {dayMissions.length > 0 && (
-                    <div className={cn(
-                      "flex gap-0.5 mt-0.5",
-                      compact && "absolute bottom-0.5"
-                    )}>
+                    <div className={cn('flex gap-0.5 mt-0.5', compact && 'absolute bottom-0.5')}>
                       {compact ? (
-                        <span 
+                        <span
                           className={cn(
-                            "w-1.5 h-1.5 rounded-full",
+                            'w-1.5 h-1.5 rounded-full',
                             highestUrgency && urgencyColors[highestUrgency]
-                          )} 
+                          )}
                         />
                       ) : (
-                        dayMissions.slice(0, 3).map((mission, idx) => (
-                          <span 
-                            key={idx}
-                            className={cn(
-                              "w-1.5 h-1.5 rounded-full",
-                              urgencyColors[mission.urgency] || 'bg-muted-foreground'
-                            )} 
-                          />
-                        ))
+                        dayMissions
+                          .slice(0, 3)
+                          .map((mission, idx) => (
+                            <span
+                              key={idx}
+                              className={cn(
+                                'w-1.5 h-1.5 rounded-full',
+                                urgencyColors[mission.urgency] || 'bg-muted-foreground'
+                              )}
+                            />
+                          ))
                       )}
                       {!compact && dayMissions.length > 3 && (
-                        <span className="text-xs text-muted-foreground">+{dayMissions.length - 3}</span>
+                        <span className="text-xs text-muted-foreground">
+                          +{dayMissions.length - 3}
+                        </span>
                       )}
                     </div>
                   )}
@@ -196,12 +192,12 @@ export default function MissionCalendar({
                       onPlanMission(day);
                     }}
                     className={cn(
-                      "absolute -top-1 -right-1 w-5 h-5 rounded-full",
-                      "bg-primary text-primary-foreground",
-                      "flex items-center justify-center",
-                      "opacity-0 group-hover:opacity-100 transition-opacity",
-                      "shadow-sm hover:scale-110 transition-transform",
-                      "z-10"
+                      'absolute -top-1 -right-1 w-5 h-5 rounded-full',
+                      'bg-primary text-primary-foreground',
+                      'flex items-center justify-center',
+                      'opacity-0 group-hover:opacity-100 transition-opacity',
+                      'shadow-sm hover:scale-110 transition-transform',
+                      'z-10'
                     )}
                     title="Planifier une mission"
                   >

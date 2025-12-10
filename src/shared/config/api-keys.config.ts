@@ -2,7 +2,7 @@
  * Configuration centralisée des clés API
  * Ce fichier regroupe toutes les clés API et configurations de services externes
  * utilisées dans l'application Mon Toit.
- * 
+ *
  * IMPORTANT: Ne JAMAIS inclure serviceRoleKey côté client !
  */
 
@@ -74,13 +74,19 @@ class ApiKeysConfig {
       endpoint: import.meta.env['VITE_AZURE_OPENAI_ENDPOINT'] || '',
       deploymentName: import.meta.env['VITE_AZURE_OPENAI_DEPLOYMENT_NAME'] || 'gpt-4o-mini',
       apiVersion: import.meta.env['VITE_AZURE_OPENAI_API_VERSION'] || '2024-10-21',
-      isConfigured: !!(import.meta.env['VITE_AZURE_OPENAI_API_KEY'] && import.meta.env['VITE_AZURE_OPENAI_ENDPOINT']),
+      isConfigured: !!(
+        import.meta.env['VITE_AZURE_OPENAI_API_KEY'] &&
+        import.meta.env['VITE_AZURE_OPENAI_ENDPOINT']
+      ),
     } as AzureOpenAIConfig,
 
     aiServices: {
       key: import.meta.env['VITE_AZURE_AI_SERVICES_API_KEY'] || '',
       endpoint: import.meta.env['VITE_AZURE_AI_SERVICES_ENDPOINT'] || '',
-      isConfigured: !!(import.meta.env['VITE_AZURE_AI_SERVICES_API_KEY'] && import.meta.env['VITE_AZURE_AI_SERVICES_ENDPOINT']),
+      isConfigured: !!(
+        import.meta.env['VITE_AZURE_AI_SERVICES_API_KEY'] &&
+        import.meta.env['VITE_AZURE_AI_SERVICES_ENDPOINT']
+      ),
     } as AzureAIServicesConfig,
 
     speech: {
@@ -89,7 +95,7 @@ class ApiKeysConfig {
       region: import.meta.env['AZURE_SPEECH_REGION'] || 'eastus',
       sttEndpoint: import.meta.env['AZURE_SPEECH_STT_ENDPOINT'] || '',
       ttsEndpoint: import.meta.env['AZURE_SPEECH_TTS_ENDPOINT'] || '',
-      isConfigured: !!(import.meta.env['AZURE_SPEECH_API_KEY']),
+      isConfigured: !!import.meta.env['AZURE_SPEECH_API_KEY'],
     } as AzureSpeechConfig,
   };
 
@@ -115,7 +121,9 @@ class ApiKeysConfig {
       partnerId: import.meta.env['VITE_INTOUCH_PARTNER_ID'] || '',
       loginApi: import.meta.env['VITE_INTOUCH_LOGIN_API'] || '',
       passwordApi: import.meta.env['VITE_INTOUCH_PASSWORD_API'] || '',
-      isConfigured: !!(import.meta.env['VITE_INTOUCH_USERNAME'] && import.meta.env['VITE_INTOUCH_PASSWORD']),
+      isConfigured: !!(
+        import.meta.env['VITE_INTOUCH_USERNAME'] && import.meta.env['VITE_INTOUCH_PASSWORD']
+      ),
     } as PaymentConfig,
   };
 
@@ -139,8 +147,12 @@ class ApiKeysConfig {
     cryptoneo: {
       appKey: import.meta.env['CRYPTONEO_APP_KEY'] || '',
       appSecret: import.meta.env['CRYPTONEO_APP_SECRET'] || '',
-      baseUrl: import.meta.env['CRYPTONEO_BASE_URL'] || 'https://ansut.cryptoneoplatforms.com/esignaturedemo',
-      isConfigured: !!(import.meta.env['CRYPTONEO_APP_KEY'] && import.meta.env['CRYPTONEO_APP_SECRET']),
+      baseUrl:
+        import.meta.env['CRYPTONEO_BASE_URL'] ||
+        'https://ansut.cryptoneoplatforms.com/esignaturedemo',
+      isConfigured: !!(
+        import.meta.env['CRYPTONEO_APP_KEY'] && import.meta.env['CRYPTONEO_APP_SECRET']
+      ),
     } as SignatureConfig,
   };
 
@@ -236,8 +248,18 @@ class ApiKeysConfig {
 
     if (import.meta.env.DEV) {
       console.group('📋 Configuration des Services API - Mon Toit');
-      console.log('✅ Services Configurés:', Object.entries(status).filter(([, v]) => v).map(([k]) => k));
-      console.log('❌ Services Non Configurés:', Object.entries(status).filter(([, v]) => !v).map(([k]) => k));
+      console.log(
+        '✅ Services Configurés:',
+        Object.entries(status)
+          .filter(([, v]) => v)
+          .map(([k]) => k)
+      );
+      console.log(
+        '❌ Services Non Configurés:',
+        Object.entries(status)
+          .filter(([, v]) => !v)
+          .map(([k]) => k)
+      );
 
       if (validation.missing.length > 0) {
         console.error('🚨 Configuration Manquante (Critique):', validation.missing);

@@ -7,11 +7,46 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState('');
 
   const users = [
-    { id: 1, name: 'Jean Dupont', email: 'jean@example.com', role: 'Locataire', status: 'Actif', joinDate: '2024-01-15' },
-    { id: 2, name: 'Marie Lambert', email: 'marie@example.com', role: 'Propriétaire', status: 'Actif', joinDate: '2024-02-20' },
-    { id: 3, name: 'Paul Martin', email: 'paul@example.com', role: 'Agence', status: 'En attente', joinDate: '2024-03-10' },
-    { id: 4, name: 'Sophie Bernard', email: 'sophie@example.com', role: 'Administrateur', status: 'Actif', joinDate: '2024-01-05' },
-    { id: 5, name: 'Lucie Petit', email: 'lucie@example.com', role: 'Trust Agent', status: 'Inactif', joinDate: '2024-02-28' },
+    {
+      id: 1,
+      name: 'Jean Dupont',
+      email: 'jean@example.com',
+      role: 'Locataire',
+      status: 'Actif',
+      joinDate: '2024-01-15',
+    },
+    {
+      id: 2,
+      name: 'Marie Lambert',
+      email: 'marie@example.com',
+      role: 'Propriétaire',
+      status: 'Actif',
+      joinDate: '2024-02-20',
+    },
+    {
+      id: 3,
+      name: 'Paul Martin',
+      email: 'paul@example.com',
+      role: 'Agence',
+      status: 'En attente',
+      joinDate: '2024-03-10',
+    },
+    {
+      id: 4,
+      name: 'Sophie Bernard',
+      email: 'sophie@example.com',
+      role: 'Administrateur',
+      status: 'Actif',
+      joinDate: '2024-01-05',
+    },
+    {
+      id: 5,
+      name: 'Lucie Petit',
+      email: 'lucie@example.com',
+      role: 'Trust Agent',
+      status: 'Inactif',
+      joinDate: '2024-02-28',
+    },
   ];
 
   return (
@@ -24,7 +59,8 @@ export default function AdminUsersPage() {
             Gestion des utilisateurs
           </h1>
           <p className="text-[#6B5A4E] mt-2">
-            Gérez les comptes, les rôles et les permissions de tous les utilisateurs de la plateforme.
+            Gérez les comptes, les rôles et les permissions de tous les utilisateurs de la
+            plateforme.
           </p>
         </div>
 
@@ -68,27 +104,39 @@ export default function AdminUsersPage() {
               </thead>
               <tbody>
                 {users.map((user) => (
-                  <tr key={user.id} className="border-b border-[#EFEBE9] last:border-0 hover:bg-[#FAF7F4]">
+                  <tr
+                    key={user.id}
+                    className="border-b border-[#EFEBE9] last:border-0 hover:bg-[#FAF7F4]"
+                  >
                     <td className="p-4">
                       <div className="font-medium text-[#2C1810]">{user.name}</div>
                     </td>
                     <td className="p-4 text-[#6B5A4E]">{user.email}</td>
                     <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        user.role === 'Administrateur' ? 'bg-purple-100 text-purple-700' :
-                        user.role === 'Propriétaire' ? 'bg-blue-100 text-blue-700' :
-                        user.role === 'Locataire' ? 'bg-green-100 text-green-700' :
-                        'bg-amber-100 text-amber-700'
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          user.role === 'Administrateur'
+                            ? 'bg-purple-100 text-purple-700'
+                            : user.role === 'Propriétaire'
+                              ? 'bg-blue-100 text-blue-700'
+                              : user.role === 'Locataire'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-amber-100 text-amber-700'
+                        }`}
+                      >
                         {user.role}
                       </span>
                     </td>
                     <td className="p-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        user.status === 'Actif' ? 'bg-green-100 text-green-700' :
-                        user.status === 'Inactif' ? 'bg-red-100 text-red-700' :
-                        'bg-amber-100 text-amber-700'
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          user.status === 'Actif'
+                            ? 'bg-green-100 text-green-700'
+                            : user.status === 'Inactif'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-amber-100 text-amber-700'
+                        }`}
+                      >
                         {user.status}
                       </span>
                     </td>
@@ -124,7 +172,8 @@ export default function AdminUsersPage() {
                 Page de gestion des utilisateurs
               </h3>
               <p className="text-[#6B5A4E] mt-1">
-                Cette page est un placeholder. Les fonctionnalités complètes de gestion des utilisateurs seront bientôt disponibles.
+                Cette page est un placeholder. Les fonctionnalités complètes de gestion des
+                utilisateurs seront bientôt disponibles.
               </p>
             </div>
           </div>

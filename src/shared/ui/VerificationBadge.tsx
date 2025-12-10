@@ -63,10 +63,11 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({ type, status }) =
   return (
     <Badge variant={getVariant()} className="flex items-center gap-1">
       {getIcon()}
-      <span>{getLabel()}: {getStatusText()}</span>
+      <span>
+        {getLabel()}: {getStatusText()}
+      </span>
     </Badge>
   );
 };
 
 export default VerificationBadge;
-

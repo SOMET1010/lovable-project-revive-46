@@ -17,23 +17,23 @@ export interface ErrorState {
 export const useErrorHandler = () => {
   const [errorState, setErrorState] = useState<ErrorState>({
     hasError: false,
-    error: null
+    error: null,
   });
 
   // Fonction pour gérer les erreurs
   const handleError = useCallback((error: any, context?: string) => {
     const errorInfo: ErrorInfo = {
-      message: error?.message || 'Une erreur inattendue s\'est produite',
+      message: error?.message || "Une erreur inattendue s'est produite",
       code: error?.code,
       details: error?.details || error,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     console.error(`Erreur${context ? ` (${context})` : ''}:`, errorInfo);
 
     setErrorState({
       hasError: true,
-      error: errorInfo
+      error: errorInfo,
     });
 
     // Optionnel : Envoyer l'erreur à un service de monitoring
@@ -46,37 +46,37 @@ export const useErrorHandler = () => {
   const clearError = useCallback(() => {
     setErrorState({
       hasError: false,
-      error: null
+      error: null,
     });
   }, []);
 
   // Fonction pour gérer les promises avec gestion d'erreur
-  const withErrorHandling = useCallback(<T>(
-    promise: Promise<T>,
-    context?: string
-  ): Promise<T | null> => {
-    return promise.catch((error) => {
-      handleError(error, context);
-      return null;
-    });
-  }, [handleError]);
+  const withErrorHandling = useCallback(
+    <T>(promise: Promise<T>, context?: string): Promise<T | null> => {
+      return promise.catch((error) => {
+        handleError(error, context);
+        return null;
+      });
+    },
+    [handleError]
+  );
 
   // Fonction pour exécuter une fonction avec gestion d'erreur
-  const withErrorBoundary = useCallback(async <T>(
-    fn: () => T | Promise<T>,
-    context?: string
-  ): Promise<T | null> => {
-    try {
-      const result = fn();
-      if (result instanceof Promise) {
-        return await result;
+  const withErrorBoundary = useCallback(
+    async <T>(fn: () => T | Promise<T>, context?: string): Promise<T | null> => {
+      try {
+        const result = fn();
+        if (result instanceof Promise) {
+          return await result;
+        }
+        return result;
+      } catch (error) {
+        handleError(error, context);
+        return null;
       }
-      return result;
-    } catch (error) {
-      handleError(error, context);
-      return null;
-    }
-  }, [handleError]);
+    },
+    [handleError]
+  );
 
   return {
     error: errorState.error,
@@ -84,7 +84,7 @@ export const useErrorHandler = () => {
     handleError,
     clearError,
     withErrorHandling,
-    withErrorBoundary
+    withErrorBoundary,
   };
 };
 
@@ -109,51 +109,36 @@ export const ErrorTypes = {
   AUTHORIZATION: 'AUTHORIZATION_ERROR',
   NOT_FOUND: 'NOT_FOUND_ERROR',
   SERVER_ERROR: 'SERVER_ERROR',
-  UNKNOWN: 'UNKNOWN_ERROR'
+  UNKNOWN: 'UNKNOWN_ERROR',
 } as const;
 
-export type ErrorType = typeof ErrorTypes[keyof typeof ErrorTypes];
+export type ErrorType = (typeof ErrorTypes)[keyof typeof ErrorTypes];
 
 // Créateur d'erreurs prédéfinies
-export const createError = (
-  type: ErrorType,
-  message: string,
-  details?: any
-): AppError => {
+export const createError = (type: ErrorType, message: string, details?: any): AppError => {
   return new AppError(message, type, details);
 };
 
 // Erreurs communes
 export const CommonErrors = {
-  network: (details?: any) => createError(
-    ErrorTypes.NETWORK,
-    'Erreur de connexion réseau. Veuillez vérifier votre connexion internet.',
-    details
-  ),
-  
-  validation: (message: string, details?: any) => createError(
-    ErrorTypes.VALIDATION,
-    message,
-    details
-  ),
-  
-  notFound: (resource: string, details?: any) => createError(
-    ErrorTypes.NOT_FOUND,
-    `${resource} non trouvé(e).`,
-    details
-  ),
-  
-  server: (details?: any) => createError(
-    ErrorTypes.SERVER_ERROR,
-    'Erreur serveur. Veuillez réessayer plus tard.',
-    details
-  ),
-  
-  unknown: (details?: any) => createError(
-    ErrorTypes.UNKNOWN,
-    'Une erreur inconnue s\'est produite.',
-    details
-  )
+  network: (details?: any) =>
+    createError(
+      ErrorTypes.NETWORK,
+      'Erreur de connexion réseau. Veuillez vérifier votre connexion internet.',
+      details
+    ),
+
+  validation: (message: string, details?: any) =>
+    createError(ErrorTypes.VALIDATION, message, details),
+
+  notFound: (resource: string, details?: any) =>
+    createError(ErrorTypes.NOT_FOUND, `${resource} non trouvé(e).`, details),
+
+  server: (details?: any) =>
+    createError(ErrorTypes.SERVER_ERROR, 'Erreur serveur. Veuillez réessayer plus tard.', details),
+
+  unknown: (details?: any) =>
+    createError(ErrorTypes.UNKNOWN, "Une erreur inconnue s'est produite.", details),
 };
 
 export default useErrorHandler;

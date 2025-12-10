@@ -1,6 +1,6 @@
 /**
  * PhoneInputWithCountry - Input téléphone avec dropdown pays
- * 
+ *
  * Features:
  * - Dropdown avec drapeaux et indicatifs pays
  * - +225 (Côte d'Ivoire) par défaut
@@ -20,7 +20,7 @@ export interface Country {
 }
 
 const COUNTRIES: Country[] = [
-  { code: 'CI', name: 'Côte d\'Ivoire', dialCode: '+225', flag: '🇨🇮', phoneLength: 10 },
+  { code: 'CI', name: "Côte d'Ivoire", dialCode: '+225', flag: '🇨🇮', phoneLength: 10 },
   { code: 'SN', name: 'Sénégal', dialCode: '+221', flag: '🇸🇳', phoneLength: 9 },
   { code: 'ML', name: 'Mali', dialCode: '+223', flag: '🇲🇱', phoneLength: 8 },
   { code: 'BF', name: 'Burkina Faso', dialCode: '+226', flag: '🇧🇫', phoneLength: 8 },
@@ -36,29 +36,32 @@ const COUNTRIES: Country[] = [
 const CI_VALID_PREFIXES = ['01', '05', '07', '27'];
 
 // Validation du numéro selon le pays
-const validatePhoneNumber = (digits: string, country: Country): { isValid: boolean; error?: string } => {
+const validatePhoneNumber = (
+  digits: string,
+  country: Country
+): { isValid: boolean; error?: string } => {
   if (digits.length === 0) {
     return { isValid: false };
   }
-  
+
   if (digits.length !== country.phoneLength) {
-    return { 
-      isValid: false, 
-      error: `Le numéro doit contenir ${country.phoneLength} chiffres` 
+    return {
+      isValid: false,
+      error: `Le numéro doit contenir ${country.phoneLength} chiffres`,
     };
   }
-  
+
   // Validation spécifique pour la Côte d'Ivoire
   if (country.code === 'CI') {
     const prefix = digits.substring(0, 2);
     if (!CI_VALID_PREFIXES.includes(prefix)) {
-      return { 
-        isValid: false, 
-        error: 'Le numéro doit commencer par 01, 05, 07 ou 27' 
+      return {
+        isValid: false,
+        error: 'Le numéro doit commencer par 01, 05, 07 ou 27',
       };
     }
   }
-  
+
   return { isValid: true };
 };
 
@@ -88,7 +91,10 @@ export function PhoneInputWithCountry({
 
   // Validation du numéro actuel
   const digits = value.replace(/\D/g, '');
-  const validation = useMemo(() => validatePhoneNumber(digits, selectedCountry), [digits, selectedCountry]);
+  const validation = useMemo(
+    () => validatePhoneNumber(digits, selectedCountry),
+    [digits, selectedCountry]
+  );
   const showValidation = digits.length > 0;
 
   // Close dropdown on outside click
@@ -116,15 +122,15 @@ export function PhoneInputWithCountry({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     const newDigits = rawValue.replace(/\D/g, '');
-    
+
     // Limit to country's phone length
     const limitedDigits = newDigits.slice(0, selectedCountry.phoneLength);
     const formatted = formatPhoneNumber(limitedDigits);
-    
+
     // Build full number (dialCode without + + digits)
     const dialCodeDigits = selectedCountry.dialCode.replace('+', '');
     const fullNumber = dialCodeDigits + limitedDigits;
-    
+
     // Validate and callback
     const newValidation = validatePhoneNumber(limitedDigits, selectedCountry);
     onChange(formatted, fullNumber, selectedCountry.dialCode, newValidation.isValid);
@@ -133,18 +139,18 @@ export function PhoneInputWithCountry({
   const handleCountrySelect = (country: Country) => {
     setSelectedCountry(country);
     setIsOpen(false);
-    
+
     // Recalculate full number with new country code
     const currentDigits = value.replace(/\D/g, '');
     const limitedDigits = currentDigits.slice(0, country.phoneLength);
     const formatted = formatPhoneNumber(limitedDigits);
     const dialCodeDigits = country.dialCode.replace('+', '');
     const fullNumber = dialCodeDigits + limitedDigits;
-    
+
     // Validate with new country
     const newValidation = validatePhoneNumber(limitedDigits, country);
     onChange(formatted, fullNumber, country.dialCode, newValidation.isValid);
-    
+
     // Focus input after selection
     setTimeout(() => inputRef.current?.focus(), 100);
   };
@@ -152,18 +158,21 @@ export function PhoneInputWithCountry({
   // Déterminer les classes de bordure selon l'état
   const getBorderClasses = () => {
     if (error) return 'border-red-400 ring-2 ring-red-100';
-    if (!showValidation) return 'border-[#EFEBE9] focus-within:border-[#F16522] focus-within:ring-4 focus-within:ring-[#F16522]/10';
+    if (!showValidation)
+      return 'border-[#EFEBE9] focus-within:border-[#F16522] focus-within:ring-4 focus-within:ring-[#F16522]/10';
     if (validation.isValid) return 'border-green-500 ring-2 ring-green-100';
     return 'border-red-400 ring-2 ring-red-100';
   };
 
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
-      <div className={`
+      <div
+        className={`
         flex items-stretch rounded-xl bg-white border overflow-hidden transition-all
         ${getBorderClasses()}
         ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
-      `}>
+      `}
+      >
         {/* Country Selector Button */}
         <button
           type="button"
@@ -177,7 +186,9 @@ export function PhoneInputWithCountry({
         >
           <span className="text-xl">{selectedCountry.flag}</span>
           <span className="font-bold text-[#2C1810] text-sm">{selectedCountry.dialCode}</span>
-          <ChevronDown className={`w-4 h-4 text-[#A69B95] transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown
+            className={`w-4 h-4 text-[#A69B95] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          />
         </button>
 
         {/* Phone Input */}
@@ -221,12 +232,14 @@ export function PhoneInputWithCountry({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="
+        <div
+          className="
           absolute top-full left-0 right-0 mt-2 
           bg-white border border-[#EFEBE9] rounded-xl shadow-xl 
           z-50 max-h-64 overflow-y-auto
           animate-fade-in
-        ">
+        "
+        >
           {COUNTRIES.map((country) => (
             <button
               key={country.code}

@@ -7,24 +7,28 @@ Le composant `HeroSimplified` est une section d'en-tête moderne et performante 
 ## Caractéristiques principales
 
 ### ✨ Design moderne
+
 - **Image statique** haute qualité (pas de carousel)
 - **Titre 64px bold** et **sous-titre 18px**
 - **Overlay noir 50%** pour une lisibilité optimale
 - **Hauteur responsive** : 500px desktop / 400px mobile
 
 ### 🔍 Formulaire de recherche intégré
+
 - Recherche par ville/quartier
 - Sélection du type de propriété
 - Saisie du budget maximum
 - Validation automatique des champs
 
 ### ♿ Accessibilité
+
 - Balises ARIA complètes
 - Navigation au clavier
 - Contraste élevé
 - Labels descriptifs
 
 ### ⚡ Performance
+
 - Image avec loading optimisé
 - CSS minimal
 - Pas d'animations complexes
@@ -53,32 +57,37 @@ function HomePage() {
 ## Props disponibles
 
 ### `onSearch` (obligatoire)
+
 Fonction appelée lors de la soumission du formulaire.
 
 **Type :** `(filters: SearchFilters) => void`
 
 **SearchFilters :**
+
 ```ts
 interface SearchFilters {
-  city: string;           // Ville ou quartier sélectionné
-  propertyType: string;   // Type de propriété (appartement, villa, etc.)
-  maxBudget: string;      // Budget maximum en FCFA
+  city: string; // Ville ou quartier sélectionné
+  propertyType: string; // Type de propriété (appartement, villa, etc.)
+  maxBudget: string; // Budget maximum en FCFA
 }
 ```
 
 ### `title` (optionnel)
+
 Titre principal affiché.
 
 **Type :** `string`  
 **Défaut :** "Trouvez votre logement idéal"
 
 ### `subtitle` (optionnel)
+
 Sous-titre affiché sous le titre.
 
 **Type :** `string`  
 **Défaut :** "Des milliers de propriétés vous attendent dans toute la Côte d'Ivoire"
 
 ### `backgroundImage` (optionnel)
+
 URL de l'image de fond.
 
 **Type :** `string`  
@@ -97,12 +106,14 @@ Le composant utilise le système de design tokens :
 ## Responsive
 
 ### Desktop (≥768px)
+
 - Hauteur : 500px
 - Formulaire sur 4 colonnes
 - Espacement optimisé
 - Boutons adaptés
 
 ### Mobile (<768px)
+
 - Hauteur : 400px
 - Formulaire empilé
 - Padding réduit
@@ -111,6 +122,7 @@ Le composant utilise le système de design tokens :
 ## Exemples d'utilisation
 
 ### 1. Page d'accueil personnalisée
+
 ```tsx
 <HeroSimplified
   onSearch={handleSearch}
@@ -121,6 +133,7 @@ Le composant utilise le système de design tokens :
 ```
 
 ### 2. Page de recherche avec filtres spécifiques
+
 ```tsx
 <HeroSimplified
   onSearch={(filters) => {
@@ -135,23 +148,25 @@ Le composant utilise le système de design tokens :
 
 ## Avantages vs HeroSlideshow/HeroSpectacular
 
-| Aspect | HeroSimplified | HeroSlideshow | HeroSpectacular |
-|--------|----------------|---------------|-----------------|
-| **Performance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| **Accessibilité** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| **Simplicité** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
-| **SEO** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| **Maintenance** | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ |
+| Aspect            | HeroSimplified | HeroSlideshow | HeroSpectacular |
+| ----------------- | -------------- | ------------- | --------------- |
+| **Performance**   | ⭐⭐⭐⭐⭐     | ⭐⭐⭐        | ⭐⭐            |
+| **Accessibilité** | ⭐⭐⭐⭐⭐     | ⭐⭐⭐⭐      | ⭐⭐⭐          |
+| **Simplicité**    | ⭐⭐⭐⭐⭐     | ⭐⭐⭐        | ⭐⭐            |
+| **SEO**           | ⭐⭐⭐⭐⭐     | ⭐⭐⭐⭐      | ⭐⭐⭐⭐        |
+| **Maintenance**   | ⭐⭐⭐⭐⭐     | ⭐⭐⭐        | ⭐⭐            |
 
 ## Bonnes pratiques
 
 ### ✅ Recommandé
+
 - Utiliser une image haute qualité (1920x1080 minimum)
 - Garder le titre court et impactant
 - Fournir un sous-titre descriptif
 - Tester l'accessibilité avec un lecteur d'écran
 
 ### ❌ À éviter
+
 - Changer l'image trop fréquemment
 - Ajouter des effets visuels complexes
 - Oublier la validation des champs
@@ -160,19 +175,21 @@ Le composant utilise le système de design tokens :
 ## Migration depuis HeroSlideshow
 
 1. **Remplacer l'import :**
+
    ```tsx
    // Avant
    import HeroSlideshow from '@/features/property/components/HeroSlideshow';
-   
+
    // Après
    import { HeroSimplified } from '@/features/property';
    ```
 
 2. **Ajuster les props :**
+
    ```tsx
    // Avant
    <HeroSlideshow />
-   
+
    // Après
    <HeroSimplified onSearch={handleSearch} />
    ```

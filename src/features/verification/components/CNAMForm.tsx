@@ -100,9 +100,7 @@ export default function CNAMForm({ userId, onSuccess }: CNAMFormProps) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1">
-            Numéro CNAM
-          </label>
+          <label className="block text-sm font-medium text-foreground mb-1">Numéro CNAM</label>
           <div className="relative">
             <Heart className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -117,9 +115,7 @@ export default function CNAMForm({ userId, onSuccess }: CNAMFormProps) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Prénom
-            </label>
+            <label className="block text-sm font-medium text-foreground mb-1">Prénom</label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -132,9 +128,7 @@ export default function CNAMForm({ userId, onSuccess }: CNAMFormProps) {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">
-              Nom
-            </label>
+            <label className="block text-sm font-medium text-foreground mb-1">Nom</label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -148,11 +142,7 @@ export default function CNAMForm({ userId, onSuccess }: CNAMFormProps) {
           </div>
         </div>
 
-        <Button 
-          type="submit" 
-          className="w-full"
-          disabled={status === 'loading'}
-        >
+        <Button type="submit" className="w-full" disabled={status === 'loading'}>
           {status === 'loading' ? (
             <>
               <Loader className="w-4 h-4 mr-2 animate-spin" />
@@ -165,7 +155,8 @@ export default function CNAMForm({ userId, onSuccess }: CNAMFormProps) {
       </form>
 
       <p className="text-xs text-muted-foreground text-center">
-        Vos données sont traitées de manière sécurisée et ne sont utilisées que pour la vérification.
+        Vos données sont traitées de manière sécurisée et ne sont utilisées que pour la
+        vérification.
       </p>
     </div>
   );

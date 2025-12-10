@@ -1,7 +1,15 @@
 import React from 'react';
-import { 
-  Building2, Users, Home, Coins, UserPlus, Settings,
-  BarChart3, FileText, UserCheck, Calendar
+import {
+  Building2,
+  Users,
+  Home,
+  Coins,
+  UserPlus,
+  Settings,
+  BarChart3,
+  FileText,
+  UserCheck,
+  Calendar,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -70,16 +78,18 @@ export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) 
     <>
       {/* Overlay pour mobile */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-30 bg-black/50 lg:hidden transition-opacity duration-300"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
+      <div
+        className={`fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         {/* Header */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-neutral-200 bg-neutral-50">
           <div className="flex items-center space-x-3">
@@ -97,7 +107,12 @@ export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) 
             aria-label="Fermer la navigation"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -107,7 +122,7 @@ export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) 
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPath === item.href;
-            
+
             return (
               <a
                 key={item.href}
@@ -119,9 +134,13 @@ export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) 
                 }`}
               >
                 <div className="flex items-center space-x-3">
-                  <Icon className={`w-5 h-5 ${
-                    isActive ? 'text-primary-600' : 'text-neutral-400 group-hover:text-primary-500'
-                  }`} />
+                  <Icon
+                    className={`w-5 h-5 ${
+                      isActive
+                        ? 'text-primary-600'
+                        : 'text-neutral-400 group-hover:text-primary-500'
+                    }`}
+                  />
                   <span>{item.label}</span>
                 </div>
                 {item.badge && item.badge > 0 && (

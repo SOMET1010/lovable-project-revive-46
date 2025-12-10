@@ -47,7 +47,12 @@ export default function UserRolesPage() {
   const { user } = useAuth();
   const { isAdmin, isLoading: permissionsLoading } = usePermissions();
 
-  const [stats, setStats] = useState<RoleStats>({ admin: 0, trust_agent: 0, moderator: 0, total: 0 });
+  const [stats, setStats] = useState<RoleStats>({
+    admin: 0,
+    trust_agent: 0,
+    moderator: 0,
+    total: 0,
+  });
   const [usersWithRoles, setUsersWithRoles] = useState<UserWithRole[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +60,10 @@ export default function UserRolesPage() {
 
   // Confirmation modal state
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [pendingAssignment, setPendingAssignment] = useState<{ user: FoundUser; role: SystemRole } | null>(null);
+  const [pendingAssignment, setPendingAssignment] = useState<{
+    user: FoundUser;
+    role: SystemRole;
+  } | null>(null);
   const [confirming, setConfirming] = useState(false);
 
   // Check permissions
@@ -97,13 +105,15 @@ export default function UserRolesPage() {
       // Load users with roles (join with profiles)
       const { data: usersData, error: usersError } = await supabase
         .from('user_roles')
-        .select(`
+        .select(
+          `
           id,
           role,
           granted_at,
           granted_by,
           user_id
-        `)
+        `
+        )
         .order('granted_at', { ascending: false });
 
       if (usersError) throw usersError;

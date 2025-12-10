@@ -28,9 +28,9 @@ export const cleanupAllAuth = () => {
     }
 
     // Clear any cookies related to auth
-    document.cookie.split(";").forEach((c) => {
+    document.cookie.split(';').forEach((c) => {
       if (c.trim().startsWith('supabase') || c.trim().startsWith('auth')) {
-        const eqPos = c.indexOf("=");
+        const eqPos = c.indexOf('=');
         const name = eqPos > -1 ? c.substr(0, eqPos) : c;
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
         removedItems.push(`cookie: ${name}`);
@@ -43,15 +43,14 @@ export const cleanupAllAuth = () => {
     return {
       success: true,
       removedItems,
-      message: 'Auth data cleaned up successfully. Please refresh the page.'
+      message: 'Auth data cleaned up successfully. Please refresh the page.',
     };
-
   } catch (error) {
     console.error('❌ Error during cleanup:', error);
     return {
       success: false,
       error,
-      message: 'Failed to clean up auth data. Try refreshing the page.'
+      message: 'Failed to clean up auth data. Try refreshing the page.',
     };
   }
 };
@@ -67,7 +66,10 @@ if (typeof window !== 'undefined') {
       const key = localStorage.key(i);
       if (key && (key.includes('supabase') || key.includes('auth'))) {
         const value = localStorage.getItem(key);
-        console.log(`  ${key}:`, value?.substring(0, 50) + (value && value.length > 50 ? '...' : ''));
+        console.log(
+          `  ${key}:`,
+          value?.substring(0, 50) + (value && value.length > 50 ? '...' : '')
+        );
       }
     }
 
@@ -76,7 +78,10 @@ if (typeof window !== 'undefined') {
       const key = sessionStorage.key(i);
       if (key && (key.includes('supabase') || key.includes('auth'))) {
         const value = sessionStorage.getItem(key);
-        console.log(`  ${key}:`, value?.substring(0, 50) + (value && value.length > 50 ? '...' : ''));
+        console.log(
+          `  ${key}:`,
+          value?.substring(0, 50) + (value && value.length > 50 ? '...' : '')
+        );
       }
     }
   };

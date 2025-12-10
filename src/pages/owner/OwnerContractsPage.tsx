@@ -1,12 +1,28 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  FileText, Plus, Search, Download, Eye, Trash2, 
-  RefreshCw, Bell, XCircle, Building, CheckCircle, Clock, AlertCircle
+import {
+  FileText,
+  Plus,
+  Search,
+  Download,
+  Eye,
+  Trash2,
+  RefreshCw,
+  Bell,
+  XCircle,
+  Building,
+  CheckCircle,
+  Clock,
+  AlertCircle,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { downloadContract, regenerateContract, deleteContract, sendSignatureReminder } from '@/services/contracts/contractService';
+import {
+  downloadContract,
+  regenerateContract,
+  deleteContract,
+  sendSignatureReminder,
+} from '@/services/contracts/contractService';
 import { toast } from '@/hooks/shared/useSafeToast';
 import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
@@ -48,7 +64,11 @@ interface Stats {
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof FileText }> = {
   brouillon: { label: 'Brouillon', color: 'bg-gray-100 text-gray-700', icon: FileText },
   en_attente_signature: { label: 'En attente', color: 'bg-amber-100 text-amber-700', icon: Clock },
-  partiellement_signe: { label: 'Partiellement signé', color: 'bg-blue-100 text-blue-700', icon: AlertCircle },
+  partiellement_signe: {
+    label: 'Partiellement signé',
+    color: 'bg-blue-100 text-blue-700',
+    icon: AlertCircle,
+  },
   actif: { label: 'Actif', color: 'bg-green-100 text-green-700', icon: CheckCircle },
   expire: { label: 'Expiré', color: 'bg-red-100 text-red-700', icon: XCircle },
   resilie: { label: 'Résilié', color: 'bg-red-100 text-red-700', icon: XCircle },
@@ -67,7 +87,15 @@ export default function OwnerContractsPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [contracts, setContracts] = useState<Contract[]>([]);
-  const [stats, setStats] = useState<Stats>({ total: 0, brouillon: 0, en_attente_signature: 0, partiellement_signe: 0, actif: 0, expire: 0, resilie: 0 });
+  const [stats, setStats] = useState<Stats>({
+    total: 0,
+    brouillon: 0,
+    en_attente_signature: 0,
+    partiellement_signe: 0,
+    actif: 0,
+    expire: 0,
+    resilie: 0,
+  });
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -80,11 +108,12 @@ export default function OwnerContractsPage() {
 
   const loadContracts = async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('lease_contracts')
-        .select(`
+        .select(
+          `
           id,
           contract_number,
           status,
@@ -102,38 +131,47 @@ export default function OwnerContractsPage() {
             city,
             main_image
           )
-        `)
+        `
+        )
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       // Fetch tenant profiles
-      const tenantIds = [...new Set((data || []).map(c => c.tenant_id))];
-      const { data: profiles } = await supabase
-        .rpc('get_public_profiles', { profile_user_ids: tenantIds });
+      const tenantIds = [...new Set((data || []).map((c) => c.tenant_id))];
+      const { data: profiles } = await supabase.rpc('get_public_profiles', {
+        profile_user_ids: tenantIds,
+      });
 
-      const profilesMap = new Map((profiles || []).map(p => [p.user_id, p]));
+      const profilesMap = new Map((profiles || []).map((p) => [p.user_id, p]));
 
-      const contractsWithTenants = (data || []).map(contract => ({
+      const contractsWithTenants = (data || []).map((contract) => ({
         ...contract,
         end_date: (contract as any).end_at || (contract as any).end_date,
         properties: contract.properties as Contract['properties'],
-        tenant_profile: profilesMap.get(contract.tenant_id) || null
+        tenant_profile: profilesMap.get(contract.tenant_id) || null,
       })) as Contract[];
 
       setContracts(contractsWithTenants);
 
       // Calculate stats
-      const newStats: Stats = { total: contractsWithTenants.length, brouillon: 0, en_attente_signature: 0, partiellement_signe: 0, actif: 0, expire: 0, resilie: 0 };
-      contractsWithTenants.forEach(c => {
+      const newStats: Stats = {
+        total: contractsWithTenants.length,
+        brouillon: 0,
+        en_attente_signature: 0,
+        partiellement_signe: 0,
+        actif: 0,
+        expire: 0,
+        resilie: 0,
+      };
+      contractsWithTenants.forEach((c) => {
         const status = c.status as keyof Stats;
         if (status in newStats && status !== 'total') {
           newStats[status]++;
         }
       });
       setStats(newStats);
-
     } catch (error) {
       console.error('Error loading contracts:', error);
       toast.error('Erreur lors du chargement des contrats');
@@ -143,9 +181,10 @@ export default function OwnerContractsPage() {
   };
 
   const filteredContracts = useMemo(() => {
-    return contracts.filter(contract => {
+    return contracts.filter((contract) => {
       const matchesFilter = filter === 'all' || contract.status === filter;
-      const matchesSearch = searchQuery === '' || 
+      const matchesSearch =
+        searchQuery === '' ||
         contract.contract_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
         contract.tenant_profile?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         contract.properties.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -187,9 +226,9 @@ export default function OwnerContractsPage() {
       toast.error('Seuls les brouillons peuvent être supprimés');
       return;
     }
-    
+
     if (!confirm(`Supprimer le contrat ${contract.contract_number} ?`)) return;
-    
+
     setActionLoading(contract.id);
     try {
       await deleteContract(contract.id);
@@ -208,24 +247,32 @@ export default function OwnerContractsPage() {
       await sendSignatureReminder(contract.id, contract.tenant_id);
       toast.success('Rappel envoyé au locataire');
     } catch {
-      toast.error('Erreur lors de l\'envoi du rappel');
+      toast.error("Erreur lors de l'envoi du rappel");
     } finally {
       setActionLoading(null);
     }
   };
 
   const getStatusConfig = (status: string) => {
-    return STATUS_CONFIG[status] || { label: status, color: 'bg-gray-100 text-gray-700', icon: FileText };
+    return (
+      STATUS_CONFIG[status] || { label: status, color: 'bg-gray-100 text-gray-700', icon: FileText }
+    );
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+    return new Date(dateStr).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
   };
 
   if (!user) {
     return (
       <OwnerDashboardLayout title="Mes contrats">
-        <div className="min-h-[60vh] bg-background flex items-center justify-center rounded-2xl">Veuillez vous connecter</div>
+        <div className="min-h-[60vh] bg-background flex items-center justify-center rounded-2xl">
+          Veuillez vous connecter
+        </div>
       </OwnerDashboardLayout>
     );
   }
@@ -244,7 +291,7 @@ export default function OwnerContractsPage() {
     <OwnerDashboardLayout title="Mes contrats">
       {/* Header */}
       <div className="bg-[#2C1810]">
-      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-6">
+        <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center">
@@ -300,7 +347,7 @@ export default function OwnerContractsPage() {
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Status Filters */}
             <div className="flex flex-wrap gap-2 flex-1">
-              {FILTER_OPTIONS.map(option => (
+              {FILTER_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setFilter(option.value)}
@@ -314,7 +361,7 @@ export default function OwnerContractsPage() {
                 </button>
               ))}
             </div>
-            
+
             {/* Search */}
             <div className="relative sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -337,9 +384,11 @@ export default function OwnerContractsPage() {
             </div>
             <h3 className="text-lg font-bold text-foreground mb-2">Aucun contrat</h3>
             <p className="text-muted-foreground mb-4">
-              {filter !== 'all' ? 'Aucun contrat ne correspond à ce filtre' : 'Créez votre premier contrat de bail'}
+              {filter !== 'all'
+                ? 'Aucun contrat ne correspond à ce filtre'
+                : 'Créez votre premier contrat de bail'}
             </p>
-            <Link 
+            <Link
               to="/dashboard/creer-contrat"
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
             >
@@ -349,13 +398,13 @@ export default function OwnerContractsPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredContracts.map(contract => {
+            {filteredContracts.map((contract) => {
               const statusConfig = getStatusConfig(contract.status);
               const StatusIcon = statusConfig.icon;
               const isLoading = actionLoading === contract.id;
 
               return (
-                <div 
+                <div
                   key={contract.id}
                   className="bg-card rounded-2xl border border-border p-4 sm:p-6 hover:border-primary/50 transition-colors"
                 >
@@ -363,8 +412,8 @@ export default function OwnerContractsPage() {
                     {/* Property Image */}
                     <div className="w-full sm:w-24 h-32 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-muted">
                       {contract.properties.main_image ? (
-                        <img 
-                          src={contract.properties.main_image} 
+                        <img
+                          src={contract.properties.main_image}
                           alt={contract.properties.title}
                           className="w-full h-full object-cover"
                         />
@@ -378,20 +427,28 @@ export default function OwnerContractsPage() {
                     {/* Contract Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="font-mono text-sm text-muted-foreground">{contract.contract_number}</span>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${statusConfig.color}`}>
+                        <span className="font-mono text-sm text-muted-foreground">
+                          {contract.contract_number}
+                        </span>
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${statusConfig.color}`}
+                        >
                           <StatusIcon className="h-3 w-3" />
                           {statusConfig.label}
                         </span>
                       </div>
-                      
-                      <h3 className="font-semibold text-foreground truncate">{contract.properties.title}</h3>
+
+                      <h3 className="font-semibold text-foreground truncate">
+                        {contract.properties.title}
+                      </h3>
                       <p className="text-sm text-muted-foreground">
                         Locataire: {contract.tenant_profile?.full_name || 'Non renseigné'}
                       </p>
-                      
+
                       <div className="flex flex-wrap items-center gap-4 mt-2 text-sm">
-                        <span className="text-primary font-bold">{contract.monthly_rent.toLocaleString()} FCFA/mois</span>
+                        <span className="text-primary font-bold">
+                          {contract.monthly_rent.toLocaleString()} FCFA/mois
+                        </span>
                         <span className="text-muted-foreground">
                           {formatDate(contract.start_date)} → {formatDate(contract.end_date)}
                         </span>
@@ -399,12 +456,24 @@ export default function OwnerContractsPage() {
 
                       {/* Signatures Status */}
                       <div className="flex items-center gap-4 mt-3 text-xs">
-                        <span className={`flex items-center gap-1 ${contract.landlord_signed_at ? 'text-green-600' : 'text-muted-foreground'}`}>
-                          {contract.landlord_signed_at ? <CheckCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                        <span
+                          className={`flex items-center gap-1 ${contract.landlord_signed_at ? 'text-green-600' : 'text-muted-foreground'}`}
+                        >
+                          {contract.landlord_signed_at ? (
+                            <CheckCircle className="h-3 w-3" />
+                          ) : (
+                            <Clock className="h-3 w-3" />
+                          )}
                           Propriétaire
                         </span>
-                        <span className={`flex items-center gap-1 ${contract.tenant_signed_at ? 'text-green-600' : 'text-muted-foreground'}`}>
-                          {contract.tenant_signed_at ? <CheckCircle className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
+                        <span
+                          className={`flex items-center gap-1 ${contract.tenant_signed_at ? 'text-green-600' : 'text-muted-foreground'}`}
+                        >
+                          {contract.tenant_signed_at ? (
+                            <CheckCircle className="h-3 w-3" />
+                          ) : (
+                            <Clock className="h-3 w-3" />
+                          )}
                           Locataire
                         </span>
                       </div>
@@ -420,18 +489,22 @@ export default function OwnerContractsPage() {
                         <Eye className="h-4 w-4" />
                         <span className="sm:hidden">Voir</span>
                       </button>
-                      
+
                       {contract.document_url && (
                         <button
                           onClick={() => handleDownload(contract)}
                           className="flex-1 sm:flex-none px-4 py-2 bg-primary/10 hover:bg-primary/20 rounded-xl text-sm font-medium text-primary transition-colors flex items-center justify-center gap-2"
                           disabled={isLoading}
                         >
-                          {isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                          {isLoading ? (
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
                           <span className="sm:hidden">PDF</span>
                         </button>
                       )}
-                      
+
                       {contract.status === 'brouillon' && (
                         <>
                           <button
@@ -451,15 +524,17 @@ export default function OwnerContractsPage() {
                         </>
                       )}
 
-                      {(contract.status === 'en_attente_signature' || contract.status === 'partiellement_signe') && !contract.tenant_signed_at && (
-                        <button
-                          onClick={() => handleSendReminder(contract)}
-                          className="flex-1 sm:flex-none px-4 py-2 bg-amber-100 hover:bg-amber-200 rounded-xl text-sm font-medium text-amber-700 transition-colors flex items-center justify-center gap-2"
-                          disabled={isLoading}
-                        >
-                          <Bell className="h-4 w-4" />
-                        </button>
-                      )}
+                      {(contract.status === 'en_attente_signature' ||
+                        contract.status === 'partiellement_signe') &&
+                        !contract.tenant_signed_at && (
+                          <button
+                            onClick={() => handleSendReminder(contract)}
+                            className="flex-1 sm:flex-none px-4 py-2 bg-amber-100 hover:bg-amber-200 rounded-xl text-sm font-medium text-amber-700 transition-colors flex items-center justify-center gap-2"
+                            disabled={isLoading}
+                          >
+                            <Bell className="h-4 w-4" />
+                          </button>
+                        )}
                     </div>
                   </div>
                 </div>

@@ -23,7 +23,7 @@ export function useAvailableCities(): UseAvailableCitiesResult {
   useEffect(() => {
     const fetchCounts = async () => {
       setLoading(true);
-      
+
       try {
         // Récupérer toutes les propriétés disponibles
         const { data, error } = await supabase

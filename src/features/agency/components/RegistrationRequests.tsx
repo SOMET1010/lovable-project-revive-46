@@ -1,8 +1,17 @@
 import { useState } from 'react';
-import { 
-  UserPlus, Clock, CheckCircle, XCircle, Mail, Phone, 
-  Calendar, Award, Star, Briefcase,
-  Eye, Search
+import {
+  UserPlus,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Mail,
+  Phone,
+  Calendar,
+  Award,
+  Star,
+  Briefcase,
+  Eye,
+  Search,
 } from 'lucide-react';
 
 interface RegistrationRequest {
@@ -46,7 +55,7 @@ const roleLabels = {
   agent: 'Agent',
   manager: 'Manager',
   admin: 'Administrateur',
-  assistant: 'Assistant'
+  assistant: 'Assistant',
 };
 
 const statusConfig = {
@@ -54,29 +63,29 @@ const statusConfig = {
     label: 'En attente',
     icon: Clock,
     className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    iconColor: 'text-yellow-600'
+    iconColor: 'text-yellow-600',
   },
   approved: {
     label: 'Approuvé',
     icon: CheckCircle,
     className: 'bg-green-100 text-green-800 border-green-200',
-    iconColor: 'text-green-600'
+    iconColor: 'text-green-600',
   },
   rejected: {
     label: 'Rejeté',
     icon: XCircle,
     className: 'bg-red-100 text-red-800 border-red-200',
-    iconColor: 'text-red-600'
-  }
+    iconColor: 'text-red-600',
+  },
 };
 
-export default function RegistrationRequests({ 
-  requests, 
-  onApprove, 
-  onReject, 
-  onViewDetails, 
+export default function RegistrationRequests({
+  requests,
+  onApprove,
+  onReject,
+  onViewDetails,
   onContact,
-  onFilterChange 
+  onFilterChange,
 }: RegistrationRequestsProps) {
   const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
   const [showRejectModal, setShowRejectModal] = useState(false);
@@ -84,27 +93,28 @@ export default function RegistrationRequests({
   const [filters, setFilters] = useState<FilterOptions>({
     status: 'pending',
     role: 'all',
-    experience: 'all'
+    experience: 'all',
   });
   const [searchTerm, setSearchTerm] = useState('');
 
   // Filtrer les demandes
-  const filteredRequests = requests.filter(request => {
-    const matchesSearch = request.agent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredRequests = requests.filter((request) => {
+    const matchesSearch =
+      request.agent_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.agent_email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = filters.status === 'all' || request.status === filters.status;
     const matchesRole = filters.role === 'all' || request.requested_role === filters.role;
-    
+
     let matchesExperience = true;
     if (filters.experience !== 'all' && request.experience_years) {
       const years = request.experience_years;
-      matchesExperience = 
+      matchesExperience =
         (filters.experience === '0-2' && years <= 2) ||
         (filters.experience === '3-5' && years >= 3 && years <= 5) ||
         (filters.experience === '5+' && years > 5);
     }
-    
+
     return matchesSearch && matchesStatus && matchesRole && matchesExperience;
   });
 
@@ -141,37 +151,37 @@ export default function RegistrationRequests({
             <div>
               <p className="text-sm text-yellow-700 font-medium">En attente</p>
               <p className="text-2xl font-bold text-yellow-900">
-                {requests.filter(r => r.status === 'pending').length}
+                {requests.filter((r) => r.status === 'pending').length}
               </p>
             </div>
             <Clock className="w-8 h-8 text-yellow-500" />
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-green-700 font-medium">Approuvées</p>
               <p className="text-2xl font-bold text-green-900">
-                {requests.filter(r => r.status === 'approved').length}
+                {requests.filter((r) => r.status === 'approved').length}
               </p>
             </div>
             <CheckCircle className="w-8 h-8 text-green-500" />
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-red-700 font-medium">Rejetées</p>
               <p className="text-2xl font-bold text-red-900">
-                {requests.filter(r => r.status === 'rejected').length}
+                {requests.filter((r) => r.status === 'rejected').length}
               </p>
             </div>
             <XCircle className="w-8 h-8 text-red-500" />
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
           <div className="flex items-center justify-between">
             <div>
@@ -198,7 +208,7 @@ export default function RegistrationRequests({
               />
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <select
               value={filters.status}
@@ -210,7 +220,7 @@ export default function RegistrationRequests({
               <option value="approved">Approuvées</option>
               <option value="rejected">Rejetées</option>
             </select>
-            
+
             <select
               value={filters.role}
               onChange={(e) => handleFilterChange({ role: e.target.value as any })}
@@ -221,7 +231,7 @@ export default function RegistrationRequests({
               <option value="manager">Managers</option>
               <option value="admin">Administrateurs</option>
             </select>
-            
+
             <select
               value={filters.experience}
               onChange={(e) => handleFilterChange({ experience: e.target.value as any })}
@@ -242,9 +252,12 @@ export default function RegistrationRequests({
           const statusInfo = statusConfig[request.status];
           const StatusIcon = statusInfo.icon;
           const rating = getRatingStars(request.experience_years);
-          
+
           return (
-            <div key={request.id} className="card-scrapbook p-6 hover:shadow-card-hover transition-all duration-300">
+            <div
+              key={request.id}
+              className="card-scrapbook p-6 hover:shadow-card-hover transition-all duration-300"
+            >
               <div className="flex items-start justify-between">
                 {/* Informations principales */}
                 <div className="flex-1">
@@ -255,17 +268,19 @@ export default function RegistrationRequests({
                         {request.agent_name.charAt(0).toUpperCase()}
                       </span>
                     </div>
-                    
+
                     {/* Contenu principal */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="text-lg font-bold text-neutral-900">{request.agent_name}</h3>
-                        <span className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${statusInfo.className}`}>
+                        <span
+                          className={`inline-flex items-center px-3 py-1 text-xs font-medium rounded-full border ${statusInfo.className}`}
+                        >
                           <StatusIcon className={`w-3 h-3 mr-1 ${statusInfo.iconColor}`} />
                           {statusInfo.label}
                         </span>
                       </div>
-                      
+
                       {/* Informations de contact */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div className="flex items-center space-x-2 text-sm text-neutral-600">
@@ -277,7 +292,7 @@ export default function RegistrationRequests({
                           <span>{request.agent_phone}</span>
                         </div>
                       </div>
-                        
+
                       {/* Détails professionnels */}
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div className="flex items-center space-x-2">
@@ -286,12 +301,13 @@ export default function RegistrationRequests({
                             {roleLabels[request.requested_role as keyof typeof roleLabels]}
                           </span>
                         </div>
-                        
+
                         {request.experience_years && (
                           <div className="flex items-center space-x-2">
                             <Award className="w-4 h-4 text-neutral-500" />
                             <span className="text-sm text-neutral-700">
-                              {request.experience_years} ans ({getExperienceLevel(request.experience_years)})
+                              {request.experience_years} ans (
+                              {getExperienceLevel(request.experience_years)})
                             </span>
                             <div className="flex items-center space-x-1 ml-2">
                               {Array.from({ length: 5 }, (_, i) => (
@@ -305,43 +321,54 @@ export default function RegistrationRequests({
                             </div>
                           </div>
                         )}
-                        
+
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4 text-neutral-500" />
                           <span className="text-sm text-neutral-700">
-                            Candidature: {new Date(request.submitted_at).toLocaleDateString('fr-FR')}
+                            Candidature:{' '}
+                            {new Date(request.submitted_at).toLocaleDateString('fr-FR')}
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Spécialisations */}
                       {request.specializations && request.specializations.length > 0 && (
                         <div className="mb-4">
-                          <p className="text-sm font-medium text-neutral-700 mb-2">Spécialisations:</p>
+                          <p className="text-sm font-medium text-neutral-700 mb-2">
+                            Spécialisations:
+                          </p>
                           <div className="flex flex-wrap gap-2">
                             {request.specializations.map((spec, index) => (
-                              <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+                              >
                                 {spec}
                               </span>
                             ))}
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Certifications */}
                       {request.certifications && request.certifications.length > 0 && (
                         <div className="mb-4">
-                          <p className="text-sm font-medium text-neutral-700 mb-2">Certifications:</p>
+                          <p className="text-sm font-medium text-neutral-700 mb-2">
+                            Certifications:
+                          </p>
                           <div className="flex flex-wrap gap-2">
                             {request.certifications.map((cert, index) => (
-                              <span key={index} className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full"
+                              >
                                 ✓ {cert}
                               </span>
                             ))}
                           </div>
                         </div>
                       )}
-                      
+
                       {/* Motivation */}
                       {request.motivation && (
                         <div className="mb-4">
@@ -351,9 +378,11 @@ export default function RegistrationRequests({
                           </p>
                         </div>
                       )}
-                      
+
                       {/* Informations supplémentaires */}
-                      {(request.previous_agency || request.education_level || request.portfolio_properties) && (
+                      {(request.previous_agency ||
+                        request.education_level ||
+                        request.portfolio_properties) && (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-neutral-600">
                           {request.previous_agency && (
                             <div>
@@ -378,7 +407,7 @@ export default function RegistrationRequests({
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Actions */}
                 <div className="flex flex-col space-y-2 ml-6">
                   {request.status === 'pending' && (
@@ -390,7 +419,7 @@ export default function RegistrationRequests({
                         <CheckCircle className="w-4 h-4" />
                         <span>Approuver</span>
                       </button>
-                      
+
                       <button
                         onClick={() => {
                           setSelectedRequest(request.id);
@@ -403,7 +432,7 @@ export default function RegistrationRequests({
                       </button>
                     </>
                   )}
-                  
+
                   <button
                     onClick={() => onViewDetails?.(request.id)}
                     className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-sm font-medium rounded-lg transition-colors flex items-center space-x-2"
@@ -411,7 +440,7 @@ export default function RegistrationRequests({
                     <Eye className="w-4 h-4" />
                     <span>Voir</span>
                   </button>
-                  
+
                   <div className="flex space-x-2">
                     <button
                       onClick={() => onContact?.(request.id, 'email')}
@@ -420,7 +449,7 @@ export default function RegistrationRequests({
                     >
                       <Mail className="w-4 h-4" />
                     </button>
-                    
+
                     <button
                       onClick={() => onContact?.(request.id, 'phone')}
                       className="p-2 text-neutral-600 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -434,17 +463,23 @@ export default function RegistrationRequests({
             </div>
           );
         })}
-        
+
         {filteredRequests.length === 0 && (
           <div className="text-center py-16">
             <UserPlus className="w-20 h-20 text-neutral-300 mx-auto mb-4" />
             <p className="text-xl text-neutral-600 mb-2">
-              {searchTerm || filters.status !== 'all' || filters.role !== 'all' || filters.experience !== 'all'
+              {searchTerm ||
+              filters.status !== 'all' ||
+              filters.role !== 'all' ||
+              filters.experience !== 'all'
                 ? 'Aucune demande trouvée'
-                : 'Aucune demande d\'inscription'}
+                : "Aucune demande d'inscription"}
             </p>
             <p className="text-neutral-500">
-              {searchTerm || filters.status !== 'all' || filters.role !== 'all' || filters.experience !== 'all'
+              {searchTerm ||
+              filters.status !== 'all' ||
+              filters.role !== 'all' ||
+              filters.experience !== 'all'
                 ? 'Essayez de modifier vos critères de recherche'
                 : 'Les nouvelles demandes apparaîtront ici'}
             </p>
@@ -462,11 +497,12 @@ export default function RegistrationRequests({
               </div>
               <h3 className="text-lg font-bold text-neutral-900">Rejeter la demande</h3>
             </div>
-            
+
             <p className="text-neutral-600 mb-4">
-              Êtes-vous sûr de vouloir rejeter cette demande d'inscription ? Cette action est irréversible.
+              Êtes-vous sûr de vouloir rejeter cette demande d'inscription ? Cette action est
+              irréversible.
             </p>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-neutral-700 mb-2">
                 Raison du rejet (optionnel)
@@ -479,7 +515,7 @@ export default function RegistrationRequests({
                 placeholder="Précisez la raison du rejet..."
               />
             </div>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={() => {

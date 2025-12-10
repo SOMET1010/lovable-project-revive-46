@@ -65,9 +65,11 @@ const pageSize = APP_CONFIG.pagination.defaultPageSize;
 ## Services Externes Configurés
 
 ### Obligatoires
+
 - **Supabase** : Base de données et authentification
 
 ### Optionnels
+
 - **Azure OpenAI** : Chatbot IA
 - **Azure AI Services** : Vision, Speech, etc.
 - **Mapbox** : Cartes interactives
@@ -84,12 +86,14 @@ const pageSize = APP_CONFIG.pagination.defaultPageSize;
 Toutes les variables d'environnement doivent être définies dans le fichier `.env` à la racine du projet.
 
 ### Essentielles
+
 ```env
 VITE_SUPABASE_URL=https://xxx.supabase.co
 VITE_SUPABASE_ANON_KEY=xxx
 ```
 
 ### Optionnelles
+
 Voir le fichier `.env` pour la liste complète des variables disponibles.
 
 ## Validation

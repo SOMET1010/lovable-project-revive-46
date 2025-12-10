@@ -14,7 +14,7 @@ export default function MaintenanceRequest() {
   const [formData, setFormData] = useState({
     issue_type: 'plumbing',
     urgency: 'medium',
-    description: ''
+    description: '',
   });
 
   const [images, setImages] = useState<File[]>([]);
@@ -53,20 +53,20 @@ export default function MaintenanceRequest() {
     if (!e.target.files) return;
 
     const files = Array.from(e.target.files);
-    setImages(prev => [...prev, ...files]);
+    setImages((prev) => [...prev, ...files]);
 
-    files.forEach(file => {
+    files.forEach((file) => {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreviews(prev => [...prev, reader.result as string]);
+        setImagePreviews((prev) => [...prev, reader.result as string]);
       };
       reader.readAsDataURL(file);
     });
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,24 +89,22 @@ export default function MaintenanceRequest() {
 
         if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('property-images')
-          .getPublicUrl(filePath);
+        const {
+          data: { publicUrl },
+        } = supabase.storage.from('property-images').getPublicUrl(filePath);
 
         imageUrls.push(publicUrl);
       }
 
-      const { error } = await supabase
-        .from('maintenance_requests')
-        .insert({
-          tenant_id: user.id,
-          property_id: activeLease.property_id,
-          contract_id: activeLease.id,
-          issue_type: formData.issue_type,
-          priority: formData.urgency,
-          description: formData.description,
-          images: imageUrls
-        });
+      const { error } = await supabase.from('maintenance_requests').insert({
+        tenant_id: user.id,
+        property_id: activeLease.property_id,
+        contract_id: activeLease.id,
+        issue_type: formData.issue_type,
+        priority: formData.urgency,
+        description: formData.description,
+        images: imageUrls,
+      });
 
       if (error) throw error;
 
@@ -140,7 +138,9 @@ export default function MaintenanceRequest() {
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Aucun bail actif</h2>
-          <p className="text-gray-600">Vous devez avoir un bail actif pour soumettre une demande de maintenance</p>
+          <p className="text-gray-600">
+            Vous devez avoir un bail actif pour soumettre une demande de maintenance
+          </p>
         </div>
       </div>
     );
@@ -154,9 +154,7 @@ export default function MaintenanceRequest() {
             <Wrench className="w-10 h-10 text-terracotta-600" />
             <span>Demande de maintenance</span>
           </h1>
-          <p className="text-xl text-gray-600">
-            Signalez un problème dans votre logement
-          </p>
+          <p className="text-xl text-gray-600">Signalez un problème dans votre logement</p>
         </div>
 
         {success && (
@@ -164,7 +162,9 @@ export default function MaintenanceRequest() {
             <CheckCircle className="w-6 h-6 text-green-600" />
             <div>
               <p className="text-green-800 font-bold">Demande envoyée avec succès !</p>
-              <p className="text-sm text-green-700">Le propriétaire a été notifié. Redirection...</p>
+              <p className="text-sm text-green-700">
+                Le propriétaire a été notifié. Redirection...
+              </p>
             </div>
           </div>
         )}
@@ -200,9 +200,7 @@ export default function MaintenanceRequest() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Urgence *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Urgence *</label>
             <select
               value={formData.urgency}
               onChange={(e) => setFormData({ ...formData, urgency: e.target.value })}

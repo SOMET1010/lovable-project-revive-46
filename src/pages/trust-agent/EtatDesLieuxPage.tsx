@@ -1,24 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Home,
-  Check,
-  Save,
-  Download,
-  Star
-} from 'lucide-react';
+import { ArrowLeft, Home, Check, Save, Download, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Textarea } from '@/shared/ui/textarea';
 import { Label } from '@/shared/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/shared/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/shared/useSafeToast';
 import type { Json } from '@/integrations/supabase/types';
@@ -48,26 +35,26 @@ const defaultRooms: RoomItem[] = [
   { id: 'sdb', name: 'Salle de bain', condition: '', notes: '', photos: [] },
   { id: 'wc', name: 'Toilettes', condition: '', notes: '', photos: [] },
   { id: 'balcon', name: 'Balcon / Terrasse', condition: '', notes: '', photos: [] },
-  { id: 'exterieur', name: 'Extérieur', condition: '', notes: '', photos: [] }
+  { id: 'exterieur', name: 'Extérieur', condition: '', notes: '', photos: [] },
 ];
 
 const conditionConfig: Record<string, { label: string; color: string; stars: number }> = {
   excellent: { label: 'Excellent', color: 'text-green-600', stars: 4 },
   bon: { label: 'Bon état', color: 'text-blue-600', stars: 3 },
   usé: { label: 'Usure normale', color: 'text-amber-600', stars: 2 },
-  'à_réparer': { label: 'À réparer', color: 'text-destructive', stars: 1 }
+  à_réparer: { label: 'À réparer', color: 'text-destructive', stars: 1 },
 };
 
 export default function EtatDesLieuxPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [etatDesLieux, setEtatDesLieux] = useState<EtatDesLieuxData>({
     type: 'entree',
     date: new Date().toISOString().split('T')?.[0] ?? '',
     rooms: defaultRooms,
     generalNotes: '',
-    signature: false
+    signature: false,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -90,7 +77,11 @@ export default function EtatDesLieuxPage() {
 
       if (error) throw error;
 
-      if (data?.etat_lieux_report && typeof data.etat_lieux_report === 'object' && !Array.isArray(data.etat_lieux_report)) {
+      if (
+        data?.etat_lieux_report &&
+        typeof data.etat_lieux_report === 'object' &&
+        !Array.isArray(data.etat_lieux_report)
+      ) {
         const report = data.etat_lieux_report as Record<string, unknown>;
         if (report['rooms']) {
           setEtatDesLieux(report as unknown as EtatDesLieuxData);
@@ -104,11 +95,9 @@ export default function EtatDesLieuxPage() {
   };
 
   const updateRoom = (roomId: string, field: keyof RoomItem, value: string) => {
-    setEtatDesLieux(prev => ({
+    setEtatDesLieux((prev) => ({
       ...prev,
-      rooms: prev.rooms.map(room => 
-        room.id === roomId ? { ...room, [field]: value } : room
-      )
+      rooms: prev.rooms.map((room) => (room.id === roomId ? { ...room, [field]: value } : room)),
     }));
   };
 
@@ -119,7 +108,7 @@ export default function EtatDesLieuxPage() {
         .from('cev_missions')
         .update({
           etat_lieux_report: etatDesLieux as unknown as Json,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', missionId);
 
@@ -133,7 +122,7 @@ export default function EtatDesLieuxPage() {
     }
   };
 
-  const completedRooms = etatDesLieux.rooms.filter(r => r.condition !== '').length;
+  const completedRooms = etatDesLieux.rooms.filter((r) => r.condition !== '').length;
   const progress = Math.round((completedRooms / etatDesLieux.rooms.length) * 100);
 
   // Suppress unused variable warnings
@@ -154,7 +143,12 @@ export default function EtatDesLieuxPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="small" className="p-2 h-auto w-auto" onClick={() => navigate(`/trust-agent/mission/${missionId}`)}>
+              <Button
+                variant="ghost"
+                size="small"
+                className="p-2 h-auto w-auto"
+                onClick={() => navigate(`/trust-agent/mission/${missionId}`)}
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -183,10 +177,10 @@ export default function EtatDesLieuxPage() {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <Label>Type d'état des lieux</Label>
-                <Select 
+                <Select
                   value={etatDesLieux.type}
-                  onValueChange={(value: 'entree' | 'sortie') => 
-                    setEtatDesLieux(prev => ({ ...prev, type: value }))
+                  onValueChange={(value: 'entree' | 'sortie') =>
+                    setEtatDesLieux((prev) => ({ ...prev, type: value }))
                   }
                 >
                   <SelectTrigger className="mt-2">
@@ -203,7 +197,7 @@ export default function EtatDesLieuxPage() {
                 <input
                   type="date"
                   value={etatDesLieux.date}
-                  onChange={(e) => setEtatDesLieux(prev => ({ ...prev, date: e.target.value }))}
+                  onChange={(e) => setEtatDesLieux((prev) => ({ ...prev, date: e.target.value }))}
                   className="mt-2 w-full px-3 py-2 border rounded-lg bg-background"
                 />
               </div>
@@ -215,10 +209,12 @@ export default function EtatDesLieuxPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-muted-foreground">Progression</span>
-            <span className="text-sm font-medium">{completedRooms}/{etatDesLieux.rooms.length} pièces</span>
+            <span className="text-sm font-medium">
+              {completedRooms}/{etatDesLieux.rooms.length} pièces
+            </span>
           </div>
           <div className="w-full bg-muted rounded-full h-2">
-            <div 
+            <div
               className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
@@ -227,7 +223,7 @@ export default function EtatDesLieuxPage() {
 
         {/* Rooms */}
         <div className="space-y-4">
-          {etatDesLieux.rooms.map(room => (
+          {etatDesLieux.rooms.map((room) => (
             <Card key={room.id} className={room.condition ? 'border-l-4 border-l-primary' : ''}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -237,10 +233,14 @@ export default function EtatDesLieuxPage() {
                   </CardTitle>
                   {room.condition && (
                     <div className="flex items-center gap-1">
-                      {Array.from({ length: conditionConfig[room.condition]?.stars || 0 }).map((_, i) => (
-                        <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                      ))}
-                      {Array.from({ length: 4 - (conditionConfig[room.condition]?.stars || 0) }).map((_, i) => (
+                      {Array.from({ length: conditionConfig[room.condition]?.stars || 0 }).map(
+                        (_, i) => (
+                          <Star key={i} className="h-4 w-4 fill-primary text-primary" />
+                        )
+                      )}
+                      {Array.from({
+                        length: 4 - (conditionConfig[room.condition]?.stars || 0),
+                      }).map((_, i) => (
                         <Star key={i} className="h-4 w-4 text-muted-foreground/30" />
                       ))}
                     </div>
@@ -250,7 +250,7 @@ export default function EtatDesLieuxPage() {
               <CardContent className="space-y-4">
                 <div>
                   <Label>État général</Label>
-                  <Select 
+                  <Select
                     value={room.condition}
                     onValueChange={(value) => updateRoom(room.id, 'condition', value)}
                   >
@@ -273,7 +273,7 @@ export default function EtatDesLieuxPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
                   <Label>Observations</Label>
                   <Textarea
@@ -298,7 +298,9 @@ export default function EtatDesLieuxPage() {
             <Textarea
               placeholder="Ajoutez vos observations générales sur le bien..."
               value={etatDesLieux.generalNotes}
-              onChange={(e) => setEtatDesLieux(prev => ({ ...prev, generalNotes: e.target.value }))}
+              onChange={(e) =>
+                setEtatDesLieux((prev) => ({ ...prev, generalNotes: e.target.value }))
+              }
               rows={4}
             />
           </CardContent>
@@ -317,9 +319,9 @@ export default function EtatDesLieuxPage() {
                   En validant, vous confirmez l'exactitude des informations
                 </p>
               </div>
-              <Button 
+              <Button
                 onClick={() => {
-                  setEtatDesLieux(prev => ({ ...prev, signature: true }));
+                  setEtatDesLieux((prev) => ({ ...prev, signature: true }));
                   saveEtatDesLieux();
                 }}
                 disabled={progress < 100}

@@ -26,7 +26,7 @@ const GoldenParticles = () => {
 // Animated title component
 const AnimatedTitle = ({ text }: { text: string }) => {
   const words = text.split(' ');
-  
+
   return (
     <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight">
       {words.map((word, wordIdx) => (
@@ -36,7 +36,7 @@ const AnimatedTitle = ({ text }: { text: string }) => {
               key={letterIdx}
               className="inline-block animate-letter-reveal"
               style={{
-                animationDelay: `${(wordIdx * 0.1) + (letterIdx * 0.05)}s`,
+                animationDelay: `${wordIdx * 0.1 + letterIdx * 0.05}s`,
               }}
             >
               {letter}
@@ -74,30 +74,35 @@ export default function HeroAfricanWow() {
   ];
 
   return (
-    <section 
+    <section
       ref={heroRef}
       className="relative min-h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-white to-amber-50"
     >
       {/* Background Pattern */}
       <div className="absolute inset-0 pattern-kente opacity-20" />
-      
+
       {/* Golden Particles */}
       <GoldenParticles />
-      
+
       {/* Gradient Orbs */}
       <div className="absolute top-20 -right-20 w-96 h-96 bg-gradient-to-br from-orange-300/30 to-amber-200/30 rounded-full blur-3xl animate-gradient-breathe" />
-      <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-gradient-to-tr from-amber-200/30 to-orange-300/30 rounded-full blur-3xl animate-gradient-breathe" style={{ animationDelay: '2s' }} />
+      <div
+        className="absolute -bottom-20 -left-20 w-80 h-80 bg-gradient-to-tr from-amber-200/30 to-orange-300/30 rounded-full blur-3xl animate-gradient-breathe"
+        style={{ animationDelay: '2s' }}
+      />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[70vh]">
-          
           {/* Left Content */}
-          <div className={`space-y-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            
+          <div
+            className={`space-y-8 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+          >
             {/* Badge */}
             <div className="inline-flex items-center space-x-2 px-4 py-2 bg-white rounded-full shadow-lg border border-orange-100 animate-badge-pulse">
               <Shield className="h-5 w-5 text-green-600" />
-              <span className="text-sm font-semibold text-gray-800">Plateforme certifiée ANSUT</span>
+              <span className="text-sm font-semibold text-gray-800">
+                Plateforme certifiée ANSUT
+              </span>
               <Sparkles className="h-4 w-4 text-amber-500" />
             </div>
 
@@ -105,25 +110,34 @@ export default function HeroAfricanWow() {
             <div className="space-y-2">
               <AnimatedTitle text="Trouvez votre" />
               <div className="relative inline-block">
-                <span className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gradient-african animate-slide-reveal" style={{ animationDelay: '0.5s' }}>
+                <span
+                  className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gradient-african animate-slide-reveal"
+                  style={{ animationDelay: '0.5s' }}
+                >
                   logement idéal
                 </span>
                 <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-terracotta-gold rounded-full animate-shimmer-gold" />
               </div>
-              <p className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 animate-slide-reveal" style={{ animationDelay: '0.7s' }}>
+              <p
+                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold text-gray-900 animate-slide-reveal"
+                style={{ animationDelay: '0.7s' }}
+              >
                 en Côte d'Ivoire
               </p>
             </div>
 
             {/* Subtitle */}
-            <p className="text-lg sm:text-xl text-gray-600 max-w-xl animate-slide-reveal" style={{ animationDelay: '0.9s' }}>
-              <span className="font-semibold text-orange-600">Location sécurisée</span> • 
-              <span className="font-semibold text-amber-600"> Identité vérifiée</span> • 
+            <p
+              className="text-lg sm:text-xl text-gray-600 max-w-xl animate-slide-reveal"
+              style={{ animationDelay: '0.9s' }}
+            >
+              <span className="font-semibold text-orange-600">Location sécurisée</span> •
+              <span className="font-semibold text-amber-600"> Identité vérifiée</span> •
               <span className="font-semibold text-green-600"> Paiement mobile</span>
             </p>
 
             {/* Search Form */}
-            <form 
+            <form
               onSubmit={handleSearch}
               className="bg-white rounded-2xl shadow-2xl p-3 border border-orange-100 animate-slide-reveal hover-lift-premium"
               style={{ animationDelay: '1.1s' }}
@@ -169,11 +183,14 @@ export default function HeroAfricanWow() {
             </form>
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-6 animate-slide-reveal" style={{ animationDelay: '1.3s' }}>
+            <div
+              className="flex flex-wrap gap-6 animate-slide-reveal"
+              style={{ animationDelay: '1.3s' }}
+            >
               {stats.map((stat, idx) => {
                 const Icon = stat.icon;
                 return (
-                  <div 
+                  <div
                     key={stat.label}
                     className="flex items-center space-x-3 px-4 py-2 bg-white/80 rounded-xl shadow-sm border border-orange-100 hover-lift-premium"
                     style={{ animationDelay: `${1.3 + idx * 0.1}s` }}
@@ -192,7 +209,9 @@ export default function HeroAfricanWow() {
           </div>
 
           {/* Right - Hero Image */}
-          <div className={`relative hidden lg:block transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}>
+          <div
+            className={`relative hidden lg:block transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10'}`}
+          >
             <div className="relative">
               {/* Main Image */}
               <div className="relative rounded-3xl overflow-hidden shadow-2xl hover-lift-premium">
@@ -202,7 +221,7 @@ export default function HeroAfricanWow() {
                   className="w-full h-[500px] object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                
+
                 {/* Price Tag */}
                 <div className="absolute bottom-6 left-6 right-6 glass-african rounded-xl p-4">
                   <div className="flex items-center justify-between">
@@ -233,7 +252,10 @@ export default function HeroAfricanWow() {
               </div>
 
               {/* Floating Card 2 */}
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl p-4 animate-golden-float border border-orange-100" style={{ animationDelay: '2s' }}>
+              <div
+                className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-xl p-4 animate-golden-float border border-orange-100"
+                style={{ animationDelay: '2s' }}
+              >
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
                     <Shield className="h-6 w-6 text-orange-600" />

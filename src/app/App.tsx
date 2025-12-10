@@ -4,11 +4,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import { routes } from './routes';
 import LoadingFallback from '@/shared/ui/LoadingFallback';
 
-const router = createBrowserRouter(routes, {
-  future: {
-    v7_startTransition: true,
-  },
-});
+const router = createBrowserRouter(routes);
 
 function App() {
   return (

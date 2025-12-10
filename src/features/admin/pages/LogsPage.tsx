@@ -29,14 +29,12 @@ export default function LogsPage() {
         <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
           <Search className="w-10 h-10 text-red-500" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">
-          Module Logs en Développement
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">Module Logs en Développement</h2>
         <p className="text-gray-600 max-w-md mx-auto mb-8">
-          Cette page affichera les logs système, les erreurs applicatives,
-          les tentatives de connexion et les événements de sécurité.
+          Cette page affichera les logs système, les erreurs applicatives, les tentatives de
+          connexion et les événements de sécurité.
         </p>
-        
+
         {/* Preview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">

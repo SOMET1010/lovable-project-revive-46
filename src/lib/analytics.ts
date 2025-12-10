@@ -29,7 +29,7 @@ export function initAnalytics() {
         anonymizeIp: true,
       },
     });
-    
+
     initialized = true;
     console.log('[Analytics] Initialized successfully');
   } catch (error) {
@@ -57,12 +57,7 @@ export function trackPageView(path: string, title?: string) {
 /**
  * Tracker un événement
  */
-export function trackEvent(
-  category: string,
-  action: string,
-  label?: string,
-  value?: number
-) {
+export function trackEvent(category: string, action: string, label?: string, value?: number) {
   if (!initialized) return;
 
   try {
@@ -111,24 +106,24 @@ export const AnalyticsEvents = {
   SIGNUP_STARTED: 'signup_started',
   SIGNUP_COMPLETED: 'signup_completed',
   LOGIN_COMPLETED: 'login_completed',
-  
+
   // Propriétés
   PROPERTY_VIEWED: 'property_viewed',
   PROPERTY_SEARCH: 'property_search',
   PROPERTY_FAVORITED: 'property_favorited',
-  
+
   // Contrats
   CONTRACT_CREATED: 'contract_created',
   CONTRACT_SIGNED: 'contract_signed',
-  
+
   // Paiements
   PAYMENT_INITIATED: 'payment_initiated',
   PAYMENT_COMPLETED: 'payment_completed',
-  
+
   // Vérification
   VERIFICATION_STARTED: 'verification_started',
   VERIFICATION_COMPLETED: 'verification_completed',
-  
+
   // Messagerie
   MESSAGE_SENT: 'message_sent',
   CONVERSATION_STARTED: 'conversation_started',
@@ -141,4 +136,3 @@ export function usePageTracking() {
   // Sera utilisé dans App.tsx avec useLocation
   return { trackPageView };
 }
-

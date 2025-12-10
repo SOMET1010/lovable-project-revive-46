@@ -1,13 +1,13 @@
 /**
  * Application roles constants
  * Centralized role definitions to avoid magic strings
- * 
+ *
  * There are TWO types of roles:
  * 1. Business Types (stored in profiles.user_type):
  *    - tenant/locataire: Can search, apply, pay rent
  *    - owner/proprietaire: Can add properties, manage contracts
  *    - agent/agence: Can manage properties for multiple owners
- * 
+ *
  * 2. System Roles (stored in user_roles table):
  *    - admin: Full platform access
  *    - moderator: Content moderation
@@ -21,12 +21,12 @@ export const ROLES = {
   TENANT: 'locataire',
   OWNER: 'proprietaire',
   AGENCY: 'agence',
-  
+
   // Business types (English - current)
   TENANT_EN: 'tenant',
   OWNER_EN: 'owner',
   AGENT: 'agent',
-  
+
   // System roles (from user_roles table)
   ADMIN: 'admin',
   MODERATOR: 'moderator',
@@ -34,7 +34,7 @@ export const ROLES = {
   USER: 'user',
 } as const;
 
-export type AppRole = typeof ROLES[keyof typeof ROLES];
+export type AppRole = (typeof ROLES)[keyof typeof ROLES];
 
 // Role groups for common access patterns
 export const TENANT_ROLES = [ROLES.TENANT, ROLES.TENANT_EN] as const;

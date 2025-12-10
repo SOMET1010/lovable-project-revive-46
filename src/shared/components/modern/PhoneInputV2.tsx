@@ -1,7 +1,7 @@
 /**
  * PhoneInputV2 - Composant Simplifié et Moderne
  * Mon Toit - Nouvelle Expérience Auth 2025
- * 
+ *
  * Design ultra-simple : Drapeau + Indicatif fixe + Input
  */
 
@@ -33,7 +33,7 @@ const formatPhone = (value: string): string => {
 const isValidIvorianPhone = (phone: string): boolean => {
   const numbers = phone.replace(/\D/g, '');
   if (numbers.length !== 10) return false;
-  
+
   const validPrefixes = ['01', '05', '07', '27'];
   const prefix = numbers.slice(0, 2);
   return validPrefixes.includes(prefix);
@@ -46,7 +46,7 @@ export const PhoneInputV2: React.FC<PhoneInputV2Props> = ({
   disabled = false,
   autoFocus = false,
   placeholder = '01 23 45 67 89',
-  className = ''
+  className = '',
 }) => {
   const [localValue, setLocalValue] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -65,7 +65,7 @@ export const PhoneInputV2: React.FC<PhoneInputV2Props> = ({
     const formatted = formatPhone(input);
     setLocalValue(formatted);
     setHasInteracted(true);
-    
+
     // Retourner le numéro complet avec indicatif
     const numbers = formatted.replace(/\D/g, '');
     const fullNumber = numbers ? `+225${numbers}` : '';
@@ -87,7 +87,8 @@ export const PhoneInputV2: React.FC<PhoneInputV2Props> = ({
   return (
     <div className={`phone-input-v2 ${className}`}>
       {/* Container */}
-      <div className={`
+      <div
+        className={`
         relative flex items-center
         border-2 rounded-2xl transition-all duration-200
         ${isFocused ? 'ring-4 ring-primary-light border-primary' : 'border-gray-300'}
@@ -95,15 +96,21 @@ export const PhoneInputV2: React.FC<PhoneInputV2Props> = ({
         ${showSuccess ? 'border-green-500 ring-4 ring-green-100' : ''}
         ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'bg-white'}
         hover:border-gray-400
-      `}>
+      `}
+      >
         {/* Icône Téléphone */}
         <div className="pl-4 pr-3 flex items-center border-r-2 border-gray-200">
-          <Phone className={`h-5 w-5 ${
-            isFocused ? 'text-primary' : 
-            showError ? 'text-red-500' : 
-            showSuccess ? 'text-green-500' : 
-            'text-gray-400'
-          } transition-colors`} />
+          <Phone
+            className={`h-5 w-5 ${
+              isFocused
+                ? 'text-primary'
+                : showError
+                  ? 'text-red-500'
+                  : showSuccess
+                    ? 'text-green-500'
+                    : 'text-gray-400'
+            } transition-colors`}
+          />
         </div>
 
         {/* Indicatif Pays */}
@@ -135,8 +142,18 @@ export const PhoneInputV2: React.FC<PhoneInputV2Props> = ({
         {/* Icône de Validation */}
         {showSuccess && (
           <div className="pr-4">
-            <svg className="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="h-6 w-6 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
         )}
@@ -146,7 +163,12 @@ export const PhoneInputV2: React.FC<PhoneInputV2Props> = ({
       {showError && (
         <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
           <span>{error || 'Numéro invalide. Utilisez un préfixe valide (01, 05, 07, 27)'}</span>
         </p>
@@ -155,7 +177,8 @@ export const PhoneInputV2: React.FC<PhoneInputV2Props> = ({
       {/* Aide */}
       {hasInteracted && !showError && !showSuccess && numbers.length > 0 && (
         <p className="mt-2 text-sm text-gray-500">
-          {10 - numbers.length} chiffre{10 - numbers.length > 1 ? 's' : ''} restant{10 - numbers.length > 1 ? 's' : ''}
+          {10 - numbers.length} chiffre{10 - numbers.length > 1 ? 's' : ''} restant
+          {10 - numbers.length > 1 ? 's' : ''}
         </p>
       )}
     </div>

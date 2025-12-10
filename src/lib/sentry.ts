@@ -6,7 +6,7 @@ import * as Sentry from '@sentry/react';
 
 /**
  * Initialiser Sentry
- * 
+ *
  * À appeler au démarrage de l'application
  */
 export function initSentry() {
@@ -17,7 +17,7 @@ export function initSentry() {
   }
 
   const dsn = import.meta.env['VITE_SENTRY_DSN'];
-  
+
   if (!dsn) {
     console.warn('[Sentry] DSN not configured, monitoring disabled');
     return;
@@ -26,10 +26,10 @@ export function initSentry() {
   Sentry.init({
     dsn,
     environment: import.meta.env['VITE_ENVIRONMENT'] || 'production',
-    
+
     // Performance Monitoring
     tracesSampleRate: 0.1, // 10% des transactions
-    
+
     // Session Replay
     replaysSessionSampleRate: 0.1, // 10% des sessions normales
     replaysOnErrorSampleRate: 1.0, // 100% des sessions avec erreurs
@@ -39,7 +39,7 @@ export function initSentry() {
       // Ignorer les erreurs de développement
       if (event.exception) {
         const error = hint.originalException;
-        
+
         // Ignorer les erreurs réseau temporaires
         if (error && typeof error === 'object' && 'message' in error) {
           const message = String(error.message).toLowerCase();
@@ -61,7 +61,7 @@ export function initSentry() {
       // Erreurs du navigateur
       'ResizeObserver loop limit exceeded',
       'Non-Error promise rejection captured',
-      
+
       // Erreurs d'extensions navigateur
       'chrome-extension://',
       'moz-extension://',

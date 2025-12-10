@@ -16,7 +16,7 @@ const Notification: React.FC<NotificationProps> = ({
   title,
   message,
   duration = 5000,
-  onClose
+  onClose,
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isLeaving, setIsLeaving] = useState(false);
@@ -61,21 +61,21 @@ const Notification: React.FC<NotificationProps> = ({
           bg: 'bg-green-50',
           border: 'border-green-200',
           text: 'text-green-800',
-          title: 'text-green-900'
+          title: 'text-green-900',
         };
       case 'error':
         return {
           bg: 'bg-red-50',
           border: 'border-red-200',
           text: 'text-red-800',
-          title: 'text-red-900'
+          title: 'text-red-900',
         };
       case 'warning':
         return {
           bg: 'bg-yellow-50',
           border: 'border-yellow-200',
           text: 'text-yellow-800',
-          title: 'text-yellow-900'
+          title: 'text-yellow-900',
         };
       case 'info':
       default:
@@ -83,7 +83,7 @@ const Notification: React.FC<NotificationProps> = ({
           bg: 'bg-blue-50',
           border: 'border-blue-200',
           text: 'text-blue-800',
-          title: 'text-blue-900'
+          title: 'text-blue-900',
         };
     }
   };
@@ -101,18 +101,10 @@ const Notification: React.FC<NotificationProps> = ({
       `}
     >
       <div className="flex items-start">
-        <div className="flex-shrink-0">
-          {getIcon()}
-        </div>
+        <div className="flex-shrink-0">{getIcon()}</div>
         <div className="ml-3 w-0 flex-1">
-          <p className={`text-sm font-medium ${styles.title}`}>
-            {title}
-          </p>
-          {message && (
-            <p className={`mt-1 text-sm ${styles.text}`}>
-              {message}
-            </p>
-          )}
+          <p className={`text-sm font-medium ${styles.title}`}>{title}</p>
+          {message && <p className={`mt-1 text-sm ${styles.text}`}>{message}</p>}
         </div>
         <div className="ml-4 flex-shrink-0 flex">
           <button
@@ -142,12 +134,12 @@ export const useNotifications = () => {
   const addNotification = (notification: Omit<NotificationItem, 'id'>) => {
     const id = Date.now().toString() + Math.random().toString(36).substr(2, 9);
     const newNotification = { ...notification, id };
-    setNotifications(prev => [...prev, newNotification]);
+    setNotifications((prev) => [...prev, newNotification]);
     return id;
   };
 
   const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   const clearAll = () => {
@@ -179,7 +171,7 @@ export const useNotifications = () => {
     success,
     error,
     warning,
-    info
+    info,
   };
 };
 
@@ -204,17 +196,15 @@ export const NotificationContainer: React.FC<{
   };
 
   return (
-    <div className={`
+    <div
+      className={`
       fixed z-50 p-4 space-y-2 
       ${getPositionClasses()}
       w-96 max-w-sm
-    `}>
+    `}
+    >
       {notifications.map((notification) => (
-        <Notification
-          key={notification.id}
-          {...notification}
-          onClose={onClose}
-        />
+        <Notification key={notification.id} {...notification} onClose={onClose} />
       ))}
     </div>
   );

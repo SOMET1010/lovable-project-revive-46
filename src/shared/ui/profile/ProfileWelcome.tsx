@@ -11,21 +11,21 @@ export default function ProfileWelcome() {
     stats: [
       { label: 'Propriétés disponibles', value: '500+', icon: Building2 },
       { label: 'Réponse moyenne', value: '< 24h', icon: Clock },
-      { label: 'Taux de satisfaction', value: '95%', icon: CheckCircle }
+      { label: 'Taux de satisfaction', value: '95%', icon: CheckCircle },
     ],
     tips: [
       'Complétez votre profil pour augmenter vos chances',
       'Activez les alertes pour ne manquer aucune offre',
-      'Vérifiez votre identité pour gagner la confiance'
+      'Vérifiez votre identité pour gagner la confiance',
     ],
     cta: {
       label: 'Commencer ma recherche',
       href: '/recherche',
       secondary: {
         label: 'Voir mon profil',
-        href: '/profil'
-      }
-    }
+        href: '/profil',
+      },
+    },
   });
 
   const getOwnerWelcome = () => ({
@@ -35,21 +35,21 @@ export default function ProfileWelcome() {
     stats: [
       { label: 'Vues moyennes', value: '150+', icon: TrendingUp },
       { label: 'Locataires vérifiés', value: '100%', icon: Shield },
-      { label: 'Paiements automatiques', value: '24/7', icon: CheckCircle }
+      { label: 'Paiements automatiques', value: '24/7', icon: CheckCircle },
     ],
     tips: [
       'Ajoutez des photos de qualité pour plus de vues',
       'Répondez rapidement pour convertir plus',
-      'Utilisez la signature électronique pour gagner du temps'
+      'Utilisez la signature électronique pour gagner du temps',
     ],
     cta: {
       label: 'Publier une propriété',
       href: '/ajouter-propriete',
       secondary: {
         label: 'Voir mon tableau de bord',
-        href: '/dashboard/proprietaire'
-      }
-    }
+        href: '/dashboard/proprietaire',
+      },
+    },
   });
 
   const getAgencyWelcome = () => ({
@@ -59,21 +59,21 @@ export default function ProfileWelcome() {
     stats: [
       { label: 'Propriétés illimitées', value: '∞', icon: Building2 },
       { label: 'Collaboration équipe', value: 'Inclus', icon: CheckCircle },
-      { label: 'Rapports détaillés', value: 'Temps réel', icon: TrendingUp }
+      { label: 'Rapports détaillés', value: 'Temps réel', icon: TrendingUp },
     ],
     tips: [
       'Invitez votre équipe pour une meilleure collaboration',
       'Utilisez le CRM pour suivre vos prospects',
-      'Consultez les statistiques pour optimiser vos performances'
+      'Consultez les statistiques pour optimiser vos performances',
     ],
     cta: {
       label: 'Accéder au dashboard',
       href: '/agence/dashboard',
       secondary: {
         label: 'Gérer mon équipe',
-        href: '/agence/equipe'
-      }
-    }
+        href: '/agence/equipe',
+      },
+    },
   });
 
   const getWelcomeContent = () => {
@@ -104,10 +104,15 @@ export default function ProfileWelcome() {
   };
 
   return (
-    <div className={`relative overflow-hidden bg-gradient-to-r ${getGradient()} rounded-3xl shadow-2xl border-4 border-white/20 p-8 mb-8`}>
+    <div
+      className={`relative overflow-hidden bg-gradient-to-r ${getGradient()} rounded-3xl shadow-2xl border-4 border-white/20 p-8 mb-8`}
+    >
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-10 right-10 w-64 h-64 bg-white rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-10 left-10 w-48 h-48 bg-white rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+        <div
+          className="absolute bottom-10 left-10 w-48 h-48 bg-white rounded-full blur-3xl animate-float"
+          style={{ animationDelay: '1s' }}
+        />
       </div>
 
       <div className="relative z-10">
@@ -117,20 +122,14 @@ export default function ProfileWelcome() {
               <Icon className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                {content.title}
-              </h1>
-              <p className="text-white/90 text-lg">
-                {content.subtitle}
-              </p>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">{content.title}</h1>
+              <p className="text-white/90 text-lg">{content.subtitle}</p>
             </div>
           </div>
 
           {profile?.full_name && (
             <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <span className="text-white font-semibold">
-                👋 {profile.full_name.split(' ')[0]}
-              </span>
+              <span className="text-white font-semibold">👋 {profile.full_name.split(' ')[0]}</span>
             </div>
           )}
         </div>

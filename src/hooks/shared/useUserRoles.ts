@@ -18,18 +18,18 @@ export interface UseUserRolesReturn {
   roles: AppRole[];
   loading: boolean;
   error: Error | null;
-  
+
   // Méthodes de vérification
   hasRole: (role: AppRole) => boolean;
   hasAnyRole: (roles: AppRole[]) => boolean;
   hasAllRoles: (roles: AppRole[]) => boolean;
-  
+
   // Raccourcis pratiques
   isAdmin: boolean;
   isModerator: boolean;
   isTrustAgent: boolean;
   isUser: boolean;
-  
+
   // Actions
   refreshRoles: () => Promise<void>;
 }
@@ -65,7 +65,7 @@ export function useUserRoles(): UseUserRolesReturn {
       setError(null);
 
       const { data, error: rpcError } = await supabase.rpc('get_user_roles', {
-        _user_id: user.id
+        _user_id: user.id,
       });
 
       if (rpcError) {
@@ -98,28 +98,28 @@ export function useUserRoles(): UseUserRolesReturn {
   }, [fetchRoles]);
 
   // Méthodes de vérification mémorisées
-  const hasRole = useCallback(
-    (role: AppRole): boolean => roles.includes(role),
-    [roles]
-  );
+  const hasRole = useCallback((role: AppRole): boolean => roles.includes(role), [roles]);
 
   const hasAnyRole = useCallback(
-    (checkRoles: AppRole[]): boolean => checkRoles.some(role => roles.includes(role)),
+    (checkRoles: AppRole[]): boolean => checkRoles.some((role) => roles.includes(role)),
     [roles]
   );
 
   const hasAllRoles = useCallback(
-    (checkRoles: AppRole[]): boolean => checkRoles.every(role => roles.includes(role)),
+    (checkRoles: AppRole[]): boolean => checkRoles.every((role) => roles.includes(role)),
     [roles]
   );
 
   // Propriétés calculées mémorisées
-  const computedValues = useMemo(() => ({
-    isAdmin: roles.includes('admin'),
-    isModerator: roles.includes('moderator'),
-    isTrustAgent: roles.includes('trust_agent'),
-    isUser: roles.includes('user'),
-  }), [roles]);
+  const computedValues = useMemo(
+    () => ({
+      isAdmin: roles.includes('admin'),
+      isModerator: roles.includes('moderator'),
+      isTrustAgent: roles.includes('trust_agent'),
+      isUser: roles.includes('user'),
+    }),
+    [roles]
+  );
 
   return {
     roles,

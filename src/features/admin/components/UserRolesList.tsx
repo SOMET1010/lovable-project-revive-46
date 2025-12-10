@@ -133,9 +133,7 @@ export function UserRolesList({
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-gray-900 truncate">
                   {userRole.profile?.full_name || 'Utilisateur'}
-                  {isCurrentUser && (
-                    <span className="ml-2 text-xs text-gray-500">(vous)</span>
-                  )}
+                  {isCurrentUser && <span className="ml-2 text-xs text-gray-500">(vous)</span>}
                 </p>
                 <p className="text-sm text-gray-500 truncate">
                   {userRole.profile?.email || 'Email non renseigné'}
@@ -149,7 +147,9 @@ export function UserRolesList({
               <div className="hidden md:flex items-center gap-1.5 text-sm text-gray-500 flex-shrink-0">
                 <Clock className="h-4 w-4" />
                 <span>
-                  {userRole.granted_at ? format(new Date(userRole.granted_at), 'dd MMM yyyy', { locale: fr }) : 'N/A'}
+                  {userRole.granted_at
+                    ? format(new Date(userRole.granted_at), 'dd MMM yyyy', { locale: fr })
+                    : 'N/A'}
                 </span>
               </div>
 
@@ -172,7 +172,10 @@ export function UserRolesList({
                     )}
                   </button>
                 ) : (
-                  <div className="p-2 text-gray-300" title="Impossible de révoquer votre propre rôle admin">
+                  <div
+                    className="p-2 text-gray-300"
+                    title="Impossible de révoquer votre propre rôle admin"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </div>
                 )}

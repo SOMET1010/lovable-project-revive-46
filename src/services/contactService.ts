@@ -19,7 +19,9 @@ export interface ContactServiceResponse<T> {
 }
 
 class ContactService {
-  async submitContact(data: Omit<ContactSubmission, 'id' | 'submitted_at' | 'resolved_at'>): Promise<ContactServiceResponse<ContactSubmission>> {
+  async submitContact(
+    data: Omit<ContactSubmission, 'id' | 'submitted_at' | 'resolved_at'>
+  ): Promise<ContactServiceResponse<ContactSubmission>> {
     try {
       const { data: submission, error } = await supabase
         .from('contact_submissions')
@@ -88,7 +90,7 @@ class ContactService {
         updateData['resolved_at'] = new Date().toISOString();
       }
 
-    const { data: updatedSubmission, error } = await supabase
+      const { data: updatedSubmission, error } = await supabase
         .from('contact_submissions')
         .update(updateData)
         .eq('id', id)
@@ -107,7 +109,11 @@ class ContactService {
     }
   }
 
-  async sendEmail(to: string, subject: string, body: string): Promise<ContactServiceResponse<boolean>> {
+  async sendEmail(
+    to: string,
+    subject: string,
+    body: string
+  ): Promise<ContactServiceResponse<boolean>> {
     try {
       const { error } = await supabase.functions.invoke('send-email', {
         body: {

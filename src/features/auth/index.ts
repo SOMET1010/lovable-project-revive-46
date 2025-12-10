@@ -1,6 +1,6 @@
 /**
  * Feature: auth
- * 
+ *
  * Exports publics de la feature auth
  */
 
@@ -42,5 +42,5 @@ export type {
   EmailVerificationStatus,
   PhoneVerificationStatus,
   IdentityVerificationStatus,
-  UserPreferences
+  UserPreferences,
 } from './types';

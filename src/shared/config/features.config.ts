@@ -8,26 +8,26 @@ export interface FeatureFlags {
   CNAM_VERIFICATION: boolean;
   ONECI_VERIFICATION: boolean;
   FACE_VERIFICATION: boolean;
-  
+
   // Fonctionnalités de recherche
   ADVANCED_SEARCH: boolean;
   AI_SEARCH: boolean;
   MAP_SEARCH: boolean;
-  
+
   // Types de propriétés
   COMMERCIAL_PROPERTIES: boolean;
   RESIDENTIAL_PROPERTIES: boolean;
-  
+
   // Paiements
   MOBILE_MONEY_PAYMENT: boolean;
   CARD_PAYMENT: boolean;
-  
+
   // Signature électronique
   CRYPTONEO_SIGNATURE: boolean;
-  
+
   // Chatbot
   SUTA_CHATBOT: boolean;
-  
+
   // Notifications
   EMAIL_NOTIFICATIONS: boolean;
   SMS_NOTIFICATIONS: boolean;
@@ -36,7 +36,7 @@ export interface FeatureFlags {
 
 /**
  * Configuration par défaut des features
- * 
+ *
  * IMPORTANT :
  * - CNAM_VERIFICATION est désactivé (hors périmètre ANSUT)
  * - COMMERCIAL_PROPERTIES est désactivé (Mon Toit = résidentiel uniquement)
@@ -44,33 +44,33 @@ export interface FeatureFlags {
  */
 export const FEATURES: FeatureFlags = {
   // Vérifications d'identité
-  CNAM_VERIFICATION: false,          // ❌ Désactivé - Hors périmètre ANSUT
-  ONECI_VERIFICATION: true,           // ✅ Activé - Vérification ONECI/SNEDAI
-  FACE_VERIFICATION: true,            // ✅ Activé - Biométrie faciale
-  
+  CNAM_VERIFICATION: false, // ❌ Désactivé - Hors périmètre ANSUT
+  ONECI_VERIFICATION: true, // ✅ Activé - Vérification ONECI/SNEDAI
+  FACE_VERIFICATION: true, // ✅ Activé - Biométrie faciale
+
   // Fonctionnalités de recherche
-  ADVANCED_SEARCH: true,              // ✅ Activé - Recherche avancée
-  AI_SEARCH: false,                   // ❌ Désactivé - Non implémenté
-  MAP_SEARCH: true,                   // ✅ Activé - Recherche par carte
-  
+  ADVANCED_SEARCH: true, // ✅ Activé - Recherche avancée
+  AI_SEARCH: false, // ❌ Désactivé - Non implémenté
+  MAP_SEARCH: true, // ✅ Activé - Recherche par carte
+
   // Types de propriétés
-  COMMERCIAL_PROPERTIES: false,       // ❌ Désactivé - Mon Toit = résidentiel uniquement
-  RESIDENTIAL_PROPERTIES: true,       // ✅ Activé - Appartements, villas, studios
-  
+  COMMERCIAL_PROPERTIES: false, // ❌ Désactivé - Mon Toit = résidentiel uniquement
+  RESIDENTIAL_PROPERTIES: true, // ✅ Activé - Appartements, villas, studios
+
   // Paiements
-  MOBILE_MONEY_PAYMENT: true,         // ✅ Activé - Orange Money, MTN Money, Moov Money
-  CARD_PAYMENT: false,                // ❌ Désactivé - À venir
-  
+  MOBILE_MONEY_PAYMENT: true, // ✅ Activé - Orange Money, MTN Money, Moov Money
+  CARD_PAYMENT: false, // ❌ Désactivé - À venir
+
   // Signature électronique
-  CRYPTONEO_SIGNATURE: true,          // ✅ Activé - Cachet électronique ANSUT
-  
+  CRYPTONEO_SIGNATURE: true, // ✅ Activé - Cachet électronique ANSUT
+
   // Chatbot
-  SUTA_CHATBOT: true,                 // ✅ Activé - Assistant anti-arnaque
-  
+  SUTA_CHATBOT: true, // ✅ Activé - Assistant anti-arnaque
+
   // Notifications
-  EMAIL_NOTIFICATIONS: true,          // ✅ Activé - Notifications par email
-  SMS_NOTIFICATIONS: false,           // ❌ Désactivé - À venir
-  WHATSAPP_NOTIFICATIONS: true,       // ✅ Activé - OTP WhatsApp via InTouch
+  EMAIL_NOTIFICATIONS: true, // ✅ Activé - Notifications par email
+  SMS_NOTIFICATIONS: false, // ❌ Désactivé - À venir
+  WHATSAPP_NOTIFICATIONS: true, // ✅ Activé - OTP WhatsApp via InTouch
 };
 
 /**
@@ -104,7 +104,7 @@ export const getDisabledFeatures = (): Partial<FeatureFlags> => {
  */
 export const getFeaturesByEnvironment = (): FeatureFlags => {
   const env = import.meta.env.MODE;
-  
+
   // En développement, on peut activer des features expérimentales
   if (env === 'development') {
     return {
@@ -113,7 +113,7 @@ export const getFeaturesByEnvironment = (): FeatureFlags => {
       // AI_SEARCH: true,
     };
   }
-  
+
   // En staging, on peut tester des features avant prod
   if (env === 'staging') {
     return {
@@ -121,10 +121,9 @@ export const getFeaturesByEnvironment = (): FeatureFlags => {
       // Tester des features en staging
     };
   }
-  
+
   // En production, utiliser la config par défaut
   return FEATURES;
 };
 
 export default FEATURES;
-

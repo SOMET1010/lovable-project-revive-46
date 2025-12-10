@@ -3,7 +3,7 @@ import {
   PushNotifications,
   Token,
   PushNotificationSchema,
-  ActionPerformed
+  ActionPerformed,
 } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
 // import { supabase } from '@/integrations/supabase/client';
@@ -42,7 +42,7 @@ export function usePushNotifications() {
     try {
       // Request permission
       const permStatus = await PushNotifications.checkPermissions();
-      
+
       if (permStatus.receive === 'prompt') {
         const newStatus = await PushNotifications.requestPermissions();
         if (newStatus.receive !== 'granted') {
@@ -77,20 +77,14 @@ export function usePushNotifications() {
     if (!isNative) return;
 
     // Token received
-    const tokenListener = PushNotifications.addListener(
-      'registration',
-      (tokenData: Token) => {
-        setToken(tokenData.value);
-      }
-    );
+    const tokenListener = PushNotifications.addListener('registration', (tokenData: Token) => {
+      setToken(tokenData.value);
+    });
 
     // Registration error
-    const errorListener = PushNotifications.addListener(
-      'registrationError',
-      (err) => {
-        setError(err.error);
-      }
-    );
+    const errorListener = PushNotifications.addListener('registrationError', (err) => {
+      setError(err.error);
+    });
 
     // Notification received while app is open
     const notificationListener = PushNotifications.addListener(
@@ -99,7 +93,7 @@ export function usePushNotifications() {
         setLastNotification({
           title: notification.title || '',
           body: notification.body || '',
-          data: notification.data
+          data: notification.data,
         });
       }
     );
@@ -112,7 +106,7 @@ export function usePushNotifications() {
         setLastNotification({
           title: notification.title || '',
           body: notification.body || '',
-          data: notification.data
+          data: notification.data,
         });
 
         // Handle navigation based on notification data
@@ -125,10 +119,10 @@ export function usePushNotifications() {
     );
 
     return () => {
-      tokenListener.then(l => l.remove());
-      errorListener.then(l => l.remove());
-      notificationListener.then(l => l.remove());
-      actionListener.then(l => l.remove());
+      tokenListener.then((l) => l.remove());
+      errorListener.then((l) => l.remove());
+      notificationListener.then((l) => l.remove());
+      actionListener.then((l) => l.remove());
     };
   }, [isNative]);
 
@@ -140,6 +134,6 @@ export function usePushNotifications() {
     lastNotification,
     register,
     unregister,
-    registerToken
+    registerToken,
   };
 }

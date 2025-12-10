@@ -7,13 +7,13 @@
    CSS Variables for Forms
    ================================ */
 :root {
-  --form-chocolat: #2C1810;
-  --form-orange: #F16522;
-  --form-sable: #A69B95;
-  --form-ivoire: #F5F0E8;
-  --form-border: #E5DED5;
-  --form-success: #22C55E;
-  --form-error: #EF4444;
+  --form-chocolat: #2c1810;
+  --form-orange: #f16522;
+  --form-sable: #a69b95;
+  --form-ivoire: #f5f0e8;
+  --form-border: #e5ded5;
+  --form-success: #22c55e;
+  --form-error: #ef4444;
 }
 
 /* ================================
@@ -161,7 +161,7 @@
 }
 
 .form-button-primary:hover:not(:disabled) {
-  background-color: #E55A1B;
+  background-color: #e55a1b;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(241, 101, 34, 0.4);
 }
@@ -217,7 +217,7 @@
 }
 
 .form-button-chocolat:hover:not(:disabled) {
-  background-color: #1F110C;
+  background-color: #1f110c;
 }
 
 /* ================================
@@ -355,7 +355,7 @@
    ================================ */
 .form-page-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--form-ivoire) 0%, #FAF8F5 100%);
+  background: linear-gradient(135deg, var(--form-ivoire) 0%, #faf8f5 100%);
   padding: 2rem 1rem;
 }
 
@@ -371,25 +371,25 @@
   .form-section-premium {
     padding: 1rem;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .form-actions-right {
     width: 100%;
     flex-direction: column;
   }
-  
+
   .form-button-primary,
   .form-button-secondary {
     width: 100%;
   }
-  
+
   .form-toggle-group {
     flex-direction: column;
   }
-  
+
   .form-toggle-button {
     width: 100%;
     justify-content: center;
@@ -404,7 +404,7 @@
     background-color: hsl(var(--card));
     border-color: hsl(var(--border));
   }
-  
+
   .form-input-premium {
     background-color: hsl(var(--background));
     border-color: hsl(var(--border));

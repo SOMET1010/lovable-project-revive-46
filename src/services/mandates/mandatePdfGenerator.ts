@@ -9,19 +9,19 @@ import { MandatePermissions, MandateScope } from '@/hooks/useAgencyMandates';
 export interface MandateData {
   mandateId: string;
   mandateScope: MandateScope;
-  
+
   // Propriétaire
   ownerName: string;
   ownerPhone?: string;
   ownerEmail?: string;
-  
+
   // Agence
   agencyName: string;
   agencyRegistrationNumber?: string;
   agencyPhone?: string;
   agencyEmail?: string;
   agencyAddress?: string;
-  
+
   // Bien (optionnel si all_properties)
   property?: {
     title: string;
@@ -29,7 +29,7 @@ export interface MandateData {
     neighborhood?: string;
     monthlyRent: number;
   };
-  
+
   // Conditions
   startDate: string;
   endDate?: string;

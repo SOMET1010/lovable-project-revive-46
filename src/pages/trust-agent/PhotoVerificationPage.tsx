@@ -1,13 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Camera, 
-  X, 
-  Check,
-  Image as ImageIcon,
-  Plus
-} from 'lucide-react';
+import { ArrowLeft, Camera, X, Check, Image as ImageIcon, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/badge';
@@ -30,14 +23,14 @@ const defaultCategories: PhotoCategory[] = [
   { id: 'sdb', label: 'Salle de bain', required: true, photos: [] },
   { id: 'wc', label: 'Toilettes', required: false, photos: [] },
   { id: 'exterieur', label: 'Espaces extérieurs', required: false, photos: [] },
-  { id: 'autres', label: 'Autres', required: false, photos: [] }
+  { id: 'autres', label: 'Autres', required: false, photos: [] },
 ];
 
 export default function PhotoVerificationPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [categories, setCategories] = useState<PhotoCategory[]>(defaultCategories);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,10 +56,10 @@ export default function PhotoVerificationPage() {
 
       if (data?.photos && typeof data.photos === 'object' && !Array.isArray(data.photos)) {
         const savedPhotos = data.photos as Record<string, string[]>;
-        setCategories(prev => 
-          prev.map(cat => ({
+        setCategories((prev) =>
+          prev.map((cat) => ({
             ...cat,
-            photos: savedPhotos[cat.id] || []
+            photos: savedPhotos[cat.id] || [],
           }))
         );
       }
@@ -102,23 +95,21 @@ export default function PhotoVerificationPage() {
           reader.onload = () => resolve(reader.result as string);
           reader.readAsDataURL(file);
         });
-        
+
         newPhotos.push(base64);
       }
 
       if (newPhotos.length > 0) {
-        setCategories(prev => 
-          prev.map(cat => 
-            cat.id === selectedCategory 
-              ? { ...cat, photos: [...cat.photos, ...newPhotos] }
-              : cat
+        setCategories((prev) =>
+          prev.map((cat) =>
+            cat.id === selectedCategory ? { ...cat, photos: [...cat.photos, ...newPhotos] } : cat
           )
         );
         toast.success(`${newPhotos.length} photo(s) ajoutée(s)`);
       }
     } catch (error) {
       console.error('Error uploading photos:', error);
-      toast.error('Erreur lors de l\'upload');
+      toast.error("Erreur lors de l'upload");
     } finally {
       setUploading(false);
       setSelectedCategory(null);
@@ -129,9 +120,9 @@ export default function PhotoVerificationPage() {
   };
 
   const removePhoto = (categoryId: string, photoIndex: number) => {
-    setCategories(prev => 
-      prev.map(cat => 
-        cat.id === categoryId 
+    setCategories((prev) =>
+      prev.map((cat) =>
+        cat.id === categoryId
           ? { ...cat, photos: cat.photos.filter((_, i) => i !== photoIndex) }
           : cat
       )
@@ -141,7 +132,7 @@ export default function PhotoVerificationPage() {
   const savePhotos = async () => {
     try {
       const photosData: Record<string, string[]> = {};
-      categories.forEach(cat => {
+      categories.forEach((cat) => {
         photosData[cat.id] = cat.photos;
       });
 
@@ -149,7 +140,7 @@ export default function PhotoVerificationPage() {
         .from('cev_missions')
         .update({
           photos: photosData as unknown as Json,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', missionId);
 
@@ -163,8 +154,8 @@ export default function PhotoVerificationPage() {
 
   const totalPhotos = categories.reduce((acc, cat) => acc + cat.photos.length, 0);
   const requiredCompleted = categories
-    .filter(cat => cat.required)
-    .every(cat => cat.photos.length > 0);
+    .filter((cat) => cat.required)
+    .every((cat) => cat.photos.length > 0);
 
   if (loading) {
     return (
@@ -191,7 +182,12 @@ export default function PhotoVerificationPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="small" className="p-2 h-auto w-auto" onClick={() => navigate(`/trust-agent/mission/${missionId}`)}>
+              <Button
+                variant="ghost"
+                size="small"
+                className="p-2 h-auto w-auto"
+                onClick={() => navigate(`/trust-agent/mission/${missionId}`)}
+              >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
@@ -213,10 +209,12 @@ export default function PhotoVerificationPage() {
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <Camera className={`h-5 w-5 ${requiredCompleted ? 'text-green-600' : 'text-amber-600'}`} />
+                <Camera
+                  className={`h-5 w-5 ${requiredCompleted ? 'text-green-600' : 'text-amber-600'}`}
+                />
                 <span>
-                  {requiredCompleted 
-                    ? 'Toutes les photos requises ont été capturées' 
+                  {requiredCompleted
+                    ? 'Toutes les photos requises ont été capturées'
                     : 'Des photos requises sont manquantes'}
                 </span>
               </div>
@@ -229,13 +227,16 @@ export default function PhotoVerificationPage() {
 
         {/* Photo Categories Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map(category => (
+          {categories.map((category) => (
             <Card key={category.id}>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base">{category.label}</CardTitle>
                   {category.required && (
-                    <Badge variant={category.photos.length > 0 ? 'default' : 'destructive'} className="text-xs">
+                    <Badge
+                      variant={category.photos.length > 0 ? 'default' : 'destructive'}
+                      className="text-xs"
+                    >
                       {category.photos.length > 0 ? 'OK' : 'Requis'}
                     </Badge>
                   )}
@@ -246,8 +247,8 @@ export default function PhotoVerificationPage() {
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   {category.photos.map((photo, index) => (
                     <div key={index} className="relative aspect-square group">
-                      <img 
-                        src={photo} 
+                      <img
+                        src={photo}
                         alt={`${category.label} ${index + 1}`}
                         className="w-full h-full object-cover rounded-lg"
                       />
@@ -259,7 +260,7 @@ export default function PhotoVerificationPage() {
                       </button>
                     </div>
                   ))}
-                  
+
                   {/* Add Photo Button */}
                   <button
                     onClick={() => {

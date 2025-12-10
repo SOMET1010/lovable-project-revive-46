@@ -41,21 +41,23 @@ export default function CEVBadge({
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-bold text-green-900">Certificat Électronique de Vérification (CEV)</h3>
+                <h3 className="font-bold text-green-900">
+                  Certificat Électronique de Vérification (CEV)
+                </h3>
                 <CheckCircle className="h-5 w-5 text-green-600" />
                 <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
                   Optionnel
                 </span>
               </div>
               <p className="text-sm text-green-800 mb-2">
-                Ce bail possède un Certificat Électronique de Vérification (CEV) délivré par 
-                l'Office National de l'État Civil et de l'Identification (ONECI), renforçant 
-                sa validité légale devant les tribunaux ivoiriens.
+                Ce bail possède un Certificat Électronique de Vérification (CEV) délivré par
+                l'Office National de l'État Civil et de l'Identification (ONECI), renforçant sa
+                validité légale devant les tribunaux ivoiriens.
               </p>
               <div className="flex items-start gap-2 mb-3 p-2 bg-blue-50 border border-blue-200 rounded">
                 <Info className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <p className="text-xs text-blue-800">
-                  Le CEV est un service optionnel fourni par l'ONECI qui ajoute une couche 
+                  Le CEV est un service optionnel fourni par l'ONECI qui ajoute une couche
                   supplémentaire de validation à votre contrat signé électroniquement.
                 </p>
               </div>

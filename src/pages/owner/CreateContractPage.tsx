@@ -7,18 +7,18 @@ import { notifyLeaseCreated } from '@/services/notifications/leaseNotificationSe
 import { ValidationService, type FormValidationResult } from '@/services/validation';
 import { useFormValidation } from '@/hooks/shared/useFormValidation';
 import { ValidatedInput, FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
-import { 
-  FileText, 
-  Calendar, 
-  DollarSign, 
-  User, 
-  Home, 
+import {
+  FileText,
+  Calendar,
+  DollarSign,
+  User,
+  Home,
   ArrowLeft,
   ArrowRight,
   Loader,
   CheckCircle,
   AlertCircle,
-  Plus
+  Plus,
 } from 'lucide-react';
 import '@/styles/form-premium.css';
 import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
@@ -61,17 +61,17 @@ export default function CreateContractPage() {
   const { propertyId: urlPropertyId } = useParams();
   const [searchParams] = useSearchParams();
   const { step, slideDirection, nextStep, prevStep, goToStep } = useFormStepper(1, 3);
-  
+
   const initialPropertyId = urlPropertyId || searchParams.get('propertyId') || '';
   const initialTenantId = searchParams.get('tenantId') || '';
-  
+
   const [properties, setProperties] = useState<Property[]>([]);
   const [applications, setApplications] = useState<AcceptedApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   const [selectedProperty, setSelectedProperty] = useState(initialPropertyId);
   const [selectedTenant, setSelectedTenant] = useState(initialTenantId);
   const [monthlyRent, setMonthlyRent] = useState('');
@@ -82,7 +82,8 @@ export default function CreateContractPage() {
   const [paymentDay, setPaymentDay] = useState('5');
   const [customClauses, setCustomClauses] = useState('');
 
-  const { validateField, getFieldState, touched, setFieldError, clearFieldError } = useFormValidation<ContractFormData>();
+  const { validateField, getFieldState, touched, setFieldError, clearFieldError } =
+    useFormValidation<ContractFormData>();
 
   const validateStep1 = (): boolean => {
     return !!selectedProperty && !!selectedTenant;
@@ -90,38 +91,51 @@ export default function CreateContractPage() {
 
   const validateStep2 = (): boolean => {
     const rentResult = ValidationService.validatePositiveNumber(monthlyRent, 'Loyer mensuel');
-    const depositResult = ValidationService.validatePositiveNumber(depositAmount, 'Dépôt de garantie');
+    const depositResult = ValidationService.validatePositiveNumber(
+      depositAmount,
+      'Dépôt de garantie'
+    );
     const paymentDayNum = parseInt(paymentDay);
-    
-    return rentResult.isValid && depositResult.isValid && 
-           !isNaN(paymentDayNum) && paymentDayNum >= 1 && paymentDayNum <= 28;
+
+    return (
+      rentResult.isValid &&
+      depositResult.isValid &&
+      !isNaN(paymentDayNum) &&
+      paymentDayNum >= 1 &&
+      paymentDayNum <= 28
+    );
   };
 
   const validateContractForm = (): FormValidationResult => {
     const errors: Record<string, string> = {};
-    
+
     const rentResult = ValidationService.validatePositiveNumber(monthlyRent, 'Loyer mensuel');
     if (!rentResult.isValid && rentResult.error) errors['monthlyRent'] = rentResult.error;
-    
-    const depositResult = ValidationService.validatePositiveNumber(depositAmount, 'Dépôt de garantie');
-    if (!depositResult.isValid && depositResult.error) errors['depositAmount'] = depositResult.error;
-    
+
+    const depositResult = ValidationService.validatePositiveNumber(
+      depositAmount,
+      'Dépôt de garantie'
+    );
+    if (!depositResult.isValid && depositResult.error)
+      errors['depositAmount'] = depositResult.error;
+
     const paymentDayNum = parseInt(paymentDay);
     if (isNaN(paymentDayNum) || paymentDayNum < 1 || paymentDayNum > 28) {
       errors['paymentDay'] = 'Le jour de paiement doit être entre 1 et 28';
     }
-    
+
     if (!startDate) errors['startDate'] = 'La date de début est obligatoire';
     if (!endDate) errors['endDate'] = 'La date de fin est obligatoire';
-    
+
     if (startDate && endDate) {
       const dateRangeResult = ValidationService.validateDateRange(startDate, endDate);
-      if (!dateRangeResult.isValid && dateRangeResult.error) errors['endDate'] = dateRangeResult.error;
+      if (!dateRangeResult.isValid && dateRangeResult.error)
+        errors['endDate'] = dateRangeResult.error;
     }
-    
+
     return {
       isValid: Object.keys(errors).length === 0,
-      errors
+      errors,
     };
   };
 
@@ -131,7 +145,7 @@ export default function CreateContractPage() {
 
   useEffect(() => {
     if (selectedProperty) {
-      const property = properties.find(p => p.id === selectedProperty);
+      const property = properties.find((p) => p.id === selectedProperty);
       if (property) {
         setMonthlyRent(property.monthly_rent.toString());
         setDepositAmount((property.monthly_rent * 2).toString());
@@ -179,15 +193,15 @@ export default function CreateContractPage() {
       if (error) throw error;
 
       if (data && data.length > 0) {
-        const applicantIds = data.map(app => app.tenant_id);
+        const applicantIds = data.map((app) => app.tenant_id);
         const { data: profiles } = await supabase
           .from('profiles')
           .select('id, full_name, email, phone')
           .in('id', applicantIds);
 
-        const appsWithProfiles = data.map(app => ({
+        const appsWithProfiles = data.map((app) => ({
           ...app,
-          profiles: profiles?.find(p => p.id === app.tenant_id) || null
+          profiles: profiles?.find((p) => p.id === app.tenant_id) || null,
         }));
 
         setApplications(appsWithProfiles);
@@ -203,13 +217,15 @@ export default function CreateContractPage() {
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    const random = Math.floor(Math.random() * 10000)
+      .toString()
+      .padStart(4, '0');
     return `MT-${year}${month}-${random}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user || !selectedProperty || !selectedTenant) {
       setError('Veuillez remplir tous les champs obligatoires');
       return;
@@ -229,7 +245,7 @@ export default function CreateContractPage() {
 
     try {
       const contractNumber = generateContractNumber();
-      
+
       const { data, error: insertError } = await supabase
         .from('lease_contracts')
         .insert({
@@ -244,7 +260,7 @@ export default function CreateContractPage() {
           end_date: endDate,
           payment_day: parseInt(paymentDay),
           custom_clauses: customClauses || null,
-          status: 'brouillon'
+          status: 'brouillon',
         })
         .select()
         .single();
@@ -257,10 +273,7 @@ export default function CreateContractPage() {
         console.error('Error generating PDF:', pdfError);
       }
 
-      await supabase
-        .from('properties')
-        .update({ status: 'reserve' })
-        .eq('id', selectedProperty);
+      await supabase.from('properties').update({ status: 'reserve' }).eq('id', selectedProperty);
 
       try {
         await notifyLeaseCreated(data.id);
@@ -269,11 +282,10 @@ export default function CreateContractPage() {
       }
 
       setSuccess('Contrat créé et PDF généré avec succès!');
-      
+
       setTimeout(() => {
         navigate(`/contrat/${data.id}`);
       }, 2000);
-
     } catch (err: unknown) {
       console.error('Error creating contract:', err);
       setError(err instanceof Error ? err.message : 'Erreur lors de la création du contrat');
@@ -309,13 +321,13 @@ export default function CreateContractPage() {
           {/* Header Premium */}
           <div className="mb-8">
             <button
-              onClick={() => step > 1 ? prevStep() : navigate(-1)}
+              onClick={() => (step > 1 ? prevStep() : navigate(-1))}
               className="flex items-center space-x-2 text-[#2C1810] hover:text-[#F16522] mb-4 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Retour</span>
             </button>
-            
+
             <div className="flex items-center space-x-3 mb-6">
               <div className="p-3 bg-[#F16522]/10 rounded-xl">
                 <FileText className="w-8 h-8 text-[#F16522]" />
@@ -360,7 +372,7 @@ export default function CreateContractPage() {
                   <Home className="w-5 h-5 text-[#F16522]" />
                   <h2 className="form-label-premium text-lg">Propriété</h2>
                 </div>
-                
+
                 {properties.length === 0 ? (
                   <div className="text-center py-6">
                     <Home className="w-12 h-12 text-[#A69B95] mx-auto mb-3" />
@@ -382,7 +394,7 @@ export default function CreateContractPage() {
                     className="form-input-premium"
                   >
                     <option value="">Sélectionner une propriété</option>
-                    {properties.map(prop => (
+                    {properties.map((prop) => (
                       <option key={prop.id} value={prop.id}>
                         {prop.title} - {prop.city} ({prop.monthly_rent.toLocaleString()} FCFA/mois)
                       </option>
@@ -397,13 +409,15 @@ export default function CreateContractPage() {
                   <User className="w-5 h-5 text-[#F16522]" />
                   <h2 className="form-label-premium text-lg">Locataire</h2>
                 </div>
-                
+
                 {!selectedProperty ? (
                   <p className="text-[#A69B95] text-sm">Sélectionnez d'abord une propriété</p>
                 ) : applications.length === 0 ? (
                   <div className="text-center py-6">
                     <User className="w-12 h-12 text-[#A69B95] mx-auto mb-3" />
-                    <p className="text-[#A69B95]">Aucune candidature acceptée pour cette propriété</p>
+                    <p className="text-[#A69B95]">
+                      Aucune candidature acceptée pour cette propriété
+                    </p>
                   </div>
                 ) : (
                   <select
@@ -413,7 +427,7 @@ export default function CreateContractPage() {
                     className="form-input-premium"
                   >
                     <option value="">Sélectionner un locataire</option>
-                    {applications.map(app => (
+                    {applications.map((app) => (
                       <option key={app.id} value={app.tenant_id}>
                         {app.profiles?.full_name || 'Nom non renseigné'} - {app.profiles?.email}
                       </option>
@@ -445,7 +459,7 @@ export default function CreateContractPage() {
                   <DollarSign className="w-5 h-5 text-[#F16522]" />
                   <h2 className="form-label-premium text-lg">Conditions financières</h2>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="form-label-premium">Loyer mensuel (FCFA) *</label>
@@ -455,18 +469,20 @@ export default function CreateContractPage() {
                         type="number"
                         value={monthlyRent}
                         onChange={(e) => setMonthlyRent(e.target.value)}
-                        onBlur={() => validateField('monthlyRent', () => 
-                          ValidationService.validatePositiveNumber(monthlyRent, 'Loyer mensuel')
-                        )}
-                      required
-                      min={0}
+                        onBlur={() =>
+                          validateField('monthlyRent', () =>
+                            ValidationService.validatePositiveNumber(monthlyRent, 'Loyer mensuel')
+                          )
+                        }
+                        required
+                        min={0}
                         error={getFieldState('monthlyRent').error}
                         touched={touched['monthlyRent']}
                         isValid={getFieldState('monthlyRent').isValid}
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="form-label-premium">Dépôt de garantie (FCFA) *</label>
                     <div className="mt-2">
@@ -475,9 +491,14 @@ export default function CreateContractPage() {
                         type="number"
                         value={depositAmount}
                         onChange={(e) => setDepositAmount(e.target.value)}
-                        onBlur={() => validateField('depositAmount', () => 
-                          ValidationService.validatePositiveNumber(depositAmount, 'Dépôt de garantie')
-                        )}
+                        onBlur={() =>
+                          validateField('depositAmount', () =>
+                            ValidationService.validatePositiveNumber(
+                              depositAmount,
+                              'Dépôt de garantie'
+                            )
+                          )
+                        }
                         required
                         min={0}
                         error={getFieldState('depositAmount').error}
@@ -486,7 +507,7 @@ export default function CreateContractPage() {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="form-label-premium">Charges mensuelles (FCFA)</label>
                     <input
@@ -497,7 +518,7 @@ export default function CreateContractPage() {
                       min={0}
                     />
                   </div>
-                  
+
                   <div>
                     <label className="form-label-premium">Jour de paiement (1-28) *</label>
                     <div className="mt-2">
@@ -557,7 +578,7 @@ export default function CreateContractPage() {
                   <Calendar className="w-5 h-5 text-[#F16522]" />
                   <h2 className="form-label-premium text-lg">Durée du bail</h2>
                 </div>
-                
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="form-label-premium">Date de début *</label>
@@ -574,7 +595,7 @@ export default function CreateContractPage() {
                       />
                     </div>
                   </div>
-                  
+
                   <div>
                     <label className="form-label-premium">Date de fin *</label>
                     <div className="mt-2">
@@ -583,17 +604,17 @@ export default function CreateContractPage() {
                         type="date"
                         value={endDate}
                         onChange={(e) => setEndDate(e.target.value)}
-                      onBlur={() => {
-                        if (startDate && endDate) {
-                          const result = ValidationService.validateDateRange(startDate, endDate);
-                          if (!result.isValid && result.error) {
-                            setFieldError('endDate', result.error);
-                          } else {
-                            clearFieldError('endDate');
+                        onBlur={() => {
+                          if (startDate && endDate) {
+                            const result = ValidationService.validateDateRange(startDate, endDate);
+                            if (!result.isValid && result.error) {
+                              setFieldError('endDate', result.error);
+                            } else {
+                              clearFieldError('endDate');
+                            }
                           }
-                        }
-                      }}
-                      required
+                        }}
+                        required
                         error={getFieldState('endDate').error}
                         touched={touched['endDate']}
                         isValid={getFieldState('endDate').isValid}
@@ -608,7 +629,7 @@ export default function CreateContractPage() {
                   <FileText className="w-5 h-5 text-[#F16522]" />
                   <h2 className="form-label-premium text-lg">Clauses personnalisées</h2>
                 </div>
-                
+
                 <textarea
                   value={customClauses}
                   onChange={(e) => setCustomClauses(e.target.value)}

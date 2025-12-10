@@ -32,17 +32,17 @@ export async function processNativeImage(
   options: ProcessImageOptions = {}
 ): Promise<{ file: File; preview: string }> {
   const { maxWidth = 1920, quality = 0.8 } = options;
-  
+
   // Convert dataUrl to File
   const fileName = `photo_${Date.now()}.jpg`;
   const rawFile = await dataUrlToFile(dataUrl, fileName);
-  
+
   // Compress the image
   const compressedFile = await UploadService.compressImage(rawFile, maxWidth, quality);
-  
+
   // Generate preview from compressed file
   const preview = await fileToDataUrl(compressedFile);
-  
+
   return { file: compressedFile, preview };
 }
 

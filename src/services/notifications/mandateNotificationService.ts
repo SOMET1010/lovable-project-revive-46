@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Types de notifications pour les mandats agence
  */
-export type MandateNotificationType = 
+export type MandateNotificationType =
   | 'mandate_created'
   | 'mandate_accepted'
   | 'mandate_refused'
@@ -25,7 +25,7 @@ interface NotificationPayload {
 async function sendMandateNotification(payload: NotificationPayload): Promise<void> {
   try {
     const { error } = await supabase.functions.invoke('send-mandate-notifications', {
-      body: payload
+      body: payload,
     });
 
     if (error) {
@@ -42,7 +42,7 @@ async function sendMandateNotification(payload: NotificationPayload): Promise<vo
 export async function notifyMandateCreated(mandateId: string): Promise<void> {
   return sendMandateNotification({
     mandateId,
-    type: 'mandate_created'
+    type: 'mandate_created',
   });
 }
 
@@ -52,7 +52,7 @@ export async function notifyMandateCreated(mandateId: string): Promise<void> {
 export async function notifyMandateAccepted(mandateId: string): Promise<void> {
   return sendMandateNotification({
     mandateId,
-    type: 'mandate_accepted'
+    type: 'mandate_accepted',
   });
 }
 
@@ -63,7 +63,7 @@ export async function notifyMandateRefused(mandateId: string, reason?: string): 
   return sendMandateNotification({
     mandateId,
     type: 'mandate_refused',
-    reason
+    reason,
   });
 }
 
@@ -74,7 +74,7 @@ export async function notifyMandateSuspended(mandateId: string, reason?: string)
   return sendMandateNotification({
     mandateId,
     type: 'mandate_suspended',
-    reason
+    reason,
   });
 }
 
@@ -84,7 +84,7 @@ export async function notifyMandateSuspended(mandateId: string, reason?: string)
 export async function notifyMandateReactivated(mandateId: string): Promise<void> {
   return sendMandateNotification({
     mandateId,
-    type: 'mandate_reactivated'
+    type: 'mandate_reactivated',
   });
 }
 
@@ -92,7 +92,7 @@ export async function notifyMandateReactivated(mandateId: string): Promise<void>
  * Notifier les deux parties que le mandat a été résilié
  */
 export async function notifyMandateTerminated(
-  mandateId: string, 
+  mandateId: string,
   terminatedBy: 'owner' | 'agency',
   reason?: string
 ): Promise<void> {
@@ -100,7 +100,7 @@ export async function notifyMandateTerminated(
     mandateId,
     type: 'mandate_terminated',
     terminatedBy,
-    reason
+    reason,
   });
 }
 
@@ -110,7 +110,7 @@ export async function notifyMandateTerminated(
 export async function notifyMandatePermissionsUpdated(mandateId: string): Promise<void> {
   return sendMandateNotification({
     mandateId,
-    type: 'mandate_permissions_updated'
+    type: 'mandate_permissions_updated',
   });
 }
 
@@ -121,5 +121,5 @@ export default {
   notifyMandateSuspended,
   notifyMandateReactivated,
   notifyMandateTerminated,
-  notifyMandatePermissionsUpdated
+  notifyMandatePermissionsUpdated,
 };

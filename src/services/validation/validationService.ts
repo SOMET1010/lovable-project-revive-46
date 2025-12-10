@@ -34,7 +34,10 @@ export const ValidationService = {
    */
   validateMinLength(value: string, minLength: number, fieldName: string): ValidationResult {
     if (value.trim().length < minLength) {
-      return { isValid: false, error: `${fieldName} doit contenir au moins ${minLength} caractères` };
+      return {
+        isValid: false,
+        error: `${fieldName} doit contenir au moins ${minLength} caractères`,
+      };
     }
     return { isValid: true };
   },
@@ -52,10 +55,18 @@ export const ValidationService = {
   /**
    * Valide la longueur min ET max combinées
    */
-  validateLength(value: string, minLength: number, maxLength: number, fieldName: string): ValidationResult {
+  validateLength(
+    value: string,
+    minLength: number,
+    maxLength: number,
+    fieldName: string
+  ): ValidationResult {
     const trimmed = value.trim();
     if (trimmed.length < minLength) {
-      return { isValid: false, error: `${fieldName} doit contenir au moins ${minLength} caractères` };
+      return {
+        isValid: false,
+        error: `${fieldName} doit contenir au moins ${minLength} caractères`,
+      };
     }
     if (trimmed.length > maxLength) {
       return { isValid: false, error: `${fieldName} ne doit pas dépasser ${maxLength} caractères` };
@@ -68,26 +79,29 @@ export const ValidationService = {
    */
   validateTitleQuality(title: string): ValidationResult {
     const trimmed = title.trim();
-    
+
     // Liste des titres génériques interdits
     const genericTitles = ['test', 'essai', 'aaa', 'abc', 'xxx', '123', 'asdf', 'qwerty', 'azerty'];
     const lowerTitle = trimmed.toLowerCase();
-    
-    if (genericTitles.some(g => lowerTitle === g || lowerTitle.startsWith(g + ' '))) {
+
+    if (genericTitles.some((g) => lowerTitle === g || lowerTitle.startsWith(g + ' '))) {
       return { isValid: false, error: 'Le titre doit être descriptif (pas de titre générique)' };
     }
-    
+
     // Vérifier qu'il y a au moins 2 mots
-    const words = trimmed.split(/\s+/).filter(w => w.length > 1);
+    const words = trimmed.split(/\s+/).filter((w) => w.length > 1);
     if (words.length < 2) {
       return { isValid: false, error: 'Le titre doit contenir au moins 2 mots' };
     }
-    
+
     // Vérifier les caractères répétés abusivement (ex: "aaaaaaa")
     if (/(.)\1{4,}/.test(trimmed)) {
-      return { isValid: false, error: 'Le titre contient des caractères répétés de manière abusive' };
+      return {
+        isValid: false,
+        error: 'Le titre contient des caractères répétés de manière abusive',
+      };
     }
-    
+
     return { isValid: true };
   },
 
@@ -97,10 +111,10 @@ export const ValidationService = {
   validateEmail(email: string): ValidationResult {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email.trim()) {
-      return { isValid: false, error: 'L\'email est obligatoire' };
+      return { isValid: false, error: "L'email est obligatoire" };
     }
     if (!emailRegex.test(email.trim())) {
-      return { isValid: false, error: 'Format d\'email invalide' };
+      return { isValid: false, error: "Format d'email invalide" };
     }
     return { isValid: true };
   },
@@ -147,7 +161,7 @@ export const ValidationService = {
     const date = new Date(dateStr);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (date < today) {
       return { isValid: false, error: `${fieldName} doit être une date future` };
     }
@@ -163,7 +177,7 @@ export const ValidationService = {
     }
     const startDate = new Date(startDateStr);
     const endDate = new Date(endDateStr);
-    
+
     if (endDate <= startDate) {
       return { isValid: false, error: 'La date de fin doit être postérieure à la date de début' };
     }
@@ -181,7 +195,7 @@ export const ValidationService = {
   validateCIPhoneNumber(phone: string): ValidationResult {
     const cleaned = phone.replace(/[\s\-\.]/g, '');
     const ciPhoneRegex = /^0[157][0-9]{8}$/;
-    
+
     if (!cleaned) {
       return { isValid: false, error: 'Le numéro de téléphone est obligatoire' };
     }
@@ -197,7 +211,7 @@ export const ValidationService = {
   validatePhoneWithCountryCode(phone: string): ValidationResult {
     const cleaned = phone.replace(/[\s\-\.]/g, '');
     const intlRegex = /^\+225[0-9]{10}$/;
-    
+
     if (!cleaned) {
       return { isValid: false, error: 'Le numéro de téléphone est obligatoire' };
     }
@@ -212,16 +226,16 @@ export const ValidationService = {
    */
   validatePhone(phone: string): ValidationResult {
     const cleaned = phone.replace(/[\s\-\.]/g, '');
-    
+
     if (!cleaned) {
       return { isValid: false, error: 'Le numéro de téléphone est obligatoire' };
     }
-    
+
     // Format international +225
     if (cleaned.startsWith('+225')) {
       return this.validatePhoneWithCountryCode(cleaned);
     }
-    
+
     // Format local
     return this.validateCIPhoneNumber(cleaned);
   },
@@ -233,7 +247,7 @@ export const ValidationService = {
   validateONECINumber(number: string): ValidationResult {
     const cleaned = number.replace(/\s/g, '').toUpperCase();
     const oneciRegex = /^[A-Z0-9]{8,15}$/;
-    
+
     if (!cleaned) {
       return { isValid: false, error: 'Le numéro ONECI est obligatoire' };
     }
@@ -250,7 +264,7 @@ export const ValidationService = {
   validateCNAMNumber(number: string): ValidationResult {
     const cleaned = number.replace(/\s/g, '');
     const cnamRegex = /^[0-9]{10,15}$/;
-    
+
     if (!cleaned) {
       return { isValid: false, error: 'Le numéro CNAM est obligatoire' };
     }
@@ -285,7 +299,7 @@ export const ValidationService = {
     }
 
     // Adresse obligatoire
-    const addressResult = this.validateRequired(formData.address, 'L\'adresse');
+    const addressResult = this.validateRequired(formData.address, "L'adresse");
     if (!addressResult.isValid && addressResult.error) {
       errors['address'] = addressResult.error;
     }
@@ -312,7 +326,7 @@ export const ValidationService = {
 
     return {
       isValid: Object.keys(errors).length === 0,
-      errors
+      errors,
     };
   },
 
@@ -338,7 +352,7 @@ export const ValidationService = {
 
     return {
       isValid: Object.keys(errors).length === 0,
-      errors
+      errors,
     };
   },
 
@@ -373,7 +387,10 @@ export const ValidationService = {
     }
 
     // Dépôt positif
-    const depositResult = this.validatePositiveNumber(formData.depositAmount, 'Le dépôt de garantie');
+    const depositResult = this.validatePositiveNumber(
+      formData.depositAmount,
+      'Le dépôt de garantie'
+    );
     if (!depositResult.isValid && depositResult.error) {
       errors['depositAmount'] = depositResult.error;
     }
@@ -407,7 +424,7 @@ export const ValidationService = {
 
     return {
       isValid: Object.keys(errors).length === 0,
-      errors
+      errors,
     };
   },
 
@@ -434,9 +451,9 @@ export const ValidationService = {
       '<': '&lt;',
       '>': '&gt;',
       '"': '&quot;',
-      "'": '&#039;'
+      "'": '&#039;',
     };
-    return html.replace(/[&<>"']/g, m => map[m] || m);
+    return html.replace(/[&<>"']/g, (m) => map[m] || m);
   },
 
   /**
@@ -444,17 +461,17 @@ export const ValidationService = {
    */
   normalizePhone(phone: string): string {
     const cleaned = phone.replace(/[\s\-\.]/g, '');
-    
+
     // Si format international
     if (cleaned.startsWith('+225')) {
       return cleaned;
     }
-    
+
     // Si format local, ajoute +225
     if (cleaned.startsWith('0')) {
       return '+225' + cleaned.substring(1);
     }
-    
+
     return cleaned;
   },
 
@@ -463,19 +480,19 @@ export const ValidationService = {
    */
   formatPhoneDisplay(phone: string): string {
     const cleaned = phone.replace(/\D/g, '');
-    
+
     // Format: +225 07 01 23 45 67
     if (cleaned.length === 13 && cleaned.startsWith('225')) {
       return `+225 ${cleaned.slice(3, 5)} ${cleaned.slice(5, 7)} ${cleaned.slice(7, 9)} ${cleaned.slice(9, 11)} ${cleaned.slice(11, 13)}`;
     }
-    
+
     // Format local: 07 01 23 45 67
     if (cleaned.length === 10) {
       return `${cleaned.slice(0, 2)} ${cleaned.slice(2, 4)} ${cleaned.slice(4, 6)} ${cleaned.slice(6, 8)} ${cleaned.slice(8, 10)}`;
     }
-    
+
     return phone;
-  }
+  },
 };
 
 export default ValidationService;

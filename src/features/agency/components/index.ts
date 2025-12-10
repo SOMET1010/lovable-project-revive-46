@@ -1,6 +1,6 @@
 /**
  * Agency Feature Components
- * 
+ *
  * Composants modulaires pour le dashboard d'agence
  */
 

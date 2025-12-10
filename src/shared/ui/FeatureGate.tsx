@@ -24,7 +24,9 @@ export function FeatureGate({
   const { isEnabled, isLoading } = useFeatureFlag(feature);
 
   if (isLoading) {
-    return loadingFallback ? <>{loadingFallback}</> : (
+    return loadingFallback ? (
+      <>{loadingFallback}</>
+    ) : (
       <div className="animate-pulse bg-muted rounded-lg h-32" />
     );
   }
@@ -73,8 +75,8 @@ function FeatureComingSoon({ featureName }: { featureName: string }) {
         </div>
       </div>
       <p className="mt-4 text-sm text-muted-foreground">
-        Nous travaillons activement sur cette fonctionnalité. 
-        Elle sera disponible prochainement pour améliorer votre expérience.
+        Nous travaillons activement sur cette fonctionnalité. Elle sera disponible prochainement
+        pour améliorer votre expérience.
       </p>
     </div>
   );

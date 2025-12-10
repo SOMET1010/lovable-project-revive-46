@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { messagingService, Message, Attachment } from '../../features/messaging/services/messaging.service';
+import {
+  messagingService,
+  Message,
+  Attachment,
+} from '../../features/messaging/services/messaging.service';
 import { useAuth } from '../../contexts';
 import { supabase } from '../../lib';
 import { useNotificationSound } from './useNotificationSound';
