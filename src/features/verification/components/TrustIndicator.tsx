@@ -4,9 +4,8 @@ interface TrustIndicatorProps {
   userId?: string;
   userType?: 'locataire' | 'proprietaire' | 'agence';
   verificationStatus?: {
-    oneci_verified: boolean;
-    cnam_verified: boolean;
-    identity_verified: boolean;
+    facial_verified: boolean;   // Vérification biométrique NeoFace
+    identity_verified: boolean; // Vérification admin ANSUT
   };
   rating?: number;
   reviewCount?: number;
@@ -27,9 +26,8 @@ export default function TrustIndicator({
     const maxScore = 5;
 
     if (verificationStatus) {
-      if (verificationStatus.oneci_verified) score += 2;
-      if (verificationStatus.cnam_verified) score += 1;
-      if (verificationStatus.identity_verified) score += 2;
+      if (verificationStatus.facial_verified) score += 3;    // NeoFace biométrique
+      if (verificationStatus.identity_verified) score += 2;  // ANSUT admin
     }
 
     return { score, maxScore };
@@ -114,32 +112,16 @@ export default function TrustIndicator({
         <div className="space-y-2 mb-4">
           <div className={`flex items-center justify-between ${sizeClasses.text}`}>
             <div className="flex items-center space-x-2">
-              {verificationStatus.oneci_verified ? (
+              {verificationStatus.facial_verified ? (
                 <CheckCircle className={`${sizeClasses.icon} text-green-600`} />
               ) : (
                 <AlertCircle className={`${sizeClasses.icon} text-gray-400`} />
               )}
-              <span className={verificationStatus.oneci_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
-                Identité ONECI
+              <span className={verificationStatus.facial_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+                Biométrie NeoFace
               </span>
             </div>
-            {verificationStatus.oneci_verified && (
-              <span className="text-green-600 font-semibold">Vérifié</span>
-            )}
-          </div>
-
-          <div className={`flex items-center justify-between ${sizeClasses.text}`}>
-            <div className="flex items-center space-x-2">
-              {verificationStatus.cnam_verified ? (
-                <CheckCircle className={`${sizeClasses.icon} text-green-600`} />
-              ) : (
-                <AlertCircle className={`${sizeClasses.icon} text-gray-400`} />
-              )}
-              <span className={verificationStatus.cnam_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
-                Affiliation CNAM
-              </span>
-            </div>
-            {verificationStatus.cnam_verified && (
+            {verificationStatus.facial_verified && (
               <span className="text-green-600 font-semibold">Vérifié</span>
             )}
           </div>
@@ -152,7 +134,7 @@ export default function TrustIndicator({
                 <AlertCircle className={`${sizeClasses.icon} text-gray-400`} />
               )}
               <span className={verificationStatus.identity_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
-                Profil vérifié
+                Identité vérifiée
               </span>
             </div>
             {verificationStatus.identity_verified && (

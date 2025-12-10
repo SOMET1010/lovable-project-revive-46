@@ -10,8 +10,7 @@ export interface OwnerBadgeProps {
   avatarUrl?: string | null;
   trustScore?: number | null;
   isVerified?: boolean;
-  oneciVerified?: boolean;
-  cnamVerified?: boolean;
+  facialVerified?: boolean;  // Vérification biométrique NeoFace
   showVerificationBadges?: boolean;
   variant?: 'inline' | 'card';
   size?: 'sm' | 'md' | 'lg';
@@ -62,8 +61,7 @@ export function OwnerBadge({
   avatarUrl,
   trustScore,
   isVerified = false,
-  oneciVerified = false,
-  cnamVerified = false,
+  facialVerified = false,
   showVerificationBadges = false,
   variant = 'inline',
   size = 'md',
@@ -248,17 +246,12 @@ export function OwnerBadge({
                 <CheckCircle className="h-3 w-3" /> Identité vérifiée
               </span>
             )}
-            {oneciVerified && (
+            {facialVerified && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
-                <Shield className="h-3 w-3" /> ONECI
+                <Shield className="h-3 w-3" /> Biométrie vérifiée
               </span>
             )}
-            {cnamVerified && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-50 text-purple-700 text-xs font-medium rounded-full">
-                <Shield className="h-3 w-3" /> CNAM
-              </span>
-            )}
-            {!isVerified && !oneciVerified && !cnamVerified && (
+            {!isVerified && !facialVerified && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full">
                 <Shield className="h-3 w-3" /> Vérification en cours
               </span>

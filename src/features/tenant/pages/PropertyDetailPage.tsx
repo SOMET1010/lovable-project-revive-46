@@ -625,8 +625,7 @@ export default function PropertyDetailPage() {
                 avatarUrl={property.owner_avatar_url}
                 trustScore={property.owner_trust_score}
                 isVerified={property.owner_is_verified ?? false}
-                oneciVerified={property.owner_oneci_verified ?? false}
-                cnamVerified={property.owner_cnam_verified ?? false}
+                facialVerified={false}
                 showVerificationBadges={!property.is_anonymous}
                 variant="card"
                 size="lg"
