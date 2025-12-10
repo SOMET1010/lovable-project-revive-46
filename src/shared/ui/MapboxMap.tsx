@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapboxToken } from '@/hooks/shared/useMapboxToken';
-import { Loader2, MapPin, Navigation2, Focus } from 'lucide-react';
+import { Loader2, MapPin, Navigation2, Focus, Map, Globe2 } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -33,6 +33,7 @@ interface MapboxMapProps {
   onMarkerDrag?: (lngLat: { lng: number; lat: number }) => void;
   searchEnabled?: boolean;
   singleMarker?: boolean;
+  styleToggleEnabled?: boolean;
 }
 
 // Coordonnées par défaut des villes ivoiriennes pour fallback
@@ -65,7 +66,14 @@ export default function MapboxMap({
   onMapClick,
   onMarkerDrag,
   singleMarker = false,
+  styleToggleEnabled = false,
 }: MapboxMapProps) {
+  type MapStyle = 'streets' | 'satellite';
+  const [mapStyle, setMapStyle] = useState<MapStyle>('streets');
+  const [styleVersion, setStyleVersion] = useState(0); // bump to reapply layers after style change
+  const styleUrl = mapStyle === 'satellite'
+    ? 'mapbox://styles/mapbox/satellite-streets-v12'
+    : 'mapbox://styles/mapbox/streets-v12';
   
   // Filtrer les propriétés avec coordonnées valides et ajouter fallback
   const validProperties = properties.map(p => {
@@ -110,7 +118,7 @@ export default function MapboxMap({
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
+        style: styleUrl,
         center: center,
         zoom: zoom,
         attributionControl: false,
@@ -156,7 +164,14 @@ export default function MapboxMap({
         map.current = null;
       }
     };
-  }, [mapboxToken]);
+  }, [mapboxToken, styleUrl]);
+
+  // Handle style toggle
+  useEffect(() => {
+    if (!map.current) return;
+    map.current.setStyle(styleUrl);
+    map.current.once('style.load', () => setStyleVersion(v => v + 1));
+  }, [styleUrl]);
 
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
@@ -330,7 +345,7 @@ export default function MapboxMap({
         });
       }
     }
-  }, [properties, mapLoaded, singleMarker, draggableMarker, fitBounds, showRadius, radiusKm]);
+  }, [properties, mapLoaded, singleMarker, draggableMarker, fitBounds, showRadius, radiusKm, styleVersion]);
 
   useEffect(() => {
     if (!highlightedPropertyId) {
@@ -469,33 +484,58 @@ export default function MapboxMap({
         aria-label="Carte interactive des propriétés"
       />
       
-      {/* Boutons de contrôle carte */}
-      <div className="absolute bottom-4 right-4 z-10 flex flex-col gap-2">
-        {/* Bouton Recentrer sur propriétés */}
-        <button
-          onClick={handleResetView}
-          disabled={validProperties.length === 0}
-          className="bg-white hover:bg-neutral-50 p-3 rounded-full shadow-lg border border-neutral-200 transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Recentrer sur les propriétés"
-          aria-label="Recentrer sur les propriétés"
-        >
-          <Focus className="w-5 h-5 text-primary" />
-        </button>
-        
-        {/* Bouton Géolocalisation */}
-        <button
-          onClick={handleLocateUser}
-          disabled={isLocating}
-          className="bg-white hover:bg-neutral-50 p-3 rounded-full shadow-lg border border-neutral-200 transition-all hover:shadow-xl disabled:opacity-50"
-          title="Me localiser"
-          aria-label="Centrer sur ma position"
-        >
-          {isLocating ? (
-            <Loader2 className="w-5 h-5 text-primary animate-spin" />
-          ) : (
-            <Navigation2 className="w-5 h-5 text-primary" />
-          )}
-        </button>
+      {/* Boutons de contrôle carte + toggle style */}
+      <div className="absolute bottom-4 right-4 z-10 flex flex-col items-end gap-3">
+        {styleToggleEnabled && (
+          <div className="bg-white rounded-2xl shadow-lg border border-neutral-200 overflow-hidden">
+            <button
+              onClick={() => setMapStyle('streets')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors ${
+                mapStyle === 'streets' ? 'bg-[#F16522] text-white' : 'text-neutral-700 hover:bg-neutral-50'
+              }`}
+            >
+              <Map className="w-4 h-4" />
+              Plan
+            </button>
+            <button
+              onClick={() => setMapStyle('satellite')}
+              className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-colors border-t border-neutral-100 ${
+                mapStyle === 'satellite' ? 'bg-[#F16522] text-white' : 'text-neutral-700 hover:bg-neutral-50'
+              }`}
+            >
+              <Globe2 className="w-4 h-4" />
+              Satellite
+            </button>
+          </div>
+        )}
+
+        <div className="flex flex-col gap-2">
+          {/* Bouton Recentrer sur propriétés */}
+          <button
+            onClick={handleResetView}
+            disabled={validProperties.length === 0}
+            className="bg-white hover:bg-neutral-50 p-3 rounded-full shadow-lg border border-neutral-200 transition-all hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Recentrer sur les propriétés"
+            aria-label="Recentrer sur les propriétés"
+          >
+            <Focus className="w-5 h-5 text-primary" />
+          </button>
+          
+          {/* Bouton Géolocalisation */}
+          <button
+            onClick={handleLocateUser}
+            disabled={isLocating}
+            className="bg-white hover:bg-neutral-50 p-3 rounded-full shadow-lg border border-neutral-200 transition-all hover:shadow-xl disabled:opacity-50"
+            title="Me localiser"
+            aria-label="Centrer sur ma position"
+          >
+            {isLocating ? (
+              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+            ) : (
+              <Navigation2 className="w-5 h-5 text-primary" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
