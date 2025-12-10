@@ -11,7 +11,6 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { toast } from 'sonner';
 import { CITIES } from '@/shared/data/cities';
 import { PROPERTY_TYPES } from '@/shared/data/propertyTypes';
-import { Link } from 'react-router-dom';
 
 interface PropertyAlert {
   id: string;
