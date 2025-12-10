@@ -707,6 +707,74 @@ export type Database = {
         }
         Relationships: []
       }
+      guarantors: {
+        Row: {
+          created_at: string | null
+          documents: Json | null
+          email: string | null
+          employer: string | null
+          full_name: string
+          id: string
+          invitation_sent_at: string | null
+          monthly_income: number | null
+          neoface_score: number | null
+          neoface_verified: boolean | null
+          occupation: string | null
+          phone: string | null
+          relationship: string | null
+          status: string | null
+          tenant_id: string
+          updated_at: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          documents?: Json | null
+          email?: string | null
+          employer?: string | null
+          full_name: string
+          id?: string
+          invitation_sent_at?: string | null
+          monthly_income?: number | null
+          neoface_score?: number | null
+          neoface_verified?: boolean | null
+          occupation?: string | null
+          phone?: string | null
+          relationship?: string | null
+          status?: string | null
+          tenant_id: string
+          updated_at?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          documents?: Json | null
+          email?: string | null
+          employer?: string | null
+          full_name?: string
+          id?: string
+          invitation_sent_at?: string | null
+          monthly_income?: number | null
+          neoface_score?: number | null
+          neoface_verified?: boolean | null
+          occupation?: string | null
+          phone?: string | null
+          relationship?: string | null
+          status?: string | null
+          tenant_id?: string
+          updated_at?: string | null
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guarantors_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       hero_slides: {
         Row: {
           created_at: string | null
@@ -1231,7 +1299,12 @@ export type Database = {
           cnam_verified: boolean | null
           cni_photo_url: string | null
           created_at: string | null
+          date_of_birth: string | null
+          dependents_count: number | null
           email: string | null
+          employer: string | null
+          employment_start_date: string | null
+          employment_type: string | null
           facial_verification_date: string | null
           facial_verification_image_url: string | null
           facial_verification_score: number | null
@@ -1239,6 +1312,10 @@ export type Database = {
           full_name: string | null
           id: string
           is_verified: boolean | null
+          marital_status: string | null
+          monthly_income: number | null
+          nationality: string | null
+          occupation: string | null
           oneci_data: Json | null
           oneci_number: string | null
           oneci_verification_date: string | null
@@ -1260,7 +1337,12 @@ export type Database = {
           cnam_verified?: boolean | null
           cni_photo_url?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
+          dependents_count?: number | null
           email?: string | null
+          employer?: string | null
+          employment_start_date?: string | null
+          employment_type?: string | null
           facial_verification_date?: string | null
           facial_verification_image_url?: string | null
           facial_verification_score?: number | null
@@ -1268,6 +1350,10 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_verified?: boolean | null
+          marital_status?: string | null
+          monthly_income?: number | null
+          nationality?: string | null
+          occupation?: string | null
           oneci_data?: Json | null
           oneci_number?: string | null
           oneci_verification_date?: string | null
@@ -1289,7 +1375,12 @@ export type Database = {
           cnam_verified?: boolean | null
           cni_photo_url?: string | null
           created_at?: string | null
+          date_of_birth?: string | null
+          dependents_count?: number | null
           email?: string | null
+          employer?: string | null
+          employment_start_date?: string | null
+          employment_type?: string | null
           facial_verification_date?: string | null
           facial_verification_image_url?: string | null
           facial_verification_score?: number | null
@@ -1297,6 +1388,10 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_verified?: boolean | null
+          marital_status?: string | null
+          monthly_income?: number | null
+          nationality?: string | null
+          occupation?: string | null
           oneci_data?: Json | null
           oneci_number?: string | null
           oneci_verification_date?: string | null
@@ -2047,6 +2142,59 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "public_properties"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_documents: {
+        Row: {
+          created_at: string | null
+          document_name: string | null
+          document_type: string
+          document_url: string
+          file_size: number | null
+          id: string
+          ocr_extracted: Json | null
+          rejection_reason: string | null
+          user_id: string
+          verified: boolean | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_name?: string | null
+          document_type: string
+          document_url: string
+          file_size?: number | null
+          id?: string
+          ocr_extracted?: Json | null
+          rejection_reason?: string | null
+          user_id: string
+          verified?: boolean | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_name?: string | null
+          document_type?: string
+          document_url?: string
+          file_size?: number | null
+          id?: string
+          ocr_extracted?: Json | null
+          rejection_reason?: string | null
+          user_id?: string
+          verified?: boolean | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_documents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
           },
         ]
       }

@@ -259,10 +259,10 @@ async function handleVerifySelfie(
     throw new Error('Réponse NeoFace invalide');
   }
 
-  // Determine verification result
+  // Determine verification result (CDC v3: seuil 85%)
   const isVerified = verifyData.status === 'verified' || 
                      verifyData.match === true || 
-                     (verifyData.matching_score && verifyData.matching_score > 0.7);
+                     (verifyData.matching_score && verifyData.matching_score > 0.85);
   
   const matchingScore = verifyData.matching_score || verifyData.score || null;
   const status = isVerified ? 'verified' : 'failed';

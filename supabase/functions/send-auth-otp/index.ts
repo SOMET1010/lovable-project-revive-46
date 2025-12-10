@@ -98,7 +98,7 @@ Deno.serve(async (req: Request) => {
 
     // ========== GÉNÉRER ET STOCKER L'OTP ==========
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes (CDC v3)
 
     const storeResponse = await fetch(`${supabaseUrl}/rest/v1/verification_codes`, {
       method: 'POST',
@@ -135,7 +135,7 @@ Deno.serve(async (req: Request) => {
       ? `${supabaseUrl}/functions/v1/send-sms-hybrid`
       : `${supabaseUrl}/functions/v1/send-whatsapp-hybrid`;
 
-    const message = `Votre code Mon Toit est : ${otp}\n\nCe code expire dans 10 minutes. Ne le partagez avec personne.`;
+    const message = `Votre code Mon Toit est : ${otp}\n\nCe code expire dans 5 minutes. Ne le partagez avec personne.`;
 
     edgeLogger.info('Sending OTP', { method, phone: normalizedPhone });
 
@@ -164,7 +164,7 @@ Deno.serve(async (req: Request) => {
           message: `Mode développement - Code généré (envoi ${method} indisponible)`,
           otp: otp, // Code OTP pour tests en dev
           devMode: true,
-          expiresIn: 600,
+          expiresIn: 300, // 5 minutes
         }),
         {
           status: 200, // 200 pour que le frontend passe à l'étape suivante
@@ -180,7 +180,7 @@ Deno.serve(async (req: Request) => {
         success: true,
         message: `Code envoyé par ${method === 'sms' ? 'SMS' : 'WhatsApp'}`,
         provider: sendResult.provider,
-        expiresIn: 600,
+        expiresIn: 300, // 5 minutes
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

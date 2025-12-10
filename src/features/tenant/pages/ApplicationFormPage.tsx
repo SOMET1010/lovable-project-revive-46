@@ -158,7 +158,7 @@ export default function ApplicationForm() {
   };
 
   const calculateApplicationScore = () => {
-    return ScoringService.calculateSimpleScore(profile);
+    return ScoringService.calculateSimpleScore(profile as Record<string, unknown> | null);
   };
 
   if (loading) {
