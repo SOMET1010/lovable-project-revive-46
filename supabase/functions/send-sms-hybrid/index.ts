@@ -87,42 +87,72 @@ Deno.serve(async (req: Request) => {
     // Define handlers for each SMS provider
     const handlers: Record<string, (config: ServiceConfig, params: SMSHandlerParams) => Promise<SMSSuccessResponse>> = {
       intouch: async (config: ServiceConfig, params: SMSHandlerParams): Promise<SMSSuccessResponse> => {
-        const agencyCode = Deno.env.get('INTOUCH_AGENCY_CODE');
-        const apiKey = Deno.env.get('INTOUCH_API_KEY');
+        // InTouch credentials - selon documentation INTOUCH_INTEGRATION_COMPLETE.md
+        const partnerId = Deno.env.get('INTOUCH_PARTNER_ID');
+        const username = Deno.env.get('INTOUCH_USERNAME');
+        const password = Deno.env.get('INTOUCH_PASSWORD');
+        const loginApi = Deno.env.get('INTOUCH_LOGIN_API');
+        const passwordApi = Deno.env.get('INTOUCH_PASSWORD_API');
 
-        if (!agencyCode || !apiKey) {
-          throw new Error('InTouch credentials not configured (INTOUCH_AGENCY_CODE, INTOUCH_API_KEY)');
+        if (!partnerId || !username || !password || !loginApi || !passwordApi) {
+          throw new Error('InTouch credentials not configured (INTOUCH_PARTNER_ID, INTOUCH_USERNAME, INTOUCH_PASSWORD, INTOUCH_LOGIN_API, INTOUCH_PASSWORD_API)');
         }
 
-        // InTouch SMS API - URL correcte
-        const intouchUrl = `https://apidist.gutouch.net/apidist/sec/${agencyCode}/sms`;
-        edgeLogger.info('InTouch SMS request', { url: intouchUrl, phone: params.phoneNumber });
+        // InTouch SMS API endpoint
+        const intouchUrl = 'https://apidist.gutouch.net/apidist/sec/ANSUT13287/sms';
+        
+        // Generate unique transaction ID
+        const transactionId = `MTT_SMS_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        
+        // Format phone number (digits only, without +)
+        const cleanPhone = params.phoneNumber.replace(/\D/g, '');
+        
+        edgeLogger.info('InTouch SMS request', { 
+          url: intouchUrl, 
+          phone: cleanPhone,
+          transactionId 
+        });
 
         const response = await fetch(intouchUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Basic ${btoa(`${agencyCode}:${apiKey}`)}`,
+            'Authorization': `Basic ${btoa(`${username}:${password}`)}`,
           },
           body: JSON.stringify({
-            recipient_phone_number: params.phoneNumber.replace('+', ''),
+            partner_id: partnerId,
+            partner_transaction_id: transactionId,
+            login_api: loginApi,
+            password_api: passwordApi,
+            recipient_phone_number: cleanPhone,
             message: params.message,
             sender_id: config.config?.sender || params.sender || 'MonToit',
           }),
         });
 
+        const responseText = await response.text();
+        edgeLogger.info('InTouch SMS response', { status: response.status, body: responseText.substring(0, 500) });
+
         if (!response.ok) {
-          const errorText = await response.text();
-          edgeLogger.error('InTouch SMS error', undefined, { status: response.status, error: errorText });
-          throw new Error(`InTouch SMS failed: ${response.status} - ${errorText}`);
+          edgeLogger.error('InTouch SMS error', undefined, { status: response.status, error: responseText });
+          throw new Error(`InTouch SMS failed: ${response.status} - ${responseText}`);
         }
 
-        const data = await response.json() as InTouchSMSResponse;
-        edgeLogger.info('InTouch SMS success', { messageId: data.message_id || data.id });
+        let data: InTouchSMSResponse;
+        try {
+          data = JSON.parse(responseText) as InTouchSMSResponse;
+        } catch {
+          // If response is not JSON, use transaction ID as reference
+          data = { transaction_id: transactionId };
+        }
+        
+        edgeLogger.info('InTouch SMS success', { 
+          messageId: data.message_id || data.id || data.transaction_id || transactionId 
+        });
 
         return {
           success: true,
-          messageId: data.message_id || data.id || data.transaction_id,
+          messageId: data.message_id || data.id || data.transaction_id || transactionId,
           provider: 'intouch',
         };
       },
