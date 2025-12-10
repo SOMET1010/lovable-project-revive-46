@@ -860,24 +860,18 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get Resend API key (fallbacks for local .env names)
-    const resendApiKey =
-      Deno.env.get('RESEND_API_KEY') ||
-      Deno.env.get('VITE_RESEND_API_KEY');
+    // Get Resend API key - Pour le développement local, utiliser la clé directement
+    let resendApiKey = Deno.env.get('RESEND_API_KEY') || Deno.env.get('VITE_RESEND_API_KEY');
+
+    // Pour le développement local, utiliser la clé directement si non trouvée
+    if (!resendApiKey && isLocalDev()) {
+      resendApiKey = "re_DvxxTkmv_KLgX7D1LSvr4tVZK1EUtRLv9";
+    }
     
     if (!resendApiKey) {
       console.error('[send-email] RESEND_API_KEY not configured');
-
-      if (isLocalDev()) {
-        console.warn('[send-email] Dev mode: returning mock success (missing API key)');
-        return new Response(
-          JSON.stringify({ success: true, mocked: true, reason: 'RESEND_API_KEY not configured', data }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
       return new Response(
-        JSON.stringify({ error: 'Email service not configured' }),
+        JSON.stringify({ error: 'Email service not configured - RESEND_API_KEY missing' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -908,15 +902,6 @@ Deno.serve(async (req: Request) => {
       });
     } catch (fetchErr: any) {
       console.error('[send-email] Network error while calling Resend:', fetchErr?.message || fetchErr);
-
-      if (isLocalDev()) {
-        console.warn('[send-email] Dev mode: returning mock success after network error');
-        return new Response(
-          JSON.stringify({ success: true, mocked: true, reason: 'Network error calling Resend', detail: fetchErr?.message || fetchErr, data }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
       return new Response(
         JSON.stringify({ error: 'Network error calling Resend', detail: fetchErr?.message || fetchErr }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -927,15 +912,6 @@ Deno.serve(async (req: Request) => {
 
     if (!response.ok) {
       console.error('[send-email] Resend error:', resultText);
-
-      if (isLocalDev()) {
-        console.warn('[send-email] Dev mode: returning mock success after Resend error');
-        return new Response(
-          JSON.stringify({ success: true, mocked: true, reason: 'Resend error', detail: resultText, data }),
-          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-
       return new Response(
         JSON.stringify({ error: 'Failed to send email', detail: resultText }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -950,15 +926,6 @@ Deno.serve(async (req: Request) => {
     );
   } catch (error: any) {
     console.error('[send-email] Error:', error);
-
-    if (isLocalDev()) {
-      console.warn('[send-email] Dev mode: returning mock success after unexpected error');
-      return new Response(
-        JSON.stringify({ success: true, mocked: true, reason: 'Unexpected error', detail: error?.message || error }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
