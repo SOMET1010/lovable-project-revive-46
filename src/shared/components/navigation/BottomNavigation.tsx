@@ -1,7 +1,8 @@
-import { Home, Search, PlusCircle, MessageCircle, User } from 'lucide-react';
+import { Home, Search, PlusCircle, MessageCircle, User, Heart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useUnreadCount } from '@/features/messaging/hooks/useUnreadCount';
+import { usePermissions } from '@/shared/hooks/usePermissions';
 
 interface NavItem {
   icon: typeof Home;
@@ -9,25 +10,42 @@ interface NavItem {
   href: string;
   badge?: number;
   requiresAuth?: boolean;
+  visible?: boolean;
 }
 
 export default function BottomNavigation() {
   const location = useLocation();
   const { user } = useAuth();
   const { count: unreadCount } = useUnreadCount();
+  const permissions = usePermissions();
 
   const isActive = (href: string) => {
     if (href === '/') return location.pathname === '/';
     return location.pathname.startsWith(href);
   };
 
+  // Navigation conditionnelle basée sur les permissions
   const navItems: NavItem[] = [
-    { icon: Home, label: 'Accueil', href: '/' },
-    { icon: Search, label: 'Recherche', href: '/recherche' },
-    { icon: PlusCircle, label: 'Publier', href: '/ajouter-propriete' },
-    { icon: MessageCircle, label: 'Messages', href: '/messages', badge: unreadCount, requiresAuth: true },
-    { icon: User, label: 'Profil', href: user ? '/profil' : '/connexion' },
-  ];
+    { icon: Home, label: 'Accueil', href: '/', visible: true },
+    { icon: Search, label: 'Recherche', href: '/recherche', visible: true },
+    // Publier visible uniquement pour les propriétaires/agents OU utilisateurs non connectés
+    { 
+      icon: PlusCircle, 
+      label: 'Publier', 
+      href: '/ajouter-propriete', 
+      visible: permissions.canAddProperty || !permissions.isAuthenticated 
+    },
+    // Favoris visible pour les locataires connectés (remplace Publier quand non visible)
+    { 
+      icon: Heart, 
+      label: 'Favoris', 
+      href: '/favoris', 
+      requiresAuth: true,
+      visible: permissions.isAuthenticated && !permissions.canAddProperty && permissions.isTenant
+    },
+    { icon: MessageCircle, label: 'Messages', href: '/messages', badge: unreadCount, requiresAuth: true, visible: true },
+    { icon: User, label: 'Profil', href: user ? '/profil' : '/connexion', visible: true },
+  ].filter(item => item.visible);
 
   // Hide on certain pages
   const hiddenRoutes = ['/connexion', '/inscription', '/completer-profil'];
