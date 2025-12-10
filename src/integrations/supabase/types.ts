@@ -1413,6 +1413,7 @@ export type Database = {
           ansut_certificate_url: string | null
           ansut_verification_date: string | null
           ansut_verified: boolean | null
+          avg_response_time_hours: number | null
           bathrooms: number | null
           bedrooms: number | null
           charges_amount: number | null
@@ -1423,6 +1424,7 @@ export type Database = {
           has_ac: boolean | null
           has_garden: boolean | null
           has_parking: boolean | null
+          has_virtual_tour: boolean | null
           id: string
           images: string[] | null
           is_anonymous: boolean | null
@@ -1441,6 +1443,7 @@ export type Database = {
           title: string
           updated_at: string | null
           view_count: number | null
+          virtual_tour_url: string | null
         }
         Insert: {
           address?: string | null
@@ -1448,6 +1451,7 @@ export type Database = {
           ansut_certificate_url?: string | null
           ansut_verification_date?: string | null
           ansut_verified?: boolean | null
+          avg_response_time_hours?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           charges_amount?: number | null
@@ -1458,6 +1462,7 @@ export type Database = {
           has_ac?: boolean | null
           has_garden?: boolean | null
           has_parking?: boolean | null
+          has_virtual_tour?: boolean | null
           id?: string
           images?: string[] | null
           is_anonymous?: boolean | null
@@ -1476,6 +1481,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           view_count?: number | null
+          virtual_tour_url?: string | null
         }
         Update: {
           address?: string | null
@@ -1483,6 +1489,7 @@ export type Database = {
           ansut_certificate_url?: string | null
           ansut_verification_date?: string | null
           ansut_verified?: boolean | null
+          avg_response_time_hours?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
           charges_amount?: number | null
@@ -1493,6 +1500,7 @@ export type Database = {
           has_ac?: boolean | null
           has_garden?: boolean | null
           has_parking?: boolean | null
+          has_virtual_tour?: boolean | null
           id?: string
           images?: string[] | null
           is_anonymous?: boolean | null
@@ -1511,6 +1519,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           view_count?: number | null
+          virtual_tour_url?: string | null
         }
         Relationships: [
           {
@@ -1526,13 +1535,16 @@ export type Database = {
         Row: {
           city: string | null
           created_at: string | null
+          frequency: string | null
           id: string
           is_active: boolean | null
           last_notified_at: string | null
+          last_results_count: number | null
           max_bedrooms: number | null
           max_price: number | null
           min_bedrooms: number | null
           min_price: number | null
+          name: string | null
           neighborhood: string | null
           property_type: string | null
           updated_at: string | null
@@ -1541,13 +1553,16 @@ export type Database = {
         Insert: {
           city?: string | null
           created_at?: string | null
+          frequency?: string | null
           id?: string
           is_active?: boolean | null
           last_notified_at?: string | null
+          last_results_count?: number | null
           max_bedrooms?: number | null
           max_price?: number | null
           min_bedrooms?: number | null
           min_price?: number | null
+          name?: string | null
           neighborhood?: string | null
           property_type?: string | null
           updated_at?: string | null
@@ -1556,13 +1571,16 @@ export type Database = {
         Update: {
           city?: string | null
           created_at?: string | null
+          frequency?: string | null
           id?: string
           is_active?: boolean | null
           last_notified_at?: string | null
+          last_results_count?: number | null
           max_bedrooms?: number | null
           max_price?: number | null
           min_bedrooms?: number | null
           min_price?: number | null
+          name?: string | null
           neighborhood?: string | null
           property_type?: string | null
           updated_at?: string | null
@@ -2329,6 +2347,142 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visit_slots: {
+        Row: {
+          booked_by: string | null
+          created_at: string | null
+          duration_minutes: number | null
+          end_time: string
+          google_calendar_event_id: string | null
+          id: string
+          is_booked: boolean | null
+          notes: string | null
+          owner_id: string
+          property_id: string
+          start_time: string
+          updated_at: string | null
+          visit_type: string | null
+        }
+        Insert: {
+          booked_by?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          end_time: string
+          google_calendar_event_id?: string | null
+          id?: string
+          is_booked?: boolean | null
+          notes?: string | null
+          owner_id: string
+          property_id: string
+          start_time: string
+          updated_at?: string | null
+          visit_type?: string | null
+        }
+        Update: {
+          booked_by?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          end_time?: string
+          google_calendar_event_id?: string | null
+          id?: string
+          is_booked?: boolean | null
+          notes?: string | null
+          owner_id?: string
+          property_id?: string
+          start_time?: string
+          updated_at?: string | null
+          visit_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_slots_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visit_slots_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visits: {
+        Row: {
+          created_at: string | null
+          feedback: string | null
+          id: string
+          notes: string | null
+          owner_id: string
+          property_id: string
+          rating: number | null
+          slot_id: string | null
+          status: string | null
+          updated_at: string | null
+          visit_date: string
+          visit_time: string
+          visit_type: string | null
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          owner_id: string
+          property_id: string
+          rating?: number | null
+          slot_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          visit_date: string
+          visit_time: string
+          visit_type?: string | null
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          owner_id?: string
+          property_id?: string
+          rating?: number | null
+          slot_id?: string | null
+          status?: string | null
+          updated_at?: string | null
+          visit_date?: string
+          visit_time?: string
+          visit_type?: string | null
+          visitor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visits_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "visit_slots"
             referencedColumns: ["id"]
           },
         ]
