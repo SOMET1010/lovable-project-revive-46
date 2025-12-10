@@ -8,6 +8,10 @@ import PropertyFormHeader from './PropertyFormHeader';
 import { propertyService } from '../services/propertyService';
 import { useNotifications, NotificationContainer } from '../../../shared/components/Notification';
 import { PropertyData } from '../services/propertyService';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/app/providers/AuthProvider';
+import NeofaceVerification from '@/shared/ui/NeofaceVerification';
+import Modal from '@/shared/ui/Modal';
 import { 
   Home, 
   MapPin, 
@@ -27,7 +31,14 @@ import {
   Trees,
   Building2,
   ImageIcon,
-  Sparkles
+  Sparkles,
+  Upload,
+  FileCheck,
+  Camera,
+  RefreshCw,
+  Loader2,
+  ShieldCheck,
+  X
 } from 'lucide-react';
 
 const STORAGE_KEY = 'property_form_draft_v2';
@@ -54,6 +65,7 @@ const PropertyForm: React.FC = () => {
   } = usePropertyForm();
 
   const { success, error: showError, notifications, removeNotification } = useNotifications();
+  const { user } = useAuth();
 
   // États pour la gestion du brouillon et du succès
   const [showDraftModal, setShowDraftModal] = useState(false);
@@ -65,6 +77,15 @@ const PropertyForm: React.FC = () => {
   const [subNeighborhood, setSubNeighborhood] = useState('');
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
+
+  // États pour la vérification CNI biométrique
+  const [cniFile, setCniFile] = useState<File | null>(null);
+  const [cniPreviewUrl, setCniPreviewUrl] = useState<string | null>(null);
+  const [cniUploadedUrl, setCniUploadedUrl] = useState<string | null>(null);
+  const [cniUploading, setCniUploading] = useState(false);
+  const [showNeofaceModal, setShowNeofaceModal] = useState(false);
+  const [cniVerificationStatus, setCniVerificationStatus] = useState<'pending' | 'verifying' | 'verified' | 'failed'>('pending');
+  const [cniMatchingScore, setCniMatchingScore] = useState<number | null>(null);
 
   // Vérifier s'il y a un brouillon au chargement
   useEffect(() => {
@@ -148,6 +169,12 @@ const PropertyForm: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    // Vérifier que la CNI est vérifiée
+    if (cniVerificationStatus !== 'verified') {
+      showError('Vérification requise', 'Veuillez vérifier votre identité avec votre pièce d\'identité avant de publier');
+      return;
+    }
+
     try {
       // Mettre à jour l'adresse avec le sous-quartier
       if (subNeighborhood) {
@@ -545,6 +572,87 @@ const PropertyForm: React.FC = () => {
     );
   };
 
+  // Handler pour l'upload de la CNI
+  const handleCniUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validation du fichier
+    if (!file.type.startsWith('image/')) {
+      showError('Fichier invalide', 'Veuillez sélectionner une image (JPG, PNG)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showError('Fichier trop volumineux', 'La taille maximale est de 5 Mo');
+      return;
+    }
+
+    setCniFile(file);
+    setCniPreviewUrl(URL.createObjectURL(file));
+    setCniVerificationStatus('pending');
+    setCniMatchingScore(null);
+
+    // Upload vers Supabase Storage
+    setCniUploading(true);
+    try {
+      const fileName = `cni_${user?.id}_${Date.now()}.${file.name.split('.').pop()}`;
+      const { data, error: uploadError } = await supabase.storage
+        .from('verifications')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('verifications')
+        .getPublicUrl(data.path);
+
+      setCniUploadedUrl(urlData.publicUrl);
+      success('CNI uploadée', 'Vous pouvez maintenant vérifier votre identité');
+      
+      // Déclencher automatiquement la vérification biométrique
+      setShowNeofaceModal(true);
+      setCniVerificationStatus('verifying');
+    } catch (err) {
+      console.error('Erreur upload CNI:', err);
+      showError('Erreur', 'Impossible d\'uploader la CNI. Réessayez.');
+    } finally {
+      setCniUploading(false);
+    }
+  };
+
+  // Handler pour la vérification NeoFace réussie
+  const handleNeofaceVerified = (verificationData: unknown) => {
+    const data = verificationData as { matching_score?: number };
+    setCniVerificationStatus('verified');
+    setCniMatchingScore(data.matching_score ? data.matching_score * 100 : null);
+    setShowNeofaceModal(false);
+    success('Identité vérifiée !', 'Votre identité a été confirmée avec succès');
+  };
+
+  // Handler pour l'échec de vérification NeoFace
+  const handleNeofaceFailed = (errorMessage: string) => {
+    setCniVerificationStatus('failed');
+    setShowNeofaceModal(false);
+    showError('Vérification échouée', errorMessage);
+  };
+
+  // Réessayer la vérification
+  const handleRetryCniVerification = () => {
+    if (cniUploadedUrl) {
+      setCniVerificationStatus('verifying');
+      setShowNeofaceModal(true);
+    }
+  };
+
+  // Supprimer la CNI
+  const handleRemoveCni = () => {
+    setCniFile(null);
+    setCniPreviewUrl(null);
+    setCniUploadedUrl(null);
+    setCniVerificationStatus('pending');
+    setCniMatchingScore(null);
+  };
+
   // Étape 4: Tarif et contact
   const renderTarifStep = () => {
     return (
@@ -658,6 +766,148 @@ const PropertyForm: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Vérification d'identité CNI - OBLIGATOIRE */}
+        <div className={`bg-white p-6 rounded-2xl border-2 shadow-sm ${
+          cniVerificationStatus === 'verified' 
+            ? 'border-green-400 bg-green-50/30' 
+            : cniVerificationStatus === 'failed'
+              ? 'border-red-400 bg-red-50/30'
+              : 'border-[#EFEBE9]'
+        }`}>
+          <div className="flex items-center gap-3 mb-5">
+            <div className={`p-2.5 rounded-xl ${
+              cniVerificationStatus === 'verified' ? 'bg-green-100' : 'bg-[#F16522]/10'
+            }`}>
+              <ShieldCheck className={`w-5 h-5 ${
+                cniVerificationStatus === 'verified' ? 'text-green-600' : 'text-[#F16522]'
+              }`} />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-bold text-[#2C1810]">Vérification d'identité *</h3>
+              <p className="text-xs text-[#A69B95]">CNI, passeport ou carte de séjour - Obligatoire</p>
+            </div>
+            {cniVerificationStatus === 'verified' && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 rounded-full">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-xs font-bold text-green-700">Vérifié</span>
+                {cniMatchingScore && (
+                  <span className="text-xs text-green-600">({cniMatchingScore.toFixed(0)}%)</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Zone d'upload ou prévisualisation */}
+          {!cniFile ? (
+            <label className="block cursor-pointer">
+              <div className="border-2 border-dashed border-[#EFEBE9] rounded-xl p-8 text-center hover:border-[#F16522] hover:bg-[#F16522]/5 transition-all">
+                <Upload className="w-10 h-10 text-[#A69B95] mx-auto mb-3" />
+                <p className="text-sm font-medium text-[#2C1810] mb-1">
+                  Cliquez pour uploader votre pièce d'identité
+                </p>
+                <p className="text-xs text-[#A69B95]">
+                  JPG ou PNG, max 5 Mo
+                </p>
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCniUpload}
+                className="hidden"
+                disabled={cniUploading}
+              />
+            </label>
+          ) : (
+            <div className="space-y-4">
+              {/* Prévisualisation de la CNI */}
+              <div className="relative rounded-xl overflow-hidden border border-[#EFEBE9]">
+                <img
+                  src={cniPreviewUrl || ''}
+                  alt="Pièce d'identité"
+                  className="w-full h-48 object-contain bg-[#FAF7F4]"
+                />
+                {cniUploading && (
+                  <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                    <Loader2 className="w-8 h-8 text-[#F16522] animate-spin" />
+                  </div>
+                )}
+                {cniVerificationStatus !== 'verified' && !cniUploading && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveCni}
+                    className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Statut de vérification */}
+              {cniVerificationStatus === 'pending' && cniUploadedUrl && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowNeofaceModal(true);
+                    setCniVerificationStatus('verifying');
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#F16522] text-white rounded-xl font-bold hover:bg-[#D55A1B] transition-colors"
+                >
+                  <Camera className="w-5 h-5" />
+                  Vérifier mon identité
+                </button>
+              )}
+
+              {cniVerificationStatus === 'verifying' && !showNeofaceModal && (
+                <div className="flex items-center justify-center gap-2 px-4 py-3 bg-[#F16522]/10 rounded-xl">
+                  <Loader2 className="w-5 h-5 text-[#F16522] animate-spin" />
+                  <span className="text-sm font-medium text-[#F16522]">Vérification en cours...</span>
+                </div>
+              )}
+
+              {cniVerificationStatus === 'verified' && (
+                <div className="flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-xl">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <div>
+                    <p className="text-sm font-bold text-green-800">Identité vérifiée avec succès</p>
+                    <p className="text-xs text-green-600">Votre visage correspond à votre pièce d'identité</p>
+                  </div>
+                </div>
+              )}
+
+              {cniVerificationStatus === 'failed' && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl">
+                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                    <div>
+                      <p className="text-sm font-bold text-red-800">Vérification échouée</p>
+                      <p className="text-xs text-red-600">Le visage ne correspond pas ou erreur technique</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleRetryCniVerification}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-[#F16522] text-[#F16522] rounded-xl font-bold hover:bg-[#F16522]/5 transition-colors"
+                  >
+                    <RefreshCw className="w-5 h-5" />
+                    Réessayer la vérification
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Info de sécurité */}
+          <div className="mt-4 pt-4 border-t border-[#EFEBE9]">
+            <p className="text-xs text-[#6B5A4E] flex items-start gap-2">
+              <FileCheck className="w-4 h-4 text-[#F16522] flex-shrink-0 mt-0.5" />
+              <span>
+                Cette vérification biométrique garantit que vous êtes bien le propriétaire déclaré. 
+                Vos données sont sécurisées et ne sont utilisées que pour la vérification.
+              </span>
+            </p>
+          </div>
+        </div>
       </div>
     );
   };
@@ -765,6 +1015,28 @@ const PropertyForm: React.FC = () => {
         notifications={notifications} 
         onClose={removeNotification}
       />
+
+      {/* Modal de vérification NeoFace */}
+      <Modal
+        isOpen={showNeofaceModal}
+        onClose={() => {
+          setShowNeofaceModal(false);
+          if (cniVerificationStatus === 'verifying') {
+            setCniVerificationStatus('pending');
+          }
+        }}
+        title="Vérification d'identité"
+        size="lg"
+      >
+        {cniUploadedUrl && user && (
+          <NeofaceVerification
+            userId={user.id}
+            cniPhotoUrl={cniUploadedUrl}
+            onVerified={handleNeofaceVerified}
+            onFailed={handleNeofaceFailed}
+          />
+        )}
+      </Modal>
 
       {/* Header avec progress */}
       <PropertyFormHeader
