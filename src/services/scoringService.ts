@@ -29,10 +29,8 @@ export interface ProfileScoreDetails {
 }
 
 export interface VerificationScoreDetails {
-  oneci: boolean;
-  cnam: boolean;
-  facial: boolean;
-  ansut: boolean;
+  facial: boolean;  // Vérification biométrique NeoFace
+  ansut: boolean;   // Vérification admin
   total: number;
 }
 
@@ -60,12 +58,10 @@ const PROFILE_POINTS = {
   address: 20,
 };
 
-// Points pour chaque vérification
+// Points pour chaque vérification (simplifié: NeoFace + ANSUT uniquement)
 const VERIFICATION_POINTS = {
-  oneci: 30,
-  cnam: 25,
-  facial: 25,
-  ansut: 20,
+  facial: 60,  // Vérification biométrique NeoFace
+  ansut: 40,   // Vérification admin ANSUT
 };
 
 export const ScoringService = {
@@ -100,16 +96,12 @@ export const ScoringService = {
    */
   calculateVerificationScore(profile: any): { score: number; details: VerificationScoreDetails } {
     const details: VerificationScoreDetails = {
-      oneci: !!profile?.oneci_verified,
-      cnam: !!profile?.cnam_verified,
       facial: profile?.facial_verification_status === 'verified',
       ansut: !!profile?.is_verified,
       total: 0,
     };
 
     let score = 0;
-    if (details.oneci) score += VERIFICATION_POINTS.oneci;
-    if (details.cnam) score += VERIFICATION_POINTS.cnam;
     if (details.facial) score += VERIFICATION_POINTS.facial;
     if (details.ansut) score += VERIFICATION_POINTS.ansut;
 

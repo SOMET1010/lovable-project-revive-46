@@ -3,19 +3,17 @@ import { CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { Badge } from './badge';
 
 interface VerificationBadgeProps {
-  type: 'oneci' | 'cnam' | 'face';
+  type: 'identity' | 'face';  // Simplifié: identité ANSUT + biométrie NeoFace
   status: 'verified' | 'pending' | 'failed' | 'not_started' | null;
 }
 
 const VerificationBadge: React.FC<VerificationBadgeProps> = ({ type, status }) => {
   const getLabel = () => {
     switch (type) {
-      case 'oneci':
-        return 'ONECI';
-      case 'cnam':
-        return 'CNAM';
+      case 'identity':
+        return 'Identité';
       case 'face':
-        return 'Vérification faciale';
+        return 'Biométrie';
       default:
         return '';
     }

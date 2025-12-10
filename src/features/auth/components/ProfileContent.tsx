@@ -29,15 +29,9 @@ export default function ProfileContent() {
       href: '/profil?tab=verification',
     },
     {
-      id: 'oneci',
-      label: 'ONECI',
-      verified: profile?.oneci_verified || false,
-      href: '/profil?tab=verification',
-    },
-    {
-      id: 'cnam',
-      label: 'CNAM',
-      verified: profile?.cnam_verified || false,
+      id: 'facial',
+      label: 'Biométrie NeoFace',
+      verified: profile?.facial_verification_status === 'verified',
       href: '/profil?tab=verification',
     },
   ];

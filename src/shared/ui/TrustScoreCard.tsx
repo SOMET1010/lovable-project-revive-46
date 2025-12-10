@@ -158,21 +158,13 @@ const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
             <div className="pt-2 border-t">
               <p className="text-sm font-medium mb-2">Vérifications</p>
               <div className="flex flex-wrap gap-2">
-                <Badge variant={details.verification.oneci ? 'success' : 'secondary'}>
-                  {details.verification.oneci ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
-                  ONECI
-                </Badge>
-                <Badge variant={details.verification.cnam ? 'success' : 'secondary'}>
-                  {details.verification.cnam ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
-                  CNAM
-                </Badge>
                 <Badge variant={details.verification.facial ? 'success' : 'secondary'}>
                   {details.verification.facial ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
-                  Facial
+                  Biométrie
                 </Badge>
                 <Badge variant={details.verification.ansut ? 'success' : 'secondary'}>
                   {details.verification.ansut ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
-                  ANSUT
+                  Identité
                 </Badge>
               </div>
             </div>
