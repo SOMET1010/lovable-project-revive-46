@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Home, X, Image as ImageIcon, Building2, Check, RefreshCw, MapPin, DollarSign, Settings, FileText, Navigation, Crosshair, Globe, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Home, X, Image as ImageIcon, Building2, Check, RefreshCw, MapPin, DollarSign, Settings, FileText, Navigation, Crosshair, Globe, Loader2, Upload, FileCheck, AlertCircle, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
@@ -41,6 +41,22 @@ interface PropertyFormData {
   is_anonymous: boolean;
 }
 
+// Document types required
+type DocumentType = 'titre_propriete' | 'piece_identite' | 'justificatif_domicile' | 'mandat_gestion';
+
+interface DocumentFile {
+  type: DocumentType;
+  file: File;
+  preview: string;
+}
+
+const DOCUMENT_TYPES: { type: DocumentType; label: string; description: string; required: boolean }[] = [
+  { type: 'titre_propriete', label: 'Titre de propriété', description: 'Attestation foncière ou titre officiel', required: true },
+  { type: 'piece_identite', label: 'Pièce d\'identité', description: 'CNI, passeport ou carte de séjour', required: true },
+  { type: 'justificatif_domicile', label: 'Justificatif de domicile', description: 'Facture eau/électricité (moins de 3 mois)', required: true },
+  { type: 'mandat_gestion', label: 'Mandat de gestion', description: 'Obligatoire si vous êtes agent/mandataire', required: false },
+];
+
 // Character limits
 const TITLE_MIN = 10;
 const TITLE_MAX = 100;
@@ -72,11 +88,12 @@ const INITIAL_FORM_DATA: PropertyFormData = {
   is_anonymous: false,
 };
 
-// Step configuration
+// Step configuration - 4 steps now
 const STEPS = [
   { id: 1, label: 'Photos & Infos', icon: ImageIcon },
   { id: 2, label: 'Localisation', icon: MapPin },
   { id: 3, label: 'Tarification', icon: DollarSign },
+  { id: 4, label: 'Documents', icon: Shield },
 ];
 
 export default function AddProperty() {
@@ -111,6 +128,11 @@ export default function AddProperty() {
   const [showDraftModal, setShowDraftModal] = useState(false);
   const [pendingDraftData, setPendingDraftData] = useState<PropertyFormData | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Documents state
+  const [documentFiles, setDocumentFiles] = useState<DocumentFile[]>([]);
+  const [uploadingDocuments, setUploadingDocuments] = useState(false);
+  const [isAgent, setIsAgent] = useState(false);
   
   // Hook de validation
   const { validateField, getFieldState, setFieldTouched } = useFormValidation<PropertyFormData>();
@@ -440,6 +462,64 @@ export default function AddProperty() {
     return uploadedUrls;
   };
 
+  // Document handling functions
+  const handleDocumentUpload = (type: DocumentType, file: File) => {
+    const preview = URL.createObjectURL(file);
+    setDocumentFiles(prev => {
+      const filtered = prev.filter(d => d.type !== type);
+      return [...filtered, { type, file, preview }];
+    });
+  };
+
+  const removeDocument = (type: DocumentType) => {
+    const doc = documentFiles.find(d => d.type === type);
+    if (doc) {
+      URL.revokeObjectURL(doc.preview);
+    }
+    setDocumentFiles(prev => prev.filter(d => d.type !== type));
+  };
+
+  const uploadDocuments = async (propertyId: string): Promise<void> => {
+    if (!user) return;
+
+    for (const doc of documentFiles) {
+      const fileExt = doc.file.name.split('.').pop();
+      const fileName = `${user.id}/${propertyId}/${doc.type}_${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('property-documents')
+        .upload(fileName, doc.file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('property-documents')
+        .getPublicUrl(fileName);
+
+      // Insert document record
+      const { error: insertError } = await supabase
+        .from('property_documents')
+        .insert({
+          property_id: propertyId,
+          owner_id: user.id,
+          document_type: doc.type,
+          document_url: urlData.publicUrl,
+          document_name: doc.file.name,
+          status: 'pending',
+        });
+
+      if (insertError) throw insertError;
+    }
+  };
+
+  const hasRequiredDocuments = () => {
+    const requiredTypes: DocumentType[] = ['titre_propriete', 'piece_identite', 'justificatif_domicile'];
+    if (isAgent) {
+      requiredTypes.push('mandat_gestion');
+    }
+    return requiredTypes.every(type => documentFiles.some(d => d.type === type));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
@@ -447,10 +527,16 @@ export default function AddProperty() {
       return;
     }
 
+    if (!hasRequiredDocuments()) {
+      toast.error('Veuillez fournir tous les documents requis');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
+      // Create property with 'en_verification' status
       const { data: property, error: insertError } = await supabase
         .from('properties')
         .insert({
@@ -477,7 +563,7 @@ export default function AddProperty() {
           is_furnished: formData.is_furnished,
           has_ac: formData.has_ac,
           is_anonymous: formData.is_anonymous,
-          status: 'disponible',
+          status: 'en_verification', // Changed from 'disponible'
         })
         .select()
         .single();
@@ -485,6 +571,7 @@ export default function AddProperty() {
       if (insertError) throw insertError;
       if (!property) throw new Error('Erreur lors de la création de la propriété');
 
+      // Upload property images
       if (imageFiles.length > 0) {
         setUploadingImages(true);
         const imageUrls = await uploadImages(property.id);
@@ -500,6 +587,10 @@ export default function AddProperty() {
         if (updateError) throw updateError;
       }
 
+      // Upload documents
+      setUploadingDocuments(true);
+      await uploadDocuments(property.id);
+
       // Clear draft after successful submission
       localStorage.removeItem(STORAGE_KEYS.PROPERTY_DRAFT);
       
@@ -513,12 +604,13 @@ export default function AddProperty() {
     } finally {
       setLoading(false);
       setUploadingImages(false);
+      setUploadingDocuments(false);
     }
   };
 
   // Navigation between steps with directional animation
   const goToStep = (targetStep: number) => {
-    if (targetStep >= 1 && targetStep <= 3) {
+    if (targetStep >= 1 && targetStep <= 4) {
       setSlideDirection(targetStep > step ? 'forward' : 'backward');
       setStep(targetStep);
     }
@@ -568,13 +660,13 @@ export default function AddProperty() {
           </div>
           
           <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--color-chocolat)' }}>
-            🎉 Félicitations !
+            🎉 Demande soumise !
           </h2>
           <p className="text-xl mb-2" style={{ color: 'var(--color-gris-texte)' }}>
-            Propriété publiée avec succès
+            Documents en cours de vérification
           </p>
           <p className="mb-6" style={{ color: 'var(--color-gris-neutre)' }}>
-            Votre annonce est maintenant visible par tous les locataires sur Mon Toit.
+            Votre annonce sera publiée après validation de vos documents par notre équipe (24-48h).
           </p>
           
           {/* Animated redirect indicator */}
@@ -1312,7 +1404,7 @@ export default function AddProperty() {
                 </div>
               </div>
 
-              {/* Step 3 Navigation & Submit */}
+              {/* Step 3 Navigation - Go to Step 4 */}
               <div className="flex justify-between items-center pt-4">
                 <button
                   type="button"
@@ -1322,19 +1414,169 @@ export default function AddProperty() {
                   <ArrowLeft className="w-4 h-4" /> Retour
                 </button>
                 <button
-                  type="submit"
-                  disabled={loading || uploadingImages}
-                  className="btn-premium-primary transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed px-10 py-4 text-lg"
-                  style={{ boxShadow: '0 8px 24px rgba(241, 101, 34, 0.3)' }}
+                  type="button"
+                  onClick={() => goToStep(4)}
+                  disabled={!formData.monthly_rent}
+                  className="btn-premium-primary transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                  {loading || uploadingImages ? (
+                  Suivant <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4: Documents */}
+          {step === 4 && (
+            <div key={`step-4-${slideDirection}`} className={`space-y-6 ${slideDirection === 'forward' ? 'step-enter-forward' : 'step-enter-backward'}`}>
+              
+              {/* Info banner */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-blue-900">Documents obligatoires</p>
+                  <p className="text-sm text-blue-700">Vos documents seront vérifiés avant publication de l'annonce (24-48h).</p>
+                </div>
+              </div>
+
+              {/* Agent checkbox */}
+              <div className="bg-white p-4 rounded-xl border" style={{ borderColor: 'var(--color-border)' }}>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isAgent}
+                    onChange={(e) => setIsAgent(e.target.checked)}
+                    className="w-5 h-5 rounded text-[var(--color-orange)]"
+                    style={{ accentColor: 'var(--color-orange)' }}
+                  />
+                  <span className="font-medium" style={{ color: 'var(--color-chocolat)' }}>
+                    Je suis un agent/mandataire (pas le propriétaire direct)
+                  </span>
+                </label>
+              </div>
+
+              {/* Document upload cards */}
+              <div className="space-y-4">
+                {DOCUMENT_TYPES.map((docType) => {
+                  const isRequired = docType.required || (docType.type === 'mandat_gestion' && isAgent);
+                  const uploadedDoc = documentFiles.find(d => d.type === docType.type);
+                  
+                  if (docType.type === 'mandat_gestion' && !isAgent) return null;
+                  
+                  return (
+                    <div 
+                      key={docType.type}
+                      className={`bg-white p-5 rounded-xl border transition-all ${
+                        uploadedDoc 
+                          ? 'border-green-400 bg-green-50' 
+                          : 'border-[var(--color-border)]'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold" style={{ color: 'var(--color-chocolat)' }}>
+                              {docType.label}
+                            </h3>
+                            {isRequired && (
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-600">
+                                Obligatoire
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm" style={{ color: 'var(--color-gris-neutre)' }}>
+                            {docType.description}
+                          </p>
+                        </div>
+                        
+                        {uploadedDoc ? (
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 text-green-600">
+                              <FileCheck className="w-5 h-5" />
+                              <span className="text-sm font-medium">Téléversé</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeDocument(docType.type)}
+                              className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                            >
+                              <X className="w-4 h-4 text-red-500" />
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="cursor-pointer">
+                            <input
+                              type="file"
+                              accept="image/*,.pdf"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleDocumentUpload(docType.type, file);
+                              }}
+                            />
+                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-orange-50)] text-[var(--color-orange)] hover:bg-[var(--color-orange-100)] transition-colors">
+                              <Upload className="w-4 h-4" />
+                              <span className="font-medium text-sm">Téléverser</span>
+                            </div>
+                          </label>
+                        )}
+                      </div>
+                      
+                      {/* Preview */}
+                      {uploadedDoc && (
+                        <div className="mt-3 flex items-center gap-2 text-sm" style={{ color: 'var(--color-gris-texte)' }}>
+                          <FileText className="w-4 h-4" />
+                          <span className="truncate">{uploadedDoc.file.name}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Progress indicator */}
+              <div className="bg-white p-4 rounded-xl border" style={{ borderColor: 'var(--color-border)' }}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-chocolat)' }}>
+                    Documents téléversés
+                  </span>
+                  <span className="text-sm" style={{ color: 'var(--color-orange)' }}>
+                    {documentFiles.length} / {isAgent ? 4 : 3}
+                  </span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${(documentFiles.length / (isAgent ? 4 : 3)) * 100}%`,
+                      backgroundColor: hasRequiredDocuments() ? 'var(--color-orange)' : 'var(--color-gris-neutre)'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Step 4 Navigation & Submit */}
+              <div className="flex justify-between items-center pt-4">
+                <button
+                  type="button"
+                  onClick={() => goToStep(3)}
+                  className="btn-premium-secondary"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Retour
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading || uploadingImages || uploadingDocuments || !hasRequiredDocuments()}
+                  className="btn-premium-primary transform hover:scale-[1.02] disabled:opacity-70 disabled:cursor-not-allowed px-10 py-4 text-lg"
+                  style={{ boxShadow: hasRequiredDocuments() ? '0 8px 24px rgba(241, 101, 34, 0.3)' : 'none' }}
+                >
+                  {loading || uploadingImages || uploadingDocuments ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>{uploadingImages ? 'Upload des images...' : 'Publication...'}</span>
+                      <span>{uploadingDocuments ? 'Upload documents...' : uploadingImages ? 'Upload images...' : 'Soumission...'}</span>
                     </>
                   ) : (
                     <>
-                      <Check className="w-5 h-5" /> Publier l'annonce
+                      <Shield className="w-5 h-5" /> Soumettre pour vérification
                     </>
                   )}
                 </button>

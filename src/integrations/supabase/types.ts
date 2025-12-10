@@ -1475,6 +1475,66 @@ export type Database = {
         }
         Relationships: []
       }
+      property_documents: {
+        Row: {
+          created_at: string | null
+          document_name: string | null
+          document_type: string
+          document_url: string
+          id: string
+          owner_id: string
+          property_id: string | null
+          rejection_reason: string | null
+          status: string | null
+          updated_at: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_name?: string | null
+          document_type: string
+          document_url: string
+          id?: string
+          owner_id: string
+          property_id?: string | null
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_name?: string | null
+          document_type?: string
+          document_url?: string
+          id?: string
+          owner_id?: string
+          property_id?: string | null
+          rejection_reason?: string | null
+          status?: string | null
+          updated_at?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rental_applications: {
         Row: {
           applicant_id: string
