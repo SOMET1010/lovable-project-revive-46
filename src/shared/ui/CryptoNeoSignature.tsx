@@ -85,7 +85,7 @@ export default function CryptoNeoSignature({
       const { data, error: signError } = await supabase.functions.invoke('cryptoneo-sign-document', {
         body: { 
           leaseId,
-          otpCode 
+          otp: otpCode  // Fixed: edge function expects 'otp' not 'otpCode'
         }
       });
 

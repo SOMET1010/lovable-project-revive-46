@@ -21,9 +21,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 1. Get lease
+    // 1. Get lease from lease_contracts table
     const { data: lease } = await supabaseAdmin
-      .from('leases')
+      .from('lease_contracts')
       .select('*, properties(city)')
       .eq('id', leaseId)
       .single();
@@ -101,12 +101,15 @@ serve(async (req) => {
         .from('lease-documents')
         .getPublicUrl(fileName);
 
-      // 7. Update lease
+      // 7. Update lease_contracts
       await supabaseAdmin
-        .from('leases')
+        .from('lease_contracts')
         .update({
           signed_document_url: urlData.publicUrl,
-          is_electronically_signed: true
+          cryptoneo_signed_document_url: urlData.publicUrl,
+          is_electronically_signed: true,
+          cryptoneo_signature_status: 'completed',
+          status: 'actif'
         })
         .eq('id', leaseId);
 
@@ -123,20 +126,18 @@ serve(async (req) => {
       // 9. Notify both parties
       await supabaseAdmin.from('notifications').insert([
         {
-          user_id: lease.landlord_id,
-          type: 'signature_completed',
-          category: 'lease',
+          user_id: lease.owner_id,
+          type: 'contract',
           title: 'Signature électronique complétée',
           message: 'Le bail a été signé électroniquement par les deux parties.',
-          link: '/leases'
+          action_url: `/contrat/${leaseId}`
         },
         {
           user_id: lease.tenant_id,
-          type: 'signature_completed',
-          category: 'lease',
+          type: 'contract',
           title: 'Signature électronique complétée',
           message: 'Le bail a été signé électroniquement par les deux parties.',
-          link: '/leases'
+          action_url: `/contrat/${leaseId}`
         }
       ]);
 
