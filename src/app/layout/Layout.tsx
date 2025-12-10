@@ -42,7 +42,6 @@ const tenantSidebarPrefixes = [
   '/score-locataire',
   '/maintenance/locataire',
   '/maintenance/proprietaire',
-  '/recherche',
 ];
 
 // Routes avec navigation latérale pour propriétaire (éviter header + breadcrumb doublons)
