@@ -59,3 +59,15 @@ verify_jwt = false
 
 [functions.neoface-verify]
 verify_jwt = false
+
+[functions.cryptoneo-callback]
+verify_jwt = false
+
+[functions.cryptoneo-mandate-callback]
+verify_jwt = false
+
+[functions.mobile-money-webhook]
+verify_jwt = false
+
+[functions.intouch-webhook-handler]
+verify_jwt = false
