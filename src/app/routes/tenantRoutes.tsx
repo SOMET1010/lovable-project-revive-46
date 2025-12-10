@@ -1,7 +1,7 @@
 import { RouteObject, Navigate } from 'react-router-dom';
 import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import ProtectedRoute from '@/shared/ui/ProtectedRoute';
-import { ROLES, OWNER_ROLES, AGENCY_ROLES, TENANT_ROLES } from '@/shared/constants/roles';
+import { OWNER_ROLES, AGENCY_ROLES, TENANT_ROLES } from '@/shared/constants/roles';
 
 // Dashboard Router - redirects based on user type
 const DashboardRouter = lazyWithRetry(() => import('@/shared/ui/DashboardRouter'));
@@ -46,14 +46,17 @@ export const tenantRoutes: RouteObject[] = [
   // Smart Dashboard Router - redirects based on user_type and roles
   { path: 'dashboard', element: <ProtectedRoute><DashboardRouter /></ProtectedRoute> },
   { path: 'mon-espace', element: <ProtectedRoute><UnifiedDashboard /></ProtectedRoute> },
+  
+  // Tenant Dashboard - route manquante corrigée
+  { path: 'tableau-de-bord', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantDashboard /></ProtectedRoute> },
 
   // Profile
   { path: 'profil', element: <ProtectedRoute><ProfilePage /></ProtectedRoute> },
   { path: 'verification', element: <Navigate to="/profil?tab=verification" replace /> },
 
-  // Favorites & saved searches (tenant only)
+  // Favorites & saved searches (tenant only) - utilise TENANT_ROLES pour compatibilité fr/en
   { path: 'favoris', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><Favorites /></ProtectedRoute> },
-  { path: 'recherches-sauvegardees', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><SavedSearches /></ProtectedRoute> },
+  { path: 'recherches-sauvegardees', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><SavedSearches /></ProtectedRoute> },
 
   // Messaging (all authenticated users)
   { path: 'messages', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES, ...OWNER_ROLES, ...AGENCY_ROLES]}><MessagesPage /></ProtectedRoute> },
@@ -76,11 +79,11 @@ export const tenantRoutes: RouteObject[] = [
   { path: 'effectuer-paiement', element: <ProtectedRoute><MakePayment /></ProtectedRoute> },
   { path: 'mes-paiements', element: <ProtectedRoute><PaymentHistory /></ProtectedRoute> },
 
-  // Tenant specific routes
-  { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantDashboard /></ProtectedRoute> },
-  { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantCalendar /></ProtectedRoute> },
-  { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantMaintenance /></ProtectedRoute> },
-  { path: 'mon-score', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><TenantScorePage /></ProtectedRoute> },
-  { path: 'profil/historique-locations', element: <ProtectedRoute allowedRoles={[ROLES.TENANT]}><RentalHistoryPage /></ProtectedRoute> },
+  // Tenant specific routes - utilise TENANT_ROLES pour compatibilité fr/en
+  { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantDashboard /></ProtectedRoute> },
+  { path: 'dashboard/locataire/calendrier', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantCalendar /></ProtectedRoute> },
+  { path: 'maintenance/locataire', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantMaintenance /></ProtectedRoute> },
+  { path: 'mon-score', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantScorePage /></ProtectedRoute> },
+  { path: 'profil/historique-locations', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><RentalHistoryPage /></ProtectedRoute> },
   { path: 'maintenance/nouvelle', element: <ProtectedRoute><MaintenanceRequest /></ProtectedRoute> },
 ];
