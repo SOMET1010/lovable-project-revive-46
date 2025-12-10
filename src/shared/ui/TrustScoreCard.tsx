@@ -162,9 +162,9 @@ const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
                   {details.verification.facial ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
                   Biométrie
                 </Badge>
-                <Badge variant={details.verification.ansut ? 'success' : 'secondary'}>
-                  {details.verification.ansut ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
-                  Identité
+                <Badge variant={details.verification.montoit ? 'success' : 'secondary'}>
+                  {details.verification.montoit ? <CheckCircle className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
+                  Mon Toit
                 </Badge>
               </div>
             </div>

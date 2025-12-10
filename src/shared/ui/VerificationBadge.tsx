@@ -3,15 +3,15 @@ import { CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { Badge } from './badge';
 
 interface VerificationBadgeProps {
-  type: 'identity' | 'face';  // Simplifié: identité ANSUT + biométrie NeoFace
+  type: 'montoit' | 'face';  // Mon Toit (tiers de confiance) + biométrie NeoFace
   status: 'verified' | 'pending' | 'failed' | 'not_started' | null;
 }
 
 const VerificationBadge: React.FC<VerificationBadgeProps> = ({ type, status }) => {
   const getLabel = () => {
     switch (type) {
-      case 'identity':
-        return 'Identité';
+      case 'montoit':
+        return 'Mon Toit';
       case 'face':
         return 'Biométrie';
       default:

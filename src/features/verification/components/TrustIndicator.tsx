@@ -5,7 +5,7 @@ interface TrustIndicatorProps {
   userType?: 'locataire' | 'proprietaire' | 'agence';
   verificationStatus?: {
     facial_verified: boolean;   // Vérification biométrique NeoFace
-    identity_verified: boolean; // Vérification admin ANSUT
+    montoit_verified: boolean;  // Vérification par Mon Toit (tiers de confiance)
   };
   rating?: number;
   reviewCount?: number;
@@ -27,7 +27,7 @@ export default function TrustIndicator({
 
     if (verificationStatus) {
       if (verificationStatus.facial_verified) score += 3;    // NeoFace biométrique
-      if (verificationStatus.identity_verified) score += 2;  // ANSUT admin
+      if (verificationStatus.montoit_verified) score += 2;   // Mon Toit tiers de confiance
     }
 
     return { score, maxScore };
@@ -128,16 +128,16 @@ export default function TrustIndicator({
 
           <div className={`flex items-center justify-between ${sizeClasses.text}`}>
             <div className="flex items-center space-x-2">
-              {verificationStatus.identity_verified ? (
+              {verificationStatus.montoit_verified ? (
                 <CheckCircle className={`${sizeClasses.icon} text-green-600`} />
               ) : (
                 <AlertCircle className={`${sizeClasses.icon} text-gray-400`} />
               )}
-              <span className={verificationStatus.identity_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
-                Identité vérifiée
+              <span className={verificationStatus.montoit_verified ? 'text-gray-900 font-medium' : 'text-gray-500'}>
+                Vérifié par Mon Toit
               </span>
             </div>
-            {verificationStatus.identity_verified && (
+            {verificationStatus.montoit_verified && (
               <span className="text-green-600 font-semibold">Vérifié</span>
             )}
           </div>

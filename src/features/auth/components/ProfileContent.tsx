@@ -23,8 +23,8 @@ export default function ProfileContent() {
 
   const verificationItems = [
     {
-      id: 'identity',
-      label: 'Identité vérifiée',
+      id: 'montoit',
+      label: 'Vérifié par Mon Toit',
       verified: profile?.is_verified || false,
       href: '/profil?tab=verification',
     },
