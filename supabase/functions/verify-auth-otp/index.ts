@@ -1,11 +1,11 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { edgeLogger } from "../_shared/logger.ts";
-import type { VerifyOTPRequest, OTPRecord } from "../_shared/types/sms.types.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { edgeLogger } from '../_shared/logger.ts';
+import type { VerifyOTPRequest, OTPRecord } from '../_shared/types/sms.types.ts';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
 interface ProfileRecord {
@@ -28,6 +28,49 @@ interface MagicLinkData {
   };
 }
 
+function normalizeSessionUrl(sessionUrl: string, redirectTo: string): string {
+  try {
+    const url = new URL(sessionUrl);
+    const redirectParam = url.searchParams.get('redirect_to');
+    const decodedRedirect = redirectParam ? decodeURIComponent(redirectParam) : null;
+
+    const sanitizedRedirect =
+      decodedRedirect && decodedRedirect.includes('/auth/callback/auth/callback')
+        ? decodedRedirect.replace('/auth/callback/auth/callback', '/auth/callback')
+        : decodedRedirect;
+
+    if (!sanitizedRedirect || sanitizedRedirect !== redirectTo) {
+      edgeLogger.warn('Overriding redirect_to in sessionUrl', {
+        current: sanitizedRedirect,
+        expected: redirectTo,
+      });
+      url.searchParams.set('redirect_to', redirectTo);
+    } else {
+      url.searchParams.set('redirect_to', sanitizedRedirect);
+    }
+
+    let normalizedUrl = url.toString();
+
+    if (normalizedUrl.includes('/auth/callback/auth/callback')) {
+      normalizedUrl = normalizedUrl.replace('/auth/callback/auth/callback', '/auth/callback');
+      edgeLogger.debug('Fixed duplicated path inside sessionUrl', { normalizedUrl });
+    }
+
+    return normalizedUrl;
+  } catch (error) {
+    edgeLogger.warn(
+      'Session URL normalization failed',
+      error instanceof Error ? error : undefined,
+      { sessionUrl }
+    );
+
+    if (sessionUrl.includes('/auth/callback/auth/callback')) {
+      return sessionUrl.replace('/auth/callback/auth/callback', '/auth/callback');
+    }
+    return sessionUrl;
+  }
+}
+
 /**
  * Helper: Génère l'ancien format 12 chiffres à partir du nouveau format 13 chiffres
  * 2250709753232 (13) → 225709753232 (12)
@@ -44,7 +87,7 @@ function getOldPhoneFormat(normalizedPhone: string): string | null {
  * Supports both 12-digit (old) and 13-digit (new) phone formats
  */
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,
       headers: corsHeaders,
@@ -52,29 +95,46 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { phoneNumber, code, fullName }: VerifyOTPRequest = await req.json();
+    const body = await req.json();
+    const { phoneNumber, code, fullName, siteUrl }: VerifyOTPRequest & { siteUrl?: string } = body;
 
     if (!phoneNumber || !code) {
-      return new Response(
-        JSON.stringify({ error: 'Numéro et code requis' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Numéro et code requis' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Extract origin for dynamic redirect URL
-    const origin = req.headers.get('origin') || req.headers.get('referer')?.replace(/\/$/, '') || 'https://silkjqepcbhlflbdtvgg.lovable.app';
-    const redirectTo = `${origin}/auth/callback`;
-    edgeLogger.debug('Using redirectTo', { redirectTo });
+    const rawOrigin =
+      siteUrl ||
+      req.headers.get('origin') ||
+      req.headers.get('referer')?.replace(/\/$/, '') ||
+      Deno.env.get('SITE_URL') ||
+      'http://localhost:8080';
+    // Nettoyer l'origine pour ne garder que le protocole, l'hôte et le port (sans chemin)
+    const cleanOrigin = (() => {
+      try {
+        const url = new URL(rawOrigin);
+        return `${url.protocol}//${url.host}`;
+      } catch {
+        // Si rawOrigin n'est pas une URL valide, utiliser localhost:8080
+        return 'http://localhost:8080';
+      }
+    })();
+    const redirectTo = `${cleanOrigin}/auth/callback`;
+    edgeLogger.debug('Using redirectTo', { redirectTo, cleanOrigin, rawOrigin, siteUrl });
+    edgeLogger.debug('Request headers', {
+      origin: req.headers.get('origin'),
+      referer: req.headers.get('referer'),
+    });
 
     // Normaliser le numéro (format 13 chiffres: 2250XXXXXXXXX)
     let normalizedPhone = phoneNumber.replace(/\D/g, '');
     if (!normalizedPhone.startsWith('225')) {
       normalizedPhone = '225' + normalizedPhone;
     }
-    
+
     const oldFormatPhone = getOldPhoneFormat(normalizedPhone);
     const e164Phone = '+' + normalizedPhone;
 
@@ -83,7 +143,11 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    edgeLogger.info('Verifying OTP', { phone: normalizedPhone, oldFormat: oldFormatPhone, hasName: !!fullName });
+    edgeLogger.info('Verifying OTP', {
+      phone: normalizedPhone,
+      oldFormat: oldFormatPhone,
+      hasName: !!fullName,
+    });
 
     // ========== RECHERCHE FLEXIBLE DU CODE OTP ==========
     // Essayer d'abord le nouveau format, puis l'ancien
@@ -129,7 +193,7 @@ Deno.serve(async (req: Request) => {
       } else if (otpOld) {
         otpRecord = otpOld as OTPRecord;
         edgeLogger.debug('OTP found with old format', { phone: oldFormatPhone });
-        
+
         // Migrer vers le nouveau format
         await supabaseAdmin
           .from('verification_codes')
@@ -140,13 +204,10 @@ Deno.serve(async (req: Request) => {
 
     if (otpError) {
       edgeLogger.error('Error fetching OTP', otpError);
-      return new Response(
-        JSON.stringify({ error: 'Erreur lors de la vérification' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Erreur lors de la vérification' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     if (!otpRecord) {
@@ -168,13 +229,10 @@ Deno.serve(async (req: Request) => {
           .eq('id', lastCodeTyped.id);
       }
 
-      return new Response(
-        JSON.stringify({ error: 'Code invalide ou expiré' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Code invalide ou expiré' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Vérifier le nombre de tentatives
@@ -197,12 +255,17 @@ Deno.serve(async (req: Request) => {
     // 1. Recherche avec nouveau format (13 chiffres)
     const { data: profileNew } = await supabaseAdmin
       .from('profiles')
-      .select('user_id, full_name, email, phone')
+      .select('id, full_name, email, phone')
       .eq('phone', normalizedPhone)
       .maybeSingle();
 
     if (profileNew) {
-      existingProfile = profileNew as ProfileRecord;
+      existingProfile = {
+        user_id: profileNew.id,
+        full_name: profileNew.full_name,
+        email: profileNew.email,
+        phone: profileNew.phone,
+      };
       edgeLogger.debug('Profile found with new format', { phone: normalizedPhone });
     }
 
@@ -210,21 +273,36 @@ Deno.serve(async (req: Request) => {
     if (!existingProfile && oldFormatPhone) {
       const { data: profileOld } = await supabaseAdmin
         .from('profiles')
-        .select('user_id, full_name, email, phone')
+        .select('id, full_name, email, phone')
         .eq('phone', oldFormatPhone)
         .maybeSingle();
 
       if (profileOld) {
-        existingProfile = profileOld as ProfileRecord;
-        edgeLogger.debug('Profile found with old format, migrating', { oldPhone: oldFormatPhone, newPhone: normalizedPhone });
-        
+        existingProfile = {
+          user_id: profileOld.id,
+          full_name: profileOld.full_name,
+          email: profileOld.email,
+          phone: profileOld.phone,
+        };
+        edgeLogger.debug('Profile found with old format, migrating', {
+          oldPhone: oldFormatPhone,
+          newPhone: normalizedPhone,
+        });
+
         // Migrer le profil vers le nouveau format
         await supabaseAdmin
           .from('profiles')
           .update({ phone: normalizedPhone, updated_at: new Date().toISOString() })
-          .eq('user_id', (profileOld as ProfileRecord).user_id);
+          .eq('id', profileOld.id);
       }
     }
+
+    // Log de débogage
+    edgeLogger.debug('Profile search result', {
+      normalizedPhone,
+      oldFormatPhone,
+      existingProfile: existingProfile ? existingProfile.user_id : null,
+    });
 
     // ========== CASE 1: EXISTING USER → LOGIN ==========
     if (existingProfile?.user_id) {
@@ -234,42 +312,48 @@ Deno.serve(async (req: Request) => {
         .eq('id', otpRecord.id);
 
       edgeLogger.info('Existing user found', { userId: existingProfile.user_id });
-      
-      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id) as { data: AuthUserData };
-      
+
+      const { data: userData } = (await supabaseAdmin.auth.admin.getUserById(
+        existingProfile.user_id
+      )) as { data: AuthUserData };
+
       if (userData?.user?.email) {
-        const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
-          type: 'magiclink',
-          email: userData.user.email,
-          options: {
-            redirectTo,
-          },
-        });
+        const { data: sessionData, error: sessionError } =
+          await supabaseAdmin.auth.admin.generateLink({
+            type: 'magiclink',
+            email: userData.user.email,
+            options: {
+              redirectTo,
+            },
+          });
 
         if (sessionError) {
           edgeLogger.error('Session error', sessionError as Error);
-          return new Response(
-            JSON.stringify({ error: 'Erreur de connexion' }),
-            {
-              status: 500,
-              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            }
-          );
+          return new Response(JSON.stringify({ error: 'Erreur de connexion' }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
         }
 
-        const sessionUrl = (sessionData as MagicLinkData)?.properties?.action_link;
+        let sessionUrl = (sessionData as MagicLinkData)?.properties?.action_link;
         if (!sessionUrl) {
-          edgeLogger.error('Magic link generation failed - no action_link', undefined, { 
-            email: userData.user.email 
+          edgeLogger.error('Magic link generation failed - no action_link', undefined, {
+            email: userData.user.email,
           });
           return new Response(
-            JSON.stringify({ error: 'Erreur de génération du lien de connexion. Vérifiez la configuration Site URL.' }),
+            JSON.stringify({
+              error:
+                'Erreur de génération du lien de connexion. Vérifiez la configuration Site URL.',
+            }),
             {
               status: 500,
               headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             }
           );
         }
+        edgeLogger.debug('sessionUrl before fix', { sessionUrl, redirectTo });
+        sessionUrl = normalizeSessionUrl(sessionUrl, redirectTo);
+        edgeLogger.debug('sessionUrl after normalization', { sessionUrl });
 
         edgeLogger.info('Login sessionUrl generated', { userId: existingProfile.user_id });
 
@@ -288,19 +372,16 @@ Deno.serve(async (req: Request) => {
         );
       }
 
-      return new Response(
-        JSON.stringify({ error: 'Erreur de récupération du compte' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Erreur de récupération du compte' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // ========== CASE 2: NEW USER, NO NAME PROVIDED → REQUEST NAME ==========
     if (!fullName?.trim()) {
       edgeLogger.info('New user, requesting name', { phone: normalizedPhone });
-      
+
       return new Response(
         JSON.stringify({
           success: true,
@@ -321,10 +402,10 @@ Deno.serve(async (req: Request) => {
       .eq('id', otpRecord.id);
 
     edgeLogger.info('Creating new user', { phone: normalizedPhone, fullName });
-    
+
     const generatedEmail = `${normalizedPhone}@phone.montoit.ci`;
     const generatedPassword = crypto.randomUUID();
-    
+
     let newUser: { user: { id: string } };
     const { data: createdUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
       email: generatedEmail,
@@ -340,12 +421,15 @@ Deno.serve(async (req: Request) => {
     });
 
     if (createError) {
-      if (createError.code === 'email_exists' || createError.message?.includes('already been registered')) {
+      if (
+        createError.code === 'email_exists' ||
+        createError.message?.includes('already been registered')
+      ) {
         edgeLogger.info('User exists in auth, fetching by email', { email: generatedEmail });
-        
+
         const { data: users } = await supabaseAdmin.auth.admin.listUsers();
-        const existingUser = users?.users?.find(u => u.email === generatedEmail);
-        
+        const existingUser = users?.users?.find((u) => u.email === generatedEmail);
+
         if (existingUser) {
           newUser = { user: { id: existingUser.id } };
           edgeLogger.debug('Found existing auth user', { userId: existingUser.id });
@@ -361,13 +445,10 @@ Deno.serve(async (req: Request) => {
         }
       } else {
         edgeLogger.error('Error creating user', createError as Error);
-        return new Response(
-          JSON.stringify({ error: 'Erreur lors de la création du compte' }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
+        return new Response(JSON.stringify({ error: 'Erreur lors de la création du compte' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
     } else {
       newUser = { user: { id: createdUser.user.id } };
@@ -375,30 +456,32 @@ Deno.serve(async (req: Request) => {
 
     edgeLogger.info('User created', { userId: newUser.user.id });
 
-    // Calculer le trust_score initial: 10 (nom) + 10 (téléphone vérifié) = 20
-    const initialTrustScore = 20;
+    // Calculer le trust_score initial: 10 (nom) + 10 (téléphone vérifié) = 20 points sur 100
+    // Convertir en échelle 0-5 (20/100 * 5 = 1.0)
+    const initialTrustScore = 1.0;
 
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .upsert({
+    const { error: profileError } = await supabaseAdmin.from('profiles').upsert(
+      {
         id: newUser.user.id,
-        user_id: newUser.user.id,
-        phone: normalizedPhone, // Toujours utiliser le nouveau format
+        phone: normalizedPhone, // Toujours utiliser le nouveau format (13 chiffres)
         email: generatedEmail,
         full_name: fullName,
-        user_type: null,
+        user_type: 'locataire', // Valeur par défaut conforme à l'enum NOT NULL
         trust_score: initialTrustScore,
         profile_setup_completed: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      }, {
+      },
+      {
         onConflict: 'id',
-      });
+      }
+    );
 
     if (profileError) {
       edgeLogger.error('Error creating profile', profileError as Error);
     }
 
+    edgeLogger.debug('Generating magic link with redirectTo', { redirectTo });
     const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: generatedEmail,
@@ -406,31 +489,35 @@ Deno.serve(async (req: Request) => {
         redirectTo,
       },
     });
+    edgeLogger.debug('Generated sessionData', { sessionData });
 
     if (sessionError) {
       edgeLogger.error('Session error for new user', sessionError as Error);
-      return new Response(
-        JSON.stringify({ error: 'Compte créé mais erreur de connexion' }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ error: 'Compte créé mais erreur de connexion' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    const sessionUrl = (sessionData as MagicLinkData)?.properties?.action_link;
+    let sessionUrl = (sessionData as MagicLinkData)?.properties?.action_link;
     if (!sessionUrl) {
-      edgeLogger.error('Magic link generation failed for new user - no action_link', undefined, { 
-        email: generatedEmail 
+      edgeLogger.error('Magic link generation failed for new user - no action_link', undefined, {
+        email: generatedEmail,
       });
       return new Response(
-        JSON.stringify({ error: 'Compte créé mais erreur de génération du lien. Vérifiez la configuration Site URL.' }),
+        JSON.stringify({
+          error:
+            'Compte créé mais erreur de génération du lien. Vérifiez la configuration Site URL.',
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         }
       );
     }
+    edgeLogger.debug('sessionUrl before fix', { sessionUrl, redirectTo });
+    sessionUrl = normalizeSessionUrl(sessionUrl, redirectTo);
+    edgeLogger.debug('sessionUrl after normalization', { sessionUrl });
 
     edgeLogger.info('New user registered', { userId: newUser.user.id });
 
@@ -448,12 +535,11 @@ Deno.serve(async (req: Request) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
-
   } catch (error) {
     edgeLogger.error('Error in verify-auth-otp', error instanceof Error ? error : undefined);
     return new Response(
       JSON.stringify({
-        error: error instanceof Error ? error.message : 'Erreur inconnue'
+        error: error instanceof Error ? error.message : 'Erreur inconnue',
       }),
       {
         status: 500,

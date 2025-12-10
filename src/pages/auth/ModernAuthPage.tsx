@@ -155,6 +155,40 @@ export default function ModernAuthPage() {
     }
   };
 
+  const buildSafeSessionUrl = (sessionUrl: string) => {
+    const expectedRedirect = `${window.location.origin}/auth/callback`;
+
+    try {
+      const url = new URL(sessionUrl);
+      const redirectParam = url.searchParams.get('redirect_to');
+      const decodedRedirect = redirectParam ? decodeURIComponent(redirectParam) : null;
+
+      const sanitizedRedirect =
+        decodedRedirect && decodedRedirect.includes('/auth/callback/auth/callback')
+          ? decodedRedirect.replace('/auth/callback/auth/callback', '/auth/callback')
+          : decodedRedirect;
+
+      if (!sanitizedRedirect || sanitizedRedirect !== expectedRedirect) {
+        url.searchParams.set('redirect_to', expectedRedirect);
+      } else {
+        url.searchParams.set('redirect_to', sanitizedRedirect);
+      }
+
+      let normalizedUrl = url.toString();
+
+      if (normalizedUrl.includes('/auth/callback/auth/callback')) {
+        normalizedUrl = normalizedUrl.replace('/auth/callback/auth/callback', '/auth/callback');
+      }
+
+      return normalizedUrl;
+    } catch (err) {
+      console.error('Failed to normalize sessionUrl', err, { sessionUrl });
+      return sessionUrl.includes('/auth/callback/auth/callback')
+        ? sessionUrl.replace('/auth/callback/auth/callback', '/auth/callback')
+        : sessionUrl;
+    }
+  };
+
   const resetPhoneFlow = () => {
     setPhoneStep('enter');
     setOtp('');
@@ -304,8 +338,9 @@ export default function ModernAuthPage() {
     setLoading(true);
 
     try {
+      const siteUrl = window.location.origin;
       const { data, error: invokeError } = await supabase.functions.invoke('verify-auth-otp', {
-        body: { phoneNumber, code: otp, fullName: withName ? fullName : undefined },
+        body: { phoneNumber, code: otp, fullName: withName ? fullName : undefined, siteUrl },
       });
 
       if (invokeError) throw new Error(invokeError.message || 'Code invalide');
@@ -323,7 +358,9 @@ export default function ModernAuthPage() {
         if (data.needsProfileCompletion) {
           sessionStorage.setItem('needsProfileCompletion', 'true');
         }
-        window.location.href = data.sessionUrl;
+        console.log('Redirecting to sessionUrl:', data.sessionUrl);
+        const safeSessionUrl = buildSafeSessionUrl(data.sessionUrl);
+        window.location.href = safeSessionUrl;
       } else if (data?.success && !data?.sessionUrl) {
         throw new Error('Erreur de génération du lien. Veuillez réessayer.');
       } else {

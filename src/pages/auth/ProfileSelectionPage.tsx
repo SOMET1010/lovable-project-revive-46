@@ -11,7 +11,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { normalizeUserType, type UserTypeEn } from '@/shared/lib/utils';
+import { normalizeUserType, translateUserType, type UserTypeEn } from '@/shared/lib/utils';
 
 export default function ProfileSelection() {
   const { user, profile } = useAuth();
@@ -78,10 +78,12 @@ export default function ProfileSelection() {
     setError('');
 
     try {
+      const userTypeForDb = translateUserType(selectedType);
+
       const { error: updateError } = await supabase
         .from('profiles')
         .update({
-          user_type: normalizeUserType(selectedType),
+          user_type: userTypeForDb,
           updated_at: new Date().toISOString(),
         })
         .eq('id', user.id);
@@ -109,7 +111,7 @@ export default function ProfileSelection() {
   }
 
   // If user already has a type set (not default), redirect to home
-  if (profile?.user_type && profile.user_type !== 'tenant') {
+  if (profile?.user_type && normalizeUserType(profile.user_type) !== 'tenant') {
     navigate('/');
     return null;
   }

@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { testDatabaseConnection } from '@/shared/lib/helpers/supabaseHealthCheck';
 import { logger } from '@/shared/lib/logger';
-import { normalizeUserType } from '@/shared/lib/utils';
+import { normalizeUserType, translateUserType } from '@/shared/lib/utils';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -227,7 +227,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           user_id: userId,
           email: userData.user.email,
           full_name: userData.user.user_metadata?.['full_name'] || '',
-          user_type: normalizeUserType(userData.user.user_metadata?.['user_type']),
+          user_type: translateUserType(userData.user.user_metadata?.['user_type']),
           phone: userData.user.user_metadata?.['phone'] || '',
         },
         { onConflict: 'id' }
@@ -315,9 +315,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) return;
 
+    const updatesToSend = { ...updates, updated_at: new Date().toISOString() };
+
+    if (updatesToSend.user_type) {
+      updatesToSend.user_type = translateUserType(updatesToSend.user_type);
+    }
+
     const { error } = await supabase
       .from('profiles')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(updatesToSend)
       .eq('id', user.id);
 
     if (error) throw error;
