@@ -56,7 +56,7 @@ export function useHomeMapProperties() {
         query = query.eq('property_type', filters.propertyType);
       }
       if (filters?.maxPrice) {
-        query = query.lte('monthly_rent', filters.maxPrice);
+        query = query.lte('price', filters.maxPrice);
       }
 
       const { data, error: fetchError } = await query;
@@ -107,7 +107,7 @@ export function useHomeMapProperties() {
         query = query.eq('property_type', filters.propertyType);
       }
       if (filters?.maxPrice) {
-        query = query.lte('monthly_rent', filters.maxPrice);
+        query = query.lte('price', filters.maxPrice);
       }
 
       const { data, error: fetchError } = await query;
