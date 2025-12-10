@@ -250,9 +250,15 @@ export default function OwnerDashboardPage() {
                         <span className={`text-xs px-3 py-1 rounded-full font-medium ${
                           property.status === 'disponible' ? 'bg-green-100 text-green-700' :
                           property.status === 'loue' ? 'bg-blue-100 text-blue-700' :
+                          property.status === 'en_verification' ? 'bg-amber-100 text-amber-700' :
+                          property.status === 'rejete' ? 'bg-red-100 text-red-700' :
                           'bg-[#EFEBE9] text-[#6B5A4E]'
                         }`}>
-                          {property.status === 'disponible' ? 'Disponible' : property.status === 'loue' ? 'Loué' : property.status}
+                          {property.status === 'disponible' ? 'Disponible' : 
+                           property.status === 'loue' ? 'Loué' : 
+                           property.status === 'en_verification' ? 'En vérification' :
+                           property.status === 'rejete' ? 'Refusé' :
+                           property.status}
                         </span>
                         <div className="flex gap-3">
                           <Link 
