@@ -243,7 +243,7 @@ export function OwnerBadge({
           <div className="flex flex-wrap gap-2">
             {isVerified && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
-                <CheckCircle className="h-3 w-3" /> Identité vérifiée
+                <CheckCircle className="h-3 w-3" /> Vérifié par Mon Toit
               </span>
             )}
             {facialVerified && (

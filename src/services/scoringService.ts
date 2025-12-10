@@ -29,8 +29,8 @@ export interface ProfileScoreDetails {
 }
 
 export interface VerificationScoreDetails {
-  facial: boolean;  // Vérification biométrique NeoFace
-  ansut: boolean;   // Vérification admin
+  facial: boolean;   // Vérification biométrique NeoFace
+  montoit: boolean;  // Vérification par Mon Toit (tiers de confiance)
   total: number;
 }
 
@@ -58,10 +58,10 @@ const PROFILE_POINTS = {
   address: 20,
 };
 
-// Points pour chaque vérification (simplifié: NeoFace + ANSUT uniquement)
+// Points pour chaque vérification (simplifié: NeoFace + Mon Toit uniquement)
 const VERIFICATION_POINTS = {
-  facial: 60,  // Vérification biométrique NeoFace
-  ansut: 40,   // Vérification admin ANSUT
+  facial: 60,   // Vérification biométrique NeoFace
+  montoit: 40,  // Vérification par Mon Toit (tiers de confiance)
 };
 
 export const ScoringService = {
@@ -97,13 +97,13 @@ export const ScoringService = {
   calculateVerificationScore(profile: any): { score: number; details: VerificationScoreDetails } {
     const details: VerificationScoreDetails = {
       facial: profile?.facial_verification_status === 'verified',
-      ansut: !!profile?.is_verified,
+      montoit: !!profile?.is_verified,
       total: 0,
     };
 
     let score = 0;
     if (details.facial) score += VERIFICATION_POINTS.facial;
-    if (details.ansut) score += VERIFICATION_POINTS.ansut;
+    if (details.montoit) score += VERIFICATION_POINTS.montoit;
 
     details.total = score;
     return { score, details };
