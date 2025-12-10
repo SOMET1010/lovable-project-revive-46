@@ -9,8 +9,8 @@ const corsHeaders = {
 const NEOFACE_API_BASE = Deno.env.get("NEOFACE_API_BASE") || "https://neoface.aineo.ai/api/v2";
 const NEOFACE_TOKEN = Deno.env.get("NEOFACE_BEARER_TOKEN");
 
-// NeoFace V2 accepts up to 10MB, we use 5MB as safety margin
-const MAX_IMAGE_SIZE_MB = 5;
+// Request timeout (15 seconds)
+const TIMEOUT_MS = 15000;
 
 interface UploadDocumentRequest {
   action: 'upload_document';
@@ -31,64 +31,38 @@ interface CheckStatusRequest {
   verification_id?: string;
 }
 
-interface NeofaceUploadResponse {
-  document_id: string;
-  url?: string;
-  success: boolean;
-  error?: string;
-}
-
-interface NeofaceVerifyResponse {
-  status: 'waiting' | 'verified' | 'failed';
-  message: string;
-  document_id: string;
-  matching_score?: number;
-  verified_at?: string;
-  error?: string;
-}
-
-// Helper to convert blob to base64
-async function blobToBase64(blob: Blob): Promise<string> {
-  const arrayBuffer = await blob.arrayBuffer();
-  const bytes = new Uint8Array(arrayBuffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i]);
+// Fetch with timeout
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number = TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeout);
+    return response;
+  } catch (error) {
+    clearTimeout(timeout);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Timeout après ${timeoutMs}ms`);
+    }
+    throw error;
   }
-  return btoa(binary);
-}
-
-// Helper to get MIME type from blob or filename
-function getMimeType(blob: Blob, filename: string): string {
-  if (blob.type && blob.type !== 'application/octet-stream') {
-    return blob.type;
-  }
-  const ext = filename.split('.').pop()?.toLowerCase();
-  if (ext === 'png') return 'image/png';
-  if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
-  return 'image/jpeg'; // default
 }
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
 
-  // Vérifier que les credentials NeoFace sont configurés
+  // Check credentials
   if (!NEOFACE_TOKEN) {
     console.error('[NeoFace] Missing NEOFACE_BEARER_TOKEN');
     return new Response(
       JSON.stringify({ 
-        error: 'Configuration NeoFace manquante. Veuillez contacter l\'administrateur.',
+        error: 'Configuration NeoFace manquante. Contactez l\'administrateur.',
         provider: 'neoface'
       }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 
@@ -101,308 +75,304 @@ Deno.serve(async (req: Request) => {
     const body = await req.json();
     const { action } = body;
 
-    console.log('[NeoFace] Action:', action);
+    console.log(`[NeoFace] Action: ${action}`);
 
-    if (action === 'upload_document') {
-      return await handleUploadDocument(body as UploadDocumentRequest, supabase);
-    } else if (action === 'verify_selfie_base64') {
-      return await handleVerifySelfieBase64(body as VerifySelfieBase64Request, supabase);
-    } else if (action === 'check_status') {
-      return await handleCheckStatus(body as CheckStatusRequest, supabase);
-    } else {
-      return new Response(
-        JSON.stringify({ error: 'Action invalide. Actions: upload_document, verify_selfie_base64, check_status' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+    switch (action) {
+      case 'upload_document':
+        return await handleUploadDocument(body as UploadDocumentRequest, supabase);
+      case 'verify_selfie_base64':
+        return await handleVerifySelfie(body as VerifySelfieBase64Request, supabase);
+      case 'check_status':
+        return await handleCheckStatus(body as CheckStatusRequest, supabase);
+      default:
+        return new Response(
+          JSON.stringify({ error: 'Action invalide' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
     }
   } catch (error: unknown) {
-    console.error('[NeoFace] Error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Erreur interne';
+    console.error('[NeoFace] Error:', errorMessage);
 
     return new Response(
-      JSON.stringify({
-        error: errorMessage,
-        provider: 'neoface'
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      JSON.stringify({ error: errorMessage, provider: 'neoface' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
 });
 
+// ==================== UPLOAD DOCUMENT ====================
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleUploadDocument(
   request: UploadDocumentRequest,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
 ): Promise<Response> {
   const { cni_photo_url, user_id } = request;
   const startTime = Date.now();
 
   console.log('[NeoFace] Uploading document for user:', user_id);
-  console.log('[NeoFace] Image URL:', cni_photo_url);
+  console.log('[NeoFace] CNI URL:', cni_photo_url);
 
-  // Télécharger l'image CNI
-  const imageResponse = await fetch(cni_photo_url);
+  // Fetch the CNI image
+  const imageResponse = await fetchWithTimeout(cni_photo_url, { method: 'GET' });
   if (!imageResponse.ok) {
-    throw new Error(`Échec téléchargement de l'image: ${imageResponse.statusText}`);
+    throw new Error(`Échec téléchargement image: ${imageResponse.statusText}`);
   }
 
   const imageBlob = await imageResponse.blob();
   const imageSizeKB = imageBlob.size / 1024;
-  const imageSizeMB = imageSizeKB / 1024;
-  
-  console.log(`[NeoFace] Image fetched, size: ${imageSizeKB.toFixed(0)}KB (${imageSizeMB.toFixed(2)}MB)`);
+  console.log(`[NeoFace] Image size: ${imageSizeKB.toFixed(0)}KB`);
 
-  // Validate image size (NeoFace accepts up to 10MB, we use 5MB safety margin)
-  if (imageSizeMB > MAX_IMAGE_SIZE_MB) {
-    console.error(`[NeoFace] Image too large: ${imageSizeMB.toFixed(2)}MB > ${MAX_IMAGE_SIZE_MB}MB limit`);
-    throw new Error(`Image trop volumineuse (${imageSizeMB.toFixed(1)}MB). Maximum autorisé: ${MAX_IMAGE_SIZE_MB}MB.`);
+  // Validate size (max 5MB)
+  if (imageSizeKB > 5120) {
+    throw new Error(`Image trop volumineuse (${(imageSizeKB/1024).toFixed(1)}MB). Max: 5MB`);
   }
 
-  // Convert to Base64 for JSON payload (more reliable than multipart for large files)
-  const base64Data = await blobToBase64(imageBlob);
-  const mimeType = getMimeType(imageBlob, 'cni.jpg');
+  // Create FormData (multipart is more reliable than JSON for images)
+  const formData = new FormData();
+  formData.append("doc_file", imageBlob, "document.jpg");
+
+  // Call NeoFace API
+  console.log('[NeoFace] Calling API:', `${NEOFACE_API_BASE}/document_capture`);
   
-  console.log('[NeoFace] Converted to base64, mime type:', mimeType);
-
-  // Prepare JSON payload with Base64 (as per NeoFace V2 API documentation)
-  const payload = {
-    doc_file: {
-      name: "document.jpg",
-      data: base64Data,
-      mime_type: mimeType
+  const uploadResponse = await fetchWithTimeout(
+    `${NEOFACE_API_BASE}/document_capture`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${NEOFACE_TOKEN}`,
+      },
+      body: formData,
     }
-  };
-
-  // Call NeoFace API with Bearer token in header
-  const uploadResponse = await fetch(`${NEOFACE_API_BASE}/document_capture`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${NEOFACE_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  );
 
   const responseText = await uploadResponse.text();
   console.log('[NeoFace] Upload response status:', uploadResponse.status);
   console.log('[NeoFace] Upload response:', responseText.substring(0, 500));
 
   if (!uploadResponse.ok) {
-    console.error('[NeoFace] Upload failed:', responseText);
-
-    await supabase.from('service_usage_logs').insert({
-      service_name: 'face_recognition',
-      provider: 'neoface',
-      status: 'failure',
-      error_message: `Upload failed: ${uploadResponse.status} - ${responseText.substring(0, 200)}`,
-      response_time_ms: Date.now() - startTime,
-    });
-
-    // Parse error if JSON
-    let errorMsg = `NeoFace upload failed: ${uploadResponse.status}`;
-    try {
-      const errorData = JSON.parse(responseText);
-      if (errorData.error) errorMsg = errorData.error;
-    } catch {
-      // Not JSON, use default message
-    }
-
-    throw new Error(errorMsg);
+    await logServiceUsage(supabase, 'failure', `Upload failed: ${uploadResponse.status}`, startTime);
+    throw new Error(`Upload échoué: ${uploadResponse.status}`);
   }
 
-  let uploadData: NeofaceUploadResponse;
+  let uploadData;
   try {
     uploadData = JSON.parse(responseText);
   } catch {
     throw new Error('Réponse NeoFace invalide');
   }
 
-  console.log('[NeoFace] Document uploaded successfully:', uploadData.document_id);
-
-  // Logger la tentative de vérification
-  const { data: verificationId, error: dbError } = await supabase
-    .rpc('log_facial_verification_attempt', {
-      p_user_id: user_id,
-      p_provider: 'neoface',
-      p_document_id: uploadData.document_id,
-      p_document_url: cni_photo_url,
-    });
-
-  if (dbError) {
-    console.error('[NeoFace] Failed to log verification attempt:', dbError);
+  const documentId = uploadData.document_id;
+  if (!documentId) {
+    throw new Error('document_id manquant dans la réponse');
   }
 
-  await supabase.from('service_usage_logs').insert({
-    service_name: 'face_recognition',
-    provider: 'neoface',
-    status: 'success',
-    response_time_ms: Date.now() - startTime,
-  });
+  console.log('[NeoFace] Document uploaded:', documentId);
+
+  // Log to database
+  let verificationId = null;
+  try {
+    const { data, error: dbError } = await supabase
+      .rpc('log_facial_verification_attempt', {
+        p_user_id: user_id,
+        p_provider: 'neoface',
+        p_document_id: documentId,
+        p_document_url: cni_photo_url,
+      });
+    if (!dbError) verificationId = data;
+  } catch (e) {
+    console.error('[NeoFace] DB log error:', e);
+  }
+
+  await logServiceUsage(supabase, 'success', null, startTime);
 
   return new Response(
     JSON.stringify({
       success: true,
-      document_id: uploadData.document_id,
+      document_id: documentId,
       verification_id: verificationId,
       provider: 'neoface',
-      message: 'Document téléchargé. Veuillez prendre un selfie pour la vérification.',
+      message: 'Document téléchargé. Prenez un selfie.',
     }),
-    {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    }
+    { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
 }
 
-async function handleVerifySelfieBase64(
+// ==================== VERIFY SELFIE ====================
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function handleVerifySelfie(
   request: VerifySelfieBase64Request,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
 ): Promise<Response> {
   const { document_id, selfie_base64, verification_id } = request;
   const startTime = Date.now();
 
-  console.log('[NeoFace] Verifying selfie (base64) for document:', document_id);
+  console.log('[NeoFace] Verifying selfie for document:', document_id);
   console.log('[NeoFace] Selfie base64 length:', selfie_base64?.length || 0);
 
   if (!selfie_base64) {
     throw new Error('Selfie base64 manquant');
   }
 
-  // Prepare JSON payload with the base64 selfie
-  const payload = {
-    document_id: document_id,
-    selfie_file: {
-      name: "selfie.jpg",
-      data: selfie_base64,
-      mime_type: "image/jpeg"
-    }
-  };
+  if (!document_id) {
+    throw new Error('document_id manquant');
+  }
 
-  // Call NeoFace API for verification
-  const verifyResponse = await fetch(`${NEOFACE_API_BASE}/match_verify`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${NEOFACE_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  // Convert base64 to blob
+  const binaryString = atob(selfie_base64);
+  const bytes = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  const selfieBlob = new Blob([bytes], { type: 'image/jpeg' });
+
+  console.log('[NeoFace] Selfie blob size:', (selfieBlob.size / 1024).toFixed(0), 'KB');
+
+  // Create FormData
+  const formData = new FormData();
+  formData.append("document_id", document_id);
+  formData.append("selfie_file", selfieBlob, "selfie.jpg");
+
+  // Call NeoFace API
+  console.log('[NeoFace] Calling match_verify API...');
+  
+  const verifyResponse = await fetchWithTimeout(
+    `${NEOFACE_API_BASE}/match_verify`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${NEOFACE_TOKEN}`,
+      },
+      body: formData,
+    }
+  );
 
   const responseText = await verifyResponse.text();
   console.log('[NeoFace] Verify response status:', verifyResponse.status);
   console.log('[NeoFace] Verify response:', responseText.substring(0, 500));
 
-  let verifyData: NeofaceVerifyResponse;
+  let verifyData;
   try {
     verifyData = JSON.parse(responseText);
   } catch {
-    console.error('[NeoFace] Failed to parse verify response:', responseText);
-    throw new Error('Réponse NeoFace invalide lors de la vérification');
+    console.error('[NeoFace] Failed to parse verify response');
+    throw new Error('Réponse NeoFace invalide');
   }
 
-  console.log('[NeoFace] Verification result:', verifyData);
+  // Determine verification result
+  const isVerified = verifyData.status === 'verified' || 
+                     verifyData.match === true || 
+                     (verifyData.matching_score && verifyData.matching_score > 0.7);
+  
+  const matchingScore = verifyData.matching_score || verifyData.score || null;
+  const status = isVerified ? 'verified' : 'failed';
+  const message = isVerified 
+    ? 'Identité vérifiée avec succès' 
+    : (verifyData.message || 'Les visages ne correspondent pas');
 
-  // Mettre à jour le statut de vérification
+  console.log('[NeoFace] Final status:', status, 'Score:', matchingScore);
+
+  // Update database
   if (verification_id) {
-    const dbStatus = verifyData.status === 'verified' ? 'passed' : 
-                     verifyData.status === 'failed' ? 'failed' : 'pending';
-
-    await supabase.rpc('update_facial_verification_status', {
-      p_verification_id: verification_id,
-      p_status: dbStatus,
-      p_matching_score: verifyData.matching_score || null,
-      p_provider_response: verifyData,
-      p_is_match: verifyData.status === 'verified',
-      p_is_live: verifyData.status === 'verified',
-      p_failure_reason: verifyData.status === 'failed' ? verifyData.message : null,
-    });
+    try {
+      await supabase.rpc('update_facial_verification_status', {
+        p_verification_id: verification_id,
+        p_status: isVerified ? 'passed' : 'failed',
+        p_matching_score: matchingScore,
+        p_provider_response: verifyData,
+        p_is_match: isVerified,
+        p_is_live: isVerified,
+        p_failure_reason: !isVerified ? message : null,
+      });
+    } catch (e) {
+      console.error('[NeoFace] DB update error:', e);
+    }
   }
 
-  await supabase.from('service_usage_logs').insert({
-    service_name: 'face_recognition',
-    provider: 'neoface',
-    status: verifyData.status === 'verified' ? 'success' : 'failure',
-    error_message: verifyData.status === 'failed' ? verifyData.message : null,
-    response_time_ms: Date.now() - startTime,
-  });
+  await logServiceUsage(supabase, isVerified ? 'success' : 'failure', !isVerified ? message : null, startTime);
 
   return new Response(
     JSON.stringify({
-      ...verifyData,
+      status,
+      message,
+      matching_score: matchingScore,
+      verified_at: isVerified ? new Date().toISOString() : null,
       provider: 'neoface',
     }),
-    {
-      status: verifyResponse.ok ? 200 : verifyResponse.status,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    { 
+      status: verifyResponse.ok ? 200 : verifyResponse.status, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     }
   );
 }
 
+// ==================== CHECK STATUS ====================
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function handleCheckStatus(
   request: CheckStatusRequest,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any
 ): Promise<Response> {
   const { document_id, verification_id } = request;
-  const startTime = Date.now();
 
   console.log('[NeoFace] Checking status for document:', document_id);
 
-  // Call NeoFace API to check status (as per V2 documentation)
-  const verifyResponse = await fetch(`${NEOFACE_API_BASE}/match_verify`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${NEOFACE_TOKEN}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      document_id: document_id,
-    }),
-  });
+  const formData = new FormData();
+  formData.append("document_id", document_id);
 
-  const statusCode = verifyResponse.status;
-  const verifyData: NeofaceVerifyResponse = await verifyResponse.json();
+  const verifyResponse = await fetchWithTimeout(
+    `${NEOFACE_API_BASE}/match_verify`,
+    {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${NEOFACE_TOKEN}`,
+      },
+      body: formData,
+    }
+  );
 
-  console.log('[NeoFace] Status check result:', verifyData.status);
+  const verifyData = await verifyResponse.json();
+  console.log('[NeoFace] Status check result:', verifyData);
 
-  // Mettre à jour si le statut a changé
+  // Update DB if final status
   if (verification_id && (verifyData.status === 'verified' || verifyData.status === 'failed')) {
-    const dbStatus = verifyData.status === 'verified' ? 'passed' : 'failed';
-
-    await supabase.rpc('update_facial_verification_status', {
-      p_verification_id: verification_id,
-      p_status: dbStatus,
-      p_matching_score: verifyData.matching_score || null,
-      p_provider_response: verifyData,
-      p_is_match: verifyData.status === 'verified',
-      p_is_live: verifyData.status === 'verified',
-      p_failure_reason: verifyData.status === 'failed' ? verifyData.message : null,
-    });
-
-    await supabase.from('service_usage_logs').insert({
-      service_name: 'face_recognition',
-      provider: 'neoface',
-      status: verifyData.status === 'verified' ? 'success' : 'failure',
-      error_message: verifyData.status === 'failed' ? verifyData.message : null,
-      response_time_ms: Date.now() - startTime,
-    });
+    try {
+      await supabase.rpc('update_facial_verification_status', {
+        p_verification_id: verification_id,
+        p_status: verifyData.status === 'verified' ? 'passed' : 'failed',
+        p_matching_score: verifyData.matching_score || null,
+        p_provider_response: verifyData,
+        p_is_match: verifyData.status === 'verified',
+        p_is_live: verifyData.status === 'verified',
+        p_failure_reason: verifyData.status === 'failed' ? verifyData.message : null,
+      });
+    } catch (e) {
+      console.error('[NeoFace] DB update error:', e);
+    }
   }
 
   return new Response(
-    JSON.stringify({
-      ...verifyData,
-      provider: 'neoface',
-    }),
-    {
-      status: statusCode,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-    }
+    JSON.stringify({ ...verifyData, provider: 'neoface' }),
+    { status: verifyResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
+}
+
+// Helper to log service usage
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function logServiceUsage(
+  supabase: any,
+  status: 'success' | 'failure',
+  errorMessage: string | null,
+  startTime: number
+) {
+  try {
+    await supabase.from('service_usage_logs').insert({
+      service_name: 'face_recognition',
+      provider: 'neoface',
+      status,
+      error_message: errorMessage,
+      response_time_ms: Date.now() - startTime,
+    });
+  } catch (e) {
+    console.error('[NeoFace] Log error:', e);
+  }
 }
