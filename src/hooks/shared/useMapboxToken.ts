@@ -2,8 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export function useMapboxToken() {
+  // Local/public fallback so we are resilient when the edge function is down
+  const envToken = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN as string | undefined;
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["mapbox-token"],
+    enabled: !envToken, // skip network call if we already have the token locally
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke("get-mapbox-token");
       
@@ -24,8 +28,8 @@ export function useMapboxToken() {
   });
 
   return { 
-    token: data, 
-    isLoading, 
-    error: error as Error | null 
+    token: envToken || data, 
+    isLoading: envToken ? false : isLoading, 
+    error: envToken ? null : (error as Error | null) 
   };
 }

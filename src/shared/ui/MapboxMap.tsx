@@ -224,6 +224,10 @@ export default function MapboxMap({
           el.style.zIndex = '1';
         });
 
+        const formattedRent = property.monthly_rent != null
+          ? `${property.monthly_rent.toLocaleString()} FCFA/mois`
+          : 'Prix non renseigné';
+
         const popupContent = `
           <div style="padding: 12px; min-width: 200px;">
             ${Array.isArray(property.images) && property.images.length > 0 ?
@@ -233,7 +237,7 @@ export default function MapboxMap({
             ${property.city || property.neighborhood ?
               `<p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">${property.city || ''}${property.neighborhood ? ' • ' + property.neighborhood : ''}</p>`
               : ''}
-            <p style="color: #ff6b35; font-weight: bold; font-size: 18px; margin-bottom: 8px;">${property.monthly_rent.toLocaleString()} FCFA/mois</p>
+            <p style="color: #ff6b35; font-weight: bold; font-size: 18px; margin-bottom: 8px;">${formattedRent}</p>
             ${property.status ?
               `<span style="background: ${property.status === 'disponible' ? '#10B981' : '#EF4444'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold;">
                 ${property.status === 'disponible' ? 'Disponible' : property.status === 'loue' ? 'Loué' : 'En attente'}

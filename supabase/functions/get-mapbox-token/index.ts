@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
   "Cache-Control": "public, max-age=3600", // Cache 1 heure
 };
@@ -14,7 +14,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const token = Deno.env.get("MAPBOX_PUBLIC_TOKEN");
+    const token = Deno.env.get("MAPBOX_PUBLIC_TOKEN") || Deno.env.get("VITE_MAPBOX_PUBLIC_TOKEN");
     
     if (!token) {
       console.error("MAPBOX_PUBLIC_TOKEN not configured");

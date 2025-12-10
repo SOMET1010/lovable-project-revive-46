@@ -22,10 +22,9 @@ const noHeaderFooterRoutes = [
 // Routes qui n'affichent pas le breadcrumb global (héros ou breadcrumb interne)
 const noBreadcrumbRoutes = ['/', '/recherche'];
 
-// Routes avec navigation latérale (éviter header + breadcrumb doublons)
+// Routes avec navigation latérale pour locataire (éviter header + breadcrumb doublons)
 const tenantSidebarPrefixes = [
   '/dashboard/locataire',
-  '/dashboard',
   '/mon-espace',
   '/mes-candidatures',
   '/mes-contrats',
@@ -43,6 +42,26 @@ const tenantSidebarPrefixes = [
   '/score-locataire',
   '/maintenance/locataire',
   '/maintenance/proprietaire',
+  '/recherche',
+];
+
+// Routes avec navigation latérale pour propriétaire (éviter header + breadcrumb doublons)
+const ownerSidebarPrefixes = [
+  '/dashboard/proprietaire',
+  '/dashboard/ajouter-propriete',
+  '/dashboard/creer-contrat',
+  '/dashboard/mes-contrats',
+  '/dashboard/candidatures',
+  '/dashboard/mes-candidatures',
+  '/dashboard/candidature',
+];
+
+// Routes avec navigation latérale pour agence (éviter header + breadcrumb doublons)
+const agencySidebarPrefixes = [
+  '/dashboard/agence',
+  '/dashboard/mes-mandats',
+  '/mes-mandats',
+  '/mandat',
 ];
 
 // Map routes to skeleton variants
@@ -60,14 +79,17 @@ export default function Layout() {
 
   const shouldShowLayout = !noLayoutRoutes.includes(path);
   const isTenantSidebarRoute = tenantSidebarPrefixes.some((prefix) => path.startsWith(prefix));
+  const isOwnerSidebarRoute = ownerSidebarPrefixes.some((prefix) => path.startsWith(prefix));
+  const isAgencySidebarRoute = agencySidebarPrefixes.some((prefix) => path.startsWith(prefix));
+  const isAnySidebarRoute = isTenantSidebarRoute || isOwnerSidebarRoute || isAgencySidebarRoute;
   const shouldShowBreadcrumb =
     !noBreadcrumbRoutes.some((route) => path.startsWith(route)) &&
-    !isTenantSidebarRoute &&
+    !isAnySidebarRoute &&
     shouldShowLayout;
   const shouldShowHeaderFooter =
     !noHeaderFooterRoutes.some((route) => path.startsWith(route)) &&
     !noLayoutRoutes.includes(path) &&
-    !isTenantSidebarRoute;
+    !isAnySidebarRoute;
   const skeletonVariant = getSkeletonVariant(path);
 
   if (!shouldShowLayout) {
