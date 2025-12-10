@@ -92,10 +92,8 @@ export default function OwnerContractsPage() {
           charges_amount,
           deposit_amount,
           start_date,
-          end_date,
+          end_at,
           document_url,
-          landlord_signed_at,
-          tenant_signed_at,
           created_at,
           tenant_id,
           properties!lease_contracts_property_id_fkey (
@@ -119,6 +117,7 @@ export default function OwnerContractsPage() {
 
       const contractsWithTenants = (data || []).map(contract => ({
         ...contract,
+        end_date: (contract as any).end_at || (contract as any).end_date,
         properties: contract.properties as Contract['properties'],
         tenant_profile: profilesMap.get(contract.tenant_id) || null
       })) as Contract[];

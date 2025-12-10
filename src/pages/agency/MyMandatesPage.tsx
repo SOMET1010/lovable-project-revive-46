@@ -74,7 +74,7 @@ export default function MyMandatesPage() {
       
       const { data } = await supabase
         .from('properties')
-        .select('id, title, city, monthly_rent')
+        .select('id, title, city')
         .eq('owner_id', user.id);
       
       setMyProperties((data || []) as Property[]);

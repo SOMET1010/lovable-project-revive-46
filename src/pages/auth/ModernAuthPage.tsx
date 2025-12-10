@@ -806,33 +806,48 @@ export default function ModernAuthPage() {
               )}
 
               {emailMode === 'register' && emailStep === 'role' && (
-                <div className="space-y-5">
-                  <p className="text-center text-[#2C1810] font-semibold">
-                    Choisissez votre profil
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="space-y-4">
+                  <div className="text-center space-y-2">
+                    <p className="text-[#2C1810] font-semibold text-lg">
+                      Profil activé — choisissez votre rôle
+                    </p>
+                    <p className="text-xs text-[#6B5A4E]">Vous pourrez le modifier plus tard depuis votre compte.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {[
-                      { value: 'locataire', label: 'Locataire', icon: Home },
-                      { value: 'proprietaire', label: 'Propriétaire', icon: Star },
-                      { value: 'agence', label: 'Agence', icon: Shield },
+                      { value: 'locataire', label: 'Locataire', icon: Home, bullets: ['Recherche & alertes', 'Candidature en 1 clic'] },
+                      { value: 'proprietaire', label: 'Propriétaire', icon: Star, bullets: ['Publier un bien', 'Contrats digitaux'] },
+                      { value: 'agence', label: 'Agence', icon: Shield, bullets: ['Mandats & équipe', 'Reporting & commissions'] },
                     ].map((opt) => (
                       <button
                         key={opt.value}
                         type="button"
                         onClick={() => handleSelectRole(opt.value as 'locataire' | 'proprietaire' | 'agence')}
-                        className={`flex items-center gap-2 px-3 py-3 rounded-lg border transition ${
+                        className={`flex items-start gap-3 px-4 py-4 rounded-2xl border transition text-left ${
                           profileType === opt.value
-                            ? 'border-[#F16522] bg-[#F16522]/10 text-[#F16522]'
-                            : 'border-gray-200 text-[#2C1810]'
+                            ? 'border-[#F16522] bg-[#F16522]/10 text-[#F16522] shadow-lg'
+                            : 'border-gray-200 text-[#2C1810] hover:border-[#F16522]/60 hover:bg-[#F16522]/5'
                         }`}
                       >
-                        <opt.icon className="h-4 w-4" />
-                        <span className="text-sm font-semibold">{opt.label}</span>
+                        <opt.icon className="h-5 w-5 mt-0.5" />
+                        <div className="space-y-1">
+                          <span className="text-sm font-semibold block">{opt.label}</span>
+                          <ul className="text-xs text-[#6B5A4E] space-y-1">
+                            {opt.bullets.map((b, i) => (
+                              <li key={i} className="flex items-center gap-1">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#F16522]" />
+                                <span>{b}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </button>
                     ))}
                   </div>
+
                   <p className="text-xs text-center text-[#6B5A4E]">
-                    Vous serez redirigé vers /dashboard/locataire après ce choix.
+                    Redirection automatique vers votre tableau de bord après sélection.
                   </p>
                 </div>
               )}

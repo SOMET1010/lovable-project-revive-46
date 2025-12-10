@@ -303,6 +303,7 @@ export default function PropertyDetailPage() {
   const { user, profile } = useAuth();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
@@ -335,9 +336,14 @@ export default function PropertyDetailPage() {
         .from('properties')
         .select('*')
         .eq('id', propertyId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) {
+        setLoadError('Propriété introuvable ou supprimée.');
+        setProperty(null);
+        return;
+      }
       
       // Étape 2: Récupérer le profil public du propriétaire via RPC sécurisé
       let ownerProfile: {
@@ -403,6 +409,7 @@ export default function PropertyDetailPage() {
       setProperty(propertyData);
     } catch (error) {
       console.error('Error loading property:', error);
+      setLoadError('Propriété introuvable ou inaccessible.');
     } finally {
       setLoading(false);
     }

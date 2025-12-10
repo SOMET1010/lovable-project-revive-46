@@ -18,13 +18,11 @@ export default function ProfileSelection() {
       icon: Home,
       title: 'Locataire',
       subtitle: 'Je cherche un logement',
-      description: 'Trouvez votre logement idéal, postulez en ligne et signez votre contrat électroniquement.',
+      description: 'Trouvez rapidement, postulez en ligne et signez en quelques clics.',
       benefits: [
-        'Recherche simplifiée de logements',
-        'Candidature en ligne rapide',
-        'Score locataire pour valoriser votre profil',
-        'Signature électronique de contrat',
-        'Paiement sécurisé du loyer'
+        'Candidature 100% en ligne',
+        'Visites planifiables en 1 clic',
+        'Signature électronique sécurisée'
       ],
       color: 'from-cyan-400 to-blue-500',
       bgColor: 'from-cyan-50 to-blue-50',
@@ -36,13 +34,11 @@ export default function ProfileSelection() {
       icon: Building2,
       title: 'Propriétaire',
       subtitle: 'Je mets mon bien en location',
-      description: 'Gérez vos propriétés, trouvez des locataires de confiance et sécurisez vos transactions.',
+      description: 'Publiez, qualifiez les candidats et signez vos baux en ligne.',
       benefits: [
-        'Gestion de plusieurs propriétés',
-        'Sélection de locataires vérifiés',
-        'Contrats électroniques automatisés',
-        'Suivi des paiements en temps réel',
-        'Tableau de bord analytique'
+        'Locataires vérifiés',
+        'Contrats et signatures digitales',
+        'Suivi des paiements en temps réel'
       ],
       color: 'from-terracotta-400 to-coral-500',
       bgColor: 'from-terracotta-50 to-coral-50',
@@ -54,13 +50,11 @@ export default function ProfileSelection() {
       icon: Briefcase,
       title: 'Agence Immobilière',
       subtitle: 'Je suis une agence professionnelle',
-      description: 'Gérez votre portefeuille, collaborez avec votre équipe et augmentez vos commissions.',
+      description: 'Pilotez votre portefeuille et collaborez avec votre équipe.',
       benefits: [
-        'Gestion multi-propriétés avancée',
-        'Collaboration en équipe',
-        'Suivi des commissions',
-        'Outils marketing intégrés',
-        'Statistiques et rapports détaillés'
+        'Portefeuille multi-biens',
+        'Collaboration équipe & mandats',
+        'Reporting et commissions'
       ],
       color: 'from-olive-400 to-green-500',
       bgColor: 'from-olive-50 to-green-50',
@@ -176,7 +170,7 @@ export default function ProfileSelection() {
                   <div className={`w-20 h-20 bg-gradient-to-br ${profileType.color} rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg transform ${
                     isSelected ? 'rotate-0' : index % 2 === 0 ? '-rotate-6' : 'rotate-6'
                   } transition-transform duration-300`}>
-                    <Icon className="h-10 w-10 text-white" />
+                    <Icon className="h-8 w-8 text-white" />
                   </div>
 
                   <div className="text-center mb-6">

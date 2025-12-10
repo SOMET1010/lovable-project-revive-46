@@ -295,6 +295,15 @@ const [step, setStep] = useState(1);
     setError('');
 
     try {
+      const priceValue = Number(formData.monthly_rent);
+      const depositValue = formData.deposit_amount ? Number(formData.deposit_amount) : null;
+      const chargesValueRaw = formData.charges_amount ? Number(formData.charges_amount) : 0;
+      const chargesValue = Number.isNaN(chargesValueRaw) ? 0 : chargesValueRaw;
+
+      if (Number.isNaN(priceValue)) {
+        throw new Error('Le loyer est invalide');
+      }
+
       const { data: property, error: insertError } = await supabase
         .from('properties')
         .insert({
@@ -305,17 +314,17 @@ const [step, setStep] = useState(1);
           city: formData.city,
           neighborhood: formData.neighborhood || null,
           property_type: formData.property_type,
-          property_category: formData.property_category,
-          bedrooms: parseInt(formData.bedrooms.toString()),
-          bathrooms: parseInt(formData.bathrooms.toString()),
+          property_category: formData.property_category || 'residentiel',
+          bedrooms_count: formData.bedrooms ? parseInt(formData.bedrooms.toString()) : null,
+          rooms_count: formData.bedrooms ? parseInt(formData.bedrooms.toString()) : null,
+          bathrooms_count: formData.bathrooms ? parseInt(formData.bathrooms.toString()) : null,
           surface_area: formData.surface_area ? parseFloat(formData.surface_area) : null,
-          monthly_rent: parseFloat(formData.monthly_rent),
-          deposit_amount: formData.deposit_amount ? parseFloat(formData.deposit_amount) : null,
-          charges_amount: parseFloat(formData.charges_amount),
+          price: priceValue,
+          deposit_amount: depositValue,
+          charges_amount: chargesValue,
           has_parking: formData.has_parking,
-          has_garden: formData.has_garden,
-          is_furnished: formData.is_furnished,
-          has_ac: formData.has_ac,
+          furnished: formData.is_furnished,
+          is_anonymous: undefined,
           is_anonymous: formData.is_anonymous,
           status: 'disponible',
         })
@@ -348,8 +357,12 @@ const [step, setStep] = useState(1);
         navigate('/dashboard/proprietaire');
       }, 3000);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Erreur lors de l\'ajout de la propriété';
-      setError(message);
+      const supabaseErr = err as { message?: string; details?: string; hint?: string };
+      const message = supabaseErr?.message || (err instanceof Error ? err.message : 'Erreur lors de l\'ajout de la propriété');
+      const details = supabaseErr?.details ? ` (${supabaseErr.details})` : '';
+      const hint = supabaseErr?.hint ? ` — ${supabaseErr.hint}` : '';
+      console.error('Error inserting property:', err);
+      setError(`${message}${details}${hint}`);
     } finally {
       setLoading(false);
       setUploadingImages(false);

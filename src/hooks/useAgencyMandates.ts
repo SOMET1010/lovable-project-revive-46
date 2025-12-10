@@ -93,7 +93,7 @@ export interface AgencyMandate {
     title: string;
     city: string;
     neighborhood: string | null;
-    monthly_rent: number;
+    monthly_rent?: number;
     main_image: string | null;
   };
   agency?: Agency;
@@ -163,7 +163,7 @@ export function useAgencyMandates() {
         .from('agency_mandates')
         .select(`
           *,
-          property:properties(id, title, city, neighborhood, monthly_rent, main_image),
+          property:properties(id, title, city, neighborhood, main_image),
           agency:agencies(*)
         `)
         .order('created_at', { ascending: false });

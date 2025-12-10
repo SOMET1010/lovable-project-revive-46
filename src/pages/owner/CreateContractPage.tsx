@@ -150,12 +150,16 @@ export default function CreateContractPage() {
     try {
       const { data: propsData, error: propsError } = await supabase
         .from('properties')
-        .select('id, title, address, city, monthly_rent')
+        .select('id, title, address, city, price')
         .eq('owner_id', user.id)
         .eq('status', 'disponible');
 
       if (propsError) throw propsError;
-      setProperties(propsData || []);
+      const normalized = (propsData || []).map((p: any) => ({
+        ...p,
+        monthly_rent: p.price ?? 0,
+      }));
+      setProperties(normalized);
     } catch (err: unknown) {
       console.error('Error loading data:', err);
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement');

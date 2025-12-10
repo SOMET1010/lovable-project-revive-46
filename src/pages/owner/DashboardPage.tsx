@@ -69,7 +69,10 @@ export default function OwnerDashboardPage() {
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
 
-      const props = (propertiesData || []) as unknown as Property[];
+      const props = (propertiesData || []).map((p: any) => ({
+        ...p,
+        monthly_rent: p.price ?? p.monthly_rent ?? 0,
+      })) as Property[];
       setProperties(props);
 
       // Load active leases count
