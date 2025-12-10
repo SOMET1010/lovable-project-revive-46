@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.get-place-details]
 verify_jwt = false
+
+[functions.neoface-verify]
+verify_jwt = false

@@ -137,42 +137,42 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
   };
 
-  // Simplified liveness detection (user interaction based)
-  const startLivenessDetection = () => {
-    // Show face detection prompt
+  // Simplified liveness detection - user confirms each challenge manually
+  const startLivenessDetection = useCallback(() => {
     setFaceDetected(true);
-    
-    // Auto-progress through challenges for better UX
-    // User just needs to follow instructions visually
-    const advanceChallenge = () => {
-      if (currentChallengeIndex < CHALLENGES.length - 1) {
-        setCurrentChallengeIndex(prev => prev + 1);
-        const challenge = CHALLENGES[currentChallengeIndex];
-        if (challenge) {
-          setCompletedChallenges(prev => [...prev, challenge]);
-        }
-      }
-    };
-    
-    // Initial timeout to let user see instructions
-    challengeTimerRef.current = window.setTimeout(advanceChallenge, 2000);
-  };
+    console.log('[NeoFace] Liveness detection started');
+  }, []);
 
-  // Handle challenge completion manually via button
+  // Handle challenge completion - user clicks button after performing action
   const completeCurrentChallenge = useCallback(() => {
-    if (currentChallenge && !completedChallenges.includes(currentChallenge)) {
-      setCompletedChallenges(prev => [...prev, currentChallenge]);
-      setCurrentChallengeIndex(prev => prev + 1);
+    const challengeIndex = completedChallenges.length;
+    const challenge = CHALLENGES[challengeIndex];
+    
+    if (challenge) {
+      console.log('[NeoFace] Completing challenge:', challenge);
+      setCompletedChallenges(prev => [...prev, challenge]);
+      setCurrentChallengeIndex(challengeIndex + 1);
     }
-  }, [currentChallenge, completedChallenges]);
+  }, [completedChallenges.length]);
 
-  // When liveness is complete, capture photo
+  // State to show capture button after liveness
+  const [readyToCapture, setReadyToCapture] = useState(false);
+
+  // When all challenges done, show capture button
   useEffect(() => {
-    if (isLivenessComplete && status === 'liveness') {
-      console.log('[NeoFace] Liveness complete, capturing photo...');
+    if (isLivenessComplete && status === 'liveness' && !readyToCapture) {
+      console.log('[NeoFace] All liveness challenges completed');
+      setReadyToCapture(true);
+    }
+  }, [isLivenessComplete, status, readyToCapture]);
+
+  // Manual capture trigger
+  const handleCaptureClick = useCallback(() => {
+    if (readyToCapture) {
+      console.log('[NeoFace] User triggered selfie capture');
       captureAndVerify();
     }
-  }, [isLivenessComplete, status]);
+  }, [readyToCapture]);
 
   const captureAndVerify = async () => {
     setStatus('capturing');
@@ -270,6 +270,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     setCompletedChallenges([]);
     setFaceDetected(false);
     setCapturedImage(null);
+    setReadyToCapture(false);
     stopCamera();
   };
 
@@ -385,15 +386,25 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
               })}
             </div>
 
-            {/* Manual advance button */}
-            <Button
-              onClick={completeCurrentChallenge}
-              disabled={!currentChallenge}
-              className="w-full bg-[#F16522] hover:bg-[#D95318] text-white"
-            >
-              <CheckCircle className="mr-2 h-4 w-4" />
-              {currentChallenge ? `J'ai fait: ${getChallengeLabel(currentChallenge)}` : 'Terminé'}
-            </Button>
+            {/* Action buttons */}
+            {!readyToCapture ? (
+              <Button
+                onClick={completeCurrentChallenge}
+                disabled={!currentChallenge}
+                className="w-full bg-[#F16522] hover:bg-[#D95318] text-white"
+              >
+                <CheckCircle className="mr-2 h-4 w-4" />
+                {currentChallenge ? `J'ai fait: ${getChallengeLabel(currentChallenge)}` : 'Terminé'}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleCaptureClick}
+                className="w-full bg-green-600 hover:bg-green-700 text-white animate-pulse"
+              >
+                <Camera className="mr-2 h-4 w-4" />
+                Capturer mon Selfie
+              </Button>
+            )}
 
             <Button onClick={handleRetry} variant="outline" className="w-full">
               Annuler
