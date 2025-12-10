@@ -10,6 +10,8 @@ const corsHeaders = {
 };
 
 const BREVO_SMS_ENDPOINT = 'https://api.brevo.com/v3/transactionalSMS/sms';
+const FETCH_TIMEOUT_MS = 10000; // 10 seconds timeout
+
 interface InTouchSMSResponse {
   message_id?: string;
   id?: string;
@@ -25,6 +27,33 @@ interface AzureSMSResult {
   successful: boolean;
   messageId?: string;
   errorMessage?: string;
+}
+
+/**
+ * Fetch with timeout using AbortController
+ */
+async function fetchWithTimeout(
+  url: string, 
+  options: RequestInit, 
+  timeoutMs: number = FETCH_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, { 
+      ...options, 
+      signal: controller.signal 
+    });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  }
 }
 
 function formatPhoneNumber(phone: string): string {
@@ -87,33 +116,35 @@ Deno.serve(async (req: Request) => {
     // Define handlers for each SMS provider
     const handlers: Record<string, (config: ServiceConfig, params: SMSHandlerParams) => Promise<SMSSuccessResponse>> = {
       intouch: async (config: ServiceConfig, params: SMSHandlerParams): Promise<SMSSuccessResponse> => {
-        // InTouch credentials - selon documentation INTOUCH_INTEGRATION_COMPLETE.md
+        // InTouch credentials
         const partnerId = Deno.env.get('INTOUCH_PARTNER_ID');
         const username = Deno.env.get('INTOUCH_USERNAME');
         const password = Deno.env.get('INTOUCH_PASSWORD');
         const loginApi = Deno.env.get('INTOUCH_LOGIN_API');
         const passwordApi = Deno.env.get('INTOUCH_PASSWORD_API');
+        const agencyCode = Deno.env.get('INTOUCH_AGENCY_CODE') || 'ANSUT13287';
 
         if (!partnerId || !username || !password || !loginApi || !passwordApi) {
-          throw new Error('InTouch credentials not configured (INTOUCH_PARTNER_ID, INTOUCH_USERNAME, INTOUCH_PASSWORD, INTOUCH_LOGIN_API, INTOUCH_PASSWORD_API)');
+          throw new Error('InTouch credentials not configured');
         }
 
-        // InTouch SMS API endpoint
-        const intouchUrl = 'https://apidist.gutouch.net/apidist/sec/ANSUT13287/sms';
+        // InTouch SMS API endpoint with dynamic agency code
+        const intouchUrl = `https://apidist.gutouch.net/apidist/sec/${agencyCode}/sms`;
         
         // Generate unique transaction ID
         const transactionId = `MTT_SMS_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
         
-        // Format phone number (digits only, without +)
+        // Format phone number (digits only)
         const cleanPhone = params.phoneNumber.replace(/\D/g, '');
         
         edgeLogger.info('InTouch SMS request', { 
           url: intouchUrl, 
           phone: cleanPhone,
-          transactionId 
+          transactionId,
+          timeout: FETCH_TIMEOUT_MS
         });
 
-        const response = await fetch(intouchUrl, {
+        const response = await fetchWithTimeout(intouchUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -131,10 +162,16 @@ Deno.serve(async (req: Request) => {
         });
 
         const responseText = await response.text();
-        edgeLogger.info('InTouch SMS response', { status: response.status, body: responseText.substring(0, 500) });
+        edgeLogger.info('InTouch SMS response', { 
+          status: response.status, 
+          body: responseText.substring(0, 500) 
+        });
 
         if (!response.ok) {
-          edgeLogger.error('InTouch SMS error', undefined, { status: response.status, error: responseText });
+          edgeLogger.error('InTouch SMS error', undefined, { 
+            status: response.status, 
+            error: responseText 
+          });
           throw new Error(`InTouch SMS failed: ${response.status} - ${responseText}`);
         }
 
@@ -142,7 +179,6 @@ Deno.serve(async (req: Request) => {
         try {
           data = JSON.parse(responseText) as InTouchSMSResponse;
         } catch {
-          // If response is not JSON, use transaction ID as reference
           data = { transaction_id: transactionId };
         }
         
@@ -192,11 +228,14 @@ Deno.serve(async (req: Request) => {
           throw new Error('Brevo API key not configured');
         }
 
-        edgeLogger.info('Brevo SMS request', { phone: params.phoneNumber });
+        edgeLogger.info('Brevo SMS request', { 
+          phone: params.phoneNumber,
+          timeout: FETCH_TIMEOUT_MS
+        });
         
         const configWithSender = config.config as { sender?: string } | undefined;
         
-        const response = await fetch(BREVO_SMS_ENDPOINT, {
+        const response = await fetchWithTimeout(BREVO_SMS_ENDPOINT, {
           method: 'POST',
           headers: {
             'api-key': apiKey,
@@ -211,14 +250,12 @@ Deno.serve(async (req: Request) => {
           })
         });
 
-        // Get response as text first for Cloudflare detection
         const responseText = await response.text();
         
         // Detect Cloudflare block
         const cfInfo = detectCloudflareBlock(response.status, responseText);
         
         if (cfInfo.isCloudflareBlock) {
-          const errorMsg = formatCloudflareError(cfInfo, BREVO_SMS_ENDPOINT);
           edgeLogger.error('Brevo SMS Cloudflare block', undefined, { 
             rayId: cfInfo.rayId, 
             blockedIp: cfInfo.blockedIp 
@@ -227,7 +264,10 @@ Deno.serve(async (req: Request) => {
         }
 
         if (!response.ok) {
-          edgeLogger.error('Brevo SMS error', undefined, { status: response.status, error: responseText.substring(0, 200) });
+          edgeLogger.error('Brevo SMS error', undefined, { 
+            status: response.status, 
+            error: responseText.substring(0, 200) 
+          });
           try {
             const errorData = JSON.parse(responseText) as { message?: string };
             throw new Error(`Brevo SMS failed: ${errorData.message || response.statusText}`);
