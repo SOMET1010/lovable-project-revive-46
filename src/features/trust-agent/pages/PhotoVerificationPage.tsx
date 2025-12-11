@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -6,20 +6,28 @@ import {
   X, 
   Check,
   Image as ImageIcon,
-  Plus
+  Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/shared/hooks/useSafeToast';
+import { UploadService, STORAGE_BUCKETS } from '@/services/upload/uploadService';
+import { NativeCameraUpload } from '@/components/native';
 import type { Json } from '@/integrations/supabase/types';
+
+interface PhotoItem {
+  url: string;
+  path: string;
+  uploadedAt: string;
+}
 
 interface PhotoCategory {
   id: string;
   label: string;
   required: boolean;
-  photos: string[];
+  photos: PhotoItem[];
 }
 
 const defaultCategories: PhotoCategory[] = [
@@ -36,12 +44,11 @@ const defaultCategories: PhotoCategory[] = [
 export default function PhotoVerificationPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [categories, setCategories] = useState<PhotoCategory[]>(defaultCategories);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
   const [missionId, setMissionId] = useState<string>('');
 
   useEffect(() => {
@@ -62,12 +69,15 @@ export default function PhotoVerificationPage() {
       if (error) throw error;
 
       if (data?.photos && typeof data.photos === 'object' && !Array.isArray(data.photos)) {
-        const savedPhotos = data.photos as Record<string, string[]>;
+        const savedPhotos = data.photos as unknown as Record<string, PhotoItem[]>;
         setCategories(prev => 
-          prev.map(cat => ({
-            ...cat,
-            photos: savedPhotos[cat.id] || []
-          }))
+          prev.map(cat => {
+            const catPhotos = savedPhotos[cat.id];
+            return {
+              ...cat,
+              photos: Array.isArray(catPhotos) ? catPhotos : []
+            };
+          })
         );
       }
     } catch (error) {
@@ -77,58 +87,63 @@ export default function PhotoVerificationPage() {
     }
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0 || !selectedCategory) return;
-
-    setUploading(true);
-    const newPhotos: string[] = [];
+  const uploadPhotosToCategory = async (categoryId: string, files: File[]) => {
+    if (!missionId) return;
+    
+    setUploading(categoryId);
+    const uploadedPhotos: PhotoItem[] = [];
 
     try {
-      for (const file of Array.from(files)) {
-        // Validate file
-        if (!file.type.startsWith('image/')) {
-          toast.error(`${file.name} n'est pas une image valide`);
-          continue;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`${file.name} dépasse la limite de 5MB`);
-          continue;
-        }
-
-        // Convert to base64 for storage (in production, use Supabase Storage)
-        const reader = new FileReader();
-        const base64 = await new Promise<string>((resolve) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
+      for (const file of files) {
+        const result = await UploadService.uploadFile({
+          bucket: STORAGE_BUCKETS.VERIFICATIONS,
+          folder: `missions/${missionId}/${categoryId}`,
+          file,
+          maxSizeMB: 5,
+          allowedTypes: ['image/jpeg', 'image/png', 'image/webp']
         });
-        
-        newPhotos.push(base64);
+
+        if (result.url && result.path) {
+          uploadedPhotos.push({
+            url: result.url,
+            path: result.path,
+            uploadedAt: new Date().toISOString()
+          });
+        } else if (result.error) {
+          toast.error(result.error);
+        }
       }
 
-      if (newPhotos.length > 0) {
+      if (uploadedPhotos.length > 0) {
         setCategories(prev => 
           prev.map(cat => 
-            cat.id === selectedCategory 
-              ? { ...cat, photos: [...cat.photos, ...newPhotos] }
+            cat.id === categoryId 
+              ? { ...cat, photos: [...cat.photos, ...uploadedPhotos] }
               : cat
           )
         );
-        toast.success(`${newPhotos.length} photo(s) ajoutée(s)`);
+        toast.success(`${uploadedPhotos.length} photo(s) uploadée(s)`);
       }
     } catch (error) {
       console.error('Error uploading photos:', error);
       toast.error('Erreur lors de l\'upload');
     } finally {
-      setUploading(false);
-      setSelectedCategory(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setUploading(null);
     }
   };
 
-  const removePhoto = (categoryId: string, photoIndex: number) => {
+  const removePhoto = async (categoryId: string, photoIndex: number) => {
+    const category = categories.find(c => c.id === categoryId);
+    const photo = category?.photos[photoIndex];
+    
+    if (photo?.path) {
+      const { error } = await UploadService.deleteFile(STORAGE_BUCKETS.VERIFICATIONS, photo.path);
+      if (error) {
+        toast.error('Erreur lors de la suppression');
+        return;
+      }
+    }
+    
     setCategories(prev => 
       prev.map(cat => 
         cat.id === categoryId 
@@ -136,11 +151,13 @@ export default function PhotoVerificationPage() {
           : cat
       )
     );
+    toast.success('Photo supprimée');
   };
 
   const savePhotos = async () => {
+    setSaving(true);
     try {
-      const photosData: Record<string, string[]> = {};
+      const photosData: Record<string, PhotoItem[]> = {};
       categories.forEach(cat => {
         photosData[cat.id] = cat.photos;
       });
@@ -158,6 +175,8 @@ export default function PhotoVerificationPage() {
     } catch (error) {
       console.error('Error saving photos:', error);
       toast.error('Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -176,16 +195,6 @@ export default function PhotoVerificationPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hidden file input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple
-        className="hidden"
-        onChange={handleFileSelect}
-      />
-
       {/* Header */}
       <header className="bg-card border-b sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">
@@ -199,8 +208,12 @@ export default function PhotoVerificationPage() {
                 <p className="text-sm text-muted-foreground">{totalPhotos} photo(s) capturée(s)</p>
               </div>
             </div>
-            <Button onClick={savePhotos}>
-              <Check className="h-4 w-4 mr-2" />
+            <Button onClick={savePhotos} disabled={saving}>
+              {saving ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4 mr-2" />
+              )}
               Sauvegarder
             </Button>
           </div>
@@ -247,7 +260,7 @@ export default function PhotoVerificationPage() {
                   {category.photos.map((photo, index) => (
                     <div key={index} className="relative aspect-square group">
                       <img 
-                        src={photo} 
+                        src={photo.url} 
                         alt={`${category.label} ${index + 1}`}
                         className="w-full h-full object-cover rounded-lg"
                       />
@@ -259,23 +272,26 @@ export default function PhotoVerificationPage() {
                       </button>
                     </div>
                   ))}
-                  
-                  {/* Add Photo Button */}
-                  <button
-                    onClick={() => {
-                      setSelectedCategory(category.id);
-                      fileInputRef.current?.click();
-                    }}
-                    disabled={uploading}
-                    className="aspect-square border-2 border-dashed border-muted-foreground/30 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-primary hover:bg-primary/5 transition-colors"
-                  >
-                    <Plus className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-xs text-muted-foreground">Ajouter</span>
-                  </button>
                 </div>
 
+                {/* NativeCameraUpload for adding photos */}
+                <NativeCameraUpload
+                  multiple
+                  maxImages={10 - category.photos.length}
+                  maxSizeMB={5}
+                  variant="inline"
+                  label={uploading === category.id ? 'Upload...' : 'Ajouter'}
+                  disabled={uploading !== null}
+                  onImageCaptured={async (file: File) => {
+                    await uploadPhotosToCategory(category.id, [file]);
+                  }}
+                  onMultipleImages={async (files: File[]) => {
+                    await uploadPhotosToCategory(category.id, files);
+                  }}
+                />
+
                 {category.photos.length === 0 && (
-                  <p className="text-xs text-muted-foreground text-center">
+                  <p className="text-xs text-muted-foreground text-center mt-3">
                     Aucune photo pour cette catégorie
                   </p>
                 )}
