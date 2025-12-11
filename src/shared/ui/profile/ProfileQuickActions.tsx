@@ -36,7 +36,7 @@ export default function ProfileQuickActions() {
     {
       icon: MessageSquare,
       label: 'Mes messages',
-      href: '/messages',
+      href: '/locataire/messages',
       color: 'from-olive-400 to-green-500',
       description: 'Contactez les propriétaires',
     },
@@ -95,7 +95,7 @@ export default function ProfileQuickActions() {
     {
       icon: MessageSquare,
       label: 'Messages',
-      href: '/messages',
+      href: '/proprietaire/messages',
       color: 'from-amber-400 to-orange-500',
       description: 'Répondez aux demandes',
     },

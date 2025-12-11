@@ -97,7 +97,7 @@ export function OwnerBadge({
     if (propertyId) params.set('property', propertyId);
     if (propertyTitle) params.set('subject', `Demande concernant: ${propertyTitle}`);
 
-    navigate(`/messages?${params.toString()}`);
+    navigate(`/locataire/messages?${params.toString()}`);
   };
 
   if (variant === 'inline') {

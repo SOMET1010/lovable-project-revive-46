@@ -296,7 +296,7 @@ export default function ApplicationCard({
 
           {/* Common actions */}
           <Link
-            to={`/messages?to=${application.applicant_id || application.tenant_id}`}
+            to={`/locataire/messages?to=${application.applicant_id || application.tenant_id}`}
             className="border border-neutral-200 hover:border-primary-300 text-neutral-700 font-medium py-2 px-3 rounded-lg text-sm flex items-center justify-center gap-1.5 transition-colors"
           >
             <MessageSquare className="h-4 w-4" />

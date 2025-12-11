@@ -66,7 +66,7 @@ const notificationConfig: Record<string, {
   'application_accepted': {
     title: () => '🎉 Candidature acceptée !',
     message: (data) => `Félicitations ! Votre candidature pour "${data.propertyTitle}" a été acceptée.`,
-    actionUrl: (appId) => `/candidature/${appId}`,
+    actionUrl: (appId) => `/locataire/candidature/${appId}`,
     emailTemplate: 'application-accepted',
     emailSubject: (data) => `🎉 Candidature acceptée - ${data.propertyTitle}`,
     getRecipients: (app) => [app.applicant_id]
@@ -90,7 +90,7 @@ const notificationConfig: Record<string, {
   'documents_requested': {
     title: () => '📋 Documents supplémentaires requis',
     message: (data) => `Des documents supplémentaires sont demandés pour votre candidature: ${data.documents?.join(', ') || 'documents'}`,
-    actionUrl: (appId) => `/candidature/${appId}`,
+    actionUrl: (appId) => `/locataire/candidature/${appId}`,
     emailTemplate: 'documents-requested',
     emailSubject: (data) => `📋 Documents requis - ${data.propertyTitle}`,
     getRecipients: (app) => [app.applicant_id]

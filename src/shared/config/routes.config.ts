@@ -84,8 +84,8 @@ export const ROUTES = {
   },
 
   VISITS: {
-    SCHEDULE: '/visiter/:id',
-    MY_VISITS: '/mes-visites',
+    SCHEDULE: '/locataire/visiter/:id',
+    MY_VISITS: '/locataire/mes-visites',
   },
 
   MAINTENANCE: {
@@ -99,8 +99,8 @@ export const ROUTES = {
   },
 
   APPLICATION: {
-    FORM: '/candidature/:propertyId',
-    DETAIL: '/candidature/:id',
+    FORM: '/locataire/candidature/:propertyId',
+    DETAIL: '/locataire/candidature/:id',
   },
 
   NOTIFICATIONS: {

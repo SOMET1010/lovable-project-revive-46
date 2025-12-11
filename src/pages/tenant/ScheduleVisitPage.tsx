@@ -332,7 +332,7 @@ export default function ScheduleVisit() {
           >
             <div className="form-section-premium">
               <label className="form-label-premium mb-4 block">Type de visite</label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <button
                   type="button"
                   onClick={() => setVisitType('physique')}
@@ -398,7 +398,7 @@ export default function ScheduleVisit() {
                 <Calendar className="w-4 h-4" />
                 Choisir une date
               </label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-7 gap-2">
                 {getNextDays(14).map((date) => (
                   <button
                     key={date.toISOString()}
@@ -436,7 +436,7 @@ export default function ScheduleVisit() {
                     Aucun créneau disponible pour cette date
                   </div>
                 ) : (
-                  <div className="grid grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {availableSlots.map((slot) => (
                       <button
                         key={slot.time}

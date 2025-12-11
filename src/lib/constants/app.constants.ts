@@ -41,8 +41,8 @@ export const ROUTES = {
     CERTIFICATES: '/mes-certificats',
   },
   VISITS: {
-    SCHEDULE: '/visiter/:id',
-    MY_VISITS: '/mes-visites',
+    SCHEDULE: '/locataire/visiter/:id',
+    MY_VISITS: '/locataire/mes-visites',
   },
   FAVORITES: '/favoris',
   SEARCHES: '/recherches-sauvegardees',

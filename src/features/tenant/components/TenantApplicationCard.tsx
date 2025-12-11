@@ -179,7 +179,7 @@ export default function TenantApplicationCard({
               {/* Contact Owner */}
               {application.owner && application.property && (
                 <Link
-                  to={`/messages?to=${application.owner.user_id}&property=${application.property_id}&subject=Candidature: ${application.property.title}`}
+                  to={`/locataire/messages?to=${application.owner.user_id}&property=${application.property_id}&subject=Candidature: ${application.property.title}`}
                   className="btn-premium-primary text-sm py-2 px-3"
                 >
                   <MessageSquare className="h-4 w-4" />

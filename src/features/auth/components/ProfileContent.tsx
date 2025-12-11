@@ -21,6 +21,19 @@ export default function ProfileContent() {
   const { profile } = useAuth();
   const [_editing, setEditing] = useState(false);
 
+  // Déterminer la route des messages selon le rôle
+  const getMessagesRoute = () => {
+    const userType = profile?.user_type?.toLowerCase();
+    if (userType === 'locataire' || userType === 'tenant') {
+      return '/locataire/messages';
+    } else if (userType === 'proprietaire' || userType === 'owner') {
+      return '/proprietaire/messages';
+    } else if (userType === 'agence' || userType === 'agency') {
+      return '/agences/messages';
+    }
+    return '/locataire/messages'; // fallback par défaut
+  };
+
   const verificationItems = [
     {
       id: 'identity',
@@ -219,7 +232,7 @@ export default function ProfileContent() {
         </Link>
 
         <Link
-          to="/messages"
+          to={getMessagesRoute()}
           className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#EFEBE9] hover:border-[#F16522] transition-colors group"
         >
           <span className="font-medium text-[#2C1810]">Messages</span>

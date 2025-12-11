@@ -392,7 +392,7 @@ export default function OwnerDashboardPage() {
                   Inviter une agence
                 </button>
                 <Link
-                  to="/messages"
+                  to="/locataire/messages"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <MessageSquare className="h-5 w-5 mr-2" />

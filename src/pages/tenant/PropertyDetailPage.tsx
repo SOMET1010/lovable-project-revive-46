@@ -312,7 +312,7 @@ function StickyCTABar({ propertyId, isOwnerOrAgency }: StickyCTABarProps) {
           <>
             <button
               onClick={() =>
-                navigate(`/visiter/${propertyId}`, {
+                navigate(`/locataire/visiter/${propertyId}`, {
                   state: { property },
                 })
               }
@@ -323,7 +323,7 @@ function StickyCTABar({ propertyId, isOwnerOrAgency }: StickyCTABarProps) {
             </button>
             <button
               onClick={() =>
-                navigate(`/candidature/${propertyId}`, {
+                navigate(`/locataire/candidature/${propertyId}`, {
                   state: { property },
                 })
               }
@@ -660,7 +660,7 @@ export default function PropertyDetailPage() {
                       <>
                         <button
                           onClick={() =>
-                            navigate(`/visiter/${property.id}`, {
+                            navigate(`/locataire/visiter/${property.id}`, {
                               state: { property },
                             })
                           }
@@ -671,7 +671,7 @@ export default function PropertyDetailPage() {
                         </button>
                         <button
                           onClick={() =>
-                            navigate(`/candidature/${property.id}`, {
+                            navigate(`/locataire/candidature/${property.id}`, {
                               state: { property },
                             })
                           }
