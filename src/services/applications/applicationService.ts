@@ -27,8 +27,7 @@ export interface ApplicationWithDetails {
   application_message?: string | null;
   cover_letter?: string | null;
   credit_score?: number | null;
-  created_at?: string | null;
-  applied_at?: string | null;
+  applied_at: string;
   updated_at: string | null;
   property: {
     id: string;
@@ -87,7 +86,7 @@ export async function getOwnerApplications(
     `
     )
     .in('property_id', propertyIds)
-    .order('created_at', { ascending: false });
+    .order('applied_at', { ascending: false });
 
   // Appliquer les filtres
   if (filters?.status && filters.status !== 'all') {
@@ -159,7 +158,7 @@ export async function getOwnerApplications(
         ...app,
         applicant_id: app.tenant_id,
         status: app.status as string,
-        created_at: (app as any).applied_at ?? (app as any).created_at ?? null,
+        applied_at: app.applied_at,
         property: propertiesMap.get(app.property_id) || null,
         applicant: profile
           ? {
@@ -399,8 +398,7 @@ export interface TenantApplicationWithDetails {
   status: string;
   application_message?: string | null;
   credit_score?: number | null;
-  created_at?: string | null;
-  applied_at?: string | null;
+  applied_at: string;
   updated_at: string | null;
   property: {
     id: string;
@@ -505,7 +503,7 @@ export async function getTenantApplications(
         ...app,
         applicant_id: app.tenant_id,
         status: app.status as string,
-        created_at: (app as any).applied_at ?? (app as any).created_at ?? null,
+        applied_at: app.applied_at,
         property: property || null,
         owner: owner
           ? {
