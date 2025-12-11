@@ -41,8 +41,7 @@ interface ExtendedProfile {
   profile_setup_completed: boolean | null;
   is_verified?: boolean;
   oneci_verified?: boolean;
-  cnam_verified?: boolean;
-  facial_verification_status?: string;
+    facial_verification_status?: string;
   bio?: string;
 }
 

@@ -62,8 +62,7 @@ interface Property {
   owner_avatar_url?: string | null;
   owner_is_verified?: boolean | null;
   owner_oneci_verified?: boolean | null;
-  owner_cnam_verified?: boolean | null;
-  // Managing agency (if anonymous)
+    // Managing agency (if anonymous)
   managing_agency_name?: string | null;
 }
 
@@ -394,13 +393,12 @@ export default function PropertyDetailPage() {
         trust_score: number | null;
         is_verified: boolean | null;
         oneci_verified: boolean | null;
-        cnam_verified: boolean | null;
       } | null = null;
 
       if (data.owner_id) {
         const { data: profileData } = await supabase
           .from('public_profiles_view')
-          .select('full_name, avatar_url, trust_score, is_verified, oneci_verified, cnam_verified')
+          .select('full_name, avatar_url, trust_score, is_verified, oneci_verified')
           .eq('id', data.owner_id)
           .maybeSingle();
 
@@ -411,8 +409,7 @@ export default function PropertyDetailPage() {
             trust_score: profileData.trust_score ?? null,
             is_verified: profileData.is_verified ?? null,
             oneci_verified: profileData.oneci_verified ?? null,
-            cnam_verified: profileData.cnam_verified ?? null,
-          };
+                      };
         }
       }
 
@@ -447,8 +444,7 @@ export default function PropertyDetailPage() {
         owner_avatar_url: ownerProfile?.avatar_url ?? null,
         owner_is_verified: ownerProfile?.is_verified ?? null,
         owner_oneci_verified: ownerProfile?.oneci_verified ?? null,
-        owner_cnam_verified: ownerProfile?.cnam_verified ?? null,
-        managing_agency_name: managingAgencyName,
+                managing_agency_name: managingAgencyName,
       } as unknown as Property;
       setProperty(propertyData);
     } catch (error) {

@@ -373,7 +373,6 @@ export default function AgencyProfilePage() {
             </div>
             <div className="flex justify-end">
               <Button type="submit" disabled={saving} className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
                 {saving ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
             </div>
@@ -472,7 +471,6 @@ export default function AgencyProfilePage() {
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={saving} className="flex items-center gap-2">
-                  <Save className="w-4 h-4" />
                   {saving ? 'Enregistrement...' : 'Enregistrer'}
                 </Button>
               </div>
@@ -508,7 +506,6 @@ export default function AgencyProfilePage() {
             </div>
             <div className="flex justify-end">
               <Button type="submit" disabled={saving} className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
                 {saving ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
             </div>

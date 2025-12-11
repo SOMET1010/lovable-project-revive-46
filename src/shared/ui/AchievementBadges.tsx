@@ -11,8 +11,7 @@ interface Achievement {
 
 interface AchievementBadgesProps {
   oneciVerified: boolean;
-  cnamVerified: boolean;
-  faceVerified: boolean;
+    faceVerified: boolean;
   tenantScore: number;
   paymentCount?: number;
   className?: string;
@@ -20,7 +19,6 @@ interface AchievementBadgesProps {
 
 export default function AchievementBadges({
   oneciVerified,
-  cnamVerified,
   faceVerified,
   tenantScore,
   paymentCount = 0,
@@ -35,15 +33,7 @@ export default function AchievementBadges({
       earned: oneciVerified,
       color: 'from-green-400 to-emerald-500',
     },
-    {
-      id: 'cnam_member',
-      title: 'Citoyen Modèle',
-      description: 'Affiliation CNAM active',
-      icon: Heart,
-      earned: cnamVerified,
-      color: 'from-blue-400 to-cyan-500',
-    },
-    {
+        {
       id: 'face_confirmed',
       title: 'Visage Confirmé',
       description: 'Vérification biométrique réussie',

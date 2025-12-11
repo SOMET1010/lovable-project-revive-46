@@ -5,7 +5,6 @@
 
 export interface FeatureFlags {
   // Vérifications d'identité
-  CNAM_VERIFICATION: boolean;
   ONECI_VERIFICATION: boolean;
   FACE_VERIFICATION: boolean;
 
@@ -38,14 +37,12 @@ export interface FeatureFlags {
  * Configuration par défaut des features
  *
  * IMPORTANT :
- * - CNAM_VERIFICATION est désactivé (hors périmètre ANSUT)
- * - COMMERCIAL_PROPERTIES est désactivé (Mon Toit = résidentiel uniquement)
+  * - COMMERCIAL_PROPERTIES est désactivé (Mon Toit = résidentiel uniquement)
  * - AI_SEARCH est désactivé (non implémenté)
  */
 export const FEATURES: FeatureFlags = {
   // Vérifications d'identité
-  CNAM_VERIFICATION: false, // ❌ Désactivé - Hors périmètre ANSUT
-  ONECI_VERIFICATION: true, // ✅ Activé - Vérification ONECI/SNEDAI
+    ONECI_VERIFICATION: true, // ✅ Activé - Vérification ONECI/SNEDAI
   FACE_VERIFICATION: true, // ✅ Activé - Biométrie faciale
 
   // Fonctionnalités de recherche

@@ -278,7 +278,6 @@ export default function BusinessRulesPage() {
                           disabled={updateMutation.isPending}
                           className="p-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
                         >
-                          <Save className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setEditingRule(null)}

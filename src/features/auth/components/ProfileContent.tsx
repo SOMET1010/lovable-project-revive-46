@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link } from 'react-router-dom';
+import { getRoleBasedRoute } from '@/shared/utils/roleRoutes';
 import {
   User,
   Mail,
@@ -21,6 +22,36 @@ export default function ProfileContent() {
   const { profile } = useAuth();
   const [_editing, setEditing] = useState(false);
 
+  // Déterminer la route du profil selon le rôle
+  const getProfileRoute = () => {
+    const userType = profile?.user_type?.toLowerCase();
+    if (userType === 'locataire' || userType === 'tenant') {
+      return '/locataire/profil';
+    } else if (userType === 'proprietaire' || userType === 'owner') {
+      return '/proprietaire/profil';
+    } else if (userType === 'agence' || userType === 'agency') {
+      return '/agences/profil';
+    }
+    return '/locataire/profil'; // fallback par défaut
+  };
+
+  // Routes spécifiques selon le rôle
+  const getFavoritesRoute = () => {
+    const userType = profile?.user_type?.toLowerCase();
+    if (userType === 'locataire' || userType === 'tenant') {
+      return '/locataire/favoris';
+    }
+    return '/locataire/favoris'; // fallback par défaut
+  };
+
+  const getSavedSearchesRoute = () => {
+    const userType = profile?.user_type?.toLowerCase();
+    if (userType === 'locataire' || userType === 'tenant') {
+      return '/locataire/recherches-sauvegardees';
+    }
+    return '/locataire/recherches-sauvegardees'; // fallback par défaut
+  };
+
   // Déterminer la route des messages selon le rôle
   const getMessagesRoute = () => {
     const userType = profile?.user_type?.toLowerCase();
@@ -39,19 +70,13 @@ export default function ProfileContent() {
       id: 'identity',
       label: 'Identité vérifiée',
       verified: profile?.is_verified || false,
-      href: '/profil?tab=verification',
+      href: `${getProfileRoute()}?tab=verification`,
     },
     {
       id: 'oneci',
       label: 'ONECI',
       verified: profile?.oneci_verified || false,
-      href: '/profil?tab=verification',
-    },
-    {
-      id: 'cnam',
-      label: 'CNAM',
-      verified: profile?.cnam_verified || false,
-      href: '/profil?tab=verification',
+      href: `${getProfileRoute()}?tab=verification`,
     },
   ];
 
@@ -116,7 +141,7 @@ export default function ProfileContent() {
                   <span className="text-sm">/100</span>
                 </div>
                 <Link
-                  to="/mon-score"
+                  to="/locataire/mon-score"
                   className="text-sm text-[#F16522] hover:underline font-medium"
                 >
                   Voir mon score
@@ -168,14 +193,14 @@ export default function ProfileContent() {
             <h3 className="font-semibold text-[#2C1810]">Vérifications</h3>
           </div>
           <Link
-            to="/profil?tab=verification"
+            to={`${getProfileRoute()}?tab=verification`}
             className="text-sm text-[#F16522] hover:underline font-medium"
           >
             Gérer
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-3">
+        <div className="grid md:grid-cols-2 gap-3">
           {verificationItems.map((item) => (
             <Link
               key={item.id}
@@ -216,7 +241,7 @@ export default function ProfileContent() {
       {/* Quick Links */}
       <div className="grid md:grid-cols-2 gap-4">
         <Link
-          to="/favoris"
+          to={getFavoritesRoute()}
           className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#EFEBE9] hover:border-[#F16522] transition-colors group"
         >
           <span className="font-medium text-[#2C1810]">Mes favoris</span>
@@ -224,7 +249,7 @@ export default function ProfileContent() {
         </Link>
 
         <Link
-          to="/recherches-sauvegardees"
+          to={getSavedSearchesRoute()}
           className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#EFEBE9] hover:border-[#F16522] transition-colors group"
         >
           <span className="font-medium text-[#2C1810]">Mes alertes</span>
@@ -240,7 +265,7 @@ export default function ProfileContent() {
         </Link>
 
         <Link
-          to="/profil"
+          to={`${getProfileRoute()}?tab=settings`}
           className="flex items-center justify-between p-4 bg-white rounded-2xl border border-[#EFEBE9] hover:border-[#F16522] transition-colors group"
         >
           <span className="font-medium text-[#2C1810]">Paramètres</span>

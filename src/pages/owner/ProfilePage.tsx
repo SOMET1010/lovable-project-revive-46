@@ -376,7 +376,6 @@ export default function OwnerProfilePage() {
                   disabled={saving}
                   className="flex items-center gap-2"
                 >
-                  <Save className="w-4 h-4" />
                   {saving ? 'Enregistrement...' : 'Enregistrer'}
                 </Button>
               </div>
@@ -476,7 +475,6 @@ export default function OwnerProfilePage() {
                     disabled={saving}
                     className="flex items-center gap-2"
                   >
-                    <Save className="w-4 h-4" />
                     {saving ? 'Enregistrement...' : 'Enregistrer'}
                   </Button>
                 </div>
