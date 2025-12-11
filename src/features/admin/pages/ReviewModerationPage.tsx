@@ -1,9 +1,7 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Button } from '@/shared/ui/button';
-import { Textarea } from '@/shared/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog';
+import { Button, Textarea, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   Star, 
@@ -279,7 +277,7 @@ export default function ReviewModerationPage() {
                     Approuver
                   </Button>
                   <Button
-                    variant="destructive"
+                    variant="danger"
                     onClick={() => {
                       setSelectedReview(review);
                       setShowRejectModal(true);
@@ -321,7 +319,7 @@ export default function ReviewModerationPage() {
             <Button variant="outline" onClick={() => setShowRejectModal(false)}>
               Annuler
             </Button>
-            <Button variant="destructive" onClick={handleReject}>
+            <Button variant="danger" onClick={handleReject}>
               Confirmer le rejet
             </Button>
           </DialogFooter>

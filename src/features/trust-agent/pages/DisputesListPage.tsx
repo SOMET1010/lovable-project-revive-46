@@ -2,9 +2,7 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui';
 import { 
   Search, 
   AlertTriangle, 
@@ -156,14 +154,14 @@ export default function DisputesListPage() {
         </div>
         <div className="flex gap-2">
           <Button
-            variant={viewMode === 'assigned' ? 'default' : 'outline'}
+            variant={viewMode === 'assigned' ? 'primary' : 'outline'}
             onClick={() => setViewMode('assigned')}
             className={viewMode === 'assigned' ? 'bg-[#F16522]' : ''}
           >
             Mes litiges
           </Button>
           <Button
-            variant={viewMode === 'all' ? 'default' : 'outline'}
+            variant={viewMode === 'all' ? 'primary' : 'outline'}
             onClick={() => setViewMode('all')}
             className={viewMode === 'all' ? 'bg-[#F16522]' : ''}
           >
@@ -281,9 +279,9 @@ export default function DisputesListPage() {
       ) : (
         <div className="space-y-3">
           {filteredDisputes.map((dispute) => {
-            const statusConfig = STATUS_CONFIG[dispute.status || 'open'] || STATUS_CONFIG.open;
-            const priorityConfig = PRIORITY_CONFIG[dispute.priority || 'normal'] || PRIORITY_CONFIG.normal;
-            const StatusIcon = statusConfig.icon;
+            const statusConfig = STATUS_CONFIG[dispute.status || 'open'] ?? STATUS_CONFIG['open'];
+            const priorityConfig = PRIORITY_CONFIG[dispute.priority || 'normal'] ?? PRIORITY_CONFIG['normal'];
+            const StatusIcon = statusConfig?.icon ?? Clock;
 
             return (
               <Link
@@ -297,12 +295,12 @@ export default function DisputesListPage() {
                       <span className="text-sm font-mono text-muted-foreground">
                         {dispute.dispute_number}
                       </span>
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${statusConfig?.color ?? ''}`}>
                         <StatusIcon className="w-3 h-3" />
-                        {statusConfig.label}
+                        {statusConfig?.label ?? 'Inconnu'}
                       </span>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityConfig.color}`}>
-                        {priorityConfig.label}
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${priorityConfig?.color ?? ''}`}>
+                        {priorityConfig?.label ?? 'Normal'}
                       </span>
                     </div>
                     <h3 className="font-medium text-[#2C1810] truncate">{dispute.subject}</h3>

@@ -2,12 +2,7 @@ import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/ui/button';
-import { Textarea } from '@/shared/ui/textarea';
-import { Label } from '@/shared/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
+import { Button, Textarea, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, 
@@ -478,7 +473,7 @@ export default function MediationPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEscalateModal(false)}>Annuler</Button>
-            <Button variant="destructive" onClick={handleEscalate}>Escalader</Button>
+            <Button variant="danger" onClick={handleEscalate}>Escalader</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

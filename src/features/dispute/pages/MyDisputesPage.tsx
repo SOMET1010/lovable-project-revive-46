@@ -2,9 +2,7 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui';
 import { 
   Plus, 
   Search, 
@@ -208,8 +206,8 @@ export default function MyDisputesPage() {
         ) : (
           <div className="space-y-4">
             {filteredDisputes.map((dispute) => {
-              const statusConfig = STATUS_CONFIG[dispute.status || 'open'] || STATUS_CONFIG.open;
-              const StatusIcon = statusConfig.icon;
+              const statusConfig = STATUS_CONFIG[dispute.status || 'open'] ?? STATUS_CONFIG['open'];
+              const StatusIcon = statusConfig?.icon ?? Clock;
               const isComplainant = dispute.complainant_id === user?.id;
 
               return (
@@ -224,9 +222,9 @@ export default function MyDisputesPage() {
                         <span className="text-sm font-mono text-muted-foreground">
                           {dispute.dispute_number}
                         </span>
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig.color}`}>
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusConfig?.color ?? ''}`}>
                           <StatusIcon className="w-3 h-3" />
-                          {statusConfig.label}
+                          {statusConfig?.label ?? 'Inconnu'}
                         </span>
                         {dispute.priority === 'urgent' && (
                           <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
