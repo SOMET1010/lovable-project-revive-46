@@ -309,7 +309,6 @@ const RentalHistoryPage: React.FC = () => {
           </div>
           {!showForm && (
             <Button onClick={() => setShowForm(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
               Ajouter une location
             </Button>
           )}
@@ -593,7 +592,6 @@ const RentalHistoryPage: React.FC = () => {
                 Ajoutez vos locations passées pour améliorer votre Trust Score
               </p>
               <Button onClick={() => setShowForm(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
                 Ajouter ma première location
               </Button>
             </CardContent>

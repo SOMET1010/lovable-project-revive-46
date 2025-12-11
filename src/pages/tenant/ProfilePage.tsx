@@ -31,7 +31,7 @@ interface Profile {
 }
 
 export default function ProfilePage() {
-  const { user, profile: authProfile } = useAuth();
+  const { user, profile: authProfile, refetchProfile } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'infos');
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -69,6 +69,26 @@ export default function ProfilePage() {
       if (error) throw error;
       if (!data) {
         throw new Error('Profil introuvable');
+      }
+
+      // Calculer le score si non présent ou à zéro
+      if (!data.trust_score || data.trust_score === 0) {
+        try {
+          const { ScoringService } = await import('@/services/scoringService');
+          const scoreBreakdown = await ScoringService.calculateGlobalTrustScore(user.id);
+
+          // Mettre à jour le trust_score dans la base de données
+          const { error: scoreError } = await supabase
+            .from('profiles')
+            .update({ trust_score: scoreBreakdown.globalScore })
+            .eq('id', user.id);
+
+          if (!scoreError) {
+            data.trust_score = scoreBreakdown.globalScore;
+          }
+        } catch (scoreErr) {
+          console.warn('Could not calculate score:', scoreErr);
+        }
       }
 
       const formattedAddress = formatAddress(data.address as AddressValue, data.city || undefined);
@@ -109,11 +129,34 @@ export default function ProfilePage() {
     if (!user) return;
     setSaving(true);
     try {
-      const { error } = await supabase.from('profiles').update(formData).eq('id', user.id);
+      // Mettre à jour les informations du profil
+      const { error: updateError } = await supabase.from('profiles').update(formData).eq('id', user.id);
+      if (updateError) throw updateError;
 
-      if (error) throw error;
+      // Calculer et mettre à jour le score de confiance
+      try {
+        const { ScoringService } = await import('@/services/scoringService');
+        const scoreBreakdown = await ScoringService.calculateGlobalTrustScore(user.id);
+
+        // Mettre à jour le trust_score dans la base de données
+        const { error: scoreError } = await supabase
+          .from('profiles')
+          .update({ trust_score: scoreBreakdown.globalScore })
+          .eq('id', user.id);
+
+        if (scoreError) {
+          console.warn('Could not update trust_score:', scoreError);
+        }
+      } catch (scoreErr) {
+        console.warn('Could not calculate score:', scoreErr);
+      }
+
       toast.success('Profil mis à jour avec succès');
       loadProfile();
+      // Recharger aussi le profil dans le contexte AuthProvider
+      if (refetchProfile) {
+        refetchProfile();
+      }
     } catch (err) {
       console.error('Error saving profile:', err);
       toast.error('Erreur lors de la sauvegarde');

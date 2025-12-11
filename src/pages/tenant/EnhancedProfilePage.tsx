@@ -38,7 +38,7 @@ interface TenantProfile {
 }
 
 export default function EnhancedProfilePage() {
-  const { user, profile: authProfile } = useAuth();
+  const { user, profile: authProfile, refetchProfile } = useAuth();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'infos');
   const [profile, setProfile] = useState<TenantProfile | null>(null);
@@ -68,6 +68,26 @@ export default function EnhancedProfilePage() {
         .single();
 
       if (profileData) {
+        // Calculer le score si non présent ou à zéro
+        if (!profileData.trust_score || profileData.trust_score === 0) {
+          try {
+            const { ScoringService } = await import('@/services/scoringService');
+            const scoreBreakdown = await ScoringService.calculateGlobalTrustScore(user.id);
+
+            // Mettre à jour le trust_score dans la base de données
+            const { error: scoreError } = await supabase
+              .from('profiles')
+              .update({ trust_score: scoreBreakdown.globalScore })
+              .eq('id', user.id);
+
+            if (!scoreError) {
+              profileData.trust_score = scoreBreakdown.globalScore;
+            }
+          } catch (scoreErr) {
+            console.warn('Could not calculate score:', scoreErr);
+          }
+        }
+
         setProfile(profileData);
         setFormData({
           full_name: profileData.full_name || '',
@@ -101,7 +121,29 @@ export default function EnhancedProfilePage() {
 
       if (error) throw error;
 
+      // Calculer et mettre à jour le score de confiance
+      try {
+        const { ScoringService } = await import('@/services/scoringService');
+        const scoreBreakdown = await ScoringService.calculateGlobalTrustScore(user.id);
+
+        // Mettre à jour le trust_score dans la base de données
+        const { error: scoreError } = await supabase
+          .from('profiles')
+          .update({ trust_score: scoreBreakdown.globalScore })
+          .eq('id', user.id);
+
+        if (scoreError) {
+          console.warn('Could not update trust_score:', scoreError);
+        }
+      } catch (scoreErr) {
+        console.warn('Could not calculate score:', scoreErr);
+      }
+
       await loadProfile();
+      // Recharger aussi le profil dans le contexte AuthProvider
+      if (refetchProfile) {
+        refetchProfile();
+      }
       toast.success('Profil mis à jour avec succès');
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -138,7 +180,29 @@ export default function EnhancedProfilePage() {
         .eq('id', user.id);
       if (updateError) throw updateError;
 
+      // Calculer et mettre à jour le score après l'upload de l'avatar
+      try {
+        const { ScoringService } = await import('@/services/scoringService');
+        const scoreBreakdown = await ScoringService.calculateGlobalTrustScore(user.id);
+
+        // Mettre à jour le trust_score dans la base de données
+        const { error: scoreError } = await supabase
+          .from('profiles')
+          .update({ trust_score: scoreBreakdown.globalScore })
+          .eq('id', user.id);
+
+        if (scoreError) {
+          console.warn('Could not update trust_score:', scoreError);
+        }
+      } catch (scoreErr) {
+        console.warn('Could not calculate score:', scoreErr);
+      }
+
       await loadProfile();
+      // Recharger aussi le profil dans le contexte AuthProvider
+      if (refetchProfile) {
+        refetchProfile();
+      }
       toast.success('Photo de profil mise à jour');
     } catch (err) {
       console.error('Error uploading avatar:', err);
