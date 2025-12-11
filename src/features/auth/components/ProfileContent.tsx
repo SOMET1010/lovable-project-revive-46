@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link } from 'react-router-dom';
 import { getRoleBasedRoute } from '@/shared/utils/roleRoutes';
+import { supabase } from '@/integrations/supabase/client';
 import {
   User,
   Mail,
@@ -81,6 +82,42 @@ export default function ProfileContent() {
   ];
 
   const trustScore = profile?.trust_score || 0;
+
+  // Calculer et mettre à jour le trust score si nécessaire
+  useEffect(() => {
+    const calculateAndUpdateScore = async () => {
+      if (!profile?.id) return;
+
+      // Si le trust_score est null ou 0, le calculer
+      if (!profile.trust_score || profile.trust_score === 0) {
+        try {
+          console.log('Calculating trust score for user:', profile.id);
+
+          // Importer dynamiquement le service de scoring pour éviter les imports circulaires
+          const { ScoringService } = await import('@/services/scoringService');
+
+          const scoreBreakdown = await ScoringService.calculateGlobalScore(profile.id);
+          console.log('Score calculated:', scoreBreakdown);
+
+          // Mettre à jour le score dans la base
+          const { error } = await supabase
+            .from('profiles')
+            .update({ trust_score: scoreBreakdown.globalScore })
+            .eq('id', profile.id);
+
+          if (error) {
+            console.error('Error updating trust_score:', error);
+          } else {
+            console.log('Trust score updated to:', scoreBreakdown.globalScore);
+          }
+        } catch (error) {
+          console.error('Error calculating trust score:', error);
+        }
+      }
+    };
+
+    calculateAndUpdateScore();
+  }, [profile?.id, profile?.trust_score]);
   const getTrustScoreColor = () => {
     if (trustScore >= 70) return 'text-green-600 bg-green-100';
     if (trustScore >= 50) return 'text-amber-600 bg-amber-100';

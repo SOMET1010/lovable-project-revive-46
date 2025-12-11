@@ -47,7 +47,6 @@ export interface ApplicationWithDetails {
     trust_score: number | null;
     is_verified: boolean | null;
     oneci_verified: boolean | null;
-    cnam_verified: boolean | null;
   } | null;
 }
 
@@ -139,7 +138,6 @@ export async function getOwnerApplications(
         trust_score: number;
         is_verified: boolean;
         oneci_verified: boolean;
-        cnam_verified: boolean;
       }) => [p.user_id ?? p.id, p]
     )
   );
@@ -171,7 +169,6 @@ export async function getOwnerApplications(
               trust_score: profile.trust_score,
               is_verified: profile.is_verified,
               oneci_verified: profile.oneci_verified,
-              cnam_verified: profile.cnam_verified,
             }
           : null,
       };

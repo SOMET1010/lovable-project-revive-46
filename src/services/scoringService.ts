@@ -30,9 +30,7 @@ export interface ProfileScoreDetails {
 
 export interface VerificationScoreDetails {
   oneci: boolean;
-  cnam: boolean;
   facial: boolean;
-  ansut: boolean;
   total: number;
 }
 
@@ -60,12 +58,10 @@ const PROFILE_POINTS = {
   address: 20,
 };
 
-// Points pour chaque vérification
+// Points pour chaque vérification (uniquement ONECI et Facial)
 const VERIFICATION_POINTS = {
-  oneci: 30,
-  cnam: 25,
-  facial: 25,
-  ansut: 20,
+  oneci: 50, // 50 points sur 100
+  facial: 50, // 50 points sur 100
 };
 
 // Si l'edge function n'existe pas / renvoie 500, on évite de la rappeler
@@ -104,17 +100,13 @@ export const ScoringService = {
   calculateVerificationScore(profile: any): { score: number; details: VerificationScoreDetails } {
     const details: VerificationScoreDetails = {
       oneci: !!profile?.oneci_verified,
-      cnam: !!profile?.cnam_verified,
       facial: profile?.facial_verification_status === 'verified',
-      ansut: !!profile?.is_verified,
       total: 0,
     };
 
     let score = 0;
     if (details.oneci) score += VERIFICATION_POINTS.oneci;
-    if (details.cnam) score += VERIFICATION_POINTS.cnam;
     if (details.facial) score += VERIFICATION_POINTS.facial;
-    if (details.ansut) score += VERIFICATION_POINTS.ansut;
 
     details.total = score;
     return { score, details };
