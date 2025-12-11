@@ -13,3 +13,4 @@ export { default as DayMissionsList } from './DayMissionsList';
 export { default as CalendarLegend } from './CalendarLegend';
 export { default as WeekCalendarWidget } from './WeekCalendarWidget';
 export { default as PlanMissionModal } from './PlanMissionModal';
+export { default as SignatureSection, type SignatureData, type SignaturesState } from './SignatureSection';
