@@ -30,13 +30,14 @@ import { Checkbox } from '@/shared/ui/checkbox';
 import { Label } from '@/shared/ui/label';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { AGENCY_ROLES } from '@/shared/constants/roles';
 
 const STEP_LABELS = ['Détails du mandat', 'Acceptation', 'Confirmation'];
 
 export default function SignMandatePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { mandates, refresh } = useAgencyMandates();
 
   const [mandate, setMandate] = useState<AgencyMandate | null>(null);
@@ -148,46 +149,55 @@ export default function SignMandatePage() {
     return labels[permission] || permission;
   };
 
+  const isAgencyUser = profile?.user_type
+    ? (AGENCY_ROLES as readonly string[]).includes(profile.user_type)
+    : false;
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div>
+        <div className="min-h-[50vh] flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
 
   if (!mandate) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Mandat introuvable</h2>
-          <Button onClick={() => navigate('/mes-mandats')}>Retour aux mandats</Button>
-        </Card>
+      <div>
+        <div className="min-h-[50vh] flex items-center justify-center">
+          <Card className="p-8 text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Mandat introuvable</h2>
+            <Button onClick={() => navigate('/mes-mandats')}>Retour aux mandats</Button>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4">
-      <div className="max-w-3xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <Button variant="ghost" onClick={() => navigate('/mes-mandats')} className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Retour aux mandats
-          </Button>
+    <div>
+      <div className="bg-background py-8 px-4">
+        <div className="max-w-3xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <Button variant="ghost" onClick={() => navigate('/mes-mandats')} className="mb-4">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Retour aux mandats
+            </Button>
 
-          <div className="flex items-center gap-3 mb-2">
-            <FileSignature className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">Signature du Mandat</h1>
+            <div className="flex items-center gap-3 mb-2">
+              <FileSignature className="h-8 w-8 text-primary" />
+              <h1 className="text-2xl font-bold">Signature du Mandat</h1>
+            </div>
+            <p className="text-muted-foreground">
+              {signerType === 'owner'
+                ? "Signez le mandat pour autoriser l'agence à gérer vos biens"
+                : 'Signez le mandat pour accepter la gestion des biens'}
+            </p>
           </div>
-          <p className="text-muted-foreground">
-            {signerType === 'owner'
-              ? "Signez le mandat pour autoriser l'agence à gérer vos biens"
-              : 'Signez le mandat pour accepter la gestion des biens'}
-          </p>
-        </div>
 
         {/* Already signed notice */}
         {alreadySigned && (
@@ -561,6 +571,7 @@ export default function SignMandatePage() {
           </Card>
         </FormStepContent>
       </div>
+    </div>
     </div>
   );
 }

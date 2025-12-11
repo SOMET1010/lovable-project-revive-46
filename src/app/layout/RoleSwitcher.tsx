@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { User, Building2, Briefcase, RefreshCw, CheckCircle, Info } from 'lucide-react';
 import { toast } from '@/hooks/shared/useToast';
+import { getDashboardRoute } from '@/shared/utils/roleRoutes';
 
 export default function RoleSwitcher() {
   const { profile, user, updateProfile } = useAuth();
@@ -23,14 +24,8 @@ export default function RoleSwitcher() {
     try {
       await updateProfile({ user_type: newRole });
 
-      // Redirect to appropriate dashboard
-      if (newRole === 'locataire') {
-        navigate('/locataire/dashboard');
-      } else if (newRole === 'proprietaire') {
-        navigate('/proprietaire/dashboard/proprietaire');
-      } else if (newRole === 'agence') {
-        navigate('/proprietaire/dashboard/agence');
-      }
+      // Redirect to appropriate dashboard using centralized logic
+      navigate(getDashboardRoute(newRole));
     } catch (err) {
       console.error('Erreur changement de rôle:', err);
       toast.error('Erreur lors du changement de rôle');

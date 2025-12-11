@@ -24,7 +24,7 @@ const noBreadcrumbRoutes = ['/', '/recherche'];
 
 // Routes avec navigation latérale pour locataire (éviter header + breadcrumb doublons)
 const tenantSidebarPrefixes = [
-  '/dashboard/locataire',
+  '/locataire',
   '/mon-espace',
   '/mes-candidatures',
   '/mes-contrats',
@@ -32,7 +32,7 @@ const tenantSidebarPrefixes = [
   '/mes-visites',
   '/mes-favoris',
   '/recherches-sauvegardees',
-  '/maintenance/locataire',
+  '/maintenance',
   '/maintenance/nouvelle',
   '/profil',
   '/mon-score',
@@ -40,26 +40,23 @@ const tenantSidebarPrefixes = [
   '/effectuer-paiement',
   '/messages',
   '/score-locataire',
-  '/maintenance/locataire',
-  '/maintenance/proprietaire',
 ];
 
 // Routes avec navigation latérale pour propriétaire (éviter header + breadcrumb doublons)
 const ownerSidebarPrefixes = [
-  '/dashboard/proprietaire',
-  '/dashboard/ajouter-propriete',
-  '/dashboard/creer-contrat',
-  '/dashboard/mes-contrats',
-  '/dashboard/candidatures',
-  '/dashboard/mes-candidatures',
-  '/dashboard/candidature',
+  '/proprietaire',
+  '/proprietaire/ajouter-propriete',
+  '/proprietaire/creer-contrat',
+  '/proprietaire/contrats',
+  '/proprietaire/candidatures',
+  '/proprietaire/candidature',
+  '/proprietaire/mes-proprietes',
 ];
 
 // Routes avec navigation latérale pour agence (éviter header + breadcrumb doublons)
 const agencySidebarPrefixes = [
-  '/dashboard/agence',
-  '/dashboard/mes-mandats',
-  '/mes-mandats',
+  '/agences',
+  '/agences/mandats',
   '/mandat',
 ];
 
@@ -93,7 +90,8 @@ export default function Layout() {
     !isAnySidebarRoute;
   const skeletonVariant = getSkeletonVariant(path);
 
-  if (!shouldShowLayout) {
+  // Si c'est une route avec layout dédié (agence, tenant, admin), laisser le composant gérer son propre layout
+  if (!shouldShowLayout || isAgencySidebarRoute || isTenantSidebarRoute) {
     return (
       <ErrorBoundary>
         <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>

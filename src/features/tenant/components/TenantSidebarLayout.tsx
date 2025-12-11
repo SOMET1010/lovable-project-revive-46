@@ -1,14 +1,15 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import TenantDashboardLayout from './TenantDashboardLayout';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { TENANT_ROLES } from '@/shared/constants/roles';
+import { TENANT_ROLES, OWNER_ROLES, AGENCY_ROLES } from '@/shared/constants/roles';
 import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
+import AgencyDashboardLayout from '@/features/agency/components/AgencyDashboardLayout';
 
 const ROUTE_TITLES = [
   { prefix: '/mon-espace', title: 'Mon Espace' },
   { prefix: '/messages', title: 'Messages' },
   { prefix: '/recherches-sauvegardees', title: 'Recherches sauvegardées' },
-  { prefix: '/dashboard/locataire/calendrier', title: 'Calendrier' },
+  { prefix: '/dashboard/calendrier', title: 'Calendrier' },
   { prefix: '/maintenance/nouvelle', title: 'Maintenance' },
   { prefix: '/visiter', title: 'Planifier une visite' },
   { prefix: '/candidature', title: 'Candidature' },
@@ -26,13 +27,25 @@ export default function TenantSidebarLayout() {
   const { pathname } = useLocation();
   const { profile } = useAuth();
   const title = getTitleForPath(pathname);
-  const isTenant = profile?.user_type
-    ? (TENANT_ROLES as readonly string[]).includes(profile.user_type)
-    : false;
-  const isOwner = profile?.user_type === 'owner' || profile?.user_type === 'proprietaire';
 
-  if (!isTenant && !isOwner) {
+  // Vérifier le rôle de l'utilisateur
+  const userRole = profile?.user_type;
+  const isTenant = userRole ? (TENANT_ROLES as readonly string[]).includes(userRole) : false;
+  const isOwner = userRole ? (OWNER_ROLES as readonly string[]).includes(userRole) : false;
+  const isAgency = userRole ? (AGENCY_ROLES as readonly string[]).includes(userRole) : false;
+
+  // Si l'utilisateur n'a pas de rôle valide, afficher le contenu sans layout
+  if (!isTenant && !isOwner && !isAgency) {
     return <Outlet />;
+  }
+
+  // Rediriger vers le bon layout selon le rôle
+  if (isAgency) {
+    return (
+      <AgencyDashboardLayout title={title}>
+        <Outlet />
+      </AgencyDashboardLayout>
+    );
   }
 
   if (isOwner) {
@@ -43,6 +56,7 @@ export default function TenantSidebarLayout() {
     );
   }
 
+  // Locataire (par défaut)
   return (
     <TenantDashboardLayout title={title}>
       <Outlet />

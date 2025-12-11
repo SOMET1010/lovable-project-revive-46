@@ -1,16 +1,8 @@
 import React from 'react';
-import {
-  Building2,
-  Users,
-  Home,
-  Coins,
-  UserPlus,
-  Settings,
-  BarChart3,
-  FileText,
-  UserCheck,
-  Calendar,
-} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Building2, Home, Settings, BarChart3, FileText, Calendar } from 'lucide-react';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -26,54 +18,19 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  {
-    label: 'Dashboard',
-    href: '/agence/dashboard',
-    icon: Building2,
-  },
-  {
-    label: 'Gestion équipe',
-    href: '/agence/equipe',
-    icon: Users,
-  },
-  {
-    label: 'Propriétés',
-    href: '/agence/proprietes',
-    icon: Home,
-  },
-  {
-    label: 'Commissions',
-    href: '/agence/commissions',
-    icon: Coins,
-  },
-  {
-    label: 'Demandes',
-    href: '/agence/inscriptions',
-    icon: UserPlus,
-  },
-  {
-    label: 'Analytics',
-    href: '/agence/analytics',
-    icon: BarChart3,
-  },
-  {
-    label: 'Rapports',
-    href: '/agence/rapports',
-    icon: FileText,
-  },
-  {
-    label: 'Validation',
-    href: '/agence/validation',
-    icon: UserCheck,
-  },
-  {
-    label: 'Calendrier',
-    href: '/agence/calendrier',
-    icon: Calendar,
-  },
+  { label: 'Dashboard', href: '/agences/dashboard', icon: Building2 },
+  { label: 'Mes mandats', href: '/agences/mandats', icon: FileText },
+  { label: 'Biens gérés', href: '/agences/biens', icon: Home },
+  { label: 'Analytics', href: '/agences/analytics', icon: BarChart3 },
+  { label: 'Calendrier', href: '/agences/calendrier', icon: Calendar },
 ];
 
+const cn = (...inputs: (string | undefined | null | false)[]) => twMerge(clsx(inputs));
+
 export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) {
+  const isActive = (href: string) =>
+    currentPath === href || currentPath.startsWith(`${href}/`) || currentPath.startsWith(href);
+
   return (
     <>
       {/* Overlay pour mobile */}
@@ -86,24 +43,25 @@ export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) 
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-40 w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 ${
+        className={cn(
+          'fixed top-0 left-0 z-40 h-full w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto',
           isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-neutral-200 bg-neutral-50">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center">
+        <div className="flex items-center justify-between p-4 border-b border-neutral-100">
+          <Link to="/agences/dashboard" className="flex items-center gap-2" onClick={onClose}>
+            <div className="w-10 h-10 bg-primary-500 rounded-xl flex items-center justify-center">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-lg text-neutral-900">MonToit Pro</h2>
-              <p className="text-xs text-neutral-500">Agence Dashboard</p>
+              <h2 className="text-lg font-bold text-neutral-900">MonToit Pro</h2>
+              <p className="text-xs text-neutral-500">Espace Agence</p>
             </div>
-          </div>
+          </Link>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-neutral-400 hover:text-neutral-600 hover:bg-neutral-100 lg:hidden"
+            className="lg:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
             aria-label="Fermer la navigation"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,51 +76,62 @@ export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) 
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPath === item.href;
+        <nav className="flex-1 overflow-y-auto p-4">
+          <ul className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
 
-            return (
-              <a
-                key={item.href}
-                href={item.href}
-                className={`group flex items-center justify-between px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                  isActive
-                    ? 'bg-primary-50 text-primary-700 shadow-sm border border-primary-200'
-                    : 'text-neutral-700 hover:bg-neutral-50 hover:text-primary-600'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <Icon
-                    className={`w-5 h-5 ${
-                      isActive
-                        ? 'text-primary-600'
-                        : 'text-neutral-400 group-hover:text-primary-500'
-                    }`}
-                  />
-                  <span>{item.label}</span>
-                </div>
-                {item.badge && item.badge > 0 && (
-                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[20px] text-center">
-                    {item.badge > 99 ? '99+' : item.badge}
-                  </span>
+              return (
+                <li key={item.href}>
+                  <Link
+                    to={item.href}
+                    onClick={onClose}
+                    className={cn(
+                      'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all',
+                      active
+                        ? 'bg-primary-50 text-primary-600 border border-primary-100'
+                        : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'
+                    )}
+                  >
+                    <Icon className={cn('h-5 w-5', active ? 'text-primary-500' : '')} />
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge && item.badge > 0 && (
+                      <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[20px] text-center">
+                        {item.badge > 99 ? '99+' : item.badge}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="my-4 border-t border-neutral-100" />
+
+          <ul className="space-y-1">
+            <li>
+              <Link
+                to="/agences/profil"
+                onClick={onClose}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all',
+                  isActive('/agences/profil')
+                    ? 'bg-primary-50 text-primary-600 border border-primary-100'
+                    : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'
                 )}
-              </a>
-            );
-          })}
+              >
+                <Settings
+                  className={cn(
+                    'h-5 w-5',
+                    isActive('/agences/profil') ? 'text-primary-500' : 'text-neutral-400'
+                  )}
+                />
+                <span>Configurations</span>
+              </Link>
+            </li>
+          </ul>
         </nav>
-
-        {/* Section settings en bas */}
-        <div className="p-4 border-t border-neutral-200">
-          <a
-            href="/agence/configurations"
-            className="flex items-center space-x-3 px-4 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50 hover:text-primary-600 rounded-xl transition-all duration-200"
-          >
-            <Settings className="w-5 h-5 text-neutral-400" />
-            <span>Configurations</span>
-          </a>
-        </div>
       </div>
     </>
   );

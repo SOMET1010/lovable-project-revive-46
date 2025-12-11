@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeUserType, translateUserType, type UserTypeEn } from '@/shared/lib/utils';
+import { getDashboardRoute, normalizeRole } from '@/shared/utils/roleRoutes';
 
 export default function ProfileSelection() {
   const { user, profile } = useAuth();
@@ -93,7 +94,7 @@ export default function ProfileSelection() {
       if (selectedType === 'tenant') {
         navigate('/');
       } else if (selectedType === 'owner') {
-        navigate('/dashboard/proprietaire');
+        navigate(getDashboardRoute('proprietaire'));
       } else if (selectedType === 'agent') {
         navigate('/agence/inscription');
       }

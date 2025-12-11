@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,6 +18,7 @@ import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { getDashboardRoute } from '@/shared/utils/roleRoutes';
 import {
   RESIDENTIAL_PROPERTY_TYPES,
   COMMERCIAL_PROPERTY_TYPES,
@@ -31,6 +32,8 @@ import { ValidatedInput } from '@/shared/ui/ValidatedInput';
 import { ValidatedTextarea } from '@/shared/ui/ValidatedTextarea';
 import type { Database } from '@/shared/lib/database.types';
 import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
+import AgencyDashboardLayout from '@/features/agency/components/AgencyDashboardLayout';
+import { AGENCY_ROLES } from '@/shared/constants/roles';
 
 type PropertyType = Database['public']['Tables']['properties']['Row']['property_type'];
 
@@ -91,7 +94,11 @@ const STEPS = [
 ];
 
 export default function AddProperty() {
-  const { user } = useAuth();
+  return <AddPropertyContent />;
+}
+
+export function AddPropertyContent() {
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
@@ -111,6 +118,17 @@ export default function AddProperty() {
   const { validateField, getFieldState, setFieldTouched } = useFormValidation<PropertyFormData>();
 
   const [formData, setFormData] = useState<PropertyFormData>(INITIAL_FORM_DATA);
+
+  const location = useLocation();
+  const userType = profile?.user_type?.toLowerCase();
+  const isAgencyUser = userType
+    ? (AGENCY_ROLES as readonly string[]).includes(userType) || userType === 'agency'
+    : false;
+  // Si l'utilisateur est une agence et que la route commence par /agences, le layout parent est déjà AgencyDashboardLayout
+  // On évite d'emboîter un deuxième layout avec sidebar.
+  const isAgencyRoute = location.pathname.startsWith('/agences');
+  const shouldUseLayout = !(isAgencyUser && isAgencyRoute);
+  const LayoutComponent = isAgencyUser ? AgencyDashboardLayout : OwnerDashboardLayout;
 
   // Load draft from localStorage on mount - show confirmation modal
   useEffect(() => {
@@ -365,7 +383,6 @@ export default function AddProperty() {
           charges_amount: chargesValue,
           has_parking: formData.has_parking,
           furnished: formData.is_furnished,
-          is_anonymous: undefined,
           is_anonymous: formData.is_anonymous,
           status: 'disponible',
         })
@@ -395,7 +412,7 @@ export default function AddProperty() {
 
       setSuccess(true);
       setTimeout(() => {
-        navigate('/dashboard/proprietaire');
+        navigate(getDashboardRoute(profile?.user_type || 'proprietaire'));
       }, 3000);
     } catch (err: unknown) {
       const supabaseErr = err as { message?: string; details?: string; hint?: string };
@@ -518,13 +535,13 @@ export default function AddProperty() {
   }
 
   return (
-    <OwnerDashboardLayout title="Ajouter une propriété">
+    <LayoutComponent title="Ajouter une propriété">
       {/* Header Sticky Premium Ivorian */}
       <div
         className="bg-white border-b sticky top-0 z-30 shadow-sm"
         style={{ borderColor: 'var(--color-border)' }}
       >
-        <div className="w-full max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="w-full px-4 lg:px-10 xl:px-12 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 font-medium transition-colors hover:opacity-80"
@@ -591,7 +608,7 @@ export default function AddProperty() {
         </div>
       </div>
 
-      <div className="w-full max-w-6xl mx-auto px-4 py-8">
+      <div className="w-full px-4 lg:px-10 xl:px-12 py-8">
         {/* Page Title */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -1292,6 +1309,6 @@ export default function AddProperty() {
           </div>
         </div>
       </Modal>
-    </OwnerDashboardLayout>
+    </LayoutComponent>
   );
 }

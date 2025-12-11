@@ -114,7 +114,7 @@ export default function MaintenanceRequest() {
       setImagePreviews([]);
 
       setTimeout(() => {
-        window.location.href = '/maintenance/locataire';
+        window.location.href = '/locataire/maintenance';
       }, 2000);
     } catch (err: any) {
       console.error('Error submitting request:', err);

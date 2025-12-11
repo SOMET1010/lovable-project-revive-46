@@ -1,6 +1,12 @@
 import { RouteObject } from 'react-router-dom';
 import Layout from '@/app/layout/Layout';
 import ErrorBoundary from '@/shared/ui/ErrorBoundary';
+import { lazyWithRetry } from '@/shared/utils/lazyLoad';
+import ProtectedRoute from '@/shared/ui/ProtectedRoute';
+import { AGENCY_ROLES } from '@/shared/constants/roles';
+
+// Dashboard Router - redirects based on user_type and roles
+const DashboardRouter = lazyWithRetry(() => import('@/shared/ui/DashboardRouter'));
 
 // Import modular routes
 import {
@@ -8,9 +14,13 @@ import {
   authRoutes,
   tenantRoutes,
   ownerRoutes,
+  agencyRoutes,
   adminRoutes,
   trustAgentRoutes,
 } from './routes/index';
+
+// Lazy load AgencyProfilePage for /agence/profile route
+const AgencyProfilePage = lazyWithRetry(() => import('@/pages/agency/ProfilePage'));
 
 /**
  * Main application routes
@@ -28,16 +38,42 @@ export const routes: RouteObject[] = [
       // Authentication routes
       ...authRoutes,
 
+      // Smart Dashboard Router - redirects based on user_type and roles (at root level)
+      {
+        path: 'dashboard',
+        element: (
+          <ProtectedRoute>
+            <DashboardRouter />
+          </ProtectedRoute>
+        ),
+      },
+
       // Tenant routes under /locataire prefix
       {
         path: 'locataire',
         children: tenantRoutes,
       },
 
-      // Owner & Agency routes under /proprietaire prefix
+      // Owner routes under /proprietaire prefix
       {
         path: 'proprietaire',
         children: ownerRoutes,
+      },
+
+      // Agency routes under /agences prefix
+      {
+        path: 'agences',
+        children: agencyRoutes,
+      },
+
+      // Alternative agency profile route
+      {
+        path: 'agence/profile',
+        element: (
+          <ProtectedRoute allowedRoles={[...AGENCY_ROLES]}>
+            <AgencyProfilePage />
+          </ProtectedRoute>
+        ),
       },
 
       // Trust Agent routes (nested with layout)

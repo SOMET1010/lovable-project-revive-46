@@ -24,7 +24,8 @@ const RentalHistoryPage = lazyWithRetry(() => import('@/pages/tenant/RentalHisto
 const UnifiedDashboard = lazyWithRetry(() => import('@/pages/dashboard/UnifiedDashboardPage'));
 
 // Profile page
-const ProfilePage = lazyWithRetry(() => import('@/pages/tenant/ProfilePage'));
+const ProfilePage = lazyWithRetry(() => import('@/pages/tenant/EnhancedProfilePage'));
+const OriginalProfilePage = lazyWithRetry(() => import('@/pages/tenant/ProfilePage'));
 
 // Favorites & saved searches
 const Favorites = lazyWithRetry(() => import('@/pages/tenant/FavoritesPage'));
@@ -47,21 +48,14 @@ const PaymentHistory = lazyWithRetry(() => import('@/pages/tenant/PaymentHistory
 // Messaging
 const MessagesPage = lazyWithRetry(() => import('@/pages/messaging/MessagesPage'));
 
-// Shared tenant layout with sidebar
+// Tenant layout with sidebar
+const TenantDashboardLayout = lazyWithRetry(() => import('@/features/tenant/components/TenantDashboardLayout'));
+// TenantSidebarLayout is used for universal routes that need role-based layout switching
 const TenantSidebarLayout = lazyWithRetry(
   () => import('@/features/tenant/components/TenantSidebarLayout')
 );
 
 export const tenantRoutes: RouteObject[] = [
-  // Smart Dashboard Router - redirects based on user_type and roles
-  {
-    path: 'dashboard',
-    element: (
-      <ProtectedRoute>
-        <DashboardRouter />
-      </ProtectedRoute>
-    ),
-  },
 
   // Profile
   {
@@ -126,7 +120,7 @@ export const tenantRoutes: RouteObject[] = [
 
   // Tenant specific routes
   {
-    path: 'dashboard/locataire',
+    path: 'dashboard',
     element: (
       <ProtectedRoute allowedRoles={[...TENANT_ROLES]}>
         <TenantDashboard />
@@ -134,7 +128,7 @@ export const tenantRoutes: RouteObject[] = [
     ),
   },
   {
-    path: 'maintenance/locataire',
+    path: 'maintenance',
     element: (
       <ProtectedRoute allowedRoles={[...TENANT_ROLES]}>
         <TenantMaintenance />
@@ -184,7 +178,7 @@ export const tenantRoutes: RouteObject[] = [
         ),
       },
       {
-        path: 'dashboard/locataire/calendrier',
+        path: 'dashboard/calendrier',
         element: (
           <ProtectedRoute allowedRoles={[...TENANT_ROLES]}>
             <TenantCalendar />

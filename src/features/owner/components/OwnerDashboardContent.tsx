@@ -289,7 +289,7 @@ export default function OwnerDashboardContent() {
         {properties.length > 0 && (
           <div className="flex justify-center mt-4">
             <Link
-              to="/dashboard/mes-proprietes"
+              to="/proprietaire/mes-proprietes"
               className="flex items-center gap-1 text-[#F16522] hover:underline font-medium"
             >
               Voir toutes les propriétés

@@ -17,11 +17,11 @@ export const ROUTES = {
   PROPERTIES: {
     SEARCH: '/recherche',
     DETAIL: '/propriete/:id',
-    ADD: '/dashboard/ajouter-propriete',
+    ADD: '/proprietaire/ajouter-propriete',
   },
   DASHBOARD: {
-    OWNER: '/dashboard/proprietaire',
-    TENANT: '/dashboard/locataire',
+    OWNER: '/proprietaire/dashboard',
+    TENANT: '/locataire/dashboard',
   },
   PROFILE: '/profil',
   MESSAGES: '/messages',

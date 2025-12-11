@@ -22,7 +22,6 @@ import useAgencyMandates, { AgencyMandate } from '@/hooks/useAgencyMandates';
 import MandateCard from '../../features/agency/components/MandateCard';
 import InviteAgencyDialog from '../../features/agency/components/InviteAgencyDialog';
 import MandatePermissionsForm from '../../features/agency/components/MandatePermissionsForm';
-import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 type ViewMode = 'owner' | 'agency';
 type StatusFilter = 'all' | 'pending' | 'active' | 'expired' | 'cancelled';
@@ -141,7 +140,7 @@ export default function MyMandatesPage() {
   };
 
   return (
-    <OwnerDashboardLayout title="Mes Mandats">
+    <>
       <div className="bg-card border-b border-border rounded-2xl shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -325,6 +324,6 @@ export default function MyMandatesPage() {
           onSave={handleSavePermissions}
         />
       )}
-    </OwnerDashboardLayout>
+    </>
   );
 }

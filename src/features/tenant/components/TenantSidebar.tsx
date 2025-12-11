@@ -35,7 +35,7 @@ const navItems = [
   { label: 'Mes Contrats', href: '/locataire/mes-contrats', icon: FileText },
   { label: 'Mes Paiements', href: '/locataire/mes-paiements', icon: CreditCard },
   { label: 'Mes Visites', href: '/locataire/mes-visites', icon: Calendar },
-  { label: 'Maintenance', href: '/locataire/maintenance/locataire', icon: Wrench },
+  { label: 'Maintenance', href: '/locataire/maintenance', icon: Wrench },
   { label: 'Mon Score', href: '/locataire/mon-score', icon: Award },
   { label: 'Historique Locations', href: '/locataire/profil/historique-locations', icon: Home },
   { label: 'Mes Favoris', href: '/locataire/favoris', icon: Heart },

@@ -27,15 +27,15 @@ interface OwnerSidebarProps {
 }
 
 const navItems = [
-  { label: 'Tableau de bord', href: '/proprietaire/dashboard/proprietaire', icon: LayoutDashboard },
-  { label: 'Mon profil', href: '/proprietaire/profil', icon: UserCircle2 },
-  { label: 'Mon espace', href: '/proprietaire/mon-espace', icon: LayoutGrid },
-  { label: 'Mes mandats', href: '/proprietaire/dashboard/mes-mandats', icon: Briefcase },
-  { label: 'Mes candidatures', href: '/proprietaire/dashboard/mes-candidatures', icon: Users },
-  { label: 'Mes contrats', href: '/proprietaire/dashboard/mes-contrats', icon: FileText },
-  { label: 'Créer un contrat', href: '/proprietaire/dashboard/creer-contrat', icon: FilePlus2 },
-  { label: 'Ajouter un bien', href: '/proprietaire/dashboard/ajouter-propriete', icon: PlusCircle },
-  { label: 'Messages', href: '/proprietaire/messages', icon: MessageSquare, hasBadge: true },
+  { label: 'Tableau de bord', href: '/proprietaire/dashboard', icon: LayoutDashboard },
+  { label: 'Mon profil', href: '/profil', icon: UserCircle2 },
+  { label: 'Mon espace', href: '/mon-espace', icon: LayoutGrid },
+  { label: 'Mes mandats', href: '/agences/mandats', icon: Briefcase },
+  { label: 'Mes candidatures', href: '/proprietaire/candidatures', icon: Users },
+  { label: 'Mes contrats', href: '/proprietaire/contrats', icon: FileText },
+  { label: 'Créer un contrat', href: '/proprietaire/creer-contrat', icon: FilePlus2 },
+  { label: 'Ajouter un bien', href: '/proprietaire/ajouter-propriete', icon: PlusCircle },
+  { label: 'Messages', href: '/messages', icon: MessageSquare, hasBadge: true },
 ];
 
 const bottomItems = [{ label: 'Rechercher', href: '/recherche', icon: Search }];
@@ -47,8 +47,8 @@ export function OwnerSidebar({ isOpen, onClose, unreadMessages = 0 }: OwnerSideb
   const currentPath = location.pathname;
 
   const isActive = (href: string) => {
-    if (href === '/proprietaire/dashboard/proprietaire') {
-      return currentPath === '/proprietaire/dashboard/proprietaire';
+    if (href === '/proprietaire/dashboard') {
+      return currentPath === '/proprietaire/dashboard';
     }
     return currentPath.startsWith(href);
   };

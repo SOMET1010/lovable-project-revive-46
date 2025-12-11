@@ -30,6 +30,7 @@ import { InputWithIcon } from '@/shared/ui';
 import { PhoneInputWithCountry } from '@/shared/components/PhoneInputWithCountry';
 import OTPInput from '@/shared/components/modern/OTPInput';
 import { callEdgeFunction } from '@/api/client';
+import { getDashboardRoute } from '@/shared/utils/roleRoutes';
 
 type AuthMethod = 'phone' | 'email';
 type PhoneStep = 'enter' | 'verify' | 'name';
@@ -235,13 +236,16 @@ export default function ModernAuthPage() {
     setLoading(true);
 
     try {
+      console.log('Attempting login with email:', email);
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (loginError) throw loginError;
-      navigate('/');
+      console.log('Login successful, redirecting to /dashboard');
+      // Use window.location for immediate redirect
+      window.location.href = '/dashboard';
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Email ou mot de passe incorrect';
       setError(errorMessage);
@@ -454,8 +458,8 @@ export default function ModernAuthPage() {
 
       await supabase.from('profiles').update({ user_type: role }).eq('id', userId);
 
-      // Redirection demandée
-      navigate('/dashboard/locataire');
+      // Redirection selon le rôle sélectionné
+      navigate(getDashboardRoute(role));
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : 'Erreur lors de la sélection du rôle';
