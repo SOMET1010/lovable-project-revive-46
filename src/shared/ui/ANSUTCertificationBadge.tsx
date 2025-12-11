@@ -1,6 +1,6 @@
 import { Shield, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { Badge } from '@/shared/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/components/ui/tooltip';
+import { Badge } from '@/shared/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/shared/ui/tooltip';
 import { cn } from '@/shared/lib/utils';
 
 interface ANSUTCertificationBadgeProps {

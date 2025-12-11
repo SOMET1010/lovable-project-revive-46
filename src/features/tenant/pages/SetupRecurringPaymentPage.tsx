@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/shared/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { 
   CreditCard, 
   Calendar, 
@@ -12,12 +12,7 @@ import {
   AlertTriangle,
   Loader2
 } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/components/ui/card';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { Switch } from '@/shared/components/ui/switch';
+import { Button, Card, CardContent, CardHeader, CardTitle, CardDescription, Input, Label, Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Switch } from '@/shared/ui';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -182,7 +177,7 @@ export default function SetupRecurringPaymentPage() {
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link to="/mes-paiements">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="small" className="p-2">
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>

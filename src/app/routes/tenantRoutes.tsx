@@ -38,6 +38,7 @@ const SignLease = lazyWithRetry(() => import('@/features/tenant/pages/SignLeaseP
 // Payment pages
 const MakePayment = lazyWithRetry(() => import('@/features/tenant/pages/MakePaymentPage'));
 const PaymentHistory = lazyWithRetry(() => import('@/features/tenant/pages/PaymentHistoryPage'));
+const SetupRecurringPayment = lazyWithRetry(() => import('@/features/tenant/pages/SetupRecurringPaymentPage'));
 
 // Messaging
 const MessagesPage = lazyWithRetry(() => import('@/features/messaging/pages/MessagesPage'));
@@ -78,6 +79,7 @@ export const tenantRoutes: RouteObject[] = [
   // Payments
   { path: 'effectuer-paiement', element: <ProtectedRoute><MakePayment /></ProtectedRoute> },
   { path: 'mes-paiements', element: <ProtectedRoute><PaymentHistory /></ProtectedRoute> },
+  { path: 'paiement-automatique', element: <ProtectedRoute><SetupRecurringPayment /></ProtectedRoute> },
 
   // Tenant specific routes - utilise TENANT_ROLES pour compatibilité fr/en
   { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantDashboard /></ProtectedRoute> },

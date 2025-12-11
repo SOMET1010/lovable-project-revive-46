@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/shared/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { 
   Coins, 
   TrendingUp, 
@@ -17,11 +17,11 @@ import {
   XCircle,
   ArrowLeft
 } from 'lucide-react';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Input } from '@/shared/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Button } from '@/shared/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
+import { Badge } from '@/shared/ui';
+import { Input } from '@/shared/ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -179,7 +179,7 @@ export default function OwnerPaymentsPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/dashboard/proprietaire">
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="small" className="p-2">
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
@@ -360,7 +360,7 @@ export default function OwnerPaymentsPage() {
                         {payment.status === 'paye' && payment.receipt_url && (
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="small"
                             onClick={() => window.open(payment.receipt_url!, '_blank')}
                           >
                             <Download className="h-4 w-4 mr-1" />
@@ -371,7 +371,7 @@ export default function OwnerPaymentsPage() {
                         {payment.status === 'en_attente' && payment.payer?.phone && (
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="small"
                             onClick={() => sendManualReminder(payment)}
                           >
                             <Send className="h-4 w-4 mr-1" />
