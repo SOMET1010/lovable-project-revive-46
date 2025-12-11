@@ -546,6 +546,154 @@ export type Database = {
         }
         Relationships: []
       }
+      dispute_messages: {
+        Row: {
+          attachments: Json | null
+          content: string
+          created_at: string | null
+          dispute_id: string
+          id: string
+          is_internal: boolean | null
+          is_read: boolean | null
+          sender_id: string
+          sender_role: string
+        }
+        Insert: {
+          attachments?: Json | null
+          content: string
+          created_at?: string | null
+          dispute_id: string
+          id?: string
+          is_internal?: boolean | null
+          is_read?: boolean | null
+          sender_id: string
+          sender_role: string
+        }
+        Update: {
+          attachments?: Json | null
+          content?: string
+          created_at?: string | null
+          dispute_id?: string
+          id?: string
+          is_internal?: boolean | null
+          is_read?: boolean | null
+          sender_id?: string
+          sender_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dispute_messages_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "disputes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disputes: {
+        Row: {
+          assigned_agent_id: string | null
+          category: string
+          complainant_id: string
+          contract_id: string | null
+          created_at: string | null
+          description: string
+          dispute_number: string
+          escalated_at: string | null
+          evidence: Json | null
+          id: string
+          intervention_id: string | null
+          priority: string | null
+          property_id: string | null
+          resolution: string | null
+          resolution_type: string | null
+          resolved_at: string | null
+          respondent_id: string
+          satisfaction_complainant: number | null
+          satisfaction_respondent: number | null
+          status: string | null
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_agent_id?: string | null
+          category: string
+          complainant_id: string
+          contract_id?: string | null
+          created_at?: string | null
+          description: string
+          dispute_number: string
+          escalated_at?: string | null
+          evidence?: Json | null
+          id?: string
+          intervention_id?: string | null
+          priority?: string | null
+          property_id?: string | null
+          resolution?: string | null
+          resolution_type?: string | null
+          resolved_at?: string | null
+          respondent_id: string
+          satisfaction_complainant?: number | null
+          satisfaction_respondent?: number | null
+          status?: string | null
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_agent_id?: string | null
+          category?: string
+          complainant_id?: string
+          contract_id?: string | null
+          created_at?: string | null
+          description?: string
+          dispute_number?: string
+          escalated_at?: string | null
+          evidence?: Json | null
+          id?: string
+          intervention_id?: string | null
+          priority?: string | null
+          property_id?: string | null
+          resolution?: string | null
+          resolution_type?: string | null
+          resolved_at?: string | null
+          respondent_id?: string
+          satisfaction_complainant?: number | null
+          satisfaction_respondent?: number | null
+          status?: string | null
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_intervention_id_fkey"
+            columns: ["intervention_id"]
+            isOneToOne: false
+            referencedRelation: "interventions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       electronic_signature_logs: {
         Row: {
           created_at: string | null
@@ -2047,10 +2195,18 @@ export type Database = {
         Row: {
           comment: string | null
           created_at: string | null
+          criteria_ratings: Json | null
+          helpful_count: number | null
           id: string
           is_visible: boolean | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_notes: string | null
+          moderation_status: string | null
           property_id: string | null
           rating: number
+          response: string | null
+          response_at: string | null
           review_type: string | null
           reviewee_id: string | null
           reviewer_id: string
@@ -2059,10 +2215,18 @@ export type Database = {
         Insert: {
           comment?: string | null
           created_at?: string | null
+          criteria_ratings?: Json | null
+          helpful_count?: number | null
           id?: string
           is_visible?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_notes?: string | null
+          moderation_status?: string | null
           property_id?: string | null
           rating: number
+          response?: string | null
+          response_at?: string | null
           review_type?: string | null
           reviewee_id?: string | null
           reviewer_id: string
@@ -2071,10 +2235,18 @@ export type Database = {
         Update: {
           comment?: string | null
           created_at?: string | null
+          criteria_ratings?: Json | null
+          helpful_count?: number | null
           id?: string
           is_visible?: boolean | null
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_notes?: string | null
+          moderation_status?: string | null
           property_id?: string | null
           rating?: number
+          response?: string | null
+          response_at?: string | null
           review_type?: string | null
           reviewee_id?: string | null
           reviewer_id?: string
@@ -3050,6 +3222,10 @@ export type Database = {
       }
     }
     Functions: {
+      assign_dispute_to_agent: {
+        Args: { p_dispute_id: string }
+        Returns: string
+      }
       auto_expire_mandates: { Args: never; Returns: number }
       calculate_profile_score: {
         Args: {
@@ -3096,6 +3272,7 @@ export type Database = {
       generate_otp: { Args: never; Returns: string }
       generate_receipt_number: { Args: never; Returns: string }
       generate_reset_token: { Args: never; Returns: string }
+      get_dispute_stats: { Args: { p_user_id?: string }; Returns: Json }
       get_platform_stats: { Args: never; Returns: Json }
       get_public_profile: {
         Args: { profile_user_id: string }
