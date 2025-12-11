@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Map, AlertCircle, MapPin } from 'lucide-react';
 
-const MapboxMap = lazy(() => import('./MapboxMap'));
+const MapboxMapGated = lazy(() => import('./MapboxMapGated'));
 const EnhancedClusterMap = lazy(() => import('./EnhancedClusterMap'));
 
 interface Property {
@@ -80,7 +80,7 @@ export default function MapWrapper(props: MapWrapperProps) {
             fitBounds={props.fitBounds}
           />
         ) : (
-          <MapboxMap {...props} />
+          <MapboxMapGated {...props} />
         )}
       </div>
     </Suspense>

@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, Home, X, Image as ImageIcon, Building2, Check, R
 import { toast } from 'sonner';
 import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
-import MapboxMap from '@/shared/ui/MapboxMap';
+import MapboxMapGated from '@/shared/ui/MapboxMapGated';
 import PlacesAutocomplete, { PlaceResult } from '@/shared/ui/PlacesAutocomplete';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -1185,7 +1185,7 @@ export default function AddProperty() {
                     📍 Cliquez ou déplacez le marqueur pour positionner le bien
                   </div>
                   
-                  <MapboxMap
+                  <MapboxMapGated
                     center={mapCenter}
                     zoom={formData.latitude ? 15 : 12}
                     properties={mapMarkerProperty}
