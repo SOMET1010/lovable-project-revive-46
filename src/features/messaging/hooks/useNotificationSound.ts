@@ -39,11 +39,15 @@ export function useNotificationSound() {
     try {
       incomingAudioRef.current.volume = soundVolume;
       incomingAudioRef.current.currentTime = 0;
-      incomingAudioRef.current.play().catch(() => {
-        // Ignore autoplay errors
+      incomingAudioRef.current.play().catch((error) => {
+        if (import.meta.env.DEV) {
+          console.debug('[NotificationSound] Incoming audio play blocked:', error);
+        }
       });
-    } catch {
-      // Ignore errors
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.debug('[NotificationSound] Incoming audio error:', error);
+      }
     }
   }, [soundEnabled, soundVolume]);
 
@@ -53,11 +57,15 @@ export function useNotificationSound() {
     try {
       outgoingAudioRef.current.volume = soundVolume * 0.5; // Softer for outgoing
       outgoingAudioRef.current.currentTime = 0;
-      outgoingAudioRef.current.play().catch(() => {
-        // Ignore autoplay errors
+      outgoingAudioRef.current.play().catch((error) => {
+        if (import.meta.env.DEV) {
+          console.debug('[NotificationSound] Outgoing audio play blocked:', error);
+        }
       });
-    } catch {
-      // Ignore errors
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.debug('[NotificationSound] Outgoing audio error:', error);
+      }
     }
   }, [soundEnabled, soundVolume]);
 
@@ -68,9 +76,15 @@ export function useNotificationSound() {
     try {
       incomingAudioRef.current.volume = soundVolume;
       incomingAudioRef.current.currentTime = 0;
-      incomingAudioRef.current.play().catch(() => {});
-    } catch {
-      // Ignore errors
+      incomingAudioRef.current.play().catch((error) => {
+        if (import.meta.env.DEV) {
+          console.debug('[NotificationSound] Test audio play blocked:', error);
+        }
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.debug('[NotificationSound] Test audio error:', error);
+      }
     }
   }, [soundVolume]);
 
