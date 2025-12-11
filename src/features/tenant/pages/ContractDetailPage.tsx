@@ -1,11 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadContract, regenerateContract } from '@/services/contracts/contractService';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { ArrowLeft, FileText, Edit, CheckCircle, X, Download, RefreshCw, Loader, ExternalLink } from 'lucide-react';
-
 interface LeaseContract {
   id: string;
   contract_number: string;
@@ -42,6 +42,8 @@ interface Profile {
 
 export default function ContractDetail() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { id: contractId } = useParams<{ id: string }>();
   const [contract, setContract] = useState<LeaseContract | null>(null);
   const [property, setProperty] = useState<Property | null>(null);
   const [owner, setOwner] = useState<Profile | null>(null);
@@ -53,8 +55,6 @@ export default function ContractDetail() {
   const [downloading, setDownloading] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-
-  const contractId = window.location.pathname.split('/')[2];
 
   useEffect(() => {
     if (user && contractId) {
@@ -78,7 +78,7 @@ export default function ContractDetail() {
 
       if (!contractData || (contractData.owner_id !== user?.id && contractData.tenant_id !== user?.id)) {
         alert('Vous n\'avez pas accès à ce contrat');
-        window.location.href = '/mes-contrats';
+        navigate('/mes-contrats');
         return;
       }
 

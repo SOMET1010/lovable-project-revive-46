@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Coins, Download, Eye, Calendar, CheckCircle, XCircle, Clock, CreditCard, Plus, ArrowRight } from 'lucide-react';
 import TenantDashboardLayout from '../components/TenantDashboardLayout';
 import { toast } from 'sonner';
-
+import type { PaymentQueryResult, StatusConfig } from '../types/supabase-mappers.types';
 interface Payment {
   id: string;
   amount: number;
@@ -62,7 +62,7 @@ export default function PaymentHistory() {
 
       if (error) throw error;
 
-      const formattedPayments: Payment[] = (data || []).map((payment: any) => ({
+      const formattedPayments: Payment[] = (data || []).map((payment: PaymentQueryResult) => ({
         id: payment.id,
         amount: payment.amount,
         payment_type: payment.payment_type,
@@ -85,14 +85,15 @@ export default function PaymentHistory() {
     }
   };
 
-  const getStatusConfig = (status: string | null) => {
-    const configs: Record<string, { label: string; icon: any; className: string }> = {
+  const getStatusConfig = (status: string | null): StatusConfig => {
+    const defaultConfig: StatusConfig = { label: 'En attente', icon: Clock, className: 'bg-yellow-100 text-yellow-700 border border-yellow-200' };
+    const configs: Record<string, StatusConfig> = {
       en_attente: { label: 'En attente', icon: Clock, className: 'bg-yellow-100 text-yellow-700 border border-yellow-200' },
       complete: { label: 'Complété', icon: CheckCircle, className: 'bg-green-100 text-green-700 border border-green-200' },
       echoue: { label: 'Échoué', icon: XCircle, className: 'bg-red-100 text-red-700 border border-red-200' },
       annule: { label: 'Annulé', icon: XCircle, className: 'bg-[#FAF7F4] text-[#6B5A4E] border border-[#EFEBE9]' }
     };
-    return configs[status || 'en_attente'] || configs['en_attente'];
+    return configs[status || 'en_attente'] ?? defaultConfig;
   };
 
   const getPaymentTypeLabel = (type: string) => {

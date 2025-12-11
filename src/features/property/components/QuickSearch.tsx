@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Home as HomeIcon, Coins, Plus, CheckCircle, Shield, Navigation, Building2 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { CITIES, ABIDJAN_COMMUNES, RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, GEOLOCATION_SETTINGS } from '@/shared/lib/constants/app.constants';
 import { FEATURES } from '@/shared/config/features.config';
-
 interface QuickSearchProps {
   onSearch?: (filters: SearchFilters) => void;
 }
@@ -19,6 +19,7 @@ interface SearchFilters {
 
 export default function QuickSearch({ onSearch }: QuickSearchProps) {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [city, setCity] = useState('');
   const [commune, setCommune] = useState('');
   const [propertyType, setPropertyType] = useState('');
@@ -168,15 +169,15 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
       if (propertyCategory) params.append('category', propertyCategory);
       if (maxBudget) params.append('max_price', maxBudget);
 
-      window.location.href = `/recherche?${params.toString()}`;
+      navigate(`/recherche?${params.toString()}`);
     }
   };
 
   const handlePublish = () => {
     if (!user) {
-      window.location.href = '/auth';
+      navigate('/auth');
     } else {
-      window.location.href = '/add-property';
+      navigate('/add-property');
     }
   };
 
