@@ -4,6 +4,7 @@ import { useContextualRoles } from '@/hooks/shared/useContextualRoles';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Key, Building2, Loader2, Home, PlusCircle, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { OWNER_ROLES, AGENCY_ROLES } from '@/shared/constants/roles';
 
 // Lazy load tab content
 const TenantDashboardContent = lazy(
@@ -100,6 +101,10 @@ export default function UnifiedDashboardPage() {
 
   const availableTabs = tabs.filter((t) => t.available);
   const hasNoContextualRoles = !isTenant && !isOwner && !rolesLoading;
+  const publisherRoles = [...OWNER_ROLES, ...AGENCY_ROLES] as const;
+  const canPublishProperty =
+    profile?.user_type &&
+    publisherRoles.includes(profile.user_type as (typeof publisherRoles)[number]);
 
   if (!user) {
     navigate('/connexion');
@@ -121,7 +126,7 @@ export default function UnifiedDashboardPage() {
     <div className="min-h-screen bg-[#FAF7F4]">
       {/* Header */}
       <div className="bg-white border-b border-[#EFEBE9]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <div className="flex items-center justify-between">
               <div>
@@ -148,13 +153,15 @@ export default function UnifiedDashboardPage() {
                   <Search className="h-4 w-4" />
                   <span className="font-medium">Rechercher</span>
                 </Link>
-                <Link
-                  to="/ajouter-propriete"
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors shadow-lg shadow-orange-500/20"
-                >
-                  <PlusCircle className="h-4 w-4" />
-                  <span className="font-medium">Publier</span>
-                </Link>
+                {canPublishProperty && (
+                  <Link
+                    to="/ajouter-propriete"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors shadow-lg shadow-orange-500/20"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    <span className="font-medium">Publier</span>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -219,13 +226,15 @@ export default function UnifiedDashboardPage() {
                       <Search className="h-4 w-4" />
                       Rechercher un logement
                     </Link>
-                    <Link
-                      to="/ajouter-propriete"
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors font-medium shadow-lg shadow-orange-500/20"
-                    >
-                      <PlusCircle className="h-4 w-4" />
-                      Publier une propriété
-                    </Link>
+                    {canPublishProperty && (
+                      <Link
+                        to="/ajouter-propriete"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors font-medium shadow-lg shadow-orange-500/20"
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                        Publier une propriété
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

@@ -165,9 +165,9 @@ export default function ProfilePage() {
 
   return (
     <Layout title="Mon Profil">
-      <div className="w-full">
+      <div className="w-full space-y-6">
         {/* Header */}
-        <div className="bg-card rounded-2xl shadow-card p-6 mb-6">
+        <div className="bg-card rounded-2xl shadow-card p-6">
           <div className="flex items-center gap-6">
             <div className="relative">
               <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden">
@@ -265,7 +265,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -290,7 +290,7 @@ export default function ProfilePage() {
                 Informations personnelles
               </h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1">
                     Nom complet
@@ -339,20 +339,20 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-foreground mb-1">Adresse</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      value={formData.address}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setFormData({ ...formData, address: e.target.value })
-                      }
-                      className="pl-10"
-                      placeholder="Votre adresse"
-                    />
-                  </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Adresse</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    value={formData.address}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
+                    className="pl-10"
+                    placeholder="Votre adresse"
+                  />
                 </div>
               </div>
 

@@ -226,7 +226,7 @@ export default function OwnerProfilePage() {
 
   return (
     <OwnerDashboardLayout title="Mon Profil">
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         {/* Profile Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center gap-6">
@@ -301,7 +301,7 @@ export default function OwnerProfilePage() {
         <div className="bg-white rounded-lg shadow-sm p-6">
           {activeTab === 'infos' && (
             <form onSubmit={handleSaveProfile} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Nom complet
@@ -483,7 +483,7 @@ export default function OwnerProfilePage() {
           {activeTab === 'stats' && (
             <div className="space-y-6">
               <h3 className="text-lg font-semibold">Statistiques</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>

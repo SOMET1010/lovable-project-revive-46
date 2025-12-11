@@ -220,7 +220,7 @@ export default function AgencyProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full">
       {/* Profile Header */}
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <div className="flex items-center gap-6">
@@ -302,7 +302,7 @@ export default function AgencyProfilePage() {
       <div className="bg-white rounded-lg shadow-sm p-6">
         {activeTab === 'infos' && (
           <form onSubmit={handleSaveProfile} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nom du représentant
@@ -467,7 +467,7 @@ export default function AgencyProfilePage() {
 
         {activeTab === 'contact' && (
           <form onSubmit={handleSaveProfile} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Téléphone de l'agence
@@ -528,7 +528,7 @@ export default function AgencyProfilePage() {
         {activeTab === 'stats' && (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold">Statistiques de l'agence</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
