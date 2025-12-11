@@ -17,6 +17,7 @@ const OwnerProfilePage = lazyWithRetry(() => import('@/pages/owner/ProfilePage')
 const ApplicationForm = lazyWithRetry(() => import('@/pages/tenant/ApplicationFormPage'));
 
 export const ownerRoutes: RouteObject[] = [
+  // Routes avec sidebar
   {
     element: (
       <ProtectedRoute allowedRoles={[...OWNER_ROLES]}>

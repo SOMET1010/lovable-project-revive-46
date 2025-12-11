@@ -18,7 +18,6 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import InviteAgencyDialog from '@/features/agency/components/InviteAgencyDialog';
 import { useAgencyMandates } from '@/hooks/useAgencyMandates';
-import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 interface Property {
   id: string;
@@ -83,6 +82,7 @@ export default function OwnerDashboardPage() {
         .order('created_at', { ascending: false });
 
       const props = (propertiesData || []).map((p: any) => ({
+        // eslint-disable-line @typescript-eslint/no-explicit-any
         ...p,
         monthly_rent: p.price ?? p.monthly_rent ?? 0,
       })) as Property[];
@@ -148,16 +148,14 @@ export default function OwnerDashboardPage() {
 
   if (loading) {
     return (
-      <OwnerDashboardLayout title="Tableau de bord propriétaire">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]"></div>
-        </div>
-      </OwnerDashboardLayout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]"></div>
+      </div>
     );
   }
 
   return (
-    <OwnerDashboardLayout title="Tableau de bord propriétaire">
+    <>
       {/* Header */}
       <div className="bg-[#2C1810] dashboard-header-animate">
         <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-6">
@@ -477,6 +475,6 @@ export default function OwnerDashboardPage() {
         agencies={agencies}
         selectedPropertyId={selectedPropertyForInvite}
       />
-    </OwnerDashboardLayout>
+    </>
   );
 }

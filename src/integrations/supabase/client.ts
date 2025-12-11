@@ -74,6 +74,20 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
     detectSessionInUrl: true,
   },
+  global: {
+    headers: {
+      'x-connect-timeout': '30s',
+      'x-read-timeout': '60s',
+    },
+  },
+  db: {
+    schema: 'public',
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
 });
 
 // Handle auth errors more aggressively

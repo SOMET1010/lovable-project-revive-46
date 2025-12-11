@@ -31,7 +31,6 @@ import {
   notifyApplicationRejected,
   notifyVisitScheduled,
 } from '@/services/notifications/applicationNotificationService';
-import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 interface VisitFormData {
   date: string;
@@ -202,16 +201,14 @@ export default function OwnerApplicationsPage() {
 
   if (loading) {
     return (
-      <OwnerDashboardLayout title="Candidatures">
-        <div className="min-h-[60vh] bg-neutral-50 flex items-center justify-center rounded-2xl">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
-        </div>
-      </OwnerDashboardLayout>
+      <div className="min-h-[60vh] bg-neutral-50 flex items-center justify-center rounded-2xl">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+      </div>
     );
   }
 
   return (
-    <OwnerDashboardLayout title="Candidatures">
+    <>
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -569,6 +566,6 @@ export default function OwnerApplicationsPage() {
           </div>
         </div>
       )}
-    </OwnerDashboardLayout>
+    </>
   );
 }

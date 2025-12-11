@@ -26,10 +26,10 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
+import { callEdgeFunction } from '@/api/client';
 import { InputWithIcon } from '@/shared/ui';
 import { PhoneInputWithCountry } from '@/shared/components/PhoneInputWithCountry';
 import OTPInput from '@/shared/components/modern/OTPInput';
-import { callEdgeFunction } from '@/api/client';
 import { getDashboardRoute } from '@/shared/utils/roleRoutes';
 
 type AuthMethod = 'phone' | 'email';
@@ -215,10 +215,19 @@ export default function ModernAuthPage() {
           name: fullName || targetEmail,
           expiresIn: '10 minutes',
         },
+      }, {
+        maxRetries: 3,
+        timeout: 30000, // 30 secondes
       });
 
       if (error) {
         console.error('Error sending OTP email:', error);
+
+        // Message plus convivial pour les timeouts
+        if (error.message?.includes('mis trop de temps') || error.message?.includes('timeout')) {
+          throw new Error('Le service d\'envoi d\'email est temporairement surchargé. Veuillez réessayer dans quelques instants.');
+        }
+
         throw new Error(error.message || 'Envoi du code impossible');
       }
 

@@ -9,7 +9,6 @@ import {
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
 import { toast } from '@/hooks/shared/useSafeToast';
-import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
 import { STORAGE_BUCKETS } from '@/services/upload/uploadService';
 
@@ -216,17 +215,14 @@ export default function OwnerProfilePage() {
 
   if (loading) {
     return (
-      <OwnerDashboardLayout title="Mon Profil">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      </OwnerDashboardLayout>
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
   return (
-    <OwnerDashboardLayout title="Mon Profil">
-      <div className="w-full">
+    <div className="w-full">
         {/* Profile Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           <div className="flex items-center gap-6">
@@ -518,7 +514,6 @@ export default function OwnerProfilePage() {
           )}
         </div>
       </div>
-    </OwnerDashboardLayout>
   );
 }
 

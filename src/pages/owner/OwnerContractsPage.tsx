@@ -24,7 +24,6 @@ import {
   sendSignatureReminder,
 } from '@/services/contracts/contractService';
 import { toast } from '@/hooks/shared/useSafeToast';
-import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 interface Contract {
   id: string;
@@ -269,26 +268,22 @@ export default function OwnerContractsPage() {
 
   if (!user) {
     return (
-      <OwnerDashboardLayout title="Mes contrats">
-        <div className="min-h-[60vh] bg-background flex items-center justify-center rounded-2xl">
-          Veuillez vous connecter
-        </div>
-      </OwnerDashboardLayout>
+      <div className="min-h-[60vh] bg-background flex items-center justify-center rounded-2xl">
+        Veuillez vous connecter
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <OwnerDashboardLayout title="Mes contrats">
-        <div className="min-h-[60vh] bg-background flex items-center justify-center rounded-2xl">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        </div>
-      </OwnerDashboardLayout>
+      <div className="min-h-[60vh] bg-background flex items-center justify-center rounded-2xl">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
   return (
-    <OwnerDashboardLayout title="Mes contrats">
+    <>
       {/* Header */}
       <div className="bg-[#2C1810]">
         <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-6">
@@ -543,6 +538,6 @@ export default function OwnerContractsPage() {
           </div>
         )}
       </div>
-    </OwnerDashboardLayout>
+    </>
   );
 }

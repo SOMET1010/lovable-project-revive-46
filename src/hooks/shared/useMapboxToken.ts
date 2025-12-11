@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { callEdgeFunction } from '@/api/client';
 
 export function useMapboxToken() {
   // Local/public fallback so we are resilient when the edge function is down
@@ -9,7 +10,10 @@ export function useMapboxToken() {
     queryKey: ['mapbox-token'],
     enabled: !envToken, // skip network call if we already have the token locally
     queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+      const { data, error } = await callEdgeFunction('get-mapbox-token', {}, {
+        maxRetries: 2,
+        timeout: 15000,
+      });
 
       if (error) {
         console.error('Failed to fetch Mapbox token:', error);
@@ -20,7 +24,7 @@ export function useMapboxToken() {
         throw new Error('No token returned');
       }
 
-      return data.token as string;
+      return (data as any).token as string;
     },
     staleTime: Infinity, // Token stable, pas besoin de refetch
     gcTime: Infinity, // Garder en cache indéfiniment

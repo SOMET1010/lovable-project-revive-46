@@ -21,7 +21,6 @@ import {
   Plus,
 } from 'lucide-react';
 import '@/styles/form-premium.css';
-import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
 
 interface ContractFormData {
   monthlyRent: string;
@@ -296,26 +295,22 @@ export default function CreateContractPage() {
 
   if (!user) {
     return (
-      <OwnerDashboardLayout title="Créer un contrat">
-        <div className="min-h-[60vh] bg-[#FAF7F4] flex items-center justify-center rounded-2xl">
-          <p className="text-[#A69B95]">Veuillez vous connecter</p>
-        </div>
-      </OwnerDashboardLayout>
+      <div className="min-h-[60vh] bg-[#FAF7F4] flex items-center justify-center rounded-2xl">
+        <p className="text-[#A69B95]">Veuillez vous connecter</p>
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <OwnerDashboardLayout title="Créer un contrat">
-        <div className="min-h-[60vh] bg-[#FAF7F4] flex items-center justify-center rounded-2xl">
-          <Loader className="w-12 h-12 text-[#F16522] animate-spin" />
-        </div>
-      </OwnerDashboardLayout>
+      <div className="min-h-[60vh] bg-[#FAF7F4] flex items-center justify-center rounded-2xl">
+        <Loader className="w-12 h-12 text-[#F16522] animate-spin" />
+      </div>
     );
   }
 
   return (
-    <OwnerDashboardLayout title="Créer un contrat">
+    <>
       <div className="bg-[#FAF7F4] pt-6 pb-12 rounded-2xl">
         <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Premium */}
@@ -671,6 +666,6 @@ export default function CreateContractPage() {
           </FormStepContent>
         </div>
       </div>
-    </OwnerDashboardLayout>
+    </>
   );
 }

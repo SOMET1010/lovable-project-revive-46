@@ -4,24 +4,40 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
+// Helper pour le développement local
+const isLocalDev = () => {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+  const envVal = (name: string) => (Deno.env.get(name) || '').toLowerCase();
+  return (
+    envVal('NODE_ENV') !== 'production' ||
+    supabaseUrl.includes('127.0.0.1') ||
+    supabaseUrl.includes('localhost')
+  );
+};
+
+// Simulation d'envoi d'email pour le développement
+const simulateEmailSend = (to: string | string[], template: string) => {
+  const toList = Array.isArray(to) ? to : [to];
+  const simulatedId = `sim_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+  console.log(`\n===== EMAIL SIMULÉ (MODE DÉVELOPPEMENT) =====`);
+  console.log(`Destinataire(s): ${toList.join(', ')}`);
+  console.log(`Template: ${template}`);
+  console.log(`ID simulé: ${simulatedId}`);
+  console.log(`=============================================\n`);
+
+  return {
+    id: simulatedId,
+    simulated: true,
+  };
+};
+
 interface EmailRequest {
   to: string | string[];
   template: string;
   data: Record<string, any>;
 }
 
-// Dev helper to allow local flows even if email provider is unavailable
-const isLocalDev = () => {
-  const envVal = (name: string) => (Deno.env.get(name) || '').toLowerCase();
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  return (
-    envVal('NODE_ENV') !== 'production' ||
-    envVal('VITE_DEMO_MODE') === 'true' ||
-    envVal('DEMO_MODE') === 'true' ||
-    supabaseUrl.includes('127.0.0.1') ||
-    supabaseUrl.includes('localhost')
-  );
-};
 
 const emailTemplates: Record<string, { subject: string; html: (data: any) => string }> = {
   'email-verification': {
@@ -860,74 +876,222 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Get Resend API key - Pour le développement local, utiliser la clé directement
-    let resendApiKey = Deno.env.get('RESEND_API_KEY') || Deno.env.get('VITE_RESEND_API_KEY');
+    // Check if we're in development mode
+    if (isLocalDev()) {
+      console.log('[send-email] Développement local détecté - Simulation d\'envoi d\'email');
+      const simulatedResult = simulateEmailSend(to, template);
 
-    // Pour le développement local, utiliser la clé directement si non trouvée
-    if (!resendApiKey && isLocalDev()) {
-      resendApiKey = "re_DvxxTkmv_KLgX7D1LSvr4tVZK1EUtRLv9";
+      return new Response(
+        JSON.stringify({
+          success: true,
+          id: simulatedResult.id,
+          template,
+          to,
+          simulated: true,
+          message: 'Email simulé avec succès (mode développement)'
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
-    
+
+    // Production mode - utiliser Resend
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+
     if (!resendApiKey) {
       console.error('[send-email] RESEND_API_KEY not configured');
       return new Response(
-        JSON.stringify({ error: 'Email service not configured - RESEND_API_KEY missing' }),
+        JSON.stringify({
+          error: 'Email service not configured',
+          detail: 'RESEND_API_KEY environment variable is missing'
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
+    // From email doit être un domaine vérifié sur Resend
     const fromEmail =
       Deno.env.get('RESEND_FROM_EMAIL') ||
-      Deno.env.get('VITE_RESEND_FROM_EMAIL') ||
-      (Deno.env.get('RESEND_DOMAIN') || Deno.env.get('VITE_RESEND_DOMAIN')
-        ? `no-reply@${Deno.env.get('RESEND_DOMAIN') || Deno.env.get('VITE_RESEND_DOMAIN')}`
-        : 'no-reply@notifications.ansut.ci');
+      'Mon Toit <no-reply@montoit.ci>';
 
     const toList = Array.isArray(to) ? to : [to];
 
-    let response: Response;
-    try {
-      response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: toList,
-          subject: emailTemplate.subject,
-          html: emailTemplate.html(data),
-        }),
-      });
-    } catch (fetchErr: any) {
-      console.error('[send-email] Network error while calling Resend:', fetchErr?.message || fetchErr);
+    // Valider les destinataires (max 50 selon la doc Resend)
+    if (toList.length > 50) {
       return new Response(
-        JSON.stringify({ error: 'Network error calling Resend', detail: fetchErr?.message || fetchErr }),
-        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Too many recipients. Maximum allowed is 50.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Préparer le corps de la requête selon la documentation Resend
+    const emailBody = {
+      from: fromEmail,
+      to: toList,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html(data),
+      // Ajouter tags pour le tracking
+      tags: [
+        {
+          name: 'template',
+          value: template,
+        },
+        {
+          name: 'service',
+          value: 'mon-toit',
+        },
+      ],
+    };
+
+    let response: Response | null = null;
+    let retryCount = 0;
+    const maxRetries = 3;
+    const baseDelay = 1000; // 1 seconde
+
+    // Gérer les retries avec backoff exponentiel
+    while (retryCount <= maxRetries) {
+      try {
+        // Ajouter un délai si c'est un retry (rate limiting)
+        if (retryCount > 0) {
+          const delay = baseDelay * Math.pow(2, retryCount - 1);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          console.log(`[send-email] Retry attempt ${retryCount}/${maxRetries} after ${delay}ms`);
+        }
+
+        response = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${resendApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(emailBody),
+        });
+
+        // Si succès, sortir de la boucle
+        if (response.ok) {
+          break;
+        }
+
+        // Si erreur 429 (rate limit), attendre avant de réessayer
+        if (response.status === 429) {
+          const rateLimitReset = response.headers.get('X-RateLimit-Reset');
+          const waitTime = rateLimitReset ? parseInt(rateLimitReset) * 1000 : baseDelay * Math.pow(2, retryCount);
+
+          console.warn(`[send-email] Rate limited. Waiting ${waitTime}ms before retry ${retryCount + 1}/${maxRetries}`);
+
+          if (retryCount < maxRetries) {
+            retryCount++;
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            continue;
+          }
+        }
+
+        // Pour les autres erreurs 4xx, ne pas réessayer
+        if (response.status >= 400 && response.status < 500) {
+          console.error(`[send-email] Client error ${response.status}: Not retrying`);
+          break;
+        }
+
+        // Pour les erreurs 5xx, réessayer
+        if (response.status >= 500) {
+          console.warn(`[send-email] Server error ${response.status}: Will retry`);
+          retryCount++;
+          continue;
+        }
+
+        break;
+      } catch (fetchErr: any) {
+        console.error(`[send-email] Network error (attempt ${retryCount + 1}):`, fetchErr?.message || fetchErr);
+
+        if (retryCount < maxRetries) {
+          retryCount++;
+          continue;
+        }
+
+        return new Response(
+          JSON.stringify({
+            error: 'Network error calling Resend',
+            detail: fetchErr?.message || fetchErr,
+            retryCount,
+          }),
+          { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Si aucune réponse n'a été obtenue (tous les retries ont échoué)
+    if (!response) {
+      return new Response(
+        JSON.stringify({
+          error: 'Failed to connect to Resend API',
+          detail: 'Max retries exceeded without successful connection',
+          retryCount,
+        }),
+        { status: 503, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     const resultText = await response.text();
 
     if (!response.ok) {
-      console.error('[send-email] Resend error:', resultText);
+      console.error('[send-email] Resend error:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: resultText,
+        retryCount,
+      });
+
+      // Analyser l'erreur pour un message plus clair
+      let errorMessage = 'Failed to send email';
+      if (response.status === 401) {
+        errorMessage = 'Invalid API key';
+      } else if (response.status === 403) {
+        errorMessage = 'Invalid domain - make sure the sender domain is verified in Resend';
+      } else if (response.status === 422) {
+        errorMessage = 'Invalid email parameters';
+      } else if (response.status === 429) {
+        errorMessage = 'Rate limit exceeded. Please try again later.';
+      }
+
       return new Response(
-        JSON.stringify({ error: 'Failed to send email', detail: resultText }),
+        JSON.stringify({
+          error: errorMessage,
+          detail: resultText,
+          status: response.status,
+          retryCount,
+        }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`[send-email] Email sent successfully to ${to}, template: ${template}`);
+    // Parser la réponse Resend qui doit contenir l'ID de l'email
+    let result;
+    try {
+      result = JSON.parse(resultText);
+    } catch (_parseErr) {
+      console.warn('[send-email] Could not parse Resend response as JSON');
+      result = { raw: resultText };
+    }
+
+    console.log(`[send-email] Email sent successfully to ${to}, template: ${template}, ID: ${result.id || 'unknown'}`);
 
     return new Response(
-      JSON.stringify({ success: true, raw: resultText }),
+      JSON.stringify({
+        success: true,
+        id: result.id,
+        template,
+        to,
+        retryCount,
+      }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error: any) {
-    console.error('[send-email] Error:', error);
+    console.error('[send-email] Unexpected error:', error);
+
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({
+        error: 'Unexpected error occurred',
+        detail: error.message,
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

@@ -142,30 +142,78 @@ export async function deleteFile(bucket: string, path: string): Promise<{ error:
 }
 
 /**
- * Helper to call Edge Functions
+ * Helper to call Edge Functions with retry logic and better error handling
  */
 export async function callEdgeFunction<TResponse = unknown>(
   functionName: string,
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
+  options: {
+    maxRetries?: number;
+    retryDelay?: number;
+    timeout?: number;
+  } = {}
 ): Promise<{ data: TResponse | null; error: Error | null }> {
-  try {
-    const { data, error } = (await supabase.functions.invoke(functionName, {
-      body,
-    })) as { data: TResponse | null; error: Error | null };
+  const { maxRetries = 2, retryDelay = 1000, timeout = 25000 } = options;
+  let lastError: Error | null = null;
 
-    if (error) {
-      console.error('Edge Function error:', error);
-      return { data: null, error };
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      // Create an AbortController for timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      const { data, error } = (await supabase.functions.invoke(functionName, {
+        body,
+        options: {
+          signal: controller.signal,
+        },
+      })) as { data: TResponse | null; error: Error | null };
+
+      clearTimeout(timeoutId);
+
+      // Check for specific error types
+      if (error) {
+        // Don't retry on authentication errors
+        if (error.message?.includes('401') || error.message?.includes('403')) {
+          console.error('Edge Function auth error:', error);
+          return { data: null, error };
+        }
+
+        // Retry on timeout or server errors
+        if (error.message?.includes('504') || error.message?.includes('timeout') || error.message?.includes('502')) {
+          console.warn(`Edge Function timeout (attempt ${attempt + 1}/${maxRetries + 1}):`, error);
+          lastError = error;
+
+          if (attempt < maxRetries) {
+            // Wait before retrying with exponential backoff
+            await new Promise(resolve => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
+            continue;
+          }
+        }
+
+        console.error('Edge Function error:', error);
+        return { data: null, error };
+      }
+
+      return { data, error: null };
+    } catch (error: any) {
+      // Handle AbortError (timeout)
+      if (error.name === 'AbortError') {
+        console.warn(`Edge Function timeout (attempt ${attempt + 1}/${maxRetries + 1})`);
+        lastError = new Error(`La fonction a mis trop de temps à répondre (${timeout}ms)`);
+
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
+          continue;
+        }
+      } else {
+        console.error('Unexpected Edge Function error:', error);
+        lastError = error instanceof Error ? error : new Error('Unknown function error');
+      }
     }
-
-    return { data, error: null };
-  } catch (error) {
-    console.error('Unexpected Edge Function error:', error);
-    return {
-      data: null,
-      error: error instanceof Error ? error : new Error('Unknown function error'),
-    };
   }
+
+  return { data: null, error: lastError };
 }
 
 export { supabase };

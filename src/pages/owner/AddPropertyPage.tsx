@@ -31,8 +31,6 @@ import { useFormValidation } from '@/hooks/shared/useFormValidation';
 import { ValidatedInput } from '@/shared/ui/ValidatedInput';
 import { ValidatedTextarea } from '@/shared/ui/ValidatedTextarea';
 import type { Database } from '@/shared/lib/database.types';
-import OwnerDashboardLayout from '@/features/owner/components/OwnerDashboardLayout';
-import AgencyDashboardLayout from '@/features/agency/components/AgencyDashboardLayout';
 import { AGENCY_ROLES } from '@/shared/constants/roles';
 
 type PropertyType = Database['public']['Tables']['properties']['Row']['property_type'];
@@ -128,7 +126,7 @@ export function AddPropertyContent() {
   // On évite d'emboîter un deuxième layout avec sidebar.
   const isAgencyRoute = location.pathname.startsWith('/agences');
   const shouldUseLayout = !(isAgencyUser && isAgencyRoute);
-  const LayoutComponent = isAgencyUser ? AgencyDashboardLayout : OwnerDashboardLayout;
+  // Le layout est déjà géré par les routes, pas besoin d'encapsuler
 
   // Load draft from localStorage on mount - show confirmation modal
   useEffect(() => {
@@ -535,7 +533,7 @@ export function AddPropertyContent() {
   }
 
   return (
-    <LayoutComponent title="Ajouter une propriété">
+    <>
       {/* Header Sticky Premium Ivorian */}
       <div
         className="bg-white border-b sticky top-0 z-30 shadow-sm"
@@ -1309,6 +1307,6 @@ export function AddPropertyContent() {
           </div>
         </div>
       </Modal>
-    </LayoutComponent>
+    </>
   );
 }
