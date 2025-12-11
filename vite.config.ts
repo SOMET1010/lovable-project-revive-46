@@ -1,4 +1,4 @@
-// Force complete rebuild - 2025-12-07T18:55:00Z
+// Force complete rebuild - 2025-12-11T19:00:00Z - Security Audit Fixes
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -18,6 +18,7 @@ export default defineConfig(({ mode }) => ({
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Permissions-Policy': 'accelerometer=(), camera=(self), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(self), payment=(self), usb=()',
+      'X-Permitted-Cross-Domain-Policies': 'none',
     },
   },
   preview: {
@@ -29,6 +30,7 @@ export default defineConfig(({ mode }) => ({
       'Permissions-Policy': 'accelerometer=(), camera=(self), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(self), payment=(self), usb=()',
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
       'Cross-Origin-Resource-Policy': 'cross-origin',
+      'X-Permitted-Cross-Domain-Policies': 'none',
     },
   },
   resolve: {
@@ -51,6 +53,18 @@ export default defineConfig(({ mode }) => ({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          supabase: ['@supabase/supabase-js'],
+          ui: ['lucide-react', 'sonner', 'class-variance-authority', 'clsx', 'tailwind-merge'],
+          maps: ['mapbox-gl'],
+          charts: ['recharts'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
