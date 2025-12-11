@@ -367,7 +367,7 @@ export function AddPropertyContent() {
           owner_id: user.id,
           title: formData.title,
           description: formData.description,
-          address: formData.address,
+          address: { full_address: formData.address }, // Convert to JSONB format
           city: formData.city,
           neighborhood: formData.neighborhood || null,
           property_type: formData.property_type,
