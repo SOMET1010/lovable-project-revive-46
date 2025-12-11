@@ -102,13 +102,16 @@ export default function MissionsListPage() {
   };
 
   const filteredMissions = missions.filter((mission) => {
+    const missionType = (mission.mission_type || '').toLowerCase();
+    const selectedType = typeFilter ? typeFilter.toLowerCase() : null;
+
     // Status filter
     if (activeTab === 'pending' && !['pending', 'assigned'].includes(mission.status)) return false;
     if (activeTab === 'in_progress' && mission.status !== 'in_progress') return false;
     if (activeTab === 'completed' && mission.status !== 'completed') return false;
 
     // Type filter
-    if (typeFilter && mission.mission_type !== typeFilter) return false;
+    if (selectedType && missionType !== selectedType) return false;
 
     // Search filter
     if (searchQuery) {
@@ -138,7 +141,7 @@ export default function MissionsListPage() {
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Mes Missions" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full px-4 lg:px-8 xl:px-12 py-8">
         {/* Search and Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
@@ -154,19 +157,21 @@ export default function MissionsListPage() {
             <Button
               variant={typeFilter === null ? 'secondary' : 'outline'}
               size="small"
+              className="flex items-center gap-2"
               onClick={() => setTypeFilter(null)}
             >
-              <Filter className="h-4 w-4 mr-1" />
+              <Filter className="h-4 w-4" />
               Tous types
             </Button>
             {Object.entries(missionTypeConfig).map(([key, config]) => (
               <Button
                 key={key}
-                variant={typeFilter === key ? 'secondary' : 'outline'}
+                variant={(typeFilter || '') === key ? 'secondary' : 'outline'}
                 size="small"
+                className="flex items-center gap-2"
                 onClick={() => setTypeFilter(key)}
               >
-                <config.icon className="h-4 w-4 mr-1" />
+                <config.icon className="h-4 w-4" />
                 {config.label}
               </Button>
             ))}
@@ -221,10 +226,9 @@ export default function MissionsListPage() {
             ) : (
               <div className="space-y-4">
                 {filteredMissions.map((mission) => {
-                  const MissionIcon =
-                    missionTypeConfig[mission.mission_type]?.icon || ClipboardList;
-                  const typeLabel =
-                    missionTypeConfig[mission.mission_type]?.label || mission.mission_type;
+                  const typeKey = (mission.mission_type || '').toLowerCase();
+                  const MissionIcon = missionTypeConfig[typeKey]?.icon || ClipboardList;
+                  const typeLabel = missionTypeConfig[typeKey]?.label || mission.mission_type;
                   const statusInfo = statusConfig[mission.status] ?? {
                     label: mission.status,
                     variant: 'secondary' as const,
@@ -235,11 +239,31 @@ export default function MissionsListPage() {
                   };
                   const isUrgent = mission.urgency === 'urgent' || mission.urgency === 'high';
 
+                  const handleMissionClick = (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (!mission.id) {
+                      console.error('Mission ID is missing', mission);
+                      return;
+                    }
+                    console.log(
+                      'Navigating to mission:',
+                      mission.id,
+                      'navigate function:',
+                      typeof navigate
+                    );
+                    try {
+                      navigate(`/trust-agent/mission/${mission.id}`);
+                    } catch (err) {
+                      console.error('Navigation error:', err);
+                    }
+                  };
+
                   return (
                     <Card
                       key={mission.id}
                       className={`cursor-pointer hover:shadow-md transition-shadow ${isUrgent ? 'border-l-4 border-l-destructive' : ''}`}
-                      onClick={() => navigate(`/trust-agent/mission/${mission.id}`)}
+                      onClick={handleMissionClick}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">

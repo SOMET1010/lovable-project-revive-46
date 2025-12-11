@@ -68,6 +68,7 @@ export default function MissionDetailPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    console.log('MissionDetailPage mounted with id:', id);
     if (id) {
       loadMission(id);
     }

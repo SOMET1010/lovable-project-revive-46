@@ -3,7 +3,14 @@
  * Centralizes all role-specific routing logic
  */
 
-export type UserRole = 'locataire' | 'proprietaire' | 'agence' | 'tenant' | 'owner' | 'agent';
+export type UserRole =
+  | 'locataire'
+  | 'proprietaire'
+  | 'agence'
+  | 'tenant'
+  | 'owner'
+  | 'agent'
+  | 'trust_agent';
 
 /**
  * Dashboard routes by role
@@ -16,6 +23,7 @@ export const DASHBOARD_ROUTES: Record<UserRole, string> = {
   owner: '/proprietaire/dashboard', // Alias for proprietaire
   agence: '/agences/dashboard',
   agent: '/agences/dashboard', // Alias for agence
+  trust_agent: '/trust-agent/dashboard',
 };
 
 /**
@@ -75,6 +83,8 @@ export function normalizeRole(role: string): UserRole {
     owner: 'owner',
     agence: 'agence',
     agent: 'agent',
+    'trust-agent': 'trust_agent',
+    trust_agent: 'trust_agent',
   };
 
   return roleMapping[role.toLowerCase()] || 'locataire';
@@ -111,4 +121,6 @@ export const ROLE_ALIASES: Record<string, UserRole> = {
   owner: 'owner',
   agence: 'agence',
   agent: 'agent',
+  trust_agent: 'trust_agent',
+  'trust-agent': 'trust_agent',
 };

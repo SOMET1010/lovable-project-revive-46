@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 // Flag global pour mémoriser l'absence du RPC et éviter de le rappeler
-const userRolesRpcSkipped = { value: true }; // RPC absent en local, ne pas appeler
+const userRolesRpcSkipped = { value: false }; // activer la détection des rôles (trust agent, etc.)
 
 // Type des rôles disponibles (correspondant à l'enum app_role en DB)
 export type AppRole = 'admin' | 'moderator' | 'user' | 'trust_agent';

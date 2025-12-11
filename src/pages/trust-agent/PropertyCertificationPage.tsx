@@ -32,8 +32,8 @@ interface Property {
   neighborhood: string | null;
   property_type: string;
   main_image: string | null;
-  ansut_verified: boolean;
-  ansut_verification_date: string | null;
+  ansut_verified?: boolean;
+  ansut_verification_date?: string | null;
   owner_id: string;
 }
 
@@ -51,6 +51,9 @@ export default function PropertyCertificationPage() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [certifying, setCertifying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [hasAnsutColumns, setHasAnsutColumns] = useState(
+    typeof window !== 'undefined' && localStorage.getItem('has_ansut_columns') === 'true'
+  );
 
   const [checklist, setChecklist] = useState<ChecklistItem[]>([
     { id: 'electricity', label: 'Installation électrique conforme', icon: Zap, checked: false },
@@ -68,10 +71,34 @@ export default function PropertyCertificationPage() {
 
   useEffect(() => {
     loadPropertiesPendingCertification();
-  }, []);
+  }, [hasAnsutColumns]);
 
+  const fetchFallback = async () => {
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('properties')
+      .select('id, title, address, city, neighborhood, property_type, main_image, owner_id')
+      .order('created_at', { ascending: false });
+
+    if (fallbackError) throw fallbackError;
+
+    const withDefaults = (fallbackData || []).map(
+      (p: Omit<Property, 'ansut_verified' | 'ansut_verification_date'>) => ({
+        ...p,
+        ansut_verified: false,
+        ansut_verification_date: null,
+      })
+    ) as Property[];
+
+    setProperties(withDefaults);
+  };
   const loadPropertiesPendingCertification = async () => {
     try {
+      // Si on sait déjà que les colonnes ANSUT sont absentes, on passe directement en fallback
+      if (!hasAnsutColumns) {
+        await fetchFallback();
+        return;
+      }
+
       const { data, error } = await supabase
         .from('properties')
         .select(
@@ -80,7 +107,27 @@ export default function PropertyCertificationPage() {
         .eq('ansut_verified', false)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // Column missing on some environments: fallback without ansut fields/filter
+        const errorCode = (error as { code?: string }).code;
+        if (errorCode === '42703' || errorCode === 'PGRST204' || errorCode === '22P02') {
+          setHasAnsutColumns(false);
+          if (typeof window !== 'undefined') localStorage.setItem('has_ansut_columns', 'false');
+          await fetchFallback();
+          return;
+        }
+        // If it's a 400 Bad Request, try without the filter
+        if (errorCode === 'PGRST100' || errorCode === '400') {
+          console.warn('Bad request, retrying without ansut_verified filter');
+          await fetchFallback();
+          setHasAnsutColumns(false);
+          if (typeof window !== 'undefined') localStorage.setItem('has_ansut_columns', 'false');
+          return;
+        }
+        throw error;
+      }
+      setHasAnsutColumns(true);
+      if (typeof window !== 'undefined') localStorage.setItem('has_ansut_columns', 'true');
       setProperties((data || []) as Property[]);
     } catch (error) {
       console.error('Error loading properties:', error);
@@ -89,7 +136,6 @@ export default function PropertyCertificationPage() {
       setLoading(false);
     }
   };
-
   const filteredProperties = properties.filter((property) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -111,32 +157,57 @@ export default function PropertyCertificationPage() {
 
   const handleCertify = async () => {
     if (!selectedProperty || !user || !allChecksPassed) return;
+    if (!hasAnsutColumns) {
+      toast.error(
+        'Le schéma de la base ne contient pas les colonnes ANSUT. Ajoutez-les avant de certifier (ansut_verified, ansut_verification_date, ansut_certificate_url).'
+      );
+      return;
+    }
 
     setCertifying(true);
     try {
       // Update property with ANSUT certification
+      const updatePayload: Record<string, unknown> = {
+        ansut_verified: true,
+        ansut_verification_date: new Date().toISOString(),
+        ansut_certificate_url: certificationData.ansutCertificateUrl || null,
+      };
+
       const { error: updateError } = await supabase
         .from('properties')
-        .update({
-          ansut_verified: true,
-          ansut_verification_date: new Date().toISOString(),
-          ansut_certificate_url: certificationData.ansutCertificateUrl || null,
-        })
+        .update(updatePayload)
         .eq('id', selectedProperty.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        const code = (updateError as { code?: string }).code;
+        if (code === '42703' || code === 'PGRST204') {
+          toast.error(
+            'Le schéma de la base ne contient pas les colonnes ANSUT (ansut_verified / ansut_certificate_url...).'
+          );
+          return;
+        }
+        throw updateError;
+      }
 
-      // Log the certification action
-      await supabase.rpc('log_admin_action', {
-        p_action: 'PROPERTY_CERTIFIED_ANSUT',
-        p_entity_type: 'properties',
-        p_entity_id: selectedProperty.id,
-        p_details: {
-          certified_by: user.email,
-          checklist_passed: checklist.map((c) => ({ id: c.id, label: c.label, passed: c.checked })),
-          notes: certificationData.notes,
-        },
-      });
+      // Log the certification action (best-effort)
+      try {
+        await supabase.rpc('log_admin_action', {
+          p_action: 'PROPERTY_CERTIFIED_ANSUT',
+          p_entity_type: 'properties',
+          p_entity_id: selectedProperty.id,
+          p_details: {
+            certified_by: user.email,
+            checklist_passed: checklist.map((c) => ({
+              id: c.id,
+              label: c.label,
+              passed: c.checked,
+            })),
+            notes: certificationData.notes,
+          },
+        });
+      } catch (logError) {
+        console.warn('Certification logged locally only (log_admin_action unavailable):', logError);
+      }
 
       toast.success('Propriété certifiée ANSUT avec succès');
 
