@@ -311,7 +311,7 @@ export default function ApplicationForm() {
               <strong>Vérification d'identité OBLIGATOIRE</strong>
             </div>
             <p>Vous devez compléter la vérification de votre identité avant de postuler.</p>
-            <Link to="/profil" className="form-button-primary mt-2">
+            <Link to="/locataire/profil" className="form-button-primary mt-2">
               Compléter ma vérification →
             </Link>
           </div>
