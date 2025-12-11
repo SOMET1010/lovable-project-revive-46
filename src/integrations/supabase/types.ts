@@ -808,6 +808,84 @@ export type Database = {
         }
         Relationships: []
       }
+      interventions: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          final_amount: number | null
+          id: string
+          maintenance_request_id: string | null
+          notes: string | null
+          owner_id: string
+          owner_rating: number | null
+          owner_review: string | null
+          photos_after: Json | null
+          photos_before: Json | null
+          provider_id: string | null
+          quoted_amount: number | null
+          rating_criteria: Json | null
+          scheduled_date: string | null
+          started_at: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          final_amount?: number | null
+          id?: string
+          maintenance_request_id?: string | null
+          notes?: string | null
+          owner_id: string
+          owner_rating?: number | null
+          owner_review?: string | null
+          photos_after?: Json | null
+          photos_before?: Json | null
+          provider_id?: string | null
+          quoted_amount?: number | null
+          rating_criteria?: Json | null
+          scheduled_date?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          final_amount?: number | null
+          id?: string
+          maintenance_request_id?: string | null
+          notes?: string | null
+          owner_id?: string
+          owner_rating?: number | null
+          owner_review?: string | null
+          photos_after?: Json | null
+          photos_before?: Json | null
+          provider_id?: string | null
+          quoted_amount?: number | null
+          rating_criteria?: Json | null
+          scheduled_date?: string | null
+          started_at?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interventions_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interventions_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lease_contracts: {
         Row: {
           ansut_certified_at: string | null
@@ -1788,6 +1866,60 @@ export type Database = {
           },
         ]
       }
+      provider_quotes: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string | null
+          estimated_duration: string | null
+          expires_at: string | null
+          id: string
+          maintenance_request_id: string | null
+          provider_id: string | null
+          status: string | null
+          validity_days: number | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description?: string | null
+          estimated_duration?: string | null
+          expires_at?: string | null
+          id?: string
+          maintenance_request_id?: string | null
+          provider_id?: string | null
+          status?: string | null
+          validity_days?: number | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string | null
+          estimated_duration?: string | null
+          expires_at?: string | null
+          id?: string
+          maintenance_request_id?: string | null
+          provider_id?: string | null
+          status?: string | null
+          validity_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_quotes_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_quotes_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "service_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rental_applications: {
         Row: {
           applicant_id: string
@@ -2024,6 +2156,92 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      service_providers: {
+        Row: {
+          address: string | null
+          bio: string | null
+          city: string | null
+          company_name: string
+          completed_jobs: number | null
+          created_at: string | null
+          documents: Json | null
+          email: string | null
+          hourly_rate: number | null
+          id: string
+          insurance_expiry: string | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          logo_url: string | null
+          phone: string | null
+          rating_avg: number | null
+          rating_count: number | null
+          response_time_avg: number | null
+          service_areas: string[]
+          siret: string | null
+          specialties: string[]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          bio?: string | null
+          city?: string | null
+          company_name: string
+          completed_jobs?: number | null
+          created_at?: string | null
+          documents?: Json | null
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          insurance_expiry?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          phone?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          response_time_avg?: number | null
+          service_areas?: string[]
+          siret?: string | null
+          specialties?: string[]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          bio?: string | null
+          city?: string | null
+          company_name?: string
+          completed_jobs?: number | null
+          created_at?: string | null
+          documents?: Json | null
+          email?: string | null
+          hourly_rate?: number | null
+          id?: string
+          insurance_expiry?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          logo_url?: string | null
+          phone?: string | null
+          rating_avg?: number | null
+          rating_count?: number | null
+          response_time_avg?: number | null
+          service_areas?: string[]
+          siret?: string | null
+          specialties?: string[]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_providers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       service_usage_logs: {
         Row: {
@@ -2874,6 +3092,7 @@ export type Database = {
       }
       cleanup_expired_verification_codes: { Args: never; Returns: number }
       cleanup_old_webhook_logs: { Args: never; Returns: number }
+      expire_old_quotes: { Args: never; Returns: number }
       generate_otp: { Args: never; Returns: string }
       generate_receipt_number: { Args: never; Returns: string }
       generate_reset_token: { Args: never; Returns: string }

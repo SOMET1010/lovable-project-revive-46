@@ -72,7 +72,6 @@ verify_jwt = false
 [functions.intouch-webhook-handler]
 verify_jwt = false
 
-# Sprint 3: Payments & Contracts
 [functions.generate-payment-receipt]
 verify_jwt = false
 
@@ -86,4 +85,13 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.ansut-certify-contract]
+verify_jwt = false
+
+[functions.match-provider]
+verify_jwt = false
+
+[functions.provider-notification]
+verify_jwt = false
+
+[functions.complete-intervention]
 verify_jwt = false
