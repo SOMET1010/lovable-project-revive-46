@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/features/auth/components/AuthProvider';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Card, CardContent } from '@/shared/ui/card';
+import { Badge } from '@/shared/ui/badge';
 import { toast } from 'sonner';
 import { 
   Coins, Search, Download, TrendingUp, Clock,
-  CheckCircle, Filter, Calendar, Users
+  CheckCircle, Filter, Users
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/components/ui/select';
+} from '@/shared/ui/select';
 
 interface Transaction {
   id: string;
@@ -29,19 +29,19 @@ interface Transaction {
   description: string | null;
   gross_amount: number;
   agency_share: number;
-  agent_share: number;
-  status: string;
+  agent_share: number | null;
+  status: string | null;
   validated_at: string | null;
   paid_at: string | null;
-  transaction_date: string;
+  transaction_date: string | null;
   agent?: {
     profiles?: {
       full_name: string | null;
-    };
-  };
+    } | null;
+  } | null;
   properties?: {
     title: string;
-  };
+  } | null;
 }
 
 export default function CommissionsPage() {
@@ -81,7 +81,7 @@ export default function CommissionsPage() {
     }
   };
 
-  const loadTransactions = async (agencyId: string) => {
+  const loadTransactions = async (agencyIdParam: string) => {
     try {
       const { data, error } = await supabase
         .from('agency_transactions')
@@ -90,7 +90,7 @@ export default function CommissionsPage() {
           agent:agent_id(profiles:user_id(full_name)),
           properties:property_id(title)
         `)
-        .eq('agency_id', agencyId)
+        .eq('agency_id', agencyIdParam)
         .order('transaction_date', { ascending: false });
 
       if (error) throw error;
@@ -162,13 +162,13 @@ export default function CommissionsPage() {
     const csv = [
       ['Date', 'Type', 'Description', 'Montant brut', 'Part agence', 'Part agent', 'Statut'].join(','),
       ...transactions.map(tx => [
-        tx.transaction_date,
+        tx.transaction_date || '',
         tx.transaction_type,
         `"${tx.description || ''}"`,
         tx.gross_amount,
         tx.agency_share,
-        tx.agent_share,
-        tx.status,
+        tx.agent_share ?? 0,
+        tx.status || '',
       ].join(','))
     ].join('\n');
 
@@ -188,7 +188,7 @@ export default function CommissionsPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
     const styles: Record<string, string> = {
       pending: 'bg-yellow-100 text-yellow-800',
       validated: 'bg-blue-100 text-blue-800',
@@ -201,7 +201,8 @@ export default function CommissionsPage() {
       paid: 'Payée',
       cancelled: 'Annulée',
     };
-    return <Badge className={styles[status] || styles.pending}>{labels[status] || status}</Badge>;
+    const s = status || 'pending';
+    return <Badge className={styles[s] || styles['pending']}>{labels[s] || s}</Badge>;
   };
 
   if (loading) {
@@ -304,7 +305,7 @@ export default function CommissionsPage() {
             <Input
               placeholder="Rechercher..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="pl-10 border-[#EFEBE9]"
             />
           </div>
@@ -349,7 +350,7 @@ export default function CommissionsPage() {
                     {filteredTransactions.map((tx) => (
                       <tr key={tx.id} className="border-t border-[#EFEBE9] hover:bg-[#FAF7F4]/50">
                         <td className="p-4 text-sm">
-                          {format(new Date(tx.transaction_date), 'dd MMM yyyy', { locale: fr })}
+                          {tx.transaction_date ? format(new Date(tx.transaction_date), 'dd MMM yyyy', { locale: fr }) : '-'}
                         </td>
                         <td className="p-4">
                           <p className="font-medium text-[#2C1810]">{tx.description || tx.transaction_type}</p>
@@ -367,7 +368,7 @@ export default function CommissionsPage() {
                           {tx.agency_share.toLocaleString()} F
                         </td>
                         <td className="p-4 text-right text-blue-600 font-medium">
-                          {tx.agent_share.toLocaleString()} F
+                          {(tx.agent_share ?? 0).toLocaleString()} F
                         </td>
                         <td className="p-4 text-center">
                           {getStatusBadge(tx.status)}

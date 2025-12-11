@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Badge } from '@/shared/ui/badge';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, User, Phone, Mail, Calendar, Target,
@@ -12,15 +12,16 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import type { Json } from '@/integrations/supabase/types';
 
 interface AgentDetail {
   id: string;
   user_id: string | null;
-  role: string;
-  status: string;
+  role: string | null;
+  status: string | null;
   hire_date: string;
-  commission_split: number;
-  target_monthly: number;
+  commission_split: number | null;
+  target_monthly: number | null;
   phone: string | null;
   email: string | null;
   specialties: string[];
@@ -29,28 +30,35 @@ interface AgentDetail {
   profiles?: {
     full_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
 }
 
 interface Transaction {
   id: string;
   transaction_type: string;
-  description: string;
+  description: string | null;
   gross_amount: number;
-  agent_share: number;
-  status: string;
-  transaction_date: string;
+  agent_share: number | null;
+  status: string | null;
+  transaction_date: string | null;
 }
 
 interface Assignment {
   id: string;
-  status: string;
+  status: string | null;
   properties: {
     id: string;
     title: string;
-    city: string;
+    city: string | null;
     monthly_rent: number;
-  };
+  } | null;
+}
+
+function parseJsonArray(data: Json | null): string[] {
+  if (Array.isArray(data)) {
+    return data.filter((item): item is string => typeof item === 'string');
+  }
+  return [];
 }
 
 export default function AgentDetailPage() {
@@ -89,14 +97,14 @@ export default function AgentDetailPage() {
 
       setAgent({
         ...agentData,
-        specialties: Array.isArray(agentData.specialties) ? agentData.specialties : [],
-        certifications: Array.isArray(agentData.certifications) ? agentData.certifications : [],
+        specialties: parseJsonArray(agentData.specialties),
+        certifications: parseJsonArray(agentData.certifications),
       });
 
       // Load transactions
       const { data: txData } = await supabase
         .from('agency_transactions')
-        .select('*')
+        .select('id, transaction_type, description, gross_amount, agent_share, status, transaction_date')
         .eq('agent_id', agentId)
         .order('transaction_date', { ascending: false })
         .limit(20);
@@ -262,7 +270,7 @@ export default function AgentDetailPage() {
                   <TrendingUp className="w-5 h-5 text-[#F16522]" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#2C1810]">{agent.commission_split}%</p>
+                  <p className="text-lg font-bold text-[#2C1810]">{agent.commission_split ?? 0}%</p>
                   <p className="text-xs text-[#2C1810]/60">Commission</p>
                 </div>
               </div>
@@ -288,11 +296,11 @@ export default function AgentDetailPage() {
                     {assignments.map((assignment) => (
                       <div key={assignment.id} className="flex items-center justify-between p-3 bg-[#FAF7F4] rounded-lg">
                         <div>
-                          <p className="font-medium text-[#2C1810]">{assignment.properties.title}</p>
-                          <p className="text-sm text-[#2C1810]/60">{assignment.properties.city}</p>
+                          <p className="font-medium text-[#2C1810]">{assignment.properties?.title}</p>
+                          <p className="text-sm text-[#2C1810]/60">{assignment.properties?.city}</p>
                         </div>
                         <p className="font-semibold text-[#F16522]">
-                          {assignment.properties.monthly_rent.toLocaleString()} FCFA
+                          {assignment.properties?.monthly_rent.toLocaleString()} FCFA
                         </p>
                       </div>
                     ))}
@@ -319,11 +327,11 @@ export default function AgentDetailPage() {
                         <div>
                           <p className="font-medium text-[#2C1810]">{tx.description || tx.transaction_type}</p>
                           <p className="text-sm text-[#2C1810]/60">
-                            {format(new Date(tx.transaction_date), 'dd MMM yyyy', { locale: fr })}
+                            {tx.transaction_date ? format(new Date(tx.transaction_date), 'dd MMM yyyy', { locale: fr }) : '-'}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-green-600">+{tx.agent_share.toLocaleString()} FCFA</p>
+                          <p className="font-semibold text-green-600">+{(tx.agent_share ?? 0).toLocaleString()} FCFA</p>
                           <Badge variant="outline" className={tx.status === 'paid' ? 'text-green-600' : 'text-yellow-600'}>
                             {tx.status === 'paid' ? 'Payé' : 'En attente'}
                           </Badge>
@@ -346,11 +354,11 @@ export default function AgentDetailPage() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-[#2C1810]/60">Objectif mensuel</p>
-                  <p className="font-semibold text-[#2C1810]">{agent.target_monthly.toLocaleString()} FCFA</p>
+                  <p className="font-semibold text-[#2C1810]">{(agent.target_monthly ?? 0).toLocaleString()} FCFA</p>
                 </div>
                 <div>
                   <p className="text-sm text-[#2C1810]/60">Part commission</p>
-                  <p className="font-semibold text-[#2C1810]">{agent.commission_split}%</p>
+                  <p className="font-semibold text-[#2C1810]">{agent.commission_split ?? 0}%</p>
                 </div>
                 {agent.bio && (
                   <div>
