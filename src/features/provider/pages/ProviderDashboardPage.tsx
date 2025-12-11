@@ -179,9 +179,9 @@ const ProviderDashboardPage: React.FC = () => {
           <p className="text-muted-foreground mb-6">
             Vous n'avez pas encore de profil prestataire. Inscrivez-vous pour commencer.
           </p>
-          <Button asChild>
-            <Link to="/devenir-prestataire">Devenir prestataire</Link>
-          </Button>
+          <Link to="/devenir-prestataire">
+            <Button>Devenir prestataire</Button>
+          </Link>
         </div>
       </div>
     );

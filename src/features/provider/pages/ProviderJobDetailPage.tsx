@@ -64,6 +64,7 @@ const ProviderJobDetailPage: React.FC = () => {
   const loadData = async () => {
     if (!id || !user?.id) return;
     setIsLoading(true);
+    try {
       // Load provider profile
       const { data: providerData, error: providerError } = await supabase
         .from('service_providers')
