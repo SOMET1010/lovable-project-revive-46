@@ -97,3 +97,9 @@ export { ValidatedTextarea } from './ValidatedTextarea';
 // Form Stepper
 export { FormStepper, FormStepContent, useFormStepper } from './FormStepper';
 export type { FormStepperProps, FormStepContentProps } from './FormStepper';
+
+// Feature-gated components
+export { FeatureGate } from './FeatureGate';
+export { default as MapboxMapGated } from './MapboxMapGated';
+export { default as ElectronicSignatureGated } from './ElectronicSignatureGated';
+export { default as MobileMoneyGated } from './MobileMoneyGated';
