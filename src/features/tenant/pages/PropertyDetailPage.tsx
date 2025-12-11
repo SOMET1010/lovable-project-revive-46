@@ -5,7 +5,7 @@ import {
   ArrowLeft, ChevronLeft, ChevronRight, CheckCircle, Car, 
   Zap, Building, Home, FileText
 } from 'lucide-react';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import MapWrapper from '@/shared/ui/MapWrapper';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { getCreateContractRoute } from '@/shared/config/routes.config';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Users, Search, Filter, Shield, Eye, Edit, Trash2,
   UserCheck, RefreshCw, Download, Upload,

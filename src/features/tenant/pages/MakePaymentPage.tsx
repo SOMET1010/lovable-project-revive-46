@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import Header from '@/app/layout/Header';
 import Footer from '@/app/layout/Footer';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';

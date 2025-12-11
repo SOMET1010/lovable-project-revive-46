@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Home, Coins, MessageSquare, Clock, Heart, Search, CheckCircle, FileText, Wrench, Award } from 'lucide-react';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import TenantDashboardLayout from '../components/TenantDashboardLayout';

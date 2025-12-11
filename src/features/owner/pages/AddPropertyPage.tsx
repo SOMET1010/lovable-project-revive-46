@@ -6,7 +6,7 @@ import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
 import MapboxMapGated from '@/shared/ui/MapboxMapGated';
 import PlacesAutocomplete, { PlaceResult } from '@/shared/ui/PlacesAutocomplete';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { RESIDENTIAL_PROPERTY_TYPES, COMMERCIAL_PROPERTY_TYPES, CITIES, ABIDJAN_COMMUNES, STORAGE_KEYS } from '@/shared/lib/constants/app.constants';
 import { ValidationService } from '@/services/validation';

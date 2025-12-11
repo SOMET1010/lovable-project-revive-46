@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Award, ChevronRight } from 'lucide-react';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService } from '@/services/scoringService';
 import { notifyApplicationReceived } from '@/services/notifications/applicationNotificationService';
