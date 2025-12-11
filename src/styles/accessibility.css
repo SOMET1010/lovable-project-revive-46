@@ -1,0 +1,186 @@
+/* 
+ * MON TOIT - Accessibilité WCAG 2.1 AA
+ * Focus visible, contraste, navigation clavier
+ */
+
+/* ===== FOCUS VISIBLE UNIVERSAL ===== */
+
+/* Style de focus visible pour tous les éléments interactifs */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[role="menuitem"]:focus-visible,
+[role="tab"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 4px hsla(var(--ring) / 0.2);
+  transition: outline 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Désactiver outline sur clic souris uniquement */
+*:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Focus spécial pour les cartes et éléments plus grands */
+.card:focus-visible,
+[role="article"]:focus-visible,
+[role="listitem"]:focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 4px;
+  border-radius: var(--border-radius-lg);
+}
+
+/* ===== SKIP LINKS (Navigation clavier avancée) ===== */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 9999;
+  padding: 12px 24px;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 16px;
+}
+
+.skip-link:focus-visible {
+  outline: 3px solid hsl(var(--background));
+  outline-offset: 2px;
+}
+
+/* ===== CONTRASTE AMÉLIORÉ ===== */
+
+/* Couleur primaire accessible pour le texte (ratio 4.5:1 minimum) */
+:root {
+  /* Orange plus foncé pour texte sur fond blanc - ratio 4.58:1 */
+  --color-primary-text: #C04010;
+  
+  /* Variante pour liens (légèrement plus foncé pour distinction) */
+  --color-link-text: #B03808;
+  --color-link-hover: #8C2D06;
+}
+
+/* Classes utilitaires pour texte accessible */
+.text-primary-accessible {
+  color: var(--color-primary-text);
+}
+
+.link-primary-accessible {
+  color: var(--color-link-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.link-primary-accessible:hover {
+  color: var(--color-link-hover);
+}
+
+/* ===== ÉTATS DE FOCUS PERSONNALISÉS ===== */
+
+/* Input fields avec focus amélioré */
+.input-focus-enhanced:focus-visible {
+  border-color: hsl(var(--ring));
+  box-shadow: 
+    0 0 0 3px hsla(var(--ring) / 0.15),
+    var(--shadow-sm);
+}
+
+/* Boutons avec focus amélioré */
+.btn-focus-enhanced:focus-visible {
+  outline: 3px solid hsl(var(--primary-foreground));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px hsla(var(--ring) / 0.3);
+}
+
+/* ===== INDICATEURS VISUELS POUR SCREEN READERS ===== */
+
+/* Classe pour contenu visible uniquement pour screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Rendre visible au focus (pour skip links) */
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* ===== HIGH CONTRAST MODE ===== */
+
+@media (prefers-contrast: high) {
+  :root {
+    --border: 0 0% 20%;
+    --ring: 18 100% 40%;
+  }
+  
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline-width: 4px;
+    outline-color: #000000;
+  }
+  
+  .btn-primary {
+    border: 2px solid #000000;
+  }
+}
+
+/* ===== REDUCED MOTION ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .skip-link {
+    transition: none;
+  }
+}
+
+/* ===== SELECTION STYLING ===== */
+
+::selection {
+  background-color: hsla(var(--primary) / 0.2);
+  color: var(--color-text-primary);
+}
+
+::-moz-selection {
+  background-color: hsla(var(--primary) / 0.2);
+  color: var(--color-text-primary);
+}

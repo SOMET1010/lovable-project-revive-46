@@ -52,6 +52,15 @@ export default function Layout() {
 
   return (
     <ErrorBoundary>
+      {/* Skip Link pour navigation clavier (accessibilité WCAG 2.1) */}
+      <a 
+        href="#main-content" 
+        className="skip-link"
+        aria-label="Aller au contenu principal"
+      >
+        Aller au contenu principal
+      </a>
+      
       {shouldShowHeaderFooter && <HeaderPremium />}
       {shouldShowHeaderFooter && <Breadcrumb />}
       <ToastContainer />
@@ -60,7 +69,12 @@ export default function Layout() {
       <ChunkLoadErrorBoundary>
         <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>
           {/* Add padding-bottom on mobile for bottom navigation */}
-          <main className={shouldShowHeaderFooter ? 'min-h-screen pb-20 md:pb-0' : ''}>
+          <main 
+            id="main-content" 
+            role="main"
+            tabIndex={-1}
+            className={shouldShowHeaderFooter ? 'min-h-screen pb-20 md:pb-0 focus:outline-none' : 'focus:outline-none'}
+          >
             <PageTransition key={location.pathname}>
               <Outlet />
             </PageTransition>
