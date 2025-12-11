@@ -71,3 +71,19 @@ verify_jwt = false
 
 [functions.intouch-webhook-handler]
 verify_jwt = false
+
+# Sprint 3: Payments & Contracts
+[functions.generate-payment-receipt]
+verify_jwt = false
+
+[functions.send-payment-reminders]
+verify_jwt = false
+
+[functions.apply-late-fees]
+verify_jwt = false
+
+[functions.process-recurring-payments]
+verify_jwt = false
+
+[functions.ansut-certify-contract]
+verify_jwt = false

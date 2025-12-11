@@ -1219,6 +1219,128 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_reminders: {
+        Row: {
+          channel: string
+          contract_id: string | null
+          created_at: string | null
+          delivered_at: string | null
+          id: string
+          message_content: string | null
+          opened_at: string | null
+          payment_id: string | null
+          reminder_type: string
+          sent_at: string | null
+          tenant_id: string
+        }
+        Insert: {
+          channel: string
+          contract_id?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          id?: string
+          message_content?: string | null
+          opened_at?: string | null
+          payment_id?: string | null
+          reminder_type: string
+          sent_at?: string | null
+          tenant_id: string
+        }
+        Update: {
+          channel?: string
+          contract_id?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          id?: string
+          message_content?: string | null
+          opened_at?: string | null
+          payment_id?: string | null
+          reminder_type?: string
+          sent_at?: string | null
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_reminders_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_reminders_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_schedules: {
+        Row: {
+          amount: number
+          authorization_date: string | null
+          contract_id: string | null
+          created_at: string | null
+          failure_count: number | null
+          id: string
+          is_active: boolean | null
+          last_payment_date: string | null
+          max_failures: number | null
+          mobile_money_number: string | null
+          mobile_money_provider: string | null
+          next_payment_date: string | null
+          payment_day: number
+          payment_method: string
+          tenant_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          authorization_date?: string | null
+          contract_id?: string | null
+          created_at?: string | null
+          failure_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_payment_date?: string | null
+          max_failures?: number | null
+          mobile_money_number?: string | null
+          mobile_money_provider?: string | null
+          next_payment_date?: string | null
+          payment_day: number
+          payment_method?: string
+          tenant_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          authorization_date?: string | null
+          contract_id?: string | null
+          created_at?: string | null
+          failure_count?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_payment_date?: string | null
+          max_failures?: number | null
+          mobile_money_number?: string | null
+          mobile_money_provider?: string | null
+          next_payment_date?: string | null
+          payment_day?: number
+          payment_method?: string
+          tenant_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_schedules_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -1226,12 +1348,18 @@ export type Database = {
           created_at: string | null
           due_date: string | null
           id: string
+          late_fee_amount: number | null
+          late_fee_applied_at: string | null
+          overdue_notice_sent_at: string | null
           paid_date: string | null
           payer_id: string
           payment_method: string | null
           payment_type: string
           property_id: string | null
+          receipt_number: string | null
+          receipt_url: string | null
           receiver_id: string | null
+          reminder_sent_at: string | null
           status: string | null
           transaction_ref: string | null
         }
@@ -1241,12 +1369,18 @@ export type Database = {
           created_at?: string | null
           due_date?: string | null
           id?: string
+          late_fee_amount?: number | null
+          late_fee_applied_at?: string | null
+          overdue_notice_sent_at?: string | null
           paid_date?: string | null
           payer_id: string
           payment_method?: string | null
           payment_type: string
           property_id?: string | null
+          receipt_number?: string | null
+          receipt_url?: string | null
           receiver_id?: string | null
+          reminder_sent_at?: string | null
           status?: string | null
           transaction_ref?: string | null
         }
@@ -1256,12 +1390,18 @@ export type Database = {
           created_at?: string | null
           due_date?: string | null
           id?: string
+          late_fee_amount?: number | null
+          late_fee_applied_at?: string | null
+          overdue_notice_sent_at?: string | null
           paid_date?: string | null
           payer_id?: string
           payment_method?: string | null
           payment_type?: string
           property_id?: string | null
+          receipt_number?: string | null
+          receipt_url?: string | null
           receiver_id?: string | null
+          reminder_sent_at?: string | null
           status?: string | null
           transaction_ref?: string | null
         }
@@ -2735,6 +2875,7 @@ export type Database = {
       cleanup_expired_verification_codes: { Args: never; Returns: number }
       cleanup_old_webhook_logs: { Args: never; Returns: number }
       generate_otp: { Args: never; Returns: string }
+      generate_receipt_number: { Args: never; Returns: string }
       generate_reset_token: { Args: never; Returns: string }
       get_platform_stats: { Args: never; Returns: Json }
       get_public_profile: {
