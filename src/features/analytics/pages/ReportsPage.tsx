@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
+import Button from '@/shared/ui/Button';
 import { 
   FileText, Download, Calendar, TrendingUp, Building, 
   Coins, Loader2

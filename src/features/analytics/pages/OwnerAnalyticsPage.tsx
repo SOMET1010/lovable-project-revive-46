@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
+import Button from '@/shared/ui/Button';
 import { 
   TrendingUp, TrendingDown, Home, Users, Coins, Clock, 
   AlertTriangle, FileText, Calendar, Download, RefreshCw
@@ -145,9 +145,9 @@ export default function OwnerAnalyticsPage() {
             </div>
             <Button 
               variant="outline" 
-              size="icon"
+              size="small"
               onClick={() => refetch()}
-              className="rounded-xl"
+              className="rounded-xl p-2"
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
@@ -219,7 +219,7 @@ export default function OwnerAnalyticsPage() {
                       {analytics.expiring_leases_30d} bail(s) expire(nt) dans les 30 prochains jours
                     </span>
                   </div>
-                  <Button variant="outline" size="sm" className="rounded-lg">
+                  <Button variant="outline" size="small" className="rounded-lg">
                     Voir
                   </Button>
                 </div>
@@ -232,7 +232,7 @@ export default function OwnerAnalyticsPage() {
                       {analytics.pending_maintenance} demande(s) de maintenance en attente
                     </span>
                   </div>
-                  <Button variant="outline" size="sm" className="rounded-lg">
+                  <Button variant="outline" size="small" className="rounded-lg">
                     Traiter
                   </Button>
                 </div>
@@ -245,7 +245,7 @@ export default function OwnerAnalyticsPage() {
                       {analytics.late_payments_count} paiement(s) en retard
                     </span>
                   </div>
-                  <Button variant="outline" size="sm" className="rounded-lg">
+                  <Button variant="outline" size="small" className="rounded-lg">
                     Relancer
                   </Button>
                 </div>
