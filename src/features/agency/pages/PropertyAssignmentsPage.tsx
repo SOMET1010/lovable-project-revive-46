@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/features/auth/components/AuthProvider';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Card, CardContent } from '@/shared/ui/card';
 import { toast } from 'sonner';
 import { 
   Building2, Search, Plus, UserPlus, X, Home, 
@@ -16,31 +15,31 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/shared/components/ui/dialog';
+} from '@/shared/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/components/ui/select';
+} from '@/shared/ui/select';
 
 interface Assignment {
   id: string;
   property_id: string;
   agent_id: string;
-  assignment_type: string;
-  status: string;
-  start_date: string;
+  assignment_type: string | null;
+  status: string | null;
+  start_date: string | null;
   commission_override: number | null;
   properties: {
     id: string;
     title: string;
-    city: string;
+    city: string | null;
     neighborhood: string | null;
     monthly_rent: number;
     main_image: string | null;
-  };
+  } | null;
   agent: {
     id: string;
     email: string | null;
@@ -48,7 +47,7 @@ interface Assignment {
       full_name: string | null;
       avatar_url: string | null;
     } | null;
-  };
+  } | null;
 }
 
 interface Agent {
@@ -62,7 +61,7 @@ interface Agent {
 interface Property {
   id: string;
   title: string;
-  city: string;
+  city: string | null;
   monthly_rent: number;
 }
 
@@ -102,7 +101,7 @@ export default function PropertyAssignmentsPage() {
     setLoading(false);
   };
 
-  const loadAssignments = async (agencyId: string) => {
+  const loadAssignments = async (agencyIdParam: string) => {
     const { data, error } = await supabase
       .from('property_assignments')
       .select(`
@@ -110,7 +109,7 @@ export default function PropertyAssignmentsPage() {
         properties:property_id(id, title, city, neighborhood, monthly_rent, main_image),
         agent:agent_id(id, email, profiles:user_id(full_name, avatar_url))
       `)
-      .eq('agency_id', agencyId)
+      .eq('agency_id', agencyIdParam)
       .eq('status', 'active')
       .order('created_at', { ascending: false });
 
@@ -122,25 +121,25 @@ export default function PropertyAssignmentsPage() {
     setAssignments(data as Assignment[] || []);
   };
 
-  const loadAgents = async (agencyId: string) => {
+  const loadAgents = async (agencyIdParam: string) => {
     const { data } = await supabase
       .from('agency_agents')
       .select('id, email, profiles:user_id(full_name)')
-      .eq('agency_id', agencyId)
+      .eq('agency_id', agencyIdParam)
       .eq('status', 'active');
 
     setAgents(data as Agent[] || []);
   };
 
-  const loadUnassignedProperties = async (agencyId: string) => {
+  const loadUnassignedProperties = async (agencyIdParam: string) => {
     // Get properties managed by agency that aren't assigned
     const { data: mandates } = await supabase
       .from('agency_mandates')
       .select('property_id')
-      .eq('agency_id', agencyId)
+      .eq('agency_id', agencyIdParam)
       .eq('status', 'active');
 
-    const propertyIds = mandates?.map(m => m.property_id).filter(Boolean) || [];
+    const propertyIds = mandates?.map(m => m.property_id).filter((id): id is string => id !== null) || [];
 
     if (propertyIds.length === 0) {
       setUnassignedProperties([]);
@@ -150,7 +149,7 @@ export default function PropertyAssignmentsPage() {
     const { data: assigned } = await supabase
       .from('property_assignments')
       .select('property_id')
-      .eq('agency_id', agencyId)
+      .eq('agency_id', agencyIdParam)
       .eq('status', 'active');
 
     const assignedIds = assigned?.map(a => a.property_id) || [];
@@ -229,9 +228,9 @@ export default function PropertyAssignmentsPage() {
   };
 
   const filteredAssignments = assignments.filter(a => 
-    a.properties.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.properties.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.agent.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+    a.properties?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.properties?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.agent?.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -310,7 +309,7 @@ export default function PropertyAssignmentsPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-[#2C1810]">
-                    {assignments.reduce((sum, a) => sum + (a.properties.monthly_rent || 0), 0).toLocaleString()}
+                    {assignments.reduce((sum, a) => sum + (a.properties?.monthly_rent || 0), 0).toLocaleString()}
                   </p>
                   <p className="text-sm text-[#2C1810]/60">Loyers/mois</p>
                 </div>
@@ -325,7 +324,7 @@ export default function PropertyAssignmentsPage() {
           <Input
             placeholder="Rechercher une propriété ou un agent..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             className="pl-10 border-[#EFEBE9]"
           />
         </div>
@@ -350,7 +349,7 @@ export default function PropertyAssignmentsPage() {
             {filteredAssignments.map((assignment) => (
               <Card key={assignment.id} className="bg-white border-[#EFEBE9] overflow-hidden">
                 <div className="h-40 bg-[#FAF7F4] relative">
-                  {assignment.properties.main_image ? (
+                  {assignment.properties?.main_image ? (
                     <img 
                       src={assignment.properties.main_image} 
                       alt={assignment.properties.title}
@@ -371,27 +370,27 @@ export default function PropertyAssignmentsPage() {
                   </Button>
                 </div>
                 <CardContent className="p-4">
-                  <h3 className="font-semibold text-[#2C1810] mb-1">{assignment.properties.title}</h3>
+                  <h3 className="font-semibold text-[#2C1810] mb-1">{assignment.properties?.title}</h3>
                   <div className="flex items-center gap-1 text-sm text-[#2C1810]/60 mb-3">
                     <MapPin className="w-3 h-3" />
-                    {assignment.properties.city}
-                    {assignment.properties.neighborhood && `, ${assignment.properties.neighborhood}`}
+                    {assignment.properties?.city}
+                    {assignment.properties?.neighborhood && `, ${assignment.properties.neighborhood}`}
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-[#EFEBE9]">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-[#F16522]/10 flex items-center justify-center">
-                        {assignment.agent.profiles?.avatar_url ? (
+                        {assignment.agent?.profiles?.avatar_url ? (
                           <img src={assignment.agent.profiles.avatar_url} alt="" className="w-8 h-8 rounded-full" />
                         ) : (
                           <User className="w-4 h-4 text-[#F16522]" />
                         )}
                       </div>
                       <span className="text-sm text-[#2C1810]">
-                        {assignment.agent.profiles?.full_name || assignment.agent.email}
+                        {assignment.agent?.profiles?.full_name || assignment.agent?.email}
                       </span>
                     </div>
                     <span className="font-semibold text-[#F16522]">
-                      {assignment.properties.monthly_rent.toLocaleString()} F
+                      {assignment.properties?.monthly_rent.toLocaleString()} F
                     </span>
                   </div>
                 </CardContent>

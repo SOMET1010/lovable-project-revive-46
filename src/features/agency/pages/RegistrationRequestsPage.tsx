@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/features/auth/components/AuthProvider';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
-import { Textarea } from '@/shared/components/ui/textarea';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Card, CardContent } from '@/shared/ui/card';
+import { Badge } from '@/shared/ui/badge';
+import { Textarea } from '@/shared/ui/textarea';
 import { toast } from 'sonner';
 import { 
-  UserPlus, Search, CheckCircle, XCircle, Clock,
+  UserPlus, Search, CheckCircle, XCircle,
   Mail, Phone, Briefcase, FileText, Eye
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -19,21 +19,29 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/shared/components/ui/dialog';
+} from '@/shared/ui/dialog';
+import type { Json } from '@/integrations/supabase/types';
 
 interface RegistrationRequest {
   id: string;
   applicant_name: string;
   applicant_email: string;
   applicant_phone: string;
-  years_experience: number;
+  years_experience: number | null;
   specialties: string[];
   certifications: string[];
   motivation: string | null;
   cv_url: string | null;
-  status: string;
+  status: string | null;
   rejection_reason: string | null;
-  created_at: string;
+  created_at: string | null;
+}
+
+function parseJsonArray(data: Json | null): string[] {
+  if (Array.isArray(data)) {
+    return data.filter((item): item is string => typeof item === 'string');
+  }
+  return [];
 }
 
 export default function RegistrationRequestsPage() {
@@ -70,20 +78,20 @@ export default function RegistrationRequestsPage() {
     }
   };
 
-  const loadRequests = async (agencyId: string) => {
+  const loadRequests = async (agencyIdParam: string) => {
     try {
       const { data, error } = await supabase
         .from('agent_registration_requests')
         .select('*')
-        .eq('agency_id', agencyId)
+        .eq('agency_id', agencyIdParam)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       const requestsData = (data || []).map(req => ({
         ...req,
-        specialties: Array.isArray(req.specialties) ? req.specialties : [],
-        certifications: Array.isArray(req.certifications) ? req.certifications : [],
+        specialties: parseJsonArray(req.specialties),
+        certifications: parseJsonArray(req.certifications),
       }));
 
       setRequests(requestsData);
@@ -161,7 +169,7 @@ export default function RegistrationRequestsPage() {
 
   const pendingCount = requests.filter(r => r.status === 'pending').length;
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
     const styles: Record<string, string> = {
       pending: 'bg-yellow-100 text-yellow-800',
       approved: 'bg-green-100 text-green-800',
@@ -172,7 +180,8 @@ export default function RegistrationRequestsPage() {
       approved: 'Approuvée',
       rejected: 'Rejetée',
     };
-    return <Badge className={styles[status] || styles.pending}>{labels[status] || status}</Badge>;
+    const s = status || 'pending';
+    return <Badge className={styles[s] || styles['pending']}>{labels[s] || s}</Badge>;
   };
 
   if (loading) {
@@ -203,7 +212,7 @@ export default function RegistrationRequestsPage() {
             <Input
               placeholder="Rechercher un candidat..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="pl-10 border-[#EFEBE9]"
             />
           </div>
@@ -259,11 +268,11 @@ export default function RegistrationRequestsPage() {
                           </span>
                           <span className="flex items-center gap-1">
                             <Briefcase className="w-3 h-3" />
-                            {request.years_experience} ans d'expérience
+                            {request.years_experience ?? 0} ans d'expérience
                           </span>
                         </div>
                         <p className="text-sm text-[#2C1810]/60 mt-2">
-                          Reçue le {format(new Date(request.created_at), 'dd MMMM yyyy à HH:mm', { locale: fr })}
+                          Reçue le {request.created_at ? format(new Date(request.created_at), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}
                         </p>
                       </div>
                     </div>
@@ -341,7 +350,7 @@ export default function RegistrationRequestsPage() {
                   </div>
                   <div>
                     <p className="text-sm text-[#2C1810]/60">Expérience</p>
-                    <p className="text-[#2C1810]">{selectedRequest.years_experience} ans</p>
+                    <p className="text-[#2C1810]">{selectedRequest.years_experience ?? 0} ans</p>
                   </div>
                 </div>
 
@@ -416,7 +425,7 @@ export default function RegistrationRequestsPage() {
               <Textarea
                 placeholder="Raison du rejet..."
                 value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setRejectionReason(e.target.value)}
                 rows={4}
               />
             </div>

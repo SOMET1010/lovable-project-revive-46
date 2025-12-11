@@ -1,15 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/features/auth/components/AuthProvider';
-import { Button } from '@/shared/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { toast } from 'sonner';
 import { 
   FileBarChart, Download, TrendingUp, Users, Building2,
   Coins, Calendar, RefreshCw, Trophy
 } from 'lucide-react';
-import { format, subMonths } from 'date-fns';
+import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import {
   BarChart,
@@ -83,12 +82,12 @@ export default function AgencyReportsPage() {
     }
   };
 
-  const generateReport = async (agencyId: string) => {
+  const generateReport = async (agencyIdParam: string) => {
     setGenerating(true);
     try {
       const response = await supabase.functions.invoke('generate-agency-report', {
         body: {
-          agency_id: agencyId,
+          agency_id: agencyIdParam,
           report_type: 'monthly',
         },
       });
@@ -302,7 +301,7 @@ export default function AgencyReportsPage() {
                           outerRadius={100}
                           paddingAngle={5}
                           dataKey="value"
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
                         >
                           {pieData.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

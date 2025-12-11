@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/features/auth/components/AuthProvider';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Badge } from '@/shared/components/ui/badge';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Card, CardContent } from '@/shared/ui/card';
+import { Badge } from '@/shared/ui/badge';
 import { toast } from 'sonner';
 import { 
   Users, Plus, Search, UserPlus, MoreVertical, 
   TrendingUp, Phone, Mail, Calendar, Target,
-  Award, Building2
+  Award
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -19,32 +19,33 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/shared/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/shared/components/ui/dialog';
-import { Label } from '@/shared/components/ui/label';
-import { Textarea } from '@/shared/components/ui/textarea';
+} from '@/shared/ui/dialog';
+import { Label } from '@/shared/ui/label';
+import { Textarea } from '@/shared/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/components/ui/select';
+} from '@/shared/ui/select';
+import type { Json } from '@/integrations/supabase/types';
 
 interface Agent {
   id: string;
   user_id: string | null;
-  role: string;
-  status: string;
+  role: string | null;
+  status: string | null;
   hire_date: string;
-  commission_split: number;
-  target_monthly: number;
+  commission_split: number | null;
+  target_monthly: number | null;
   phone: string | null;
   email: string | null;
   specialties: string[];
@@ -52,7 +53,14 @@ interface Agent {
   profiles?: {
     full_name: string | null;
     avatar_url: string | null;
-  };
+  } | null;
+}
+
+function parseJsonArray(data: Json | null): string[] {
+  if (Array.isArray(data)) {
+    return data.filter((item): item is string => typeof item === 'string');
+  }
+  return [];
 }
 
 export default function TeamManagementPage() {
@@ -102,7 +110,7 @@ export default function TeamManagementPage() {
     }
   };
 
-  const loadAgents = async (agencyId: string) => {
+  const loadAgents = async (agencyIdParam: string) => {
     try {
       const { data, error } = await supabase
         .from('agency_agents')
@@ -110,14 +118,14 @@ export default function TeamManagementPage() {
           *,
           profiles:user_id(full_name, avatar_url)
         `)
-        .eq('agency_id', agencyId)
+        .eq('agency_id', agencyIdParam)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       const agentsData = (data || []).map(agent => ({
         ...agent,
-        specialties: Array.isArray(agent.specialties) ? agent.specialties : [],
+        specialties: parseJsonArray(agent.specialties),
       }));
 
       setAgents(agentsData);
@@ -194,7 +202,7 @@ export default function TeamManagementPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
     const styles: Record<string, string> = {
       active: 'bg-green-100 text-green-800',
       pending: 'bg-yellow-100 text-yellow-800',
@@ -207,10 +215,11 @@ export default function TeamManagementPage() {
       suspended: 'Suspendu',
       terminated: 'Terminé',
     };
-    return <Badge className={styles[status] || styles.pending}>{labels[status] || status}</Badge>;
+    const s = status || 'pending';
+    return <Badge className={styles[s] || styles['pending']}>{labels[s] || s}</Badge>;
   };
 
-  const getRoleBadge = (role: string) => {
+  const getRoleBadge = (role: string | null) => {
     const styles: Record<string, string> = {
       admin: 'bg-purple-100 text-purple-800',
       manager: 'bg-blue-100 text-blue-800',
@@ -221,7 +230,8 @@ export default function TeamManagementPage() {
       manager: 'Manager',
       agent: 'Agent',
     };
-    return <Badge variant="outline" className={styles[role] || styles.agent}>{labels[role] || role}</Badge>;
+    const r = role || 'agent';
+    return <Badge variant="outline" className={styles[r] || styles['agent']}>{labels[r] || r}</Badge>;
   };
 
   if (loading) {
@@ -310,7 +320,7 @@ export default function TeamManagementPage() {
             <Input
               placeholder="Rechercher un agent..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="pl-10 border-[#EFEBE9]"
             />
           </div>
@@ -410,12 +420,12 @@ export default function TeamManagementPage() {
                   <div className="mt-4 pt-4 border-t border-[#EFEBE9] flex justify-between text-sm">
                     <div>
                       <p className="text-[#2C1810]/60">Commission</p>
-                      <p className="font-semibold text-[#2C1810]">{agent.commission_split}%</p>
+                      <p className="font-semibold text-[#2C1810]">{agent.commission_split ?? 0}%</p>
                     </div>
                     <div className="text-right">
                       <p className="text-[#2C1810]/60">Objectif mensuel</p>
                       <p className="font-semibold text-[#2C1810]">
-                        {agent.target_monthly.toLocaleString()} FCFA
+                        {(agent.target_monthly ?? 0).toLocaleString()} FCFA
                       </p>
                     </div>
                   </div>
@@ -437,7 +447,7 @@ export default function TeamManagementPage() {
                 <Input
                   type="email"
                   value={newAgent.email}
-                  onChange={(e) => setNewAgent({ ...newAgent, email: e.target.value })}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAgent({ ...newAgent, email: e.target.value })}
                   placeholder="agent@example.com"
                 />
               </div>
@@ -445,7 +455,7 @@ export default function TeamManagementPage() {
                 <Label>Téléphone</Label>
                 <Input
                   value={newAgent.phone}
-                  onChange={(e) => setNewAgent({ ...newAgent, phone: e.target.value })}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAgent({ ...newAgent, phone: e.target.value })}
                   placeholder="+225 07 XX XX XX XX"
                 />
               </div>
@@ -468,7 +478,7 @@ export default function TeamManagementPage() {
                   <Input
                     type="number"
                     value={newAgent.commission_split}
-                    onChange={(e) => setNewAgent({ ...newAgent, commission_split: Number(e.target.value) })}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAgent({ ...newAgent, commission_split: Number(e.target.value) })}
                   />
                 </div>
                 <div>
@@ -476,16 +486,17 @@ export default function TeamManagementPage() {
                   <Input
                     type="number"
                     value={newAgent.target_monthly}
-                    onChange={(e) => setNewAgent({ ...newAgent, target_monthly: Number(e.target.value) })}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAgent({ ...newAgent, target_monthly: Number(e.target.value) })}
                   />
                 </div>
               </div>
               <div>
-                <Label>Bio</Label>
+                <Label>Bio (optionnel)</Label>
                 <Textarea
                   value={newAgent.bio}
-                  onChange={(e) => setNewAgent({ ...newAgent, bio: e.target.value })}
-                  placeholder="Courte description de l'agent..."
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNewAgent({ ...newAgent, bio: e.target.value })}
+                  placeholder="Présentation de l'agent..."
+                  rows={3}
                 />
               </div>
             </div>
