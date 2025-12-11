@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Badge } from '@/shared/ui/badge';
+import { Button, Card, CardContent, CardHeader, CardTitle, Badge } from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, User, Phone, Mail, Calendar, Target,

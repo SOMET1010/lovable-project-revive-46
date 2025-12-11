@@ -1,12 +1,7 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Textarea } from '@/shared/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Label } from '@/shared/ui/label';
-import { Switch } from '@/shared/ui/switch';
+import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Label, Switch } from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   Settings, Building2, Save, Phone, Mail, Globe,
