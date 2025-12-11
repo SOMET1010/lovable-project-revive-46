@@ -347,14 +347,14 @@ export default function OwnerDashboardPage() {
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Actions Rapides</h3>
               <div className="space-y-3">
                 <Link
-                  to="/dashboard/ajouter-propriete"
+                  to="/proprietaire/ajouter-propriete"
                   className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Ajouter un bien
                 </Link>
                 <Link
-                  to="/dashboard/candidatures"
+                  to="/proprietaire/candidatures"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Users className="h-5 w-5 mr-2" />
@@ -366,14 +366,14 @@ export default function OwnerDashboardPage() {
                   )}
                 </Link>
                 <Link
-                  to="/dashboard/mes-contrats"
+                  to="/proprietaire/contrats"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <FileText className="h-5 w-5 mr-2" />
                   Mes contrats
                 </Link>
                 <Link
-                  to="/mes-mandats"
+                  to="/proprietaire/mes-mandats"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Handshake className="h-5 w-5 mr-2" />

@@ -15,6 +15,8 @@ const OwnerProfilePage = lazyWithRetry(() => import('@/pages/owner/ProfilePage')
 
 // Application form (for owner viewing applications)
 const ApplicationForm = lazyWithRetry(() => import('@/pages/tenant/ApplicationFormPage'));
+// MyMandatesPage can be used by both owners and agencies
+const MyMandatesPage = lazyWithRetry(() => import('@/pages/agency/MyMandatesPage'));
 
 export const ownerRoutes: RouteObject[] = [
   // Routes avec sidebar
@@ -71,6 +73,12 @@ export const ownerRoutes: RouteObject[] = [
       {
         path: 'candidatures',
         element: <OwnerApplications />,
+      },
+
+      // Mandates (shared with agencies but accessible to owners)
+      {
+        path: 'mes-mandats',
+        element: <MyMandatesPage />,
       },
     ],
   },

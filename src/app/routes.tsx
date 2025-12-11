@@ -21,6 +21,8 @@ import {
 
 // Lazy load AgencyProfilePage for /agence/profile route
 const AgencyProfilePage = lazyWithRetry(() => import('@/pages/agency/ProfilePage'));
+// Lazy load MyMandatesPage for /mes-mandats route (shared between owners and agencies)
+const MyMandatesPage = lazyWithRetry(() => import('@/pages/agency/MyMandatesPage'));
 
 /**
  * Main application routes
@@ -72,6 +74,16 @@ export const routes: RouteObject[] = [
         element: (
           <ProtectedRoute allowedRoles={[...AGENCY_ROLES]}>
             <AgencyProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+
+      // Global mandates route (accessible to both owners and agencies)
+      {
+        path: 'mes-mandats',
+        element: (
+          <ProtectedRoute>
+            <MyMandatesPage />
           </ProtectedRoute>
         ),
       },
