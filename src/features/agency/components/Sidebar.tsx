@@ -1,6 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Home, Settings, BarChart3, FileText, Calendar } from 'lucide-react';
+import {
+  Building2,
+  Home,
+  Settings,
+  BarChart3,
+  FileText,
+  Calendar,
+  PlusCircle,
+  Users,
+  FilePlus2,
+  MessageSquare,
+  Search,
+  Calendar as CalendarIcon,
+} from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -20,7 +33,13 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/agences/dashboard', icon: Building2 },
   { label: 'Mes mandats', href: '/agences/mandats', icon: FileText },
-  { label: 'Biens gérés', href: '/agences/biens', icon: Home },
+  { label: 'Mes biens', href: '/agences/biens', icon: Home },
+  { label: 'Ajouter un bien', href: '/agences/ajouter-bien', icon: PlusCircle },
+  { label: 'Mes candidatures', href: '/agences/candidatures', icon: Users },
+  { label: 'Mes contrats', href: '/agences/contrats', icon: FileText },
+  { label: 'Créer un contrat', href: '/agences/creer-contrat', icon: FilePlus2 },
+  { label: 'Messages', href: '/agences/messages', icon: MessageSquare },
+  { label: 'Visites', href: '/agences/visites', icon: CalendarIcon },
   { label: 'Analytics', href: '/agences/analytics', icon: BarChart3 },
   { label: 'Calendrier', href: '/agences/calendrier', icon: Calendar },
 ];
@@ -110,6 +129,26 @@ export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) 
           <div className="my-4 border-t border-neutral-100" />
 
           <ul className="space-y-1">
+            <li>
+              <Link
+                to="/recherche"
+                onClick={onClose}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all',
+                  isActive('/recherche')
+                    ? 'bg-primary-50 text-primary-600 border border-primary-100'
+                    : 'text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900'
+                )}
+              >
+                <Search
+                  className={cn(
+                    'h-5 w-5',
+                    isActive('/recherche') ? 'text-primary-500' : 'text-neutral-400'
+                  )}
+                />
+                <span>Rechercher</span>
+              </Link>
+            </li>
             <li>
               <Link
                 to="/agences/profil"

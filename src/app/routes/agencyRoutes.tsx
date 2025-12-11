@@ -13,6 +13,11 @@ const AgencyAddProperty = lazyWithRetry(() => import('@/pages/agency/AddProperty
 const AgencyAnalyticsPage = lazyWithRetry(() => import('@/pages/agency/AnalyticsPage'));
 const AgencyCalendarPage = lazyWithRetry(() => import('@/pages/agency/CalendarPage'));
 const AgencyProfilePage = lazyWithRetry(() => import('@/pages/agency/ProfilePage'));
+const AgencyCandidaturesPage = lazyWithRetry(() => import('@/pages/agency/CandidaturesPage'));
+const AgencyContratsPage = lazyWithRetry(() => import('@/pages/agency/ContratsPage'));
+const CreateContractPage = lazyWithRetry(() => import('@/pages/owner/CreateContractPage'));
+const MessagesPage = lazyWithRetry(() => import('@/pages/messaging/MessagesPage'));
+const AgencyVisitsPage = lazyWithRetry(() => import('@/pages/agency/VisitsPage'));
 
 export const agencyRoutes: RouteObject[] = [
   {
@@ -47,6 +52,10 @@ export const agencyRoutes: RouteObject[] = [
         path: 'biens',
         element: <AgencyAddProperty />,
       },
+      {
+        path: 'ajouter-bien',
+        element: <AgencyAddProperty />,
+      },
 
       // Profile
       {
@@ -55,6 +64,38 @@ export const agencyRoutes: RouteObject[] = [
       },
 
       // Agency-specific pages
+      {
+        path: 'candidatures',
+        element: <AgencyCandidaturesPage />,
+      },
+      {
+        path: 'candidatures/:id',
+        element: <AgencyCandidaturesPage />,
+      },
+      {
+        path: 'contrats',
+        element: <AgencyContratsPage />,
+      },
+      {
+        path: 'contrats/:id',
+        element: <AgencyContratsPage />,
+      },
+      {
+        path: 'creer-contrat',
+        element: <CreateContractPage />,
+      },
+      {
+        path: 'creer-contrat/:propertyId',
+        element: <CreateContractPage />,
+      },
+      {
+        path: 'messages',
+        element: <MessagesPage />,
+      },
+      {
+        path: 'visites',
+        element: <AgencyVisitsPage />,
+      },
       {
         path: 'analytics',
         element: <AgencyAnalyticsPage />,

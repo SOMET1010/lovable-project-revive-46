@@ -12,6 +12,7 @@ const OwnerContracts = lazyWithRetry(() => import('@/pages/owner/OwnerContractsP
 const OwnerApplications = lazyWithRetry(() => import('@/pages/owner/OwnerApplicationsPage'));
 const MyProperties = lazyWithRetry(() => import('@/pages/owner/MyPropertiesPage'));
 const OwnerProfilePage = lazyWithRetry(() => import('@/pages/owner/ProfilePage'));
+const OwnerVisitsPage = lazyWithRetry(() => import('@/pages/owner/VisitsPage'));
 
 // Application form (for owner viewing applications)
 const ApplicationForm = lazyWithRetry(() => import('@/pages/tenant/ApplicationFormPage'));
@@ -87,6 +88,12 @@ export const ownerRoutes: RouteObject[] = [
       {
         path: 'messages',
         element: <MessagesPage />,
+      },
+
+      // Visits
+      {
+        path: 'visites',
+        element: <OwnerVisitsPage />,
       },
     ],
   },
