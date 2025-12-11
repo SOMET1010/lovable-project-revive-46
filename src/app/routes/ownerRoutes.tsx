@@ -17,6 +17,10 @@ const OwnerApplications = lazyWithRetry(() => import('@/features/owner/pages/Own
 const OwnerMaintenance = lazyWithRetry(() => import('@/features/owner/pages/OwnerMaintenancePage'));
 const OwnerPayments = lazyWithRetry(() => import('@/features/owner/pages/OwnerPaymentsPage'));
 const MySubmissions = lazyWithRetry(() => import('@/features/owner/pages/MySubmissionsPage'));
+const MultiPropertyDashboard = lazyWithRetry(() => import('@/features/owner/pages/MultiPropertyDashboard'));
+const FinancialDashboard = lazyWithRetry(() => import('@/features/owner/pages/FinancialDashboardPage'));
+const NotificationSettings = lazyWithRetry(() => import('@/features/owner/pages/NotificationSettingsPage'));
+const PaymentPlansApproval = lazyWithRetry(() => import('@/features/owner/pages/PaymentPlansApprovalPage'));
 
 // Application form (for owner viewing applications)
 const ApplicationForm = lazyWithRetry(() => import('@/features/tenant/pages/ApplicationFormPage'));
@@ -81,6 +85,24 @@ export const ownerRoutes: RouteObject[] = [
   { 
     path: 'dashboard/mes-soumissions', 
     element: <ProtectedRoute allowedRoles={[...OWNER_ROLES]}><MySubmissions /></ProtectedRoute> 
+  },
+
+  // Sprint 6: Multi-property & Financial dashboards
+  { 
+    path: 'dashboard/multi-biens', 
+    element: <ProtectedRoute allowedRoles={[...OWNER_ROLES]}><MultiPropertyDashboard /></ProtectedRoute> 
+  },
+  { 
+    path: 'dashboard/finances', 
+    element: <ProtectedRoute allowedRoles={[...OWNER_ROLES]}><FinancialDashboard /></ProtectedRoute> 
+  },
+  { 
+    path: 'dashboard/parametres-notifications', 
+    element: <ProtectedRoute allowedRoles={[...OWNER_ROLES]}><NotificationSettings /></ProtectedRoute> 
+  },
+  { 
+    path: 'dashboard/echeanciers', 
+    element: <ProtectedRoute allowedRoles={[...OWNER_ROLES]}><PaymentPlansApproval /></ProtectedRoute> 
   },
 
   // Agency dashboard
