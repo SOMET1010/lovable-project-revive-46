@@ -1,27 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/components/ui/button';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Input } from '@/shared/components/ui/input';
-import { Label } from '@/shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
+import { Button } from '@/shared/ui/button';
+import { Textarea } from '@/shared/ui/textarea';
+import { Label } from '@/shared/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, 
   Send, 
-  Clock, 
   CheckCircle, 
-  AlertTriangle,
   ArrowUpCircle,
   User,
   Shield,
   Lock,
-  Loader2,
-  MessageSquare
+  Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -32,16 +28,16 @@ interface Dispute {
   category: string;
   subject: string;
   description: string;
-  status: string;
-  priority: string;
+  status: string | null;
+  priority: string | null;
   resolution: string | null;
   resolution_type: string | null;
-  created_at: string;
+  created_at: string | null;
   resolved_at: string | null;
   complainant_id: string;
   respondent_id: string;
   assigned_agent_id: string | null;
-  evidence: Array<{ url: string; type: string }>;
+  evidence: Array<{ url: string; type: string }> | null;
 }
 
 interface DisputeMessage {
@@ -49,8 +45,8 @@ interface DisputeMessage {
   sender_id: string;
   sender_role: string;
   content: string;
-  created_at: string;
-  is_internal: boolean;
+  created_at: string | null;
+  is_internal: boolean | null;
 }
 
 interface Profile {
@@ -106,7 +102,7 @@ export default function MediationPage() {
       return;
     }
 
-    setDispute(data);
+    setDispute(data as Dispute);
 
     // Load profiles
     const userIds = [data.complainant_id, data.respondent_id];
@@ -226,6 +222,18 @@ export default function MediationPage() {
     }
   };
 
+  const handleMessageChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value);
+  };
+
+  const handleResolutionTextChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setResolution(prev => ({ ...prev, text: e.target.value }));
+  };
+
+  const handleEscalateReasonChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setEscalateReason(e.target.value);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -238,7 +246,7 @@ export default function MediationPage() {
 
   const complainant = profiles[dispute.complainant_id];
   const respondent = profiles[dispute.respondent_id];
-  const canTakeAction = ['open', 'under_review', 'mediation'].includes(dispute.status);
+  const canTakeAction = ['open', 'under_review', 'mediation'].includes(dispute.status || '');
 
   return (
     <div className="space-y-6">
@@ -327,7 +335,7 @@ export default function MediationPage() {
                   <Textarea
                     placeholder={isInternal ? 'Ajouter une note interne...' : 'Écrire aux parties...'}
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={handleMessageChange}
                     rows={2}
                     className="resize-none"
                   />
@@ -396,12 +404,12 @@ export default function MediationPage() {
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Priorité</dt>
                 <dd className={`font-medium ${dispute.priority === 'urgent' ? 'text-red-600' : ''}`}>
-                  {dispute.priority}
+                  {dispute.priority || 'Normal'}
                 </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Créé le</dt>
-                <dd>{format(new Date(dispute.created_at), 'dd/MM/yyyy', { locale: fr })}</dd>
+                <dd>{dispute.created_at && format(new Date(dispute.created_at), 'dd/MM/yyyy', { locale: fr })}</dd>
               </div>
             </dl>
           </div>
@@ -434,7 +442,7 @@ export default function MediationPage() {
               <Textarea
                 placeholder="Expliquez la décision et les actions à prendre..."
                 value={resolution.text}
-                onChange={(e) => setResolution(prev => ({ ...prev, text: e.target.value }))}
+                onChange={handleResolutionTextChange}
                 rows={4}
               />
             </div>
@@ -463,7 +471,7 @@ export default function MediationPage() {
               <Textarea
                 placeholder="Expliquez pourquoi ce litige nécessite une attention supérieure..."
                 value={escalateReason}
-                onChange={(e) => setEscalateReason(e.target.value)}
+                onChange={handleEscalateReasonChange}
                 rows={4}
               />
             </div>
@@ -491,46 +499,55 @@ function MessageBubble({
 }) {
   const isOwn = message.sender_id === currentUserId;
   const isSystem = message.sender_role === 'system';
-  const profile = profiles[message.sender_id];
+  const isMediator = message.sender_role === 'mediator';
+  const senderProfile = profiles[message.sender_id];
 
   if (isSystem) {
     return (
       <div className="text-center">
-        <span className="inline-block px-3 py-1.5 bg-[#EFEBE9] rounded-full text-xs text-muted-foreground">
+        <span className="inline-block px-4 py-2 bg-[#EFEBE9] rounded-full text-sm text-muted-foreground">
           {message.content}
         </span>
       </div>
     );
   }
 
-  const roleLabel = {
-    complainant: 'Plaignant',
-    respondent: 'Mis en cause',
-    mediator: 'Médiateur'
-  }[message.sender_role] || message.sender_role;
-
   return (
     <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[80%] ${isOwn ? 'text-right' : 'text-left'}`}>
-        <div className="flex items-center gap-1 mb-1">
+      <div className={`max-w-[70%] ${isOwn ? 'order-2' : 'order-1'}`}>
+        <div className="flex items-center gap-2 mb-1">
           <span className="text-xs text-muted-foreground">
-            {profile?.full_name || 'Utilisateur'} ({roleLabel})
+            {senderProfile?.full_name || 'Utilisateur'}
+            {isMediator && ' (Médiateur)'}
           </span>
-          {isInternal && <Lock className="w-3 h-3 text-amber-500" />}
+          <span className="text-xs text-muted-foreground">
+            {message.created_at && format(new Date(message.created_at), 'HH:mm', { locale: fr })}
+          </span>
+          {isInternal && <Lock className="w-3 h-3 text-amber-600" />}
         </div>
-        <div className={`rounded-xl px-3 py-2 text-sm ${
-          isInternal 
-            ? 'bg-amber-100 text-amber-900' 
-            : isOwn 
-            ? 'bg-[#F16522] text-white' 
-            : 'bg-[#EFEBE9] text-[#2C1810]'
-        }`}>
+        <div
+          className={`rounded-2xl px-4 py-3 ${
+            isInternal
+              ? 'bg-amber-100 text-amber-900 border border-amber-200'
+              : isOwn
+              ? 'bg-[#F16522] text-white rounded-tr-sm'
+              : isMediator
+              ? 'bg-blue-100 text-blue-900 rounded-tl-sm'
+              : 'bg-[#EFEBE9] text-[#2C1810] rounded-tl-sm'
+          }`}
+        >
           {message.content}
         </div>
-        <span className="text-xs text-muted-foreground">
-          {format(new Date(message.created_at), 'HH:mm', { locale: fr })}
-        </span>
       </div>
     </div>
   );
+}
+
+interface DisputeMessage {
+  id: string;
+  sender_id: string;
+  sender_role: string;
+  content: string;
+  created_at: string | null;
+  is_internal: boolean | null;
 }
