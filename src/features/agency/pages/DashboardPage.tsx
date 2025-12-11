@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Users, Coins, FileText, Home, MessageSquare, TrendingUp, Plus, Eye, BarChart3, Handshake } from 'lucide-react';
+import { Building2, Users, Coins, FileText, Home, MessageSquare, TrendingUp, Plus, Eye, BarChart3, Settings, UserPlus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
@@ -309,25 +309,46 @@ export default function AgencyDashboardPage() {
                   Ajouter un bien
                 </Link>
                 <Link 
-                  to="/mes-contrats"
+                  to="/dashboard/agence/equipe"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
-                  <FileText className="h-5 w-5 mr-2" />
-                  Contrats
+                  <Users className="h-5 w-5 mr-2" />
+                  Mon équipe
                 </Link>
                 <Link 
-                  to="/mes-mandats"
+                  to="/dashboard/agence/commissions"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
-                  <Handshake className="h-5 w-5 mr-2" />
-                  Mes mandats
+                  <Coins className="h-5 w-5 mr-2" />
+                  Commissions
                 </Link>
                 <Link 
-                  to="/messages"
+                  to="/dashboard/agence/proprietes"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
-                  <MessageSquare className="h-5 w-5 mr-2" />
-                  Messages
+                  <Home className="h-5 w-5 mr-2" />
+                  Assignations
+                </Link>
+                <Link 
+                  to="/dashboard/agence/candidatures"
+                  className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <UserPlus className="h-5 w-5 mr-2" />
+                  Recrutement
+                </Link>
+                <Link 
+                  to="/dashboard/agence/rapports"
+                  className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <BarChart3 className="h-5 w-5 mr-2" />
+                  Rapports
+                </Link>
+                <Link 
+                  to="/dashboard/agence/parametres"
+                  className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
+                >
+                  <Settings className="h-5 w-5 mr-2" />
+                  Paramètres
                 </Link>
               </div>
             </div>

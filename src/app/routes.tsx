@@ -8,6 +8,7 @@ import {
   authRoutes,
   tenantRoutes,
   ownerRoutes,
+  agencyRoutes,
   adminRoutes,
   trustAgentRoutes,
 } from './routes/index';
@@ -31,10 +32,11 @@ export const routes: RouteObject[] = [
       // Tenant routes (dashboard, applications, visits, contracts, payments)
       ...tenantRoutes,
 
-      // Owner & Agency routes (property management, contracts)
+      // Owner routes (property management, contracts)
       ...ownerRoutes,
 
-      // Trust Agent routes (nested with layout)
+      // Agency routes (team, commissions, assignments - Sprint 7)
+      ...agencyRoutes,
       trustAgentRoutes,
 
       // Admin routes (nested with layout)
