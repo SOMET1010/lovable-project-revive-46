@@ -140,6 +140,9 @@ export default function PostponementRequestPage() {
       const newDueDate = new Date(originalDueDate);
       newDueDate.setDate(newDueDate.getDate() + daysRequested);
 
+      const originalDateStr = originalDueDate.toISOString().split('T')[0] as string;
+      const newDateStr = newDueDate.toISOString().split('T')[0] as string;
+
       const { error } = await supabase
         .from('postponement_requests')
         .insert([{
@@ -150,8 +153,8 @@ export default function PostponementRequestPage() {
           reason_details: reasonDetails.trim(),
           justification_url: justificationUrl,
           days_requested: daysRequested,
-          original_due_date: originalDueDate.toISOString().split('T')[0],
-          new_due_date: newDueDate.toISOString().split('T')[0],
+          original_due_date: originalDateStr,
+          new_due_date: newDateStr,
         }]);
 
       if (error) throw error;

@@ -39,6 +39,9 @@ const SignLease = lazyWithRetry(() => import('@/features/tenant/pages/SignLeaseP
 const MakePayment = lazyWithRetry(() => import('@/features/tenant/pages/MakePaymentPage'));
 const PaymentHistory = lazyWithRetry(() => import('@/features/tenant/pages/PaymentHistoryPage'));
 const SetupRecurringPayment = lazyWithRetry(() => import('@/features/tenant/pages/SetupRecurringPaymentPage'));
+const PaymentReminders = lazyWithRetry(() => import('@/features/tenant/pages/PaymentRemindersPage'));
+const PaymentPlanRequest = lazyWithRetry(() => import('@/features/tenant/pages/PaymentPlanRequestPage'));
+const PostponementRequest = lazyWithRetry(() => import('@/features/tenant/pages/PostponementRequestPage'));
 
 // Messaging
 const MessagesPage = lazyWithRetry(() => import('@/features/messaging/pages/MessagesPage'));
@@ -80,6 +83,9 @@ export const tenantRoutes: RouteObject[] = [
   { path: 'effectuer-paiement', element: <ProtectedRoute><MakePayment /></ProtectedRoute> },
   { path: 'mes-paiements', element: <ProtectedRoute><PaymentHistory /></ProtectedRoute> },
   { path: 'paiement-automatique', element: <ProtectedRoute><SetupRecurringPayment /></ProtectedRoute> },
+  { path: 'mes-rappels', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><PaymentReminders /></ProtectedRoute> },
+  { path: 'proposer-echeancier/:leaseId', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><PaymentPlanRequest /></ProtectedRoute> },
+  { path: 'demande-report/:leaseId', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><PostponementRequest /></ProtectedRoute> },
 
   // Tenant specific routes - utilise TENANT_ROLES pour compatibilité fr/en
   { path: 'dashboard/locataire', element: <ProtectedRoute allowedRoles={[...TENANT_ROLES]}><TenantDashboard /></ProtectedRoute> },
