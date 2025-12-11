@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { 
   Plus, 
   Search, 
@@ -23,9 +23,9 @@ interface Dispute {
   dispute_number: string;
   category: string;
   subject: string;
-  status: string;
-  priority: string;
-  created_at: string;
+  status: string | null;
+  priority: string | null;
+  created_at: string | null;
   resolved_at: string | null;
   complainant_id: string;
   respondent_id: string;
@@ -82,7 +82,22 @@ export default function MyDisputesPage() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setDisputes(data || []);
+      
+      // Map data with proper types
+      const mappedDisputes: Dispute[] = (data || []).map(d => ({
+        id: d.id,
+        dispute_number: d.dispute_number,
+        category: d.category,
+        subject: d.subject,
+        status: d.status,
+        priority: d.priority,
+        created_at: d.created_at,
+        resolved_at: d.resolved_at,
+        complainant_id: d.complainant_id,
+        respondent_id: d.respondent_id
+      }));
+      
+      setDisputes(mappedDisputes);
     } catch (error) {
       console.error('Erreur chargement litiges:', error);
     } finally {
@@ -97,8 +112,12 @@ export default function MyDisputesPage() {
 
   const stats = {
     total: disputes.length,
-    active: disputes.filter(d => ['open', 'under_review', 'mediation'].includes(d.status)).length,
+    active: disputes.filter(d => ['open', 'under_review', 'mediation'].includes(d.status || '')).length,
     resolved: disputes.filter(d => d.status === 'resolved').length
+  };
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
   return (
@@ -143,7 +162,7 @@ export default function MyDisputesPage() {
             <Input
               placeholder="Rechercher par numéro ou sujet..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={handleSearchChange}
               className="pl-10"
             />
           </div>
@@ -189,7 +208,7 @@ export default function MyDisputesPage() {
         ) : (
           <div className="space-y-4">
             {filteredDisputes.map((dispute) => {
-              const statusConfig = STATUS_CONFIG[dispute.status] || STATUS_CONFIG.open;
+              const statusConfig = STATUS_CONFIG[dispute.status || 'open'] || STATUS_CONFIG.open;
               const StatusIcon = statusConfig.icon;
               const isComplainant = dispute.complainant_id === user?.id;
 
@@ -226,7 +245,7 @@ export default function MyDisputesPage() {
                           {CATEGORY_LABELS[dispute.category] || dispute.category}
                         </span>
                         <span>
-                          {format(new Date(dispute.created_at), 'dd MMM yyyy', { locale: fr })}
+                          {dispute.created_at && format(new Date(dispute.created_at), 'dd MMM yyyy', { locale: fr })}
                         </span>
                         <span className={isComplainant ? 'text-blue-600' : 'text-orange-600'}>
                           {isComplainant ? 'Plaignant' : 'Mis en cause'}

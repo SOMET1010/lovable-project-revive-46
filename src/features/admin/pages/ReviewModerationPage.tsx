@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { Button } from '@/shared/components/ui/button';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog';
+import { useAuth } from '@/app/providers/AuthProvider';
+import { Button } from '@/shared/ui/button';
+import { Textarea } from '@/shared/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog';
 import { toast } from 'sonner';
 import { 
   Star, 
@@ -152,6 +152,10 @@ export default function ReviewModerationPage() {
     }
   };
 
+  const handleNotesChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setModerationNotes(e.target.value);
+  };
+
   const renderStars = (rating: number) => (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
@@ -236,7 +240,7 @@ export default function ReviewModerationPage() {
                         {reviewer?.full_name || 'Utilisateur'}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {format(new Date(review.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                        {review.created_at && format(new Date(review.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
                       </p>
                     </div>
                   </div>
@@ -309,7 +313,7 @@ export default function ReviewModerationPage() {
             <Textarea
               placeholder="Raison du rejet (optionnel)..."
               value={moderationNotes}
-              onChange={(e) => setModerationNotes(e.target.value)}
+              onChange={handleNotesChange}
               rows={3}
             />
           </div>

@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Label } from '@/shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Textarea } from '@/shared/ui/textarea';
+import { Label } from '@/shared/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { toast } from 'sonner';
 import { 
   AlertTriangle, 
@@ -148,6 +148,11 @@ export default function CreateDisputePage() {
     }
   };
 
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
   return (
     <div className="min-h-screen bg-[#FAF7F4]">
       <div className="max-w-3xl mx-auto px-4 py-8">
@@ -253,9 +258,10 @@ export default function CreateDisputePage() {
                 <Label htmlFor="subject">Sujet du litige *</Label>
                 <Input
                   id="subject"
+                  name="subject"
                   placeholder="Ex: Loyer de novembre non remboursé"
                   value={formData.subject}
-                  onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                  onChange={handleInputChange}
                   maxLength={100}
                 />
                 <p className="text-xs text-muted-foreground text-right">
@@ -268,9 +274,10 @@ export default function CreateDisputePage() {
                 <Label htmlFor="description">Description détaillée *</Label>
                 <Textarea
                   id="description"
+                  name="description"
                   placeholder="Décrivez en détail la situation, les faits, les dates importantes..."
                   value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={handleInputChange}
                   rows={6}
                   className="resize-none"
                 />

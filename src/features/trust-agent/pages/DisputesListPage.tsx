@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, ChangeEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Button } from '@/shared/ui/button';
+import { Input } from '@/shared/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { 
   Search, 
   AlertTriangle, 
@@ -24,9 +24,9 @@ interface Dispute {
   dispute_number: string;
   category: string;
   subject: string;
-  status: string;
-  priority: string;
-  created_at: string;
+  status: string | null;
+  priority: string | null;
+  created_at: string | null;
   complainant_id: string;
   respondent_id: string;
   assigned_agent_id: string | null;
@@ -101,7 +101,22 @@ export default function DisputesListPage() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setDisputes(data || []);
+      
+      // Map data with proper types
+      const mappedDisputes: Dispute[] = (data || []).map(d => ({
+        id: d.id,
+        dispute_number: d.dispute_number,
+        category: d.category,
+        subject: d.subject,
+        status: d.status,
+        priority: d.priority,
+        created_at: d.created_at,
+        complainant_id: d.complainant_id,
+        respondent_id: d.respondent_id,
+        assigned_agent_id: d.assigned_agent_id
+      }));
+      
+      setDisputes(mappedDisputes);
     } catch (error) {
       console.error('Erreur chargement litiges:', error);
     } finally {
@@ -124,6 +139,10 @@ export default function DisputesListPage() {
     d.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
     d.dispute_number.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
 
   return (
     <div className="space-y-6">
@@ -210,7 +229,7 @@ export default function DisputesListPage() {
           <Input
             placeholder="Rechercher..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={handleSearchChange}
             className="pl-10"
           />
         </div>
@@ -262,8 +281,8 @@ export default function DisputesListPage() {
       ) : (
         <div className="space-y-3">
           {filteredDisputes.map((dispute) => {
-            const statusConfig = STATUS_CONFIG[dispute.status] || STATUS_CONFIG.open;
-            const priorityConfig = PRIORITY_CONFIG[dispute.priority] || PRIORITY_CONFIG.normal;
+            const statusConfig = STATUS_CONFIG[dispute.status || 'open'] || STATUS_CONFIG.open;
+            const priorityConfig = PRIORITY_CONFIG[dispute.priority || 'normal'] || PRIORITY_CONFIG.normal;
             const StatusIcon = statusConfig.icon;
 
             return (
@@ -288,7 +307,7 @@ export default function DisputesListPage() {
                     </div>
                     <h3 className="font-medium text-[#2C1810] truncate">{dispute.subject}</h3>
                     <p className="text-sm text-muted-foreground">
-                      {format(new Date(dispute.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                      {dispute.created_at && format(new Date(dispute.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
                     </p>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />

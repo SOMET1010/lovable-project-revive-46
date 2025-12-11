@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, ChangeEvent, KeyboardEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/components/ui/button';
-import { Textarea } from '@/shared/components/ui/textarea';
+import { Button } from '@/shared/ui/button';
+import { Textarea } from '@/shared/ui/textarea';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, 
@@ -192,6 +192,17 @@ export default function DisputeDetailPage() {
     }
   };
 
+  const handleTextareaChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
@@ -202,9 +213,9 @@ export default function DisputeDetailPage() {
 
   if (!dispute) return null;
 
-  const statusConfig = STATUS_CONFIG[dispute.status] || STATUS_CONFIG.open;
+  const statusConfig = STATUS_CONFIG[dispute.status || 'open'] || STATUS_CONFIG.open;
   const isComplainant = dispute.complainant_id === user?.id;
-  const canSendMessage = ['open', 'under_review', 'mediation'].includes(dispute.status);
+  const canSendMessage = ['open', 'under_review', 'mediation'].includes(dispute.status || '');
 
   return (
     <div className="min-h-screen bg-[#FAF7F4]">
@@ -245,7 +256,7 @@ export default function DisputeDetailPage() {
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground" />
-                <span>Créé le {format(new Date(dispute.created_at), 'dd MMMM yyyy', { locale: fr })}</span>
+                <span>Créé le {dispute.created_at && format(new Date(dispute.created_at), 'dd MMMM yyyy', { locale: fr })}</span>
               </div>
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-muted-foreground" />
@@ -256,7 +267,7 @@ export default function DisputeDetailPage() {
               {dispute.assigned_agent_id && profiles[dispute.assigned_agent_id] && (
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                  <span>Médiateur: {profiles[dispute.assigned_agent_id].full_name}</span>
+                  <span>Médiateur: {profiles[dispute.assigned_agent_id]?.full_name || 'Agent'}</span>
                 </div>
               )}
             </div>
@@ -337,7 +348,7 @@ export default function DisputeDetailPage() {
                           {isMediator && ' (Médiateur)'}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {format(new Date(message.created_at), 'HH:mm', { locale: fr })}
+                          {message.created_at && format(new Date(message.created_at), 'HH:mm', { locale: fr })}
                         </span>
                       </div>
                       <div
@@ -366,15 +377,10 @@ export default function DisputeDetailPage() {
                 <Textarea
                   placeholder="Écrivez votre message..."
                   value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
+                  onChange={handleTextareaChange}
                   rows={2}
                   className="resize-none"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }
-                  }}
+                  onKeyDown={handleKeyDown}
                 />
                 <Button
                   onClick={handleSendMessage}

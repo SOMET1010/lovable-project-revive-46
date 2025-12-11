@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog';
-import { Button } from '@/shared/components/ui/button';
-import { Textarea } from '@/shared/components/ui/textarea';
-import { Label } from '@/shared/components/ui/label';
+import { useState, ChangeEvent } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog';
+import { Button } from '@/shared/ui/button';
+import { Textarea } from '@/shared/ui/textarea';
+import { Label } from '@/shared/ui/label';
 import { Star, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { toast } from 'sonner';
 
 interface CreateReviewModalProps {
@@ -109,6 +109,10 @@ export default function CreateReviewModal({
     }
   };
 
+  const handleCommentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    setComment(e.target.value);
+  };
+
   const renderStars = (
     rating: number, 
     onRate: (r: number) => void, 
@@ -195,7 +199,7 @@ export default function CreateReviewModal({
               id="comment"
               placeholder="Partagez votre expérience en détail..."
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={handleCommentChange}
               rows={4}
               className="resize-none"
             />

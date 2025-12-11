@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { Button } from '@/shared/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import ReviewCard from './ReviewCard';
 import CreateReviewModal from './CreateReviewModal';
 import { Star, Plus, TrendingUp } from 'lucide-react';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/app/providers/AuthProvider';
+import type { Json } from '@/integrations/supabase/types';
 
 interface Review {
   id: string;
   rating: number;
   comment: string | null;
-  created_at: string | null;
+  created_at: string;
   reviewer_id: string;
   response: string | null;
   response_at: string | null;
   helpful_count: number | null;
   criteria_ratings: Record<string, number> | null;
+  reviewer_name?: string;
+  reviewer_avatar?: string | null;
+  is_verified?: boolean;
 }
 
 interface PropertyReviewsSectionProps {
@@ -72,14 +76,28 @@ export default function PropertyReviewsSection({
       if (error) throw error;
 
       const reviewsData = data || [];
-      setReviews(reviewsData);
+      
+      // Map data with proper types
+      const mappedReviews: Review[] = reviewsData.map(r => ({
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment,
+        created_at: r.created_at || new Date().toISOString(),
+        reviewer_id: r.reviewer_id,
+        response: r.response,
+        response_at: r.response_at,
+        helpful_count: r.helpful_count,
+        criteria_ratings: r.criteria_ratings as Record<string, number> | null
+      }));
+      
+      setReviews(mappedReviews);
 
       // Calculate stats
-      if (reviewsData.length > 0) {
-        const total = reviewsData.length;
-        const sum = reviewsData.reduce((acc, r) => acc + r.rating, 0);
+      if (mappedReviews.length > 0) {
+        const total = mappedReviews.length;
+        const sum = mappedReviews.reduce((acc, r) => acc + r.rating, 0);
         const distribution = [0, 0, 0, 0, 0];
-        reviewsData.forEach(r => {
+        mappedReviews.forEach(r => {
           if (r.rating >= 1 && r.rating <= 5) {
             distribution[r.rating - 1]++;
           }
@@ -92,7 +110,7 @@ export default function PropertyReviewsSection({
       }
 
       // Load reviewer profiles
-      const reviewerIds = reviewsData.map(r => r.reviewer_id);
+      const reviewerIds = mappedReviews.map(r => r.reviewer_id);
       if (reviewerIds.length > 0) {
         const { data: profilesData } = await supabase.rpc('get_public_profiles_safe', {
           profile_user_ids: reviewerIds
@@ -119,7 +137,8 @@ export default function PropertyReviewsSection({
 
   const handleHelpful = async (reviewId: string) => {
     try {
-      await supabase.from('reviews').update({ helpful_count: (reviews.find(r => r.id === reviewId)?.helpful_count || 0) + 1 }).eq('id', reviewId);
+      const currentReview = reviews.find(r => r.id === reviewId);
+      await supabase.from('reviews').update({ helpful_count: (currentReview?.helpful_count || 0) + 1 }).eq('id', reviewId);
       loadReviews();
     } catch (error) {
       console.error('Erreur:', error);
@@ -158,7 +177,7 @@ export default function PropertyReviewsSection({
             {/* Distribution */}
             <div className="hidden md:block space-y-1">
               {[5, 4, 3, 2, 1].map((rating) => {
-                const count = stats.distribution[rating - 1];
+                const count = stats.distribution[rating - 1] ?? 0;
                 const percentage = stats.total > 0 ? (count / stats.total) * 100 : 0;
                 return (
                   <div key={rating} className="flex items-center gap-2">

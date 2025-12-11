@@ -95,3 +95,12 @@ verify_jwt = false
 
 [functions.complete-intervention]
 verify_jwt = false
+
+[functions.create-dispute]
+verify_jwt = true
+
+[functions.resolve-dispute]
+verify_jwt = true
+
+[functions.escalate-dispute]
+verify_jwt = true
