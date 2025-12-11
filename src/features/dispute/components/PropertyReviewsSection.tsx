@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui';
 import ReviewCard from './ReviewCard';
 import CreateReviewModal from './CreateReviewModal';
 import { Star, Plus, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import type { Json } from '@/integrations/supabase/types';
 
 interface Review {
   id: string;
@@ -98,8 +96,9 @@ export default function PropertyReviewsSection({
         const sum = mappedReviews.reduce((acc, r) => acc + r.rating, 0);
         const distribution = [0, 0, 0, 0, 0];
         mappedReviews.forEach(r => {
-          if (r.rating >= 1 && r.rating <= 5) {
-            distribution[r.rating - 1]++;
+          const index = r.rating - 1;
+          if (r.rating >= 1 && r.rating <= 5 && distribution[index] !== undefined) {
+            distribution[index] = (distribution[index] ?? 0) + 1;
           }
         });
         setStats({
@@ -271,6 +270,7 @@ export default function PropertyReviewsSection({
                 key={review.id}
                 review={{
                   ...review,
+                  helpful_count: review.helpful_count ?? undefined,
                   reviewer_name: profile?.full_name,
                   reviewer_avatar: profile?.avatar_url,
                   is_verified: profile?.is_verified,

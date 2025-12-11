@@ -1,8 +1,5 @@
 import { useState, ChangeEvent } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog';
-import { Button } from '@/shared/ui/button';
-import { Textarea } from '@/shared/ui/textarea';
-import { Label } from '@/shared/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Textarea, Label } from '@/shared/ui';
 import { Star, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';

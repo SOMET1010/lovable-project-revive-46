@@ -2,8 +2,7 @@ import { useState, useEffect, useRef, ChangeEvent, KeyboardEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/shared/ui/button';
-import { Textarea } from '@/shared/ui/textarea';
+import { Button, Textarea } from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   ArrowLeft, 
@@ -213,7 +212,7 @@ export default function DisputeDetailPage() {
 
   if (!dispute) return null;
 
-  const statusConfig = STATUS_CONFIG[dispute.status || 'open'] || STATUS_CONFIG.open;
+  const statusConfig = STATUS_CONFIG[dispute.status || 'open'] ?? STATUS_CONFIG['open'];
   const isComplainant = dispute.complainant_id === user?.id;
   const canSendMessage = ['open', 'under_review', 'mediation'].includes(dispute.status || '');
 
@@ -238,8 +237,8 @@ export default function DisputeDetailPage() {
                   <span className="text-sm font-mono text-muted-foreground">
                     {dispute.dispute_number}
                   </span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig.bgColor} ${statusConfig.color}`}>
-                    {statusConfig.label}
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig?.bgColor ?? ''} ${statusConfig?.color ?? ''}`}>
+                    {statusConfig?.label ?? 'Inconnu'}
                   </span>
                   {dispute.priority === 'urgent' && (
                     <span className="px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
