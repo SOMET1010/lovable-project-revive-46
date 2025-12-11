@@ -54,6 +54,7 @@ export type Database = {
         Row: {
           address: string | null
           agency_name: string
+          avg_conversion_rate: number | null
           city: string | null
           commission_rate: number | null
           created_at: string | null
@@ -62,17 +63,25 @@ export type Database = {
           id: string
           is_verified: boolean | null
           logo_url: string | null
+          monthly_target: number | null
           phone: string | null
           registration_number: string | null
+          settings: Json | null
           status: string | null
+          subscription_expires_at: string | null
+          subscription_tier: string | null
+          total_agents: number | null
+          total_properties_managed: number | null
           updated_at: string | null
           user_id: string
           verified_at: string | null
           website: string | null
+          ytd_revenue: number | null
         }
         Insert: {
           address?: string | null
           agency_name: string
+          avg_conversion_rate?: number | null
           city?: string | null
           commission_rate?: number | null
           created_at?: string | null
@@ -81,17 +90,25 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           logo_url?: string | null
+          monthly_target?: number | null
           phone?: string | null
           registration_number?: string | null
+          settings?: Json | null
           status?: string | null
+          subscription_expires_at?: string | null
+          subscription_tier?: string | null
+          total_agents?: number | null
+          total_properties_managed?: number | null
           updated_at?: string | null
           user_id: string
           verified_at?: string | null
           website?: string | null
+          ytd_revenue?: number | null
         }
         Update: {
           address?: string | null
           agency_name?: string
+          avg_conversion_rate?: number | null
           city?: string | null
           commission_rate?: number | null
           created_at?: string | null
@@ -100,15 +117,101 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           logo_url?: string | null
+          monthly_target?: number | null
           phone?: string | null
           registration_number?: string | null
+          settings?: Json | null
           status?: string | null
+          subscription_expires_at?: string | null
+          subscription_tier?: string | null
+          total_agents?: number | null
+          total_properties_managed?: number | null
           updated_at?: string | null
           user_id?: string
           verified_at?: string | null
           website?: string | null
+          ytd_revenue?: number | null
         }
         Relationships: []
+      }
+      agency_agents: {
+        Row: {
+          agency_id: string
+          bio: string | null
+          certifications: Json | null
+          commission_split: number | null
+          created_at: string | null
+          email: string | null
+          hire_date: string
+          id: string
+          phone: string | null
+          role: string | null
+          specialties: Json | null
+          status: string | null
+          target_monthly: number | null
+          termination_date: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agency_id: string
+          bio?: string | null
+          certifications?: Json | null
+          commission_split?: number | null
+          created_at?: string | null
+          email?: string | null
+          hire_date?: string
+          id?: string
+          phone?: string | null
+          role?: string | null
+          specialties?: Json | null
+          status?: string | null
+          target_monthly?: number | null
+          termination_date?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agency_id?: string
+          bio?: string | null
+          certifications?: Json | null
+          commission_split?: number | null
+          created_at?: string | null
+          email?: string | null
+          hire_date?: string
+          id?: string
+          phone?: string | null
+          role?: string | null
+          specialties?: Json | null
+          status?: string | null
+          target_monthly?: number | null
+          termination_date?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_agents_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_agents_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_agents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       agency_mandates: {
         Row: {
@@ -234,6 +337,275 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agency_transactions: {
+        Row: {
+          agency_id: string
+          agency_share: number
+          agent_id: string | null
+          agent_share: number | null
+          created_at: string | null
+          description: string | null
+          gross_amount: number
+          id: string
+          lease_id: string | null
+          paid_at: string | null
+          payment_reference: string | null
+          property_id: string | null
+          status: string | null
+          transaction_date: string | null
+          transaction_type: string
+          validated_at: string | null
+          validated_by: string | null
+        }
+        Insert: {
+          agency_id: string
+          agency_share: number
+          agent_id?: string | null
+          agent_share?: number | null
+          created_at?: string | null
+          description?: string | null
+          gross_amount: number
+          id?: string
+          lease_id?: string | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          property_id?: string | null
+          status?: string | null
+          transaction_date?: string | null
+          transaction_type: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Update: {
+          agency_id?: string
+          agency_share?: number
+          agent_id?: string | null
+          agent_share?: number | null
+          created_at?: string | null
+          description?: string | null
+          gross_amount?: number
+          id?: string
+          lease_id?: string | null
+          paid_at?: string | null
+          payment_reference?: string | null
+          property_id?: string | null
+          status?: string | null
+          transaction_date?: string | null
+          transaction_type?: string
+          validated_at?: string | null
+          validated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_transactions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_transactions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_transactions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agency_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_transactions_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_transactions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_transactions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_activities: {
+        Row: {
+          activity_type: string
+          agent_id: string
+          created_at: string | null
+          description: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          activity_type: string
+          agent_id: string
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          activity_type?: string
+          agent_id?: string
+          created_at?: string | null
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_activities_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agency_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_performance_targets: {
+        Row: {
+          actual_leases: number | null
+          actual_revenue: number | null
+          actual_visits: number | null
+          agent_id: string
+          bonus_earned: number | null
+          created_at: string | null
+          id: string
+          period_end: string
+          period_start: string
+          target_leases: number | null
+          target_revenue: number | null
+          target_visits: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          actual_leases?: number | null
+          actual_revenue?: number | null
+          actual_visits?: number | null
+          agent_id: string
+          bonus_earned?: number | null
+          created_at?: string | null
+          id?: string
+          period_end: string
+          period_start: string
+          target_leases?: number | null
+          target_revenue?: number | null
+          target_visits?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          actual_leases?: number | null
+          actual_revenue?: number | null
+          actual_visits?: number | null
+          agent_id?: string
+          bonus_earned?: number | null
+          created_at?: string | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          target_leases?: number | null
+          target_revenue?: number | null
+          target_visits?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_performance_targets_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agency_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_registration_requests: {
+        Row: {
+          agency_id: string
+          applicant_email: string
+          applicant_name: string
+          applicant_phone: string
+          certifications: Json | null
+          created_at: string | null
+          cv_url: string | null
+          id: string
+          motivation: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          specialties: Json | null
+          status: string | null
+          years_experience: number | null
+        }
+        Insert: {
+          agency_id: string
+          applicant_email: string
+          applicant_name: string
+          applicant_phone: string
+          certifications?: Json | null
+          created_at?: string | null
+          cv_url?: string | null
+          id?: string
+          motivation?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          specialties?: Json | null
+          status?: string | null
+          years_experience?: number | null
+        }
+        Update: {
+          agency_id?: string
+          applicant_email?: string
+          applicant_name?: string
+          applicant_phone?: string
+          certifications?: Json | null
+          created_at?: string | null
+          cv_url?: string | null
+          id?: string
+          motivation?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          specialties?: Json | null
+          status?: string | null
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_registration_requests_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_registration_requests_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agencies"
             referencedColumns: ["id"]
           },
         ]
@@ -2086,10 +2458,12 @@ export type Database = {
       properties: {
         Row: {
           address: string | null
+          agency_id: string | null
           amenities: string[] | null
           ansut_certificate_url: string | null
           ansut_verification_date: string | null
           ansut_verified: boolean | null
+          assigned_agent_id: string | null
           avg_response_time_hours: number | null
           bathrooms: number | null
           bedrooms: number | null
@@ -2124,10 +2498,12 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          agency_id?: string | null
           amenities?: string[] | null
           ansut_certificate_url?: string | null
           ansut_verification_date?: string | null
           ansut_verified?: boolean | null
+          assigned_agent_id?: string | null
           avg_response_time_hours?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
@@ -2162,10 +2538,12 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          agency_id?: string | null
           amenities?: string[] | null
           ansut_certificate_url?: string | null
           ansut_verification_date?: string | null
           ansut_verified?: boolean | null
+          assigned_agent_id?: string | null
           avg_response_time_hours?: number | null
           bathrooms?: number | null
           bedrooms?: number | null
@@ -2205,6 +2583,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "properties_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_assigned_agent_id_fkey"
+            columns: ["assigned_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agency_agents"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2264,6 +2663,94 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      property_assignments: {
+        Row: {
+          agency_id: string
+          agent_id: string
+          assigned_by: string | null
+          assignment_type: string | null
+          commission_override: number | null
+          created_at: string | null
+          end_date: string | null
+          id: string
+          notes: string | null
+          property_id: string
+          start_date: string | null
+          status: string | null
+        }
+        Insert: {
+          agency_id: string
+          agent_id: string
+          assigned_by?: string | null
+          assignment_type?: string | null
+          commission_override?: number | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          property_id: string
+          start_date?: string | null
+          status?: string | null
+        }
+        Update: {
+          agency_id?: string
+          agent_id?: string
+          assigned_by?: string | null
+          assignment_type?: string | null
+          commission_override?: number | null
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          notes?: string | null
+          property_id?: string
+          start_date?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_assignments_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_assignments_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "public_agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_assignments_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agency_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "property_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_assignments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       property_documents: {
         Row: {
@@ -3675,6 +4162,22 @@ export type Database = {
       generate_otp: { Args: never; Returns: string }
       generate_receipt_number: { Args: never; Returns: string }
       generate_reset_token: { Args: never; Returns: string }
+      get_agency_stats: { Args: { p_agency_id: string }; Returns: Json }
+      get_agent_commissions: {
+        Args: { p_agent_id: string; p_end_date?: string; p_start_date?: string }
+        Returns: Json
+      }
+      get_agent_leaderboard: {
+        Args: { p_agency_id: string; p_limit?: number }
+        Returns: {
+          agent_id: string
+          agent_name: string
+          avatar_url: string
+          rank: number
+          total_leases: number
+          total_revenue: number
+        }[]
+      }
       get_dispute_stats: { Args: { p_user_id?: string }; Returns: Json }
       get_owner_properties_summary: {
         Args: { p_owner_id: string }
