@@ -110,9 +110,14 @@ export function NativeCameraUpload({
 
     setIsProcessing(true);
     try {
+      // Process all files first, then update state once
+      const processedFiles: File[] = [];
+      const processedPreviews: string[] = [];
+
       for (const file of selectedFiles) {
         // Validate file size
         if (file.size > maxSizeMB * 1024 * 1024) {
+          console.warn(`File ${file.name} exceeds ${maxSizeMB}MB limit, skipping`);
           continue;
         }
 
@@ -124,19 +129,46 @@ export function NativeCameraUpload({
         );
         const preview = await fileToDataUrl(compressedFile);
 
-        if (multiple) {
-          setFiles(prev => [...prev, compressedFile]);
-          setPreviews(prev => [...prev, preview]);
-        } else {
-          setFiles([compressedFile]);
-          setPreviews([preview]);
-          onImageCaptured(compressedFile, preview);
-          break;
-        }
+        processedFiles.push(compressedFile);
+        processedPreviews.push(preview);
+
+        // For single mode, only process first file
+        if (!multiple) break;
       }
 
-      if (multiple && files.length > 0) {
-        onMultipleImages?.(files, previews);
+      if (processedFiles.length === 0) {
+        return;
+      }
+
+      if (multiple) {
+        // Update state with all new files
+        setFiles(prev => {
+          const newFiles = [...prev, ...processedFiles];
+          return newFiles;
+        });
+        setPreviews(prev => {
+          const newPreviews = [...prev, ...processedPreviews];
+          return newPreviews;
+        });
+        // Call callback with ALL files (existing + new) using functional update pattern
+        setFiles(currentFiles => {
+          setPreviews(currentPreviews => {
+            // Use setTimeout to ensure state is updated before callback
+            setTimeout(() => {
+              onMultipleImages?.(currentFiles, currentPreviews);
+            }, 0);
+            return currentPreviews;
+          });
+          return currentFiles;
+        });
+      } else {
+        setFiles(processedFiles);
+        setPreviews(processedPreviews);
+        const firstFile = processedFiles[0];
+        const firstPreview = processedPreviews[0];
+        if (firstFile && firstPreview) {
+          onImageCaptured(firstFile, firstPreview);
+        }
       }
     } finally {
       setIsProcessing(false);

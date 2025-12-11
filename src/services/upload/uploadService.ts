@@ -16,7 +16,7 @@ export interface UploadResult {
 }
 
 export class UploadService {
-  static async uploadFile(options: UploadOptions): Promise<UploadResult> {
+  static async uploadFile(options: UploadOptions, retryCount = 0): Promise<UploadResult> {
     const {
       bucket,
       folder = '',
@@ -25,6 +25,7 @@ export class UploadService {
       maxSizeMB = 10,
       allowedTypes = []
     } = options;
+    const MAX_RETRIES = 2;
 
     try {
       if (maxSizeMB && file.size > maxSizeMB * 1024 * 1024) {
@@ -60,7 +61,15 @@ export class UploadService {
         });
 
       if (error) {
-        console.error('Upload error:', error);
+        console.error(`Upload error (attempt ${retryCount + 1}):`, error);
+        
+        // Retry on network/timeout errors
+        if (retryCount < MAX_RETRIES && (error.message?.includes('timeout') || error.message?.includes('network'))) {
+          console.log(`Retrying upload... (${retryCount + 1}/${MAX_RETRIES})`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+          return this.uploadFile(options, retryCount + 1);
+        }
+        
         return {
           url: '',
           path: '',
@@ -78,7 +87,15 @@ export class UploadService {
         error: undefined
       };
     } catch (err: any) {
-      console.error('Upload exception:', err);
+      console.error(`Upload exception (attempt ${retryCount + 1}):`, err);
+      
+      // Retry on network errors
+      if (retryCount < MAX_RETRIES) {
+        console.log(`Retrying upload after exception... (${retryCount + 1}/${MAX_RETRIES})`);
+        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+        return this.uploadFile(options, retryCount + 1);
+      }
+      
       return {
         url: '',
         path: '',
