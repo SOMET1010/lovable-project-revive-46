@@ -610,6 +610,36 @@ export type Database = {
           },
         ]
       }
+      analytics_snapshots: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          metrics: Json
+          snapshot_date: string
+          snapshot_type: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          metrics?: Json
+          snapshot_date: string
+          snapshot_type: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          metrics?: Json
+          snapshot_date?: string
+          snapshot_type?: string
+        }
+        Relationships: []
+      }
       api_keys: {
         Row: {
           api_key: string
@@ -887,6 +917,84 @@ export type Database = {
           submitted_at?: string | null
         }
         Relationships: []
+      }
+      departure_notices: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          departure_date: string
+          deposit_deductions: Json | null
+          deposit_return_amount: number | null
+          deposit_returned_at: string | null
+          exit_inventory_id: string | null
+          exit_inventory_scheduled_at: string | null
+          id: string
+          initiated_by: string
+          lease_id: string
+          notice_date: string
+          notice_document_url: string | null
+          reason: string | null
+          reason_details: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          departure_date: string
+          deposit_deductions?: Json | null
+          deposit_return_amount?: number | null
+          deposit_returned_at?: string | null
+          exit_inventory_id?: string | null
+          exit_inventory_scheduled_at?: string | null
+          id?: string
+          initiated_by: string
+          lease_id: string
+          notice_date: string
+          notice_document_url?: string | null
+          reason?: string | null
+          reason_details?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          departure_date?: string
+          deposit_deductions?: Json | null
+          deposit_return_amount?: number | null
+          deposit_returned_at?: string | null
+          exit_inventory_id?: string | null
+          exit_inventory_scheduled_at?: string | null
+          id?: string
+          initiated_by?: string
+          lease_id?: string
+          notice_date?: string
+          notice_document_url?: string | null
+          reason?: string | null
+          reason_details?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departure_notices_exit_inventory_id_fkey"
+            columns: ["exit_inventory_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "departure_notices_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       digital_certificates: {
         Row: {
@@ -1406,6 +1514,106 @@ export type Database = {
           },
         ]
       }
+      inventory_reports: {
+        Row: {
+          created_at: string
+          damages: Json
+          general_condition: string | null
+          id: string
+          inspection_date: string
+          inspector_id: string | null
+          inspector_signature_url: string | null
+          inspector_signed_at: string | null
+          keys_inventory: Json
+          lease_id: string
+          observations: string | null
+          pdf_url: string | null
+          photos: Json
+          property_id: string
+          report_type: string
+          rooms: Json
+          status: string
+          tenant_present: boolean | null
+          tenant_signature_url: string | null
+          tenant_signed_at: string | null
+          total_damages_cost: number | null
+          updated_at: string
+          utilities: Json
+        }
+        Insert: {
+          created_at?: string
+          damages?: Json
+          general_condition?: string | null
+          id?: string
+          inspection_date: string
+          inspector_id?: string | null
+          inspector_signature_url?: string | null
+          inspector_signed_at?: string | null
+          keys_inventory?: Json
+          lease_id: string
+          observations?: string | null
+          pdf_url?: string | null
+          photos?: Json
+          property_id: string
+          report_type: string
+          rooms?: Json
+          status?: string
+          tenant_present?: boolean | null
+          tenant_signature_url?: string | null
+          tenant_signed_at?: string | null
+          total_damages_cost?: number | null
+          updated_at?: string
+          utilities?: Json
+        }
+        Update: {
+          created_at?: string
+          damages?: Json
+          general_condition?: string | null
+          id?: string
+          inspection_date?: string
+          inspector_id?: string | null
+          inspector_signature_url?: string | null
+          inspector_signed_at?: string | null
+          keys_inventory?: Json
+          lease_id?: string
+          observations?: string | null
+          pdf_url?: string | null
+          photos?: Json
+          property_id?: string
+          report_type?: string
+          rooms?: Json
+          status?: string
+          tenant_present?: boolean | null
+          tenant_signature_url?: string | null
+          tenant_signed_at?: string | null
+          total_damages_cost?: number | null
+          updated_at?: string
+          utilities?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_reports_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_reports_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "public_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lease_contracts: {
         Row: {
           ansut_certified_at: string | null
@@ -1553,6 +1761,68 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "lease_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lease_renewals: {
+        Row: {
+          created_at: string
+          finalized_at: string | null
+          id: string
+          lease_id: string
+          original_end_date: string
+          owner_notes: string | null
+          owner_response_at: string | null
+          proposed_end_date: string
+          proposed_rent: number | null
+          reminder_sent_at: string | null
+          rent_increase_percent: number | null
+          status: string
+          tenant_notes: string | null
+          tenant_response_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          finalized_at?: string | null
+          id?: string
+          lease_id: string
+          original_end_date: string
+          owner_notes?: string | null
+          owner_response_at?: string | null
+          proposed_end_date: string
+          proposed_rent?: number | null
+          reminder_sent_at?: string | null
+          rent_increase_percent?: number | null
+          status?: string
+          tenant_notes?: string | null
+          tenant_response_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          finalized_at?: string | null
+          id?: string
+          lease_id?: string
+          original_end_date?: string
+          owner_notes?: string | null
+          owner_response_at?: string | null
+          proposed_end_date?: string
+          proposed_rent?: number | null
+          reminder_sent_at?: string | null
+          rent_increase_percent?: number | null
+          status?: string
+          tenant_notes?: string | null
+          tenant_response_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lease_renewals_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
             referencedColumns: ["id"]
           },
         ]
@@ -4179,8 +4449,16 @@ export type Database = {
         }[]
       }
       get_dispute_stats: { Args: { p_user_id?: string }; Returns: Json }
+      get_owner_analytics: {
+        Args: { p_end_date?: string; p_owner_id: string; p_start_date?: string }
+        Returns: Json
+      }
       get_owner_properties_summary: {
         Args: { p_owner_id: string }
+        Returns: Json
+      }
+      get_platform_analytics: {
+        Args: { p_end_date?: string; p_start_date?: string }
         Returns: Json
       }
       get_platform_stats: { Args: never; Returns: Json }
