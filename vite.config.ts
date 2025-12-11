@@ -1,14 +1,22 @@
-// Force complete rebuild - 2025-12-11T19:00:00Z - Security Audit Fixes
+// Force complete rebuild - 2025-12-11T20:00:00Z - Bundle Analysis + Security Audit Fixes
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import { componentTagger } from "lovable-tagger";
+import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === 'development' && componentTagger(),
+    // Bundle visualizer - generates stats.html on build
+    mode === 'production' && visualizer({
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+      filename: 'dist/stats.html'
+    }),
   ].filter(Boolean),
   server: {
     host: "::",
