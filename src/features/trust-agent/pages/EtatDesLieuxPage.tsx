@@ -22,6 +22,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/shared/hooks/useSafeToast';
 import type { Json } from '@/integrations/supabase/types';
+import { SignatureSection, type SignaturesState } from '../components/SignatureSection';
 
 interface RoomItem {
   id: string;
@@ -36,7 +37,8 @@ interface EtatDesLieuxData {
   date: string;
   rooms: RoomItem[];
   generalNotes: string;
-  signature: boolean;
+  signatures: SignaturesState;
+  validatedAt?: string;
 }
 
 const defaultRooms: RoomItem[] = [
@@ -67,7 +69,7 @@ export default function EtatDesLieuxPage() {
     date: new Date().toISOString().split('T')?.[0] ?? '',
     rooms: defaultRooms,
     generalNotes: '',
-    signature: false
+    signatures: {}
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -305,33 +307,63 @@ export default function EtatDesLieuxPage() {
         </Card>
 
         {/* Signature Section */}
+        <div className="mt-6">
+          <SignatureSection
+            signatures={etatDesLieux.signatures}
+            onSignaturesChange={(signatures) => 
+              setEtatDesLieux(prev => ({ ...prev, signatures }))
+            }
+            readOnly={!!etatDesLieux.validatedAt}
+          />
+        </div>
+
+        {/* Validation Button */}
         <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Validation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-muted rounded-lg">
               <div>
-                <p className="font-medium">État des lieux complété</p>
+                <p className="font-medium">Finaliser l'état des lieux</p>
                 <p className="text-sm text-muted-foreground">
-                  En validant, vous confirmez l'exactitude des informations
+                  {progress < 100 
+                    ? `Complétez toutes les pièces (${progress}% fait)`
+                    : !etatDesLieux.signatures.proprietaire?.dataUrl || !etatDesLieux.signatures.locataire?.dataUrl
+                    ? 'Les deux signatures sont requises'
+                    : 'Prêt pour validation finale'}
                 </p>
               </div>
               <Button 
                 onClick={() => {
-                  setEtatDesLieux(prev => ({ ...prev, signature: true }));
+                  setEtatDesLieux(prev => ({ 
+                    ...prev, 
+                    validatedAt: new Date().toISOString() 
+                  }));
                   saveEtatDesLieux();
+                  toast.success('État des lieux validé avec les signatures');
                 }}
-                disabled={progress < 100}
+                disabled={
+                  progress < 100 || 
+                  !etatDesLieux.signatures.proprietaire?.dataUrl || 
+                  !etatDesLieux.signatures.locataire?.dataUrl
+                }
+                className="whitespace-nowrap"
               >
                 <Check className="h-4 w-4 mr-2" />
                 Valider l'état des lieux
               </Button>
             </div>
-            {progress < 100 && (
-              <p className="text-sm text-muted-foreground mt-2 text-center">
-                Complétez toutes les pièces pour pouvoir valider
-              </p>
+            
+            {etatDesLieux.validatedAt && (
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  ✓ Validé le {new Date(etatDesLieux.validatedAt).toLocaleDateString('fr-FR', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </p>
+              </div>
             )}
           </CardContent>
         </Card>

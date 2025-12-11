@@ -103,3 +103,6 @@ export { FeatureGate } from './FeatureGate';
 export { default as MapboxMapGated } from './MapboxMapGated';
 export { default as ElectronicSignatureGated } from './ElectronicSignatureGated';
 export { default as MobileMoneyGated } from './MobileMoneyGated';
+
+// Signature components
+export { SignaturePad } from './SignaturePad';
