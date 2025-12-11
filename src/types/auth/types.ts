@@ -116,7 +116,6 @@ export interface PhoneVerificationStatus {
 export interface IdentityVerificationStatus {
   verified: boolean;
   oneci_verified: boolean;
-  cnam_verified: boolean;
   face_verified: boolean;
   verified_at?: string;
 }

@@ -3,7 +3,7 @@ import { CheckCircle, XCircle, Clock, AlertCircle } from 'lucide-react';
 import { Badge } from './badge';
 
 interface VerificationBadgeProps {
-  type: 'oneci' | 'cnam' | 'face';
+  type: 'oneci' | 'face';
   status: 'verified' | 'pending' | 'failed' | 'not_started' | null;
 }
 
@@ -12,8 +12,6 @@ const VerificationBadge: React.FC<VerificationBadgeProps> = ({ type, status }) =
     switch (type) {
       case 'oneci':
         return 'ONECI';
-      case 'cnam':
-        return 'CNAM';
       case 'face':
         return 'Vérification faciale';
       default:

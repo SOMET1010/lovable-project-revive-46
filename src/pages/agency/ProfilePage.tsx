@@ -38,8 +38,7 @@ interface AgencyProfile {
   user_type: string | null;
   is_verified: boolean | null;
   oneci_verified: boolean | null;
-  cnam_verified: boolean | null;
-  trust_score: number | null;
+    trust_score: number | null;
   agency_name?: string | null;
   agency_logo?: string | null;
   agency_description?: string | null;

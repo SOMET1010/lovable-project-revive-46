@@ -28,8 +28,7 @@ interface TenantProfile {
   user_type: string | null;
   is_verified: boolean | null;
   oneci_verified: boolean | null;
-  cnam_verified: boolean | null;
-  trust_score: number | null;
+    trust_score: number | null;
   tenant_score?: number;
   rental_history_count?: number;
   applications_count?: number;
@@ -402,12 +401,7 @@ export default function EnhancedProfilePage() {
                   description="Carte d'identité vérifiée"
                   verified={profile?.oneci_verified}
                 />
-                <VerificationItem
-                  title="Vérification CNAM"
-                  description="Statut professionnel vérifié"
-                  verified={profile?.cnam_verified}
-                />
-              </div>
+                              </div>
 
               {!profile?.oneci_verified && (
                 <div className="mt-8">
@@ -454,7 +448,6 @@ export default function EnhancedProfilePage() {
               </div>
               <div className="mt-6">
                 <Button className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
                   Voir l'historique complet
                 </Button>
               </div>

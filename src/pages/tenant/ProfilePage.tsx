@@ -26,7 +26,6 @@ interface Profile {
   user_type: string | null;
   is_verified: boolean | null;
   oneci_verified: boolean | null;
-  cnam_verified: boolean | null;
   trust_score: number | null;
 }
 
@@ -105,8 +104,7 @@ export default function ProfilePage() {
         user_type: data.user_type,
         is_verified: data.is_verified,
         oneci_verified: data.oneci_verified,
-        cnam_verified: data.cnam_verified,
-        trust_score: data.trust_score,
+                trust_score: data.trust_score,
       };
 
       setProfile(profileData);

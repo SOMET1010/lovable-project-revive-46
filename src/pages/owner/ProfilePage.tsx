@@ -25,7 +25,6 @@ interface Profile {
   user_type: string | null;
   is_verified: boolean | null;
   oneci_verified: boolean | null;
-  cnam_verified: boolean | null;
   trust_score: number | null;
   agency_name?: string | null;
   agency_logo?: string | null;
@@ -497,11 +496,6 @@ export default function OwnerProfilePage() {
                 title="Vérification ONECI"
                 description="Carte d'identité vérifiée"
                 verified={profile?.oneci_verified}
-              />
-              <VerificationItem
-                title="Vérification CNAM"
-                description="Statut professionnel vérifié"
-                verified={profile?.cnam_verified}
               />
             </div>
           )}

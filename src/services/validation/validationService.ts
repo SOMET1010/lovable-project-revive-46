@@ -1,6 +1,6 @@
 /**
  * ValidationService - Service centralisé de validation pour Mon Toit
- * Gère toutes les validations : email, téléphone CI, ONECI, CNAM, dates, nombres
+ * Gère toutes les validations : email, téléphone CI, ONECI, dates, nombres
  */
 
 export interface ValidationResult {
@@ -257,23 +257,7 @@ export const ValidationService = {
     return { isValid: true };
   },
 
-  /**
-   * Valide un numéro CNAM (Assurance Maladie)
-   * Format: 10-15 chiffres
-   */
-  validateCNAMNumber(number: string): ValidationResult {
-    const cleaned = number.replace(/\s/g, '');
-    const cnamRegex = /^[0-9]{10,15}$/;
-
-    if (!cleaned) {
-      return { isValid: false, error: 'Le numéro CNAM est obligatoire' };
-    }
-    if (!cnamRegex.test(cleaned)) {
-      return { isValid: false, error: 'Numéro CNAM invalide (10-15 chiffres)' };
-    }
-    return { isValid: true };
-  },
-
+  
   // ============================================
   // VALIDATIONS DE FORMULAIRES COMPLETS
   // ============================================

@@ -179,8 +179,7 @@ export const REGEX_PATTERNS = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   PHONE_CI: /^[0-9]{10}$/,
   CNI: /^[0-9]{12}$/,
-  CNAM: /^[0-9]{10}$/,
-  PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
+    PASSWORD: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
 } as const;
 
 // Error Messages
@@ -189,8 +188,7 @@ export const ERROR_MESSAGES = {
   INVALID_EMAIL: 'Adresse email invalide',
   INVALID_PHONE: 'Numéro de téléphone invalide',
   INVALID_CNI: 'Numéro CNI invalide (12 chiffres)',
-  INVALID_CNAM: 'Numéro CNAM invalide (10 chiffres)',
-  PASSWORD_TOO_SHORT: 'Le mot de passe doit contenir au moins 8 caractères',
+    PASSWORD_TOO_SHORT: 'Le mot de passe doit contenir au moins 8 caractères',
   PASSWORD_MISMATCH: 'Les mots de passe ne correspondent pas',
   FILE_TOO_LARGE: 'Le fichier est trop volumineux (max 5MB)',
   INVALID_FILE_TYPE: 'Type de fichier non autorisé',
