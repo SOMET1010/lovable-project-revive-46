@@ -1,10 +1,10 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Card, CardContent } from '@/shared/ui/card';
-import { Badge } from '@/shared/ui/badge';
+import { 
+  Button, Input, Card, CardContent, Badge,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+} from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   Coins, Search, Download, TrendingUp, Clock,
@@ -12,13 +12,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select';
 
 interface Transaction {
   id: string;
@@ -376,12 +369,12 @@ export default function CommissionsPage() {
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
                             {tx.status === 'pending' && (
-                              <Button size="sm" variant="outline" onClick={() => handleValidate(tx.id)}>
+                              <Button size="small" variant="outline" onClick={() => handleValidate(tx.id)}>
                                 Valider
                               </Button>
                             )}
                             {tx.status === 'validated' && (
-                              <Button size="sm" onClick={() => handleMarkPaid(tx.id)} className="bg-green-600 hover:bg-green-700">
+                              <Button size="small" onClick={() => handleMarkPaid(tx.id)} className="bg-green-600 hover:bg-green-700">
                                 Marquer payée
                               </Button>
                             )}

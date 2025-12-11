@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Button } from '@/shared/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   FileBarChart, Download, TrendingUp, Users, Building2,

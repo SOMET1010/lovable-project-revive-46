@@ -1,11 +1,10 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Card, CardContent } from '@/shared/ui/card';
-import { Badge } from '@/shared/ui/badge';
-import { Textarea } from '@/shared/ui/textarea';
+import { 
+  Button, Input, Card, CardContent, Badge, Textarea,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter 
+} from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   UserPlus, Search, CheckCircle, XCircle,
@@ -13,13 +12,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/shared/ui/dialog';
 import type { Json } from '@/integrations/supabase/types';
 
 interface RegistrationRequest {
@@ -220,7 +212,7 @@ export default function RegistrationRequestsPage() {
             {['pending', 'approved', 'rejected', 'all'].map((status) => (
               <Button
                 key={status}
-                variant={statusFilter === status ? 'default' : 'outline'}
+                variant={statusFilter === status ? 'primary' : 'outline'}
                 onClick={() => setStatusFilter(status)}
                 className={statusFilter === status ? 'bg-[#F16522] hover:bg-[#D14E12]' : ''}
               >
@@ -279,7 +271,7 @@ export default function RegistrationRequestsPage() {
                     <div className="flex gap-2 ml-16 md:ml-0">
                       <Button
                         variant="outline"
-                        size="sm"
+                        size="small"
                         onClick={() => {
                           setSelectedRequest(request);
                           setShowDetailModal(true);
@@ -291,7 +283,7 @@ export default function RegistrationRequestsPage() {
                       {request.status === 'pending' && (
                         <>
                           <Button
-                            size="sm"
+                            size="small"
                             className="bg-green-600 hover:bg-green-700"
                             onClick={() => handleApprove(request)}
                             disabled={processing}
@@ -300,8 +292,8 @@ export default function RegistrationRequestsPage() {
                             Approuver
                           </Button>
                           <Button
-                            size="sm"
-                            variant="destructive"
+                            size="small"
+                            variant="danger"
                             onClick={() => {
                               setSelectedRequest(request);
                               setShowRejectModal(true);
@@ -373,12 +365,15 @@ export default function RegistrationRequestsPage() {
                 )}
 
                 {selectedRequest.cv_url && (
-                  <Button variant="outline" asChild>
-                    <a href={selectedRequest.cv_url} target="_blank" rel="noopener noreferrer">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Voir le CV
-                    </a>
-                  </Button>
+                  <a 
+                    href={selectedRequest.cv_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center px-4 py-2 border border-[#EFEBE9] rounded-md text-[#2C1810] hover:bg-[#FAF7F4] transition-colors"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Voir le CV
+                  </a>
                 )}
 
                 {selectedRequest.status === 'rejected' && selectedRequest.rejection_reason && (
@@ -393,7 +388,7 @@ export default function RegistrationRequestsPage() {
               {selectedRequest?.status === 'pending' && (
                 <>
                   <Button
-                    variant="destructive"
+                    variant="danger"
                     onClick={() => setShowRejectModal(true)}
                     disabled={processing}
                   >
@@ -434,7 +429,7 @@ export default function RegistrationRequestsPage() {
                 Annuler
               </Button>
               <Button 
-                variant="destructive" 
+                variant="danger" 
                 onClick={handleReject}
                 disabled={processing || !rejectionReason.trim()}
               >

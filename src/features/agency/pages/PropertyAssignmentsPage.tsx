@@ -1,28 +1,16 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Card, CardContent } from '@/shared/ui/card';
+import { 
+  Button, Input, Card, CardContent,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+} from '@/shared/ui';
 import { toast } from 'sonner';
 import { 
   Building2, Search, Plus, UserPlus, X, Home, 
   MapPin, Coins, User
 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/shared/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/ui/select';
 
 interface Assignment {
   id: string;
@@ -362,8 +350,8 @@ export default function PropertyAssignmentsPage() {
                   )}
                   <Button
                     variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+                    size="small"
+                    className="absolute top-2 right-2 bg-white/80 hover:bg-white p-2 min-h-0"
                     onClick={() => handleRemoveAssignment(assignment.id)}
                   >
                     <X className="w-4 h-4 text-red-500" />
