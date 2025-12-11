@@ -526,7 +526,7 @@ export function AddPropertyContent() {
 
       setSuccess(true);
       setTimeout(() => {
-        navigate(getDashboardRoute(profile?.user_type || 'proprietaire'));
+        navigate('/proprietaire/mes-biens');
       }, 3000);
     } catch (err: unknown) {
       const supabaseErr = err as { message?: string; details?: string; hint?: string };
@@ -1347,11 +1347,11 @@ export function AddPropertyContent() {
                   {loading || uploadingImages ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>{uploadingImages ? 'Upload des images...' : 'Publication...'}</span>
+                      <span>{uploadingImages ? 'Upload des images...' : (isEditMode ? 'Mise à jour...' : 'Publication...')}</span>
                     </>
                   ) : (
                     <>
-                      <Check className="w-5 h-5" /> Publier l'annonce
+                      <Check className="w-5 h-5" /> {isEditMode ? 'Mettre à jour l\'annonce' : 'Publier l\'annonce'}
                     </>
                   )}
                 </button>
