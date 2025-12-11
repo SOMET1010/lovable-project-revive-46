@@ -3,8 +3,21 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  User, Phone, MapPin, Shield, Camera, Save, CheckCircle, AlertCircle,
-  Building2, Home, FileText, TrendingUp, Users, Mail, Globe
+  User,
+  Phone,
+  MapPin,
+  Shield,
+  Camera,
+  Save,
+  CheckCircle,
+  AlertCircle,
+  Building2,
+  Home,
+  FileText,
+  TrendingUp,
+  Users,
+  Mail,
+  Globe,
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
@@ -106,10 +119,7 @@ export default function AgencyProfilePage() {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
+      const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
 
       if (error) throw error;
 
@@ -137,9 +147,7 @@ export default function AgencyProfilePage() {
         .upload(fileName, file, { upsert: true });
       if (uploadError) throw uploadError;
 
-      const { data: publicUrlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(fileName);
+      const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
       const publicUrl = publicUrlData?.publicUrl;
       if (!publicUrl) throw new Error('URL publique introuvable');
@@ -175,9 +183,7 @@ export default function AgencyProfilePage() {
         .upload(fileName, file, { upsert: true });
       if (uploadError) throw uploadError;
 
-      const { data: publicUrlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(fileName);
+      const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
       const publicUrl = publicUrlData?.publicUrl;
       if (!publicUrl) throw new Error('URL publique introuvable');
@@ -189,7 +195,7 @@ export default function AgencyProfilePage() {
       if (updateError) throw updateError;
 
       await loadProfile();
-      toast.success('Logo de l\'agence mis à jour');
+      toast.success("Logo de l'agence mis à jour");
     } catch (err) {
       console.error('Error uploading logo:', err);
       toast.error('Échec du téléchargement du logo');
@@ -199,9 +205,15 @@ export default function AgencyProfilePage() {
     }
   };
 
-  const displayName = (profile?.agency_name && profile.agency_name.trim()) ||
-                     (profile?.full_name && profile.full_name.trim()) ||
-                     'Utilisateur';
+  const displayName =
+    (profile?.agency_name && profile.agency_name.trim()) ||
+    (profile?.full_name && profile.full_name.trim()) ||
+    'Utilisateur';
+
+  const isAgencyUser =
+    profile?.user_type === 'agence' ||
+    profile?.user_type === 'agent' ||
+    authProfile?.user_type === 'agence';
 
   const tabs = [
     { id: 'infos', label: 'Informations', icon: User },
@@ -318,12 +330,7 @@ export default function AgencyProfilePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Email personnel
                 </label>
-                <Input
-                  type="email"
-                  value={profile?.email || ''}
-                  disabled
-                  className="bg-gray-50"
-                />
+                <Input type="email" value={profile?.email || ''} disabled className="bg-gray-50" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -337,9 +344,7 @@ export default function AgencyProfilePage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ville
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
                 <Input
                   type="text"
                   value={formData.city}
@@ -349,9 +354,7 @@ export default function AgencyProfilePage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Adresse
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
               <Input
                 type="text"
                 value={formData.address}
@@ -360,9 +363,7 @@ export default function AgencyProfilePage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bio
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
               <textarea
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                 rows={4}
@@ -372,11 +373,7 @@ export default function AgencyProfilePage() {
               />
             </div>
             <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={saving}
-                className="flex items-center gap-2"
-              >
+              <Button type="submit" disabled={saving} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
@@ -385,84 +382,103 @@ export default function AgencyProfilePage() {
         )}
 
         {activeTab === 'agency' && (
-          <form onSubmit={handleSaveProfile} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nom de l'agence
-              </label>
-              <Input
-                type="text"
-                value={formData.agency_name}
-                onChange={(e) => setFormData({ ...formData, agency_name: e.target.value })}
-                placeholder="Nom de votre agence"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Logo de l'agence
-              </label>
-              <div className="flex items-center gap-4">
-                {profile?.agency_logo ? (
-                  <img
-                    src={profile.agency_logo}
-                    alt="Logo agence"
-                    className="w-20 h-20 rounded-lg object-cover border"
-                  />
-                ) : (
-                  <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center border">
-                    <Building2 className="w-10 h-10 text-gray-400" />
-                  </div>
-                )}
-                <div>
-                  <label className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-                    <Camera className="w-4 h-4" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                      id="logo-upload"
-                    />
-                    {uploadingLogo ? 'Upload...' : 'Changer le logo'}
-                  </label>
+          <div className="space-y-6">
+            {!isAgencyUser && (
+              <div className="p-4 border border-amber-200 bg-amber-50 rounded-lg">
+                <p className="font-semibold text-amber-800 mb-2">Fonctionnalité agence</p>
+                <p className="text-amber-700 text-sm">
+                  Cet onglet permet de gérer les informations de votre agence. Vous semblez connecté
+                  en tant que propriétaire ; pour devenir agence, complétez votre inscription.
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <Button asChild variant="outline">
+                    <a href="/agence/inscription">Devenir une agence</a>
+                  </Button>
+                  <Button asChild>
+                    <a href="/proprietaire/mes-mandats">Voir mes mandats</a>
+                  </Button>
                 </div>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description de l'agence
-              </label>
-              <textarea
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                rows={4}
-                value={formData.agency_description}
-                onChange={(e) => setFormData({ ...formData, agency_description: e.target.value })}
-                placeholder="Décrivez votre agence, vos services et votre expertise..."
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Site web
-              </label>
-              <Input
-                type="url"
-                value={formData.agency_website}
-                onChange={(e) => setFormData({ ...formData, agency_website: e.target.value })}
-                placeholder="https://www.monagence.ci"
-              />
-            </div>
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={saving}
-                className="flex items-center gap-2"
-              >
-                <Save className="w-4 h-4" />
-                {saving ? 'Enregistrement...' : 'Enregistrer'}
-              </Button>
-            </div>
-          </form>
+            )}
+
+            <form onSubmit={handleSaveProfile} className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nom de l'agence
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.agency_name}
+                    onChange={(e) => setFormData({ ...formData, agency_name: e.target.value })}
+                    placeholder="Nom de votre agence"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Site web</label>
+                  <Input
+                    type="url"
+                    value={formData.agency_website}
+                    onChange={(e) => setFormData({ ...formData, agency_website: e.target.value })}
+                    placeholder="https://www.monagence.ci"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Logo de l'agence
+                </label>
+                <div className="flex items-center gap-4">
+                  {profile?.agency_logo ? (
+                    <img
+                      src={profile.agency_logo}
+                      alt="Logo agence"
+                      className="w-20 h-20 rounded-lg object-cover border"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center border">
+                      <Building2 className="w-10 h-10 text-gray-400" />
+                    </div>
+                  )}
+                  <div>
+                    <label className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                      <Camera className="w-4 h-4" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                        id="logo-upload"
+                      />
+                      {uploadingLogo ? 'Upload...' : 'Changer le logo'}
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description de l'agence
+                </label>
+                <textarea
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  rows={4}
+                  value={formData.agency_description}
+                  onChange={(e) => setFormData({ ...formData, agency_description: e.target.value })}
+                  placeholder="Décrivez votre agence, vos services et votre expertise..."
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={saving} className="flex items-center gap-2">
+                  <Save className="w-4 h-4" />
+                  {saving ? 'Enregistrement...' : 'Enregistrer'}
+                </Button>
+              </div>
+            </form>
+          </div>
         )}
 
         {activeTab === 'contact' && (
@@ -492,11 +508,7 @@ export default function AgencyProfilePage() {
               </div>
             </div>
             <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={saving}
-                className="flex items-center gap-2"
-              >
+              <Button type="submit" disabled={saving} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {saving ? 'Enregistrement...' : 'Enregistrer'}
               </Button>
@@ -516,11 +528,6 @@ export default function AgencyProfilePage() {
               title="Agrément ONECI"
               description="Agrément professionnel vérifié"
               verified={profile?.oneci_verified}
-            />
-            <VerificationItem
-              title="Vérification CNAM"
-              description="Statut professionnel vérifié"
-              verified={profile?.cnam_verified}
             />
           </div>
         )}
@@ -552,7 +559,9 @@ export default function AgencyProfilePage() {
                   <div>
                     <p className="text-sm text-gray-600">Revenus totaux</p>
                     <p className="text-2xl font-bold">
-                      {profile?.total_revenue ? `${profile.total_revenue.toLocaleString()} FCFA` : '0 FCFA'}
+                      {profile?.total_revenue
+                        ? `${profile.total_revenue.toLocaleString()} FCFA`
+                        : '0 FCFA'}
                     </p>
                   </div>
                   <TrendingUp className="w-8 h-8 text-green-500" />

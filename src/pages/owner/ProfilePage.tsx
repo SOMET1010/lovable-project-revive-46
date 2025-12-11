@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
   User, Phone, MapPin, Shield, Camera, Save, CheckCircle, AlertCircle,
@@ -37,6 +37,7 @@ interface Profile {
 export default function OwnerProfilePage() {
   const { user, profile: authProfile } = useAuth();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'infos');
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -212,6 +213,10 @@ export default function OwnerProfilePage() {
     { id: 'verification', label: 'Vérifications', icon: Shield },
     { id: 'stats', label: 'Statistiques', icon: TrendingUp },
   ];
+  const isOwnerOnly =
+    profile?.user_type === 'proprietaire' ||
+    profile?.user_type === 'owner' ||
+    authProfile?.user_type === 'proprietaire';
 
   if (loading) {
     return (
@@ -379,80 +384,105 @@ export default function OwnerProfilePage() {
             </form>
           )}
 
-          {activeTab === 'agency' && profile?.user_type !== 'proprietaire' && (
-            <form onSubmit={handleSaveProfile} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom de l'agence
-                </label>
-                <Input
-                  type="text"
-                  value={formData.agency_name}
-                  onChange={(e) => setFormData({ ...formData, agency_name: e.target.value })}
-                  placeholder="Nom de votre agence"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Logo de l'agence
-                </label>
-                <div className="flex items-center gap-4">
-                  {profile?.agency_logo ? (
-                    <img
-                      src={profile.agency_logo}
-                      alt="Logo agence"
-                      className="w-16 h-16 rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-8 h-8 text-gray-400" />
-                    </div>
-                  )}
-                  <div>
-                    <label className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-                      <Camera className="w-4 h-4" />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleLogoUpload}
-                        className="hidden"
-                        id="logo-upload"
-                      />
-                      {uploadingLogo ? 'Upload...' : 'Changer le logo'}
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleLogoUpload}
-                      className="hidden"
-                      id="logo-upload"
-                    />
+          {activeTab === 'agency' && (
+            <div className="space-y-6">
+              {isOwnerOnly && (
+                <div className="p-4 border border-amber-200 bg-amber-50 rounded-lg">
+                  <p className="font-semibold text-amber-800 mb-1">Fonctionnalité agence</p>
+                  <p className="text-amber-700 text-sm">
+                    Vous êtes identifié comme propriétaire. Pour activer les fonctionnalités agence
+                    (logo, identité et coordonnées d'agence), complétez vos informations ci-dessous
+                    ou créez un compte agence dédié.
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => navigate('/agence/inscription')}
+                      className="whitespace-nowrap"
+                    >
+                      Créer un compte agence
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => navigate('/proprietaire/mes-mandats')}
+                      className="whitespace-nowrap"
+                    >
+                      Voir mes mandats
+                    </Button>
                   </div>
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description de l'agence
-                </label>
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                  rows={4}
-                  value={formData.agency_description}
-                  onChange={(e) => setFormData({ ...formData, agency_description: e.target.value })}
-                  placeholder="Décrivez votre agence..."
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2"
-                >
-                  <Save className="w-4 h-4" />
-                  {saving ? 'Enregistrement...' : 'Enregistrer'}
-                </Button>
-              </div>
-            </form>
+              )}
+
+              <form onSubmit={handleSaveProfile} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nom de l'agence
+                  </label>
+                  <Input
+                    type="text"
+                    value={formData.agency_name}
+                    onChange={(e) => setFormData({ ...formData, agency_name: e.target.value })}
+                    placeholder="Nom de votre agence"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Logo de l'agence
+                  </label>
+                  <div className="flex items-center gap-4">
+                    {profile?.agency_logo ? (
+                      <img
+                        src={profile.agency_logo}
+                        alt="Logo agence"
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <Building2 className="w-8 h-8 text-gray-400" />
+                      </div>
+                    )}
+                    <div>
+                      <label className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                        <Camera className="w-4 h-4" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                          id="logo-upload"
+                        />
+                        {uploadingLogo ? 'Upload...' : 'Changer le logo'}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Description de l'agence
+                  </label>
+                  <textarea
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    rows={4}
+                    value={formData.agency_description}
+                    onChange={(e) =>
+                      setFormData({ ...formData, agency_description: e.target.value })
+                    }
+                    placeholder="Décrivez votre agence..."
+                  />
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    type="submit"
+                    disabled={saving}
+                    className="flex items-center gap-2"
+                  >
+                    <Save className="w-4 h-4" />
+                    {saving ? 'Enregistrement...' : 'Enregistrer'}
+                  </Button>
+                </div>
+              </form>
+            </div>
           )}
 
           {activeTab === 'verification' && (
