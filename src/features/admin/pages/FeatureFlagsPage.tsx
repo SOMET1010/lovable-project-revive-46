@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Flag, 
@@ -14,16 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { toast } from '@/shared/hooks/useSafeToast';
-
-interface FeatureFlag {
-  id: string;
-  feature_name: string;
-  is_enabled: boolean;
-  description: string | null;
-  config: Record<string, unknown> | null;
-  created_at: string;
-  updated_at: string;
-}
+import { useAllFeatureFlags, useInvalidateFeatureFlags, type FeatureFlagType } from '@/shared/hooks';
 
 const categoryIcons: Record<string, LucideIcon> = {
   verification: Shield,
@@ -45,43 +36,11 @@ const categoryLabels: Record<string, string> = {
 };
 
 export default function FeatureFlagsPage() {
-  const [flags, setFlags] = useState<FeatureFlag[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: flags = [], isLoading, refetch } = useAllFeatureFlags();
+  const invalidateFlags = useInvalidateFeatureFlags();
   const [toggling, setToggling] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadFlags();
-  }, []);
-
-  const loadFlags = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('feature_flags')
-        .select('*')
-        .order('feature_name');
-
-      if (error) throw error;
-      
-      const mappedFlags: FeatureFlag[] = (data || []).map(d => ({
-        id: d.id,
-        feature_name: d.feature_name,
-        is_enabled: d.is_enabled ?? false,
-        description: d.description,
-        config: d.config as Record<string, unknown> | null,
-        created_at: d.created_at ?? '',
-        updated_at: d.updated_at ?? '',
-      }));
-      
-      setFlags(mappedFlags);
-    } catch (err) {
-      console.error('Error loading feature flags:', err);
-      toast.error('Erreur lors du chargement des feature flags');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleFlag = async (flag: FeatureFlag) => {
+  const toggleFlag = async (flag: FeatureFlagType) => {
     setToggling(flag.id);
     try {
       const { error } = await supabase
@@ -92,7 +51,8 @@ export default function FeatureFlagsPage() {
       if (error) throw error;
       
       toast.success(`${flag.feature_name} ${!flag.is_enabled ? 'activé' : 'désactivé'}`);
-      loadFlags();
+      invalidateFlags(); // Invalidate cache to refresh all components using feature flags
+      refetch();
     } catch (err) {
       console.error('Error toggling flag:', err);
       toast.error('Erreur lors de la modification');
@@ -101,7 +61,7 @@ export default function FeatureFlagsPage() {
     }
   };
 
-  const getCategory = (flag: FeatureFlag): string => {
+  const getCategory = (flag: FeatureFlagType): string => {
     const config = flag.config;
     return (config?.['category'] as string) || 'default';
   };
@@ -111,9 +71,9 @@ export default function FeatureFlagsPage() {
     if (!acc[category]) acc[category] = [];
     acc[category].push(flag);
     return acc;
-  }, {} as Record<string, FeatureFlag[]>);
+  }, {} as Record<string, FeatureFlagType[]>);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-6">
         <div className="flex items-center justify-center h-64">
@@ -136,7 +96,7 @@ export default function FeatureFlagsPage() {
             Gérez l'activation des fonctionnalités de la plateforme
           </p>
         </div>
-        <Button onClick={loadFlags} variant="outline" size="small">
+        <Button onClick={() => refetch()} variant="outline" size="small">
           <RefreshCw className="w-4 h-4 mr-2" />
           Actualiser
         </Button>
@@ -191,6 +151,29 @@ export default function FeatureFlagsPage() {
           );
         })}
       </div>
+
+      {/* Usage Example */}
+      <div className="bg-muted/30 rounded-xl p-6 border border-border">
+        <h3 className="font-semibold text-foreground mb-3">Utilisation dans le code</h3>
+        <pre className="bg-card p-4 rounded-lg text-sm overflow-x-auto">
+{`// Vérifier un flag
+import { useFeatureFlag, FEATURE_FLAGS } from '@/shared/hooks';
+
+function MyComponent() {
+  const { isEnabled } = useFeatureFlag(FEATURE_FLAGS.AI_CHATBOT);
+  
+  if (!isEnabled) return null;
+  return <ChatbotWidget />;
+}
+
+// Ou avec le composant FeatureGate
+import { FeatureGate } from '@/shared/components';
+
+<FeatureGate feature="ai_chatbot">
+  <ChatbotWidget />
+</FeatureGate>`}
+        </pre>
+      </div>
     </div>
   );
 }
@@ -200,7 +183,7 @@ function FlagRow({
   toggling, 
   onToggle 
 }: { 
-  flag: FeatureFlag; 
+  flag: FeatureFlagType; 
   toggling: boolean;
   onToggle: () => void;
 }) {
