@@ -31,12 +31,12 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
     agent: '/profil',
   },
   addProperty: {
-    locataire: '/propriete/ajouter',
-    tenant: '/propriete/ajouter',
-    proprietaire: '/propriete/ajouter',
-    owner: '/propriete/ajouter',
-    agence: '/propriete/ajouter',
-    agent: '/propriete/ajouter',
+    locataire: '/proprietaire/ajouter-propriete',
+    tenant: '/proprietaire/ajouter-propriete',
+    proprietaire: '/proprietaire/ajouter-propriete',
+    owner: '/proprietaire/ajouter-propriete',
+    agence: '/proprietaire/ajouter-propriete',
+    agent: '/proprietaire/ajouter-propriete',
   },
   contracts: {
     locataire: '/mes-contrats',
@@ -69,12 +69,12 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
  */
 export function normalizeRole(role: string): UserRole {
   const roleMapping: Record<string, UserRole> = {
-    'locataire': 'locataire',
-    'tenant': 'tenant',
-    'proprietaire': 'proprietaire',
-    'owner': 'owner',
-    'agence': 'agence',
-    'agent': 'agent',
+    locataire: 'locataire',
+    tenant: 'tenant',
+    proprietaire: 'proprietaire',
+    owner: 'owner',
+    agence: 'agence',
+    agent: 'agent',
   };
 
   return roleMapping[role.toLowerCase()] || 'locataire';
@@ -92,7 +92,10 @@ export function getDashboardRoute(role: string | undefined): string {
 /**
  * Get route for a specific route type and role
  */
-export function getRoleRoute(routeType: keyof typeof ROLE_ROUTES, role: string | undefined): string {
+export function getRoleRoute(
+  routeType: keyof typeof ROLE_ROUTES,
+  role: string | undefined
+): string {
   if (!role) return ROLE_ROUTES[routeType].locataire;
   const normalizedRole = normalizeRole(role);
   return ROLE_ROUTES[routeType][normalizedRole] || ROLE_ROUTES[routeType].locataire;
@@ -102,10 +105,10 @@ export function getRoleRoute(routeType: keyof typeof ROLE_ROUTES, role: string |
  * Role aliases mapping
  */
 export const ROLE_ALIASES: Record<string, UserRole> = {
-  'locataire': 'locataire',
-  'tenant': 'tenant',
-  'proprietaire': 'proprietaire',
-  'owner': 'owner',
-  'agence': 'agence',
-  'agent': 'agent',
+  locataire: 'locataire',
+  tenant: 'tenant',
+  proprietaire: 'proprietaire',
+  owner: 'owner',
+  agence: 'agence',
+  agent: 'agent',
 };
