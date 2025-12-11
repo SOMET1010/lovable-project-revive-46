@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import type { Profile } from '@/types';
 
 export interface ScoreBreakdown {
   profileScore: number; // 0-100 (20% du total)
@@ -65,13 +66,13 @@ const VERIFICATION_POINTS = {
 };
 
 // Si l'edge function n'existe pas / renvoie 500, on évite de la rappeler
-let skipTenantScoring = true; // désactivé pour éviter les appels 500 tant que la fonction n'est pas dispo
+let skipTenantScoring = false; // activé par défaut, sera désactivé automatiquement en cas d'erreur
 
 export const ScoringService = {
   /**
    * Calcule le score de profil (complétude)
    */
-  calculateProfileScore(profile: any): { score: number; details: ProfileScoreDetails } {
+  calculateProfileScore(profile: Profile | null): { score: number; details: ProfileScoreDetails } {
     const details: ProfileScoreDetails = {
       fullName: !!profile?.full_name,
       phone: !!profile?.phone,
@@ -97,7 +98,10 @@ export const ScoringService = {
   /**
    * Calcule le score de vérification
    */
-  calculateVerificationScore(profile: any): { score: number; details: VerificationScoreDetails } {
+  calculateVerificationScore(profile: Profile | null): {
+    score: number;
+    details: VerificationScoreDetails;
+  } {
     const details: VerificationScoreDetails = {
       oneci: !!profile?.oneci_verified,
       facial: profile?.facial_verification_status === 'verified',
@@ -229,7 +233,7 @@ export const ScoringService = {
   /**
    * Calcule un score simple pour les candidatures (sans appel async)
    */
-  calculateSimpleScore(profile: any): number {
+  calculateSimpleScore(profile: Profile | null): number {
     const profileResult = this.calculateProfileScore(profile);
     const verificationResult = this.calculateVerificationScore(profile);
 

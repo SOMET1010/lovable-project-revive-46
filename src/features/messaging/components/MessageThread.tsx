@@ -55,6 +55,23 @@ export function MessageThread({
 
   const participantName = conversation.other_participant?.full_name ?? 'Utilisateur';
 
+  const handleVideoCall = () => {
+    console.log('Initiate video call with', otherParticipantId);
+    // TODO: intégrer avec un service de visioconférence (ex: Daily.co, Twilio)
+    alert("Fonctionnalité d'appel vidéo à implémenter");
+  };
+
+  const handleVoiceCall = () => {
+    console.log('Initiate voice call with', otherParticipantId);
+    // TODO: intégrer avec un service de téléphonie VoIP
+    alert("Fonctionnalité d'appel vocal à implémenter");
+  };
+
+  const handleMoreActions = () => {
+    console.log('More actions menu');
+    // TODO: ouvrir un menu déroulant avec options supplémentaires
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#FAF7F4]/50 relative z-10">
       {/* Header Premium */}
@@ -84,13 +101,25 @@ export function MessageThread({
         {/* Action buttons */}
         <div className="flex items-center gap-1">
           <SoundToggle />
-          <button className="p-2.5 hover:bg-[#FAF7F4] rounded-full text-[#6B5A4E] transition-colors">
+          <button
+            onClick={handleVideoCall}
+            className="p-2.5 hover:bg-[#FAF7F4] rounded-full text-[#6B5A4E] transition-colors"
+            title="Appel vidéo"
+          >
             <Video className="h-5 w-5" />
           </button>
-          <button className="p-2.5 hover:bg-[#FAF7F4] rounded-full text-[#6B5A4E] transition-colors">
+          <button
+            onClick={handleVoiceCall}
+            className="p-2.5 hover:bg-[#FAF7F4] rounded-full text-[#6B5A4E] transition-colors"
+            title="Appel vocal"
+          >
             <Phone className="h-5 w-5" />
           </button>
-          <button className="p-2.5 hover:bg-[#FAF7F4] rounded-full text-[#6B5A4E] transition-colors">
+          <button
+            onClick={handleMoreActions}
+            className="p-2.5 hover:bg-[#FAF7F4] rounded-full text-[#6B5A4E] transition-colors"
+            title="Plus d'actions"
+          >
             <MoreVertical className="h-5 w-5" />
           </button>
         </div>
