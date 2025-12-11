@@ -15,7 +15,7 @@ import {
   Mail, Lock, User, Phone, Loader2, ArrowRight, ArrowLeft, 
   Smartphone, Star, Home, Shield, MessageCircle 
 } from 'lucide-react';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { InputWithIcon } from '@/shared/ui';
 import { PhoneInputWithCountry } from '@/shared/components/PhoneInputWithCountry';
 

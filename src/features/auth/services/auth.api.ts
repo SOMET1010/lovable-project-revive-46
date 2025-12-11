@@ -4,7 +4,7 @@
  * Ce service centralise tous les appels API liés à l'authentification et à la gestion des utilisateurs.
  */
 
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];

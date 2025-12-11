@@ -6,7 +6,6 @@ import {
   ActionPerformed
 } from '@capacitor/push-notifications';
 import { Capacitor } from '@capacitor/core';
-// import { supabase } from '@/integrations/supabase/client';
 
 interface NotificationData {
   title: string;
@@ -25,12 +24,6 @@ export function usePushNotifications() {
   const registerToken = useCallback(async (_pushToken: string, _userId: string) => {
     // Store token in database for server-side push
     // Note: You may need to add a push_token column to profiles table
-    // and uncomment the following code:
-    // const { error: dbError } = await supabase
-    //   .from('profiles')
-    //   .update({ push_token: _pushToken })
-    //   .eq('user_id', _userId);
-    // if (dbError) console.error('Error storing push token:', dbError);
   }, []);
 
   const register = useCallback(async () => {

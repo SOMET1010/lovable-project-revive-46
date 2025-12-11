@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Download, ArrowLeft, Coins, Home as HomeIcon, Eye, Wrench } from 'lucide-react';
 
 interface CalendarEvent {

@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Camera, ImagePlus, X, Upload, Loader2 } from 'lucide-react';
 import { CameraResultType } from '@capacitor/camera';
 import { Button } from '@/shared/ui/Button';
-import { useNativeCamera } from '@/hooks/native/useNativeCamera';
+import { useNativeCamera } from '@/shared/hooks/native';
 import { processNativeImage, fileToDataUrl } from '@/shared/utils/imageUtils';
 import { UploadService } from '@/services/upload/uploadService';
 import { cn } from '@/shared/lib/utils';

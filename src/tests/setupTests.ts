@@ -1,6 +1,12 @@
 // Configuration des tests pour éviter les erreurs JavaScript
-import { vi, beforeAll, afterAll } from 'vitest';
+import { vi, beforeAll, afterAll, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
+
+// Cleanup after each test
+afterEach(() => {
+  cleanup();
+});
 
 // Mock global pour les APIs du navigateur
 global.fetch = vi.fn();
