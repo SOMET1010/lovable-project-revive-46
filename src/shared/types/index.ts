@@ -5,6 +5,12 @@
 
 import type { Database } from '@/shared/lib/database.types';
 
+// Re-export migrated types from src/types/
+export * from './analytics.types';
+export * from './export.types';
+export * from './speech-recognition.types';
+export * from './visit.types';
+
 // Re-export database types for convenience
 export type Property = Database['public']['Tables']['properties']['Row'];
 export type PropertyInsert = Database['public']['Tables']['properties']['Insert'];

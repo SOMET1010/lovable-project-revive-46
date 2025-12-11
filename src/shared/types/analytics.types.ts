@@ -1,5 +1,6 @@
 /**
  * Types for Analytics Dashboard
+ * Migrated from src/types/analytics.types.ts
  */
 
 export interface ChartDataPoint {

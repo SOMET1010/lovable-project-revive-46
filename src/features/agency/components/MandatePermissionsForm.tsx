@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { X, Shield, Save } from 'lucide-react';
-import type { AgencyMandate, MandatePermissions } from '@/hooks/useAgencyMandates';
+import type { AgencyMandate, MandatePermissions } from '@/shared/hooks/useAgencyMandates';
 
 interface MandatePermissionsFormProps {
   isOpen: boolean;

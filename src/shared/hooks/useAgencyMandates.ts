@@ -1,6 +1,7 @@
 /**
  * Hook pour la gestion des mandats agence
  * Permet aux propriétaires d'inviter des agences et aux agences de gérer les mandats
+ * Migrated from src/hooks/useAgencyMandates.ts
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -143,7 +144,9 @@ export function useAgencyMandates() {
       .maybeSingle();
     
     if (err) {
-      console.error('Error fetching agency:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching agency:', err);
+      }
       return null;
     }
     
@@ -172,7 +175,9 @@ export function useAgencyMandates() {
       
       setMandates((data || []) as unknown as AgencyMandate[]);
     } catch (err) {
-      console.error('Error fetching mandates:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching mandates:', err);
+      }
       setError('Erreur lors du chargement des mandats');
     } finally {
       setLoading(false);
@@ -188,7 +193,9 @@ export function useAgencyMandates() {
       .order('agency_name');
     
     if (err) {
-      console.error('Error fetching agencies:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error fetching agencies:', err);
+      }
       return;
     }
     
@@ -233,7 +240,9 @@ export function useAgencyMandates() {
       .single();
     
     if (err) {
-      console.error('Error creating mandate:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error creating mandate:', err);
+      }
       toast.error('Erreur lors de la création du mandat');
       return null;
     }
@@ -257,7 +266,9 @@ export function useAgencyMandates() {
       .eq('id', mandateId);
     
     if (err) {
-      console.error('Error accepting mandate:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error accepting mandate:', err);
+      }
       toast.error('Erreur lors de l\'acceptation du mandat');
       return false;
     }
@@ -281,7 +292,9 @@ export function useAgencyMandates() {
       .eq('id', mandateId);
     
     if (err) {
-      console.error('Error refusing mandate:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error refusing mandate:', err);
+      }
       toast.error('Erreur lors du refus du mandat');
       return false;
     }
@@ -312,7 +325,9 @@ export function useAgencyMandates() {
       .eq('id', mandateId);
     
     if (err) {
-      console.error('Error terminating mandate:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error terminating mandate:', err);
+      }
       toast.error('Erreur lors de la résiliation du mandat');
       return false;
     }
@@ -336,7 +351,9 @@ export function useAgencyMandates() {
       .eq('id', mandateId);
     
     if (err) {
-      console.error('Error suspending mandate:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error suspending mandate:', err);
+      }
       toast.error('Erreur lors de la suspension du mandat');
       return false;
     }
@@ -360,7 +377,9 @@ export function useAgencyMandates() {
       .eq('id', mandateId);
     
     if (err) {
-      console.error('Error reactivating mandate:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error reactivating mandate:', err);
+      }
       toast.error('Erreur lors de la réactivation du mandat');
       return false;
     }
@@ -384,7 +403,9 @@ export function useAgencyMandates() {
       .eq('id', mandateId);
     
     if (err) {
-      console.error('Error updating permissions:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error updating permissions:', err);
+      }
       toast.error('Erreur lors de la mise à jour des permissions');
       return false;
     }
@@ -408,7 +429,9 @@ export function useAgencyMandates() {
       .eq('id', mandateId);
     
     if (err) {
-      console.error('Error updating commission rate:', err);
+      if (import.meta.env.DEV) {
+        console.error('Error updating commission rate:', err);
+      }
       toast.error('Erreur lors de la mise à jour du taux');
       return false;
     }
@@ -472,12 +495,14 @@ export function useAgencyMandates() {
       await downloadMandatePDF(pdfData, filename);
       toast.success('Document de mandat téléchargé');
       return true;
-    } catch (error) {
-      console.error('Error generating mandate PDF:', error);
+    } catch (pdfError) {
+      if (import.meta.env.DEV) {
+        console.error('Error generating mandate PDF:', pdfError);
+      }
       toast.error('Erreur lors de la génération du PDF');
       return false;
     }
-  }, [fetchMandates]);
+  }, [mandates]);
 
   // Initial load
   useEffect(() => {
@@ -507,7 +532,7 @@ export function useAgencyMandates() {
     loading,
     error,
     
-    // Filtered data
+    // Filtered lists
     pendingMandates,
     activeMandates,
     expiredMandates,
@@ -532,5 +557,3 @@ export function useAgencyMandates() {
     refreshAgencies: fetchAgencies,
   };
 }
-
-export default useAgencyMandates;

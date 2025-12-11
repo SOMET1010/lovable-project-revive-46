@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import useAgencyMandates, { AgencyMandate } from '@/hooks/useAgencyMandates';
+import { useAgencyMandates, type AgencyMandate } from '@/shared/hooks/useAgencyMandates';
 import MandateCard from '../components/MandateCard';
 import InviteAgencyDialog from '../components/InviteAgencyDialog';
 import MandatePermissionsForm from '../components/MandatePermissionsForm';

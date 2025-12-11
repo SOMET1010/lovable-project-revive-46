@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from 'recharts';
-import type { ChartDataPoint } from '@/types/analytics.types';
+import type { ChartDataPoint } from '@/shared/types/analytics.types';
 
 interface AnalyticsBarChartProps {
   data: ChartDataPoint[];

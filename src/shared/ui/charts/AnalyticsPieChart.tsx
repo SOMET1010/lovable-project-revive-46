@@ -3,7 +3,7 @@
  */
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import type { ChartDataPoint } from '@/types/analytics.types';
+import type { ChartDataPoint } from '@/shared/types/analytics.types';
 
 interface AnalyticsPieChartProps {
   data: ChartDataPoint[];

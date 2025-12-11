@@ -4,7 +4,7 @@
 
 import jsPDF from 'jspdf';
 import { MandatePdfSectionWriter } from './MandatePdfSectionWriter';
-import { MandatePermissions, MandateScope } from '@/hooks/useAgencyMandates';
+import { MandatePermissions, MandateScope } from '@/shared/hooks/useAgencyMandates';
 
 export interface MandateData {
   mandateId: string;

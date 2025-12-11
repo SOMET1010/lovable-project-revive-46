@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
 import InviteAgencyDialog from '@/features/agency/components/InviteAgencyDialog';
-import { useAgencyMandates } from '@/hooks/useAgencyMandates';
+import { useAgencyMandates } from '@/shared/hooks/useAgencyMandates';
 import OwnerDashboardLayout from '../components/OwnerDashboardLayout';
 
 interface Property {

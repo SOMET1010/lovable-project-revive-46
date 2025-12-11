@@ -4,7 +4,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { analyticsService } from '@/services/analyticsService';
-import type { AnalyticsPeriod } from '@/types/analytics.types';
+import type { AnalyticsPeriod } from '@/shared/types/analytics.types';
 
 export function useAnalytics(period: AnalyticsPeriod = '30d') {
   const overviewQuery = useQuery({

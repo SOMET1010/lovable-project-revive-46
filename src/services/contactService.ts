@@ -1,4 +1,4 @@
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { logger } from '@/shared/lib/logger';
 
 export interface ContactSubmission {

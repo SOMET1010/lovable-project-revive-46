@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Building2, Search, Calendar, Percent, Check, Download, CheckCircle2, FileSignature } from 'lucide-react';
 import { format, addMonths } from 'date-fns';
-import type { Agency, MandatePermissions, AgencyMandate } from '@/hooks/useAgencyMandates';
+import type { Agency, MandatePermissions, AgencyMandate } from '@/shared/hooks/useAgencyMandates';
 
 interface Property {
   id: string;

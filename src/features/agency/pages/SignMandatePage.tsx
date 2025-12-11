@@ -21,7 +21,7 @@ import {
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useAgencyMandates, type AgencyMandate } from '@/hooks/useAgencyMandates';
+import { useAgencyMandates, type AgencyMandate } from '@/shared/hooks/useAgencyMandates';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui/FormStepper';
 import Button from '@/shared/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/shared/ui/Card';

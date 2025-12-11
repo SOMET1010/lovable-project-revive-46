@@ -1,5 +1,6 @@
 /**
  * Types pour les visites (MyVisitsPage)
+ * Migrated from src/types/visit.types.ts
  */
 
 // =====================================================
