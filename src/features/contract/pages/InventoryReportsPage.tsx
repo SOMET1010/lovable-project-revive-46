@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Button } from '@/shared/ui/button';
+import { useQuery } from '@tanstack/react-query';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
+import Button from '@/shared/ui/Button';
 import { 
   ClipboardList, Plus, Camera, FileText, Check, X, 
   Loader2, Home, Calendar, Eye, Download, Edit
@@ -33,15 +33,13 @@ interface InventoryReport {
   };
   lease_contracts?: {
     contract_number: string;
-    profiles?: {
-      full_name: string;
-    };
+    tenant_id: string;
   };
+  tenant_name?: string;
 }
 
 export default function InventoryReportsPage() {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | 'entry' | 'exit'>('all');
 
   const { data: reports, isLoading } = useQuery({
@@ -54,7 +52,7 @@ export default function InventoryReportsPage() {
           properties (title, address, images),
           lease_contracts (
             contract_number,
-            profiles:tenant_id (full_name)
+            tenant_id
           )
         `)
         .order('created_at', { ascending: false });
@@ -65,29 +63,20 @@ export default function InventoryReportsPage() {
       
       const { data, error } = await query;
       if (error) throw error;
-      return data as InventoryReport[];
-    },
-    enabled: !!user?.id
-  });
-
-  // Fetch active leases for creating new inventory
-  const { data: activeLeases } = useQuery({
-    queryKey: ['active-leases-for-inventory', user?.id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('lease_contracts')
-        .select(`
-          id,
-          contract_number,
-          property_id,
-          properties (title, address),
-          profiles:tenant_id (full_name)
-        `)
-        .eq('owner_id', user?.id)
-        .eq('status', 'active');
       
-      if (error) throw error;
-      return data;
+      // Fetch tenant names separately
+      const tenantIds = [...new Set(data?.map(r => r.lease_contracts?.tenant_id).filter(Boolean) as string[])];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', tenantIds);
+      
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+      
+      return data?.map(r => ({
+        ...r,
+        tenant_name: r.lease_contracts?.tenant_id ? profileMap.get(r.lease_contracts.tenant_id) : undefined
+      })) as InventoryReport[];
     },
     enabled: !!user?.id
   });
@@ -98,10 +87,10 @@ export default function InventoryReportsPage() {
       pending_signatures: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'En attente de signatures' },
       completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Complété' }
     };
-    const style = styles[status] || styles.draft;
+    const style = styles[status] ?? styles['draft'];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
-        {style.label}
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}>
+        {style?.label ?? status}
       </span>
     );
   };
@@ -144,8 +133,8 @@ export default function InventoryReportsPage() {
           {(['all', 'entry', 'exit'] as const).map((f) => (
             <Button
               key={f}
-              variant={filter === f ? 'default' : 'outline'}
-              size="sm"
+              variant={filter === f ? 'primary' : 'outline'}
+              size="small"
               className={`rounded-xl ${filter === f ? 'bg-[#F16522] hover:bg-[#F16522]/90' : ''}`}
               onClick={() => setFilter(f)}
             >
@@ -198,7 +187,7 @@ export default function InventoryReportsPage() {
                         {report.properties?.title}
                       </p>
                       <p className="text-sm text-[#2C1810]/60">
-                        {report.lease_contracts?.profiles?.full_name} • {report.lease_contracts?.contract_number}
+                        {report.tenant_name} • {report.lease_contracts?.contract_number}
                       </p>
                       <div className="flex items-center gap-4 mt-1 text-xs text-[#2C1810]/40">
                         <span className="flex items-center gap-1">
@@ -220,20 +209,20 @@ export default function InventoryReportsPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-2">
                       <Link to={`/dashboard/etats-des-lieux/${report.id}`}>
-                        <Button variant="outline" size="icon" className="rounded-lg">
+                        <Button variant="outline" size="small" className="rounded-lg p-2">
                           <Eye className="h-4 w-4" />
                         </Button>
                       </Link>
                       {report.status === 'draft' && (
                         <Link to={`/dashboard/etats-des-lieux/${report.id}/editer`}>
-                          <Button variant="outline" size="icon" className="rounded-lg">
+                          <Button variant="outline" size="small" className="rounded-lg p-2">
                             <Edit className="h-4 w-4" />
                           </Button>
                         </Link>
                       )}
                       {report.pdf_url && (
                         <a href={report.pdf_url} target="_blank" rel="noopener noreferrer">
-                          <Button variant="outline" size="icon" className="rounded-lg">
+                          <Button variant="outline" size="small" className="rounded-lg p-2">
                             <Download className="h-4 w-4" />
                           </Button>
                         </a>

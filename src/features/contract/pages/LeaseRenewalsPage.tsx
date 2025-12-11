@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
+import Button from '@/shared/ui/Button';
 import { 
-  Calendar, RefreshCw, Plus, Check, X, Clock, 
-  FileText, AlertTriangle, ChevronRight, Loader2
+  Calendar, RefreshCw, Plus, Check,
+  AlertTriangle, ChevronRight, Loader2
 } from 'lucide-react';
 import { format, addYears, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -16,7 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/shared/ui/dialog';
+} from '@/shared/ui';
 
 interface LeaseRenewal {
   id: string;
@@ -35,14 +35,13 @@ interface LeaseRenewal {
     contract_number: string;
     monthly_rent: number;
     property_id: string;
+    tenant_id: string;
     properties?: {
       title: string;
       address: string;
     };
-    profiles?: {
-      full_name: string;
-    };
   };
+  tenant_name?: string;
 }
 
 interface ExpiringLease {
@@ -56,9 +55,7 @@ interface ExpiringLease {
     title: string;
     address: string;
   };
-  profiles?: {
-    full_name: string;
-  };
+  tenant_name?: string;
 }
 
 export default function LeaseRenewalsPage() {
@@ -85,14 +82,27 @@ export default function LeaseRenewalsPage() {
             contract_number,
             monthly_rent,
             property_id,
-            properties (title, address),
-            profiles:tenant_id (full_name)
+            tenant_id,
+            properties (title, address)
           )
         `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as LeaseRenewal[];
+      
+      // Fetch tenant names separately
+      const tenantIds = [...new Set(data?.map(r => r.lease_contracts?.tenant_id).filter(Boolean) as string[])];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', tenantIds);
+      
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+      
+      return data?.map(r => ({
+        ...r,
+        tenant_name: r.lease_contracts?.tenant_id ? profileMap.get(r.lease_contracts.tenant_id) : undefined
+      })) as LeaseRenewal[];
     },
     enabled: !!user?.id
   });
@@ -112,19 +122,30 @@ export default function LeaseRenewalsPage() {
           monthly_rent,
           tenant_id,
           property_id,
-          properties (title, address),
-          profiles:tenant_id (full_name)
+          properties (title, address)
         `)
-        .eq('owner_id', user?.id)
+        .eq('owner_id', user?.id ?? '')
         .eq('status', 'active')
         .lte('end_date', in90Days)
         .order('end_date', { ascending: true });
       
       if (error) throw error;
       
+      // Fetch tenant names separately
+      const tenantIds = [...new Set(data?.map(l => l.tenant_id).filter(Boolean) as string[])];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', tenantIds);
+      
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+      
       // Filter out leases that already have pending renewals
       const renewalLeaseIds = renewals?.filter(r => r.status === 'pending').map(r => r.lease_id) || [];
-      return (data as ExpiringLease[]).filter(l => !renewalLeaseIds.includes(l.id));
+      return (data?.map(l => ({
+        ...l,
+        tenant_name: profileMap.get(l.tenant_id)
+      })) as ExpiringLease[]).filter(l => !renewalLeaseIds.includes(l.id));
     },
     enabled: !!user?.id && !!renewals
   });
@@ -165,10 +186,10 @@ export default function LeaseRenewalsPage() {
       finalized: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Finalisé' },
       expired: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Expiré' }
     };
-    const style = styles[status] || styles.pending;
+    const style = styles[status] ?? styles['pending'];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
-        {style.label}
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}>
+        {style?.label ?? status}
       </span>
     );
   };
@@ -224,7 +245,7 @@ export default function LeaseRenewalsPage() {
                           {lease.properties?.title || lease.contract_number}
                         </p>
                         <p className="text-sm text-[#2C1810]/60">
-                          {lease.profiles?.full_name} • Expire le {format(new Date(lease.end_date), 'dd MMMM yyyy', { locale: fr })}
+                          {lease.tenant_name} • Expire le {format(new Date(lease.end_date), 'dd MMMM yyyy', { locale: fr })}
                         </p>
                       </div>
                     </div>
@@ -233,7 +254,7 @@ export default function LeaseRenewalsPage() {
                         {daysLeft}j restants
                       </span>
                       <Button 
-                        size="sm"
+                        size="small"
                         className="bg-[#F16522] hover:bg-[#F16522]/90 rounded-lg"
                         onClick={() => openCreateModal(lease)}
                       >
@@ -274,7 +295,7 @@ export default function LeaseRenewalsPage() {
                           {renewal.lease_contracts?.properties?.title || renewal.lease_contracts?.contract_number}
                         </p>
                         <p className="text-sm text-[#2C1810]/60">
-                          {renewal.lease_contracts?.profiles?.full_name}
+                          {renewal.tenant_name}
                         </p>
                         <div className="flex items-center gap-4 mt-1 text-xs text-[#2C1810]/40">
                           <span>
@@ -321,7 +342,7 @@ export default function LeaseRenewalsPage() {
               <div className="space-y-4">
                 <div className="p-4 bg-[#FAF7F4] rounded-xl">
                   <p className="font-medium text-[#2C1810]">{selectedLease.properties?.title}</p>
-                  <p className="text-sm text-[#2C1810]/60">{selectedLease.profiles?.full_name}</p>
+                  <p className="text-sm text-[#2C1810]/60">{selectedLease.tenant_name}</p>
                   <p className="text-sm text-[#2C1810]/60">
                     Loyer actuel: {formatCurrency(selectedLease.monthly_rent)}
                   </p>

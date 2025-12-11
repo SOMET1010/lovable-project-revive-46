@@ -2,21 +2,20 @@ import { useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Button } from '@/shared/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
+import Button from '@/shared/ui/Button';
 import { 
-  LogOut, Plus, Calendar, Check, X, Clock, 
-  Loader2, Home, AlertTriangle, Coins, FileText
+  LogOut, Calendar, Check, 
+  Loader2, AlertTriangle, FileText
 } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/shared/ui/dialog';
+} from '@/shared/ui';
 
 interface DepartureNotice {
   id: string;
@@ -35,14 +34,13 @@ interface DepartureNotice {
     monthly_rent: number;
     deposit_amount: number;
     property_id: string;
+    tenant_id: string;
     properties?: {
       title: string;
       address: string;
     };
-    profiles?: {
-      full_name: string;
-    };
   };
+  tenant_name?: string;
 }
 
 interface ActiveLease {
@@ -56,9 +54,7 @@ interface ActiveLease {
     title: string;
     address: string;
   };
-  profiles?: {
-    full_name: string;
-  };
+  tenant_name?: string;
 }
 
 const DEPARTURE_REASONS = [
@@ -95,14 +91,27 @@ export default function DepartureNoticesPage() {
             monthly_rent,
             deposit_amount,
             property_id,
-            properties (title, address),
-            profiles:tenant_id (full_name)
+            tenant_id,
+            properties (title, address)
           )
         `)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return data as DepartureNotice[];
+      
+      // Fetch tenant names separately
+      const tenantIds = [...new Set(data?.map(n => n.lease_contracts?.tenant_id).filter(Boolean) as string[])];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', tenantIds);
+      
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+      
+      return data?.map(n => ({
+        ...n,
+        tenant_name: n.lease_contracts?.tenant_id ? profileMap.get(n.lease_contracts.tenant_id) : undefined
+      })) as DepartureNotice[];
     },
     enabled: !!user?.id
   });
@@ -120,14 +129,26 @@ export default function DepartureNoticesPage() {
           deposit_amount,
           tenant_id,
           property_id,
-          properties (title, address),
-          profiles:tenant_id (full_name)
+          properties (title, address)
         `)
-        .eq('owner_id', user?.id)
+        .eq('owner_id', user?.id ?? '')
         .eq('status', 'active');
       
       if (error) throw error;
-      return data as ActiveLease[];
+      
+      // Fetch tenant names separately
+      const tenantIds = [...new Set(data?.map(l => l.tenant_id).filter(Boolean) as string[])];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', tenantIds);
+      
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+      
+      return data?.map(l => ({
+        ...l,
+        tenant_name: profileMap.get(l.tenant_id)
+      })) as ActiveLease[];
     },
     enabled: !!user?.id
   });
@@ -186,10 +207,10 @@ export default function DepartureNoticesPage() {
       completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Terminé' },
       cancelled: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Annulé' }
     };
-    const style = styles[status] || styles.pending;
+    const style = styles[status] ?? styles['pending'];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
-        {style.label}
+      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}>
+        {style?.label ?? status}
       </span>
     );
   };
@@ -238,14 +259,14 @@ export default function DepartureNoticesPage() {
                       {lease.properties?.title}
                     </p>
                     <p className="text-sm text-[#2C1810]/60">
-                      {lease.profiles?.full_name}
+                      {lease.tenant_name}
                     </p>
                     <p className="text-xs text-[#2C1810]/40 mt-1">
                       Loyer: {formatCurrency(lease.monthly_rent)}
                     </p>
                     <Button 
                       variant="outline"
-                      size="sm"
+                      size="small"
                       className="mt-3 w-full rounded-lg"
                       onClick={() => openCreateModal(lease)}
                     >
@@ -303,7 +324,7 @@ export default function DepartureNoticesPage() {
                               {notice.lease_contracts?.properties?.title}
                             </p>
                             <p className="text-sm text-[#2C1810]/60">
-                              {notice.lease_contracts?.profiles?.full_name} • {notice.lease_contracts?.contract_number}
+                              {notice.tenant_name} • {notice.lease_contracts?.contract_number}
                             </p>
                             <div className="flex items-center gap-4 mt-2 text-xs text-[#2C1810]/40">
                               <span className="flex items-center gap-1">
@@ -338,7 +359,7 @@ export default function DepartureNoticesPage() {
                           
                           {notice.status === 'pending' && notice.initiated_by === 'tenant' && (
                             <Button 
-                              size="sm"
+                              size="small"
                               className="bg-[#F16522] hover:bg-[#F16522]/90 rounded-lg"
                               onClick={() => acknowledgeNotice.mutate(notice.id)}
                               disabled={acknowledgeNotice.isPending}
@@ -351,7 +372,7 @@ export default function DepartureNoticesPage() {
                           {notice.status === 'acknowledged' && (
                             <Button 
                               variant="outline"
-                              size="sm"
+                              size="small"
                               className="rounded-lg"
                             >
                               <FileText className="h-4 w-4 mr-1" />
@@ -384,7 +405,7 @@ export default function DepartureNoticesPage() {
               <div className="space-y-4">
                 <div className="p-4 bg-[#FAF7F4] rounded-xl">
                   <p className="font-medium text-[#2C1810]">{selectedLease.properties?.title}</p>
-                  <p className="text-sm text-[#2C1810]/60">{selectedLease.profiles?.full_name}</p>
+                  <p className="text-sm text-[#2C1810]/60">{selectedLease.tenant_name}</p>
                   <p className="text-sm text-[#2C1810]/60">
                     Caution: {formatCurrency(selectedLease.deposit_amount || 0)}
                   </p>
@@ -449,12 +470,12 @@ export default function DepartureNoticesPage() {
               <Button 
                 className="bg-[#F16522] hover:bg-[#F16522]/90 rounded-xl"
                 onClick={() => createNotice.mutate()}
-                disabled={createNotice.isPending || !noticeForm.departureDate || !noticeForm.reason}
+                disabled={createNotice.isPending}
               >
                 {createNotice.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (
-                  <LogOut className="h-4 w-4 mr-2" />
+                  <Check className="h-4 w-4 mr-2" />
                 )}
                 Envoyer le préavis
               </Button>
