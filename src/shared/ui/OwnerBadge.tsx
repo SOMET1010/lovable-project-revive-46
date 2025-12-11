@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { cn } from '@/shared/lib/utils';
 import { ScoreBadge } from './ScoreBadge';
 import { Button } from './Button';
-import { useAuthStore } from '@/store/authStore';
+import { useAuth } from '@/app/providers/AuthProvider';
 
 export interface OwnerBadgeProps {
   name?: string | null;
@@ -77,7 +77,7 @@ export function OwnerBadge({
   managedByAgencyName,
 }: OwnerBadgeProps) {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const sizes = sizeConfig[size];
 
   const isOwnProfile = user?.id === ownerId;

@@ -1,8 +1,10 @@
 import { AlertCircle, RefreshCw, LogOut, Mail } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 
 export default function ProfileErrorDisplay() {
   const { profileError, refreshProfile, signOut, clearProfileError } = useAuth();
+  const navigate = useNavigate();
 
   if (!profileError) return null;
 
@@ -52,7 +54,7 @@ export default function ProfileErrorDisplay() {
 
   const handleSignOut = async () => {
     await signOut();
-    window.location.href = '/connexion';
+    navigate('/connexion');
   };
 
   return (

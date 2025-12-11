@@ -55,7 +55,9 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    // Use window.location for ErrorBoundary as it's a class component
+    // and navigate hook isn't available. Full reload is acceptable for error recovery.
+    window.location.assign('/');
   };
 
   override render() {

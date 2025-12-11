@@ -4,6 +4,15 @@
  */
 
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
+import type { 
+  FavoritePropertyData, 
+  SearchFilters, 
+  SyncQueueData, 
+  SyncAction,
+  SyncStatus,
+  QueueStatus,
+  GeoLocation
+} from './indexedDB.types';
 
 const DB_NAME = 'montoit-offline-db';
 const DB_VERSION = 1;
@@ -13,9 +22,9 @@ interface MontoitDB extends DBSchema {
     key: string;
     value: {
       id: string;
-      propertyData: any;
+      propertyData: FavoritePropertyData;
       addedAt: number;
-      syncStatus: 'synced' | 'pending' | 'error';
+      syncStatus: SyncStatus;
     };
     indexes: { 'by-sync-status': string };
   };
@@ -24,8 +33,8 @@ interface MontoitDB extends DBSchema {
     value: {
       id: number;
       query: string;
-      filters: any;
-      location?: { lat: number; lng: number };
+      filters: SearchFilters;
+      location?: GeoLocation;
       timestamp: number;
     };
     indexes: { 'by-timestamp': number };
@@ -34,11 +43,11 @@ interface MontoitDB extends DBSchema {
     key: number;
     value: {
       id: number;
-      action: 'favorite_add' | 'favorite_remove' | 'property_view' | 'contact_submit';
-      data: any;
+      action: SyncAction;
+      data: SyncQueueData;
       timestamp: number;
       retryCount: number;
-      status: 'pending' | 'processing' | 'failed';
+      status: QueueStatus;
     };
     indexes: { 'by-status': string };
   };
@@ -46,7 +55,7 @@ interface MontoitDB extends DBSchema {
     key: string;
     value: {
       id: string;
-      data: any;
+      data: FavoritePropertyData;
       cachedAt: number;
       expiresAt: number;
     };
@@ -99,7 +108,7 @@ class IndexedDBService {
 
   // === FAVORIS ===
 
-  async addFavorite(propertyId: string, propertyData: any): Promise<void> {
+  async addFavorite(propertyId: string, propertyData: FavoritePropertyData): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -124,7 +133,7 @@ class IndexedDBService {
     await this.addToSyncQueue('favorite_remove', { propertyId });
   }
 
-  async getFavorites(): Promise<any[]> {
+  async getFavorites(): Promise<FavoritePropertyData[]> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -132,7 +141,7 @@ class IndexedDBService {
     return favorites.map((f) => f.propertyData);
   }
 
-  async updateFavoriteStatus(propertyId: string, status: 'synced' | 'pending' | 'error'): Promise<void> {
+  async updateFavoriteStatus(propertyId: string, status: SyncStatus): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -153,7 +162,7 @@ class IndexedDBService {
 
   // === HISTORIQUE RECHERCHES ===
 
-  async addSearchHistory(query: string, filters: any, location?: { lat: number; lng: number }): Promise<void> {
+  async addSearchHistory(query: string, filters: SearchFilters, location?: GeoLocation): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -176,7 +185,7 @@ class IndexedDBService {
     }
   }
 
-  async getSearchHistory(limit = 20): Promise<any[]> {
+  async getSearchHistory(limit = 20): Promise<Array<{ query: string; filters: SearchFilters; location?: GeoLocation; timestamp: number }>> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -193,13 +202,13 @@ class IndexedDBService {
 
   // === QUEUE SYNCHRONISATION ===
 
-  async addToSyncQueue(action: string, data: any): Promise<void> {
+  async addToSyncQueue(action: SyncAction, data: SyncQueueData): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
     await this.db.add('syncQueue', {
       id: Date.now(),
-      action: action as any,
+      action,
       data,
       timestamp: Date.now(),
       retryCount: 0,
@@ -207,14 +216,14 @@ class IndexedDBService {
     });
   }
 
-  async getSyncQueue(): Promise<any[]> {
+  async getSyncQueue(): Promise<Array<{ id: number; action: SyncAction; data: SyncQueueData; timestamp: number; retryCount: number; status: QueueStatus }>> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
     return await this.db.getAllFromIndex('syncQueue', 'by-status', 'pending');
   }
 
-  async updateSyncQueueItem(id: number, status: 'pending' | 'processing' | 'failed', retryCount?: number): Promise<void> {
+  async updateSyncQueueItem(id: number, status: QueueStatus, retryCount?: number): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -244,7 +253,7 @@ class IndexedDBService {
 
   // === CACHE PROPRIÉTÉS ===
 
-  async cacheProperty(propertyId: string, data: any, ttlMinutes = 30): Promise<void> {
+  async cacheProperty(propertyId: string, data: FavoritePropertyData, ttlMinutes = 30): Promise<void> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 
@@ -257,7 +266,7 @@ class IndexedDBService {
     });
   }
 
-  async getCachedProperty(propertyId: string): Promise<any | null> {
+  async getCachedProperty(propertyId: string): Promise<FavoritePropertyData | null> {
     await this.init();
     if (!this.db) throw new Error('Database not initialized');
 

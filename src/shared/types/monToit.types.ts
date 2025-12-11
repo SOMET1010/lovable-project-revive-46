@@ -44,6 +44,42 @@ export interface ApplicationMetadata {
 // ============================================================================
 
 /**
+ * Interface pour les propriétés de base dans les relations
+ */
+export interface PropertyBasic {
+  id: string;
+  title: string;
+  address: string | null;
+  city: string;
+  neighborhood?: string | null;
+  monthly_rent?: number;
+  main_image?: string | null;
+}
+
+/**
+ * Interface pour les données d'applicant de base
+ */
+export interface ApplicantBasic {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  phone?: string | null;
+  avatar_url?: string | null;
+  trust_score?: number | null;
+}
+
+/**
+ * Interface pour les documents de candidature
+ */
+export interface ApplicationDocument {
+  id: string;
+  document_type: string;
+  file_url: string;
+  status?: 'pending' | 'approved' | 'rejected';
+  uploaded_at?: string;
+}
+
+/**
  * Type pour les données complètes d'application récupérées de la base
  */
 export interface CompleteApplicationData {
@@ -51,28 +87,39 @@ export interface CompleteApplicationData {
   property_id: string;
   applicant_id: string;
   status: string;
-  message?: string;
+  message?: string | null;
   created_at: string;
   updated_at: string;
-  property?: {
-    id: string;
-    title: string;
-    address: string;
-    [key: string]: any;
-  };
-  applicant?: {
-    id: string;
-    full_name: string;
-    email: string;
-    [key: string]: any;
-  };
-  documents?: {
-    id: string;
-    document_type: string;
-    file_url: string;
-    [key: string]: any;
-  }[];
-  [key: string]: any;
+  // Relations typées
+  property?: PropertyBasic | null;
+  applicant?: ApplicantBasic | null;
+  documents?: ApplicationDocument[];
+  // Extensions pour données additionnelles
+  guarantor_info?: GuarantorInfo;
+  income_info?: IncomeInfo;
+  metadata?: Record<string, unknown>;
+}
+
+/**
+ * Informations sur le garant
+ */
+export interface GuarantorInfo {
+  full_name: string;
+  relationship: string;
+  phone?: string;
+  email?: string;
+  occupation?: string;
+  monthly_income?: number;
+}
+
+/**
+ * Informations sur les revenus
+ */
+export interface IncomeInfo {
+  monthly_income: number;
+  employment_type: 'cdi' | 'cdd' | 'freelance' | 'business_owner' | 'retired' | 'other';
+  employer_name?: string;
+  employment_start_date?: string;
 }
 
 /**
