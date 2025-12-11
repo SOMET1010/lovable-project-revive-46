@@ -1,15 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Home,
-  MapPin,
-  Users,
-  Calendar,
-  Edit,
-  Eye,
-  Plus,
-  Building2,
-} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Home, MapPin, Users, Calendar, Edit, Eye, Plus, Building2, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -28,6 +19,7 @@ interface Property {
 
 export default function MyPropertiesPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'available' | 'rented' | 'maintenance'>('all');
@@ -39,210 +31,306 @@ export default function MyPropertiesPage() {
   const fetchProperties = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
+    // First, fetch properties
+    const { data: propertiesData, error: propertiesError } = await supabase
       .from('properties')
-      .select(`
-        *,
-        applications(count)
-      `)
+      .select('*')
       .eq('owner_id', user.id)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching properties:', error);
-    } else {
-      setProperties(data || []);
+    if (propertiesError) {
+      console.error('Error fetching properties:', propertiesError);
+      setLoading(false);
+      return;
     }
+
+    // Then, for each property, count applications separately
+    if (propertiesData) {
+      const propertiesWithCounts = await Promise.all(
+        propertiesData.map(async (property) => {
+          const { count, error: countError } = await supabase
+            .from('rental_applications')
+            .select('*', { count: 'exact', head: true })
+            .eq('property_id', property.id);
+
+          return {
+            ...property,
+            applications_count: countError ? 0 : count || 0,
+          };
+        })
+      );
+
+      setProperties(propertiesWithCounts);
+    }
+
     setLoading(false);
   };
 
-  const filteredProperties = properties.filter(property =>
-    filter === 'all' || property.status === filter
+  const filteredProperties = properties.filter(
+    (property) => filter === 'all' || property.status === filter
   );
+
+  const handleDeleteProperty = async (propertyId: string) => {
+    if (
+      !confirm(
+        'Êtes-vous sûr de vouloir supprimer cette propriété ? Cette action est irréversible.'
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', propertyId)
+        .eq('owner_id', user?.id);
+
+      if (error) {
+        console.error('Error deleting property:', error);
+        alert('Erreur lors de la suppression de la propriété');
+      } else {
+        setProperties(properties.filter((p) => p.id !== propertyId));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Une erreur est survenue');
+    }
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'available':
-        return <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Disponible</span>;
+        return (
+          <span className="px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-200">
+            Disponible
+          </span>
+        );
       case 'rented':
-        return <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">Loué</span>;
+        return (
+          <span className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">
+            Loué
+          </span>
+        );
       case 'maintenance':
-        return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Maintenance</span>;
+        return (
+          <span className="px-3 py-1.5 bg-yellow-50 text-yellow-700 text-xs font-semibold rounded-full border border-yellow-200">
+            Maintenance
+          </span>
+        );
       default:
-        return <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Inconnu</span>;
+        return (
+          <span className="px-3 py-1.5 bg-gray-50 text-gray-700 text-xs font-semibold rounded-full border border-gray-200">
+            Inconnu
+          </span>
+        );
     }
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Mes Propriétés</h1>
-          <p className="text-gray-600">Gérez votre portefeuille immobilier</p>
-        </div>
-        <Link
-          to="/proprietaire/ajouter-propriete"
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-        >
-          <Plus className="w-4 h-4" />
-          Ajouter un bien
-        </Link>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow">
+      <div className="bg-[#2C1810]">
+        <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Total</p>
-              <p className="text-2xl font-bold">{properties.length}</p>
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center">
+                <Building2 className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Mes Biens</h1>
+                <p className="text-[#E8D4C5] mt-1">Gérez votre portefeuille immobilier</p>
+              </div>
             </div>
-            <Building2 className="w-8 h-8 text-blue-500" />
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Disponibles</p>
-              <p className="text-2xl font-bold text-green-600">
-                {properties.filter(p => p.status === 'available').length}
-              </p>
-            </div>
-            <Home className="w-8 h-8 text-green-500" />
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">Loués</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {properties.filter(p => p.status === 'rented').length}
-              </p>
-            </div>
-            <Users className="w-8 h-8 text-blue-500" />
-          </div>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-500 text-sm">En maintenance</p>
-              <p className="text-2xl font-bold text-yellow-600">
-                {properties.filter(p => p.status === 'maintenance').length}
-              </p>
-            </div>
-            <Calendar className="w-8 h-8 text-yellow-500" />
+            <Link
+              to="/proprietaire/ajouter-propriete"
+              className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
+            >
+              <Plus className="h-5 w-5" />
+              <span className="hidden sm:inline">Ajouter un bien</span>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* Filter */}
-      <div className="flex gap-2">
-        {[
-          { value: 'all', label: 'Tous' },
-          { value: 'available', label: 'Disponibles' },
-          { value: 'rented', label: 'Loués' },
-          { value: 'maintenance', label: 'Maintenance' },
-        ].map((item) => (
-          <button
-            key={item.value}
-            onClick={() => setFilter(item.value as any)}
-            className={`px-4 py-2 rounded-lg ${
-              filter === item.value
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
+      {/* Content */}
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-[#FFF5F0] p-2 rounded-xl">
+                <Building2 className="h-5 w-5 text-[#F16522]" />
+              </div>
+              <span className="text-sm text-[#6B5A4E]">Total</span>
+            </div>
+            <p className="text-3xl font-bold text-[#2C1810]">{properties.length}</p>
+          </div>
 
-      {/* Properties List */}
-      <div className="bg-white rounded-lg shadow">
-        {filteredProperties.length === 0 ? (
-          <div className="text-center py-12">
-            <Home className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Aucune propriété</h3>
-            <p className="text-gray-500 mb-4">
-              {filter === 'all'
-                ? "Vous n'avez pas encore ajouté de propriété"
-                : `Aucune propriété ${filter === 'available' ? 'disponible' : filter === 'rented' ? 'louée' : 'en maintenance'}`
-              }
+          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-green-50 p-2 rounded-xl">
+                <Home className="h-5 w-5 text-green-600" />
+              </div>
+              <span className="text-sm text-[#6B5A4E]">Disponibles</span>
+            </div>
+            <p className="text-3xl font-bold text-[#2C1810]">
+              {properties.filter((p) => p.status === 'available').length}
             </p>
-            {filter === 'all' && (
-              <Link
-                to="/proprietaire/ajouter-propriete"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                <Plus className="w-4 h-4" />
-                Ajouter votre première propriété
-              </Link>
-            )}
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-4 font-medium">Propriété</th>
-                  <th className="text-left p-4 font-medium">Localisation</th>
-                  <th className="text-left p-4 font-medium">Loyer</th>
-                  <th className="text-left p-4 font-medium">Statut</th>
-                  <th className="text-left p-4 font-medium">Candidatures</th>
-                  <th className="text-left p-4 font-medium">Vues</th>
-                  <th className="text-left p-4 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProperties.map((property) => (
-                  <tr key={property.id} className="border-b hover:bg-gray-50">
-                    <td className="p-4">
-                      <div>
-                        <h4 className="font-medium">{property.title}</h4>
-                        <p className="text-sm text-gray-500">{property.type}</p>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1 text-sm">
-                        <MapPin className="w-4 h-4 text-gray-400" />
-                        {property.city}, {property.neighborhood}
-                      </div>
-                    </td>
-                    <td className="p-4 font-medium">
-                      {property.monthly_rent?.toLocaleString()} FCFA
-                    </td>
-                    <td className="p-4">{getStatusBadge(property.status)}</td>
-                    <td className="p-4 text-sm">
-                      {property.applications_count || 0} candidature(s)
-                    </td>
-                    <td className="p-4 text-sm">
-                      {property.views_count || 0}
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        <button className="p-1 hover:bg-gray-100 rounded">
-                          <Eye className="w-4 h-4 text-gray-600" />
-                        </button>
-                        <button className="p-1 hover:bg-gray-100 rounded">
-                          <Edit className="w-4 h-4 text-gray-600" />
-                        </button>
-                      </div>
-                    </td>
+
+          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-blue-50 p-2 rounded-xl">
+                <Users className="h-5 w-5 text-blue-600" />
+              </div>
+              <span className="text-sm text-[#6B5A4E]">Loués</span>
+            </div>
+            <p className="text-3xl font-bold text-[#2C1810]">
+              {properties.filter((p) => p.status === 'rented').length}
+            </p>
+          </div>
+
+          <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9]">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="bg-yellow-50 p-2 rounded-xl">
+                <Calendar className="h-5 w-5 text-yellow-600" />
+              </div>
+              <span className="text-sm text-[#6B5A4E]">En maintenance</span>
+            </div>
+            <p className="text-3xl font-bold text-[#2C1810]">
+              {properties.filter((p) => p.status === 'maintenance').length}
+            </p>
+          </div>
+        </div>
+
+        {/* Filter */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {[
+            { value: 'all', label: 'Tous' },
+            { value: 'available', label: 'Disponibles' },
+            { value: 'rented', label: 'Loués' },
+            { value: 'maintenance', label: 'Maintenance' },
+          ].map((item) => (
+            <button
+              key={item.value}
+              onClick={() => setFilter(item.value as any)}
+              className={`px-6 py-3 rounded-xl font-medium transition-all ${
+                filter === item.value
+                  ? 'bg-[#F16522] text-white shadow-lg'
+                  : 'bg-white text-[#6B5A4E] hover:bg-[#FFF5F0] border border-[#EFEBE9]'
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Properties List */}
+        <div className="bg-white rounded-[20px] border border-[#EFEBE9] overflow-hidden">
+          {filteredProperties.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 bg-[#FFF5F0] rounded-full flex items-center justify-center mx-auto mb-6">
+                <Home className="w-10 h-10 text-[#F16522]" />
+              </div>
+              <h3 className="text-xl font-semibold text-[#2C1810] mb-3">Aucune propriété</h3>
+              <p className="text-[#6B5A4E] mb-8 max-w-md mx-auto">
+                {filter === 'all'
+                  ? "Vous n'avez pas encore ajouté de bien à votre portefeuille"
+                  : `Aucun bien ${filter === 'available' ? 'disponible' : filter === 'rented' ? 'loué' : 'en maintenance'}`}
+              </p>
+              {filter === 'all' && (
+                <Link
+                  to="/proprietaire/ajouter-propriete"
+                  className="inline-flex items-center gap-3 bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-8 rounded-xl transition-colors"
+                >
+                  <Plus className="w-5 h-5" />
+                  Ajouter votre premier bien
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-[#FBFAF9] border-b border-[#EFEBE9]">
+                  <tr>
+                    <th className="text-left p-6 font-semibold text-[#2C1810]">Propriété</th>
+                    <th className="text-left p-6 font-semibold text-[#2C1810]">Localisation</th>
+                    <th className="text-left p-6 font-semibold text-[#2C1810]">Loyer</th>
+                    <th className="text-left p-6 font-semibold text-[#2C1810]">Statut</th>
+                    <th className="text-left p-6 font-semibold text-[#2C1810]">Candidatures</th>
+                    <th className="text-left p-6 font-semibold text-[#2C1810]">Vues</th>
+                    <th className="text-left p-6 font-semibold text-[#2C1810]">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody>
+                  {filteredProperties.map((property) => (
+                    <tr
+                      key={property.id}
+                      className="border-b border-[#EFEBE9] hover:bg-[#FBFAF9] transition-colors"
+                    >
+                      <td className="p-6">
+                        <div>
+                          <h4 className="font-semibold text-[#2C1810]">{property.title}</h4>
+                          <p className="text-sm text-[#6B5A4E]">{property.type}</p>
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="flex items-center gap-2 text-sm text-[#6B5A4E]">
+                          <MapPin className="w-4 h-4 text-[#F16522]" />
+                          {property.city}, {property.neighborhood}
+                        </div>
+                      </td>
+                      <td className="p-6 font-semibold text-[#2C1810]">
+                        {property.monthly_rent?.toLocaleString()} FCFA
+                      </td>
+                      <td className="p-6">{getStatusBadge(property.status)}</td>
+                      <td className="p-6 text-sm text-[#6B5A4E]">
+                        {property.applications_count || 0} candidature(s)
+                      </td>
+                      <td className="p-6 text-sm text-[#6B5A4E]">{property.views_count || 0}</td>
+                      <td className="p-6">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => navigate(`/propriete/${property.id}`)}
+                            className="p-2.5 hover:bg-[#FBFAF9] rounded-xl transition-colors group"
+                            title="Voir les détails"
+                          >
+                            <Eye className="w-4 h-4 text-[#6B5A4E] group-hover:text-[#F16522]" />
+                          </button>
+                          <button
+                            onClick={() =>
+                              navigate(`/proprietaire/ajouter-propriete?edit=${property.id}`)
+                            }
+                            className="p-2.5 hover:bg-[#FBFAF9] rounded-xl transition-colors group"
+                            title="Modifier"
+                          >
+                            <Edit className="w-4 h-4 text-[#6B5A4E] group-hover:text-[#F16522]" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProperty(property.id)}
+                            className="p-2.5 hover:bg-red-50 rounded-xl transition-colors group"
+                            title="Supprimer"
+                          >
+                            <Trash2 className="w-4 h-4 text-[#6B5A4E] group-hover:text-red-600" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

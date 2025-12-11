@@ -30,7 +30,7 @@ export const ROUTES = {
   },
 
   PROPERTIES: {
-    ADD: '/dashboard/ajouter-propriete',
+    ADD: '/propriete/ajouter',
     STATS: '/dashboard/statistiques-propriete/:id',
     FAVORITES: '/favoris',
     SAVED_SEARCHES: '/recherches-sauvegardees',

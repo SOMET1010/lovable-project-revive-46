@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -116,8 +116,12 @@ export function AddPropertyContent() {
   const { validateField, getFieldState, setFieldTouched } = useFormValidation<PropertyFormData>();
 
   const [formData, setFormData] = useState<PropertyFormData>(INITIAL_FORM_DATA);
+  const [loadingEdit, setLoadingEdit] = useState(false);
 
   const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const editPropertyId = searchParams.get('edit');
+  const isEditMode = !!editPropertyId;
   const userType = profile?.user_type?.toLowerCase();
   const isAgencyUser = userType
     ? (AGENCY_ROLES as readonly string[]).includes(userType) || userType === 'agency'
@@ -145,6 +149,79 @@ export function AddPropertyContent() {
       }
     }
   }, []);
+
+  // Load property data in edit mode
+  useEffect(() => {
+    if (isEditMode && editPropertyId) {
+      loadPropertyData(editPropertyId);
+    }
+  }, [isEditMode, editPropertyId]);
+
+  const loadPropertyData = async (propertyId: string) => {
+    setLoadingEdit(true);
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('id', propertyId)
+        .eq('owner_id', user?.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading property:', error);
+        alert('Erreur lors du chargement de la propriété');
+        navigate('/proprietaire/mes-biens');
+        return;
+      }
+
+      if (data) {
+        setFormData({
+          title: data.title || '',
+          description: data.description || '',
+          address: data.address || '',
+          city: data.city || '',
+          neighborhood: data.neighborhood || '',
+          property_type: data.property_type || 'apartment',
+          property_category: data.property_category || 'residential',
+          bedrooms: data.bedrooms || 0,
+          bathrooms: data.bathrooms || 0,
+          surface_area: data.surface_area?.toString() || '',
+          monthly_rent: data.monthly_rent?.toString() || '',
+          deposit_amount: data.deposit_amount?.toString() || '',
+          charges: data.charges?.toString() || '',
+          available_from: data.available_from || '',
+          amenities: data.amenities || [],
+          images: data.images || [],
+          furnished: data.furnished || false,
+          allowed_occupants: data.allowed_occupants?.toString() || '',
+          floor_level: data.floor_level?.toString() || '',
+          total_floors: data.total_floors?.toString() || '',
+          construction_year: data.construction_year?.toString() || '',
+          has_elevator: data.has_elevator || false,
+          has_parking: data.has_parking || false,
+          has_balcony: data.has_balcony || false,
+          has_terrace: data.has_terrace || false,
+          has_garden: data.has_garden || false,
+          has_pool: data.has_pool || false,
+          has_air_conditioning: data.has_air_conditioning || false,
+          security_features: data.security_features || [],
+          nearby_amenities: data.nearby_amenities || [],
+          transport_options: data.transport_options || [],
+          energy_rating: data.energy_rating || '',
+          access_requirements: data.access_requirements || [],
+          rental_conditions: data.rental_conditions || '',
+          show_contact_form: data.show_contact_form ?? true,
+          status: data.status || 'available',
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Une erreur est survenue');
+      navigate('/proprietaire/mes-biens');
+    } finally {
+      setLoadingEdit(false);
+    }
+  };
 
   // Save draft to localStorage with debounce
   const saveDraft = useCallback(() => {
@@ -352,47 +429,86 @@ export function AddPropertyContent() {
     setError('');
 
     try {
-      const priceValue = Number(formData.monthly_rent);
+      const monthlyRentValue = Number(formData.monthly_rent);
       const depositValue = formData.deposit_amount ? Number(formData.deposit_amount) : null;
-      const chargesValueRaw = formData.charges_amount ? Number(formData.charges_amount) : 0;
-      const chargesValue = Number.isNaN(chargesValueRaw) ? 0 : chargesValueRaw;
+      const chargesValue = formData.charges ? Number(formData.charges) : 0;
 
-      if (Number.isNaN(priceValue)) {
+      if (Number.isNaN(monthlyRentValue)) {
         throw new Error('Le loyer est invalide');
       }
 
-      const { data: property, error: insertError } = await supabase
-        .from('properties')
-        .insert({
-          owner_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          address: { full_address: formData.address }, // Convert to JSONB format
-          city: formData.city,
-          neighborhood: formData.neighborhood || null,
-          property_type: formData.property_type,
-          property_category: formData.property_category || 'residentiel',
-          bedrooms_count: formData.bedrooms ? parseInt(formData.bedrooms.toString()) : null,
-          rooms_count: formData.bedrooms ? parseInt(formData.bedrooms.toString()) : null,
-          bathrooms_count: formData.bathrooms ? parseInt(formData.bathrooms.toString()) : null,
-          surface_area: formData.surface_area ? parseFloat(formData.surface_area) : null,
-          price: priceValue,
-          deposit_amount: depositValue,
-          charges_amount: chargesValue,
-          has_parking: formData.has_parking,
-          furnished: formData.is_furnished,
-          is_anonymous: formData.is_anonymous,
-          status: 'disponible',
-        })
-        .select()
-        .single();
+      const propertyData = {
+        owner_id: user.id,
+        title: formData.title,
+        description: formData.description,
+        address: formData.address,
+        city: formData.city,
+        neighborhood: formData.neighborhood || null,
+        property_type: formData.property_type,
+        property_category: formData.property_category || 'residential',
+        bedrooms: formData.bedrooms || 0,
+        bathrooms: formData.bathrooms || 0,
+        surface_area: formData.surface_area ? parseFloat(formData.surface_area) : null,
+        monthly_rent: monthlyRentValue,
+        deposit_amount: depositValue,
+        charges: chargesValue,
+        available_from: formData.available_from || null,
+        amenities: formData.amenities || [],
+        images: formData.images || [],
+        furnished: formData.furnished || false,
+        allowed_occupants: formData.allowed_occupants ? parseInt(formData.allowed_occupants) : null,
+        floor_level: formData.floor_level ? parseInt(formData.floor_level) : null,
+        total_floors: formData.total_floors ? parseInt(formData.total_floors) : null,
+        construction_year: formData.construction_year ? parseInt(formData.construction_year) : null,
+        has_elevator: formData.has_elevator || false,
+        has_parking: formData.has_parking || false,
+        has_balcony: formData.has_balcony || false,
+        has_terrace: formData.has_terrace || false,
+        has_garden: formData.has_garden || false,
+        has_pool: formData.has_pool || false,
+        has_air_conditioning: formData.has_air_conditioning || false,
+        security_features: formData.security_features || [],
+        nearby_amenities: formData.nearby_amenities || [],
+        transport_options: formData.transport_options || [],
+        energy_rating: formData.energy_rating || null,
+        access_requirements: formData.access_requirements || [],
+        rental_conditions: formData.rental_conditions || '',
+        show_contact_form: formData.show_contact_form ?? true,
+        status: formData.status || 'available',
+      };
 
-      if (insertError) throw insertError;
-      if (!property) throw new Error('Erreur lors de la création de la propriété');
+      let data, error;
+
+      if (isEditMode && editPropertyId) {
+        // Update existing property
+        const result = await supabase
+          .from('properties')
+          .update(propertyData)
+          .eq('id', editPropertyId)
+          .eq('owner_id', user.id)
+          .select()
+          .single();
+
+        data = result.data;
+        error = result.error;
+      } else {
+        // Create new property
+        const result = await supabase
+          .from('properties')
+          .insert(propertyData)
+          .select()
+          .single();
+
+        data = result.data;
+        error = result.error;
+      }
+
+      if (error) throw error;
+      if (!data) throw new Error(`Erreur lors de ${isEditMode ? 'la mise à jour' : 'la création'} de la propriété`);
 
       if (imageFiles.length > 0) {
         setUploadingImages(true);
-        const imageUrls = await uploadImages(property.id);
+        const imageUrls = await uploadImages(data.id);
 
         const { error: updateError } = await supabase
           .from('properties')
@@ -400,7 +516,7 @@ export function AddPropertyContent() {
             images: imageUrls,
             main_image: imageUrls[0],
           })
-          .eq('id', property.id);
+          .eq('id', data.id);
 
         if (updateError) throw updateError;
       }
@@ -614,11 +730,14 @@ export function AddPropertyContent() {
               <Home className="w-6 h-6" style={{ color: 'var(--color-orange)' }} />
             </div>
             <h1 className="text-2xl font-bold" style={{ color: 'var(--color-chocolat)' }}>
-              Ajouter une propriété
+              {isEditMode ? 'Modifier la propriété' : 'Ajouter une propriété'}
             </h1>
           </div>
           <p style={{ color: 'var(--color-gris-texte)' }}>
-            Remplissez les informations de votre propriété pour la publier sur Mon Toit
+            {isEditMode
+              ? 'Modifiez les informations de votre propriété'
+              : 'Remplissez les informations de votre propriété pour la publier sur Mon Toit'
+            }
           </p>
         </div>
 

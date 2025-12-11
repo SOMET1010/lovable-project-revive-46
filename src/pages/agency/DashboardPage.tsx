@@ -154,7 +154,7 @@ export default function AgencyDashboardPage() {
                 </div>
               </div>
               <Link
-                to="/dashboard/ajouter-propriete"
+                to="/propriete/ajouter"
                 className="bg-white text-[#F16522] hover:bg-[#F16522] hover:text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2 shadow-sm"
               >
                 <Plus className="h-5 w-5" />
@@ -224,7 +224,7 @@ export default function AgencyDashboardPage() {
                     <span>Biens en Gestion</span>
                   </h2>
                   <Link
-                    to="/dashboard/ajouter-propriete"
+                    to="/propriete/ajouter"
                     className="text-[#F16522] hover:underline text-sm font-medium"
                   >
                     + Ajouter
@@ -291,7 +291,7 @@ export default function AgencyDashboardPage() {
                     </h3>
                     <p className="text-[#6B5A4E] mb-4">Ajoutez votre premier bien dès maintenant</p>
                     <Link
-                      to="/dashboard/ajouter-propriete"
+                      to="/propriete/ajouter"
                       className="inline-flex items-center gap-2 text-[#F16522] hover:underline font-semibold"
                     >
                       <Plus className="h-4 w-4" />

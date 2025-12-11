@@ -172,7 +172,7 @@ export default function OwnerDashboardPage() {
               </div>
             </div>
             <Link
-              to="/dashboard/ajouter-propriete"
+              to="/propriete/ajouter"
               className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
             >
               <Plus className="h-5 w-5" />
@@ -240,7 +240,7 @@ export default function OwnerDashboardPage() {
                   <span>Mes Propriétés</span>
                 </h2>
                 <Link
-                  to="/dashboard/ajouter-propriete"
+                  to="/propriete/ajouter"
                   className="text-[#F16522] hover:underline text-sm font-medium"
                 >
                   + Ajouter
@@ -329,7 +329,7 @@ export default function OwnerDashboardPage() {
                   <h3 className="text-lg font-bold text-[#2C1810] mb-2">Aucune propriété</h3>
                   <p className="text-[#6B5A4E] mb-4">Commencez à louer votre bien dès maintenant</p>
                   <Link
-                    to="/dashboard/ajouter-propriete"
+                    to="/propriete/ajouter"
                     className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
                   >
                     <Plus className="h-5 w-5 mr-2" />
@@ -347,7 +347,7 @@ export default function OwnerDashboardPage() {
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Actions Rapides</h3>
               <div className="space-y-3">
                 <Link
-                  to="/proprietaire/ajouter-propriete"
+                  to="/propriete/ajouter"
                   className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Plus className="h-5 w-5 mr-2" />

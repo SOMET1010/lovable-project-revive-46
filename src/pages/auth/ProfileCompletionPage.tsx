@@ -91,7 +91,7 @@ export default function ProfileCompletionPage() {
         userType === 'tenant'
           ? '/recherche'
           : userType === 'owner'
-            ? '/dashboard/ajouter-propriete'
+            ? '/propriete/ajouter'
             : '/dashboard';
 
       navigate(redirectPath);

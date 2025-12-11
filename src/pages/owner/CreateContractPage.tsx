@@ -374,7 +374,7 @@ export default function CreateContractPage() {
                     <p className="text-[#A69B95] mb-4">Aucune propriété disponible</p>
                     <button
                       type="button"
-                      onClick={() => navigate('/dashboard/ajouter-propriete')}
+                      onClick={() => navigate('/propriete/ajouter')}
                       className="form-button-primary inline-flex items-center space-x-2"
                     >
                       <Plus className="w-4 h-4" />

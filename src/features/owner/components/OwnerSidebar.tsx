@@ -12,6 +12,7 @@ import {
   X,
   LogOut,
   Handshake,
+  Building2,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -27,12 +28,13 @@ interface OwnerSidebarProps {
 
 const navItems = [
   { label: 'Tableau de bord', href: '/proprietaire/dashboard', icon: LayoutDashboard },
-  { label: 'Mon profil', href: '/proprietaire/profil', icon: UserCircle2 },
+  { label: 'Mes biens', href: '/proprietaire/mes-biens', icon: Building2 },
+  { label: 'Ajouter un bien', href: '/proprietaire/ajouter-propriete', icon: PlusCircle },
   { label: 'Mes candidatures', href: '/proprietaire/candidatures', icon: Users },
   { label: 'Mes contrats', href: '/proprietaire/contrats', icon: FileText },
   { label: 'Créer un contrat', href: '/proprietaire/creer-contrat', icon: FilePlus2 },
   { label: 'Mandats agence', href: '/proprietaire/mes-mandats', icon: Handshake },
-  { label: 'Ajouter un bien', href: '/proprietaire/ajouter-propriete', icon: PlusCircle },
+  { label: 'Mon profil', href: '/proprietaire/profil', icon: UserCircle2 },
   { label: 'Messages', href: '/proprietaire/messages', icon: MessageSquare, hasBadge: true },
 ];
 

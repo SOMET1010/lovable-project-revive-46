@@ -31,12 +31,12 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
     agent: '/profil',
   },
   addProperty: {
-    locataire: '/dashboard/ajouter-propriete',
-    tenant: '/dashboard/ajouter-propriete',
-    proprietaire: '/dashboard/ajouter-propriete',
-    owner: '/dashboard/ajouter-propriete',
-    agence: '/dashboard/ajouter-propriete',
-    agent: '/dashboard/ajouter-propriete',
+    locataire: '/propriete/ajouter',
+    tenant: '/propriete/ajouter',
+    proprietaire: '/propriete/ajouter',
+    owner: '/propriete/ajouter',
+    agence: '/propriete/ajouter',
+    agent: '/propriete/ajouter',
   },
   contracts: {
     locataire: '/mes-contrats',

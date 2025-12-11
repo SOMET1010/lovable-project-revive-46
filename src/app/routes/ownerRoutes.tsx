@@ -61,7 +61,7 @@ export const ownerRoutes: RouteObject[] = [
 
       // Properties
       {
-        path: 'mes-proprietes',
+        path: 'mes-biens',
         element: <MyProperties />,
       },
 

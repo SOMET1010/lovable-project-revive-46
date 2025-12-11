@@ -298,7 +298,7 @@ export default function OwnerContractsPage() {
               </div>
             </div>
             <Link
-              to="/dashboard/creer-contrat"
+              to="/proprietaire/creer-contrat"
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
             >
               <Plus className="h-5 w-5" />
@@ -384,7 +384,7 @@ export default function OwnerContractsPage() {
                 : 'Créez votre premier contrat de bail'}
             </p>
             <Link
-              to="/dashboard/creer-contrat"
+              to="/proprietaire/creer-contrat"
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
             >
               <Plus className="h-5 w-5 mr-2" />
