@@ -39,3 +39,7 @@ export * from './debouncing';
 // Real-time hooks
 export { useLeaseSignatureRealtime } from './useLeaseSignatureRealtime';
 export type { LeaseSignatureData } from './useLeaseSignatureRealtime';
+
+// Migrated hooks from src/hooks/
+export { useAgencyMandates } from './useAgencyMandates';
+export type { Agency, MandatePermissions, MandateScope, AgencyMandate, CreateMandateParams } from './useAgencyMandates';

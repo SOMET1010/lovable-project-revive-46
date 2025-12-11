@@ -9,7 +9,7 @@ import type {
   ApplicationExportData,
   PaymentExportData,
   OwnerReportData
-} from '@/types/export.types';
+} from '@/shared/types/export.types';
 
 interface DashboardData {
   title: string;

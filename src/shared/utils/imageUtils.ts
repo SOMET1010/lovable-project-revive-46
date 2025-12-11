@@ -1,3 +1,8 @@
+/**
+ * Image utility functions
+ * Migrated from src/utils/imageUtils.ts
+ */
+
 import { UploadService } from '@/services/upload/uploadService';
 
 interface ProcessImageOptions {

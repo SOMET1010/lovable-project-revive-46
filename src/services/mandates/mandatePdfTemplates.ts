@@ -2,7 +2,7 @@
  * Templates de texte pour les documents de mandat
  */
 
-import { MandatePermissions } from '@/hooks/useAgencyMandates';
+import { MandatePermissions } from '@/shared/hooks/useAgencyMandates';
 
 export const getMandateHeaderText = () => ({
   republic: 'RÉPUBLIQUE DE CÔTE D\'IVOIRE',

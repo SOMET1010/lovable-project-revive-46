@@ -14,7 +14,7 @@ import {
   AnalyticsAreaChart,
 } from '@/shared/ui/charts';
 import { useAnalytics } from '@/shared/hooks/useAnalytics';
-import type { AnalyticsPeriod } from '@/types/analytics.types';
+import type { AnalyticsPeriod } from '@/shared/types/analytics.types';
 
 const PERIOD_OPTIONS: { value: AnalyticsPeriod; label: string }[] = [
   { value: '7d', label: '7 jours' },

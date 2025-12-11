@@ -10,7 +10,7 @@ import type {
   TransactionStats,
   ChartDataPoint,
   AnalyticsPeriod,
-} from '@/types/analytics.types';
+} from '@/shared/types/analytics.types';
 
 const MONTHS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
 

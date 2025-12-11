@@ -4,7 +4,7 @@
  */
 
 import type { ChatMessage, ChatConversation } from '@/shared/types/monToit.types';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Récupère ou crée une conversation pour un utilisateur

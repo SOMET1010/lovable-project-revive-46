@@ -1,6 +1,7 @@
 /**
  * Types pour Web Speech API (Speech Recognition)
  * Ces types ne sont pas dans lib.dom.d.ts standard
+ * Migrated from src/types/speech-recognition.types.ts
  */
 
 // =====================================================

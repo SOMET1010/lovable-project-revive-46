@@ -1,5 +1,6 @@
 /**
  * Types pour les services d'export (Dashboard & Analytics)
+ * Migrated from src/types/export.types.ts
  */
 
 import jsPDF from 'jspdf';

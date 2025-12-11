@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import TenantDashboardLayout from '../components/TenantDashboardLayout';
 import { logger } from '@/shared/lib/logger';
 import { toast } from 'sonner';
-import type { Visit, VisitFilter } from '@/types/visit.types';
+import type { Visit, VisitFilter } from '@/shared/types/visit.types';
 
 export default function MyVisits() {
   const { user } = useAuth();

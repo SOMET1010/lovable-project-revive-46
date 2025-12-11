@@ -8,7 +8,7 @@ import type {
   SpeechRecognitionEvent,
   SpeechRecognitionErrorEvent,
   ParsedVoiceQuery
-} from '@/types/speech-recognition.types';
+} from '@/shared/types/speech-recognition.types';
 
 interface VoiceSearchProps {
   onTranscript: (transcript: string) => void;

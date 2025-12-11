@@ -7,7 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { logger } from '@/shared/lib/logger';
-import type { TableRowData, JsPDFWithAutoTable } from '@/types/export.types';
+import type { TableRowData, JsPDFWithAutoTable } from '@/shared/types/export.types';
 
 // =====================================================
 // Export PDF

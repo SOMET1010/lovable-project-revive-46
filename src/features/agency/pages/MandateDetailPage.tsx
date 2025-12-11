@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useAgencyMandates, type MandatePermissions } from '@/hooks/useAgencyMandates';
+import { useAgencyMandates, type MandatePermissions } from '@/shared/hooks/useAgencyMandates';
 import { useAuth } from '@/app/providers/AuthProvider';
 import MandateStatusBadge from '../components/MandateStatusBadge';
 import MandatePermissionsForm from '../components/MandatePermissionsForm';
