@@ -11,6 +11,8 @@ import { GlobalLoadingSkeleton } from '@/shared/ui/GlobalLoadingSkeleton';
 import { FloatingCallButton } from '@/shared/ui/FloatingCallButton';
 import SUTAChatWidget from '@/shared/components/SUTAChatWidget';
 import BottomNavigation from '@/shared/components/navigation/BottomNavigation';
+import { CookieConsent } from '@/shared/ui/CookieConsent';
+
 const noLayoutRoutes = ['/auth/callback'];
 const noHeaderFooterRoutes = [
   '/admin',
@@ -68,6 +70,8 @@ export default function Layout() {
       {shouldShowHeaderFooter && <FooterPremium />}
       {/* Mobile Bottom Navigation */}
       {shouldShowHeaderFooter && <BottomNavigation />}
+      {/* Cookie Consent Banner */}
+      <CookieConsent />
     </ErrorBoundary>
   );
 }
