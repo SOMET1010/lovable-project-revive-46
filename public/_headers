@@ -1,23 +1,23 @@
-# Security Headers for Mon Toit Platform - Updated 2025-12
+# Security Headers for Mon Toit Platform - Audit Update 2025-12-11
 
 /*
-  # Content Security Policy (CSP) - Complete
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://www.gstatic.com blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.mapbox.com; font-src 'self' data: https://fonts.gstatic.com https://*.mapbox.com; img-src 'self' data: https: blob: https://*.mapbox.com https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.mapbox.com https://apidist.gutouch.net https://apis.google.com https://api.brevo.com https://vladmandic.github.io; worker-src 'self' blob:; frame-src 'self' https://accounts.google.com; child-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content
+  # Content Security Policy - Optimized per security audit
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://accounts.google.com https://www.gstatic.com https://www.googletagmanager.com blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.mapbox.com; font-src 'self' data: https://fonts.gstatic.com https://*.mapbox.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.mapbox.com https://apidist.gutouch.net https://apis.google.com https://api.brevo.com https://vladmandic.github.io https://www.google-analytics.com; worker-src 'self' blob:; frame-src 'self' https://accounts.google.com; child-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests; block-all-mixed-content
 
-  # Prevent clickjacking
-  X-Frame-Options: SAMEORIGIN
+  # Prevent clickjacking - DENY for stricter security
+  X-Frame-Options: DENY
 
   # Prevent MIME type sniffing
   X-Content-Type-Options: nosniff
 
-  # Enable browser XSS protection (legacy browsers)
+  # Enable browser XSS protection
   X-XSS-Protection: 1; mode=block
 
   # Referrer Policy
   Referrer-Policy: strict-origin-when-cross-origin
 
-  # Permissions Policy (Feature Policy replacement)
-  Permissions-Policy: accelerometer=(), camera=(self), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(self), payment=(self), usb=(), fullscreen=(self)
+  # Permissions Policy - Restrict browser APIs
+  Permissions-Policy: accelerometer=(), camera=(self), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(self), payment=(self), usb=(), fullscreen=(self), interest-cohort=()
 
   # Strict Transport Security (HSTS) - 1 year with preload
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
@@ -27,17 +27,61 @@
   Cross-Origin-Resource-Policy: cross-origin
   Cross-Origin-Embedder-Policy: unsafe-none
 
-# Cache control for static assets
+  # Prevent cross-domain policies
+  X-Permitted-Cross-Domain-Policies: none
+
+# Cache control for static assets - immutable for long-term caching
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# No cache for HTML (for SPA updates)
+# JavaScript bundles
+/*.js
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: application/javascript; charset=utf-8
+
+# CSS files
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+  Content-Type: text/css; charset=utf-8
+
+# Images
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+# Web fonts
+/*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML - short cache for SPA updates
+/index.html
+  Cache-Control: public, max-age=3600
+
 /*.html
   Cache-Control: no-cache, no-store, must-revalidate
 
-# Service Worker - no cache
+# Service Worker - no cache for updates
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
+
+# PWA manifest
+/manifest.json
+  Cache-Control: public, max-age=86400
+  Content-Type: application/json; charset=utf-8
+
+# SEO files
+/robots.txt
+  Cache-Control: public, max-age=86400
+  Content-Type: text/plain; charset=utf-8
+
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+  Content-Type: application/xml; charset=utf-8
 
 # Models for face-api.js
 /models/*

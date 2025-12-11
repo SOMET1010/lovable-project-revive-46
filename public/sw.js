@@ -1,5 +1,6 @@
-const CACHE_NAME = 'mon-toit-v3.2.1';
-const RUNTIME_CACHE = 'mon-toit-runtime';
+// Mon Toit Service Worker - Updated per audit 2025-12-11
+const CACHE_NAME = 'mon-toit-v3.2.32';
+const RUNTIME_CACHE = 'mon-toit-runtime-v3.2.32';
 
 const STATIC_ASSETS = [
   '/',
