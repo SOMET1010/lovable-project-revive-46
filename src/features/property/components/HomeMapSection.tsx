@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Building2, Home, Loader2, ArrowRight, RefreshCw, Warehouse, Tent } from 'lucide-react';
 import type { LngLatBounds } from 'mapbox-gl';
-import MapboxMap from '@/shared/ui/MapboxMap';
+import MapboxMapGated from '@/shared/ui/MapboxMapGated';
 import { useHomeMapProperties } from '../hooks/useHomeMapProperties';
 
 // --- CONFIGURATION PREMIUM ---
@@ -182,7 +182,7 @@ export default function HomeMapSection() {
           </div>
 
           {/* Map Component */}
-          <MapboxMap
+          <MapboxMapGated
             center={[-3.9962, 5.3600]}
             zoom={11}
             properties={mapProperties}
