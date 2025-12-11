@@ -33,7 +33,7 @@ const navItems = [
   { label: 'Créer un contrat', href: '/proprietaire/creer-contrat', icon: FilePlus2 },
   { label: 'Mandats agence', href: '/proprietaire/mes-mandats', icon: Handshake },
   { label: 'Ajouter un bien', href: '/proprietaire/ajouter-propriete', icon: PlusCircle },
-  { label: 'Messages', href: '/locataire/messages', icon: MessageSquare, hasBadge: true },
+  { label: 'Messages', href: '/proprietaire/messages', icon: MessageSquare, hasBadge: true },
 ];
 
 const bottomItems = [{ label: 'Rechercher', href: '/recherche', icon: Search }];

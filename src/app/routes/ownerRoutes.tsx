@@ -17,6 +17,8 @@ const OwnerProfilePage = lazyWithRetry(() => import('@/pages/owner/ProfilePage')
 const ApplicationForm = lazyWithRetry(() => import('@/pages/tenant/ApplicationFormPage'));
 // MyMandatesPage can be used by both owners and agencies
 const MyMandatesPage = lazyWithRetry(() => import('@/pages/agency/MyMandatesPage'));
+// MessagesPage is shared across all user types
+const MessagesPage = lazyWithRetry(() => import('@/pages/messaging/MessagesPage'));
 
 export const ownerRoutes: RouteObject[] = [
   // Routes avec sidebar
@@ -79,6 +81,12 @@ export const ownerRoutes: RouteObject[] = [
       {
         path: 'mes-mandats',
         element: <MyMandatesPage />,
+      },
+
+      // Messages (shared across all user types)
+      {
+        path: 'messages',
+        element: <MessagesPage />,
       },
     ],
   },
