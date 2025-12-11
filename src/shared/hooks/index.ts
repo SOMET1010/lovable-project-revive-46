@@ -8,7 +8,16 @@ export type { default as UseParallaxReturn } from './useParallax';
 
 export { useBreakpoint } from './useBreakpoint';
 export { useErrorHandler } from './useErrorHandler';
-export { useFeatureFlag } from './useFeatureFlag';
+export { 
+  useFeatureFlag, 
+  useAllFeatureFlags, 
+  useMultipleFeatureFlags, 
+  useFeatureFlagsByCategory,
+  useInvalidateFeatureFlags,
+  FeatureFlag,
+  FEATURE_FLAGS 
+} from './useFeatureFlag';
+export type { FeatureFlag as FeatureFlagType, FeatureFlagName } from './useFeatureFlag';
 export { useLocalStorage } from './useLocalStorage';
 export { useToast } from './useToast';
 export { useUserRoles } from './useUserRoles';
