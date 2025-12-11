@@ -83,7 +83,15 @@ export default function MakePayment() {
 
       if (contractsError) throw contractsError;
 
-      const formattedContracts: Contract[] = (contractsData || []).map((contract: any) => ({
+      interface LeaseContractBasic {
+        id: string;
+        property_id: string;
+        monthly_rent: number;
+        deposit_amount: number | null;
+        owner_id: string;
+      }
+      
+      const formattedContracts: Contract[] = (contractsData || []).map((contract: LeaseContractBasic) => ({
         id: contract.id,
         property_id: contract.property_id,
         monthly_rent: contract.monthly_rent,
@@ -374,7 +382,7 @@ export default function MakePayment() {
                             <button
                               key={type.value}
                               type="button"
-                              onClick={() => handlePaymentTypeChange(type.value as any)}
+                              onClick={() => handlePaymentTypeChange(type.value as PaymentFormData['payment_type'])}
                               className={`p-4 border-2 rounded-xl text-left transition-all ${
                                 formData.payment_type === type.value
                                   ? 'border-[#F16522] bg-[#F16522]/10'

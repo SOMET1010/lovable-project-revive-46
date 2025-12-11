@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Coins, Filter, X, Sparkles } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -18,6 +19,7 @@ interface EnhancedSearchProps {
 
 export default function EnhancedSearch({ onSearch, showQuickFilters = true, compact = false }: EnhancedSearchProps) {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<SearchFilters>({
     city: '',
     propertyType: '',
@@ -52,7 +54,7 @@ export default function EnhancedSearch({ onSearch, showQuickFilters = true, comp
       if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
       if (filters.bedrooms) params.set('bedrooms', filters.bedrooms);
 
-      window.location.href = `/recherche?${params.toString()}`;
+      navigate(`/recherche?${params.toString()}`);
     }
   };
 

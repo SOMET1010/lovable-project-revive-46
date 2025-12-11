@@ -5,39 +5,38 @@ import { FileText, Eye, Edit, CheckCircle, Clock, XCircle, AlertCircle, ArrowRig
 import { Link } from 'react-router-dom';
 import TenantDashboardLayout from '../components/TenantDashboardLayout';
 import { toast } from 'sonner';
-
+import type { StatusConfig } from '../types/supabase-mappers.types';
 interface Contract {
   id: string;
-  contract_number: string;
+  contract_number: string | null;
   property_id: string;
-  contract_type: string;
-  status: string;
+  status: string | null;
   start_date: string;
   end_date: string | null;
   monthly_rent: number;
-  deposit_amount: number;
-  charges_amount: number;
+  deposit_amount: number | null;
+  charges_amount: number | null;
   owner_signed_at: string | null;
   tenant_signed_at: string | null;
-  created_at: string;
+  created_at: string | null;
   property: {
     title: string;
-    address: string;
+    address: string | null;
     city: string;
-    main_image: string;
-  };
+    main_image: string | null;
+  } | null;
   owner: {
     id: string;
-    full_name: string;
-    email: string;
-    phone: string;
-  };
+    full_name: string | null;
+    email: string | null;
+    phone: string | null;
+  } | null;
   tenant: {
     id: string;
-    full_name: string;
-    email: string;
-    phone: string;
-  };
+    full_name: string | null;
+    email: string | null;
+    phone: string | null;
+  } | null;
 }
 
 type FilterType = 'all' | 'active' | 'pending' | 'expired';
@@ -62,7 +61,6 @@ export default function MyContracts() {
           id,
           contract_number,
           property_id,
-          contract_type,
           status,
           start_date,
           end_date,
@@ -89,13 +87,33 @@ export default function MyContracts() {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading contracts:', error);
+        throw error;
+      }
 
-      const formattedContracts = (data || []).map((contract: any) => ({
+      interface LeaseContractResult {
+        id: string;
+        contract_number: string | null;
+        property_id: string;
+        status: string | null;
+        start_date: string;
+        end_date: string | null;
+        monthly_rent: number;
+        deposit_amount: number | null;
+        charges_amount: number | null;
+        owner_signed_at: string | null;
+        tenant_signed_at: string | null;
+        created_at: string | null;
+        properties: { title: string; address: string | null; city: string; main_image: string | null } | null;
+        owner: { id: string; full_name: string | null; email: string | null; phone: string | null } | null;
+        tenant: { id: string; full_name: string | null; email: string | null; phone: string | null } | null;
+      }
+      
+      const formattedContracts: Contract[] = ((data || []) as unknown as LeaseContractResult[]).map((contract) => ({
         id: contract.id,
         contract_number: contract.contract_number,
         property_id: contract.property_id,
-        contract_type: contract.contract_type,
         status: contract.status,
         start_date: contract.start_date,
         end_date: contract.end_date,
@@ -119,8 +137,8 @@ export default function MyContracts() {
     }
   };
 
-  const getStatusConfig = (status: string) => {
-    const configs: Record<string, { label: string; icon: any; className: string }> = {
+  const getStatusConfig = (status: string): StatusConfig => {
+    const configs: Record<string, StatusConfig> = {
       brouillon: { label: 'Brouillon', icon: AlertCircle, className: 'bg-[#FAF7F4] text-[#6B5A4E] border border-[#EFEBE9]' },
       en_attente_signature: { label: 'En attente', icon: Clock, className: 'bg-yellow-100 text-yellow-700 border border-yellow-200' },
       partiellement_signe: { label: 'Partiellement signé', icon: Clock, className: 'bg-blue-100 text-blue-700 border border-blue-200' },
@@ -132,7 +150,8 @@ export default function MyContracts() {
     return configs[status] || { label: status, icon: AlertCircle, className: 'bg-[#FAF7F4] text-[#6B5A4E] border border-[#EFEBE9]' };
   };
 
-  const formatDate = (date: string) => {
+  const formatDate = (date: string | null) => {
+    if (!date) return 'Non définie';
     return new Date(date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
@@ -141,8 +160,8 @@ export default function MyContracts() {
   const stats = {
     total: contracts.length,
     active: contracts.filter(c => c.status === 'actif').length,
-    pending: contracts.filter(c => ['brouillon', 'en_attente_signature', 'partiellement_signe'].includes(c.status)).length,
-    expired: contracts.filter(c => ['expire', 'resilie', 'annule'].includes(c.status)).length
+    pending: contracts.filter(c => c.status && ['brouillon', 'en_attente_signature', 'partiellement_signe'].includes(c.status)).length,
+    expired: contracts.filter(c => c.status && ['expire', 'resilie', 'annule'].includes(c.status)).length
   };
 
   if (!user) {
@@ -269,7 +288,7 @@ export default function MyContracts() {
         ) : (
           <div className="space-y-4">
             {contracts.map((contract) => {
-              const statusConfig = getStatusConfig(contract.status);
+              const statusConfig = getStatusConfig(contract.status ?? 'brouillon');
               const StatusIcon = statusConfig.icon;
               
               return (
@@ -277,8 +296,8 @@ export default function MyContracts() {
                   <div className="flex flex-col md:flex-row">
                     <div className="md:w-48 h-40 md:h-auto">
                       <img
-                        src={contract.property.main_image || '/placeholder-property.jpg'}
-                        alt={contract.property.title}
+                        src={contract.property?.main_image || '/placeholder-property.jpg'}
+                        alt={contract.property?.title || 'Propriété'}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -292,8 +311,8 @@ export default function MyContracts() {
                               {statusConfig.label}
                             </span>
                           </div>
-                          <p className="text-[#2C1810] font-semibold mb-1">{contract.property.title}</p>
-                          <p className="text-sm text-[#6B5A4E]">{contract.property.address}, {contract.property.city}</p>
+                          <p className="text-[#2C1810] font-semibold mb-1">{contract.property?.title || 'Propriété'}</p>
+                          <p className="text-sm text-[#6B5A4E]">{contract.property?.address || ''}, {contract.property?.city || ''}</p>
                         </div>
                         <div className="text-right">
                           <p className="text-2xl font-bold text-[#F16522]">{contract.monthly_rent.toLocaleString()} FCFA</p>
@@ -312,7 +331,7 @@ export default function MyContracts() {
                         </div>
                         <div>
                           <p className="text-xs text-[#A69B95] uppercase tracking-wider mb-1">Caution</p>
-                          <p className="font-semibold text-[#2C1810]">{contract.deposit_amount.toLocaleString()} FCFA</p>
+                          <p className="font-semibold text-[#2C1810]">{(contract.deposit_amount ?? 0).toLocaleString()} FCFA</p>
                         </div>
                         <div>
                           <p className="text-xs text-[#A69B95] uppercase tracking-wider mb-1">{isOwner(contract) ? 'Locataire' : 'Propriétaire'}</p>

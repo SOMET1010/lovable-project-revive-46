@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { Wrench, Upload, AlertCircle, CheckCircle, Camera, X } from 'lucide-react';
+import type { MaintenanceLeaseQueryResult } from '../types/supabase-mappers.types';
 
 export default function MaintenanceRequest() {
   const { user } = useAuth();
-  const [activeLease, setActiveLease] = useState<any>(null);
+  const navigate = useNavigate();
+  const [activeLease, setActiveLease] = useState<MaintenanceLeaseQueryResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -21,11 +24,11 @@ export default function MaintenanceRequest() {
 
   useEffect(() => {
     if (!user) {
-      window.location.href = '/connexion';
+      navigate('/connexion');
       return;
     }
     loadActiveLease();
-  }, [user]);
+  }, [user, navigate]);
 
   const loadActiveLease = async () => {
     if (!user) return;
@@ -115,7 +118,7 @@ export default function MaintenanceRequest() {
       setImagePreviews([]);
 
       setTimeout(() => {
-        window.location.href = '/maintenance/locataire';
+        navigate('/maintenance/locataire');
       }, 2000);
     } catch (err: any) {
       console.error('Error submitting request:', err);
