@@ -26,6 +26,9 @@
 /* Premium Form Styles */
 @import './styles/form-premium.css';
 
+/* Accessibilité WCAG 2.1 AA */
+@import './styles/accessibility.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
