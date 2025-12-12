@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
         subtitle="Découvrez comment nous protégeons vos données personnelles"
       />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="bg-white rounded-[20px] p-8 border border-[#EFEBE9] shadow-sm">
           <p className="text-sm text-[#6B5A4E] mb-8">Dernière mise à jour : Novembre 2025</p>
 
