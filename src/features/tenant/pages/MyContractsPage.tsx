@@ -3,7 +3,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { FileText, Eye, Edit, CheckCircle, Clock, XCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { InteriorPageLayout } from '@/shared/components';
+import TenantDashboardLayout from '../components/TenantDashboardLayout';
 import { toast } from 'sonner';
 import type { StatusConfig } from '../types/supabase-mappers.types';
 interface Contract {
@@ -166,7 +166,7 @@ export default function MyContracts() {
 
   if (!user) {
     return (
-      <InteriorPageLayout title="Mes contrats de bail" subtitle="Gérez vos baux et contrats de location">
+      <TenantDashboardLayout title="Mes contrats de bail">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="w-20 h-20 rounded-full bg-[#FAF7F4] flex items-center justify-center mx-auto mb-6">
@@ -176,12 +176,12 @@ export default function MyContracts() {
             <p className="text-[#6B5A4E]">Veuillez vous connecter pour voir vos contrats</p>
           </div>
         </div>
-      </InteriorPageLayout>
+      </TenantDashboardLayout>
     );
   }
 
   return (
-    <InteriorPageLayout title="Mes contrats de bail" subtitle="Gérez vos baux et contrats de location">
+    <TenantDashboardLayout title="Mes contrats de bail">
       <div className="max-w-7xl mx-auto">
         {/* Header Premium */}
         <div className="mb-8">
@@ -387,6 +387,6 @@ export default function MyContracts() {
           </div>
         )}
       </div>
-    </InteriorPageLayout>
+    </TenantDashboardLayout>
   );
 }
