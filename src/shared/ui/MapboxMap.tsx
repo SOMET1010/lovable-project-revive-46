@@ -248,6 +248,16 @@ export default function MapboxMap({
   
   const { token: mapboxToken, isLoading: tokenLoading, error: tokenError } = useMapboxToken();
 
+  // Log pour diagnostic
+  if (import.meta.env.DEV) {
+    console.log('[MapboxMap] Token state:', { 
+      hasToken: !!mapboxToken, 
+      tokenLoading, 
+      tokenError: tokenError?.message,
+      propertiesCount: validProperties.length
+    });
+  }
+
   // Fonction de changement de style
   const handleStyleChange = useCallback((style: MapStyleType) => {
     if (!map.current || style === mapStyle) return;
