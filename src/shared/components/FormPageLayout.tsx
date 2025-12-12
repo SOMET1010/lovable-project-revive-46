@@ -46,13 +46,13 @@ export default function FormPageLayout({
             </button>
           )}
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-start gap-4">
             {Icon && (
-              <div className="p-3 bg-[#F16522]/10 rounded-xl">
+              <div className="p-3 bg-[#F16522]/10 rounded-xl flex-shrink-0">
                 <Icon className="w-8 h-8 text-[#F16522]" />
               </div>
             )}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h1 className="text-2xl md:text-3xl font-bold text-[#2C1810]">{title}</h1>
               {subtitle && (
                 <p className="text-[#6B5A4E] mt-1">{subtitle}</p>
