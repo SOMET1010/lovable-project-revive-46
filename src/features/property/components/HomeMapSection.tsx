@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, Building2, Home, Loader2, ArrowRight, RefreshCw, Warehouse, Tent } from 'lucide-react';
-import type { LngLatBounds } from 'mapbox-gl';
+import { MapPin, Building2, Home, Loader2, ArrowRight, Warehouse, Tent } from 'lucide-react';
 import MapboxMapGated from '@/shared/ui/MapboxMapGated';
 import { useHomeMapProperties } from '../hooks/useHomeMapProperties';
 
@@ -25,7 +24,7 @@ const BUDGET_OPTIONS = [
 
 export default function HomeMapSection() {
   const navigate = useNavigate();
-  const { properties, loading, totalCount, fetchInitialProperties, fetchPropertiesInBounds } = useHomeMapProperties();
+  const { properties, loading, totalCount, fetchInitialProperties } = useHomeMapProperties();
 
   // Log pour diagnostic
   if (import.meta.env.DEV) {
@@ -40,13 +39,6 @@ export default function HomeMapSection() {
     propertyType: 'all',
     maxPrice: 0,
   });
-  const [showSearchButton, setShowSearchButton] = useState(false);
-  const [pendingBounds, setPendingBounds] = useState<{
-    north: number;
-    south: number;
-    east: number;
-    west: number;
-  } | null>(null);
 
   // Charger les propriétés initiales
   useEffect(() => {
@@ -55,30 +47,6 @@ export default function HomeMapSection() {
       maxPrice: filters.maxPrice || undefined,
     });
   }, [fetchInitialProperties, filters.propertyType, filters.maxPrice]);
-
-  // Gérer le changement de bounds
-  const handleBoundsChange = useCallback((bounds: LngLatBounds) => {
-    const ne = bounds.getNorthEast();
-    const sw = bounds.getSouthWest();
-    setPendingBounds({
-      north: ne.lat,
-      south: sw.lat,
-      east: ne.lng,
-      west: sw.lng,
-    });
-    setShowSearchButton(true);
-  }, []);
-
-  // Rechercher dans la zone visible
-  const handleSearchInZone = useCallback(() => {
-    if (pendingBounds) {
-      fetchPropertiesInBounds(pendingBounds, {
-        propertyType: filters.propertyType,
-        maxPrice: filters.maxPrice || undefined,
-      });
-      setShowSearchButton(false);
-    }
-  }, [pendingBounds, fetchPropertiesInBounds, filters]);
 
   // Gérer le clic sur un marqueur
   const handleMarkerClick = useCallback((property: { id: string }) => {
@@ -169,42 +137,17 @@ export default function HomeMapSection() {
 
         {/* --- CARTE PREMIUM --- */}
         <div className="relative h-[600px] rounded-[32px] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-[#EFEBE9]">
-          
-          {/* Bouton Flottant "Chercher ici" - Style Airbnb */}
-          <div className={`absolute top-6 left-1/2 -translate-x-1/2 z-20 transition-all duration-300 transform ${
-            showSearchButton 
-              ? 'translate-y-0 opacity-100' 
-              : '-translate-y-10 opacity-0 pointer-events-none'
-          }`}>
-            <button
-              onClick={handleSearchInZone}
-              disabled={loading}
-              className="flex items-center gap-2 px-6 py-3 bg-white text-[#2C1810] font-bold rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all border border-[#EFEBE9] disabled:opacity-50"
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-[#F16522]" />
-              ) : (
-                <RefreshCw className="w-4 h-4 text-[#F16522]" />
-              )}
-              {loading ? 'Chargement...' : 'Chercher dans cette zone'}
-            </button>
-          </div>
-
           {/* Map Component */}
           <MapboxMapGated
             center={[-3.9962, 5.3600]}
             zoom={11}
             properties={mapProperties}
             height="600px"
-            clustering={true}
-            priceLabels={true}
-            styleToggleEnabled={true}
-            onBoundsChange={handleBoundsChange}
             onMarkerClick={handleMarkerClick}
           />
 
           {/* Loading Overlay Subtil */}
-          {loading && !showSearchButton && (
+          {loading && (
             <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px] flex items-center justify-center z-10">
               <div className="bg-white p-4 rounded-full shadow-xl animate-bounce">
                 <Loader2 className="w-6 h-6 text-[#F16522] animate-spin" />
