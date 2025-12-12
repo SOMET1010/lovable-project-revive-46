@@ -222,14 +222,13 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       {/* Carte */}
       <div ref={mapContainerRef} className="absolute inset-0 rounded-xl overflow-hidden" />
 
-      {/* Badge OpenStreetMap */}
+      {/* Badge carte */}
       <div className="absolute top-3 left-3 z-[1000]">
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md border border-border/50">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-background/95 backdrop-blur-sm rounded-full shadow-md border border-border/50">
           <MapPin className="w-4 h-4 text-primary" />
           <span className="text-xs font-medium text-foreground">
-            {validProperties.length} bien{validProperties.length > 1 ? 's' : ''} visible{validProperties.length > 1 ? 's' : ''}
+            {validProperties.length} bien{validProperties.length > 1 ? 's' : ''} sur la carte
           </span>
-          <span className="text-xs text-muted-foreground">• OpenStreetMap</span>
         </div>
       </div>
 

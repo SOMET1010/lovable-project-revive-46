@@ -1,18 +1,35 @@
 import { FEATURE_FLAGS, useFeatureFlag } from '@/shared/hooks/useFeatureFlag';
-import MapboxMap from './MapboxMap';
 import LeafletMap from './LeafletMap';
-import { MapPin, Loader2, Map } from 'lucide-react';
-import { useState, useEffect, useMemo } from 'react';
+import { MapPin, Loader2 } from 'lucide-react';
+import { useMemo } from 'react';
 
-// Re-export all props from MapboxMap
-type MapboxMapProps = Parameters<typeof MapboxMap>[0];
+interface Property {
+  id: string;
+  title: string;
+  monthly_rent: number;
+  longitude: number;
+  latitude: number;
+  status?: string;
+  images?: string[];
+  city?: string;
+  neighborhood?: string;
+  main_image?: string;
+  bedrooms?: number;
+  surface_area?: number;
+}
 
-interface MapboxMapGatedProps extends MapboxMapProps {
+interface MapboxMapGatedProps {
+  center?: [number, number];
+  zoom?: number;
+  properties?: Property[];
+  highlightedPropertyId?: string;
+  onMarkerClick?: (property: Property) => void;
+  height?: string;
   fallbackMessage?: string;
 }
 
 /**
- * Fallback simple quand toutes les cartes échouent
+ * Fallback simple quand les cartes sont désactivées
  */
 function MapFallback({ height = '400px' }: { height?: string }) {
   return (
@@ -47,12 +64,17 @@ function MapLoading({ height = '400px' }: { height?: string }) {
 }
 
 /**
- * Wrapper MapboxMap avec fallback automatique vers OpenStreetMap/Leaflet
+ * Composant carte principal utilisant OpenStreetMap (Leaflet)
+ * Wrapper avec feature flag pour activer/désactiver les cartes
  */
-function MapboxWithFallback({ height, properties, onMarkerClick, ...props }: MapboxMapProps) {
-  const [useLeaflet, setUseLeaflet] = useState(false);
-  const [mapboxError, setMapboxError] = useState(false);
-  const [loadTimeout, setLoadTimeout] = useState(false);
+export default function MapboxMapGated({ 
+  height, 
+  properties, 
+  onMarkerClick,
+  center,
+  zoom,
+}: MapboxMapGatedProps) {
+  const { isEnabled, isLoading, error } = useFeatureFlag(FEATURE_FLAGS.MAPBOX_MAPS);
 
   // Convertir les propriétés pour Leaflet (format différent)
   const leafletProperties = useMemo(() => {
@@ -71,76 +93,14 @@ function MapboxWithFallback({ height, properties, onMarkerClick, ...props }: Map
     }));
   }, [properties]);
 
-  // Timeout de 8 secondes pour Mapbox, puis fallback vers Leaflet
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!mapboxError) {
-        setLoadTimeout(true);
-      }
-    }, 8000);
-
-    return () => clearTimeout(timer);
-  }, [mapboxError]);
-
-  // Si Mapbox échoue ou timeout, utiliser Leaflet
-  useEffect(() => {
-    if (mapboxError || loadTimeout) {
-      console.log('[MapboxMapGated] Switching to OpenStreetMap fallback');
-      setUseLeaflet(true);
-    }
-  }, [mapboxError, loadTimeout]);
-
-  // Écouter les erreurs Mapbox via un event custom
-  useEffect(() => {
-    const handleMapboxError = () => {
-      console.log('[MapboxMapGated] Mapbox error detected, switching to Leaflet');
-      setMapboxError(true);
-    };
-
-    window.addEventListener('mapbox-error', handleMapboxError);
-    return () => window.removeEventListener('mapbox-error', handleMapboxError);
-  }, []);
-
-  if (useLeaflet) {
-    return (
-      <div className="relative">
-        <LeafletMap
-          properties={leafletProperties}
-          height={height}
-          onPropertyClick={(id) => {
-            const prop = properties?.find(p => p.id === id);
-            if (prop && onMarkerClick) onMarkerClick(prop);
-          }}
-          showControls={true}
-        />
-        {/* Badge indiquant le fallback */}
-        <div className="absolute top-12 left-3 z-[1001]">
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-xs">
-            <Map className="w-3 h-3" />
-            <span>Mode alternatif</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return <MapboxMap height={height} properties={properties} onMarkerClick={onMarkerClick} {...props} />;
-}
-
-/**
- * MapboxMap avec feature flag - affiche un fallback si désactivé
- * Avec fallback automatique vers OpenStreetMap si Mapbox échoue
- */
-export default function MapboxMapGated({ height, ...props }: MapboxMapGatedProps) {
-  const { isEnabled, isLoading, error } = useFeatureFlag(FEATURE_FLAGS.MAPBOX_MAPS);
-
-  // Log pour diagnostic
+  // Log pour diagnostic (DEV only)
   if (import.meta.env.DEV) {
     console.log('[MapboxMapGated] Feature flag state:', { 
       feature: FEATURE_FLAGS.MAPBOX_MAPS,
       isEnabled, 
       isLoading,
-      error: error?.message 
+      error: error?.message,
+      propertiesCount: properties?.length || 0
     });
   }
 
@@ -149,21 +109,26 @@ export default function MapboxMapGated({ height, ...props }: MapboxMapGatedProps
     return <MapLoading height={height} />;
   }
 
-  // Erreur lors du chargement du feature flag
-  if (error) {
-    console.error('[MapboxMapGated] Feature flag error:', error);
-    // En cas d'erreur, on tente quand même d'afficher la carte avec fallback
-    return <MapboxWithFallback height={height} {...props} />;
-  }
-
   // Feature flag désactivé
-  if (!isEnabled) {
+  if (!isEnabled && !error) {
     if (import.meta.env.DEV) {
       console.log('[MapboxMapGated] Feature disabled, showing fallback');
     }
     return <MapFallback height={height} />;
   }
 
-  // Feature flag activé - afficher la carte avec fallback automatique
-  return <MapboxWithFallback height={height} {...props} />;
+  // Afficher la carte Leaflet (OpenStreetMap)
+  return (
+    <LeafletMap
+      properties={leafletProperties}
+      height={height}
+      onPropertyClick={(id) => {
+        const prop = properties?.find(p => p.id === id);
+        if (prop && onMarkerClick) onMarkerClick(prop);
+      }}
+      showControls={true}
+      initialCenter={center ? [center[1], center[0]] : undefined}
+      initialZoom={zoom}
+    />
+  );
 }

@@ -174,26 +174,6 @@ export default function AddProperty() {
     );
   }, []);
 
-  // Handler pour le clic sur la carte
-  const handleMapClick = useCallback((lngLat: { lng: number; lat: number }) => {
-    setFormData(prev => ({
-      ...prev,
-      latitude: lngLat.lat.toFixed(6),
-      longitude: lngLat.lng.toFixed(6),
-    }));
-    toast.success('Position définie !');
-  }, []);
-
-  // Handler pour le déplacement du marqueur
-  const handleMarkerDrag = useCallback((lngLat: { lng: number; lat: number }) => {
-    setFormData(prev => ({
-      ...prev,
-      latitude: lngLat.lat.toFixed(6),
-      longitude: lngLat.lng.toFixed(6),
-    }));
-    toast.success('Position mise à jour !');
-  }, []);
-
   // Coordonnées de la ville pour centrer la carte
   const CITY_COORDS: Record<string, [number, number]> = {
     'Abidjan': [-4.0083, 5.3600],
@@ -1189,12 +1169,6 @@ export default function AddProperty() {
                     center={mapCenter}
                     zoom={formData.latitude ? 15 : 12}
                     properties={mapMarkerProperty}
-                    singleMarker={true}
-                    draggableMarker={true}
-                    onMarkerDrag={handleMarkerDrag}
-                    onMapClick={handleMapClick}
-                    searchEnabled={true}
-                    styleToggleEnabled={true}
                     height="320px"
                   />
                   
