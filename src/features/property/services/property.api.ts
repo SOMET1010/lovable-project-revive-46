@@ -185,11 +185,11 @@ export const propertyApi = {
     }
 
     if (filters?.minPrice !== undefined) {
-      query = query.gte('price', filters.minPrice);
+      query = query.gte('monthly_rent', filters.minPrice);
     }
 
     if (filters?.maxPrice !== undefined) {
-      query = query.lte('price', filters.maxPrice);
+      query = query.lte('monthly_rent', filters.maxPrice);
     }
 
     if (filters?.minRooms !== undefined) {

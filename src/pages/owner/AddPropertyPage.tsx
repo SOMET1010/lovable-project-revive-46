@@ -91,6 +91,12 @@ const STEPS = [
   { id: 3, label: 'Tarification', icon: DollarSign },
 ];
 
+const toDbCategory = (category: PropertyFormData['property_category']) =>
+  category === 'commercial' ? 'commercial' : 'residentiel';
+
+const toUiCategory = (category?: string | null): PropertyFormData['property_category'] =>
+  category === 'commercial' ? 'commercial' : 'residential';
+
 export default function AddProperty() {
   return <AddPropertyContent />;
 }
@@ -175,43 +181,30 @@ export function AddPropertyContent() {
       }
 
       if (data) {
+        const addressValue =
+          typeof data.address === 'string'
+            ? data.address
+            : (data as unknown as { address?: { street?: string } })?.address?.street ?? '';
+
         setFormData({
           title: data.title || '',
           description: data.description || '',
-          address: data.address || '',
+          address: addressValue,
           city: data.city || '',
           neighborhood: data.neighborhood || '',
-          property_type: data.property_type || 'apartment',
-          property_category: data.property_category || 'residential',
-          bedrooms: data.bedrooms || 0,
-          bathrooms: data.bathrooms || 0,
+          property_type: (data.property_type as PropertyType) || 'appartement',
+          property_category: toUiCategory(data.property_category),
+          bedrooms: data.bedrooms ?? 0,
+          bathrooms: data.bathrooms ?? 0,
           surface_area: data.surface_area?.toString() || '',
-          monthly_rent: data.monthly_rent?.toString() || '',
+          monthly_rent: (data.monthly_rent ?? data.price ?? '').toString(),
           deposit_amount: data.deposit_amount?.toString() || '',
-          charges: data.charges?.toString() || '',
-          available_from: data.available_from || '',
-          amenities: data.amenities || [],
-          images: data.images || [],
-          furnished: data.furnished || false,
-          allowed_occupants: data.allowed_occupants?.toString() || '',
-          floor_level: data.floor_level?.toString() || '',
-          total_floors: data.total_floors?.toString() || '',
-          construction_year: data.construction_year?.toString() || '',
-          has_elevator: data.has_elevator || false,
-          has_parking: data.has_parking || false,
-          has_balcony: data.has_balcony || false,
-          has_terrace: data.has_terrace || false,
-          has_garden: data.has_garden || false,
-          has_pool: data.has_pool || false,
-          has_air_conditioning: data.has_air_conditioning || false,
-          security_features: data.security_features || [],
-          nearby_amenities: data.nearby_amenities || [],
-          transport_options: data.transport_options || [],
-          energy_rating: data.energy_rating || '',
-          access_requirements: data.access_requirements || [],
-          rental_conditions: data.rental_conditions || '',
-          show_contact_form: data.show_contact_form ?? true,
-          status: data.status || 'available',
+          charges_amount: data.charges_amount?.toString() || '',
+          has_parking: data.has_parking ?? false,
+          has_garden: data.has_garden ?? false,
+          is_furnished: data.is_furnished ?? false,
+          has_ac: data.has_ac ?? false,
+          is_anonymous: data.is_anonymous ?? false,
         });
       }
     } catch (error) {
@@ -431,46 +424,43 @@ export function AddPropertyContent() {
     try {
       const monthlyRentValue = Number(formData.monthly_rent);
       const depositValue = formData.deposit_amount ? Number(formData.deposit_amount) : null;
-      const chargesValue = formData.charges ? Number(formData.charges) : 0;
+      const chargesValue = formData.charges_amount ? Number(formData.charges_amount) : 0;
+      const bedroomsValue = Number(formData.bedrooms);
+      const bathroomsValue = Number(formData.bathrooms);
+      const surfaceValue = formData.surface_area ? Number(formData.surface_area) : null;
+      const normalizedDeposit = depositValue === null || Number.isNaN(depositValue) ? null : depositValue;
+      const normalizedCharges = Number.isNaN(chargesValue) ? 0 : chargesValue;
+      const normalizedSurface =
+        surfaceValue === null || Number.isNaN(surfaceValue) ? null : surfaceValue;
 
       if (Number.isNaN(monthlyRentValue)) {
         throw new Error('Le loyer est invalide');
       }
 
-      // Convert address to JSONB format
-      const addressJson = formData.address ? { street: formData.address } : {};
-
       const propertyData = {
         owner_id: user.id,
         title: formData.title,
         description: formData.description || null,
-        address: addressJson,
-        city: formData.city || null,
+        address: formData.address || '',
+        city: formData.city || '',
         neighborhood: formData.neighborhood || null,
         property_type: formData.property_type,
-        property_category:
-          formData.property_category === 'commercial' ? 'commercial' : 'residentiel',
-        bedrooms_count: formData.bedrooms || 0,
-        bathrooms_count: formData.bathrooms || 0,
-        surface_area: formData.surface_area ? parseFloat(formData.surface_area) : null,
-        price: monthlyRentValue, // column is 'price' not 'monthly_rent'
-        deposit_amount: depositValue,
-        charges_amount: chargesValue,
-        has_parking: formData.has_parking || false,
-        has_garden: formData.has_garden || false,
-        furnished: formData.is_furnished || false,
-        has_ac: formData.has_ac || false,
-        is_anonymous: formData.is_anonymous || false,
+        property_category: toDbCategory(formData.property_category),
+        bedrooms: Number.isNaN(bedroomsValue) ? 0 : bedroomsValue,
+        bathrooms: Number.isNaN(bathroomsValue) ? 0 : bathroomsValue,
+        surface_area: normalizedSurface,
+        monthly_rent: monthlyRentValue,
+        deposit_amount: normalizedDeposit,
+        charges_amount: normalizedCharges,
+        has_parking: !!formData.has_parking,
+        has_garden: !!formData.has_garden,
+        is_furnished: !!formData.is_furnished,
+        has_ac: !!formData.has_ac,
+        is_anonymous: !!formData.is_anonymous,
         status: 'disponible' as const,
-        // Default values for other required fields
-        rooms_count: formData.bedrooms || 0,
-        charges_included: chargesValue > 0,
-        is_public: true,
-        is_verified: false,
-        featured: false,
-        views_count: 0,
-        favorites_count: 0,
-        applications_count: 0,
+        images: [],
+        main_image: null,
+        view_count: 0,
       };
 
       let data, error;
