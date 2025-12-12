@@ -1,4 +1,5 @@
-import { ChevronRight } from 'lucide-react';
+
+import { ChevronRight, MapPin, Wallet, User } from 'lucide-react';
 
 interface Contract {
   id: string;
@@ -14,39 +15,64 @@ interface Contract {
 }
 
 interface PaymentContractCardProps {
-  contract: Contract;
+  contract: Contract | null | undefined;
   onSelect: (contract: Contract) => void;
 }
 
 export default function PaymentContractCard({ contract, onSelect }: PaymentContractCardProps) {
+  if (!contract) {
+    console.warn("PaymentContractCard: Données 'contract' manquantes");
+    return null;
+  }
+
+  const imageSrc = contract.property_main_image?.length 
+    ? contract.property_main_image 
+    : 'https://placehold.co/400x300/e2e8f0/1e293b?text=No+Image';
+
   return (
     <button
+      type="button"
       onClick={() => onSelect(contract)}
-      className="w-full bg-white border-2 border-[#EFEBE9] rounded-xl p-6 shadow-sm hover:border-[#F16522] hover:shadow-lg transition-all duration-300 text-left group"
+      className="w-full bg-white border border-border rounded-xl p-4 shadow-sm hover:border-primary hover:shadow-md transition-all duration-300 text-left group flex items-start gap-4"
     >
-      <div className="flex items-start space-x-4">
+      <div className="relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-muted border border-border">
         <img
-          src={contract.property_main_image || 'https://via.placeholder.com/100'}
-          alt={contract.property_title}
-          className="w-20 h-20 rounded-lg object-cover"
+          src={imageSrc}
+          alt={contract.property_title || 'Propriété'}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = 'https://placehold.co/400x300/e2e8f0/1e293b?text=Erreur';
+          }}
         />
-        <div className="flex-1">
-          <h3 className="text-lg font-bold text-[#2C1810] mb-1">
-            {contract.property_title}
-          </h3>
-          <p className="text-sm text-[#A69B95] mb-2">
-            {contract.property_address}, {contract.property_city}
-          </p>
-          <div className="flex items-center space-x-4 text-sm">
-            <span className="font-semibold text-[#F16522]">
-              Loyer: {contract.monthly_rent.toLocaleString()} FCFA
-            </span>
-            <span className="text-[#A69B95]">
-              Propriétaire: {contract.owner_name}
-            </span>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <h3 className="text-lg font-bold text-foreground mb-1 truncate pr-2">
+          {contract.property_title || 'Titre non disponible'}
+        </h3>
+        
+        <div className="flex items-center text-muted-foreground text-sm mb-3">
+          <MapPin className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+          <span className="truncate">
+            {contract.property_address || 'Adresse inconnue'}, {contract.property_city || ''}
+          </span>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div className="flex items-center font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
+            <Wallet className="w-3.5 h-3.5 mr-1.5" />
+            {contract.monthly_rent?.toLocaleString() ?? 0} FCFA
+          </div>
+          
+          <div className="flex items-center text-muted-foreground text-xs">
+            <User className="w-3 h-3 mr-1" />
+            <span className="truncate max-w-[100px]">{contract.owner_name || 'Propriétaire'}</span>
           </div>
         </div>
-        <ChevronRight className="w-6 h-6 text-[#A69B95] group-hover:text-[#F16522] transition-colors" />
+      </div>
+
+      <div className="self-center pl-2">
+        <ChevronRight className="w-5 h-5 text-muted-foreground/50 group-hover:text-primary transition-colors" />
       </div>
     </button>
   );
