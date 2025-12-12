@@ -16,6 +16,28 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [3.2.33] - 2025-12-12
+
+### Added
+- **Contribution OpenStreetMap**
+  - Colonne `osm_contribution_consent` dans table `properties`
+  - Badge "Améliore OSM" sur les cartes propriétés (icône Globe2, couleurs vertes)
+  - Tooltip informatif Radix UI expliquant OpenStreetMap et l'impact de la contribution
+  - Checkbox consentement OSM dans formulaire d'ajout de propriété
+  - Index optimisé `idx_properties_osm_consent` pour requêtes de contribution
+
+### Changed
+- `PropertyBadges` enrichi avec badge OSM et tooltip riche éducatif
+- `PropertyCard` et `PropertyCardMobile` intègrent le nouveau badge OSM
+- `AddPropertyPage` inclut option de contribution OpenStreetMap (Step 3)
+
+### Documentation
+- Tooltip éducatif sur OpenStreetMap ("Wikipedia des cartes")
+- Explication de l'impact sur la cartographie de Côte d'Ivoire
+- Rassurance sur l'anonymisation des données partagées
+
+---
+
 ## [3.2.32] - 2025-12-11
 
 ### Added
