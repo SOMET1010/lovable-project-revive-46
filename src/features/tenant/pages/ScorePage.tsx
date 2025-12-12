@@ -46,28 +46,32 @@ const ScorePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <Skeleton className="h-8 w-64 mb-6" />
-        <div className="grid gap-6 md:grid-cols-2">
-          <Skeleton className="h-[400px]" />
-          <Skeleton className="h-[400px]" />
+      <TenantDashboardLayout title="Mon Score">
+        <div className="max-w-4xl mx-auto">
+          <Skeleton className="h-8 w-64 mb-6" />
+          <div className="grid gap-6 md:grid-cols-2">
+            <Skeleton className="h-[400px]" />
+            <Skeleton className="h-[400px]" />
+          </div>
         </div>
-      </div>
+      </TenantDashboardLayout>
     );
   }
 
   if (!scoreBreakdown) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="text-center py-12">
-          <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Impossible de charger votre score</h2>
-          <p className="text-muted-foreground mb-4">
-            Veuillez vous connecter pour voir votre Trust Score
-          </p>
-          <Button onClick={() => navigate('/connexion')}>Se connecter</Button>
+      <TenantDashboardLayout title="Mon Score">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-12">
+            <AlertCircle className="h-12 w-12 mx-auto text-[#A69B95] mb-4" />
+            <h2 className="text-xl font-semibold text-[#2C1810] mb-2">Impossible de charger votre score</h2>
+            <p className="text-[#6B5A4E] mb-4">
+              Veuillez vous connecter pour voir votre Trust Score
+            </p>
+            <Button onClick={() => navigate('/connexion')}>Se connecter</Button>
+          </div>
         </div>
-      </div>
+      </TenantDashboardLayout>
     );
   }
 

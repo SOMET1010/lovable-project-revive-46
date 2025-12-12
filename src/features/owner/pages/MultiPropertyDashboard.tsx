@@ -7,6 +7,7 @@ import {
 import { Button, Card, CardContent } from '@/shared/ui';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import OwnerDashboardLayout from '../components/OwnerDashboardLayout';
 
 interface PropertySummary {
   total_properties: number;
@@ -132,24 +133,22 @@ export default function MultiPropertyDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 bg-muted rounded w-1/3"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-muted rounded-xl"></div>
-              ))}
-            </div>
+      <OwnerDashboardLayout title="Tableau de bord Multi-Biens">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-[#EFEBE9] rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-[#EFEBE9] rounded-xl"></div>
+            ))}
           </div>
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <OwnerDashboardLayout title="Tableau de bord Multi-Biens">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -332,6 +331,6 @@ export default function MultiPropertyDashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </OwnerDashboardLayout>
   );
 }

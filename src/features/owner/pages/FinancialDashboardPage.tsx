@@ -6,6 +6,7 @@ import {
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import OwnerDashboardLayout from '../components/OwnerDashboardLayout';
 
 interface MonthlyStats {
   month: string;
@@ -166,24 +167,22 @@ export default function FinancialDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-muted rounded w-1/4"></div>
-            <div className="grid grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-muted rounded-xl"></div>
-              ))}
-            </div>
+      <OwnerDashboardLayout title="Dashboard Financier">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-[#EFEBE9] rounded w-1/4"></div>
+          <div className="grid grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-32 bg-[#EFEBE9] rounded-xl"></div>
+            ))}
           </div>
         </div>
-      </div>
+      </OwnerDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <OwnerDashboardLayout title="Dashboard Financier">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -375,6 +374,6 @@ export default function FinancialDashboardPage() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </OwnerDashboardLayout>
   );
 }
