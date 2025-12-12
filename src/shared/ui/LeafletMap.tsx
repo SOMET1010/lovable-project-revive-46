@@ -59,6 +59,8 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       p.longitude >= -180 &&
       p.longitude <= 180
   );
+  console.log('LeafletMap: properties count', properties.length);
+  console.log('LeafletMap: valid properties count', validProperties.length);
 
   // Initialiser la carte
   useEffect(() => {
@@ -71,13 +73,25 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       zoomControl: showControls,
     });
 
-    // Ajouter le layer OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Ajouter le layer OpenStreetMap avec gestion d'erreur
+    const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
     }).addTo(mapRef.current);
 
+    tileLayer.on('tileerror', (error) => {
+      console.error('Tile loading error:', error);
+    });
+
     setMapLoaded(true);
+
+    // Log pour déboguer
+    console.log(
+      'LeafletMap: carte créée, dimensions du conteneur:',
+      mapContainerRef.current?.offsetWidth,
+      mapContainerRef.current?.offsetHeight
+    );
+    console.log('LeafletMap: tileLayer ajoutée', tileLayer);
 
     return () => {
       if (mapRef.current) {

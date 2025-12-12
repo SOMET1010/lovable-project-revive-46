@@ -63,12 +63,15 @@ export default function MapWrapper(props: MapWrapperProps) {
 
   // Normalize properties
   const normalizedProperties = useMemo(() => {
-    return props.properties.map(normalizeProperty);
+    const normalized = props.properties.map(normalizeProperty);
+    console.log('MapWrapper: raw properties count', props.properties.length);
+    console.log('MapWrapper: normalized properties', normalized);
+    return normalized;
   }, [props.properties]);
 
   // Convert normalized properties to LeafletMap format
   const leafletProperties = useMemo(() => {
-    return normalizedProperties.map((p) => ({
+    const leafletProps = normalizedProperties.map((p) => ({
       id: p.id,
       title: p.title,
       city: p.city || '',
@@ -80,6 +83,8 @@ export default function MapWrapper(props: MapWrapperProps) {
       bedrooms: p.bedrooms,
       surface_area: p.surface_area,
     }));
+    console.log('MapWrapper: leaflet properties count', leafletProps.length);
+    return leafletProps;
   }, [normalizedProperties]);
 
   // Handle property click
@@ -119,6 +124,12 @@ export default function MapWrapper(props: MapWrapperProps) {
           console.error('Leaflet component error, using fallback');
           setMapError(true);
           setUseAzureFallback(true);
+        }}
+        style={{
+          border: '2px solid red',
+          backgroundColor: 'yellow',
+          height: props.height || '500px',
+          position: 'relative',
         }}
       >
         <LeafletMap

@@ -27,7 +27,6 @@ import InfiniteScroll from '@/shared/components/InfiniteScroll';
 import { useInfiniteProperties } from '../../hooks/tenant/useInfiniteProperties';
 import { useAvailableCities } from '../../hooks/tenant/useAvailableCities';
 import { useSaveSearch } from '../../hooks/tenant/useSaveSearch';
-import { useAuth } from '@/app/providers/AuthProvider';
 import SaveSearchDialog from '../../features/tenant/components/SaveSearchDialog';
 
 // Premium Ivorian Color Palette
@@ -46,14 +45,16 @@ export default function SearchPropertiesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // State for view mode
-  const [activeView, setActiveView] = useState<'list' | 'map'>('list');
+  const [activeView, setActiveView] = useState<'list' | 'map'>('map');
+  useEffect(() => {
+    console.log('activeView changed to', activeView);
+  }, [activeView]);
   const [sortBy, setSortBy] = useState<'recent' | 'price_asc' | 'price_desc'>('recent');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [useClusterMode, setUseClusterMode] = useState(true);
 
   // Search filters from URL
   const [city, setCity] = useState(searchParams.get('city') || '');
-  const [_neighborhood, setNeighborhood] = useState(searchParams.get('neighborhood') || '');
   const [propertyType, setPropertyType] = useState(searchParams.get('type') || '');
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
   const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
@@ -73,7 +74,6 @@ export default function SearchPropertiesPage() {
 
   // Save search hook
   const { saveSearch, isAuthenticated } = useSaveSearch();
-  const { user: _user } = useAuth();
 
   // Infinite scroll hook with sorting
   const {
@@ -131,7 +131,6 @@ export default function SearchPropertiesPage() {
 
   const clearFilters = () => {
     setCity('');
-    setNeighborhood('');
     setPropertyType('');
     setMinPrice('');
     setMaxPrice('');
@@ -177,6 +176,13 @@ export default function SearchPropertiesPage() {
   // Quick filter tags
   const quickFilters = ['Piscine', 'Meublé', 'Bord de lagune', 'Sécurisé', 'Parking'];
 
+  console.log('SearchPropertiesPage: activeView =', activeView);
+  console.log('SearchPropertiesPage: totalCount =', totalCount);
+  console.log('SearchPropertiesPage: properties count =', properties.length);
+  const propertiesWithCoords = properties.filter(
+    (p) => p.longitude !== null && p.latitude !== null
+  );
+  console.log('SearchPropertiesPage: properties with coordinates =', propertiesWithCoords.length);
   return (
     <div className="min-h-screen" style={{ backgroundColor: COLORS.creme }}>
       {/* ==================== HEADER AVEC DÉGRADÉ ALLÉGÉ ==================== */}
@@ -246,9 +252,6 @@ export default function SearchPropertiesPage() {
                   value={city}
                   onChange={(e) => {
                     setCity(e.target.value);
-                    if (e.target.value !== 'Abidjan') {
-                      setNeighborhood('');
-                    }
                   }}
                   className="w-full border-0 p-0 h-6 font-bold focus:ring-0 bg-transparent cursor-pointer"
                   style={{ color: COLORS.chocolat }}
@@ -416,7 +419,10 @@ export default function SearchPropertiesPage() {
             >
               <button
                 type="button"
-                onClick={() => setActiveView('list')}
+                onClick={() => {
+                  console.log('Setting activeView to list');
+                  setActiveView('list');
+                }}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-full transition-all text-sm font-medium ${
                   activeView === 'list' ? 'text-white shadow-md' : 'hover:bg-gray-50'
                 }`}
@@ -430,7 +436,10 @@ export default function SearchPropertiesPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setActiveView('map')}
+                onClick={() => {
+                  console.log('Setting activeView to map');
+                  setActiveView('map');
+                }}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-full transition-all text-sm font-medium ${
                   activeView === 'map' ? 'text-white shadow-md' : 'hover:bg-gray-50'
                 }`}
@@ -738,7 +747,7 @@ export default function SearchPropertiesPage() {
 
           {/* MAP (Visible seulement si mode Carte activé) */}
           {activeView === 'map' && (
-            <div className="hidden lg:block w-[45%] h-[800px] sticky top-24">
+            <div className="block w-[45%] h-[800px] sticky top-24">
               {/* Toggle Cluster/Marqueurs */}
               <div className="flex justify-end mb-3">
                 <div
@@ -781,7 +790,9 @@ export default function SearchPropertiesPage() {
                 0 ? (
                   <MapWrapper
                     properties={
-                      properties.filter((p) => p.longitude !== null && p.latitude !== null) as any
+                      properties.filter(
+                        (p) => p.longitude !== null && p.latitude !== null
+                      ) as unknown[]
                     }
                     height="100%"
                     fitBounds={properties.length > 0}
@@ -858,7 +869,9 @@ export default function SearchPropertiesPage() {
               {properties.filter((p) => p.longitude !== null && p.latitude !== null).length > 0 ? (
                 <MapWrapper
                   properties={
-                    properties.filter((p) => p.longitude !== null && p.latitude !== null) as any
+                    properties.filter(
+                      (p) => p.longitude !== null && p.latitude !== null
+                    ) as unknown[]
                   }
                   height="100%"
                   fitBounds={properties.length > 0}
