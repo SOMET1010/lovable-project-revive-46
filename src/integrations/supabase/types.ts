@@ -2755,6 +2755,7 @@ export type Database = {
           main_image: string | null
           monthly_rent: number
           neighborhood: string | null
+          osm_contribution_consent: boolean | null
           owner_id: string | null
           price: number | null
           property_category: string | null
@@ -2795,6 +2796,7 @@ export type Database = {
           main_image?: string | null
           monthly_rent: number
           neighborhood?: string | null
+          osm_contribution_consent?: boolean | null
           owner_id?: string | null
           price?: number | null
           property_category?: string | null
@@ -2835,6 +2837,7 @@ export type Database = {
           main_image?: string | null
           monthly_rent?: number
           neighborhood?: string | null
+          osm_contribution_consent?: boolean | null
           owner_id?: string | null
           price?: number | null
           property_category?: string | null

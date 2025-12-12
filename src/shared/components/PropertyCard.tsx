@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Bed, Bath, Maximize } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
 import { OwnerBadge } from '@/shared/ui';
+import { PropertyBadges } from '@/shared/ui/PropertyBadges';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -23,6 +24,7 @@ interface PropertyCardProps {
   ownerName?: string | null;
   ownerAvatarUrl?: string | null;
   ownerIsVerified?: boolean;
+  avgResponseTimeHours?: number | null;
 }
 
 export default function PropertyCard({
@@ -33,6 +35,7 @@ export default function PropertyCard({
   ownerName,
   ownerAvatarUrl,
   ownerIsVerified,
+  avgResponseTimeHours,
 }: PropertyCardProps) {
   const imageUrl = property.images?.[0] || FALLBACK_IMAGE;
 
@@ -55,18 +58,28 @@ export default function PropertyCard({
           onError={handleImageError}
         />
 
+        {/* Property Badges - Top Left */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1">
+          {showBadge && badgeText && (
+            <div className="px-3 py-1.5 bg-[var(--color-orange)] text-white rounded-full text-xs font-semibold shadow-lg">
+              {badgeText}
+            </div>
+          )}
+          <PropertyBadges
+            ownerIsVerified={ownerIsVerified}
+            avgResponseTimeHours={avgResponseTimeHours}
+            hasVirtualTour={property.has_virtual_tour ?? false}
+            createdAt={property.created_at ?? undefined}
+            osmContributionConsent={property.osm_contribution_consent ?? false}
+            size="sm"
+          />
+        </div>
+
         {/* Prix en Overlay - Bottom Left */}
         <div className="absolute bottom-3 left-3 px-4 py-2 bg-[var(--color-chocolat)]/90 backdrop-blur-sm rounded-xl text-white shadow-lg">
           <span className="text-lg font-bold">{FormatService.formatCurrency(property.monthly_rent)}</span>
           <span className="text-xs opacity-80 ml-1">/mois</span>
         </div>
-
-        {/* Badge Nouveau - Orange Premium */}
-        {showBadge && badgeText && (
-          <div className="absolute top-3 left-3 px-3 py-1.5 bg-[var(--color-orange)] text-white rounded-full text-xs font-semibold shadow-lg">
-            {badgeText}
-          </div>
-        )}
 
         {/* Owner Badge with Trust Score - Bottom Right */}
         {ownerTrustScore != null && (

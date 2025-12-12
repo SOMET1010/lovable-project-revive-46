@@ -39,6 +39,7 @@ interface PropertyFormData {
   is_furnished: boolean;
   has_ac: boolean;
   is_anonymous: boolean;
+  osm_contribution_consent: boolean;
 }
 
 // Document types required
@@ -86,6 +87,7 @@ const INITIAL_FORM_DATA: PropertyFormData = {
   is_furnished: false,
   has_ac: false,
   is_anonymous: false,
+  osm_contribution_consent: false,
 };
 
 // Step configuration - 4 steps now
@@ -543,7 +545,8 @@ export default function AddProperty() {
           is_furnished: formData.is_furnished,
           has_ac: formData.has_ac,
           is_anonymous: formData.is_anonymous,
-          status: 'en_verification', // Changed from 'disponible'
+          osm_contribution_consent: formData.osm_contribution_consent,
+          status: 'en_verification',
         })
         .select()
         .single();
@@ -1526,6 +1529,33 @@ export default function AddProperty() {
                     }}
                   />
                 </div>
+              </div>
+
+              {/* OSM Contribution Consent */}
+              <div className="bg-white p-5 rounded-xl border" style={{ borderColor: 'var(--color-border)' }}>
+                <label className="flex items-start gap-4 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="osm_contribution_consent"
+                    checked={formData.osm_contribution_consent}
+                    onChange={handleChange}
+                    className="w-5 h-5 mt-0.5 rounded text-green-600 focus:ring-green-500"
+                    style={{ accentColor: '#22c55e' }}
+                  />
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Globe className="w-5 h-5 text-green-600" />
+                      <span className="font-semibold" style={{ color: 'var(--color-chocolat)' }}>
+                        Contribuer à OpenStreetMap
+                      </span>
+                    </div>
+                    <p className="text-sm" style={{ color: 'var(--color-gris-neutre)' }}>
+                      L'adresse de cette propriété sera partagée anonymement avec OpenStreetMap 
+                      pour améliorer la cartographie de Côte d'Ivoire. Un badge "Améliore OSM" 
+                      sera affiché sur votre annonce.
+                    </p>
+                  </div>
+                </label>
               </div>
 
               {/* Step 4 Navigation & Submit */}

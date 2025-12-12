@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Bed, Bath, Maximize, MapPin, Heart } from 'lucide-react';
 import { FormatService } from '@/services/format/formatService';
 import { useState } from 'react';
+import { PropertyBadges } from '@/shared/ui/PropertyBadges';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
@@ -19,6 +20,8 @@ interface PropertyCardMobileProps {
   property: Property;
   onFavoriteToggle?: (id: string) => void;
   isFavorite?: boolean;
+  ownerIsVerified?: boolean;
+  avgResponseTimeHours?: number | null;
 }
 
 /**
@@ -28,6 +31,8 @@ export default function PropertyCardMobile({
   property,
   onFavoriteToggle,
   isFavorite = false,
+  ownerIsVerified,
+  avgResponseTimeHours,
 }: PropertyCardMobileProps) {
   const [liked, setLiked] = useState(isFavorite);
   const imageUrl = property.images?.[0] || FALLBACK_IMAGE;
@@ -74,9 +79,19 @@ export default function PropertyCardMobile({
           />
         </button>
 
-        {/* Property type badge */}
-        <div className="absolute top-3 left-3 px-3 py-1.5 bg-[#F16522] text-white rounded-full text-xs font-semibold uppercase tracking-wide">
-          {property.property_type}
+        {/* Property type badge and PropertyBadges */}
+        <div className="absolute top-3 left-3 flex flex-col gap-1">
+          <div className="px-3 py-1.5 bg-[#F16522] text-white rounded-full text-xs font-semibold uppercase tracking-wide">
+            {property.property_type}
+          </div>
+          <PropertyBadges
+            ownerIsVerified={ownerIsVerified}
+            avgResponseTimeHours={avgResponseTimeHours}
+            hasVirtualTour={property.has_virtual_tour ?? false}
+            createdAt={property.created_at ?? undefined}
+            osmContributionConsent={property.osm_contribution_consent ?? false}
+            size="sm"
+          />
         </div>
 
         {/* Price overlay */}
