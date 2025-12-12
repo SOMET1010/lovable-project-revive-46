@@ -238,15 +238,11 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       console.log('[NeoFace] Verification result:', data);
 
       if (data.status === 'verified') {
-        setStatus('success');
-        setMatchingScore(data.matching_score || null);
-        setProgress('Identité vérifiée !');
-        onVerified({
-          document_id: documentId,
-          matching_score: data.matching_score,
-          verified_at: data.verified_at,
-          provider: 'neoface',
-        });
+        handleVerificationSuccess(data);
+      } else if (data.status === 'waiting') {
+        // NeoFace needs more time - start polling
+        console.log('[NeoFace] Status waiting, starting polling...');
+        await pollVerificationStatus(5); // max 5 attempts
       } else {
         throw new Error(data.message || 'Les visages ne correspondent pas');
       }
@@ -257,6 +253,64 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       setError(errorMessage);
       onFailed(errorMessage);
     }
+  };
+
+  // Handle successful verification
+  const handleVerificationSuccess = (data: { matching_score?: number; verified_at?: string }) => {
+    setStatus('success');
+    setMatchingScore(data.matching_score || null);
+    setProgress('Identité vérifiée !');
+    onVerified({
+      document_id: documentId,
+      matching_score: data.matching_score,
+      verified_at: data.verified_at,
+      provider: 'neoface',
+    });
+  };
+
+  // Poll verification status when NeoFace returns 'waiting'
+  const pollVerificationStatus = async (maxAttempts: number) => {
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      setProgress(`Analyse en cours... (${attempt}/${maxAttempts})`);
+      
+      // Wait 2 seconds between attempts
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      try {
+        const { data, error: invokeError } = await supabase.functions.invoke('neoface-verify', {
+          body: {
+            action: 'check_status',
+            document_id: documentId,
+            verification_id: verificationId,
+          },
+        });
+
+        if (invokeError) throw new Error(invokeError.message);
+
+        console.log(`[NeoFace] Poll attempt ${attempt}:`, data?.status);
+
+        if (data?.status === 'verified') {
+          handleVerificationSuccess(data);
+          return;
+        } else if (data?.status === 'failed') {
+          throw new Error(data.message || 'Les visages ne correspondent pas');
+        }
+        // If still 'waiting', continue polling
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Erreur de vérification';
+        console.error('[NeoFace] Poll error:', errorMessage);
+        setStatus('error');
+        setError(errorMessage);
+        onFailed(errorMessage);
+        return;
+      }
+    }
+
+    // Timeout after max attempts
+    const timeoutMessage = 'Délai d\'attente dépassé. Veuillez réessayer.';
+    setStatus('error');
+    setError(timeoutMessage);
+    onFailed(timeoutMessage);
   };
 
   const handleRetry = () => {
