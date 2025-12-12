@@ -28,10 +28,13 @@ type VerificationStatus =
   | 'uploading' 
   | 'capturing_selfie'  // Capture selfie locale avec caméra navigateur
   | 'verifying'         // Envoi du selfie et vérification
+  | 'polling'           // Attente résultat NeoFace (status: waiting)
   | 'success' 
   | 'error';
 
 // --- CONSTANTES ---
+const POLL_INTERVAL_MS = 2000;
+const MAX_POLL_ATTEMPTS = 15; // 30 secondes max
 
 // --- COMPOSANT ---
 
@@ -48,9 +51,8 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const [verificationId, setVerificationId] = useState<string | null>(null);
   const [matchingScore, setMatchingScore] = useState<number | null>(null);
   const [progressMessage, setProgressMessage] = useState<string>('');
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  // Note: pollingRef kept for future use if needed
-  void pollingRef;
+  const [pollCount, setPollCount] = useState(0);
+  const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // --- ÉTAPE 1: Upload du document ---
 
@@ -115,10 +117,69 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         setStatus('error');
         setError(msg);
         onFailed(msg);
+      } else if (data?.status === 'waiting') {
+        // NeoFace traite de manière asynchrone, démarrer le polling
+        setStatus('polling');
+        setPollCount(0);
+        setProgressMessage('Analyse biométrique en cours...');
+        startPolling();
       } else {
         throw new Error('Réponse inattendue du serveur.');
       }
 
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erreur lors de la vérification';
+      setStatus('error');
+      setError(msg);
+      onFailed(msg);
+    }
+  };
+
+  // --- POLLING pour état "waiting" ---
+
+  const startPolling = () => {
+    if (pollingRef.current) clearTimeout(pollingRef.current);
+    pollVerificationStatus(1);
+  };
+
+  const pollVerificationStatus = async (attempt: number) => {
+    if (attempt > MAX_POLL_ATTEMPTS) {
+      setStatus('error');
+      setError('Délai d\'attente dépassé. Veuillez réessayer.');
+      onFailed('Timeout de vérification');
+      return;
+    }
+
+    setPollCount(attempt);
+    setProgressMessage(`Analyse en cours... (${attempt}/${MAX_POLL_ATTEMPTS})`);
+
+    try {
+      const { data, error: invokeError } = await supabase.functions.invoke('neoface-verify', {
+        body: { 
+          action: 'check_status', 
+          document_id: documentId,
+          verification_id: verificationId,
+          user_id: userId
+        },
+      });
+
+      if (invokeError) throw new Error(invokeError.message);
+
+      if (data?.status === 'verified') {
+        handleSuccess(data);
+      } else if (data?.status === 'failed') {
+        const msg = data.message || "La correspondance faciale a échoué.";
+        setStatus('error');
+        setError(msg);
+        onFailed(msg);
+      } else if (data?.status === 'waiting') {
+        // Continuer le polling
+        pollingRef.current = setTimeout(() => {
+          pollVerificationStatus(attempt + 1);
+        }, POLL_INTERVAL_MS);
+      } else {
+        throw new Error('Réponse inattendue du serveur.');
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur lors de la vérification';
       setStatus('error');
@@ -141,12 +202,14 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   };
 
   const handleRetry = () => {
+    if (pollingRef.current) clearTimeout(pollingRef.current);
     setStatus('idle');
     setError(null);
     setDocumentId(null);
     setVerificationId(null);
     setMatchingScore(null);
     setProgressMessage('');
+    setPollCount(0);
   };
 
   // --- RENDER ---
@@ -255,6 +318,28 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
             <div>
               <h4 className="text-lg font-bold text-[#2C1810]">Analyse biométrique</h4>
               <p className="text-sm text-[#6B5A4E] mt-2 animate-pulse">{progressMessage}</p>
+            </div>
+          </div>
+        )}
+
+        {/* ÉTAT POLLING (attente résultat NeoFace) */}
+        {status === 'polling' && (
+          <div className="text-center space-y-6 py-8 animate-fade-in">
+            <div className="relative w-24 h-24 mx-auto">
+              <div className="absolute inset-0 bg-amber-500/10 rounded-full animate-pulse" />
+              <div className="relative w-24 h-24 rounded-full flex items-center justify-center">
+                <Loader2 className="w-12 h-12 text-amber-500 animate-spin" />
+              </div>
+            </div>
+            <div>
+              <h4 className="text-lg font-bold text-[#2C1810]">Analyse en cours</h4>
+              <p className="text-sm text-[#6B5A4E] mt-2 animate-pulse">{progressMessage}</p>
+              <div className="mt-4 w-full bg-border rounded-full h-2 overflow-hidden">
+                <div 
+                  className="bg-amber-500 h-full transition-all duration-500" 
+                  style={{ width: `${(pollCount / MAX_POLL_ATTEMPTS) * 100}%` }}
+                />
+              </div>
             </div>
           </div>
         )}
