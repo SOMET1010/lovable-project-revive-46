@@ -55,15 +55,11 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   
   // Refs
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const popupRef = useRef<Window | null>(null);
 
   // Cleanup
   useEffect(() => {
     return () => {
       stopPolling();
-      if (popupRef.current && !popupRef.current.closed) {
-        popupRef.current.close();
-      }
     };
   }, []);
 
@@ -115,20 +111,11 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const openSelfiePopup = () => {
     if (!selfieUrl || !documentId) return;
 
-    // Fermer l'ancien popup si existant
-    if (popupRef.current && !popupRef.current.closed) {
-      popupRef.current.close();
-    }
-    
-    // Calcul pour centrer le popup (taille mobile-friendly)
-    const width = 450;
-    const height = 750;
-    const left = (window.screen.width - width) / 2;
-    const top = (window.screen.height - height) / 2;
-    
-    const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`;
-    
-    popupRef.current = window.open(selfieUrl, 'neoface_selfie_capture', features);
+    // Ouvrir avec noopener,noreferrer pour éviter ERR_BLOCKED_BY_RESPONSE
+    // Cela supprime la relation opener qui cause le blocage COOP de NeoFace
+    // Note: noopener fait que window.open() retourne null, donc on ne peut pas
+    // référencer le popup, mais le polling continue normalement côté serveur
+    window.open(selfieUrl, '_blank', 'noopener,noreferrer');
     
     // Démarrer le polling immédiatement après ouverture
     startPolling(documentId, verificationId);
@@ -192,9 +179,6 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   };
 
   const handleSuccess = (data: { matching_score?: number }) => {
-    if (popupRef.current && !popupRef.current.closed) {
-      popupRef.current.close();
-    }
     setStatus('success');
     setMatchingScore(data.matching_score ?? null);
     setProgressMessage('Identité confirmée !');
@@ -209,9 +193,6 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
 
   const handleRetry = () => {
     stopPolling();
-    if (popupRef.current && !popupRef.current.closed) {
-      popupRef.current.close();
-    }
     
     setStatus('idle');
     setError(null);
