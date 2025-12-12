@@ -312,7 +312,7 @@ export default function CreateContractPage() {
   return (
     <>
       <div className="bg-[#FAF7F4] pt-6 pb-12 rounded-2xl">
-        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
           {/* Header Premium */}
           <div className="mb-8">
             <button

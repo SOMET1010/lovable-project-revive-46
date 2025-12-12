@@ -1,10 +1,16 @@
 /**
  * Configuration générale de l'application Mon Toit
+ * Les valeurs peuvent être surchargées par les variables d'environnement.
  */
+
+// Récupération des variables d'environnement (définies à la construction)
+const env = import.meta.env;
 
 export const APP_CONFIG = {
   name: 'Mon Toit',
-  version: '3.2.28',
+  version: env['VITE_APP_VERSION'] || '3.2.28',
+  branch: env['VITE_GIT_BRANCH'] || 'main',
+  commitHash: env['VITE_GIT_COMMIT_HASH'] || '',
   description: "Plateforme de location immobilière sécurisée en Côte d'Ivoire",
 
   company: {

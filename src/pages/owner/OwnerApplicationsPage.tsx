@@ -211,7 +211,7 @@ export default function OwnerApplicationsPage() {
     <>
       {/* Header */}
       <div className="bg-gradient-to-r from-primary-600 to-primary-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
               <Users className="h-7 w-7 text-white" />

@@ -14,6 +14,7 @@ interface VisitRow {
   visit_type: string | null;
   status: string | null;
   notes: string | null;
+  tenant_id?: string | null;
   property: {
     id: string;
     title: string | null;
@@ -21,12 +22,19 @@ interface VisitRow {
     address: any;
     main_image: string | null;
   } | null;
-  tenant: {
+  tenant?: {
     id: string;
     full_name: string | null;
     email: string | null;
     phone: string | null;
   } | null;
+}
+
+interface TenantProfile {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -68,18 +76,13 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
           visit_type,
           status,
           notes,
+          tenant_id,
           property:properties (
             id,
             title,
             city,
             address,
             main_image
-          ),
-          tenant:profiles (
-            id,
-            full_name,
-            email,
-            phone
           )
         `
         )
@@ -88,7 +91,39 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
         .order('visit_time', { ascending: true });
 
       if (error) throw error;
-      setVisits((data as VisitRow[]) || []);
+
+      const rows = ((data as VisitRow[]) || []).map((row) => {
+        // Utiliser visit_date et visit_time directement
+        const date = row.visit_date || '';
+        const time = row.visit_time || null;
+        return {
+          ...row,
+          visit_date: date,
+          visit_time: time,
+        };
+      });
+
+      // Récupérer les profils des locataires si besoin
+      const tenantIds = Array.from(
+        new Set(rows.map((row) => row.tenant_id).filter((id): id is string => !!id))
+      );
+      let tenantsMap = new Map<string, TenantProfile>();
+      if (tenantIds.length > 0) {
+        const { data: tenantsData, error: tenantsError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email, phone')
+          .in('id', tenantIds);
+        if (!tenantsError && tenantsData) {
+          tenantsMap = new Map(tenantsData.map((t) => [t.id, t]));
+        }
+      }
+
+      const enriched = rows.map((row) => ({
+        ...row,
+        tenant: row.tenant_id ? tenantsMap.get(row.tenant_id) || null : null,
+      }));
+
+      setVisits(enriched);
     } catch (err) {
       console.error('Erreur lors du chargement des visites', err);
       setVisits([]);
@@ -123,8 +158,7 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
     return { total: visits.length, upcoming, past, cancelled };
   }, [visits]);
 
-  const title =
-    mode === 'agency' ? 'Visites programmées' : 'Mes visites programmées';
+  const title = mode === 'agency' ? 'Visites programmées' : 'Mes visites programmées';
   const subtitle =
     mode === 'agency'
       ? 'Consultez les visites prévues pour les biens de votre agence'
@@ -182,9 +216,9 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total" value={stats.total} />
-        <StatCard label="À venir" value={stats.upcoming} accent="green" />
-        <StatCard label="Passées" value={stats.past} accent="blue" />
-        <StatCard label="Annulées" value={stats.cancelled} accent="red" />
+        <StatCard label="À venir" value={stats.upcoming} />
+        <StatCard label="Passées" value={stats.past} />
+        <StatCard label="Annulées" value={stats.cancelled} />
       </div>
 
       {/* List */}
@@ -208,7 +242,7 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
             <h3 className="text-lg font-semibold text-[#2C1810] mb-2">Aucune visite</h3>
             <p className="max-w-md mx-auto">
               {filter === 'upcoming'
-                ? "Aucune visite programmée pour le moment."
+                ? 'Aucune visite programmée pour le moment.'
                 : 'Aucune visite correspondant à ce filtre.'}
             </p>
           </div>
@@ -254,7 +288,9 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4" />
-                          <span>{visit.visit_type === 'virtuelle' ? 'Visite virtuelle' : 'En physique'}</span>
+                          <span>
+                            {visit.visit_type === 'virtuelle' ? 'Visite virtuelle' : 'En physique'}
+                          </span>
                         </div>
                         {visit.notes && (
                           <div className="sm:col-span-2 flex items-center gap-2">
@@ -267,9 +303,13 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
 
                     <div className="flex flex-col gap-3 min-w-[220px]">
                       <span
-                        className={`inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full text-sm font-semibold ${STATUS_STYLES[statusKey] || STATUS_STYLES.en_attente}`}
+                        className={`inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full text-sm font-semibold ${STATUS_STYLES[statusKey] || STATUS_STYLES['en_attente']}`}
                       >
-                        {statusKey === 'en_attente' ? <Clock className="h-4 w-4" /> : <Calendar className="h-4 w-4" />}
+                        {statusKey === 'en_attente' ? (
+                          <Clock className="h-4 w-4" />
+                        ) : (
+                          <Calendar className="h-4 w-4" />
+                        )}
                         {STATUS_LABELS[statusKey] || statusKey}
                       </span>
 
@@ -303,24 +343,7 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
   );
 }
 
-function StatCard({
-  label,
-  value,
-  accent = 'orange',
-}: {
-  label: string;
-  value: number;
-  accent?: 'orange' | 'green' | 'red' | 'blue';
-}) {
-  const bg =
-    accent === 'green'
-      ? 'bg-green-100 text-green-700'
-      : accent === 'red'
-        ? 'bg-red-100 text-red-700'
-        : accent === 'blue'
-          ? 'bg-blue-100 text-blue-700'
-          : 'bg-[#FFF5F0] text-[#F16522]';
-
+function StatCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium">
       <div className="flex items-center gap-2 text-sm text-[#6B5A4E] mb-2">{label}</div>

@@ -17,10 +17,10 @@ export function formatAddress(address: AddressValue, fallbackCity?: string): str
   if (typeof address === 'object') {
     const addr = address as Record<string, unknown>;
     const parts = [
-      typeof addr.street === 'string' ? addr.street : null,
-      typeof addr.neighborhood === 'string' ? addr.neighborhood : null,
-      typeof addr.city === 'string' ? addr.city : fallbackCity,
-      typeof addr.country === 'string' ? addr.country : null,
+      typeof addr['street'] === 'string' ? addr['street'] : null,
+      typeof addr['neighborhood'] === 'string' ? addr['neighborhood'] : null,
+      typeof addr['city'] === 'string' ? addr['city'] : fallbackCity,
+      typeof addr['country'] === 'string' ? addr['country'] : null,
     ].filter((part): part is string => !!part && part.trim().length > 0);
 
     if (parts.length > 0) {

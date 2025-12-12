@@ -33,7 +33,7 @@ console.error = function (...args) {
       });
 
       // Show user-friendly message in development
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env['NODE_ENV'] === 'development') {
         console.warn('🔐 JWT Error intercepted and auth data cleaned up. Please refresh the page.');
       }
 

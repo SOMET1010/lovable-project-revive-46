@@ -287,7 +287,7 @@ export default function TenantCalendar() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-coral-50">
       <div className="glass-card border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link
@@ -321,7 +321,7 @@ export default function TenantCalendar() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         <div className="card-scrapbook p-6">
           <div className="flex items-center justify-between mb-6">
             <button

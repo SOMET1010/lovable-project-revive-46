@@ -37,6 +37,7 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
     owner: '/profil',
     agence: '/profil',
     agent: '/profil',
+    trust_agent: '/profil',
   },
   addProperty: {
     locataire: '/proprietaire/ajouter-propriete',
@@ -45,6 +46,7 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
     owner: '/proprietaire/ajouter-propriete',
     agence: '/proprietaire/ajouter-propriete',
     agent: '/proprietaire/ajouter-propriete',
+    trust_agent: '/proprietaire/ajouter-propriete',
   },
   contracts: {
     locataire: '/mes-contrats',
@@ -53,6 +55,7 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
     owner: '/proprietaire/contrats',
     agence: '/proprietaire/contrats',
     agent: '/proprietaire/contrats',
+    trust_agent: '/proprietaire/contrats',
   },
   applications: {
     locataire: '/mes-candidatures',
@@ -61,6 +64,7 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
     owner: '/proprietaire/candidatures',
     agence: '/proprietaire/candidatures',
     agent: '/proprietaire/candidatures',
+    trust_agent: '/proprietaire/candidatures',
   },
   messages: {
     locataire: '/messages',
@@ -69,6 +73,7 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
     owner: '/messages',
     agence: '/messages',
     agent: '/messages',
+    trust_agent: '/messages',
   },
 };
 
@@ -106,9 +111,10 @@ export function getRoleRoute(
   routeType: keyof typeof ROLE_ROUTES,
   role: string | undefined
 ): string {
-  if (!role) return ROLE_ROUTES[routeType].locataire;
+  const routeMap = ROLE_ROUTES[routeType]!;
+  if (!role) return routeMap.locataire;
   const normalizedRole = normalizeRole(role);
-  return ROLE_ROUTES[routeType][normalizedRole] || ROLE_ROUTES[routeType].locataire;
+  return routeMap[normalizedRole] || routeMap.locataire;
 }
 
 /**

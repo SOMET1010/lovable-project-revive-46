@@ -99,7 +99,7 @@ export default function CandidaturesPage() {
     <div className="bg-[#FAF7F4]">
       {/* Header */}
       <div className="bg-[#2C1810] dashboard-header-animate rounded-2xl lg:rounded-[28px] px-4 sm:px-6 lg:px-8 py-6 shadow-lg mb-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center icon-pulse-premium shadow-md">
@@ -131,7 +131,7 @@ export default function CandidaturesPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12">
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium">

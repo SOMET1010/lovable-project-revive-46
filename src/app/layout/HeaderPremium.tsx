@@ -20,7 +20,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ComponentType } from 'react';
 import { useBreakpoint } from '@/hooks/shared/useBreakpoint';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useUnreadCount } from '@/hooks/messaging/useUnreadCount';
@@ -76,6 +76,37 @@ export default function HeaderPremium() {
   };
 
   const systemRoleBadge = getSystemRoleBadge();
+  const contextLinks = [];
+  if (permissions.isTenant) {
+    contextLinks.push({
+      label: 'Espace locataire',
+      href: '/locataire/dashboard',
+      icon: Key,
+      badge: activeLeasesAsTenantCount,
+      isActive: isInTenantContext,
+      accent: 'tenant',
+    });
+  }
+  if (permissions.isOwner) {
+    contextLinks.push({
+      label: 'Espace propriétaire',
+      href: '/proprietaire/dashboard',
+      icon: Building2,
+      badge: propertiesCount,
+      isActive: isInOwnerContext,
+      accent: 'owner',
+    });
+  }
+  if (permissions.isAgent) {
+    contextLinks.push({
+      label: 'Espace agence',
+      href: '/agences/dashboard',
+      icon: Building2,
+      badge: undefined,
+      isActive: location.pathname.startsWith('/agences'),
+      accent: 'agent',
+    });
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -96,50 +127,86 @@ export default function HeaderPremium() {
     },
   ].filter((item) => item.visible);
 
-  // Menu utilisateur filtré par permissions
-  const userMenuItems = user
-    ? [
-        {
-          label: 'Mon Espace',
-          href: '/locataire/mon-espace',
-          icon: LayoutDashboard,
-          visible: true,
-        },
-        { label: 'Mon Profil', href: '/locataire/profil', icon: User, visible: true },
-        {
-          label: 'Messages',
-          href: '/locataire/messages',
-          icon: MessageCircle,
-          badge: unreadCount,
-          visible: permissions.canSendMessages,
-        },
-        {
-          label: 'Mes Favoris',
-          href: '/locataire/favoris',
-          icon: Heart,
-          visible: permissions.isTenant,
-        },
-        {
-          label: 'Mes Visites',
-          href: '/locataire/mes-visites',
-          icon: Calendar,
-          visible: permissions.canScheduleVisits,
-        },
-        {
-          label: 'Mes Alertes',
-          href: '/locataire/recherches-sauvegardees',
-          icon: Bell,
-          visible: permissions.isTenant,
-        },
-        {
-          label: 'Mes Contrats',
-          href: '/locataire/mes-contrats',
-          icon: FileText,
-          visible: permissions.canViewOwnContracts,
-        },
-        { label: 'Paramètres', href: '/locataire/profil', icon: Settings, visible: true },
-      ].filter((item) => item.visible)
-    : [];
+  // Menu utilisateur filtré par permissions et rôle (tenant/owner/agent)
+  const buildUserMenuItems = () => {
+    if (!user) return [];
+    const items: {
+      label: string;
+      href: string;
+      icon: ComponentType<{ className?: string }>;
+      badge?: number;
+    }[] = [];
+    const addItem = (
+      label: string,
+      href: string,
+      icon: React.ComponentType<{ className?: string }>,
+      badge?: number
+    ) => {
+      // éviter les doublons par href
+      if (items.some((i) => i.href === href)) return;
+      items.push({ label, href, icon, badge });
+    };
+
+    // Contexte prioritaire basé sur l'URL, sinon rôles disponibles
+    const primaryContext = isInOwnerContext
+      ? 'owner'
+      : isInTrustAgentContext
+        ? 'trust'
+        : isInTenantContext
+          ? 'tenant'
+          : permissions.isOwner
+            ? 'owner'
+            : permissions.isAgent
+              ? 'agent'
+              : permissions.isTenant
+                ? 'tenant'
+                : 'guest';
+
+    // Locataire
+    if (permissions.isTenant) {
+      addItem('Vue locataire', '/locataire/dashboard', LayoutDashboard);
+      addItem('Mes locations', '/locataire/dashboard', Key);
+      addItem('Mes favoris', '/locataire/favoris', Heart);
+      addItem('Mes visites', '/locataire/mes-visites', Calendar);
+      addItem('Mes contrats', '/locataire/mes-contrats', FileText);
+      addItem('Messages', '/locataire/messages', MessageCircle, unreadCount);
+      addItem('Profil locataire', '/locataire/profil', User);
+    }
+
+    // Propriétaire
+    if (permissions.isOwner) {
+      addItem('Espace propriétaire', '/proprietaire/dashboard', Building2);
+      addItem('Mes biens', '/proprietaire/mes-biens', Building2);
+      addItem('Candidatures', '/proprietaire/candidatures', LayoutDashboard);
+      addItem('Contrats', '/proprietaire/contrats', FileText);
+      addItem('Messages', '/proprietaire/messages', MessageCircle, unreadCount);
+      addItem('Profil propriétaire', '/proprietaire/profil', User);
+    }
+
+    // Agence
+    if (permissions.isAgent) {
+      addItem('Espace agence', '/agences/dashboard', Building2);
+      addItem('Mandats', '/agences/mandats', LayoutDashboard);
+      addItem('Candidatures', '/agences/candidatures', LayoutDashboard);
+      addItem('Contrats', '/agences/contrats', FileText);
+      addItem('Messages', '/agences/messages', MessageCircle, unreadCount);
+      addItem('Profil agence', '/agences/profil', Settings);
+    }
+
+    // Profil/settings par défaut selon le contexte principal
+    const profilePaths: Record<string, string> = {
+      owner: '/proprietaire/profil',
+      agent: '/agences/profil',
+      tenant: '/locataire/profil',
+      trust: '/trust-agent/dashboard',
+      guest: '/profil',
+    };
+    addItem('Paramètres', profilePaths[primaryContext] || '/profil', Settings);
+
+    return items;
+  };
+
+  const userMenuItems = buildUserMenuItems();
 
   const handleSignOut = async () => {
     await signOut();
@@ -306,67 +373,42 @@ export default function HeaderPremium() {
                         <p className="px-2 py-1 text-xs font-bold text-[#A69B95] uppercase tracking-wider">
                           Mon Espace
                         </p>
-
-                        {/* Unified Dashboard */}
-                        <Link
-                          to="/locataire/mon-espace"
-                          className={`flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                            location.pathname === '/locataire/mon-espace'
-                              ? 'bg-[#F16522]/10 text-[#F16522]'
-                              : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
-                          }`}
-                        >
-                          <LayoutDashboard className="h-4 w-4" />
-                          <span>Vue d'ensemble</span>
-                        </Link>
-
-                        {/* Owner Dashboard */}
-                        {permissions.isOwner && (
-                          <Link
-                            to="/proprietaire/dashboard/proprietaire"
-                            className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
-                              isInOwnerContext
-                                ? 'bg-[#F16522]/10 text-[#F16522]'
-                                : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <Building2 className="h-4 w-4" />
-                              <span>Mes Propriétés</span>
-                            </div>
-                            <span className="bg-[#F16522]/10 text-[#F16522] text-xs font-bold px-2 py-0.5 rounded-full">
-                              {propertiesCount}
-                            </span>
-                          </Link>
-                        )}
-
-                        {/* Tenant Dashboard */}
-                        {permissions.isTenant && (
-                          <Link
-                            to="/locataire/dashboard"
-                            className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
-                              isInTenantContext
-                                ? 'bg-[#F16522]/10 text-[#F16522]'
-                                : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <Key className="h-4 w-4" />
-                              <span>Mes Locations</span>
-                            </div>
-                            <span className="bg-[#25D366]/10 text-[#25D366] text-xs font-bold px-2 py-0.5 rounded-full">
-                              {activeLeasesAsTenantCount}
-                            </span>
-                          </Link>
-                        )}
-
-                        {/* New user without roles */}
-                        {!permissions.isOwner && !permissions.isTenant && !permissions.isAgent && (
+                        {contextLinks.length === 0 && (
                           <div className="px-3 py-2 text-xs text-[#A69B95]">
                             Commencez à chercher un logement ou publiez une annonce pour voir vos
                             espaces ici.
                           </div>
                         )}
+                        {contextLinks.map((link) => {
+                          const Icon = link.icon;
+                          return (
+                            <Link
+                              key={link.href}
+                              to={link.href}
+                              className={`flex items-center justify-between px-3 py-2 text-sm rounded-lg transition-colors ${
+                                link.isActive
+                                  ? 'bg-[#F16522]/10 text-[#F16522]'
+                                  : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                              }`}
+                            >
+                              <span className="flex items-center gap-3">
+                                <Icon className="h-4 w-4" />
+                                {link.label}
+                              </span>
+                              {link.badge !== undefined && (
+                                <span
+                                  className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                    link.accent === 'tenant'
+                                      ? 'bg-[#25D366]/10 text-[#25D366]'
+                                      : 'bg-[#F16522]/10 text-[#F16522]'
+                                  }`}
+                                >
+                                  {link.badge}
+                                </span>
+                              )}
+                            </Link>
+                          );
+                        })}
                       </div>
 
                       {/* Other Menu Items */}
@@ -521,59 +563,42 @@ export default function HeaderPremium() {
               <p className="px-4 py-2 text-xs font-bold text-[#A69B95] uppercase tracking-wider">
                 Mon Espace
               </p>
-
-              <Link
-                to="/locataire/mon-espace"
-                onClick={() => setShowMobileMenu(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transition-colors ${
-                  location.pathname === '/locataire/mon-espace'
-                    ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
-                    : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
-                }`}
-              >
-                <LayoutDashboard className="h-5 w-5" />
-                <span className="font-medium">Vue d'ensemble</span>
-              </Link>
-
-              {permissions.isOwner && (
-                <Link
-                  to="/proprietaire/dashboard/proprietaire"
-                  onClick={() => setShowMobileMenu(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
-                    isInOwnerContext
-                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
-                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Building2 className="h-5 w-5" />
-                    <span className="font-medium">Mes Propriétés</span>
-                  </div>
-                  <span className="bg-[#F16522]/10 text-[#F16522] text-xs font-bold px-2 py-0.5 rounded-full">
-                    {propertiesCount}
-                  </span>
-                </Link>
+              {contextLinks.length === 0 && (
+                <div className="px-4 py-2 text-xs text-[#A69B95]">
+                  Commencez à chercher un logement ou publiez une annonce pour voir vos espaces ici.
+                </div>
               )}
-
-              {permissions.isTenant && (
-                <Link
-                  to="/locataire/dashboard"
-                  onClick={() => setShowMobileMenu(false)}
-                  className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
-                    isInTenantContext
-                      ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
-                      : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Key className="h-5 w-5" />
-                    <span className="font-medium">Mes Locations</span>
-                  </div>
-                  <span className="bg-[#25D366]/10 text-[#25D366] text-xs font-bold px-2 py-0.5 rounded-full">
-                    {activeLeasesAsTenantCount}
-                  </span>
-                </Link>
-              )}
+              {contextLinks.map((link) => {
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    onClick={() => setShowMobileMenu(false)}
+                    className={`flex items-center justify-between px-4 py-3 rounded-r-lg transition-colors ${
+                      link.isActive
+                        ? 'bg-[#F16522]/10 text-[#F16522] border-l-4 border-[#F16522]'
+                        : 'text-[#6B5A4E] hover:bg-[#FAF7F4] hover:text-[#F16522]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="h-5 w-5" />
+                      <span className="font-medium">{link.label}</span>
+                    </div>
+                    {link.badge !== undefined && (
+                      <span
+                        className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                          link.accent === 'tenant'
+                            ? 'bg-[#25D366]/10 text-[#25D366]'
+                            : 'bg-[#F16522]/10 text-[#F16522]'
+                        }`}
+                      >
+                        {link.badge}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
             </div>
           )}
 
