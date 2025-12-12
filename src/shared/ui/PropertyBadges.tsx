@@ -1,9 +1,9 @@
 /**
  * PropertyBadges - Badges visuels pour les annonces
- * Affiche: Vérifié, Réponse rapide, Visite virtuelle, Nouveau
+ * Affiche: Vérifié, Réponse rapide, Visite virtuelle, Nouveau, Améliore OSM
  */
 
-import { ShieldCheck, Zap, Video, Sparkles } from 'lucide-react';
+import { ShieldCheck, Zap, Video, Sparkles, Globe2 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 
 interface PropertyBadgesProps {
@@ -11,6 +11,7 @@ interface PropertyBadgesProps {
   avgResponseTimeHours?: number | null;
   hasVirtualTour?: boolean;
   createdAt?: string;
+  osmContributionConsent?: boolean;
   size?: 'sm' | 'md';
   className?: string;
 }
@@ -21,6 +22,7 @@ interface BadgeConfig {
   bgColor: string;
   textColor: string;
   show: boolean;
+  tooltip?: string;
 }
 
 export function PropertyBadges({
@@ -28,6 +30,7 @@ export function PropertyBadges({
   avgResponseTimeHours,
   hasVirtualTour = false,
   createdAt,
+  osmContributionConsent = false,
   size = 'sm',
   className
 }: PropertyBadgesProps) {
@@ -67,6 +70,14 @@ export function PropertyBadges({
       bgColor: 'bg-purple-100',
       textColor: 'text-purple-700',
       show: isNew
+    },
+    {
+      label: 'Améliore OSM',
+      icon: Globe2,
+      bgColor: 'bg-green-100',
+      textColor: 'text-green-700',
+      show: osmContributionConsent,
+      tooltip: 'Cette propriété améliore la cartographie OpenStreetMap'
     }
   ];
 
@@ -95,6 +106,7 @@ export function PropertyBadges({
             badge.textColor,
             sizeClasses[size]
           )}
+          title={badge.tooltip}
         >
           <badge.icon className={iconSizes[size]} />
           {badge.label}
