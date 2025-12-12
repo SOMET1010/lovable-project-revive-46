@@ -163,11 +163,14 @@ async function handleUploadDocument(
   }
 
   const documentId = uploadData.document_id;
-  if (!documentId) {
-    throw new Error('document_id manquant dans la réponse');
+  const selfieUrl = uploadData.url;
+
+  if (!documentId || !selfieUrl) {
+    throw new Error('document_id ou url manquant dans la réponse NeoFace');
   }
 
   console.log('[NeoFace] Document uploaded:', documentId);
+  console.log('[NeoFace] Selfie URL:', selfieUrl);
 
   // Log to database
   let verificationId = null;
@@ -190,6 +193,7 @@ async function handleUploadDocument(
     JSON.stringify({
       success: true,
       document_id: documentId,
+      selfie_url: selfieUrl,
       verification_id: verificationId,
       provider: 'neoface',
       message: 'Document téléchargé. Prenez un selfie.',
