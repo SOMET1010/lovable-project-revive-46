@@ -15,3 +15,6 @@ export { default as PropertyCardMobile } from './PropertyCardMobile';
 
 // Feature Flags
 export { FeatureGate, withFeatureFlag } from './FeatureGate';
+
+// Layouts
+export { InteriorPageLayout } from './InteriorPageLayout';

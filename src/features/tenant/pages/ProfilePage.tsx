@@ -6,7 +6,7 @@ import { User, Phone, MapPin, Shield, Camera, Save, CheckCircle, AlertCircle, Sc
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
 import { toast } from '@/shared/hooks/useSafeToast';
-import TenantDashboardLayout from '../components/TenantDashboardLayout';
+import { InteriorPageLayout } from '@/shared/components';
 import FeatureGate from '@/shared/ui/FeatureGate';
 import ONECIForm from '@/features/verification/components/ONECIForm';
 import CNAMForm from '@/features/verification/components/CNAMForm';
@@ -124,11 +124,11 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <TenantDashboardLayout title="Mon Profil">
+      <InteriorPageLayout title="Mon Profil" subtitle="Gérez vos informations personnelles">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
         </div>
-      </TenantDashboardLayout>
+      </InteriorPageLayout>
     );
   }
 
@@ -138,7 +138,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <TenantDashboardLayout title="Mon Profil">
+    <InteriorPageLayout title="Mon Profil" subtitle="Gérez vos informations personnelles">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-card rounded-2xl shadow-card p-6 mb-6">
@@ -357,7 +357,7 @@ export default function ProfilePage() {
           )}
         </div>
       </div>
-    </TenantDashboardLayout>
+    </InteriorPageLayout>
   );
 }
 

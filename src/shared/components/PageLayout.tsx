@@ -139,9 +139,9 @@ export const PageLayoutWithTabs: React.FC<PageLayoutWithTabsProps> = ({
               className={`
                 flex items-center gap-2 px-4 py-3 border-b-2 font-medium text-sm whitespace-nowrap
                 transition-colors
-                ${activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+              ${activeTab === tab.id
+                  ? 'border-primary-500 text-primary-500'
+                  : 'border-transparent text-neutral-600 hover:text-neutral-900 hover:border-neutral-300'
                 }
               `}
               aria-current={activeTab === tab.id ? 'page' : undefined}
@@ -152,8 +152,8 @@ export const PageLayoutWithTabs: React.FC<PageLayoutWithTabsProps> = ({
                 <span className={`
                   px-2 py-0.5 rounded-full text-xs font-semibold
                   ${activeTab === tab.id
-                    ? 'bg-blue-100 text-blue-600'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'bg-primary-100 text-primary-500'
+                    : 'bg-neutral-100 text-neutral-600'
                   }
                 `}>
                   {tab.count}
