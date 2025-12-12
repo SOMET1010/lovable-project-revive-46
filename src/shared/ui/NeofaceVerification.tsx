@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Camera, CheckCircle, XCircle, Loader2, RefreshCw, ShieldCheck, Eye, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Camera, CheckCircle, XCircle, Loader2, RefreshCw, ShieldCheck, ExternalLink } from 'lucide-react';
 import { Button } from './Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './Card';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,26 +11,10 @@ interface NeofaceVerificationProps {
   onFailed: (error: string) => void;
 }
 
-type VerificationStatus = 'idle' | 'uploading' | 'liveness' | 'capturing' | 'verifying' | 'success' | 'error';
-type LivenessChallenge = 'blink' | 'turn_left' | 'turn_right';
+type VerificationStatus = 'idle' | 'uploading' | 'waiting_selfie' | 'polling' | 'success' | 'error';
 
-const CHALLENGES: LivenessChallenge[] = ['blink', 'turn_left', 'turn_right'];
-
-const getChallengeLabel = (challenge: LivenessChallenge): string => {
-  switch (challenge) {
-    case 'blink': return 'Clignez des yeux';
-    case 'turn_left': return 'Tournez la tête à gauche';
-    case 'turn_right': return 'Tournez la tête à droite';
-  }
-};
-
-const getChallengeIcon = (challenge: LivenessChallenge) => {
-  switch (challenge) {
-    case 'blink': return Eye;
-    case 'turn_left': return ArrowLeft;
-    case 'turn_right': return ArrowRight;
-  }
-};
+const MAX_POLL_ATTEMPTS = 60; // 2 minutes max (60 x 2s)
+const POLL_INTERVAL_MS = 2000; // 2 seconds
 
 const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   userId,
@@ -41,67 +25,37 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const [status, setStatus] = useState<VerificationStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
-  const [verificationId, setVerificationId] = useState<string | null>(null);
+  const [_verificationId, setVerificationId] = useState<string | null>(null);
+  const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
   const [matchingScore, setMatchingScore] = useState<number | null>(null);
   const [progress, setProgress] = useState('');
+  const [pollAttempt, setPollAttempt] = useState(0);
   
-  // Liveness state
-  const [currentChallengeIndex, setCurrentChallengeIndex] = useState(0);
-  const [completedChallenges, setCompletedChallenges] = useState<LivenessChallenge[]>([]);
-  const [faceDetected, setFaceDetected] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-  
-  // Refs
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const animationRef = useRef<number | null>(null);
-  const challengeTimerRef = useRef<number | null>(null);
-
-  const currentChallenge = currentChallengeIndex < CHALLENGES.length ? CHALLENGES[currentChallengeIndex] : null;
-  const livenessProgress = (completedChallenges.length / CHALLENGES.length) * 100;
-  const isLivenessComplete = completedChallenges.length === CHALLENGES.length;
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const popupRef = useRef<Window | null>(null);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      stopCamera();
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      if (challengeTimerRef.current) clearTimeout(challengeTimerRef.current);
+      stopPolling();
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.close();
+      }
     };
   }, []);
 
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-      streamRef.current = null;
+  const stopPolling = useCallback(() => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
     }
   }, []);
 
-  const startCamera = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-      return true;
-    } catch (err) {
-      console.error('[NeoFace] Camera error:', err);
-      setError('Impossible d\'accéder à la caméra. Vérifiez les permissions.');
-      setStatus('error');
-      return false;
-    }
-  }, []);
-
-  // Upload document to NeoFace
+  // Upload document to NeoFace and get selfie URL
   const uploadDocument = async () => {
     setStatus('uploading');
     setProgress('Téléchargement du document CNI...');
+    setError(null);
     
     try {
       console.log('[NeoFace] Uploading document...');
@@ -117,17 +71,27 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       if (data?.error) throw new Error(data.error);
 
       console.log('[NeoFace] Document uploaded:', data);
-      setDocumentId(data.document_id);
-      setVerificationId(data.verification_id);
-      setProgress('Document téléchargé !');
       
-      // Start liveness detection
-      setStatus('liveness');
-      const cameraStarted = await startCamera();
-      if (!cameraStarted) return;
+      const docId = data.document_id;
+      const selfieLink = data.selfie_url;
+      const verifyId = data.verification_id;
       
-      // Start simulated face detection (simplified for reliability)
-      startLivenessDetection();
+      if (!docId || !selfieLink) {
+        throw new Error('Réponse NeoFace incomplète');
+      }
+
+      setDocumentId(docId);
+      setSelfieUrl(selfieLink);
+      setVerificationId(verifyId);
+      setProgress('Document téléchargé ! Ouvrez la fenêtre NeoFace pour capturer votre selfie.');
+      setStatus('waiting_selfie');
+
+      // Open NeoFace selfie capture in popup
+      openSelfiePopup(selfieLink);
+      
+      // Start polling for result
+      startPolling(docId, verifyId);
+      
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors du téléchargement';
       console.error('[NeoFace] Upload error:', errorMessage);
@@ -137,129 +101,110 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
   };
 
-  // Simplified liveness detection - user confirms each challenge manually
-  const startLivenessDetection = useCallback(() => {
-    setFaceDetected(true);
-    console.log('[NeoFace] Liveness detection started');
-  }, []);
-
-  // Handle challenge completion - user clicks button after performing action
-  const completeCurrentChallenge = useCallback(() => {
-    const challengeIndex = completedChallenges.length;
-    const challenge = CHALLENGES[challengeIndex];
+  // Open NeoFace selfie capture page in popup
+  const openSelfiePopup = (url: string) => {
+    console.log('[NeoFace] Opening selfie popup:', url);
     
-    if (challenge) {
-      console.log('[NeoFace] Completing challenge:', challenge);
-      setCompletedChallenges(prev => [...prev, challenge]);
-      setCurrentChallengeIndex(challengeIndex + 1);
+    // Close existing popup if any
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.close();
     }
-  }, [completedChallenges.length]);
-
-  // State to show capture button after liveness
-  const [readyToCapture, setReadyToCapture] = useState(false);
-
-  // When all challenges done, show capture button
-  useEffect(() => {
-    if (isLivenessComplete && status === 'liveness' && !readyToCapture) {
-      console.log('[NeoFace] All liveness challenges completed');
-      setReadyToCapture(true);
-    }
-  }, [isLivenessComplete, status, readyToCapture]);
-
-  // Manual capture trigger
-  const handleCaptureClick = useCallback(() => {
-    if (readyToCapture) {
-      console.log('[NeoFace] User triggered selfie capture');
-      captureAndVerify();
-    }
-  }, [readyToCapture]);
-
-  const captureAndVerify = async () => {
-    setStatus('capturing');
-    setProgress('Capture en cours...');
-
-    // Capture from video
-    if (!videoRef.current || !canvasRef.current) {
-      setError('Caméra non disponible');
-      setStatus('error');
-      return;
-    }
-
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      setError('Erreur de capture');
-      setStatus('error');
-      return;
-    }
-
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-
-    // Mirror for selfie
-    context.translate(canvas.width, 0);
-    context.scale(-1, 1);
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imageData = canvas.toDataURL('image/jpeg', 0.9);
-    setCapturedImage(imageData);
     
-    // Stop camera
-    stopCamera();
+    // Open new popup
+    const width = 500;
+    const height = 700;
+    const left = (window.screen.width - width) / 2;
+    const top = (window.screen.height - height) / 2;
     
-    // Extract base64 data
-    const base64Data = imageData.split(',')[1];
-    if (!base64Data) {
-      setError('Erreur de capture du selfie');
-      setStatus('error');
-      return;
+    popupRef.current = window.open(
+      url,
+      'neoface_selfie',
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+    );
+    
+    // If popup blocked, user can click link manually
+    if (!popupRef.current) {
+      console.warn('[NeoFace] Popup blocked, user will need to click link');
     }
+  };
 
-    // Verify with NeoFace
-    setStatus('verifying');
-    setProgress('Comparaison des visages...');
+  // Manually open popup again if blocked
+  const handleOpenPopup = () => {
+    if (selfieUrl) {
+      openSelfiePopup(selfieUrl);
+    }
+  };
 
-    try {
-      console.log('[NeoFace] Verifying selfie...');
-      const { data, error: invokeError } = await supabase.functions.invoke('neoface-verify', {
-        body: {
-          action: 'verify_selfie_base64',
-          document_id: documentId,
-          selfie_base64: base64Data,
-          verification_id: verificationId,
-        },
+  // Start polling for verification result
+  const startPolling = (docId: string, verifyId: string | null) => {
+    console.log('[NeoFace] Starting polling for document:', docId);
+    setStatus('polling');
+    setPollAttempt(0);
+    
+    pollingRef.current = setInterval(async () => {
+      setPollAttempt(prev => {
+        const attempt = prev + 1;
+        
+        if (attempt > MAX_POLL_ATTEMPTS) {
+          stopPolling();
+          setStatus('error');
+          setError('Délai d\'attente dépassé (2 minutes). Veuillez réessayer.');
+          onFailed('Timeout: vérification non complétée');
+          return prev;
+        }
+        
+        setProgress(`Vérification en cours... (${attempt}/${MAX_POLL_ATTEMPTS})`);
+        return attempt;
       });
+      
+      try {
+        const { data, error: invokeError } = await supabase.functions.invoke('neoface-verify', {
+          body: {
+            action: 'check_status',
+            document_id: docId,
+            verification_id: verifyId,
+          },
+        });
 
-      if (invokeError) throw new Error(invokeError.message);
-      if (data?.error) throw new Error(data.error);
+        if (invokeError) {
+          console.error('[NeoFace] Poll invoke error:', invokeError);
+          return; // Continue polling
+        }
 
-      console.log('[NeoFace] Verification result:', data);
+        console.log('[NeoFace] Poll result:', data?.status);
 
-      if (data.status === 'verified') {
-        handleVerificationSuccess(data);
-      } else if (data.status === 'waiting') {
-        // NeoFace needs more time - start polling
-        console.log('[NeoFace] Status waiting, starting polling...');
-        await pollVerificationStatus(5); // max 5 attempts
-      } else {
-        throw new Error(data.message || 'Les visages ne correspondent pas');
+        if (data?.status === 'verified') {
+          stopPolling();
+          handleVerificationSuccess(data);
+        } else if (data?.status === 'failed') {
+          stopPolling();
+          const failMessage = data.message || 'Les visages ne correspondent pas';
+          setStatus('error');
+          setError(failMessage);
+          onFailed(failMessage);
+        }
+        // If 'waiting', continue polling
+        
+      } catch (err) {
+        console.error('[NeoFace] Poll error:', err);
+        // Continue polling on error
       }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur de vérification';
-      console.error('[NeoFace] Verification error:', errorMessage);
-      setStatus('error');
-      setError(errorMessage);
-      onFailed(errorMessage);
-    }
+    }, POLL_INTERVAL_MS);
   };
 
   // Handle successful verification
   const handleVerificationSuccess = (data: { matching_score?: number; verified_at?: string }) => {
+    console.log('[NeoFace] Verification success!', data);
+    
+    // Close popup if still open
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.close();
+    }
+    
     setStatus('success');
     setMatchingScore(data.matching_score || null);
-    setProgress('Identité vérifiée !');
+    setProgress('Identité vérifiée avec succès !');
+    
     onVerified({
       document_id: documentId,
       matching_score: data.matching_score,
@@ -268,64 +213,21 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     });
   };
 
-  // Poll verification status when NeoFace returns 'waiting'
-  const pollVerificationStatus = async (maxAttempts: number) => {
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      setProgress(`Analyse en cours... (${attempt}/${maxAttempts})`);
-      
-      // Wait 2 seconds between attempts
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      try {
-        const { data, error: invokeError } = await supabase.functions.invoke('neoface-verify', {
-          body: {
-            action: 'check_status',
-            document_id: documentId,
-            verification_id: verificationId,
-          },
-        });
-
-        if (invokeError) throw new Error(invokeError.message);
-
-        console.log(`[NeoFace] Poll attempt ${attempt}:`, data?.status);
-
-        if (data?.status === 'verified') {
-          handleVerificationSuccess(data);
-          return;
-        } else if (data?.status === 'failed') {
-          throw new Error(data.message || 'Les visages ne correspondent pas');
-        }
-        // If still 'waiting', continue polling
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Erreur de vérification';
-        console.error('[NeoFace] Poll error:', errorMessage);
-        setStatus('error');
-        setError(errorMessage);
-        onFailed(errorMessage);
-        return;
-      }
-    }
-
-    // Timeout after max attempts
-    const timeoutMessage = 'Délai d\'attente dépassé. Veuillez réessayer.';
-    setStatus('error');
-    setError(timeoutMessage);
-    onFailed(timeoutMessage);
-  };
-
+  // Reset and retry
   const handleRetry = () => {
+    stopPolling();
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.close();
+    }
+    
     setStatus('idle');
     setError(null);
     setDocumentId(null);
     setVerificationId(null);
+    setSelfieUrl(null);
     setMatchingScore(null);
     setProgress('');
-    setCurrentChallengeIndex(0);
-    setCompletedChallenges([]);
-    setFaceDetected(false);
-    setCapturedImage(null);
-    setReadyToCapture(false);
-    stopCamera();
+    setPollAttempt(0);
   };
 
   return (
@@ -336,13 +238,11 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           Vérification Faciale
         </CardTitle>
         <CardDescription className="text-white/80">
-          Vérification biométrique avec détection de vivacité
+          Vérification biométrique sécurisée avec NeoFace
         </CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-4 p-6 bg-[#FDF6E3]">
-        <canvas ref={canvasRef} className="hidden" />
-        
         {/* IDLE: Show CNI and start button */}
         {status === 'idle' && (
           <>
@@ -355,6 +255,15 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
                 />
               </div>
             )}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
+              <p className="font-medium mb-2">Comment ça marche :</p>
+              <ol className="list-decimal list-inside space-y-1 text-blue-700">
+                <li>Cliquez sur "Commencer la Vérification"</li>
+                <li>Une fenêtre NeoFace s'ouvrira pour capturer votre selfie</li>
+                <li>Suivez les instructions dans la fenêtre NeoFace</li>
+                <li>Revenez ici - la vérification se terminera automatiquement</li>
+              </ol>
+            </div>
             <Button
               onClick={uploadDocument}
               className="w-full bg-[#F16522] hover:bg-[#D95318] text-white font-semibold py-3 rounded-xl shadow-md"
@@ -373,90 +282,68 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           </div>
         )}
 
-        {/* LIVENESS: Face detection with challenges */}
-        {status === 'liveness' && (
+        {/* WAITING_SELFIE: Popup opened, waiting for user */}
+        {status === 'waiting_selfie' && (
           <div className="space-y-4">
-            {/* Video preview */}
-            <div className="relative rounded-xl overflow-hidden bg-black aspect-[4/3]">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                className="w-full h-full object-cover"
-                style={{ transform: 'scaleX(-1)' }}
-              />
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+              <ExternalLink className="h-8 w-8 text-amber-600 mx-auto mb-3" />
+              <p className="text-amber-800 font-medium mb-2">
+                Fenêtre NeoFace ouverte
+              </p>
+              <p className="text-amber-700 text-sm mb-4">
+                Capturez votre selfie dans la fenêtre NeoFace, puis revenez ici.
+                La vérification se terminera automatiquement.
+              </p>
               
-              {/* Face guide */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className={`w-48 h-60 rounded-full border-4 transition-all ${faceDetected ? 'border-green-400' : 'border-white/50'}`} />
-              </div>
-
-              {/* Current challenge */}
-              {currentChallenge && (
-                <div className="absolute bottom-4 left-4 right-4 bg-black/70 rounded-xl p-3 backdrop-blur-sm">
-                  <div className="flex items-center justify-center gap-3">
-                    {React.createElement(getChallengeIcon(currentChallenge), { className: 'w-5 h-5 text-[#F16522]' })}
-                    <span className="text-white font-medium">{getChallengeLabel(currentChallenge)}</span>
-                  </div>
-                </div>
+              {selfieUrl && (
+                <Button
+                  onClick={handleOpenPopup}
+                  variant="outline"
+                  className="border-amber-400 text-amber-700 hover:bg-amber-100"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Réouvrir la fenêtre NeoFace
+                </Button>
               )}
             </div>
+            
+            <div className="text-center text-sm text-[#5D4037]/70">
+              En attente de votre selfie...
+            </div>
 
+            <Button onClick={handleRetry} variant="outline" className="w-full">
+              Annuler
+            </Button>
+          </div>
+        )}
+
+        {/* POLLING: Checking verification status */}
+        {status === 'polling' && (
+          <div className="space-y-4">
+            <div className="bg-[#F16522]/10 border border-[#F16522]/30 rounded-xl p-6 text-center">
+              <Loader2 className="h-10 w-10 text-[#F16522] animate-spin mx-auto mb-4" />
+              <p className="text-[#3C2A1E] font-medium mb-2">{progress}</p>
+              <p className="text-[#5D4037]/70 text-sm">
+                Capturez votre selfie dans la fenêtre NeoFace si ce n'est pas déjà fait.
+              </p>
+            </div>
+            
             {/* Progress bar */}
             <div className="h-2 bg-[#EFEBE9] rounded-full overflow-hidden">
               <div
                 className="h-full bg-[#F16522] transition-all duration-500"
-                style={{ width: `${livenessProgress}%` }}
+                style={{ width: `${(pollAttempt / MAX_POLL_ATTEMPTS) * 100}%` }}
               />
             </div>
 
-            {/* Challenge indicators */}
-            <div className="flex justify-between">
-              {CHALLENGES.map((challenge, index) => {
-                const isComplete = completedChallenges.includes(challenge);
-                const isActive = currentChallenge === challenge;
-                const Icon = getChallengeIcon(challenge);
-                
-                return (
-                  <div
-                    key={challenge}
-                    className={`flex flex-col items-center gap-2 p-2 rounded-lg transition-all ${
-                      isComplete ? 'bg-green-100' : isActive ? 'bg-[#F16522]/10' : ''
-                    }`}
-                  >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      isComplete ? 'bg-green-500 text-white' : isActive ? 'bg-[#F16522] text-white' : 'bg-[#EFEBE9]'
-                    }`}>
-                      {isComplete ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-                    </div>
-                    <span className={`text-xs font-medium ${
-                      isComplete ? 'text-green-600' : isActive ? 'text-[#F16522]' : 'text-[#5D4037]/50'
-                    }`}>
-                      {index + 1}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Action buttons */}
-            {!readyToCapture ? (
+            {selfieUrl && (
               <Button
-                onClick={completeCurrentChallenge}
-                disabled={!currentChallenge}
-                className="w-full bg-[#F16522] hover:bg-[#D95318] text-white"
+                onClick={handleOpenPopup}
+                variant="outline"
+                className="w-full border-[#F16522]/30 text-[#F16522] hover:bg-[#F16522]/10"
               >
-                <CheckCircle className="mr-2 h-4 w-4" />
-                {currentChallenge ? `J'ai fait: ${getChallengeLabel(currentChallenge)}` : 'Terminé'}
-              </Button>
-            ) : (
-              <Button
-                onClick={handleCaptureClick}
-                className="w-full bg-green-600 hover:bg-green-700 text-white animate-pulse"
-              >
-                <Camera className="mr-2 h-4 w-4" />
-                Capturer mon Selfie
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Ouvrir NeoFace
               </Button>
             )}
 
@@ -466,67 +353,44 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           </div>
         )}
 
-        {/* CAPTURING/VERIFYING: Processing states */}
-        {(status === 'capturing' || status === 'verifying') && (
-          <div className="space-y-4">
-            {capturedImage && (
-              <div className="relative rounded-xl overflow-hidden">
-                <img src={capturedImage} alt="Selfie capturé" className="w-full rounded-xl" />
-              </div>
-            )}
-            <div className="bg-[#F16522]/10 border border-[#F16522]/30 rounded-xl p-6 text-center">
-              <Loader2 className="h-10 w-10 text-[#F16522] animate-spin mx-auto mb-4" />
-              <p className="text-[#3C2A1E] font-medium">{progress}</p>
-              <p className="text-sm text-[#5D4037] mt-2">Analyse biométrique en cours...</p>
-            </div>
-          </div>
-        )}
-
-        {/* SUCCESS */}
+        {/* SUCCESS: Verification complete */}
         {status === 'success' && (
           <div className="bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-            <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
-            <p className="text-lg font-medium text-green-900">Identité Vérifiée !</p>
-            <p className="text-sm text-green-700 mt-2">Votre identité a été vérifiée avec succès.</p>
-            {matchingScore !== null && (
-              <p className="text-sm text-green-600 mt-3 font-medium">
-                Score: {(matchingScore * 100).toFixed(1)}%
-              </p>
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-10 w-10 text-green-600" />
+            </div>
+            <p className="text-green-800 font-semibold text-lg mb-2">Identité Vérifiée !</p>
+            {matchingScore && (
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <ShieldCheck className="h-5 w-5 text-green-600" />
+                <span className="text-green-700">
+                  Score de correspondance : {Math.round(matchingScore * 100)}%
+                </span>
+              </div>
             )}
+            <p className="text-green-700 text-sm">
+              Votre identité a été vérifiée avec succès via NeoFace.
+            </p>
           </div>
         )}
 
-        {/* ERROR */}
-        {status === 'error' && error && (
-          <>
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <div className="flex items-start gap-2">
-                <XCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-red-800">Erreur</p>
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
-                </div>
-              </div>
+        {/* ERROR: Show error with retry */}
+        {status === 'error' && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <XCircle className="h-10 w-10 text-red-600" />
             </div>
-            <Button onClick={handleRetry} variant="outline" className="w-full border-[#3C2A1E] text-[#3C2A1E]">
+            <p className="text-red-800 font-semibold text-lg mb-2">Vérification Échouée</p>
+            <p className="text-red-700 text-sm mb-4">{error}</p>
+            <Button
+              onClick={handleRetry}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
               <RefreshCw className="mr-2 h-4 w-4" />
               Réessayer
             </Button>
-          </>
+          </div>
         )}
-
-        {/* Security info */}
-        <div className="border-t border-[#3C2A1E]/10 pt-4 space-y-2">
-          <p className="text-xs text-[#3C2A1E] font-semibold uppercase tracking-wide flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#F16522]" />
-            Vérification Sécurisée
-          </p>
-          <ul className="text-xs text-[#5D4037] space-y-1">
-            <li>✓ Capture sécurisée via votre caméra</li>
-            <li>✓ Détection de vivacité anti-fraude</li>
-            <li>✓ Comparaison avec votre pièce d'identité</li>
-          </ul>
-        </div>
       </CardContent>
     </Card>
   );
