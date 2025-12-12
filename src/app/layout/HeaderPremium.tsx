@@ -53,6 +53,7 @@ export default function HeaderPremium() {
 
   // Générer le label de rôle contextuel
   const getRoleLabel = () => {
+    if (permissions.isTrustAgent) return '🛡️ Agent de confiance';
     if (permissions.isOwner && permissions.isTenant) return '🏠 Propriétaire & 🔑 Locataire';
     if (permissions.isOwner) return '🏠 Propriétaire';
     if (permissions.isTenant) return '🔑 Locataire';
@@ -76,7 +77,14 @@ export default function HeaderPremium() {
   };
 
   const systemRoleBadge = getSystemRoleBadge();
-  const contextLinks = [];
+  const contextLinks: Array<{
+    label: string;
+    href: string;
+    icon: ComponentType<{ className?: string }>;
+    badge?: number;
+    isActive: boolean;
+    accent: string;
+  }> = [];
   if (permissions.isTenant) {
     contextLinks.push({
       label: 'Espace locataire',
@@ -105,6 +113,16 @@ export default function HeaderPremium() {
       badge: undefined,
       isActive: location.pathname.startsWith('/agences'),
       accent: 'agent',
+    });
+  }
+  if (permissions.isTrustAgent) {
+    contextLinks.push({
+      label: 'Espace trust agent',
+      href: '/trust-agent/dashboard',
+      icon: Shield,
+      badge: undefined,
+      isActive: location.pathname.startsWith('/trust-agent'),
+      accent: 'trust',
     });
   }
 
@@ -154,13 +172,15 @@ export default function HeaderPremium() {
         ? 'trust'
         : isInTenantContext
           ? 'tenant'
-          : permissions.isOwner
-            ? 'owner'
-            : permissions.isAgent
-              ? 'agent'
-              : permissions.isTenant
-                ? 'tenant'
-                : 'guest';
+          : permissions.isTrustAgent
+            ? 'trust'
+            : permissions.isOwner
+              ? 'owner'
+              : permissions.isAgent
+                ? 'agent'
+                : permissions.isTenant
+                  ? 'tenant'
+                  : 'guest';
 
     // Locataire
     if (permissions.isTenant) {
@@ -191,6 +211,14 @@ export default function HeaderPremium() {
       addItem('Contrats', '/agences/contrats', FileText);
       addItem('Messages', '/agences/messages', MessageCircle, unreadCount);
       addItem('Profil agence', '/agences/profil', Settings);
+    }
+
+    // Trust agent
+    if (permissions.isTrustAgent) {
+      addItem('Espace trust agent', '/trust-agent/dashboard', Shield);
+      addItem('Missions', '/trust-agent/missions', LayoutDashboard);
+      addItem('Certifications', '/trust-agent/certifications/users', BadgeCheck);
+      addItem('Historique', '/trust-agent/history', Clock);
     }
 
     // Profil/settings par défaut selon le contexte principal

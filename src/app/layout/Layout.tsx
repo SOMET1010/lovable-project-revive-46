@@ -10,6 +10,7 @@ import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { GlobalLoadingSkeleton } from '@/shared/ui/GlobalLoadingSkeleton';
 import { FloatingCallButton } from '@/shared/ui/FloatingCallButton';
 import SUTAChatWidget from '@/shared/components/SUTAChatWidget';
+import { CookieConsent } from '@/shared/ui/CookieConsent';
 const noLayoutRoutes = ['/auth/callback'];
 const noHeaderFooterRoutes = [
   '/admin',
@@ -54,11 +55,7 @@ const ownerSidebarPrefixes = [
 ];
 
 // Routes avec navigation latérale pour agence (éviter header + breadcrumb doublons)
-const agencySidebarPrefixes = [
-  '/agences',
-  '/agences/mandats',
-  '/mandat',
-];
+const agencySidebarPrefixes = ['/agences', '/agences/mandats', '/mandat'];
 
 // Routes avec layout dédié pour trust agent
 const trustAgentSidebarPrefixes = ['/trust-agent'];
@@ -98,7 +95,12 @@ export default function Layout() {
   const skeletonVariant = getSkeletonVariant(path);
 
   // Si c'est une route avec layout dédié (agence, tenant, admin), laisser le composant gérer son propre layout
-  if (!shouldShowLayout || isAgencySidebarRoute || isTenantSidebarRoute || isTrustAgentSidebarRoute) {
+  if (
+    !shouldShowLayout ||
+    isAgencySidebarRoute ||
+    isTenantSidebarRoute ||
+    isTrustAgentSidebarRoute
+  ) {
     return (
       <ErrorBoundary>
         <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>
@@ -125,6 +127,7 @@ export default function Layout() {
         </Suspense>
       </ChunkLoadErrorBoundary>
       {shouldShowHeaderFooter && <FooterPremium />}
+      <CookieConsent />
     </ErrorBoundary>
   );
 }

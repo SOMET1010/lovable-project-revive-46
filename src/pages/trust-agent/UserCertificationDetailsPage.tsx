@@ -15,7 +15,6 @@ import {
   Camera,
   Edit,
   History,
-  Download,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/Card';
 import { Badge } from '@/shared/ui/badge';
@@ -23,6 +22,7 @@ import { Button } from '@/shared/ui/Button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import TrustAgentHeader from '../../features/trust-agent/components/TrustAgentHeader';
+import { cn } from '@/shared/lib/utils';
 
 interface UserDetails {
   id: string;
@@ -52,7 +52,7 @@ interface VerificationRecord {
   created_at: string;
   verified_at?: string | null;
   notes?: string | null;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 export default function UserCertificationDetailsPage() {
@@ -154,13 +154,33 @@ export default function UserCertificationDetailsPage() {
   const getVerificationStatusBadge = (status: string) => {
     switch (status) {
       case 'verifie':
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle2 className="h-3 w-3 mr-1" />Vérifié</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
+            Vérifié
+          </Badge>
+        );
       case 'en_attente':
-        return <Badge variant="secondary"><XCircle className="h-3 w-3 mr-1" />En attente</Badge>;
+        return (
+          <Badge variant="secondary">
+            <XCircle className="h-3 w-3 mr-1" />
+            En attente
+          </Badge>
+        );
       case 'rejete':
-        return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" />Rejeté</Badge>;
+        return (
+          <Badge className="bg-red-100 text-red-800">
+            <XCircle className="h-3 w-3 mr-1" />
+            Rejeté
+          </Badge>
+        );
       case 'expiré':
-        return <Badge className="bg-amber-100 text-amber-800"><XCircle className="h-3 w-3 mr-1" />Expiré</Badge>;
+        return (
+          <Badge className="bg-amber-100 text-amber-800">
+            <XCircle className="h-3 w-3 mr-1" />
+            Expiré
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -186,7 +206,10 @@ export default function UserCertificationDetailsPage() {
             <CardContent className="py-12 text-center">
               <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <p className="text-muted-foreground">Utilisateur non trouvé</p>
-              <Button className="mt-4" onClick={() => navigate('/trust-agent/certifications/users')}>
+              <Button
+                className="mt-4"
+                onClick={() => navigate('/trust-agent/certifications/users')}
+              >
                 Retour à la liste
               </Button>
             </CardContent>
@@ -207,7 +230,9 @@ export default function UserCertificationDetailsPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Retour
           </Button>
-          <Button onClick={() => navigate(`/trust-agent/certifications/users/certify?id=${user.id}`)}>
+          <Button
+            onClick={() => navigate(`/trust-agent/certifications/users/certify?id=${user.id}`)}
+          >
             <Edit className="h-4 w-4 mr-2" />
             Modifier la certification
           </Button>
@@ -237,10 +262,8 @@ export default function UserCertificationDetailsPage() {
                   )}
                 </div>
                 <div className="text-center">
-                  <h3 className="font-semibold text-lg">
-                    {user.full_name || 'Nom non renseigné'}
-                  </h3>
-                  <Badge className={getUserTypeColor(user.user_type)} className="mt-2">
+                  <h3 className="font-semibold text-lg">{user.full_name || 'Nom non renseigné'}</h3>
+                  <Badge className={cn(getUserTypeColor(user.user_type), 'mt-2')}>
                     {getUserTypeLabel(user.user_type)}
                   </Badge>
                 </div>
@@ -270,9 +293,7 @@ export default function UserCertificationDetailsPage() {
               <div className="p-4 rounded-lg bg-primary/10">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Trust Score</span>
-                  <span className="text-2xl font-bold text-primary">
-                    {user.trust_score}%
-                  </span>
+                  <span className="text-2xl font-bold text-primary">{user.trust_score}%</span>
                 </div>
               </div>
 
@@ -290,9 +311,7 @@ export default function UserCertificationDetailsPage() {
                   <h4 className="font-medium mb-2">Informations Agence</h4>
                   <p className="text-sm font-medium">{user.agency_name}</p>
                   {user.agency_description && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {user.agency_description}
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">{user.agency_description}</p>
                   )}
                 </div>
               )}
@@ -362,13 +381,12 @@ export default function UserCertificationDetailsPage() {
                     )}
                   </div>
                   {user.oneci_number && (
-                    <p className="text-sm text-muted-foreground">
-                      N° ONECI: {user.oneci_number}
-                    </p>
+                    <p className="text-sm text-muted-foreground">N° ONECI: {user.oneci_number}</p>
                   )}
                   {user.oneci_verification_date && (
                     <p className="text-sm text-muted-foreground">
-                      Vérifié le {new Date(user.oneci_verification_date).toLocaleDateString('fr-FR')}
+                      Vérifié le{' '}
+                      {new Date(user.oneci_verification_date).toLocaleDateString('fr-FR')}
                     </p>
                   )}
                 </div>
@@ -415,13 +433,12 @@ export default function UserCertificationDetailsPage() {
                           Créé le {new Date(record.created_at).toLocaleDateString('fr-FR')}
                           {record.verified_at && (
                             <span>
-                              {' • '}Vérifié le {new Date(record.verified_at).toLocaleDateString('fr-FR')}
+                              {' • '}Vérifié le{' '}
+                              {new Date(record.verified_at).toLocaleDateString('fr-FR')}
                             </span>
                           )}
                         </div>
-                        {record.notes && (
-                          <p className="text-sm mt-2">Notes: {record.notes}</p>
-                        )}
+                        {record.notes && <p className="text-sm mt-2">Notes: {record.notes}</p>}
                       </div>
                     ))}
                   </div>
