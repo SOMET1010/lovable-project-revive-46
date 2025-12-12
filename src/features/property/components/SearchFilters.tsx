@@ -231,7 +231,7 @@ export default function SearchFilters({
 
       {/* Filtres avancés */}
       {showAdvanced && (
-        <div className="border-t pt-4 space-y-4">
+        <div className="border-t mt-4 pt-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Chambres */}
             <div>
@@ -284,7 +284,7 @@ export default function SearchFilters({
 
           {/* Équipements */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Équipements</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Équipements</label>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => {
@@ -348,7 +348,7 @@ export default function SearchFilters({
         variant="primary"
         size="large"
         fullWidth
-        className="mt-4"
+        className=""
       >
         Rechercher
       </Button>

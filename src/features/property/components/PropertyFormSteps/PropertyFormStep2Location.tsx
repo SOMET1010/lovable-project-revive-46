@@ -34,6 +34,12 @@ export const PropertyFormStep2Location: React.FC<PropertyFormStep2Props> = ({
   return (
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-2xl border border-[#EFEBE9] shadow-sm">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2.5 bg-[#F16522]/10 rounded-xl">
+            <MapPin className="w-5 h-5 text-[#F16522]" />
+          </div>
+          <h3 className="font-bold text-[#2C1810]">Localisation</h3>
+        </div>
         <CitySelector
           selectedCity={formData.city}
           selectedDistrict={formData.district}
@@ -53,7 +59,7 @@ export const PropertyFormStep2Location: React.FC<PropertyFormStep2Props> = ({
 
       {/* Adresse détaillée */}
       <div className="bg-white p-6 rounded-2xl border border-[#EFEBE9] shadow-sm">
-        <label className="block text-xs font-bold uppercase text-[#A69B95] mb-2.5 tracking-wide">
+        <label className="block text-xs font-bold uppercase text-[#A69B95] mb-2 tracking-wide">
           <MapPin className="inline w-3.5 h-3.5 mr-1" /> Adresse détaillée (optionnel)
         </label>
         <input
