@@ -1,8 +1,7 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
 import { Map, AlertCircle, MapPin } from 'lucide-react';
 
-const MapboxMap = lazy(() => import('./MapboxMap'));
-const EnhancedClusterMap = lazy(() => import('./EnhancedClusterMap'));
+const LeafletMap = lazy(() => import('./LeafletMap'));
 
 interface Property {
   id: string;
@@ -22,10 +21,10 @@ interface Property {
 interface MapWrapperProps {
   center?: [number, number];
   zoom?: number;
-  properties: Property[];
+  properties: unknown[]; // Accept any shape, will be normalized
   highlightedPropertyId?: string;
   onMarkerClick?: (property: Property) => void;
-  onBoundsChange?: (bounds: any) => void;
+  onBoundsChange?: (bounds: unknown) => void;
   clustering?: boolean;
   draggableMarker?: boolean;
   showRadius?: boolean;
@@ -39,49 +38,97 @@ interface MapWrapperProps {
   useClusterMode?: boolean;
 }
 
+// Normalize property object to match the expected Property interface
+function normalizeProperty(property: unknown): Property {
+  const p = property as Record<string, unknown>;
+  return {
+    id: String(p['id'] || ''),
+    title: String(p['title'] || p['name'] || ''),
+    monthly_rent: Number(p['monthly_rent'] ?? p['price'] ?? p['monthlyRent'] ?? 0),
+    longitude: Number(p['longitude'] ?? p['lng'] ?? 0),
+    latitude: Number(p['latitude'] ?? p['lat'] ?? 0),
+    status: p['status'] as string | undefined,
+    images: p['images'] as string[] | undefined,
+    city: p['city'] as string | undefined,
+    neighborhood: p['neighborhood'] as string | undefined,
+    bedrooms: (p['bedrooms'] ?? p['bedrooms_count']) as number | undefined,
+    bathrooms: p['bathrooms'] as number | undefined,
+    surface_area: (p['surface_area'] ?? p['surface']) as number | undefined,
+  };
+}
+
 export default function MapWrapper(props: MapWrapperProps) {
-  const [_mapError, setMapError] = useState(false);
+  const [, setMapError] = useState(false);
   const [useAzureFallback, setUseAzureFallback] = useState(false);
+
+  // Normalize properties
+  const normalizedProperties = useMemo(() => {
+    return props.properties.map(normalizeProperty);
+  }, [props.properties]);
+
+  // Convert normalized properties to LeafletMap format
+  const leafletProperties = useMemo(() => {
+    return normalizedProperties.map((p) => ({
+      id: p.id,
+      title: p.title,
+      city: p.city || '',
+      price: p.monthly_rent,
+      latitude: p.latitude,
+      longitude: p.longitude,
+      images: p.images,
+      property_type: undefined,
+      bedrooms: p.bedrooms,
+      surface_area: p.surface_area,
+    }));
+  }, [normalizedProperties]);
+
+  // Handle property click
+  const handlePropertyClick = (propertyId: string) => {
+    if (props.onMarkerClick) {
+      const property = normalizedProperties.find((p) => p.id === propertyId);
+      if (property) {
+        props.onMarkerClick(property);
+      }
+    }
+  };
 
   useEffect(() => {
     const handleMapError = () => {
-      console.error('Mapbox failed to load, switching to fallback');
+      console.error('Leaflet failed to load, switching to fallback');
       setMapError(true);
       setUseAzureFallback(true);
     };
 
-    window.addEventListener('mapbox-error', handleMapError);
-    return () => window.removeEventListener('mapbox-error', handleMapError);
+    window.addEventListener('leaflet-error', handleMapError);
+    return () => window.removeEventListener('leaflet-error', handleMapError);
   }, []);
 
   if (useAzureFallback) {
     return <AzureMapsComponent {...props} />;
   }
 
-  // Utiliser EnhancedClusterMap si mode cluster activé et plus de 10 propriétés
-  const shouldUseClusterMap = props.useClusterMode && props.properties.length > 10;
+  // Determine center for LeafletMap (swap coordinates because Leaflet expects [lat, lng])
+  const leafletCenter: [number, number] | undefined = props.center
+    ? [props.center[1], props.center[0]]
+    : undefined;
 
   return (
     <Suspense fallback={<MapLoadingSkeleton height={props.height} />}>
       <div
         onError={() => {
-          console.error('Mapbox component error, using fallback');
+          console.error('Leaflet component error, using fallback');
           setMapError(true);
           setUseAzureFallback(true);
         }}
       >
-        {shouldUseClusterMap ? (
-          <EnhancedClusterMap
-            properties={props.properties}
-            onMarkerClick={props.onMarkerClick}
-            center={props.center}
-            zoom={props.zoom}
-            height={props.height}
-            fitBounds={props.fitBounds}
-          />
-        ) : (
-          <MapboxMap {...props} />
-        )}
+        <LeafletMap
+          properties={leafletProperties}
+          height={props.height || '500px'}
+          onPropertyClick={handlePropertyClick}
+          showControls={true}
+          initialCenter={leafletCenter}
+          initialZoom={props.zoom}
+        />
       </div>
     </Suspense>
   );
@@ -121,14 +168,12 @@ function MapLoadingSkeleton({ height = '500px' }: { height?: string }) {
   );
 }
 
-function AzureMapsComponent({
-  properties,
-  height = '500px',
-  center: _center = [-4.0083, 5.36],
-  zoom: _zoom = 12,
-  onMarkerClick,
-}: MapWrapperProps) {
+function AzureMapsComponent({ properties, height = '500px', onMarkerClick }: MapWrapperProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+
+  const normalizedProperties = useMemo(() => {
+    return properties.map(normalizeProperty);
+  }, [properties]);
 
   const handleMarkerClick = (property: Property) => {
     setSelectedProperty(property);
@@ -154,18 +199,19 @@ function AzureMapsComponent({
             </p>
             <div className="flex items-center justify-center space-x-2 text-sm text-primary bg-primary/10 px-4 py-2 rounded-lg">
               <AlertCircle className="h-4 w-4" />
-              <span>Vérifiez la configuration du token Mapbox</span>
+              <span>Vérifiez la configuration de la carte</span>
             </div>
           </div>
 
-          {properties.length > 0 && (
+          {normalizedProperties.length > 0 && (
             <div className="bg-card rounded-2xl shadow-lg p-6">
               <h4 className="font-bold text-lg mb-4 text-foreground">
-                {properties.length} propriété{properties.length > 1 ? 's' : ''} disponible
-                {properties.length > 1 ? 's' : ''}
+                {normalizedProperties.length} propriété{normalizedProperties.length > 1 ? 's' : ''}{' '}
+                disponible
+                {normalizedProperties.length > 1 ? 's' : ''}
               </h4>
               <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
-                {properties.slice(0, 5).map((property) => (
+                {normalizedProperties.slice(0, 5).map((property) => (
                   <button
                     key={property.id}
                     onClick={() => handleMarkerClick(property)}
@@ -195,10 +241,11 @@ function AzureMapsComponent({
                   </button>
                 ))}
               </div>
-              {properties.length > 5 && (
+              {normalizedProperties.length > 5 && (
                 <p className="text-sm text-muted-foreground mt-4 text-center">
-                  + {properties.length - 5} autre{properties.length - 5 > 1 ? 's' : ''} propriété
-                  {properties.length - 5 > 1 ? 's' : ''}
+                  + {normalizedProperties.length - 5} autre
+                  {normalizedProperties.length - 5 > 1 ? 's' : ''} propriété
+                  {normalizedProperties.length - 5 > 1 ? 's' : ''}
                 </p>
               )}
             </div>
