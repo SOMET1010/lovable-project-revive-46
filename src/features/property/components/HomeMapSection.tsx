@@ -26,6 +26,15 @@ const BUDGET_OPTIONS = [
 export default function HomeMapSection() {
   const navigate = useNavigate();
   const { properties, loading, totalCount, fetchInitialProperties, fetchPropertiesInBounds } = useHomeMapProperties();
+
+  // Log pour diagnostic
+  if (import.meta.env.DEV) {
+    console.log('[HomeMapSection] Properties state:', { 
+      count: properties.length, 
+      loading,
+      totalCount
+    });
+  }
   
   const [filters, setFilters] = useState({
     propertyType: 'all',

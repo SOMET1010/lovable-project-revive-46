@@ -1,7 +1,6 @@
-import { FeatureGate } from '@/shared/ui/FeatureGate';
-import { FEATURE_FLAGS } from '@/shared/hooks/useFeatureFlag';
+import { FEATURE_FLAGS, useFeatureFlag } from '@/shared/hooks/useFeatureFlag';
 import MapboxMap from './MapboxMap';
-import { MapPin } from 'lucide-react';
+import { MapPin, Loader2 } from 'lucide-react';
 
 // Re-export all props from MapboxMap
 type MapboxMapProps = Parameters<typeof MapboxMap>[0];
@@ -31,15 +30,56 @@ function MapFallback({ height = '400px' }: { height?: string }) {
 }
 
 /**
+ * Loading state pour la carte
+ */
+function MapLoading({ height = '400px' }: { height?: string }) {
+  return (
+    <div 
+      className="flex flex-col items-center justify-center bg-muted/20 rounded-xl animate-pulse"
+      style={{ height }}
+    >
+      <Loader2 className="w-8 h-8 text-primary animate-spin mb-2" />
+      <p className="text-sm text-muted-foreground">Chargement de la carte...</p>
+    </div>
+  );
+}
+
+/**
  * MapboxMap avec feature flag - affiche un fallback si désactivé
  */
 export default function MapboxMapGated({ height, ...props }: MapboxMapGatedProps) {
-  return (
-    <FeatureGate 
-      feature={FEATURE_FLAGS.MAPBOX_MAPS} 
-      fallback={<MapFallback height={height} />}
-    >
-      <MapboxMap height={height} {...props} />
-    </FeatureGate>
-  );
+  const { isEnabled, isLoading, error } = useFeatureFlag(FEATURE_FLAGS.MAPBOX_MAPS);
+
+  // Log pour diagnostic
+  if (import.meta.env.DEV) {
+    console.log('[MapboxMapGated] Feature flag state:', { 
+      feature: FEATURE_FLAGS.MAPBOX_MAPS,
+      isEnabled, 
+      isLoading,
+      error: error?.message 
+    });
+  }
+
+  // État de chargement du feature flag
+  if (isLoading) {
+    return <MapLoading height={height} />;
+  }
+
+  // Erreur lors du chargement du feature flag
+  if (error) {
+    console.error('[MapboxMapGated] Feature flag error:', error);
+    // En cas d'erreur, on tente quand même d'afficher la carte
+    return <MapboxMap height={height} {...props} />;
+  }
+
+  // Feature flag désactivé
+  if (!isEnabled) {
+    if (import.meta.env.DEV) {
+      console.log('[MapboxMapGated] Feature disabled, showing fallback');
+    }
+    return <MapFallback height={height} />;
+  }
+
+  // Feature flag activé - afficher la carte
+  return <MapboxMap height={height} {...props} />;
 }
