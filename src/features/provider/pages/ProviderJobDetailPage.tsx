@@ -138,13 +138,13 @@ const ProviderJobDetailPage: React.FC = () => {
   const getUrgencyConfig = (urgency: string) => {
     switch (urgency) {
       case 'critique':
-        return { color: 'bg-red-100 text-red-700', icon: AlertCircle, label: 'Critique' };
+        return { color: 'bg-[#FFEBEE] text-[#D32F2F]', icon: AlertCircle, label: 'Critique' };
       case 'urgente':
-        return { color: 'bg-orange-100 text-orange-700', icon: AlertCircle, label: 'Urgente' };
+        return { color: 'bg-[#FFF3E0] text-[#ED6C02]', icon: AlertCircle, label: 'Urgente' };
       case 'normale':
-        return { color: 'bg-blue-100 text-blue-700', icon: Clock, label: 'Normale' };
+        return { color: 'bg-[#FFF3E0] text-[#ED6C02]', icon: Clock, label: 'Normale' };
       default:
-        return { color: 'bg-gray-100 text-gray-700', icon: Clock, label: urgency };
+        return { color: 'bg-[#FAF7F4] text-[#6B5A4E]', icon: Clock, label: urgency };
     }
   };
 

@@ -527,7 +527,7 @@ function MessageBubble({
               : isOwn
               ? 'bg-[#F16522] text-white rounded-tr-sm'
               : isMediator
-              ? 'bg-blue-100 text-blue-900 rounded-tl-sm'
+              ? 'bg-[#FFF3E0] text-[#ED6C02] rounded-tl-sm'
               : 'bg-[#EFEBE9] text-[#2C1810] rounded-tl-sm'
           }`}
         >

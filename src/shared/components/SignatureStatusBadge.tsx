@@ -18,14 +18,14 @@ export function SignatureStatusBadge({ status, isTenant, compact = false }: Sign
         };
       case 'tenant_signed':
         return {
-          color: 'bg-blue-100 text-blue-800 border-blue-200',
+          color: 'bg-[#FFF3E0] text-[#ED6C02] border-[#ED6C02]/20',
           icon: UserCheck,
           text: isTenant ? 'Votre signature' : 'Locataire signé',
           description: isTenant ? 'Vous avez signé' : 'En attente de votre signature'
         };
       case 'landlord_signed':
         return {
-          color: 'bg-blue-100 text-blue-800 border-blue-200',
+          color: 'bg-[#FFF3E0] text-[#ED6C02] border-[#ED6C02]/20',
           icon: UserCheck,
           text: isTenant ? 'Propriétaire signé' : 'Votre signature',
           description: isTenant ? 'En attente de votre signature' : 'Vous avez signé'
