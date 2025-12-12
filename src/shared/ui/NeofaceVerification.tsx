@@ -34,7 +34,7 @@ type VerificationStatus =
 
 // --- CONSTANTES ---
 const POLL_INTERVAL_MS = 2000;
-const MAX_POLL_ATTEMPTS = 15; // 30 secondes max
+const MAX_POLL_ATTEMPTS = 30; // 60 secondes max
 
 // --- COMPOSANT ---
 
