@@ -42,7 +42,7 @@ export function useHomeMapProperties() {
       let query = supabase
         .from('properties')
         .select(
-          'id, title, latitude, longitude, monthly_rent:price, property_type, city, neighborhood, main_image, bedrooms:bedrooms_count, surface_area, status'
+          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status'
         )
         .eq('status', 'disponible')
         .not('latitude', 'is', null) // `not.is.null` is the PostgREST form
@@ -72,12 +72,12 @@ export function useHomeMapProperties() {
           title: p.title,
           latitude: p.latitude as number,
           longitude: p.longitude as number,
-          monthly_rent: p.monthly_rent,
+          monthly_rent: p.price, // colonne price
           property_type: p.property_type,
           city: p.city,
           neighborhood: p.neighborhood,
           main_image: p.main_image,
-          bedrooms: p.bedrooms,
+          bedrooms: p.bedrooms_count, // colonne bedrooms_count
           surface_area: p.surface_area,
           status: p.status,
         }));
@@ -100,7 +100,7 @@ export function useHomeMapProperties() {
       let query = supabase
         .from('properties')
         .select(
-          'id, title, latitude, longitude, monthly_rent:price, property_type, city, neighborhood, main_image, bedrooms:bedrooms_count, surface_area, status'
+          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status'
         )
         .eq('status', 'disponible')
         .not('latitude', 'is', null) // `not.is.null` is the PostgREST form
@@ -125,12 +125,12 @@ export function useHomeMapProperties() {
           title: p.title,
           latitude: p.latitude as number,
           longitude: p.longitude as number,
-          monthly_rent: p.monthly_rent,
+          monthly_rent: p.price, // colonne price
           property_type: p.property_type,
           city: p.city,
           neighborhood: p.neighborhood,
           main_image: p.main_image,
-          bedrooms: p.bedrooms,
+          bedrooms: p.bedrooms_count, // colonne bedrooms_count
           surface_area: p.surface_area,
           status: p.status,
         }));

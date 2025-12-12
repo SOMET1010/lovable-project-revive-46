@@ -41,7 +41,9 @@ export function useHomeMapProperties() {
     try {
       let query = supabase
         .from('properties')
-        .select('id, title, latitude, longitude, monthly_rent, property_type, city, neighborhood, main_image, bedrooms, surface_area, status')
+        .select(
+          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status'
+        )
         .eq('status', 'disponible')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
@@ -56,7 +58,7 @@ export function useHomeMapProperties() {
         query = query.eq('property_type', filters.propertyType);
       }
       if (filters?.maxPrice) {
-        query = query.lte('monthly_rent', filters.maxPrice);
+        query = query.lte('price', filters.maxPrice);
       }
 
       const { data, error: fetchError } = await query;
@@ -64,18 +66,18 @@ export function useHomeMapProperties() {
       if (fetchError) throw fetchError;
 
       const validProperties: MapProperty[] = (data || [])
-        .filter(p => p.latitude !== null && p.longitude !== null)
-        .map(p => ({
+        .filter((p) => p.latitude !== null && p.longitude !== null)
+        .map((p) => ({
           id: p.id,
           title: p.title,
           latitude: p.latitude as number,
           longitude: p.longitude as number,
-          monthly_rent: p.monthly_rent,
+          monthly_rent: p.price, // colonne price
           property_type: p.property_type,
           city: p.city,
           neighborhood: p.neighborhood,
           main_image: p.main_image,
-          bedrooms: p.bedrooms,
+          bedrooms: p.bedrooms_count, // colonne bedrooms_count
           surface_area: p.surface_area,
           status: p.status,
         }));
@@ -97,7 +99,9 @@ export function useHomeMapProperties() {
     try {
       let query = supabase
         .from('properties')
-        .select('id, title, latitude, longitude, monthly_rent, property_type, city, neighborhood, main_image, bedrooms, surface_area, status')
+        .select(
+          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status'
+        )
         .eq('status', 'disponible')
         .not('latitude', 'is', null)
         .not('longitude', 'is', null)
@@ -107,7 +111,7 @@ export function useHomeMapProperties() {
         query = query.eq('property_type', filters.propertyType);
       }
       if (filters?.maxPrice) {
-        query = query.lte('monthly_rent', filters.maxPrice);
+        query = query.lte('price', filters.maxPrice);
       }
 
       const { data, error: fetchError } = await query;
@@ -115,18 +119,18 @@ export function useHomeMapProperties() {
       if (fetchError) throw fetchError;
 
       const validProperties: MapProperty[] = (data || [])
-        .filter(p => p.latitude !== null && p.longitude !== null)
-        .map(p => ({
+        .filter((p) => p.latitude !== null && p.longitude !== null)
+        .map((p) => ({
           id: p.id,
           title: p.title,
           latitude: p.latitude as number,
           longitude: p.longitude as number,
-          monthly_rent: p.monthly_rent,
+          monthly_rent: p.price, // colonne price
           property_type: p.property_type,
           city: p.city,
           neighborhood: p.neighborhood,
           main_image: p.main_image,
-          bedrooms: p.bedrooms,
+          bedrooms: p.bedrooms_count, // colonne bedrooms_count
           surface_area: p.surface_area,
           status: p.status,
         }));
