@@ -3,7 +3,7 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { FileText, Eye, Edit, CheckCircle, Clock, XCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import TenantDashboardLayout from '../components/TenantDashboardLayout';
+import { InteriorPageLayout } from '@/shared/components';
 import { toast } from 'sonner';
 import type { StatusConfig } from '../types/supabase-mappers.types';
 interface Contract {
@@ -141,7 +141,7 @@ export default function MyContracts() {
     const configs: Record<string, StatusConfig> = {
       brouillon: { label: 'Brouillon', icon: AlertCircle, className: 'bg-[#FAF7F4] text-[#6B5A4E] border border-[#EFEBE9]' },
       en_attente_signature: { label: 'En attente', icon: Clock, className: 'bg-yellow-100 text-yellow-700 border border-yellow-200' },
-      partiellement_signe: { label: 'Partiellement signé', icon: Clock, className: 'bg-blue-100 text-blue-700 border border-blue-200' },
+      partiellement_signe: { label: 'Partiellement signé', icon: Clock, className: 'bg-primary-100 text-primary-600 border border-primary-200' },
       actif: { label: 'Actif', icon: CheckCircle, className: 'bg-green-100 text-green-700 border border-green-200' },
       expire: { label: 'Expiré', icon: XCircle, className: 'bg-red-100 text-red-700 border border-red-200' },
       resilie: { label: 'Résilié', icon: XCircle, className: 'bg-red-100 text-red-700 border border-red-200' },
@@ -166,7 +166,7 @@ export default function MyContracts() {
 
   if (!user) {
     return (
-      <TenantDashboardLayout title="Mes Contrats">
+      <InteriorPageLayout title="Mes contrats de bail" subtitle="Gérez vos baux et contrats de location">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="w-20 h-20 rounded-full bg-[#FAF7F4] flex items-center justify-center mx-auto mb-6">
@@ -176,12 +176,12 @@ export default function MyContracts() {
             <p className="text-[#6B5A4E]">Veuillez vous connecter pour voir vos contrats</p>
           </div>
         </div>
-      </TenantDashboardLayout>
+      </InteriorPageLayout>
     );
   }
 
   return (
-    <TenantDashboardLayout title="Mes Contrats">
+    <InteriorPageLayout title="Mes contrats de bail" subtitle="Gérez vos baux et contrats de location">
       <div className="max-w-7xl mx-auto">
         {/* Header Premium */}
         <div className="mb-8">
@@ -387,6 +387,6 @@ export default function MyContracts() {
           </div>
         )}
       </div>
-    </TenantDashboardLayout>
+    </InteriorPageLayout>
   );
 }
