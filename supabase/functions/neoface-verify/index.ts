@@ -260,20 +260,31 @@ async function handleVerifySelfie(
   }
 
   // Determine verification result (CDC v3: seuil 85%)
-  const isVerified = verifyData.status === 'verified' || 
-                     verifyData.match === true || 
-                     (verifyData.matching_score && verifyData.matching_score > 0.85);
-  
+  const rawStatus = verifyData.status;
   const matchingScore = verifyData.matching_score || verifyData.score || null;
-  const status = isVerified ? 'verified' : 'failed';
-  const message = isVerified 
-    ? 'Identité vérifiée avec succès' 
-    : (verifyData.message || 'Les visages ne correspondent pas');
+
+  let status: 'verified' | 'waiting' | 'failed';
+  let message: string;
+  let isVerified = false;
+
+  if (rawStatus === 'waiting') {
+    // NeoFace n'a pas encore terminé - retourner ce status pour polling
+    status = 'waiting';
+    message = 'Vérification en cours, veuillez patienter...';
+    console.log('[NeoFace] Status waiting - client should poll');
+  } else if (rawStatus === 'verified' || verifyData.match === true || (matchingScore && matchingScore > 0.85)) {
+    status = 'verified';
+    message = 'Identité vérifiée avec succès';
+    isVerified = true;
+  } else {
+    status = 'failed';
+    message = verifyData.message || 'Les visages ne correspondent pas';
+  }
 
   console.log('[NeoFace] Final status:', status, 'Score:', matchingScore);
 
-  // Update database
-  if (verification_id) {
+  // Update database only for final states (not waiting)
+  if (verification_id && status !== 'waiting') {
     try {
       await supabase.rpc('update_facial_verification_status', {
         p_verification_id: verification_id,
@@ -289,7 +300,10 @@ async function handleVerifySelfie(
     }
   }
 
-  await logServiceUsage(supabase, isVerified ? 'success' : 'failure', !isVerified ? message : null, startTime);
+  // Only log final states
+  if (status !== 'waiting') {
+    await logServiceUsage(supabase, isVerified ? 'success' : 'failure', !isVerified ? message : null, startTime);
+  }
 
   return new Response(
     JSON.stringify({
