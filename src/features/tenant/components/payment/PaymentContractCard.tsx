@@ -22,7 +22,7 @@ export default function PaymentContractCard({ contract, onSelect }: PaymentContr
   return (
     <button
       onClick={() => onSelect(contract)}
-      className="w-full bg-[#FAF7F4] border-2 border-[#EFEBE9] rounded-xl p-6 hover:border-[#F16522] hover:shadow-lg transition-all duration-300 text-left group"
+      className="w-full bg-white border-2 border-[#EFEBE9] rounded-xl p-6 shadow-sm hover:border-[#F16522] hover:shadow-lg transition-all duration-300 text-left group"
     >
       <div className="flex items-start space-x-4">
         <img
