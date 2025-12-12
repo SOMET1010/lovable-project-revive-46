@@ -1,5 +1,5 @@
 import { SlidersHorizontal, X, MapPin, Home, Bed, Bath, DollarSign, Sofa, ParkingCircle, Wind } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Button from '@/shared/ui/Button';
 import { useDebouncedCallback } from '@/shared/hooks';
 import type { Database } from '@/shared/lib/database.types';
@@ -30,6 +30,7 @@ interface SearchFiltersProps {
   setHasAC: (ac: boolean | null) => void;
   onSearch: () => void;
   onReset: () => void;
+  resultsCount?: number;
 }
 
 export default function SearchFilters({
@@ -55,6 +56,7 @@ export default function SearchFilters({
   setHasAC,
   onSearch,
   onReset,
+  resultsCount,
 }: SearchFiltersProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   
@@ -62,6 +64,21 @@ export default function SearchFilters({
   const debouncedUpdateFilters = useDebouncedCallback((callback: () => void) => {
     callback();
   }, 300);
+
+  // Calculer le nombre de filtres actifs
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (searchCity) count++;
+    if (propertyType) count++;
+    if (minPrice) count++;
+    if (maxPrice) count++;
+    if (bedrooms) count++;
+    if (bathrooms) count++;
+    if (isFurnished !== null) count++;
+    if (hasParking !== null) count++;
+    if (hasAC !== null) count++;
+    return count;
+  }, [searchCity, propertyType, minPrice, maxPrice, bedrooms, bathrooms, isFurnished, hasParking, hasAC]);
 
   const ivoirianCities = [
     'Abidjan', 'Yamoussoukro', 'Bouaké', 'Daloa', 'San-Pédro',
@@ -85,17 +102,31 @@ export default function SearchFilters({
     <div className="bg-white rounded-xl shadow-md p-4 md:p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <SlidersHorizontal className="h-5 w-5 text-blue-600" aria-hidden="true" />
+          <SlidersHorizontal className="h-5 w-5 text-[#F16522]" aria-hidden="true" />
           <h2 className="text-lg font-bold text-gray-900">Filtres de recherche</h2>
+          {/* Badge du nombre de filtres actifs */}
+          {activeFiltersCount > 0 && (
+            <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-[#F16522] rounded-full">
+              {activeFiltersCount}
+            </span>
+          )}
         </div>
-        <button
-          onClick={onReset}
-          className="text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-          aria-label="Réinitialiser tous les filtres"
-        >
-          <X className="h-4 w-4" aria-hidden="true" />
-          <span>Réinitialiser</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Compteur de résultats */}
+          {resultsCount !== undefined && (
+            <span className="text-sm text-[#A69B95] font-medium">
+              {resultsCount} {resultsCount > 1 ? 'résultats' : 'résultat'}
+            </span>
+          )}
+          <button
+            onClick={onReset}
+            className="text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#F16522]/20 focus:ring-offset-1"
+            aria-label="Réinitialiser tous les filtres"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+            <span>Réinitialiser</span>
+          </button>
+        </div>
       </div>
 
       {/* Filtres essentiels */}
@@ -113,7 +144,7 @@ export default function SearchFilters({
               setSearchCity(value);
               debouncedUpdateFilters(() => {});
             }}
-            className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] transition-all"
           >
             <option value="">Toutes les villes</option>
             {ivoirianCities.map((city) => (
@@ -137,7 +168,7 @@ export default function SearchFilters({
               setPropertyType(value);
               debouncedUpdateFilters(() => {});
             }}
-            className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] transition-all"
           >
             <option value="">Tous les types</option>
             {propertyTypes.map((type) => (
@@ -163,7 +194,7 @@ export default function SearchFilters({
               debouncedUpdateFilters(() => {});
             }}
             placeholder="Ex: 50000"
-            className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] transition-all"
           />
         </div>
 
@@ -182,7 +213,7 @@ export default function SearchFilters({
               debouncedUpdateFilters(() => {});
             }}
             placeholder="Ex: 500000"
-            className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] transition-all"
           />
         </div>
       </div>
@@ -190,7 +221,7 @@ export default function SearchFilters({
       {/* Bouton filtres avancés */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
-        className="text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-medium flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+        className="text-sm text-[#F16522] hover:text-[#D55A1B] hover:bg-[#F16522]/10 font-medium flex items-center space-x-1 px-3 py-2 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-[#F16522]/20 focus:ring-offset-1"
         aria-label={showAdvanced ? 'Masquer les filtres avancés' : 'Afficher les filtres avancés'}
         aria-expanded={showAdvanced}
       >
@@ -215,7 +246,7 @@ export default function SearchFilters({
                   setBedrooms(value);
                   debouncedUpdateFilters(() => {});
                 }}
-                className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] transition-all"
               >
                 <option value="">Indifférent</option>
                 {[1, 2, 3, 4, 5, 6].map((num) => (
@@ -239,7 +270,7 @@ export default function SearchFilters({
                   setBathrooms(value);
                   debouncedUpdateFilters(() => {});
                 }}
-                className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522] transition-all"
               >
                 <option value="">Indifférent</option>
                 {[1, 2, 3, 4].map((num) => (
@@ -261,9 +292,9 @@ export default function SearchFilters({
                   setIsFurnished(newValue);
                   debouncedUpdateFilters(() => {});
                 }}
-                className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
+                className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#F16522]/20 focus:ring-offset-1 ${
                   isFurnished === true
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
+                    ? 'bg-[#F16522]/10 border-[#F16522] text-[#F16522]'
                     : 'border-gray-300 text-gray-700 hover:border-gray-400'
                 }`}
                 aria-label="Filtrer les biens meublés"
@@ -278,9 +309,9 @@ export default function SearchFilters({
                   setHasParking(newValue);
                   debouncedUpdateFilters(() => {});
                 }}
-                className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
+                className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#F16522]/20 focus:ring-offset-1 ${
                   hasParking === true
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
+                    ? 'bg-[#F16522]/10 border-[#F16522] text-[#F16522]'
                     : 'border-gray-300 text-gray-700 hover:border-gray-400'
                 }`}
                 aria-label="Filtrer les biens avec parking"
@@ -295,9 +326,9 @@ export default function SearchFilters({
                   setHasAC(newValue);
                   debouncedUpdateFilters(() => {});
                 }}
-                className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
+                className={`px-4 py-2 rounded-xl border-2 transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-[#F16522]/20 focus:ring-offset-1 ${
                   hasAC === true
-                    ? 'bg-blue-50 border-blue-500 text-blue-700'
+                    ? 'bg-[#F16522]/10 border-[#F16522] text-[#F16522]'
                     : 'border-gray-300 text-gray-700 hover:border-gray-400'
                 }`}
                 aria-label="Filtrer les biens avec climatisation"
