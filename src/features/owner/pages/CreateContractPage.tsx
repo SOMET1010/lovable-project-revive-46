@@ -318,7 +318,7 @@ export default function CreateContractPage() {
               <span>Retour</span>
             </button>
             
-            <div className="flex items-center space-x-3 mb-6">
+            <div className="flex items-center gap-4 mb-8">
               <div className="p-3 bg-[#F16522]/10 rounded-xl">
                 <FileText className="w-8 h-8 text-[#F16522]" />
               </div>
@@ -425,7 +425,7 @@ export default function CreateContractPage() {
               </div>
 
               {/* Navigation */}
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-6">
                 <button
                   type="button"
                   onClick={nextStep}
@@ -529,7 +529,7 @@ export default function CreateContractPage() {
               </div>
 
               {/* Navigation */}
-              <div className="flex items-center justify-between pt-4">
+              <div className="flex items-center justify-between pt-6">
                 <button
                   type="button"
                   onClick={prevStep}
@@ -621,7 +621,7 @@ export default function CreateContractPage() {
               </div>
 
               {/* Navigation */}
-              <div className="flex items-center justify-between pt-4">
+              <div className="flex items-center justify-between pt-6">
                 <button
                   type="button"
                   onClick={prevStep}

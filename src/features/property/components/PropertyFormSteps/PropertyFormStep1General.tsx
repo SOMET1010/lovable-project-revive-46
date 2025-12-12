@@ -67,14 +67,14 @@ export const PropertyFormStep1General: React.FC<PropertyFormStep1Props> = ({
 
       {/* Titre et Type */}
       <div className="bg-white p-6 rounded-2xl border border-[#EFEBE9] shadow-sm space-y-5">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3 mb-4">
           <div className="p-2.5 bg-[#F16522]/10 rounded-xl">
             <Sparkles className="w-5 h-5 text-[#F16522]" />
           </div>
           <h3 className="font-bold text-[#2C1810]">Informations principales</h3>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold uppercase text-[#A69B95] mb-2 tracking-wide">
               Titre de l'annonce <span className="text-[#F16522]">*</span>
