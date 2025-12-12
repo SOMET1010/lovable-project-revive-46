@@ -97,10 +97,27 @@ export default function PropertyCertificationPage() {
   };
   const loadPropertiesPendingCertification = async () => {
     try {
+      console.log('🔍 loadPropertiesPendingCertification - hasAnsutColumns:', hasAnsutColumns);
+
       // Si on sait déjà que les colonnes ANSUT sont absentes, on passe directement en fallback
       if (!hasAnsutColumns) {
-        await fetchFallback();
-        return;
+        console.log('⚠️ Using fallback mode - trying to detect ANSUT columns...');
+        // On essaie quand même une requête avec les colonnes ANSUT pour voir si elles existent
+        const { data, error } = await supabase
+          .from('properties')
+          .select('id, ansut_verified')
+          .limit(1);
+
+        if (error) {
+          console.log('❌ ANSUT columns detection failed:', error);
+          await fetchFallback();
+          return;
+        } else {
+          console.log('✅ ANSUT columns detected! Switching to ANSUT mode');
+          setHasAnsutColumns(true);
+          if (typeof window !== 'undefined') localStorage.setItem('has_ansut_columns', 'true');
+          // On continue avec la suite du code normal
+        }
       }
 
       const { data, error } = await supabase

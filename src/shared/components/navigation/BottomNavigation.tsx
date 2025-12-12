@@ -1,7 +1,7 @@
 import { Home, Search, PlusCircle, MessageCircle, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useUnreadCount } from '@/features/messaging/hooks/useUnreadCount';
+import { useUnreadCount } from '@/hooks/messaging/useUnreadCount';
 
 interface NavItem {
   icon: typeof Home;
@@ -25,18 +25,24 @@ export default function BottomNavigation() {
     { icon: Home, label: 'Accueil', href: '/' },
     { icon: Search, label: 'Recherche', href: '/recherche' },
     { icon: PlusCircle, label: 'Publier', href: '/ajouter-propriete' },
-    { icon: MessageCircle, label: 'Messages', href: '/messages', badge: unreadCount, requiresAuth: true },
+    {
+      icon: MessageCircle,
+      label: 'Messages',
+      href: '/messages',
+      badge: unreadCount,
+      requiresAuth: true,
+    },
     { icon: User, label: 'Profil', href: user ? '/profil' : '/connexion' },
   ];
 
   // Hide on certain pages
   const hiddenRoutes = ['/connexion', '/inscription', '/completer-profil'];
-  if (hiddenRoutes.some(route => location.pathname.startsWith(route))) {
+  if (hiddenRoutes.some((route) => location.pathname.startsWith(route))) {
     return null;
   }
 
   return (
-    <nav 
+    <nav
       className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white border-t border-[#EFEBE9] shadow-[0_-4px_20px_rgba(44,24,16,0.08)]"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       role="navigation"
@@ -55,17 +61,15 @@ export default function BottomNavigation() {
               key={item.label}
               to={item.href}
               className={`flex flex-col items-center justify-center flex-1 h-full py-2 transition-all duration-200 ${
-                active 
-                  ? 'text-[#F16522]' 
-                  : 'text-[#A69B95] hover:text-[#6B5A4E]'
+                active ? 'text-[#F16522]' : 'text-[#A69B95] hover:text-[#6B5A4E]'
               }`}
               aria-current={active ? 'page' : undefined}
             >
               <div className="relative">
-                <Icon 
+                <Icon
                   className={`h-6 w-6 transition-transform duration-200 ${
                     active ? 'scale-110' : ''
-                  }`} 
+                  }`}
                   strokeWidth={active ? 2.5 : 2}
                 />
                 {/* Badge for unread messages */}
@@ -75,15 +79,15 @@ export default function BottomNavigation() {
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] mt-1 font-medium transition-all duration-200 ${
-                active ? 'font-semibold' : ''
-              }`}>
+              <span
+                className={`text-[10px] mt-1 font-medium transition-all duration-200 ${
+                  active ? 'font-semibold' : ''
+                }`}
+              >
                 {item.label}
               </span>
               {/* Active indicator */}
-              {active && (
-                <div className="absolute bottom-1 w-8 h-1 bg-[#F16522] rounded-full" />
-              )}
+              {active && <div className="absolute bottom-1 w-8 h-1 bg-[#F16522] rounded-full" />}
             </Link>
           );
         })}
