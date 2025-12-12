@@ -1,22 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, FileText, CheckCircle, User, Mail, Phone, MapPin, Shield, Award, ChevronRight } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { FileText, CheckCircle, Home, MapPin, Coins, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { ScoringService } from '@/services/scoringService';
 import { notifyApplicationReceived } from '@/services/notifications/applicationNotificationService';
-import { ValidationService } from '@/services/validation';
-import { useFormValidation } from '@/shared/hooks/useFormValidation';
-import { ValidatedTextarea, FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
+import FormPageLayout from '@/shared/components/FormPageLayout';
+import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui';
+import { ApplicationStep1PersonalInfo, ApplicationStep2Motivation } from '../components/application';
 import type { Database } from '@/shared/lib/database.types';
 
 type Property = Database['public']['Tables']['properties']['Row'];
 
-interface ApplicationFormData {
-  coverLetter: string;
-}
-
-// Extended profile type with new columns
 interface ExtendedProfile {
   id: string;
   user_id: string | null;
@@ -29,29 +24,33 @@ interface ExtendedProfile {
   user_type: string | null;
   profile_setup_completed: boolean | null;
   is_verified?: boolean;
-  oneci_verified?: boolean;
-  cnam_verified?: boolean;
-  facial_verification_status?: string;
-  bio?: string;
+  trust_score?: number | null;
+  occupation?: string | null;
+  employer?: string | null;
+  monthly_income?: number | null;
 }
 
-export default function ApplicationForm() {
+export default function ApplicationFormPage() {
+  const { id: propertyId } = useParams<{ id: string }>();
   const { user, profile: authProfile } = useAuth();
   const navigate = useNavigate();
   const profile = authProfile as ExtendedProfile | null;
+  
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [coverLetter, setCoverLetter] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [existingApplication, setExistingApplication] = useState(false);
   
-  // Form stepper
-  const { step, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(1, 2);
+  const { step, slideDirection, nextStep, prevStep } = useFormStepper(1, 2);
+  const isVerified = profile?.is_verified ?? false;
   
-  // Form validation
-  const { validateField, getFieldState, touched } = useFormValidation<ApplicationFormData>();
+  // Calcul du score de candidature
+  const applicationScore = useCallback(() => {
+    return ScoringService.calculateSimpleScore(profile as Record<string, unknown> | null);
+  }, [profile]);
 
   useEffect(() => {
     if (!user) {
@@ -59,11 +58,10 @@ export default function ApplicationForm() {
       return;
     }
 
-    const propertyId = window.location.pathname.split('/').pop();
     if (propertyId) {
       loadProperty(propertyId);
     }
-  }, [user, navigate]);
+  }, [user, propertyId, navigate]);
 
   const loadProperty = async (id: string) => {
     try {
@@ -81,7 +79,7 @@ export default function ApplicationForm() {
 
       setProperty(data);
 
-      // Check for existing application (duplicate detection)
+      // Check for existing application
       if (user) {
         const { data: existing } = await supabase
           .from('rental_applications')
@@ -107,20 +105,16 @@ export default function ApplicationForm() {
     e.preventDefault();
     if (!user || !property) return;
 
-    // Validate cover letter
-    const coverLetterValid = validateField('coverLetter', () => 
-      ValidationService.validateMinLength(coverLetter, 50, 'La lettre de motivation')
-    );
-    
-    if (!coverLetterValid) {
+    if (coverLetter.length < 50) {
+      setError('La lettre de motivation doit contenir au moins 50 caractères');
       return;
     }
 
     setSubmitting(true);
-    setError('');
+    setError(null);
 
     try {
-      const applicationScore = calculateApplicationScore();
+      const score = applicationScore();
 
       const { data: applicationData, error: insertError } = await supabase
         .from('rental_applications')
@@ -128,7 +122,7 @@ export default function ApplicationForm() {
           property_id: property.id,
           applicant_id: user.id,
           cover_letter: coverLetter,
-          application_score: applicationScore,
+          application_score: score,
           status: 'en_attente',
         })
         .select('id')
@@ -147,308 +141,176 @@ export default function ApplicationForm() {
       }
 
       setSuccess(true);
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la soumission de la candidature');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la soumission';
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const calculateApplicationScore = () => {
-    return ScoringService.calculateSimpleScore(profile as Record<string, unknown> | null);
-  };
-
-  if (loading) {
+  // État non connecté
+  if (!user) {
     return (
-      <div className="form-page-container flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4" style={{ borderColor: 'var(--form-orange)' }}></div>
-      </div>
-    );
-  }
-
-  if (!property) return null;
-
-  if (success) {
-    return (
-      <div className="form-page-container flex items-center justify-center p-4">
-        <div className="form-section-premium max-w-md text-center animate-scale-in">
-          <div className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)' }}>
-            <CheckCircle className="h-12 w-12" style={{ color: 'var(--form-success)' }} />
-          </div>
-          <h2 className="text-3xl font-bold mb-3" style={{ color: 'var(--form-chocolat)' }}>Candidature envoyée!</h2>
-          <p className="text-lg mb-6" style={{ color: 'var(--form-sable)' }}>
-            Votre candidature a été envoyée avec succès au propriétaire. Vous serez notifié de sa réponse.
-          </p>
-          <p className="text-sm font-medium animate-pulse" style={{ color: 'var(--form-orange)' }}>Redirection en cours...</p>
-        </div>
-      </div>
-    );
-  }
-
-  const applicationScore = calculateApplicationScore();
-  const isVerified = profile?.is_verified ?? false;
-
-  const stepLabels = ['Informations', 'Motivation'];
-
-  return (
-    <div className="form-page-container">
-      {/* Header */}
-      <div className="form-section-premium mb-6" style={{ borderRadius: 0, border: 'none', borderBottom: '1px solid var(--form-border)' }}>
-        <div className="max-w-4xl mx-auto px-4 py-4">
+      <FormPageLayout title="Candidature de location" showBackButton={false}>
+        <div className="text-center py-12">
+          <FileText className="w-16 h-16 text-[#A69B95] mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-[#2C1810] mb-2">Connexion requise</h2>
+          <p className="text-[#A69B95] mb-6">Connectez-vous pour postuler à ce bien</p>
           <button
-            onClick={() => window.history.back()}
-            className="flex items-center space-x-2 font-medium transition-all duration-300 hover:scale-105"
-            style={{ color: 'var(--form-orange)' }}
+            onClick={() => navigate('/connexion')}
+            className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-8 rounded-xl"
           >
-            <ArrowLeft className="h-5 w-5" />
-            <span>Retour</span>
+            Se connecter
           </button>
         </div>
-      </div>
+      </FormPageLayout>
+    );
+  }
 
-      <div className="form-content-wrapper px-4">
-        {/* Property Info Header */}
-        <div className="form-section-premium mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <FileText className="h-8 w-8" style={{ color: 'var(--form-orange)' }} />
-            <h1 className="text-2xl md:text-3xl font-bold" style={{ color: 'var(--form-chocolat)' }}>
-              Postuler pour cette propriété
-            </h1>
-          </div>
-          <div className="p-4 rounded-xl" style={{ backgroundColor: 'var(--form-ivoire)', border: '1px solid var(--form-border)' }}>
-            <p className="font-bold text-lg" style={{ color: 'var(--form-chocolat)' }}>{property.title}</p>
-            <p className="flex items-center gap-2 mt-1" style={{ color: 'var(--form-sable)' }}>
-              <MapPin className="h-4 w-4" />
-              <span>{property.city}, {property.neighborhood}</span>
-            </p>
-            <p className="font-bold text-lg mt-2" style={{ color: 'var(--form-orange)' }}>
-              {property.monthly_rent.toLocaleString()} FCFA/mois
-            </p>
-          </div>
+  // Chargement
+  if (loading) {
+    return (
+      <FormPageLayout title="Candidature de location" showBackButton={false}>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-[#F16522]" />
         </div>
+      </FormPageLayout>
+    );
+  }
 
-        {/* Stepper */}
-        <div className="mb-8">
-          <FormStepper
-            currentStep={step}
-            totalSteps={2}
-            onStepChange={goToStep}
-            labels={stepLabels}
-          />
+  // Propriété non trouvée
+  if (!property) {
+    return (
+      <FormPageLayout title="Candidature de location" backPath="/recherche">
+        <div className="text-center py-12">
+          <Home className="w-16 h-16 text-[#A69B95] mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-[#2C1810] mb-2">Bien introuvable</h2>
+          <p className="text-[#A69B95] mb-6">Ce bien n'existe pas ou n'est plus disponible</p>
+          <button
+            onClick={() => navigate('/recherche')}
+            className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-8 rounded-xl"
+          >
+            Rechercher un bien
+          </button>
         </div>
+      </FormPageLayout>
+    );
+  }
 
-        {error && (
-          <div className="form-error-message mb-6">
-            <strong>Erreur:</strong> {error}
+  // Succès
+  if (success) {
+    return (
+      <FormPageLayout title="Candidature envoyée" icon={CheckCircle} showBackButton={false}>
+        <div className="text-center py-8">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-10 h-10 text-green-600" />
           </div>
-        )}
-
-        {!isVerified && (
-          <div className="form-error-message mb-6 flex-col items-start gap-3">
-            <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6" />
-              <strong>Vérification d'identité OBLIGATOIRE</strong>
-            </div>
-            <p>Vous devez compléter la vérification de votre identité avant de postuler.</p>
-            <Link
-              to="/profil"
-              className="form-button-primary mt-2"
+          <h2 className="text-2xl font-bold text-[#2C1810] mb-3">
+            Candidature envoyée !
+          </h2>
+          <p className="text-[#6B5A4E] mb-8 max-w-md mx-auto">
+            Votre candidature a été transmise au propriétaire. 
+            Vous serez notifié dès qu'il aura pris une décision.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => navigate('/mes-candidatures')}
+              className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-8 rounded-xl"
             >
-              Compléter ma vérification →
-            </Link>
+              Voir mes candidatures
+            </button>
+            <button
+              onClick={() => navigate('/recherche')}
+              className="border border-[#EFEBE9] text-[#2C1810] hover:bg-[#FAF7F4] font-semibold py-3 px-8 rounded-xl"
+            >
+              Continuer ma recherche
+            </button>
           </div>
-        )}
+        </div>
+      </FormPageLayout>
+    );
+  }
 
-        <form onSubmit={handleSubmit}>
-          {/* STEP 1: Informations personnelles */}
-          <FormStepContent step={1} currentStep={step} slideDirection={slideDirection} className="space-y-6">
-            {/* Personal Info */}
-            <div className="form-section-premium">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
-                <User className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
-                <span>Informations personnelles</span>
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
-                  <div className="flex items-center gap-3">
-                    <User className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
-                    <span className="form-label-premium mb-0">Nom complet</span>
-                  </div>
-                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.full_name || 'Non renseigné'}</span>
-                </div>
-                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
-                    <span className="form-label-premium mb-0">Email</span>
-                  </div>
-                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{user?.email}</span>
-                </div>
-                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
-                    <span className="form-label-premium mb-0">Téléphone</span>
-                  </div>
-                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.phone || 'Non renseigné'}</span>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5" style={{ color: 'var(--form-sable)' }} />
-                    <span className="form-label-premium mb-0">Ville</span>
-                  </div>
-                  <span className="font-bold" style={{ color: 'var(--form-chocolat)' }}>{profile?.city || 'Non renseignée'}</span>
-                </div>
-              </div>
-              <Link
-                to="/profil"
-                className="text-sm font-bold mt-4 inline-block transition-all hover:scale-105"
-                style={{ color: 'var(--form-orange)' }}
-              >
-                Modifier mes informations →
-              </Link>
-            </div>
+  const steps = [
+    { number: 1, title: 'Mon profil' },
+    { number: 2, title: 'Motivation' }
+  ];
 
-            {/* Verification Status */}
-            <div className="form-section-premium">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
-                <Shield className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
-                <span>Statut de vérification</span>
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b" style={{ borderColor: 'var(--form-border)' }}>
-                  <div>
-                    <span className="form-label-premium mb-0">Vérification d'identité</span>
-                    <span className="text-xs block" style={{ color: 'var(--form-sable)' }}>Document CNI authentifié via ONECI/CNAM</span>
-                  </div>
-                  <span className={`font-bold px-4 py-2 rounded-full text-sm ${
-                    isVerified
-                      ? 'text-white'
-                      : ''
-                  }`} style={{ 
-                    backgroundColor: isVerified ? 'var(--form-success)' : 'var(--form-ivoire)',
-                    color: isVerified ? 'white' : 'var(--form-sable)'
-                  }}>
-                    {isVerified ? '✓ Vérifié' : '✗ Non vérifié'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <span className="form-label-premium mb-0">Profil complet</span>
-                  <span className={`font-bold px-4 py-2 rounded-full text-sm`} style={{
-                    backgroundColor: profile?.profile_setup_completed ? 'var(--form-success)' : 'var(--form-ivoire)',
-                    color: profile?.profile_setup_completed ? 'white' : 'var(--form-sable)'
-                  }}>
-                    {profile?.profile_setup_completed ? '✓ Complet' : '✗ Incomplet'}
-                  </span>
-                </div>
-              </div>
-            </div>
+  // Profil adapté pour le sous-composant
+  const profileForStep = profile ? {
+    full_name: profile.full_name,
+    avatar_url: profile.avatar_url,
+    phone: profile.phone,
+    city: profile.city,
+    occupation: profile.occupation || null,
+    employer: profile.employer || null,
+    monthly_income: profile.monthly_income || null,
+    trust_score: profile.trust_score || null,
+    is_verified: profile.is_verified || null,
+  } : null;
 
-            {/* Score Preview */}
-            <div className="form-section-premium" style={{ backgroundColor: 'var(--form-ivoire)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-lg flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
-                  <Award className="h-6 w-6" style={{ color: 'var(--form-orange)' }} />
-                  <span>Score de candidature</span>
-                </h3>
-                <span className="text-3xl font-bold" style={{ color: 'var(--form-orange)' }}>{applicationScore}/100</span>
-              </div>
-              <div className="bg-white rounded-full h-4 overflow-hidden shadow-inner">
-                <div
-                  className="h-full transition-all duration-500"
-                  style={{ width: `${applicationScore}%`, backgroundColor: 'var(--form-orange)' }}
-                />
-              </div>
+  return (
+    <FormPageLayout 
+      title="Postuler pour ce bien"
+      subtitle={property.title}
+      icon={FileText}
+      backPath={`/propriete/${propertyId}`}
+    >
+      {/* Résumé du bien */}
+      <div className="bg-[#FAF7F4] rounded-xl p-4 border border-[#EFEBE9] mb-6 flex items-center gap-4">
+        <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#EFEBE9] flex-shrink-0">
+          {property.main_image ? (
+            <img src={property.main_image} alt={property.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Home className="w-6 h-6 text-[#A69B95]" />
             </div>
-
-            {/* Next Button */}
-            <div className="form-actions">
-              <div></div>
-              <button
-                type="button"
-                onClick={nextStep}
-                className="form-button-primary"
-              >
-                <span>Continuer</span>
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
-          </FormStepContent>
-
-          {/* STEP 2: Lettre de motivation */}
-          <FormStepContent step={2} currentStep={step} slideDirection={slideDirection} className="space-y-6">
-            <div className="form-section-premium">
-              <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--form-chocolat)' }}>
-                <FileText className="h-5 w-5" style={{ color: 'var(--form-orange)' }} />
-                <span>Lettre de motivation</span>
-              </h2>
-              <ValidatedTextarea
-                name="coverLetter"
-                value={coverLetter}
-                onChange={(e) => setCoverLetter(e.target.value)}
-                onBlur={() => validateField('coverLetter', () => 
-                  ValidationService.validateMinLength(coverLetter, 50, 'La lettre de motivation')
-                )}
-                rows={10}
-                required
-                placeholder="Présentez-vous et expliquez pourquoi vous souhaitez louer cette propriété... (minimum 50 caractères)"
-                error={getFieldState('coverLetter').error}
-                touched={touched['coverLetter']}
-                isValid={getFieldState('coverLetter').isValid}
-                showCharCount
-                maxLength={2000}
-                helperText={coverLetter.length < 50 ? `${coverLetter.length}/50 caractères minimum` : undefined}
-              />
-            </div>
-
-            {/* Terms */}
-            <div className="form-section-premium">
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  id="terms"
-                  required
-                  className="mt-1 w-5 h-5 rounded"
-                  style={{ accentColor: 'var(--form-orange)' }}
-                />
-                <label htmlFor="terms" className="text-sm" style={{ color: 'var(--form-chocolat)' }}>
-                  Je confirme que toutes les informations fournies sont exactes et j'accepte les{' '}
-                  <Link to="/conditions-utilisation" className="font-bold" style={{ color: 'var(--form-orange)' }}>
-                    conditions d'utilisation
-                  </Link>.
-                </label>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="form-actions">
-              <button
-                type="button"
-                onClick={prevStep}
-                className="form-button-secondary"
-              >
-                <ArrowLeft className="h-5 w-5" />
-                <span>Retour</span>
-              </button>
-              <button
-                type="submit"
-                disabled={submitting || !!error || !isVerified || existingApplication}
-                className="form-button-primary"
-              >
-                <FileText className="h-5 w-5" />
-                <span>
-                  {!isVerified
-                    ? 'Vérification requise'
-                    : submitting
-                    ? 'Envoi en cours...'
-                    : 'Envoyer ma candidature'}
-                </span>
-              </button>
-            </div>
-          </FormStepContent>
-        </form>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-[#2C1810] truncate">{property.title}</h3>
+          <p className="text-sm text-[#A69B95] flex items-center gap-1">
+            <MapPin className="w-4 h-4" />
+            {property.address ? `${property.address}, ` : ''}{property.city}
+          </p>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className="font-bold text-[#F16522] flex items-center gap-1">
+            <Coins className="w-4 h-4" />
+            {property.monthly_rent.toLocaleString()} FCFA
+          </p>
+          <p className="text-xs text-[#A69B95]">/mois</p>
+        </div>
       </div>
-    </div>
+
+      {/* Stepper */}
+      <FormStepper steps={steps} currentStep={step} className="mb-8" />
+
+      {/* Étape 1 - Mon profil */}
+      <FormStepContent step={1} currentStep={step} slideDirection={slideDirection}>
+        <ApplicationStep1PersonalInfo
+          profile={profileForStep}
+          userEmail={user.email}
+          applicationScore={applicationScore()}
+          isVerified={isVerified}
+          onNext={nextStep}
+        />
+      </FormStepContent>
+
+      {/* Étape 2 - Motivation */}
+      <FormStepContent step={2} currentStep={step} slideDirection={slideDirection}>
+        <ApplicationStep2Motivation
+          coverLetter={coverLetter}
+          onCoverLetterChange={setCoverLetter}
+          isVerified={isVerified}
+          submitting={submitting}
+          existingApplication={existingApplication}
+          error={error}
+          onPrev={prevStep}
+          onSubmit={handleSubmit}
+        />
+      </FormStepContent>
+    </FormPageLayout>
   );
 }
