@@ -1,15 +1,17 @@
 /**
  * AlertCreationModal - Modal de création d'alerte personnalisée
  * Permet de créer une alerte avec nom, critères et fréquence
+ * Avec validation temps réel
  */
 
-import { useState, useEffect } from 'react';
-import { X, Bell, MapPin, Home, Coins, BedDouble, Clock } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { X, Bell, MapPin, Home, Coins, BedDouble, Clock, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { toast } from 'sonner';
 import { CITIES } from '@/shared/data/cities';
 import { PROPERTY_TYPES } from '@/shared/data/propertyTypes';
+import { useFormValidation } from '@/shared/hooks/useFormValidation';
 
 interface AlertCreationModalProps {
   isOpen: boolean;
@@ -25,6 +27,17 @@ interface AlertCreationModalProps {
   onSuccess?: () => void;
 }
 
+interface AlertFormData {
+  name: string;
+  city: string;
+  propertyType: string;
+  minPrice: string;
+  maxPrice: string;
+  minBedrooms: string;
+  maxBedrooms: string;
+  frequency: 'instant' | 'daily' | 'weekly';
+}
+
 export function AlertCreationModal({ 
   isOpen, 
   onClose, 
@@ -34,8 +47,17 @@ export function AlertCreationModal({
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [activeAlertsCount, setActiveAlertsCount] = useState(0);
+  
+  // Hook de validation temps réel
+  const { 
+    errors, 
+    getFieldState, 
+    setFieldError, 
+    clearFieldError,
+    clearAllErrors 
+  } = useFormValidation<AlertFormData>();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<AlertFormData>({
     name: '',
     city: prefillData?.city || '',
     propertyType: prefillData?.propertyType || '',
@@ -43,15 +65,67 @@ export function AlertCreationModal({
     maxPrice: prefillData?.maxPrice?.toString() || '',
     minBedrooms: prefillData?.minBedrooms?.toString() || '',
     maxBedrooms: prefillData?.maxBedrooms?.toString() || '',
-    frequency: 'daily' as 'instant' | 'daily' | 'weekly'
+    frequency: 'daily'
   });
+
+  // Validation du nom en temps réel
+  const validateName = useCallback((value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setFieldError('name', 'Le nom de l\'alerte est requis');
+      return false;
+    }
+    if (trimmed.length < 3) {
+      setFieldError('name', 'Le nom doit contenir au moins 3 caractères');
+      return false;
+    }
+    if (trimmed.length > 50) {
+      setFieldError('name', 'Le nom ne peut pas dépasser 50 caractères');
+      return false;
+    }
+    clearFieldError('name');
+    return true;
+  }, [setFieldError, clearFieldError]);
+
+  // Validation du budget
+  const validateBudget = useCallback(() => {
+    const minPrice = parseFloat(formData.minPrice);
+    const maxPrice = parseFloat(formData.maxPrice);
+    
+    if (formData.minPrice && formData.maxPrice && minPrice > maxPrice) {
+      setFieldError('maxPrice', 'Le prix max doit être supérieur au prix min');
+      return false;
+    }
+    clearFieldError('maxPrice');
+    return true;
+  }, [formData.minPrice, formData.maxPrice, setFieldError, clearFieldError]);
+
+  // Validation des chambres
+  const validateBedrooms = useCallback(() => {
+    const min = parseInt(formData.minBedrooms);
+    const max = parseInt(formData.maxBedrooms);
+    
+    if (formData.minBedrooms && formData.maxBedrooms && min > max) {
+      setFieldError('maxBedrooms', 'Le max doit être supérieur au min');
+      return false;
+    }
+    clearFieldError('maxBedrooms');
+    return true;
+  }, [formData.minBedrooms, formData.maxBedrooms, setFieldError, clearFieldError]);
+
+  // Handler pour le changement de nom avec validation
+  const handleNameChange = (value: string) => {
+    setFormData(prev => ({ ...prev, name: value }));
+    validateName(value);
+  };
 
   // Charger le nombre d'alertes actives
   useEffect(() => {
     if (isOpen && user) {
       loadActiveAlertsCount();
+      clearAllErrors();
     }
-  }, [isOpen, user]);
+  }, [isOpen, user, clearAllErrors]);
 
   // Pré-remplir avec les données passées
   useEffect(() => {
@@ -67,6 +141,15 @@ export function AlertCreationModal({
       }));
     }
   }, [prefillData]);
+
+  // Valider budget et chambres quand les valeurs changent
+  useEffect(() => {
+    validateBudget();
+  }, [formData.minPrice, formData.maxPrice, validateBudget]);
+
+  useEffect(() => {
+    validateBedrooms();
+  }, [formData.minBedrooms, formData.maxBedrooms, validateBedrooms]);
 
   const loadActiveAlertsCount = async () => {
     if (!user) return;
@@ -85,8 +168,12 @@ export function AlertCreationModal({
       return;
     }
 
-    if (!formData.name.trim()) {
-      toast.error('Veuillez donner un nom à votre alerte');
+    // Validation finale
+    const isNameValid = validateName(formData.name);
+    const isBudgetValid = validateBudget();
+    const isBedroomsValid = validateBedrooms();
+
+    if (!isNameValid || !isBudgetValid || !isBedroomsValid) {
       return;
     }
 
@@ -127,6 +214,7 @@ export function AlertCreationModal({
         maxBedrooms: '',
         frequency: 'daily'
       });
+      clearAllErrors();
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
       if (errorMessage.includes('Maximum 5')) {
@@ -138,6 +226,10 @@ export function AlertCreationModal({
       setLoading(false);
     }
   };
+
+  // Vérifier si le formulaire a des erreurs
+  const hasErrors = Object.keys(errors).length > 0;
+  const nameState = getFieldState('name');
 
   if (!isOpen) return null;
 
@@ -154,8 +246,8 @@ export function AlertCreationModal({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-neutral-200">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Bell className="w-5 h-5 text-primary" />
+            <div className="w-10 h-10 rounded-full bg-[#F16522]/10 flex items-center justify-center">
+              <Bell className="w-5 h-5 text-[#F16522]" />
             </div>
             <div>
               <h2 className="font-semibold text-foreground">Créer une alerte</h2>
@@ -174,19 +266,34 @@ export function AlertCreationModal({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          {/* Nom de l'alerte */}
+          {/* Nom de l'alerte avec validation temps réel */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-1">
-              Nom de l'alerte *
+              Nom de l'alerte <span className="text-[#F16522]">*</span>
             </label>
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => handleNameChange(e.target.value)}
               placeholder="Ex: Appartement Cocody"
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              required
+              maxLength={50}
+              className={`w-full px-3 py-2 border rounded-lg transition-all focus:ring-2 focus:ring-[#F16522]/20 ${
+                nameState.isInvalid 
+                  ? 'border-red-400 bg-red-50/50' 
+                  : nameState.isValid 
+                    ? 'border-green-400 bg-green-50/50' 
+                    : 'border-neutral-300 focus:border-[#F16522]'
+              }`}
             />
+            {nameState.error && (
+              <p className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                <AlertCircle className="w-3 h-3" />
+                {nameState.error}
+              </p>
+            )}
+            <p className="text-xs text-muted-foreground mt-1">
+              {formData.name.length}/50 caractères
+            </p>
           </div>
 
           {/* Ville */}
@@ -198,7 +305,7 @@ export function AlertCreationModal({
             <select
               value={formData.city}
               onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522]"
             >
               <option value="">Toutes les villes</option>
               {CITIES.map(city => (
@@ -216,7 +323,7 @@ export function AlertCreationModal({
             <select
               value={formData.propertyType}
               onChange={(e) => setFormData(prev => ({ ...prev, propertyType: e.target.value }))}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522]"
             >
               <option value="">Tous les types</option>
               {PROPERTY_TYPES.map((type: { value: string; label: string }) => (
@@ -237,16 +344,24 @@ export function AlertCreationModal({
                 value={formData.minPrice}
                 onChange={(e) => setFormData(prev => ({ ...prev, minPrice: e.target.value }))}
                 placeholder="Min"
-                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522]"
               />
               <input
                 type="number"
                 value={formData.maxPrice}
                 onChange={(e) => setFormData(prev => ({ ...prev, maxPrice: e.target.value }))}
                 placeholder="Max"
-                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#F16522]/20 ${
+                  errors['maxPrice'] ? 'border-red-400' : 'border-neutral-300 focus:border-[#F16522]'
+                }`}
               />
             </div>
+            {errors['maxPrice'] && (
+              <p className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors['maxPrice']}
+              </p>
+            )}
           </div>
 
           {/* Chambres */}
@@ -262,7 +377,7 @@ export function AlertCreationModal({
                 value={formData.minBedrooms}
                 onChange={(e) => setFormData(prev => ({ ...prev, minBedrooms: e.target.value }))}
                 placeholder="Min"
-                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522]"
               />
               <input
                 type="number"
@@ -270,9 +385,17 @@ export function AlertCreationModal({
                 value={formData.maxBedrooms}
                 onChange={(e) => setFormData(prev => ({ ...prev, maxBedrooms: e.target.value }))}
                 placeholder="Max"
-                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#F16522]/20 ${
+                  errors['maxBedrooms'] ? 'border-red-400' : 'border-neutral-300 focus:border-[#F16522]'
+                }`}
               />
             </div>
+            {errors['maxBedrooms'] && (
+              <p className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors['maxBedrooms']}
+              </p>
+            )}
           </div>
 
           {/* Fréquence */}
@@ -293,7 +416,7 @@ export function AlertCreationModal({
                   onClick={() => setFormData(prev => ({ ...prev, frequency: option.value as 'instant' | 'daily' | 'weekly' }))}
                   className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                     formData.frequency === option.value
-                      ? 'bg-primary text-white'
+                      ? 'bg-[#F16522] text-white'
                       : 'bg-neutral-100 text-foreground hover:bg-neutral-200'
                   }`}
                 >
@@ -306,8 +429,8 @@ export function AlertCreationModal({
           {/* Submit */}
           <button
             type="submit"
-            disabled={loading || activeAlertsCount >= 5}
-            className="w-full py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            disabled={loading || activeAlertsCount >= 5 || hasErrors || !formData.name.trim()}
+            className="w-full py-3 bg-[#F16522] text-white rounded-lg font-medium hover:bg-[#D55A1B] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Création...' : 'Créer l\'alerte'}
           </button>

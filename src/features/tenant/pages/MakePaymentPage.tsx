@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,7 +13,9 @@ import {
   AlertCircle, 
   CheckCircle, 
   ArrowLeft,
-  ChevronRight
+  ChevronRight,
+  Lock,
+  ShieldCheck
 } from 'lucide-react';
 import '@/styles/form-premium.css';
 
@@ -42,6 +44,23 @@ interface Contract {
 
 const STEP_LABELS = ['Sélection', 'Paiement'];
 
+// Validation du numéro Mobile Money CI
+const validateMobileMoneyNumber = (number: string): { isValid: boolean; error?: string } => {
+  const cleaned = number.replace(/[\s\-+]/g, '');
+  // Format CI : 07, 01, 05 + 8 chiffres (total 10 chiffres)
+  // Ou avec indicatif 225 (total 12 chiffres)
+  const regexShort = /^(07|01|05)\d{8}$/;
+  const regexLong = /^225(07|01|05)\d{8}$/;
+  
+  if (!cleaned) {
+    return { isValid: false, error: 'Numéro requis' };
+  }
+  if (!regexShort.test(cleaned) && !regexLong.test(cleaned)) {
+    return { isValid: false, error: 'Format invalide. Utilisez 07/01/05 suivi de 8 chiffres' };
+  }
+  return { isValid: true };
+};
+
 export default function MakePayment() {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -53,6 +72,8 @@ export default function MakePayment() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [mobileMoneyError, setMobileMoneyError] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const [formData, setFormData] = useState<PaymentFormData>({
     property_id: '',
@@ -69,6 +90,17 @@ export default function MakePayment() {
       loadUserContracts();
     }
   }, [user]);
+
+  // Validation du numéro Mobile Money en temps réel
+  const handleMobileMoneyNumberChange = useCallback((value: string) => {
+    setFormData(prev => ({ ...prev, mobile_money_number: value }));
+    if (value) {
+      const validation = validateMobileMoneyNumber(value);
+      setMobileMoneyError(validation.error || '');
+    } else {
+      setMobileMoneyError('');
+    }
+  }, []);
 
   const loadUserContracts = async () => {
     if (!user) return;
@@ -120,7 +152,7 @@ export default function MakePayment() {
       }
 
       setContracts(formattedContracts);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading contracts:', err);
       setError('Erreur lors du chargement des contrats');
     } finally {
@@ -164,8 +196,28 @@ export default function MakePayment() {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Vérifier si le formulaire est prêt pour soumission
+  const isFormValid = useCallback(() => {
+    if (formData.payment_method === 'mobile_money') {
+      const validation = validateMobileMoneyNumber(formData.mobile_money_number || '');
+      return validation.isValid && formData.amount > 0;
+    }
+    return formData.amount > 0;
+  }, [formData]);
+
+  const handlePreConfirm = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isFormValid()) {
+      if (formData.payment_method === 'mobile_money') {
+        const validation = validateMobileMoneyNumber(formData.mobile_money_number || '');
+        setMobileMoneyError(validation.error || '');
+      }
+      return;
+    }
+    setShowConfirmation(true);
+  };
+
+  const handleSubmit = async () => {
     if (!user || !selectedContract) return;
 
     setSubmitting(true);
@@ -203,9 +255,11 @@ export default function MakePayment() {
       setTimeout(() => {
         navigate('/mes-paiements');
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error processing payment:', err);
-      setError(err.message || 'Erreur lors du traitement du paiement');
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors du traitement du paiement';
+      setError(errorMessage);
+      setShowConfirmation(false);
     } finally {
       setSubmitting(false);
     }
@@ -339,7 +393,88 @@ export default function MakePayment() {
 
               {/* Étape 2: Détails du paiement */}
               <FormStepContent step={2} currentStep={step} slideDirection={slideDirection}>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Modal de confirmation pré-paiement */}
+                {showConfirmation && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/50" onClick={() => setShowConfirmation(false)} />
+                    <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6">
+                      {/* Récapitulatif sécurisé */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="p-2 bg-green-100 rounded-full">
+                          <ShieldCheck className="w-6 h-6 text-green-600" />
+                        </div>
+                        <h3 className="text-lg font-bold text-[#2C1810]">Confirmer le paiement</h3>
+                      </div>
+                      
+                      <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <Lock className="w-5 h-5 text-green-600" />
+                          <span className="font-semibold text-green-800">Récapitulatif sécurisé</span>
+                        </div>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-[#6B5A4E]">Montant</span>
+                            <span className="font-bold text-[#2C1810]">{formData.amount.toLocaleString()} FCFA</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-[#6B5A4E]">Type</span>
+                            <span className="text-[#2C1810]">
+                              {formData.payment_type === 'loyer' ? 'Loyer mensuel' : 
+                               formData.payment_type === 'depot_garantie' ? 'Dépôt de garantie' : 
+                               formData.payment_type === 'charges' ? 'Charges' : 'Frais d\'agence'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-[#6B5A4E]">Méthode</span>
+                            <span className="text-[#2C1810]">
+                              {formData.payment_method === 'mobile_money' ? 'Mobile Money' : 'Carte bancaire'}
+                            </span>
+                          </div>
+                          {formData.payment_method === 'mobile_money' && formData.mobile_money_number && (
+                            <div className="flex justify-between">
+                              <span className="text-[#6B5A4E]">Numéro</span>
+                              <span className="text-[#2C1810]">{formData.mobile_money_number}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between">
+                            <span className="text-[#6B5A4E]">Propriété</span>
+                            <span className="text-[#2C1810]">{selectedContract?.property_title}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmation(false)}
+                          className="flex-1 py-3 px-4 border-2 border-[#A69B95]/30 rounded-xl font-semibold text-[#2C1810] hover:bg-[#FAF7F4] transition-colors"
+                        >
+                          Annuler
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          disabled={submitting}
+                          className="flex-1 py-3 px-4 bg-[#F16522] text-white rounded-xl font-semibold hover:bg-[#D55A1B] disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                        >
+                          {submitting ? (
+                            <>
+                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                              <span>Traitement...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="w-4 h-4" />
+                              <span>Confirmer</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <form onSubmit={handlePreConfirm} className="space-y-6">
                   <div className="form-section-premium">
                     <h2 className="form-label-premium text-lg mb-6">Détails du paiement</h2>
 
@@ -371,7 +506,7 @@ export default function MakePayment() {
                     <div className="space-y-6">
                       {/* Type de paiement */}
                       <div>
-                        <label className="form-label-premium">Type de paiement</label>
+                        <label className="form-label-premium required">Type de paiement</label>
                         <div className="grid grid-cols-2 gap-4 mt-3">
                           {[
                             { value: 'loyer', label: 'Loyer mensuel', amount: selectedContract?.monthly_rent || 0 },
@@ -404,7 +539,7 @@ export default function MakePayment() {
 
                       {/* Montant */}
                       <div>
-                        <label className="form-label-premium">Montant</label>
+                        <label className="form-label-premium required">Montant</label>
                         <input
                           type="number"
                           value={formData.amount}
@@ -416,7 +551,7 @@ export default function MakePayment() {
 
                       {/* Méthode de paiement */}
                       <div>
-                        <label className="form-label-premium">Méthode de paiement</label>
+                        <label className="form-label-premium required">Méthode de paiement</label>
                         <div className="grid grid-cols-2 gap-4 mt-3">
                           <button
                             type="button"
@@ -453,10 +588,10 @@ export default function MakePayment() {
                       {formData.payment_method === 'mobile_money' && (
                         <div className="space-y-4 p-4 bg-[#FAF7F4] rounded-xl border border-[#A69B95]/20">
                           <div>
-                            <label className="form-label-premium">Opérateur Mobile Money</label>
+                            <label className="form-label-premium required">Opérateur Mobile Money</label>
                             <select
                               value={formData.mobile_money_provider}
-                              onChange={(e) => setFormData({ ...formData, mobile_money_provider: e.target.value as any })}
+                              onChange={(e) => setFormData({ ...formData, mobile_money_provider: e.target.value as PaymentFormData['mobile_money_provider'] })}
                               className="form-input-premium mt-2"
                               required
                             >
@@ -467,15 +602,24 @@ export default function MakePayment() {
                             </select>
                           </div>
                           <div>
-                            <label className="form-label-premium">Numéro Mobile Money</label>
+                            <label className="form-label-premium required">Numéro Mobile Money</label>
                             <input
                               type="tel"
                               value={formData.mobile_money_number}
-                              onChange={(e) => setFormData({ ...formData, mobile_money_number: e.target.value })}
-                              className="form-input-premium mt-2"
+                              onChange={(e) => handleMobileMoneyNumberChange(e.target.value)}
+                              className={`form-input-premium mt-2 ${mobileMoneyError ? 'border-red-400' : ''}`}
                               placeholder="07 XX XX XX XX"
                               required
                             />
+                            {mobileMoneyError && (
+                              <p className="flex items-center gap-1 text-red-500 text-xs mt-1">
+                                <AlertCircle className="w-3 h-3" />
+                                {mobileMoneyError}
+                              </p>
+                            )}
+                            <p className="text-xs text-[#A69B95] mt-1">
+                              Format accepté: 07, 01 ou 05 suivi de 8 chiffres
+                            </p>
                           </div>
                         </div>
                       )}
@@ -495,20 +639,12 @@ export default function MakePayment() {
                     
                     <button
                       type="submit"
-                      disabled={submitting}
-                      className="form-button-primary flex items-center space-x-2"
+                      disabled={!isFormValid()}
+                      className="form-button-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {submitting ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                          <span>Traitement...</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Confirmer le paiement</span>
-                          <CheckCircle className="w-5 h-5" />
-                        </>
-                      )}
+                      <Lock className="w-4 h-4" />
+                      <span>Confirmer le paiement</span>
+                      <CheckCircle className="w-5 h-5" />
                     </button>
                   </div>
                 </form>
