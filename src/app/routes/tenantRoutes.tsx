@@ -30,6 +30,8 @@ const OriginalProfilePage = lazyWithRetry(() => import('@/pages/tenant/ProfilePa
 // Favorites & saved searches
 const Favorites = lazyWithRetry(() => import('@/pages/tenant/FavoritesPage'));
 const SavedSearches = lazyWithRetry(() => import('@/pages/tenant/SavedSearchesPage'));
+const Documents = lazyWithRetry(() => import('@/pages/tenant/DocumentsPage'));
+const Notifications = lazyWithRetry(() => import('@/pages/tenant/NotificationsPage'));
 
 // Application & Visit pages
 const ApplicationForm = lazyWithRetry(() => import('@/pages/tenant/ApplicationFormPage'));
@@ -74,6 +76,22 @@ export const tenantRoutes: RouteObject[] = [
     element: (
       <ProtectedRoute allowedRoles={[...TENANT_ROLES]}>
         <Favorites />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'documents',
+    element: (
+      <ProtectedRoute allowedRoles={[...TENANT_ROLES]}>
+        <Documents />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'notifications',
+    element: (
+      <ProtectedRoute allowedRoles={[...TENANT_ROLES]}>
+        <Notifications />
       </ProtectedRoute>
     ),
   },

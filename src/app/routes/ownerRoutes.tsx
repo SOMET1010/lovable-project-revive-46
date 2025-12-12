@@ -49,11 +49,19 @@ export const ownerRoutes: RouteObject[] = [
       // Contracts
       {
         path: 'creer-contrat',
-        element: <CreateContract />,
+        element: (
+          <ProtectedRoute allowedRoles={[...PROPERTY_MANAGER_ROLES]}>
+            <CreateContract />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'creer-contrat/:propertyId',
-        element: <CreateContract />,
+        element: (
+          <ProtectedRoute allowedRoles={[...PROPERTY_MANAGER_ROLES]}>
+            <CreateContract />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'contrats',

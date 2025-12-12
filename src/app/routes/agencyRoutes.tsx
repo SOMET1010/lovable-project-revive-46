@@ -82,11 +82,19 @@ export const agencyRoutes: RouteObject[] = [
       },
       {
         path: 'creer-contrat',
-        element: <CreateContractPage />,
+        element: (
+          <ProtectedRoute allowedRoles={[...AGENCY_ROLES]}>
+            <CreateContractPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'creer-contrat/:propertyId',
-        element: <CreateContractPage />,
+        element: (
+          <ProtectedRoute allowedRoles={[...AGENCY_ROLES]}>
+            <CreateContractPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'messages',

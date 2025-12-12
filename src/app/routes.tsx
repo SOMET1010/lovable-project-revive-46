@@ -17,6 +17,7 @@ import {
   agencyRoutes,
   adminRoutes,
   trustAgentRoutes,
+  moderatorRoutes,
 } from './routes/index';
 
 // Lazy load AgencyProfilePage for /agence/profile route
@@ -90,6 +91,12 @@ export const routes: RouteObject[] = [
 
       // Trust Agent routes (nested with layout)
       trustAgentRoutes,
+
+      // Moderator routes under /moderator prefix
+      {
+        path: 'moderator',
+        children: moderatorRoutes,
+      },
 
       // Admin routes (nested with layout)
       adminRoutes,

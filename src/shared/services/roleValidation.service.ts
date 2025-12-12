@@ -154,14 +154,14 @@ export async function isResourceOwner(
       break;
     case 'contract':
       query = supabase
-        .from('contracts')
-        .select('tenant_id, property_id')
+        .from('lease_contracts')
+        .select('tenant_id, owner_id, property_id')
         .eq('id', resourceId)
         .single();
       break;
     case 'application':
       query = supabase
-        .from('applications')
+        .from('rental_applications')
         .select('tenant_id, property_id')
         .eq('id', resourceId)
         .single();
@@ -185,8 +185,26 @@ export async function isResourceOwner(
     return data.owner_id === user.id;
   }
 
-  // Pour les contrats et applications
-  if (resourceType === 'contract' || resourceType === 'application') {
+  // Pour les contrats
+  if (resourceType === 'contract') {
+    // Vérifier si l'utilisateur est le tenant
+    if (data.tenant_id === user.id) return true;
+
+    // Vérifier si l'utilisateur est le propriétaire direct du contrat
+    if (data.owner_id === user.id) return true;
+
+    // Vérifier si l'utilisateur est le propriétaire de la propriété
+    const { data: property } = await supabase
+      .from('properties')
+      .select('owner_id')
+      .eq('id', data.property_id)
+      .single();
+
+    return property?.owner_id === user.id;
+  }
+
+  // Pour les applications
+  if (resourceType === 'application') {
     // Vérifier si l'utilisateur est le tenant
     if (data.tenant_id === user.id) return true;
 
@@ -230,6 +248,38 @@ export function requireRole(allowedRoles: UserRole[]) {
       throw new Error(`Rôle requis: ${allowedRoles.join(' ou ')}`);
     }
   };
+}
+
+/**
+ * Vérifie si l'utilisateur peut gérer un contrat spécifique
+ */
+export async function canManageContract(contractId: string): Promise<boolean> {
+  // Vérifier la permission de base
+  const hasBasicPermission = await hasPermission('canManageContracts');
+  if (!hasBasicPermission) return false;
+
+  // Les admins peuvent gérer tous les contrats
+  const hasAccessAll = await hasPermission('canAccessAllContracts');
+  if (hasAccessAll) return true;
+
+  // Vérifier si l'utilisateur est partie prenante du contrat
+  return await isResourceOwner('contract', contractId);
+}
+
+/**
+ * Vérifie si l'utilisateur peut créer un contrat pour une propriété
+ */
+export async function canCreateContractForProperty(propertyId: string): Promise<boolean> {
+  // Vérifier la permission de base
+  const hasBasicPermission = await hasPermission('canManageContracts');
+  if (!hasBasicPermission) return false;
+
+  // Les admins peuvent créer des contrats pour n'importe quelle propriété
+  const hasAccessAll = await hasPermission('canAccessAllContracts');
+  if (hasAccessAll) return true;
+
+  // Vérifier si l'utilisateur est le propriétaire de la propriété
+  return await isResourceOwner('property', propertyId);
 }
 
 /**

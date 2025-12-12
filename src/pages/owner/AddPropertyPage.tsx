@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,7 +18,6 @@ import { NativeCameraUpload } from '@/components/native';
 import Modal from '@/shared/ui/Modal';
 import { supabase } from '@/services/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { getDashboardRoute } from '@/shared/utils/roleRoutes';
 import {
   RESIDENTIAL_PROPERTY_TYPES,
   COMMERCIAL_PROPERTY_TYPES,
@@ -31,7 +30,6 @@ import { useFormValidation } from '@/hooks/shared/useFormValidation';
 import { ValidatedInput } from '@/shared/ui/ValidatedInput';
 import { ValidatedTextarea } from '@/shared/ui/ValidatedTextarea';
 import type { Database } from '@/shared/lib/database.types';
-import { AGENCY_ROLES } from '@/shared/constants/roles';
 
 type PropertyType = Database['public']['Tables']['properties']['Row']['property_type'];
 
@@ -102,7 +100,7 @@ export default function AddProperty() {
 }
 
 export function AddPropertyContent() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
@@ -122,20 +120,10 @@ export function AddPropertyContent() {
   const { validateField, getFieldState, setFieldTouched } = useFormValidation<PropertyFormData>();
 
   const [formData, setFormData] = useState<PropertyFormData>(INITIAL_FORM_DATA);
-  const [loadingEdit, setLoadingEdit] = useState(false);
 
-  const location = useLocation();
   const [searchParams] = useSearchParams();
   const editPropertyId = searchParams.get('edit');
   const isEditMode = !!editPropertyId;
-  const userType = profile?.user_type?.toLowerCase();
-  const isAgencyUser = userType
-    ? (AGENCY_ROLES as readonly string[]).includes(userType) || userType === 'agency'
-    : false;
-  // Si l'utilisateur est une agence et que la route commence par /agences, le layout parent est déjà AgencyDashboardLayout
-  // On évite d'emboîter un deuxième layout avec sidebar.
-  const isAgencyRoute = location.pathname.startsWith('/agences');
-  const shouldUseLayout = !(isAgencyUser && isAgencyRoute);
   // Le layout est déjà géré par les routes, pas besoin d'encapsuler
 
   // Load draft from localStorage on mount - show confirmation modal
@@ -156,65 +144,72 @@ export function AddPropertyContent() {
     }
   }, []);
 
+  const loadPropertyData = useCallback(
+    async (propertyId: string) => {
+      if (!user) {
+        navigate('/connexion');
+        return;
+      }
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', propertyId)
+          .eq('owner_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('Error loading property:', error);
+          alert('Erreur lors du chargement de la propriété');
+          navigate('/proprietaire/mes-biens');
+          return;
+        }
+
+        if (data) {
+          const addressValue =
+            typeof data.address === 'string'
+              ? data.address
+              : ((data as unknown as { address?: { street?: string } })?.address?.street ?? '');
+
+          setFormData({
+            title: data.title || '',
+            description: data.description || '',
+            address: addressValue,
+            city: data.city || '',
+            neighborhood: data.neighborhood || '',
+            property_type: (data.property_type as PropertyType) || 'appartement',
+            property_category: toUiCategory(data.property_category),
+            bedrooms: data.bedrooms ?? 0,
+            bathrooms: data.bathrooms ?? 0,
+            surface_area: data.surface_area?.toString() || '',
+            monthly_rent: (data.monthly_rent ?? data.price ?? '').toString(),
+            deposit_amount: data.deposit_amount?.toString() || '',
+            charges_amount: data.charges_amount?.toString() || '',
+            has_parking: data.has_parking ?? false,
+            has_garden: data.has_garden ?? false,
+            is_furnished: data.is_furnished ?? false,
+            has_ac: data.has_ac ?? false,
+            is_anonymous: data.is_anonymous ?? false,
+          });
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Une erreur est survenue');
+        navigate('/proprietaire/mes-biens');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, navigate]
+  );
+
   // Load property data in edit mode
   useEffect(() => {
     if (isEditMode && editPropertyId) {
       loadPropertyData(editPropertyId);
     }
-  }, [isEditMode, editPropertyId]);
-
-  const loadPropertyData = async (propertyId: string) => {
-    setLoadingEdit(true);
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('id', propertyId)
-        .eq('owner_id', user?.id)
-        .single();
-
-      if (error) {
-        console.error('Error loading property:', error);
-        alert('Erreur lors du chargement de la propriété');
-        navigate('/proprietaire/mes-biens');
-        return;
-      }
-
-      if (data) {
-        const addressValue =
-          typeof data.address === 'string'
-            ? data.address
-            : (data as unknown as { address?: { street?: string } })?.address?.street ?? '';
-
-        setFormData({
-          title: data.title || '',
-          description: data.description || '',
-          address: addressValue,
-          city: data.city || '',
-          neighborhood: data.neighborhood || '',
-          property_type: (data.property_type as PropertyType) || 'appartement',
-          property_category: toUiCategory(data.property_category),
-          bedrooms: data.bedrooms ?? 0,
-          bathrooms: data.bathrooms ?? 0,
-          surface_area: data.surface_area?.toString() || '',
-          monthly_rent: (data.monthly_rent ?? data.price ?? '').toString(),
-          deposit_amount: data.deposit_amount?.toString() || '',
-          charges_amount: data.charges_amount?.toString() || '',
-          has_parking: data.has_parking ?? false,
-          has_garden: data.has_garden ?? false,
-          is_furnished: data.is_furnished ?? false,
-          has_ac: data.has_ac ?? false,
-          is_anonymous: data.is_anonymous ?? false,
-        });
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Une erreur est survenue');
-      navigate('/proprietaire/mes-biens');
-    } finally {
-      setLoadingEdit(false);
-    }
-  };
+  }, [isEditMode, editPropertyId, loadPropertyData]);
 
   // Save draft to localStorage with debounce
   const saveDraft = useCallback(() => {
@@ -428,7 +423,8 @@ export function AddPropertyContent() {
       const bedroomsValue = Number(formData.bedrooms);
       const bathroomsValue = Number(formData.bathrooms);
       const surfaceValue = formData.surface_area ? Number(formData.surface_area) : null;
-      const normalizedDeposit = depositValue === null || Number.isNaN(depositValue) ? null : depositValue;
+      const normalizedDeposit =
+        depositValue === null || Number.isNaN(depositValue) ? null : depositValue;
       const normalizedCharges = Number.isNaN(chargesValue) ? 0 : chargesValue;
       const normalizedSurface =
         surfaceValue === null || Number.isNaN(surfaceValue) ? null : surfaceValue;

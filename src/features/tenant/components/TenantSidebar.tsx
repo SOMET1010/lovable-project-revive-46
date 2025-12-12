@@ -14,6 +14,8 @@ import {
   X,
   Home,
   LogOut,
+  Folder,
+  Bell,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -39,6 +41,8 @@ const navItems = [
   { label: 'Mon Score', href: '/locataire/mon-score', icon: Award },
   { label: 'Historique Locations', href: '/locataire/profil/historique-locations', icon: Home },
   { label: 'Mes Favoris', href: '/locataire/favoris', icon: Heart },
+  { label: 'Mes Documents', href: '/locataire/documents', icon: Folder },
+  { label: 'Notifications', href: '/locataire/notifications', icon: Bell },
   { label: 'Messages', href: '/locataire/messages', icon: MessageSquare, hasBadge: true },
 ];
 
