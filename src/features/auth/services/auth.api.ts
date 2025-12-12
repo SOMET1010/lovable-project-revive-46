@@ -6,6 +6,8 @@
 
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
+import { hasPermission, requirePermission, requireRole, hasRole } from '@/shared/services/roleValidation.service';
+import { rateLimiter, getCurrentUserId } from '@/shared/services/rateLimiter.service';
 
 type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
 
@@ -32,9 +34,16 @@ export interface OTPVerificationData {
  */
 export const authApi = {
   /**
-   * Inscription d'un nouvel utilisateur
+   * Inscription d'un nouvel utilisateur (avec rate limiting)
    */
   signUp: async (data: SignUpData) => {
+    const identifier = await getCurrentUserId();
+    const rateLimitResult = await rateLimiter.checkLimit(identifier, 'auth:register');
+
+    if (!rateLimitResult.allowed) {
+      throw new Error(rateLimitResult.message || 'Trop de tentatives d\'inscription. Réessayez plus tard.');
+    }
+
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -53,9 +62,16 @@ export const authApi = {
   },
 
   /**
-   * Connexion d'un utilisateur
+   * Connexion d'un utilisateur (avec rate limiting)
    */
   signIn: async (data: SignInData) => {
+    const identifier = `email:${data.email}`;
+    const rateLimitResult = await rateLimiter.checkLimit(identifier, 'auth:login');
+
+    if (!rateLimitResult.allowed) {
+      throw new Error(rateLimitResult.message || 'Trop de tentatives de connexion. Réessayez plus tard.');
+    }
+
     const { data: authData, error } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
@@ -93,9 +109,16 @@ export const authApi = {
   },
 
   /**
-   * Envoie un email de réinitialisation de mot de passe
+   * Envoie un email de réinitialisation de mot de passe (avec rate limiting)
    */
   resetPassword: async (email: string) => {
+    const identifier = `email:${email}`;
+    const rateLimitResult = await rateLimiter.checkLimit(identifier, 'auth:reset-password');
+
+    if (!rateLimitResult.allowed) {
+      throw new Error(rateLimitResult.message || 'Trop de demandes de réinitialisation. Réessayez plus tard.');
+    }
+
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
@@ -157,6 +180,27 @@ export const authApi = {
    * Met à jour le profil d'un utilisateur
    */
   updateProfile: async (userId: string, updates: ProfileUpdate) => {
+    // Vérifier que l'utilisateur est autorisé à modifier ce profil
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Utilisateur non authentifié');
+
+    // Vérifier si l'utilisateur modifie son propre profil
+    if (user.id !== userId) {
+      // Si ce n'est pas son profil, vérifier qu'il a les permissions nécessaires
+      const canManageUsers = await hasPermission('canManageUsers');
+      if (!canManageUsers) {
+        throw new Error('Non autorisé à modifier ce profil');
+      }
+    }
+
+    // Empêcher la modification non autorisée du rôle
+    if (updates.user_type && user.id !== userId) {
+      const canManageUsers = await hasPermission('canManageUsers');
+      if (!canManageUsers) {
+        delete updates.user_type; // Supprimer la modification du rôle
+      }
+    }
+
     const { data, error } = await supabase
       .from('profiles')
       .update(updates)
@@ -169,9 +213,12 @@ export const authApi = {
   },
 
   /**
-   * Change le rôle actif d'un utilisateur
+   * Change le rôle actif d'un utilisateur (sécurisé)
    */
   switchRole: async (userId: string, newRole: string) => {
+    // Seuls les admins peuvent changer les rôles
+    await requireRole(['admin'])();
+
     const { data, error } = await supabase
       .from('profiles')
       .update({ user_type: newRole })

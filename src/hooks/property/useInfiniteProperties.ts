@@ -13,6 +13,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
 import { cacheService } from '@/shared/services/cacheService';
+import { enrichPropertiesWithOwners } from '@/features/property/services/property.api';
 
 type Property = Database['public']['Tables']['properties']['Row'];
 
@@ -74,13 +75,28 @@ export function useInfiniteProperties(
     [filters]
   );
 
-  // Charger le count total
+  // Charger le count total (uniquement propriétés avec propriétaire vérifié)
   const loadTotal = useCallback(async () => {
     try {
+      // Récupérer les IDs des profils vérifiés
+      const { data: verifiedProfiles, error: profilesError } = await supabase
+        .from('public_profiles_view')
+        .select('id')
+        .eq('is_verified', true);
+
+      if (profilesError) throw profilesError;
+
+      const verifiedOwnerIds = verifiedProfiles?.map((p) => p.id) || [];
+      if (verifiedOwnerIds.length === 0) {
+        setTotal(0);
+        return;
+      }
+
       let query = supabase
         .from('properties')
         .select('id', { count: 'exact', head: true })
-        .eq('status', 'disponible');
+        .eq('status', 'disponible')
+        .in('owner_id', verifiedOwnerIds);
 
       // Appliquer les filtres
       if (filters.propertyCategory) {
@@ -233,25 +249,33 @@ export function useInfiniteProperties(
 
         if (queryError) throw queryError;
 
-        const newProperties = data || [];
+        const rawProperties = data || [];
 
-        // Sauvegarder dans le cache
-        if (enableCache && newProperties.length > 0) {
-          cacheService.set(cacheKey, newProperties, cacheTTL);
+        // Enrichir avec les données du propriétaire et filtrer les propriétés vérifiées
+        const enrichedProperties = await enrichPropertiesWithOwners(rawProperties);
+        const verifiedProperties = enrichedProperties.filter((p) => p.owner_is_verified === true);
+
+        // Sauvegarder dans le cache (on stocke les propriétés enrichies vérifiées)
+        if (enableCache && verifiedProperties.length > 0) {
+          cacheService.set(cacheKey, verifiedProperties, cacheTTL);
         }
 
         // Mettre à jour l'état
         if (append) {
-          setProperties((prev) => [...prev, ...newProperties]);
+          setProperties((prev) => [...prev, ...verifiedProperties]);
         } else {
-          setProperties(newProperties);
+          setProperties(verifiedProperties);
         }
 
-        setHasMore(newProperties.length === pageSize);
+        // Déterminer s'il y a plus de propriétés à charger
+        // Si le nombre de propriétés brutes récupérées est inférieur à pageSize, c'est qu'il n'y a plus de données côté serveur
+        // Mais même si rawProperties.length === pageSize, il se peut que verifiedProperties.length < pageSize.
+        // On considère qu'il y a plus de données si rawProperties.length === pageSize (car il pourrait y avoir des propriétés vérifiées dans la page suivante)
+        setHasMore(rawProperties.length === pageSize);
         setCurrentPage(page);
 
         // Précharger la page suivante
-        if (newProperties.length === pageSize) {
+        if (rawProperties.length === pageSize) {
           // Nettoyer le timeout précédent s'il existe
           if (preloadTimeoutRef.current) {
             clearTimeout(preloadTimeoutRef.current);
@@ -267,10 +291,16 @@ export function useInfiniteProperties(
             }
           }, 1000);
         }
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== 'AbortError') {
           console.error('Error loading properties:', err);
           setError(err);
+        } else if (err instanceof Error) {
+          console.error('Error loading properties:', err);
+          setError(err);
+        } else {
+          console.error('Unknown error loading properties:', err);
+          setError(new Error('Unknown error'));
         }
       } finally {
         setLoading(false);

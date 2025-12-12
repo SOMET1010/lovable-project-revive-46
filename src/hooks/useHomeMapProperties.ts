@@ -1,6 +1,58 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface PublicProfile {
+  user_id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  trust_score: number | null;
+  is_verified: boolean | null;
+  city: string | null;
+  oneci_verified: boolean | null;
+  cnam_verified: boolean | null;
+}
+
+const fetchOwnerProfiles = async (ownerIds: string[]): Promise<Map<string, PublicProfile>> => {
+  const uniqueIds = [...new Set(ownerIds.filter(Boolean))];
+  if (uniqueIds.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from('public_profiles_view')
+    .select('*')
+    .in('id', uniqueIds);
+
+  if (error) {
+    console.error('Error fetching owner profiles:', error);
+    return new Map();
+  }
+
+  const profileMap = new Map<string, PublicProfile>();
+  (data || []).forEach((profile: unknown) => {
+    const p = profile as {
+      id: string;
+      full_name: string | null;
+      avatar_url: string | null;
+      trust_score: number | null;
+      is_verified: boolean | null;
+      city: string | null;
+      oneci_verified: boolean | null;
+      cnam_verified: boolean | null;
+    };
+    profileMap.set(p.id, {
+      user_id: p.id,
+      full_name: p.full_name,
+      avatar_url: p.avatar_url,
+      trust_score: p.trust_score,
+      is_verified: p.is_verified,
+      city: p.city,
+      oneci_verified: p.oneci_verified,
+      cnam_verified: p.cnam_verified,
+    });
+  });
+
+  return profileMap;
+};
+
 interface MapProperty {
   id: string;
   title: string;
@@ -42,7 +94,7 @@ export function useHomeMapProperties() {
       let query = supabase
         .from('properties')
         .select(
-          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status'
+          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status, owner_id'
         )
         .eq('status', 'disponible')
         .not('latitude', 'is', null) // `not.is.null` is the PostgREST form
@@ -65,7 +117,8 @@ export function useHomeMapProperties() {
 
       if (fetchError) throw fetchError;
 
-      const validProperties: MapProperty[] = (data || [])
+      // Map properties with owner_id
+      const propertiesWithOwner = (data || [])
         .filter((p) => p.latitude !== null && p.longitude !== null)
         .map((p) => ({
           id: p.id,
@@ -80,7 +133,37 @@ export function useHomeMapProperties() {
           bedrooms: p.bedrooms_count, // colonne bedrooms_count
           surface_area: p.surface_area,
           status: p.status,
+          owner_id: p.owner_id,
         }));
+
+      // Collect owner IDs
+      const ownerIds = propertiesWithOwner.map((p) => p.owner_id).filter(Boolean);
+      const ownerProfiles = await fetchOwnerProfiles(ownerIds);
+
+      // Filter properties where owner is verified
+      const verifiedProperties = propertiesWithOwner.filter((p) => {
+        const profile = ownerProfiles.get(p.owner_id);
+        return profile?.is_verified === true;
+      });
+
+      console.log('useHomeMapProperties: raw properties count', propertiesWithOwner.length);
+      console.log('useHomeMapProperties: verified properties count', verifiedProperties.length);
+
+      // Convert to MapProperty (without owner_id)
+      const validProperties: MapProperty[] = verifiedProperties.map((p) => ({
+        id: p.id,
+        title: p.title,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        monthly_rent: p.monthly_rent,
+        property_type: p.property_type,
+        city: p.city,
+        neighborhood: p.neighborhood,
+        main_image: p.main_image,
+        bedrooms: p.bedrooms,
+        surface_area: p.surface_area,
+        status: p.status,
+      }));
 
       setProperties(validProperties);
       setTotalCount(validProperties.length);
@@ -100,7 +183,7 @@ export function useHomeMapProperties() {
       let query = supabase
         .from('properties')
         .select(
-          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status'
+          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status, owner_id'
         )
         .eq('status', 'disponible')
         .not('latitude', 'is', null) // `not.is.null` is the PostgREST form
@@ -118,7 +201,8 @@ export function useHomeMapProperties() {
 
       if (fetchError) throw fetchError;
 
-      const validProperties: MapProperty[] = (data || [])
+      // Map properties with owner_id
+      const propertiesWithOwner = (data || [])
         .filter((p) => p.latitude !== null && p.longitude !== null)
         .map((p) => ({
           id: p.id,
@@ -133,7 +217,34 @@ export function useHomeMapProperties() {
           bedrooms: p.bedrooms_count, // colonne bedrooms_count
           surface_area: p.surface_area,
           status: p.status,
+          owner_id: p.owner_id,
         }));
+
+      // Collect owner IDs
+      const ownerIds = propertiesWithOwner.map((p) => p.owner_id).filter(Boolean);
+      const ownerProfiles = await fetchOwnerProfiles(ownerIds);
+
+      // Filter properties where owner is verified
+      const verifiedProperties = propertiesWithOwner.filter((p) => {
+        const profile = ownerProfiles.get(p.owner_id);
+        return profile?.is_verified === true;
+      });
+
+      // Convert to MapProperty (without owner_id)
+      const validProperties: MapProperty[] = verifiedProperties.map((p) => ({
+        id: p.id,
+        title: p.title,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        monthly_rent: p.monthly_rent,
+        property_type: p.property_type,
+        city: p.city,
+        neighborhood: p.neighborhood,
+        main_image: p.main_image,
+        bedrooms: p.bedrooms,
+        surface_area: p.surface_area,
+        status: p.status,
+      }));
 
       setProperties(validProperties);
       setTotalCount(validProperties.length);

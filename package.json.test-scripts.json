@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "test:security": "vitest --config vitest.security.config.ts",
+    "test:security:watch": "vitest --config vitest.security.config.ts --watch",
+    "test:security:coverage": "vitest --config vitest.security.config.ts --coverage",
+    "test:security:ui": "vitest --config vitest.security.config.ts --ui",
+    "test:security:run": "vitest --config vitest.security.config.ts --run",
+    "test:security:report": "vitest --config vitest.security.config.ts --reporter=html --outputFile=security-report.html",
+    "test:integration:security": "vitest --config vitest.security.config.ts src/tests/security.integration.test.ts",
+    "test:penetration": "node src/tests/penetration-test.js",
+    "test:security:all": "npm run test:security:run && npm run test:integration:security && npm run test:penetration"
+  }
+}

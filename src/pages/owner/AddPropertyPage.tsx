@@ -437,44 +437,40 @@ export function AddPropertyContent() {
         throw new Error('Le loyer est invalide');
       }
 
+      // Convert address to JSONB format
+      const addressJson = formData.address ? { street: formData.address } : {};
+
       const propertyData = {
         owner_id: user.id,
         title: formData.title,
-        description: formData.description,
-        address: formData.address,
-        city: formData.city,
+        description: formData.description || null,
+        address: addressJson,
+        city: formData.city || null,
         neighborhood: formData.neighborhood || null,
         property_type: formData.property_type,
-        property_category: formData.property_category || 'residential',
-        bedrooms: formData.bedrooms || 0,
-        bathrooms: formData.bathrooms || 0,
+        property_category:
+          formData.property_category === 'commercial' ? 'commercial' : 'residentiel',
+        bedrooms_count: formData.bedrooms || 0,
+        bathrooms_count: formData.bathrooms || 0,
         surface_area: formData.surface_area ? parseFloat(formData.surface_area) : null,
-        monthly_rent: monthlyRentValue,
+        price: monthlyRentValue, // column is 'price' not 'monthly_rent'
         deposit_amount: depositValue,
-        charges: chargesValue,
-        available_from: formData.available_from || null,
-        amenities: formData.amenities || [],
-        images: formData.images || [],
-        furnished: formData.furnished || false,
-        allowed_occupants: formData.allowed_occupants ? parseInt(formData.allowed_occupants) : null,
-        floor_level: formData.floor_level ? parseInt(formData.floor_level) : null,
-        total_floors: formData.total_floors ? parseInt(formData.total_floors) : null,
-        construction_year: formData.construction_year ? parseInt(formData.construction_year) : null,
-        has_elevator: formData.has_elevator || false,
+        charges_amount: chargesValue,
         has_parking: formData.has_parking || false,
-        has_balcony: formData.has_balcony || false,
-        has_terrace: formData.has_terrace || false,
         has_garden: formData.has_garden || false,
-        has_pool: formData.has_pool || false,
-        has_air_conditioning: formData.has_air_conditioning || false,
-        security_features: formData.security_features || [],
-        nearby_amenities: formData.nearby_amenities || [],
-        transport_options: formData.transport_options || [],
-        energy_rating: formData.energy_rating || null,
-        access_requirements: formData.access_requirements || [],
-        rental_conditions: formData.rental_conditions || '',
-        show_contact_form: formData.show_contact_form ?? true,
-        status: formData.status || 'available',
+        furnished: formData.is_furnished || false,
+        has_ac: formData.has_ac || false,
+        is_anonymous: formData.is_anonymous || false,
+        status: 'disponible' as const,
+        // Default values for other required fields
+        rooms_count: formData.bedrooms || 0,
+        charges_included: chargesValue > 0,
+        is_public: true,
+        is_verified: false,
+        featured: false,
+        views_count: 0,
+        favorites_count: 0,
+        applications_count: 0,
       };
 
       let data, error;
@@ -493,18 +489,17 @@ export function AddPropertyContent() {
         error = result.error;
       } else {
         // Create new property
-        const result = await supabase
-          .from('properties')
-          .insert(propertyData)
-          .select()
-          .single();
+        const result = await supabase.from('properties').insert(propertyData).select().single();
 
         data = result.data;
         error = result.error;
       }
 
       if (error) throw error;
-      if (!data) throw new Error(`Erreur lors de ${isEditMode ? 'la mise à jour' : 'la création'} de la propriété`);
+      if (!data)
+        throw new Error(
+          `Erreur lors de ${isEditMode ? 'la mise à jour' : 'la création'} de la propriété`
+        );
 
       if (imageFiles.length > 0) {
         setUploadingImages(true);
@@ -736,8 +731,7 @@ export function AddPropertyContent() {
           <p style={{ color: 'var(--color-gris-texte)' }}>
             {isEditMode
               ? 'Modifiez les informations de votre propriété'
-              : 'Remplissez les informations de votre propriété pour la publier sur Mon Toit'
-            }
+              : 'Remplissez les informations de votre propriété pour la publier sur Mon Toit'}
           </p>
         </div>
 
@@ -1347,11 +1341,18 @@ export function AddPropertyContent() {
                   {loading || uploadingImages ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>{uploadingImages ? 'Upload des images...' : (isEditMode ? 'Mise à jour...' : 'Publication...')}</span>
+                      <span>
+                        {uploadingImages
+                          ? 'Upload des images...'
+                          : isEditMode
+                            ? 'Mise à jour...'
+                            : 'Publication...'}
+                      </span>
                     </>
                   ) : (
                     <>
-                      <Check className="w-5 h-5" /> {isEditMode ? 'Mettre à jour l\'annonce' : 'Publier l\'annonce'}
+                      <Check className="w-5 h-5" />{' '}
+                      {isEditMode ? "Mettre à jour l'annonce" : "Publier l'annonce"}
                     </>
                   )}
                 </button>

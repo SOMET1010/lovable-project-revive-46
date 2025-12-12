@@ -13,6 +13,7 @@ import { withErrorHandling } from '@/integrations/supabase/error-handler';
 import { cacheService } from '@/shared/services/cacheService';
 import type { Database } from '@/shared/lib/database.types';
 import type { PropertyWithOwnerScore } from '../types';
+import { requirePermission, requireOwnership } from '@/shared/services/roleValidation.service';
 
 type PropertyInsert = Database['public']['Tables']['properties']['Insert'];
 type PropertyUpdate = Database['public']['Tables']['properties']['Update'];
@@ -23,6 +24,18 @@ const CACHE_PREFIX = 'properties_';
 // Type pour les données publiques du propriétaire retournées par get_public_profile
 interface PublicProfile {
   user_id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  trust_score: number | null;
+  is_verified: boolean | null;
+  city: string | null;
+  oneci_verified: boolean | null;
+  cnam_verified: boolean | null;
+}
+
+// Type pour les lignes de la vue public_profiles_view
+interface PublicProfileRow {
+  id: string;
   full_name: string | null;
   avatar_url: string | null;
   trust_score: number | null;
@@ -63,7 +76,7 @@ const fetchOwnerProfiles = async (ownerIds: string[]): Promise<Map<string, Publi
   }
 
   const profileMap = new Map<string, PublicProfile>();
-  (data || []).forEach((profile: any) => {
+  ((data as PublicProfileRow[]) || []).forEach((profile) => {
     profileMap.set(profile.id, {
       user_id: profile.id,
       full_name: profile.full_name,
@@ -82,7 +95,7 @@ const fetchOwnerProfiles = async (ownerIds: string[]): Promise<Map<string, Publi
 /**
  * Enrichit les propriétés avec les données publiques des propriétaires
  */
-const enrichPropertiesWithOwners = async (
+export const enrichPropertiesWithOwners = async (
   properties: Database['public']['Tables']['properties']['Row'][]
 ): Promise<PropertyWithOwnerScore[]> => {
   const ownerIds = properties.map((p) => p.owner_id).filter((id): id is string => id !== null);
@@ -303,9 +316,12 @@ export const propertyApi = {
   },
 
   /**
-   * Crée une nouvelle propriété et invalide le cache
+   * Crée une nouvelle propriété et invalide le cache (sécurisé)
    */
   create: async (property: PropertyInsert) => {
+    // Vérifier que l'utilisateur a la permission de créer une propriété
+    await requirePermission('canCreateProperty')();
+
     const { data, error } = await supabase.from('properties').insert(property).select().single();
 
     if (error) throw error;
@@ -316,9 +332,13 @@ export const propertyApi = {
   },
 
   /**
-   * Met à jour une propriété et invalide le cache
+   * Met à jour une propriété et invalide le cache (sécurisé)
    */
   update: async (id: string, updates: PropertyUpdate) => {
+    // Vérifier la permission ET la propriété
+    await requirePermission('canEditProperty')();
+    await requireOwnership('property')(id);
+
     const { data, error } = await supabase
       .from('properties')
       .update(updates)
@@ -335,9 +355,13 @@ export const propertyApi = {
   },
 
   /**
-   * Supprime une propriété et invalide le cache
+   * Supprime une propriété et invalide le cache (sécurisé)
    */
   delete: async (id: string) => {
+    // Vérifier la permission ET la propriété
+    await requirePermission('canDeleteProperty')();
+    await requireOwnership('property')(id);
+
     const { error } = await supabase.from('properties').delete().eq('id', id);
 
     if (error) throw error;

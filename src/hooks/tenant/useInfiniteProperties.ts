@@ -6,6 +6,7 @@ type Property = Database['public']['Tables']['properties']['Row'];
 type PropertyWithScore = Property & {
   owner_trust_score?: number | null;
   owner_full_name?: string | null;
+  owner_is_verified?: boolean | null;
 };
 
 interface UseInfinitePropertiesOptions {
@@ -96,7 +97,12 @@ export function useInfiniteProperties(
       const uniqueOwnerIds = [...new Set(ownerIds)];
 
       if (uniqueOwnerIds.length === 0) {
-        return data.map((p) => ({ ...p, owner_trust_score: null, owner_full_name: null }));
+        return data.map((p) => ({
+          ...p,
+          owner_trust_score: null,
+          owner_full_name: null,
+          owner_is_verified: null,
+        }));
       }
 
       const { data: profilesData } = await supabase.rpc('get_public_profiles', {
@@ -105,13 +111,19 @@ export function useInfiniteProperties(
 
       const ownerProfiles = new Map<
         string,
-        { trust_score: number | null; full_name: string | null }
+        { trust_score: number | null; full_name: string | null; is_verified: boolean | null }
       >();
       (profilesData || []).forEach(
-        (profile: { user_id: string; trust_score: number | null; full_name: string | null }) => {
+        (profile: {
+          user_id: string;
+          trust_score: number | null;
+          full_name: string | null;
+          is_verified: boolean | null;
+        }) => {
           ownerProfiles.set(profile.user_id, {
             trust_score: profile.trust_score,
             full_name: profile.full_name,
+            is_verified: profile.is_verified,
           });
         }
       );
@@ -122,6 +134,7 @@ export function useInfiniteProperties(
           ...p,
           owner_trust_score: owner?.trust_score ?? null,
           owner_full_name: owner?.full_name ?? null,
+          owner_is_verified: owner?.is_verified ?? null,
         };
       });
     },
@@ -142,7 +155,30 @@ export function useInfiniteProperties(
       setError(null);
 
       try {
-        const query = buildQuery();
+        // Récupérer les IDs des propriétaires vérifiés
+        const { data: verifiedProfiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('is_verified', true);
+
+        if (profilesError) throw profilesError;
+
+        const verifiedOwnerIds = verifiedProfiles?.map((p) => p.id) || [];
+        console.log('useInfiniteProperties: verifiedOwnerIds count', verifiedOwnerIds.length);
+
+        let query = buildQuery();
+        // Filtrer par propriétaires vérifiés si la liste n'est pas vide
+        if (verifiedOwnerIds.length > 0) {
+          query = query.in('owner_id', verifiedOwnerIds);
+        } else {
+          // Aucun propriétaire vérifié, donc aucune propriété à afficher
+          console.log('useInfiniteProperties: aucun propriétaire vérifié');
+          setProperties([]);
+          setTotalCount(0);
+          setHasMore(false);
+          return;
+        }
+
         const orderColumn =
           sortBy === 'price_asc' || sortBy === 'price_desc' ? 'price' : 'created_at';
         const ascending = sortBy === 'price_asc';
@@ -170,20 +206,28 @@ export function useInfiniteProperties(
         }
 
         const enrichedData = await enrichWithOwnerData(data || []);
+        // Filtrer une seconde fois pour s'assurer (au cas où la jointure échoue)
+        const verifiedProperties = enrichedData.filter((p) => p.owner_is_verified === true);
+        console.log('useInfiniteProperties: raw data count', data?.length || 0);
+        console.log('useInfiniteProperties: enriched count', enrichedData.length);
+        console.log('useInfiniteProperties: verified count', verifiedProperties.length);
+        console.log('useInfiniteProperties: count from query', count);
         const currentTotal = count || 0;
 
         if (isLoadMore) {
           setProperties((prev) => {
-            const newTotal = prev.length + enrichedData.length;
+            const newTotal = prev.length + verifiedProperties.length;
             // Update hasMore based on actual fetched count vs total
-            setHasMore(newTotal < currentTotal && enrichedData.length === pageSize);
-            return [...prev, ...enrichedData];
+            setHasMore(newTotal < currentTotal && verifiedProperties.length === pageSize);
+            return [...prev, ...verifiedProperties];
           });
         } else {
-          setProperties(enrichedData);
+          setProperties(verifiedProperties);
           setTotalCount(currentTotal);
           // hasMore is true only if we got a full page AND there's more data
-          setHasMore(enrichedData.length === pageSize && enrichedData.length < currentTotal);
+          setHasMore(
+            verifiedProperties.length === pageSize && verifiedProperties.length < currentTotal
+          );
         }
 
         pageRef.current = page;
