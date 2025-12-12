@@ -179,7 +179,7 @@ export default function PhotoVerificationPage() {
 
       {/* Header */}
       <header className="bg-card border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
@@ -203,7 +203,7 @@ export default function PhotoVerificationPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         {/* Status Banner */}
         <Card className={`mb-6 ${requiredCompleted ? 'border-green-500' : 'border-amber-500'}`}>
           <CardContent className="py-4">

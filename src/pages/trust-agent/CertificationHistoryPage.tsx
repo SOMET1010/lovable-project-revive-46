@@ -126,7 +126,7 @@ export default function CertificationHistoryPage() {
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Historique des Certifications" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
@@ -206,15 +206,15 @@ export default function CertificationHistoryPage() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="all" className="gap-2">
+            <TabsTrigger value="all" className="flex items-center justify-center gap-2">
               <Filter className="h-4 w-4" />
               Toutes ({stats.total})
             </TabsTrigger>
-            <TabsTrigger value="users" className="gap-2">
+            <TabsTrigger value="users" className="flex items-center justify-center gap-2">
               <UserCheck className="h-4 w-4" />
               Utilisateurs ({stats.users})
             </TabsTrigger>
-            <TabsTrigger value="properties" className="gap-2">
+            <TabsTrigger value="properties" className="flex items-center justify-center gap-2">
               <Home className="h-4 w-4" />
               Propriétés ({stats.properties})
             </TabsTrigger>

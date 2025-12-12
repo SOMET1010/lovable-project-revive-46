@@ -232,7 +232,7 @@ export default function PropertyCertificationPage() {
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Certification Propriétés ANSUT" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Properties List */}
           <div className="lg:col-span-1 space-y-4">

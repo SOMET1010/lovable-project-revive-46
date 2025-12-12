@@ -90,7 +90,7 @@ export default function CalendarPage() {
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Calendrier des Missions" />
 
-      <main className="container mx-auto px-4 py-6">
+      <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
         {/* Header with back link and add button */}
         <div className="flex items-center justify-between mb-4">
           <Link to="/trust-agent/dashboard">

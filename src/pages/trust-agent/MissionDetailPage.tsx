@@ -185,7 +185,7 @@ export default function MissionDetailPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
@@ -209,7 +209,7 @@ export default function MissionDetailPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">

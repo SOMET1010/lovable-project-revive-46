@@ -23,6 +23,12 @@ const PropertyCertification = lazyWithRetry(
 const CertificationHistory = lazyWithRetry(
   () => import('@/pages/trust-agent/CertificationHistoryPage')
 );
+const CertifiedUsersList = lazyWithRetry(
+  () => import('@/pages/trust-agent/CertifiedUsersListPage')
+);
+const UserCertificationDetails = lazyWithRetry(
+  () => import('@/pages/trust-agent/UserCertificationDetailsPage')
+);
 
 export const trustAgentRoutes: RouteObject = {
   path: 'trust-agent',
@@ -40,7 +46,9 @@ export const trustAgentRoutes: RouteObject = {
     { path: 'photos/:id', element: <PhotoVerification /> },
     { path: 'documents/:id', element: <DocumentValidation /> },
     { path: 'etat-des-lieux/:id', element: <EtatDesLieux /> },
-    { path: 'certifications/users', element: <UserCertification /> },
+    { path: 'certifications/users', element: <CertifiedUsersList /> },
+    { path: 'certifications/users/certify', element: <UserCertification /> },
+    { path: 'certification/:id', element: <UserCertificationDetails /> },
     { path: 'certifications/properties', element: <PropertyCertification /> },
     { path: 'history', element: <CertificationHistory /> },
   ],

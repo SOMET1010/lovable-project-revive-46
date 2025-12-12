@@ -164,7 +164,7 @@ export default function UserCertificationPage() {
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Certification Utilisateurs" />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         {/* Search Section */}
         <Card className="mb-8">
           <CardHeader>

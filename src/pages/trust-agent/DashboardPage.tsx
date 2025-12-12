@@ -130,7 +130,7 @@ export default function TrustAgentDashboardPage() {
     <div className="min-h-screen bg-background">
       <TrustAgentHeader title="Dashboard Agent" />
 
-      <main className="w-full px-4 lg:px-8 xl:px-12 py-8">
+      <main className="w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-card">

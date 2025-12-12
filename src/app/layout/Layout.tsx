@@ -60,6 +60,9 @@ const agencySidebarPrefixes = [
   '/mandat',
 ];
 
+// Routes avec layout dédié pour trust agent
+const trustAgentSidebarPrefixes = ['/trust-agent'];
+
 // Map routes to skeleton variants
 function getSkeletonVariant(path: string): 'default' | 'dashboard' | 'property' | 'list' | 'form' {
   if (path.includes('dashboard') || path.includes('tableau-de-bord')) return 'dashboard';
@@ -79,7 +82,11 @@ export default function Layout() {
   const isTenantSidebarRoute = tenantSidebarPrefixes.some((prefix) => path.startsWith(prefix));
   const isOwnerSidebarRoute = ownerSidebarPrefixes.some((prefix) => path.startsWith(prefix));
   const isAgencySidebarRoute = agencySidebarPrefixes.some((prefix) => path.startsWith(prefix));
-  const isAnySidebarRoute = isTenantSidebarRoute || isOwnerSidebarRoute || isAgencySidebarRoute;
+  const isTrustAgentSidebarRoute = trustAgentSidebarPrefixes.some((prefix) =>
+    path.startsWith(prefix)
+  );
+  const isAnySidebarRoute =
+    isTenantSidebarRoute || isOwnerSidebarRoute || isAgencySidebarRoute || isTrustAgentSidebarRoute;
   const shouldShowBreadcrumb =
     !noBreadcrumbRoutes.some((route) => path.startsWith(route)) &&
     !isAnySidebarRoute &&
@@ -91,7 +98,7 @@ export default function Layout() {
   const skeletonVariant = getSkeletonVariant(path);
 
   // Si c'est une route avec layout dédié (agence, tenant, admin), laisser le composant gérer son propre layout
-  if (!shouldShowLayout || isAgencySidebarRoute || isTenantSidebarRoute) {
+  if (!shouldShowLayout || isAgencySidebarRoute || isTenantSidebarRoute || isTrustAgentSidebarRoute) {
     return (
       <ErrorBoundary>
         <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>

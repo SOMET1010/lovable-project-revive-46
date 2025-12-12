@@ -140,7 +140,7 @@ export default function EtatDesLieuxPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card border-b sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button
@@ -170,7 +170,7 @@ export default function EtatDesLieuxPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
         {/* Type & Date */}
         <Card className="mb-6">
           <CardContent className="pt-6">
