@@ -65,12 +65,6 @@ export default function MakePayment() {
     mobile_money_number: '',
   });
 
-  useEffect(() => {
-    if (user) {
-      loadUserContracts();
-    }
-  }, [user]);
-
   const loadUserContracts = async () => {
     if (!user) return;
 
@@ -84,7 +78,15 @@ export default function MakePayment() {
 
       if (contractsError) throw contractsError;
 
-      const formattedContracts: Contract[] = (contractsData || []).map((contract: any) => ({
+      interface ContractRow {
+        id: string;
+        property_id: string;
+        monthly_rent: number;
+        deposit_amount: number | null;
+        owner_id: string;
+      }
+
+      const formattedContracts: Contract[] = (contractsData || []).map((contract: ContractRow) => ({
         id: contract.id,
         property_id: contract.property_id,
         monthly_rent: contract.monthly_rent,
@@ -113,7 +115,7 @@ export default function MakePayment() {
       }
 
       setContracts(formattedContracts);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading contracts:', err);
       setError('Erreur lors du chargement des contrats');
     } finally {
@@ -200,13 +202,19 @@ export default function MakePayment() {
       setTimeout(() => {
         navigate('/mes-paiements');
       }, 2000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error processing payment:', err);
-      setError(err.message || 'Erreur lors du traitement du paiement');
+      setError(err instanceof Error ? err.message : 'Erreur lors du traitement du paiement');
     } finally {
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      loadUserContracts();
+    }
+  }, [user, loadUserContracts]);
 
   if (!user) {
     return (
@@ -227,8 +235,8 @@ export default function MakePayment() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-[#FAF7F4] pt-20 pb-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full min-h-screen bg-[#FAF7F4] pt-20 pb-12">
+        <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header Premium Ivorian */}
           <div className="mb-8">
             <button
@@ -399,7 +407,11 @@ export default function MakePayment() {
                             <button
                               key={type.value}
                               type="button"
-                              onClick={() => handlePaymentTypeChange(type.value as any)}
+                              onClick={() =>
+                                handlePaymentTypeChange(
+                                  type.value as PaymentFormData['payment_type']
+                                )
+                              }
                               className={`p-4 border-2 rounded-xl text-left transition-all ${
                                 formData.payment_type === type.value
                                   ? 'border-[#F16522] bg-[#F16522]/10'
@@ -492,7 +504,8 @@ export default function MakePayment() {
                               onChange={(e) =>
                                 setFormData({
                                   ...formData,
-                                  mobile_money_provider: e.target.value as any,
+                                  mobile_money_provider: e.target
+                                    .value as PaymentFormData['mobile_money_provider'],
                                 })
                               }
                               className="form-input-premium mt-2"

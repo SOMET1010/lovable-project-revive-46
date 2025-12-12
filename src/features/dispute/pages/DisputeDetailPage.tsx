@@ -4,15 +4,15 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Button, Textarea } from '@/shared/ui';
 import { toast } from 'sonner';
-import { 
-  ArrowLeft, 
-  Send, 
-  Clock, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Send,
+  Clock,
+  CheckCircle,
   MessageSquare,
   User,
   Star,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -51,7 +51,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: str
   mediation: { label: 'En médiation', color: 'text-orange-800', bgColor: 'bg-orange-100' },
   resolved: { label: 'Résolu', color: 'text-green-800', bgColor: 'bg-green-100' },
   escalated: { label: 'Escaladé', color: 'text-red-800', bgColor: 'bg-red-100' },
-  closed: { label: 'Fermé', color: 'text-gray-800', bgColor: 'bg-gray-100' }
+  closed: { label: 'Fermé', color: 'text-gray-800', bgColor: 'bg-gray-100' },
 };
 
 export default function DisputeDetailPage() {
@@ -62,32 +62,19 @@ export default function DisputeDetailPage() {
 
   const [dispute, setDispute] = useState<Dispute | null>(null);
   const [messages, setMessages] = useState<DisputeMessage[]>([]);
-  const [profiles, setProfiles] = useState<Record<string, { full_name: string; avatar_url: string | null }>>({});
+  const [profiles, setProfiles] = useState<
+    Record<string, { full_name: string; avatar_url: string | null }>
+  >({});
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [showRating, setShowRating] = useState(false);
   const [rating, setRating] = useState(0);
 
-  useEffect(() => {
-    if (id && user) {
-      loadDispute();
-      loadMessages();
-    }
-  }, [id, user]);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
   const loadDispute = async () => {
     if (!id) return;
-    
-    const { data, error } = await supabase
-      .from('disputes')
-      .select('*')
-      .eq('id', id)
-      .single();
+
+    const { data, error } = await supabase.from('disputes').select('*').eq('id', id).single();
 
     if (error) {
       console.error('Erreur chargement litige:', error);
@@ -97,20 +84,22 @@ export default function DisputeDetailPage() {
     }
 
     setDispute(data);
-    
+
     // Load profiles
     const userIds = [data.complainant_id, data.respondent_id];
     if (data.assigned_agent_id) userIds.push(data.assigned_agent_id);
 
     const { data: profilesData } = await supabase.rpc('get_public_profiles_safe', {
-      profile_user_ids: userIds
+      profile_user_ids: userIds,
     });
 
     if (profilesData) {
       const profilesMap: Record<string, { full_name: string; avatar_url: string | null }> = {};
-      profilesData.forEach((p: { user_id: string; full_name: string; avatar_url: string | null }) => {
-        profilesMap[p.user_id] = { full_name: p.full_name, avatar_url: p.avatar_url };
-      });
+      profilesData.forEach(
+        (p: { user_id: string; full_name: string; avatar_url: string | null }) => {
+          profilesMap[p.user_id] = { full_name: p.full_name, avatar_url: p.avatar_url };
+        }
+      );
       setProfiles(profilesMap);
     }
 
@@ -138,6 +127,17 @@ export default function DisputeDetailPage() {
     }
   };
 
+  useEffect(() => {
+    if (id && user) {
+      loadDispute();
+      loadMessages();
+    }
+  }, [id, user, loadDispute, loadMessages]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !user || !dispute) return;
 
@@ -145,15 +145,13 @@ export default function DisputeDetailPage() {
     const isComplainant = dispute.complainant_id === user.id;
 
     try {
-      const { error } = await supabase
-        .from('dispute_messages')
-        .insert({
-          dispute_id: dispute.id,
-          sender_id: user.id,
-          sender_role: isComplainant ? 'complainant' : 'respondent',
-          content: newMessage.trim(),
-          is_internal: false
-        });
+      const { error } = await supabase.from('dispute_messages').insert({
+        dispute_id: dispute.id,
+        sender_id: user.id,
+        sender_role: isComplainant ? 'complainant' : 'respondent',
+        content: newMessage.trim(),
+        is_internal: false,
+      });
 
       if (error) throw error;
 
@@ -161,7 +159,7 @@ export default function DisputeDetailPage() {
       loadMessages();
     } catch (error) {
       console.error('Erreur envoi message:', error);
-      toast.error('Erreur lors de l\'envoi du message');
+      toast.error("Erreur lors de l'envoi du message");
     } finally {
       setIsSending(false);
     }
@@ -218,14 +216,10 @@ export default function DisputeDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F4]">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="w-full mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/mes-litiges')}
-            className="mb-4"
-          >
+          <Button variant="ghost" onClick={() => navigate('/mes-litiges')} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Retour aux litiges
           </Button>
@@ -237,7 +231,9 @@ export default function DisputeDetailPage() {
                   <span className="text-sm font-mono text-muted-foreground">
                     {dispute.dispute_number}
                   </span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig?.bgColor ?? ''} ${statusConfig?.color ?? ''}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${statusConfig?.bgColor ?? ''} ${statusConfig?.color ?? ''}`}
+                  >
                     {statusConfig?.label ?? 'Inconnu'}
                   </span>
                   {dispute.priority === 'urgent' && (
@@ -255,7 +251,11 @@ export default function DisputeDetailPage() {
             <div className="flex flex-wrap gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted-foreground" />
-                <span>Créé le {dispute.created_at && format(new Date(dispute.created_at), 'dd MMMM yyyy', { locale: fr })}</span>
+                <span>
+                  Créé le{' '}
+                  {dispute.created_at &&
+                    format(new Date(dispute.created_at), 'dd MMMM yyyy', { locale: fr })}
+                </span>
               </div>
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-muted-foreground" />
@@ -266,7 +266,9 @@ export default function DisputeDetailPage() {
               {dispute.assigned_agent_id && profiles[dispute.assigned_agent_id] && (
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                  <span>Médiateur: {profiles[dispute.assigned_agent_id]?.full_name || 'Agent'}</span>
+                  <span>
+                    Médiateur: {profiles[dispute.assigned_agent_id]?.full_name || 'Agent'}
+                  </span>
                 </div>
               )}
             </div>
@@ -347,7 +349,8 @@ export default function DisputeDetailPage() {
                           {isMediator && ' (Médiateur)'}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {message.created_at && format(new Date(message.created_at), 'HH:mm', { locale: fr })}
+                          {message.created_at &&
+                            format(new Date(message.created_at), 'HH:mm', { locale: fr })}
                         </span>
                       </div>
                       <div
@@ -355,8 +358,8 @@ export default function DisputeDetailPage() {
                           isOwnMessage
                             ? 'bg-[#F16522] text-white rounded-tr-sm'
                             : isMediator
-                            ? 'bg-blue-100 text-blue-900 rounded-tl-sm'
-                            : 'bg-[#EFEBE9] text-[#2C1810] rounded-tl-sm'
+                              ? 'bg-blue-100 text-blue-900 rounded-tl-sm'
+                              : 'bg-[#EFEBE9] text-[#2C1810] rounded-tl-sm'
                         }`}
                       >
                         {message.content}
@@ -396,7 +399,8 @@ export default function DisputeDetailPage() {
             </div>
           ) : (
             <div className="p-4 border-t border-[#EFEBE9] text-center text-muted-foreground">
-              Ce litige est {dispute.status === 'resolved' ? 'résolu' : 'fermé'}. Vous ne pouvez plus envoyer de messages.
+              Ce litige est {dispute.status === 'resolved' ? 'résolu' : 'fermé'}. Vous ne pouvez
+              plus envoyer de messages.
             </div>
           )}
         </div>

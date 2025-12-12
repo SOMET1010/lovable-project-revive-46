@@ -74,7 +74,7 @@ export default function HeroMinimalist({ onSearch }: HeroMinimalistProps) {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-4 md:px-6 py-16">
+      <div className="relative z-10 w-full w-full mx-auto px-4 md:px-6 py-16">
         {/* Title - 64px Bold White */}
         <div className="text-center mb-8">
           <h1

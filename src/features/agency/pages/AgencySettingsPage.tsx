@@ -1,12 +1,19 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Button, Input, Textarea, Card, CardContent, CardHeader, CardTitle, Label, Switch } from '@/shared/ui';
+import {
+  Button,
+  Input,
+  Textarea,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Label,
+  Switch,
+} from '@/shared/ui';
 import { toast } from 'sonner';
-import { 
-  Settings, Building2, Save, Phone, Mail, Globe,
-  MapPin, Percent
-} from 'lucide-react';
+import { Settings, Building2, Save, Phone, Mail, Globe, MapPin, Percent } from 'lucide-react';
 
 interface AgencySettings {
   id: string;
@@ -32,10 +39,6 @@ export default function AgencySettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    loadAgency();
-  }, [user]);
-
   const loadAgency = async () => {
     if (!user) return;
 
@@ -59,11 +62,11 @@ export default function AgencySettingsPage() {
         description: data.description,
         commission_rate: data.commission_rate ?? 10,
         monthly_target: data.monthly_target ?? 0,
-        settings: typeof data.settings === 'object' && data.settings !== null 
-          ? data.settings as AgencySettings['settings']
-          : {},
+        settings:
+          typeof data.settings === 'object' && data.settings !== null
+            ? (data.settings as AgencySettings['settings'])
+            : {},
       });
-
     } catch (error) {
       console.error('Error loading agency:', error);
       toast.error('Erreur lors du chargement');
@@ -71,6 +74,10 @@ export default function AgencySettingsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadAgency();
+  }, [user, loadAgency]);
 
   const handleSave = async () => {
     if (!agency) return;
@@ -97,10 +104,9 @@ export default function AgencySettingsPage() {
       if (error) throw error;
 
       toast.success('Paramètres enregistrés');
-
     } catch (error) {
       console.error('Error saving:', error);
-      toast.error('Erreur lors de l\'enregistrement');
+      toast.error("Erreur lors de l'enregistrement");
     } finally {
       setSaving(false);
     }
@@ -140,14 +146,18 @@ export default function AgencySettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF7F4] py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="mx-auto px-4 w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-[#2C1810]">Paramètres de l'agence</h1>
             <p className="text-[#2C1810]/60 mt-1">Configurez les informations et préférences</p>
           </div>
-          <Button onClick={handleSave} disabled={saving} className="bg-[#F16522] hover:bg-[#D14E12]">
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-[#F16522] hover:bg-[#D14E12]"
+          >
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Enregistrement...' : 'Enregistrer'}
           </Button>
@@ -167,7 +177,9 @@ export default function AgencySettingsPage() {
                 <Label>Nom de l'agence</Label>
                 <Input
                   value={agency.agency_name}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('agency_name', e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    updateField('agency_name', e.target.value)
+                  }
                   className="border-[#EFEBE9]"
                 />
               </div>
@@ -175,7 +187,9 @@ export default function AgencySettingsPage() {
                 <Label>Description</Label>
                 <Textarea
                   value={agency.description || ''}
-                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => updateField('description', e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                    updateField('description', e.target.value)
+                  }
                   placeholder="Description de votre agence..."
                   rows={3}
                   className="border-[#EFEBE9]"
@@ -190,7 +204,9 @@ export default function AgencySettingsPage() {
                   <Input
                     type="email"
                     value={agency.email || ''}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('email', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateField('email', e.target.value)
+                    }
                     className="border-[#EFEBE9]"
                   />
                 </div>
@@ -201,7 +217,9 @@ export default function AgencySettingsPage() {
                   </Label>
                   <Input
                     value={agency.phone || ''}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('phone', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateField('phone', e.target.value)
+                    }
                     className="border-[#EFEBE9]"
                   />
                 </div>
@@ -214,7 +232,9 @@ export default function AgencySettingsPage() {
                   </Label>
                   <Input
                     value={agency.address || ''}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('address', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateField('address', e.target.value)
+                    }
                     className="border-[#EFEBE9]"
                   />
                 </div>
@@ -222,7 +242,9 @@ export default function AgencySettingsPage() {
                   <Label>Ville</Label>
                   <Input
                     value={agency.city || ''}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('city', e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateField('city', e.target.value)
+                    }
                     className="border-[#EFEBE9]"
                   />
                 </div>
@@ -234,7 +256,9 @@ export default function AgencySettingsPage() {
                 </Label>
                 <Input
                   value={agency.website || ''}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('website', e.target.value)}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    updateField('website', e.target.value)
+                  }
                   placeholder="https://..."
                   className="border-[#EFEBE9]"
                 />
@@ -259,7 +283,9 @@ export default function AgencySettingsPage() {
                     min="0"
                     max="100"
                     value={agency.commission_rate}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('commission_rate', Number(e.target.value))}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateField('commission_rate', Number(e.target.value))
+                    }
                     className="border-[#EFEBE9]"
                   />
                   <p className="text-sm text-[#2C1810]/60 mt-1">
@@ -272,7 +298,9 @@ export default function AgencySettingsPage() {
                     type="number"
                     min="0"
                     value={agency.monthly_target}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => updateField('monthly_target', Number(e.target.value))}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      updateField('monthly_target', Number(e.target.value))
+                    }
                     className="border-[#EFEBE9]"
                   />
                 </div>
@@ -284,7 +312,9 @@ export default function AgencySettingsPage() {
                   min="0"
                   max="100"
                   value={agency.settings.default_commission_split || 50}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => updateSetting('default_commission_split', Number(e.target.value))}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    updateSetting('default_commission_split', Number(e.target.value))
+                  }
                   className="border-[#EFEBE9]"
                 />
                 <p className="text-sm text-[#2C1810]/60 mt-1">
@@ -312,7 +342,9 @@ export default function AgencySettingsPage() {
                 </div>
                 <Switch
                   checked={agency.settings.notify_on_new_request || false}
-                  onCheckedChange={(checked: boolean) => updateSetting('notify_on_new_request', checked)}
+                  onCheckedChange={(checked: boolean) =>
+                    updateSetting('notify_on_new_request', checked)
+                  }
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -324,7 +356,9 @@ export default function AgencySettingsPage() {
                 </div>
                 <Switch
                   checked={agency.settings.auto_approve_agents || false}
-                  onCheckedChange={(checked: boolean) => updateSetting('auto_approve_agents', checked)}
+                  onCheckedChange={(checked: boolean) =>
+                    updateSetting('auto_approve_agents', checked)
+                  }
                 />
               </div>
             </CardContent>

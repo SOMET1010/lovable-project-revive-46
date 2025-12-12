@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Home,
   Coins,
@@ -36,11 +36,29 @@ interface Payment {
   created_at: string;
 }
 
+interface Property {
+  id: string;
+  title: string;
+  city: string | null;
+  neighborhood: string | null;
+  [key: string]: unknown; // allow extra fields
+}
+
+interface Favorite {
+  id: string;
+  property_id: string | null;
+  user_id: string;
+  created_at: string | null;
+  properties?: Property | null;
+}
+
 export default function TenantDashboard() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [activeLease, setActiveLease] = useState<(LeaseContract & { property?: any }) | null>(null);
+  const [activeLease, setActiveLease] = useState<
+    (LeaseContract & { property?: Property | null }) | null
+  >(null);
   const [nextPayment, setNextPayment] = useState<{
     amount: number;
     dueDate: string;
@@ -52,24 +70,9 @@ export default function TenantDashboard() {
     paymentStatus: 'up_to_date' as 'up_to_date' | 'late',
   });
   const [recentPayments, setRecentPayments] = useState<Payment[]>([]);
-  const [recentFavorites, setRecentFavorites] = useState<any[]>([]);
-  const [_savedSearches, setSavedSearches] = useState<any[]>([]);
+  const [recentFavorites, setRecentFavorites] = useState<Favorite[]>([]);
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/connexion');
-      return;
-    }
-
-    if (profile && profile.user_type !== 'locataire') {
-      navigate('/');
-      return;
-    }
-
-    loadDashboardData();
-  }, [user, profile, navigate]);
-
-  const loadDashboardData = async () => {
+  const loadDashboardData = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -135,7 +138,7 @@ export default function TenantDashboard() {
 
       // Load unread messages count
       const { data: messagesData } = await supabase
-        .from('messages' as any)
+        .from('messages')
         .select('id')
         .eq('receiver_id', user.id)
         .eq('is_read', false);
@@ -144,7 +147,7 @@ export default function TenantDashboard() {
 
       // Load maintenance requests count
       const { data: maintenanceData } = await supabase
-        .from('maintenance_requests' as any)
+        .from('maintenance_requests')
         .select('id')
         .eq('tenant_id', user.id)
         .in('status', ['ouverte', 'en_cours']);
@@ -161,21 +164,27 @@ export default function TenantDashboard() {
 
       setRecentFavorites(favoritesData || []);
 
-      // Load saved searches
-      const { data: searchesData } = await supabase
-        .from('saved_searches' as any)
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      setSavedSearches((searchesData || []) as any[]);
+      // Load saved searches (not used, removed to avoid lint error)
     } catch (error) {
       console.error('Error loading dashboard data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/connexion');
+      return;
+    }
+
+    if (profile && profile.user_type !== 'locataire') {
+      navigate('/');
+      return;
+    }
+
+    loadDashboardData();
+  }, [user, profile, navigate, loadDashboardData]);
 
   if (loading) {
     return (
@@ -322,7 +331,7 @@ export default function TenantDashboard() {
                       </span>
                     </div>
                     <Link
-                      to="/effectuer-paiement"
+                      to="/locataire/effectuer-paiement"
                       className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-2 px-4 rounded-xl transition-colors"
                     >
                       Payer maintenant
@@ -394,14 +403,14 @@ export default function TenantDashboard() {
                 {activeLease && (
                   <>
                     <Link
-                      to="/effectuer-paiement"
+                      to="/locataire/effectuer-paiement"
                       className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <Coins className="h-5 w-5 mr-2" />
                       Payer mon loyer
                     </Link>
                     <Link
-                      to="/maintenance/nouvelle"
+                      to="locataire/maintenance"
                       className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <Wrench className="h-5 w-5 mr-2" />
@@ -417,7 +426,7 @@ export default function TenantDashboard() {
                   </>
                 )}
                 <Link
-                  to="/mon-score"
+                  to="/locataire/mon-score"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Award className="h-5 w-5 mr-2" />
@@ -470,7 +479,7 @@ export default function TenantDashboard() {
                   </Link>
                 </div>
                 <div className="space-y-3">
-                  {recentFavorites.map((fav: any) => (
+                  {recentFavorites.map((fav) => (
                     <Link
                       key={fav.id}
                       to={`/propriete/${fav.property_id}`}

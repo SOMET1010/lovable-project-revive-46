@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import * as React from 'react';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Hook pour vérifier si un feature flag est activé
@@ -38,8 +38,16 @@ export function useFeatureFlag(
         { headers }
       );
 
+      // If the Edge Function is not available, return default value
+      if (response.status === 503 || response.status === 404) {
+        console.warn(`Feature flag service unavailable for key: ${flagKey}, using default value (false)`);
+        return { enabled: false, key: flagKey };
+      }
+
       if (!response.ok) {
-        throw new Error('Failed to check feature flag');
+        console.error(`Failed to check feature flag ${flagKey}:`, response.statusText);
+        // Return false as default when there's an error
+        return { enabled: false, key: flagKey };
       }
 
       return response.json();
@@ -95,7 +103,16 @@ export function useFeatureFlagsByCategory(category: string) {
         }
       );
 
-      if (!response.ok) throw new Error('Failed to fetch feature flags');
+      // If the Edge Function is not available, return empty array
+      if (response.status === 503 || response.status === 404) {
+        console.warn(`Feature flags service unavailable for category: ${category}, returning empty array`);
+        return [];
+      }
+
+      if (!response.ok) {
+        console.error(`Failed to fetch feature flags for category ${category}:`, response.statusText);
+        return [];
+      }
 
       const result = await response.json();
       return result.flags;

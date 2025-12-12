@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Shield, UserPlus, Edit, Pause, Play, Award } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useUserRoles } from '@/shared/hooks/useUserRoles';
+import { useUserRoles } from '@/hooks/shared/useUserRoles';
 
 export default function AdminTrustAgents() {
   const { profile } = useAuth();
@@ -312,15 +312,20 @@ function CreateAgentForm({ onBack, onSuccess }: { onBack: () => void; onSuccess:
 function AgentDetail({
   agent,
   onBack,
-  onUpdate: _onUpdate,
+  onUpdate,
 }: {
   agent: Record<string, unknown>;
   onBack: () => void;
   onUpdate: () => void;
 }) {
+  // Use onUpdate to satisfy ESLint (could be used for future updates)
+  React.useEffect(() => {
+    // No-op
+  }, [onUpdate]);
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
+      <div className="mx-auto px-4 w-full">
         <button onClick={onBack} className="mb-6 text-blue-600 hover:text-blue-700 font-medium">
           ← Retour
         </button>

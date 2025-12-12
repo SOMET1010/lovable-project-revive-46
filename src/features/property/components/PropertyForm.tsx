@@ -531,7 +531,7 @@ const PropertyForm: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full mx-auto">
       <NotificationContainer notifications={notifications} onClose={removeNotification} />
 
       {/* Indicateur de progression */}

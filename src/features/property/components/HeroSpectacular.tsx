@@ -53,7 +53,7 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
       setCurrentSlide((prev) => (prev + 1) % heroImages.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [heroImages.length]);
 
   // Animation titre lettre par lettre
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function HeroSpectacular({ onSearch }: HeroSpectacularProps) {
 
       {/* Contenu principal */}
       <div className="relative h-full flex items-center justify-center px-4 z-10">
-        <div className="w-full max-w-4xl">
+        <div className="w-full">
           {/* Titre avec effet spectaculaire */}
           <div className="text-center mb-6 sm:mb-8 px-4 hero-glow-orange">
             <h1 className="hero-title-spectacular hero-text-enhanced text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold mb-4 leading-tight">

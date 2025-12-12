@@ -14,6 +14,8 @@ interface Payment {
   created_at: string | null;
   property_title?: string;
   property_city?: string;
+  receiver_name?: string;
+  payer_name?: string;
 }
 
 export default function PaymentHistory() {
@@ -26,11 +28,18 @@ export default function PaymentHistory() {
     'all'
   );
 
-  useEffect(() => {
-    if (user) {
-      loadPayments();
-    }
-  }, [user, filter, statusFilter]);
+  interface PaymentRow {
+    id: string;
+    amount: number;
+    payment_type: string;
+    payment_method: string | null;
+    status: string | null;
+    created_at: string | null;
+    properties?: {
+      title?: string;
+      city?: string;
+    } | null;
+  }
 
   const loadPayments = async () => {
     if (!user) return;
@@ -53,7 +62,7 @@ export default function PaymentHistory() {
 
       if (error) throw error;
 
-      const formattedPayments: Payment[] = (data || []).map((payment: any) => ({
+      const formattedPayments: Payment[] = (data || []).map((payment: PaymentRow) => ({
         id: payment.id,
         amount: payment.amount,
         payment_type: payment.payment_type,
@@ -149,6 +158,12 @@ export default function PaymentHistory() {
       .reduce((sum, payment) => sum + payment.amount, 0);
   };
 
+  useEffect(() => {
+    if (user) {
+      loadPayments();
+    }
+  }, [user, filter, statusFilter, loadPayments]);
+
   if (!user) {
     return (
       <TenantDashboardLayout title="Mes Paiements">
@@ -215,7 +230,7 @@ export default function PaymentHistory() {
             <div className="flex flex-wrap gap-3">
               <select
                 value={filter}
-                onChange={(e) => setFilter(e.target.value as any)}
+                onChange={(e) => setFilter(e.target.value as 'all' | 'sent' | 'received')}
                 className="px-4 py-2 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-terracotta-200 focus:border-terracotta-500 font-medium"
               >
                 <option value="all">Tous les paiements</option>
@@ -225,7 +240,9 @@ export default function PaymentHistory() {
 
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as 'all' | 'en_attente' | 'complete' | 'echoue')
+                }
                 className="px-4 py-2 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-terracotta-200 focus:border-terracotta-500 font-medium"
               >
                 <option value="all">Tous les statuts</option>
@@ -236,7 +253,7 @@ export default function PaymentHistory() {
             </div>
 
             <Link
-              to="/effectuer-paiement"
+              to="/locataire/effectuer-paiement"
               className="btn-primary px-6 py-2 flex items-center space-x-2"
             >
               <Coins className="w-5 h-5" />
@@ -254,7 +271,7 @@ export default function PaymentHistory() {
             <Coins className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun paiement</h3>
             <p className="text-gray-600 mb-6">Vous n'avez pas encore effectué de paiement</p>
-            <Link to="/effectuer-paiement" className="btn-primary">
+            <Link to="/locataire/effectuer-paiement" className="btn-primary">
               Effectuer un paiement
             </Link>
           </div>

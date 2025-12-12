@@ -77,7 +77,7 @@ export default function HeroAfrican({ onSearch }: HeroAfricanProps) {
 
       {/* Content */}
       <div className="container relative z-10 py-20">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="w-full mx-auto text-center">
           {/* Badge */}
           <div
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 animate-fade-in-up"
