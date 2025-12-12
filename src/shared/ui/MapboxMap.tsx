@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useMapboxToken } from '@/shared/hooks/useMapboxToken';
 import { usePlacesAutocomplete, PlaceSuggestion } from '@/shared/hooks/usePlacesAutocomplete';
-import { Loader2, MapPin, Navigation2, Focus, Search, X, Map, Globe } from 'lucide-react';
+import { Loader2, MapPin, Navigation2, Focus, Search, X, Map, Globe, AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -245,18 +245,34 @@ export default function MapboxMap({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [mapStyle, setMapStyle] = useState<MapStyleType>('streets');
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   
   const { token: mapboxToken, isLoading: tokenLoading, error: tokenError } = useMapboxToken();
 
-  // Log pour diagnostic
+  // Log pour diagnostic (DEV only)
   if (import.meta.env.DEV) {
     console.log('[MapboxMap] Token state:', { 
       hasToken: !!mapboxToken, 
       tokenLoading, 
       tokenError: tokenError?.message,
-      propertiesCount: validProperties.length
+      propertiesCount: validProperties.length,
+      mapError,
+      retryCount
     });
   }
+
+  // Handler pour retry
+  const handleRetry = useCallback(() => {
+    setMapError(null);
+    setRetryCount(prev => prev + 1);
+    // Force re-render by clearing map ref
+    if (map.current) {
+      map.current.remove();
+      map.current = null;
+    }
+    setMapLoaded(false);
+  }, []);
 
   // Fonction de changement de style
   const handleStyleChange = useCallback((style: MapStyleType) => {
@@ -386,6 +402,17 @@ export default function MapboxMap({
         attributionControl: false,
       });
 
+      // Gérer les erreurs de chargement (timeout réseau, etc.)
+      map.current.on('error', (e) => {
+        console.error('[MapboxMap] Map error:', e);
+        const errorMessage = e.error?.message || 'Erreur de chargement';
+        if (errorMessage.includes('Failed to fetch') || errorMessage.includes('timeout') || errorMessage.includes('ERR_CONNECTION')) {
+          setMapError('La connexion au service de cartographie a échoué. Vérifiez votre connexion internet.');
+        } else {
+          setMapError(`Erreur de carte: ${errorMessage}`);
+        }
+      });
+
       map.current.addControl(
         new mapboxgl.NavigationControl({
           showCompass: true,
@@ -415,9 +442,11 @@ export default function MapboxMap({
 
       map.current.on('load', () => {
         setMapLoaded(true);
+        setMapError(null); // Clear any previous errors on successful load
       });
     } catch (error) {
-      console.error('Error initializing map:', error);
+      console.error('[MapboxMap] Error initializing map:', error);
+      setMapError('Impossible d\'initialiser la carte.');
     }
 
     return () => {
@@ -426,7 +455,7 @@ export default function MapboxMap({
         map.current = null;
       }
     };
-  }, [mapboxToken]);
+  }, [mapboxToken, retryCount]);
 
   // Gestion des marqueurs et clustering
   useEffect(() => {
@@ -889,6 +918,33 @@ export default function MapboxMap({
     );
   };
 
+  // Afficher le fallback d'erreur
+  if (mapError) {
+    return (
+      <div 
+        className="relative w-full flex flex-col items-center justify-center bg-muted/30 rounded-xl border border-border"
+        style={{ height }}
+      >
+        <AlertTriangle className="w-12 h-12 text-orange-500 mb-4" />
+        <h3 className="font-bold text-lg text-foreground mb-2">Carte indisponible</h3>
+        <p className="text-sm text-muted-foreground text-center max-w-md mb-4 px-4">
+          {mapError}
+        </p>
+        <button
+          onClick={handleRetry}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Réessayer
+        </button>
+        {retryCount > 0 && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Tentative {retryCount + 1}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-full">
