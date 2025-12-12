@@ -408,6 +408,8 @@ export default function MapboxMap({
         const errorMessage = e.error?.message || 'Erreur de chargement';
         if (errorMessage.includes('Failed to fetch') || errorMessage.includes('timeout') || errorMessage.includes('ERR_CONNECTION')) {
           setMapError('La connexion au service de cartographie a échoué. Vérifiez votre connexion internet.');
+          // Émettre un événement pour que le composant parent puisse réagir
+          window.dispatchEvent(new CustomEvent('mapbox-error'));
         } else {
           setMapError(`Erreur de carte: ${errorMessage}`);
         }
