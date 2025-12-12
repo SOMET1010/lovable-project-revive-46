@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Camera, CheckCircle2, XCircle, Loader2, RefreshCw, 
-  ShieldCheck, ExternalLink, ScanFace, Lock 
+  ShieldCheck, ExternalLink, ScanFace, Lock, Smartphone
 } from 'lucide-react';
 import { Button } from './Button';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +22,13 @@ interface NeofaceVerificationProps {
   onFailed: (error: string) => void;
 }
 
-type VerificationStatus = 'idle' | 'uploading' | 'waiting_selfie' | 'polling' | 'success' | 'error';
+type VerificationStatus = 
+  | 'idle' 
+  | 'uploading' 
+  | 'ready_for_selfie'  // Document envoyé, prêt pour action utilisateur (évite blocage popup)
+  | 'polling' 
+  | 'success' 
+  | 'error';
 
 // --- CONSTANTES ---
 
@@ -41,10 +47,11 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const [status, setStatus] = useState<VerificationStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
-  const [_verificationId, setVerificationId] = useState<string | null>(null);
+  const [verificationId, setVerificationId] = useState<string | null>(null);
   const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
   const [matchingScore, setMatchingScore] = useState<number | null>(null);
   const [pollAttempt, setPollAttempt] = useState(0);
+  const [progressMessage, setProgressMessage] = useState<string>('');
   
   // Refs
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -67,11 +74,12 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
   }, []);
 
-  // --- ACTIONS ---
+  // --- ÉTAPE 1: Upload du document (NE PAS ouvrir le popup automatiquement) ---
 
-  const uploadDocument = async () => {
+  const initializeVerification = async () => {
     setStatus('uploading');
     setError(null);
+    setProgressMessage('Analyse et sécurisation de votre document...');
     
     try {
       const { data, error: invokeError } = await supabase.functions.invoke('neoface-verify', {
@@ -88,13 +96,11 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       setDocumentId(data.document_id);
       setSelfieUrl(data.selfie_url);
       setVerificationId(data.verification_id);
-      setStatus('waiting_selfie');
-
-      // Ouvrir la popup automatiquement
-      openSelfiePopup(data.selfie_url);
       
-      // Démarrer le polling
-      startPolling(data.document_id, data.verification_id);
+      // IMPORTANT: On passe à l'état "prêt" au lieu d'ouvrir le popup directement
+      // Cela évite le blocage popup des navigateurs (qui bloquent window.open après async)
+      setStatus('ready_for_selfie');
+      setProgressMessage('Document prêt. Ouvrez la caméra pour continuer.');
       
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Erreur de connexion au service de vérification';
@@ -104,37 +110,58 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
   };
 
-  const openSelfiePopup = (url: string) => {
+  // --- ÉTAPE 2: Ouverture du Popup (Action utilisateur directe = pas de blocage) ---
+
+  const openSelfiePopup = () => {
+    if (!selfieUrl || !documentId) return;
+
+    // Fermer l'ancien popup si existant
     if (popupRef.current && !popupRef.current.closed) {
       popupRef.current.close();
     }
     
-    const width = 500;
-    const height = 700;
+    // Calcul pour centrer le popup (taille mobile-friendly)
+    const width = 450;
+    const height = 750;
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
     
-    popupRef.current = window.open(
-      url,
-      'neoface_selfie',
-      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-    );
+    const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes,status=yes`;
+    
+    popupRef.current = window.open(selfieUrl, 'neoface_selfie_capture', features);
+    
+    // Démarrer le polling immédiatement après ouverture
+    startPolling(documentId, verificationId);
   };
+
+  // --- ÉTAPE 3: Polling avec messages dynamiques ---
 
   const startPolling = (docId: string, verifyId: string | null) => {
     setStatus('polling');
     setPollAttempt(0);
+    setProgressMessage('En attente de votre selfie...');
     
+    // Nettoyage préventif
+    stopPolling();
+
     pollingRef.current = setInterval(async () => {
       setPollAttempt(prev => {
         const next = prev + 1;
+        
+        // Timeout après MAX_POLL_ATTEMPTS
         if (next >= MAX_POLL_ATTEMPTS) {
           stopPolling();
           setStatus('error');
-          setError("Le temps imparti est écoulé. Veuillez réessayer.");
-          onFailed("Timeout de vérification");
+          setError('Le délai de vérification est dépassé. Avez-vous terminé le selfie ?');
+          onFailed('Timeout: verification incomplete');
           return prev;
         }
+        
+        // Messages de progression dynamiques
+        if (next === 5) setProgressMessage('Analyse biométrique en cours...');
+        if (next === 15) setProgressMessage('Comparaison avec votre document...');
+        if (next === 30) setProgressMessage('Finalisation de la vérification...');
+        
         return next;
       });
       
@@ -143,6 +170,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           body: { action: 'check_status', document_id: docId, verification_id: verifyId },
         });
 
+        // Ignorer les erreurs réseau transitoires, continuer le polling
         if (invokeError) return;
 
         if (data) {
@@ -158,7 +186,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           }
         }
       } catch (_err) {
-        // Continue polling
+        // Continue polling malgré l'exception (robustesse réseau)
       }
     }, POLL_INTERVAL_MS);
   };
@@ -169,6 +197,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
     setStatus('success');
     setMatchingScore(data.matching_score ?? null);
+    setProgressMessage('Identité confirmée !');
     
     onVerified({
       document_id: documentId!,
@@ -190,6 +219,8 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     setDocumentId(null);
     setVerificationId(null);
     setSelfieUrl(null);
+    setMatchingScore(null);
+    setProgressMessage('');
   };
 
   // Calcul progression pour le cercle SVG
@@ -216,11 +247,17 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           </div>
         </div>
         
-        {/* Badge de statut pendant le polling */}
-        {(status === 'polling' || status === 'waiting_selfie') && (
+        {/* Badge de statut dynamique */}
+        {status === 'polling' && (
           <div className="flex items-center gap-2 px-3 py-1 bg-primary/20 rounded-full border border-primary/30">
             <span className="w-2 h-2 bg-primary rounded-full animate-pulse" />
             <span className="text-xs text-primary font-bold">En cours</span>
+          </div>
+        )}
+        {status === 'ready_for_selfie' && (
+          <div className="flex items-center gap-2 px-3 py-1 bg-amber-500/20 rounded-full border border-amber-500/30">
+            <span className="w-2 h-2 bg-amber-500 rounded-full" />
+            <span className="text-xs text-amber-500 font-bold">Prêt</span>
           </div>
         )}
       </div>
@@ -240,7 +277,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
             <div>
               <p className="text-[#2C1810] font-bold text-lg mb-2">Prêt pour la vérification ?</p>
               <p className="text-[#6B5A4E] text-sm leading-relaxed max-w-xs mx-auto">
-                Nous allons ouvrir une fenêtre sécurisée pour scanner votre visage et le comparer à votre document d'identité.
+                Nous allons vérifier que vous êtes bien le propriétaire de la pièce d'identité fournie.
               </p>
             </div>
 
@@ -255,16 +292,67 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
             )}
 
             <Button 
-              onClick={uploadDocument}
+              onClick={initializeVerification}
               className="w-full py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
             >
-              <ScanFace className="w-5 h-5" /> Commencer la vérification
+              <ScanFace className="w-5 h-5" /> Démarrer la vérification
             </Button>
           </div>
         )}
 
-        {/* ÉTAT CHARGEMENT / POLLING */}
-        {(status === 'uploading' || status === 'waiting_selfie' || status === 'polling') && (
+        {/* ÉTAT UPLOADING */}
+        {status === 'uploading' && (
+          <div className="text-center space-y-6 py-8 animate-fade-in">
+            <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto" />
+            <div>
+              <p className="text-[#2C1810] font-medium animate-pulse">{progressMessage}</p>
+              <p className="text-[#6B5A4E] text-sm mt-2">Cela ne prendra que quelques secondes...</p>
+            </div>
+          </div>
+        )}
+
+        {/* ÉTAT READY_FOR_SELFIE (Bouton manuel pour éviter blocage popup) */}
+        {status === 'ready_for_selfie' && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="bg-[#FAF7F4] border border-border rounded-xl p-6 text-center">
+              <div className="mb-4 flex justify-center">
+                <div className="relative">
+                  <Smartphone className="h-16 w-16 text-[#2C1810]" />
+                  <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1 border-2 border-white">
+                    <Camera className="h-4 w-4 text-white" />
+                  </div>
+                </div>
+              </div>
+              
+              <h3 className="text-lg font-semibold text-[#2C1810] mb-2">
+                Prêt pour le Selfie
+              </h3>
+              
+              <p className="text-[#6B5A4E] text-sm mb-6 max-w-xs mx-auto">
+                Cliquez ci-dessous pour ouvrir la caméra sécurisée. Cadrez votre visage dans l'ovale.
+              </p>
+              
+              <Button
+                onClick={openSelfiePopup}
+                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 rounded-lg shadow-md flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="h-5 w-5" />
+                Ouvrir la caméra
+              </Button>
+            </div>
+            
+            <Button 
+              onClick={handleRetry} 
+              variant="ghost" 
+              className="w-full text-[#A69B95] hover:text-[#6B5A4E] text-sm"
+            >
+              Annuler / Recommencer
+            </Button>
+          </div>
+        )}
+
+        {/* ÉTAT POLLING */}
+        {status === 'polling' && (
           <div className="text-center space-y-6 animate-fade-in">
             
             {/* Cercle de progression SVG */}
@@ -297,28 +385,28 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
             </div>
 
             <div>
-              <h4 className="text-lg font-bold text-[#2C1810]">
-                {status === 'uploading' ? "Initialisation..." : "Vérification en cours"}
-              </h4>
-              <p className="text-sm text-[#6B5A4E] mt-2 max-w-xs mx-auto">
-                {status === 'uploading' 
-                  ? "Préparation de l'environnement sécurisé..." 
-                  : "Veuillez effectuer le selfie dans la fenêtre qui s'est ouverte."}
-              </p>
+              <h4 className="text-lg font-bold text-[#2C1810]">Vérification en cours</h4>
+              <p className="text-sm text-[#6B5A4E] mt-2 animate-pulse">{progressMessage}</p>
             </div>
 
-            {/* Fallback manuel */}
-            {(status === 'waiting_selfie' || status === 'polling') && selfieUrl && (
-              <div className="bg-[#FAF7F4] p-4 rounded-xl border border-border">
-                <p className="text-xs text-[#A69B95] mb-3 font-medium">La fenêtre ne s'est pas ouverte ?</p>
-                <button 
-                  onClick={() => openSelfiePopup(selfieUrl)}
-                  className="text-xs font-bold text-[#2C1810] flex items-center justify-center gap-1 hover:underline w-full py-2 border border-[#A69B95]/30 rounded-lg hover:bg-white transition-colors"
-                >
-                  <ExternalLink className="w-3 h-3" /> Ouvrir manuellement
-                </button>
-              </div>
-            )}
+            {/* Bouton de réouverture popup (fallback) */}
+            <div className="bg-[#FAF7F4] p-4 rounded-xl border border-border">
+              <p className="text-xs text-[#A69B95] mb-3 font-medium">La fenêtre ne s'est pas ouverte ?</p>
+              <button 
+                onClick={openSelfiePopup}
+                className="text-xs font-bold text-[#2C1810] flex items-center justify-center gap-1 hover:underline w-full py-2 border border-[#A69B95]/30 rounded-lg hover:bg-white transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" /> Réouvrir la caméra NeoFace
+              </button>
+            </div>
+            
+            <Button 
+              onClick={handleRetry} 
+              variant="ghost" 
+              className="w-full text-[#A69B95] hover:text-[#6B5A4E] text-sm"
+            >
+              Annuler / Recommencer
+            </Button>
           </div>
         )}
 
