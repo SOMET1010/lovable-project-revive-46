@@ -106,7 +106,7 @@ const ResetPasswordPage = () => {
   // Affichage erreur token
   if (tokenError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF7F4] px-4">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-card p-8 text-center">
           <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
             <X className="w-8 h-8 text-red-600" />
@@ -131,7 +131,7 @@ const ResetPasswordPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F4] px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-card p-8">
         {/* Header */}
         <div className="text-center mb-8">

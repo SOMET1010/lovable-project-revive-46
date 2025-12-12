@@ -111,9 +111,9 @@ const InterventionTimelinePage: React.FC = () => {
 
   const getUrgencyConfig = (urgency: string) => {
     switch (urgency) {
-      case 'critique': return { color: 'bg-red-100 text-red-700', label: 'Critique' };
-      case 'urgente': return { color: 'bg-orange-100 text-orange-700', label: 'Urgente' };
-      default: return { color: 'bg-blue-100 text-blue-700', label: 'Normale' };
+      case 'critique': return { color: 'bg-[#FFEBEE] text-[#D32F2F]', label: 'Critique' };
+      case 'urgente': return { color: 'bg-[#FFF3E0] text-[#ED6C02]', label: 'Urgente' };
+      default: return { color: 'bg-[#FFF3E0] text-[#ED6C02]', label: 'Normale' };
     }
   };
 

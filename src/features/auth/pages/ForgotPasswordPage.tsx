@@ -49,7 +49,7 @@ export default function ForgotPassword() {
       }
 
       setSuccess(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Password reset error:', err);
       setError('Une erreur est survenue. Veuillez réessayer ou contacter le support.');
     } finally {
@@ -58,34 +58,28 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen custom-cursor relative overflow-hidden flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 via-blue-300 to-indigo-300" />
-
-      <div className="absolute inset-0 opacity-30">
-        <div className="absolute top-20 left-20 w-64 h-64 bg-cyan-300 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-blue-300 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-200 rounded-full blur-3xl animate-float" style={{ animationDelay: '0.5s' }} />
-      </div>
-
-      <div className="max-w-md w-full relative z-10">
+    <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        {/* Back Button */}
         <button
           onClick={() => navigate('/connexion')}
-          className="mb-6 flex items-center space-x-2 text-white hover:text-cyan-100 transition-colors"
+          className="mb-6 flex items-center gap-2 text-[#F16522] hover:text-[#d9571d] transition-colors font-semibold"
         >
           <ArrowLeft className="h-5 w-5" />
-          <span className="font-semibold">Retour à la connexion</span>
+          <span>Retour à la connexion</span>
         </button>
 
-        <div className="glass-card rounded-3xl p-8 md:p-10 shadow-2xl">
-          <div className="text-center mb-8">
-            <div className="mx-auto w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl flex items-center justify-center mb-6 shadow-lg animate-bounce-subtle">
-              <KeyRound className="h-10 w-10 text-white" />
+        {/* Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 md:p-8 space-y-6">
+          {/* Header */}
+          <div className="text-center">
+            <div className="mx-auto w-16 h-16 bg-[#FFF5F0] rounded-full flex items-center justify-center mb-4">
+              <KeyRound className="h-8 w-8 text-[#F16522]" />
             </div>
-
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold text-[#2C1810]">
               Mot de passe oublié ?
             </h2>
-            <p className="text-gray-600">
+            <p className="text-[#6B5A4E] mt-2">
               Entrez votre email pour recevoir un lien de réinitialisation
             </p>
           </div>
@@ -96,7 +90,6 @@ export default function ForgotPassword() {
                 <InputWithIcon
                   icon={Mail}
                   label="Adresse email"
-                  variant="cyan"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -109,15 +102,15 @@ export default function ForgotPassword() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full btn-primary py-4 text-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
-                    <span className="flex items-center justify-center space-x-2">
-                      <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>Envoi en cours...</span>
                     </span>
                   ) : (
-                    <span className="flex items-center justify-center space-x-2">
+                    <span className="flex items-center justify-center gap-2">
                       <KeyRound className="w-5 h-5" />
                       <span>Envoyer le lien</span>
                     </span>
@@ -125,10 +118,11 @@ export default function ForgotPassword() {
                 </button>
               </form>
 
-              <div className="mt-8 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl">
-                <div className="flex items-start space-x-3">
-                  <Shield className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-xs text-blue-800">
+              {/* Security Info */}
+              <div className="p-4 bg-[#FFF5F0] border border-[#F16522]/20 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <Shield className="h-5 w-5 text-[#F16522] flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-[#2C1810]">
                     <p className="font-semibold mb-1">Sécurité :</p>
                     <p>
                       Si un compte existe avec cette adresse email, vous recevrez un lien de réinitialisation valide pendant 30 minutes.
@@ -138,25 +132,25 @@ export default function ForgotPassword() {
               </div>
             </>
           ) : (
-            <div className="text-center space-y-6 animate-scale-in">
-              <div className="mx-auto w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center shadow-lg">
-                <CheckCircle className="h-10 w-10 text-white" />
+            <div className="text-center space-y-6">
+              <div className="mx-auto w-20 h-20 bg-[#E8F5E9] rounded-full flex items-center justify-center">
+                <CheckCircle className="h-10 w-10 text-[#2E7D32]" />
               </div>
 
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                <h3 className="text-2xl font-bold text-[#2C1810] mb-2">
                   Email envoyé !
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-[#6B5A4E]">
                   Si un compte est associé à <strong>{email}</strong>, vous recevrez un email avec les instructions pour réinitialiser votre mot de passe.
                 </p>
               </div>
 
-              <div className="p-4 bg-amber-50 border-2 border-amber-200 rounded-2xl text-left">
-                <p className="text-sm text-amber-800 font-medium mb-2">
+              <div className="p-4 bg-[#FFF3E0] border border-[#ED6C02]/20 rounded-xl text-left">
+                <p className="text-sm text-[#ED6C02] font-medium mb-2">
                   Vous n'avez pas reçu l'email ?
                 </p>
-                <ul className="text-xs text-amber-700 space-y-1 list-disc list-inside">
+                <ul className="text-xs text-[#6B5A4E] space-y-1 list-disc list-inside">
                   <li>Vérifiez votre dossier spam ou courrier indésirable</li>
                   <li>Assurez-vous d'avoir saisi la bonne adresse email</li>
                   <li>Patientez quelques minutes (délai de livraison possible)</li>
@@ -170,14 +164,14 @@ export default function ForgotPassword() {
                     setEmail('');
                     setError('');
                   }}
-                  className="text-cyan-600 hover:text-cyan-700 font-semibold text-sm transition-colors"
+                  className="text-[#F16522] hover:text-[#d9571d] font-semibold text-sm transition-colors"
                 >
                   Réessayer avec une autre adresse
                 </button>
 
                 <button
                   onClick={() => navigate('/connexion')}
-                  className="text-gray-600 hover:text-gray-700 font-medium text-sm transition-colors"
+                  className="text-[#6B5A4E] hover:text-[#2C1810] font-medium text-sm transition-colors"
                 >
                   Retour à la connexion
                 </button>

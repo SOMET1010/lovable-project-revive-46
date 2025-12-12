@@ -41,19 +41,19 @@ interface DisputeStats {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  open: { label: 'Ouvert', color: 'bg-blue-100 text-blue-800', icon: Clock },
-  under_review: { label: 'En examen', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  mediation: { label: 'En médiation', color: 'bg-orange-100 text-orange-800', icon: MessageSquare },
-  resolved: { label: 'Résolu', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-  escalated: { label: 'Escaladé', color: 'bg-red-100 text-red-800', icon: ArrowUpCircle },
-  closed: { label: 'Fermé', color: 'bg-gray-100 text-gray-800', icon: CheckCircle }
+  open: { label: 'Ouvert', color: 'bg-[#FFF3E0] text-[#ED6C02]', icon: Clock },
+  under_review: { label: 'En examen', color: 'bg-[#FFF3E0] text-[#ED6C02]', icon: Clock },
+  mediation: { label: 'En médiation', color: 'bg-[#FFF3E0] text-[#ED6C02]', icon: MessageSquare },
+  resolved: { label: 'Résolu', color: 'bg-[#E8F5E9] text-[#2E7D32]', icon: CheckCircle },
+  escalated: { label: 'Escaladé', color: 'bg-[#FFEBEE] text-[#D32F2F]', icon: ArrowUpCircle },
+  closed: { label: 'Fermé', color: 'bg-[#E8F5E9] text-[#2E7D32]', icon: CheckCircle }
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  low: { label: 'Basse', color: 'bg-gray-100 text-gray-700' },
-  normal: { label: 'Normale', color: 'bg-blue-100 text-blue-700' },
-  high: { label: 'Haute', color: 'bg-orange-100 text-orange-700' },
-  urgent: { label: 'Urgente', color: 'bg-red-100 text-red-700' }
+  low: { label: 'Basse', color: 'bg-[#FAF7F4] text-[#6B5A4E]' },
+  normal: { label: 'Normale', color: 'bg-[#FFF3E0] text-[#ED6C02]' },
+  high: { label: 'Haute', color: 'bg-[#FFF3E0] text-[#ED6C02]' },
+  urgent: { label: 'Urgente', color: 'bg-[#FFEBEE] text-[#D32F2F]' }
 };
 
 export default function DisputesListPage() {

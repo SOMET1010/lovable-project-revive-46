@@ -81,11 +81,11 @@ export default function TenantMaintenance() {
     const defaultConfig = { color: 'bg-yellow-100 text-yellow-800', icon: Clock, label: 'En attente' };
     const configs: Record<string, { color: string; icon: any; label: string }> = {
       ouverte: defaultConfig,
-      acceptee: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle, label: 'Acceptée' },
-      en_cours: { color: 'bg-purple-100 text-purple-800', icon: Wrench, label: 'En cours' },
-      planifiee: { color: 'bg-cyan-100 text-cyan-800', icon: Calendar, label: 'Planifiée' },
-      resolue: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Résolue' },
-      refusee: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Refusée' }
+      acceptee: { color: 'bg-[#FFF3E0] text-[#ED6C02]', icon: CheckCircle, label: 'Acceptée' },
+      en_cours: { color: 'bg-[#FFF3E0] text-[#ED6C02]', icon: Wrench, label: 'En cours' },
+      planifiee: { color: 'bg-[#FFF3E0] text-[#ED6C02]', icon: Calendar, label: 'Planifiée' },
+      resolue: { color: 'bg-[#E8F5E9] text-[#2E7D32]', icon: CheckCircle, label: 'Résolue' },
+      refusee: { color: 'bg-[#FFEBEE] text-[#D32F2F]', icon: XCircle, label: 'Refusée' }
     };
 
     const config = configs[status || 'ouverte'] ?? defaultConfig;

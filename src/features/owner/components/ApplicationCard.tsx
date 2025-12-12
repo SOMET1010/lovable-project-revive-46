@@ -55,15 +55,15 @@ function StatusBadge({ status }: { status: string }) {
   const getStatusStyle = () => {
     switch (status) {
       case 'en_attente':
-        return 'bg-amber-100 text-amber-700';
+        return 'bg-[#FFF3E0] text-[#ED6C02]';
       case 'en_cours':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-[#FFF3E0] text-[#ED6C02]';
       case 'acceptee':
-        return 'bg-green-100 text-green-700';
+        return 'bg-[#E8F5E9] text-[#2E7D32]';
       case 'refusee':
-        return 'bg-red-100 text-red-700';
+        return 'bg-[#FFEBEE] text-[#D32F2F]';
       default:
-        return 'bg-neutral-100 text-neutral-700';
+        return 'bg-[#FAF7F4] text-[#6B5A4E]';
     }
   };
 
