@@ -50,23 +50,24 @@ export default function MyVisits() {
           id,
           property_id,
           visit_type,
-          confirmed_date,
+          visit_date,
+          visit_time,
           status,
           notes,
-          tenant_feedback,
-          tenant_rating,
+          feedback,
+          rating,
           properties!inner(id, title, address, city, main_image)
         `
         )
         .eq('tenant_id', user.id)
-        .order('confirmed_date', { ascending: false });
+        .order('visit_date', { ascending: false });
 
       if (filter === 'upcoming') {
         const today = new Date().toISOString().split('T')[0];
-        query = query.gte('confirmed_date', today ?? '').in('status', ['en_attente', 'confirmee']);
+        query = query.gte('visit_date', today ?? '').in('status', ['en_attente', 'confirmee']);
       } else if (filter === 'past') {
         const today = new Date().toISOString().split('T')[0];
-        query = query.or(`confirmed_date.lt.${today},status.eq.terminee,status.eq.annulee`);
+        query = query.or(`visit_date.lt.${today},status.eq.terminee,status.eq.annulee`);
       }
 
       const { data, error } = await query;
@@ -77,12 +78,12 @@ export default function MyVisits() {
         id: visit.id,
         property_id: visit.property_id,
         visit_type: visit.visit_type || 'physique',
-        visit_date: visit.confirmed_date,
-        visit_time: visit.confirmed_date ? new Date(visit.confirmed_date).toISOString() : '',
+        visit_date: visit.visit_date,
+        visit_time: visit.visit_time,
         status: visit.status || 'en_attente',
         notes: visit.notes,
-        feedback: visit.tenant_feedback,
-        rating: visit.tenant_rating,
+        feedback: visit.feedback,
+        rating: visit.rating,
         property: visit.properties,
       }));
 

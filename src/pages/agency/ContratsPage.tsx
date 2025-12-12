@@ -59,50 +59,92 @@ export default function ContratsPage() {
     if (!user) return;
     setLoading(true);
     try {
-      // Contrats où l'agence (owner/agent) est propriétaire
-      const { data: contractsData, error } = await supabase
-        .from('lease_contracts')
-        .select(`
-          id,
-          contract_number,
-          monthly_rent,
-          deposit_amount,
-          charges_amount,
-          start_date,
-          end_date,
-          status,
-          signed_at,
-          properties (
-            title,
-            city
-          ),
-          tenant:profiles!lease_contracts_tenant_id_fkey (
-            full_name,
-            email,
-            phone
-          )
-        `)
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
+      const selectVariants = [
+        `
+        id,
+        contract_number,
+        monthly_rent,
+        deposit_amount,
+        charges_amount,
+        start_date,
+        end_at,
+        status,
+        properties ( title, city ),
+        tenant:profiles!lease_contracts_tenant_id_fkey ( full_name, email, phone )
+      `,
+        `
+        id,
+        contract_number,
+        monthly_rent,
+        deposit_amount,
+        charges_amount,
+        start_date,
+        end_at,
+        status,
+        properties ( title, city ),
+        tenant:profiles!lease_contracts_tenant_id_fkey ( full_name, email, phone )
+      `,
+        `
+        id,
+        contract_number,
+        monthly_rent,
+        deposit_amount,
+        charges_amount,
+        status,
+        created_at,
+        properties ( title, city ),
+        tenant:profiles!lease_contracts_tenant_id_fkey ( full_name, email, phone )
+      `,
+      ];
 
-      if (error) throw error;
+      let contractsData: any[] | null = null;
+      let lastError: any = null;
 
-      const formatted: Contract[] = (contractsData || []).map((c: any) => ({
-        id: c.id,
-        contract_number: c.contract_number || '—',
-        tenant_name: c.tenant?.full_name || 'Locataire inconnu',
-        tenant_email: c.tenant?.email || null,
-        tenant_phone: c.tenant?.phone || null,
-        property_title: c.properties?.title || 'Propriété inconnue',
-        property_city: c.properties?.city || '',
-        start_date: c.start_date,
-        end_date: c.end_date,
-        monthly_rent: c.monthly_rent || 0,
-        status: c.status || 'inconnu',
-        signed_at: c.signed_at,
-        deposit_amount: c.deposit_amount,
-        charges_amount: c.charges_amount,
-      }));
+      for (const columns of selectVariants) {
+        const { data, error } = await supabase
+          .from('lease_contracts')
+          .select(columns)
+          .eq('owner_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (!error) {
+          contractsData = data || [];
+          lastError = null;
+          break;
+        }
+
+        lastError = error;
+        if ((error as any).code !== '42703') {
+          break; // autre erreur: on sort
+        }
+      }
+
+      if (lastError && !contractsData) {
+        console.warn('Contrats agences: schéma incompatible, aucune donnée chargée', lastError);
+        setContracts([]);
+        return;
+      }
+
+      const formatted: Contract[] = (contractsData || []).map((c: any) => {
+        const start = c.start_date || c.created_at || '';
+        const end = c.end_at || c.created_at || '';
+        return {
+          id: c.id,
+          contract_number: c.contract_number || '—',
+          tenant_name: c.tenant?.full_name || 'Locataire inconnu',
+          tenant_email: c.tenant?.email || null,
+          tenant_phone: c.tenant?.phone || null,
+          property_title: c.properties?.title || 'Propriété inconnue',
+          property_city: c.properties?.city || '',
+          start_date: start,
+          end_date: end,
+          monthly_rent: c.monthly_rent || 0,
+          status: c.status || 'inconnu',
+          signed_at: c.signed_at || null,
+          deposit_amount: c.deposit_amount,
+          charges_amount: c.charges_amount,
+        };
+      });
 
       setContracts(formatted);
     } catch (err) {

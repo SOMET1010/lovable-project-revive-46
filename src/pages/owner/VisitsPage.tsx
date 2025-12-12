@@ -15,6 +15,7 @@ interface VisitRow {
   status: string | null;
   notes: string | null;
   tenant_id?: string | null;
+  confirmed_date?: string | null;
   property: {
     id: string;
     title: string | null;
@@ -71,8 +72,7 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
         .select(
           `
           id,
-          visit_date,
-          visit_time,
+          confirmed_date,
           visit_type,
           status,
           notes,
@@ -87,15 +87,15 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
         `
         )
         .eq('owner_id', user.id)
-        .order('visit_date', { ascending: true })
-        .order('visit_time', { ascending: true });
+        .order('confirmed_date', { ascending: true });
 
       if (error) throw error;
 
       const rows = ((data as VisitRow[]) || []).map((row) => {
-        // Utiliser visit_date et visit_time directement
-        const date = row.visit_date || '';
-        const time = row.visit_time || null;
+        const confirmed = (row as any).confirmed_date || '';
+        const [d, t] = confirmed ? confirmed.split('T') : ['', ''];
+        const date = d || '';
+        const time = t ? t.replace('Z', '') : null;
         return {
           ...row,
           visit_date: date,

@@ -112,21 +112,13 @@ export default function ScheduleVisit() {
     try {
       const { data: existingVisits } = await supabase
         .from('visit_requests')
-        .select('confirmed_date')
+        .select('visit_date, visit_time')
         .eq('property_id', property.id)
         .in('status', ['en_attente', 'confirmee'])
-        .gte('confirmed_date', `${dateStr}T00:00:00`)
-        .lt('confirmed_date', `${nextStr}T00:00:00`);
+        .gte('visit_date', dateStr)
+        .lt('visit_date', nextStr);
 
-      const bookedTimes = new Set(
-        (existingVisits || [])
-          .map((v) => v.confirmed_date)
-          .filter(Boolean)
-          .map((d: string) => {
-            const dt = new Date(d);
-            return dt.toISOString().substring(11, 16); // HH:MM
-          })
-      );
+      const bookedTimes = new Set((existingVisits || []).map((v) => v.visit_time).filter(Boolean));
 
       const slots = DEFAULT_TIME_SLOTS.map((slot) => ({
         ...slot,
@@ -146,16 +138,21 @@ export default function ScheduleVisit() {
 
     setSubmitting(true);
     try {
-      const confirmedDate = new Date(selectedDate);
-      const [hours, minutes] = selectedTime.split(':').map((v) => parseInt(v, 10));
-      if (!isNaN(hours)) confirmedDate.setHours(hours, minutes || 0, 0, 0);
+      const parts = selectedTime.split(':');
+      const hoursStr = parts[0] ?? '0';
+      const minutesStr = parts[1] ?? '0';
+      const hours = parseInt(hoursStr, 10);
+      const minutes = parseInt(minutesStr, 10);
+      const visitDate = new Date(selectedDate);
+      if (!isNaN(hours)) visitDate.setHours(hours, minutes || 0, 0, 0);
 
       const { error } = await supabase.from('visit_requests').insert({
         property_id: property.id,
         tenant_id: user.id,
         owner_id: property.owner_id,
         visit_type: visitType,
-        confirmed_date: confirmedDate.toISOString(),
+        visit_date: selectedDate.toISOString().split('T')[0],
+        visit_time: selectedTime,
         notes: notes || null,
         status: 'en_attente',
       } as never);
