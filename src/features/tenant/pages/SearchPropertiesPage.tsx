@@ -182,7 +182,7 @@ export default function SearchPropertiesPage() {
       
       {/* ==================== HEADER AVEC DÉGRADÉ ALLÉGÉ ==================== */}
       <header 
-        className="relative overflow-hidden pb-8 pt-20 md:pt-24 px-4"
+        className="relative overflow-hidden pb-8 pt-8 md:pt-12 px-4"
         style={{ 
           background: `linear-gradient(to bottom, ${COLORS.chocolat} 0%, #3D2518 100%)` 
         }}
