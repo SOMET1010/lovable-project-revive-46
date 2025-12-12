@@ -81,7 +81,7 @@ export default function ProfileContent() {
     },
   ];
 
-  const trustScore = profile?.trust_score || 0;
+  const trustScore = profile?.trust_score ? Math.round((profile.trust_score / 5) * 100) : 0;
 
   // Calculer et mettre à jour le trust score si nécessaire
   useEffect(() => {
@@ -96,13 +96,16 @@ export default function ProfileContent() {
           // Importer dynamiquement le service de scoring pour éviter les imports circulaires
           const { ScoringService } = await import('@/services/scoringService');
 
-          const scoreBreakdown = await ScoringService.calculateGlobalScore(profile.id);
+          const scoreBreakdown = await ScoringService.calculateGlobalTrustScore(profile.id);
           console.log('Score calculated:', scoreBreakdown);
+
+          // Convertir le score de 0-100 vers 0-5 pour la base de données
+          const normalizedScore = (scoreBreakdown.globalScore / 100) * 5;
 
           // Mettre à jour le score dans la base
           const { error } = await supabase
             .from('profiles')
-            .update({ trust_score: scoreBreakdown.globalScore })
+            .update({ trust_score: normalizedScore })
             .eq('id', profile.id);
 
           if (error) {

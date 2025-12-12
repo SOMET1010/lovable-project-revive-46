@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import {
   FileText,
   Upload,
@@ -72,16 +72,21 @@ export default function DocumentsPage() {
 
   const loadDocuments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_documents')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+      // Get user's documents from profiles table
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('documents')
+        .eq('id', user?.id)
+        .single();
 
       if (error) throw error;
-      setDocuments(data || []);
+
+      // Parse and set documents
+      const docs = profile?.documents || [];
+      setDocuments(docs);
     } catch (error) {
       console.error('Error loading documents:', error);
+      setDocuments([]);
     } finally {
       setLoading(false);
     }
@@ -119,20 +124,37 @@ export default function DocumentsPage() {
         .from('user-documents')
         .getPublicUrl(fileName);
 
-      // Save document record
-      const { error: insertError } = await supabase
-        .from('user_documents')
-        .insert({
-          user_id: user?.id,
-          name: file.name,
-          type: selectedType,
-          file_url: publicUrl,
-          file_type: file.type,
-          file_size: file.size,
-          status: 'pending'
-        });
+      // Get current documents
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('documents')
+        .eq('id', user?.id)
+        .single();
 
-      if (insertError) throw insertError;
+      const currentDocs = profile?.documents || [];
+
+      // Create new document object
+      const newDoc: Document = {
+        id: Date.now().toString(), // Generate unique ID
+        name: file.name,
+        type: selectedType as Document['type'],
+        file_url: publicUrl,
+        file_type: file.type,
+        file_size: file.size,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      };
+
+      // Update documents array
+      const updatedDocs = [...currentDocs, newDoc];
+
+      // Save to profiles table
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ documents: updatedDocs })
+        .eq('id', user?.id);
+
+      if (updateError) throw updateError;
 
       // Reload documents
       await loadDocuments();
@@ -154,19 +176,24 @@ export default function DocumentsPage() {
 
       // Delete from storage
       const filePath = document.file_url.split('/').slice(-2).join('/');
-      await supabase.storage
+      const { error: deleteError } = await supabase.storage
         .from('user-documents')
         .remove([filePath]);
 
-      // Delete from database
-      const { error } = await supabase
-        .from('user_documents')
-        .delete()
-        .eq('id', documentId);
+      if (deleteError) console.error('Storage delete error:', deleteError);
 
-      if (error) throw error;
+      // Remove document from array
+      const updatedDocs = documents.filter(d => d.id !== documentId);
 
-      setDocuments(documents.filter(d => d.id !== documentId));
+      // Update profiles table
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ documents: updatedDocs })
+        .eq('id', user?.id);
+
+      if (updateError) throw updateError;
+
+      setDocuments(updatedDocs);
     } catch (error) {
       console.error('Error deleting document:', error);
       alert('Erreur lors de la suppression du document');

@@ -50,24 +50,22 @@ export default function MyVisits() {
           id,
           property_id,
           visit_type,
-          visit_date,
-          visit_time,
+          confirmed_date,
           status,
           notes,
-          feedback,
-          rating,
+          metadata,
           properties!inner(id, title, address, city, main_image)
         `
         )
         .eq('tenant_id', user.id)
-        .order('visit_date', { ascending: false });
+        .order('confirmed_date', { ascending: false });
 
       if (filter === 'upcoming') {
-        const today = new Date().toISOString().split('T')[0];
-        query = query.gte('visit_date', today ?? '').in('status', ['en_attente', 'confirmee']);
+        const today = new Date().toISOString();
+        query = query.gte('confirmed_date', today).in('status', ['en_attente', 'confirmee']);
       } else if (filter === 'past') {
-        const today = new Date().toISOString().split('T')[0];
-        query = query.or(`visit_date.lt.${today},status.eq.terminee,status.eq.annulee`);
+        const today = new Date().toISOString();
+        query = query.or(`confirmed_date.lt.${today},status.eq.terminee,status.eq.annulee`);
       }
 
       const { data, error } = await query;
@@ -78,12 +76,12 @@ export default function MyVisits() {
         id: visit.id,
         property_id: visit.property_id,
         visit_type: visit.visit_type || 'physique',
-        visit_date: visit.visit_date,
-        visit_time: visit.visit_time,
+        visit_date: visit.confirmed_date || visit.created_at,
+        visit_time: visit.confirmed_date || visit.created_at,
         status: visit.status || 'en_attente',
         notes: visit.notes,
-        feedback: visit.feedback,
-        rating: visit.rating,
+        feedback: visit.metadata?.feedback || null,
+        rating: visit.metadata?.rating || null,
         property: visit.properties,
       }));
 
@@ -107,7 +105,7 @@ export default function MyVisits() {
         .update({
           status: 'annulee',
           cancelled_at: new Date().toISOString(),
-          cancellation_reason: 'Annulée par le visiteur',
+          rejection_reason: 'Annulée par le visiteur',
         })
         .eq('id', visitId);
 
@@ -133,12 +131,28 @@ export default function MyVisits() {
 
     setSubmittingFeedback(true);
     try {
+      // Get current metadata
+      const { data: currentVisit } = await supabase
+        .from('visit_requests')
+        .select('metadata')
+        .eq('id', selectedVisit.id)
+        .single();
+
+      const updatedMetadata = {
+        ...(currentVisit?.metadata || {}),
+        feedback,
+        rating,
+        tenant_feedback: feedback,
+        tenant_rating: rating,
+      };
+
       const { error } = await supabase
         .from('visit_requests')
         .update({
-          feedback,
-          rating,
+          metadata: updatedMetadata,
+          tenant_attended: true,
           status: 'terminee',
+          completed_at: new Date().toISOString(),
         })
         .eq('id', selectedVisit.id);
 
