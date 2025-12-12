@@ -6,6 +6,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { logger } from '@/shared/lib/logger';
+import { isLocalSupabase } from '@/shared/utils/environment';
 
 export interface ApiResponse<T> {
   data: T | null;
@@ -153,6 +154,18 @@ export async function callEdgeFunction<TResponse = unknown>(
     timeout?: number;
   } = {}
 ): Promise<{ data: TResponse | null; error: Error | null }> {
+  // Si Supabase est local, on simule une réponse réussie pour éviter les erreurs 503
+  if (isLocalSupabase()) {
+    console.warn(`Edge Function "${functionName}" appelée en local, simulation de succès.`);
+    // Retourner une réponse simulée selon le type de fonction
+    if (functionName === 'send-email') {
+      // Pour l'envoi d'email, on simule un succès
+      return { data: { success: true, message: 'Email simulé (local)' } as TResponse, error: null };
+    }
+    // Pour d'autres fonctions, on retourne un objet générique
+    return { data: { success: true } as TResponse, error: null };
+  }
+
   const { maxRetries = 2, retryDelay = 1000, timeout = 25000 } = options;
   let lastError: Error | null = null;
 
@@ -164,9 +177,7 @@ export async function callEdgeFunction<TResponse = unknown>(
 
       const { data, error } = (await supabase.functions.invoke(functionName, {
         body,
-        options: {
-          signal: controller.signal,
-        },
+        signal: controller.signal,
       })) as { data: TResponse | null; error: Error | null };
 
       clearTimeout(timeoutId);
@@ -180,13 +191,17 @@ export async function callEdgeFunction<TResponse = unknown>(
         }
 
         // Retry on timeout or server errors
-        if (error.message?.includes('504') || error.message?.includes('timeout') || error.message?.includes('502')) {
+        if (
+          error.message?.includes('504') ||
+          error.message?.includes('timeout') ||
+          error.message?.includes('502')
+        ) {
           console.warn(`Edge Function timeout (attempt ${attempt + 1}/${maxRetries + 1}):`, error);
           lastError = error;
 
           if (attempt < maxRetries) {
             // Wait before retrying with exponential backoff
-            await new Promise(resolve => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
+            await new Promise((resolve) => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
             continue;
           }
         }
@@ -196,14 +211,14 @@ export async function callEdgeFunction<TResponse = unknown>(
       }
 
       return { data, error: null };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Handle AbortError (timeout)
-      if (error.name === 'AbortError') {
+      if (error instanceof Error && error.name === 'AbortError') {
         console.warn(`Edge Function timeout (attempt ${attempt + 1}/${maxRetries + 1})`);
         lastError = new Error(`La fonction a mis trop de temps à répondre (${timeout}ms)`);
 
         if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
+          await new Promise((resolve) => setTimeout(resolve, retryDelay * Math.pow(2, attempt)));
           continue;
         }
       } else {

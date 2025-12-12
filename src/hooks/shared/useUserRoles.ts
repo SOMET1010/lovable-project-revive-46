@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { isLocalSupabase } from '@/shared/utils/environment';
 
 // Flag global pour mémoriser l'absence du RPC et éviter de le rappeler
 const userRolesRpcSkipped = { value: false }; // activer la détection des rôles (trust agent, etc.)
@@ -47,6 +48,19 @@ export function useUserRoles(): UseUserRolesReturn {
     // Pas d'utilisateur connecté
     if (!user?.id) {
       setRoles([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    // Si on est en environnement local, on saute l'appel RPC et on retourne un rôle par défaut
+    if (isLocalSupabase()) {
+      skipRpc.value = true;
+      userRolesRpcSkipped.value = true;
+      // En local, on peut définir un rôle par défaut (ex: 'user')
+      // Pour le développement, on peut aussi simuler d'autres rôles via une variable d'environnement
+      const defaultRole: AppRole = 'user';
+      setRoles([defaultRole]);
       setLoading(false);
       setError(null);
       return;
