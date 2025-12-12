@@ -20,9 +20,8 @@ import { propertyService, PropertyData } from '../../services/propertyService';
 
 interface PropertyFormStep1Props {
   formData: PropertyData;
-  errors: Record<string, string>;
-  updateField: (field: keyof PropertyData, value: any) => void;
-  validateField: (field: keyof PropertyData) => void;
+  errors: Partial<Record<keyof PropertyData, string>>;
+  updateField: (field: keyof PropertyData, value: unknown) => void;
   isSubmitting: boolean;
 }
 
@@ -30,14 +29,9 @@ export const PropertyFormStep1General: React.FC<PropertyFormStep1Props> = ({
   formData,
   errors,
   updateField,
-  validateField,
   isSubmitting: _isSubmitting
 }) => {
   const propertyTypes = propertyService.getPropertyTypes();
-
-  const handleBlur = (field: keyof PropertyData) => {
-    validateField(field);
-  };
 
   return (
     <div className="space-y-8">
@@ -89,7 +83,6 @@ export const PropertyFormStep1General: React.FC<PropertyFormStep1Props> = ({
               type="text"
               value={formData['title']}
               onChange={(e) => updateField('title', e.target.value)}
-              onBlur={() => handleBlur('title')}
               placeholder="Ex: Villa duplex 5 pièces Riviera"
               maxLength={100}
               className={`
@@ -138,7 +131,6 @@ export const PropertyFormStep1General: React.FC<PropertyFormStep1Props> = ({
           <textarea
             value={formData['description']}
             onChange={(e) => updateField('description', e.target.value)}
-            onBlur={() => handleBlur('description')}
             placeholder="Décrivez les atouts de votre bien, son environnement..."
             rows={4}
             maxLength={2000}

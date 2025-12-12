@@ -10,8 +10,8 @@ import { PropertyData } from '../../services/propertyService';
 
 interface PropertyFormStep2Props {
   formData: PropertyData;
-  errors: Record<string, string>;
-  updateField: (field: keyof PropertyData, value: any) => void;
+  errors: Partial<Record<keyof PropertyData, string>>;
+  updateField: (field: keyof PropertyData, value: unknown) => void;
   isSubmitting: boolean;
   subNeighborhood: string;
   setSubNeighborhood: (value: string) => void;

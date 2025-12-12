@@ -10,22 +10,24 @@ import { PropertyData } from '../../services/propertyService';
 
 interface PropertyFormStep3Props {
   formData: PropertyData;
-  errors: Record<string, string>;
+  errors: Partial<Record<keyof PropertyData, string>>;
+  updateField: (field: keyof PropertyData, value: unknown) => void;
   isSubmitting: boolean;
-  onImagesAdd: (files: File[]) => void;
-  onImageRemove: (index: number) => void;
-  onMainImageSet: (index: number) => void;
-  onImagesReorder: (fromIndex: number, toIndex: number) => void;
+  addImages: (files: File[]) => void;
+  removeImage: (index: number) => void;
+  setMainImage: (index: number) => void;
+  reorderImages: (fromIndex: number, toIndex: number) => void;
 }
 
 export const PropertyFormStep3Photos: React.FC<PropertyFormStep3Props> = ({
   formData,
   errors,
+  updateField: _updateField,
   isSubmitting,
-  onImagesAdd,
-  onImageRemove,
-  onMainImageSet,
-  onImagesReorder
+  addImages,
+  removeImage,
+  setMainImage,
+  reorderImages
 }) => {
   return (
     <div className="space-y-6">
@@ -43,10 +45,10 @@ export const PropertyFormStep3Photos: React.FC<PropertyFormStep3Props> = ({
         <PropertyImageUpload
           images={formData['images'] as File[]}
           mainImageIndex={(formData['mainImageIndex'] as number) || 0}
-          onImagesAdd={onImagesAdd}
-          onImageRemove={onImageRemove}
-          onMainImageSet={onMainImageSet}
-          onImagesReorder={onImagesReorder}
+          onImagesAdd={addImages}
+          onImageRemove={removeImage}
+          onMainImageSet={setMainImage}
+          onImagesReorder={reorderImages}
           disabled={isSubmitting}
           maxImages={20}
         />
