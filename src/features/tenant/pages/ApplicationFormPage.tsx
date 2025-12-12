@@ -44,7 +44,7 @@ export default function ApplicationFormPage() {
   const [success, setSuccess] = useState(false);
   const [existingApplication, setExistingApplication] = useState(false);
   
-  const { step, slideDirection, nextStep, prevStep } = useFormStepper(1, 2);
+  const { step, slideDirection, nextStep, prevStep, goToStep } = useFormStepper(1, 2);
   const isVerified = profile?.is_verified ?? false;
   
   // Calcul du score de candidature
@@ -232,10 +232,6 @@ export default function ApplicationFormPage() {
     );
   }
 
-  const steps = [
-    { number: 1, title: 'Mon profil' },
-    { number: 2, title: 'Motivation' }
-  ];
 
   // Profil adapté pour le sous-composant
   const profileForStep = profile ? {
@@ -285,7 +281,13 @@ export default function ApplicationFormPage() {
       </div>
 
       {/* Stepper */}
-      <FormStepper steps={steps} currentStep={step} className="mb-8" />
+      <FormStepper 
+        currentStep={step} 
+        totalSteps={2} 
+        onStepChange={goToStep}
+        labels={['Mon profil', 'Motivation']}
+        className="mb-8" 
+      />
 
       {/* Étape 1 - Mon profil */}
       <FormStepContent step={1} currentStep={step} slideDirection={slideDirection}>
