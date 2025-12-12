@@ -18,7 +18,6 @@ export default function ServiceProvidersPage() {
         </div>
         <Link to="/admin/tableau-de-bord">
           <Button variant="outline" className="gap-2">
-            <ArrowLeft className="w-4 h-4" />
             Retour au Dashboard
           </Button>
         </Link>

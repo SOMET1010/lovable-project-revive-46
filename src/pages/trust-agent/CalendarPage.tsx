@@ -95,12 +95,10 @@ export default function CalendarPage() {
         <div className="flex items-center justify-between mb-4">
           <Link to="/trust-agent/dashboard">
             <Button variant="ghost" size="small" className="-ml-2">
-              <ArrowLeft className="h-4 w-4 mr-2" />
               Retour au dashboard
             </Button>
           </Link>
           <Button onClick={() => handlePlanMission(new Date())}>
-            <Plus className="h-4 w-4 mr-2" />
             Nouvelle Mission
           </Button>
         </div>

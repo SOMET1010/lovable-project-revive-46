@@ -52,8 +52,12 @@ export default function PropertyCertificationPage() {
   const [certifying, setCertifying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [hasAnsutColumns, setHasAnsutColumns] = useState(
-    typeof window !== 'undefined' && localStorage.getItem('has_ansut_columns') === 'true'
+    false  // Forcer à false pour redétecter à chaque chargement
   );
+
+  // Debug: Afficher l'état initial
+  console.log('Initial hasAnsutColumns:', hasAnsutColumns);
+  console.log('localStorage has_ansut_columns:', typeof window !== 'undefined' ? localStorage.getItem('has_ansut_columns') : 'N/A');
 
   const [checklist, setChecklist] = useState<ChecklistItem[]>([
     { id: 'electricity', label: 'Installation électrique conforme', icon: Zap, checked: false },
@@ -156,14 +160,39 @@ export default function PropertyCertificationPage() {
   const allChecksPassed = checklist.every((item) => item.checked);
 
   const handleCertify = async () => {
-    if (!selectedProperty || !user || !allChecksPassed) return;
+    console.log('=== handleCertify START ===');
+    console.log('selectedProperty:', selectedProperty?.id);
+    console.log('user:', user?.email);
+    console.log('allChecksPassed:', allChecksPassed);
+    console.log('hasAnsutColumns:', hasAnsutColumns);
+    console.log('checklist:', checklist);
+
+    if (!selectedProperty) {
+      console.log('❌ No selected property');
+      toast.error('Sélectionnez une propriété à certifier.');
+      return;
+    }
+    if (!user) {
+      console.log('❌ No user');
+      toast.error('Session expirée, veuillez vous reconnecter.');
+      return;
+    }
+    if (!allChecksPassed) {
+      console.log('❌ Not all checks passed');
+      const unchecked = checklist.filter(c => !c.checked);
+      console.log('Unchecked items:', unchecked);
+      toast.error('Cochez tous les points de conformité avant de certifier.');
+      return;
+    }
     if (!hasAnsutColumns) {
+      console.log('❌ Missing ANSUT columns');
       toast.error(
         'Le schéma de la base ne contient pas les colonnes ANSUT. Ajoutez-les avant de certifier (ansut_verified, ansut_verification_date, ansut_certificate_url).'
       );
       return;
     }
 
+    console.log('✅ All checks passed, starting certification...');
     setCertifying(true);
     try {
       // Update property with ANSUT certification
@@ -173,12 +202,15 @@ export default function PropertyCertificationPage() {
         ansut_certificate_url: certificationData.ansutCertificateUrl || null,
       };
 
+      console.log('Update payload:', updatePayload);
+
       const { error: updateError } = await supabase
         .from('properties')
         .update(updatePayload)
         .eq('id', selectedProperty.id);
 
       if (updateError) {
+        console.log('❌ Update error:', updateError);
         const code = (updateError as { code?: string }).code;
         if (code === '42703' || code === 'PGRST204') {
           toast.error(
@@ -188,6 +220,8 @@ export default function PropertyCertificationPage() {
         }
         throw updateError;
       }
+
+      console.log('✅ Property updated successfully');
 
       // Log the certification action (best-effort)
       try {
@@ -450,7 +484,13 @@ export default function PropertyCertificationPage() {
                   {/* Submit */}
                   <Button
                     className="w-full"
-                    onClick={handleCertify}
+                    onClick={() => {
+                      console.log('🔘 BUTTON CLICKED!');
+                      console.log('🔘 Button disabled:', certifying || !allChecksPassed);
+                      console.log('🔘 certifying:', certifying);
+                      console.log('🔘 allChecksPassed:', allChecksPassed);
+                      handleCertify();
+                    }}
                     disabled={certifying || !allChecksPassed}
                   >
                     {certifying ? (
@@ -459,7 +499,6 @@ export default function PropertyCertificationPage() {
                       `${checklist.filter((c) => !c.checked).length} vérification(s) manquante(s)`
                     ) : (
                       <>
-                        <CheckCircle2 className="h-4 w-4 mr-2" />
                         Certifier cette propriété
                       </>
                     )}
