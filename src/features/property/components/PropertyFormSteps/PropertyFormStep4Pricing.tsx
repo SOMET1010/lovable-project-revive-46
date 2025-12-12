@@ -21,9 +21,8 @@ import { PropertyData } from '../../services/propertyService';
 
 interface PropertyFormStep4Props {
   formData: PropertyData;
-  errors: Record<string, string>;
-  updateField: (field: keyof PropertyData, value: any) => void;
-  validateField: (field: keyof PropertyData) => void;
+  errors: Partial<Record<keyof PropertyData, string>>;
+  updateField: (field: keyof PropertyData, value: unknown) => void;
   isSubmitting: boolean;
   // CNI verification props
   cniFile: File | null;
@@ -42,7 +41,6 @@ export const PropertyFormStep4Pricing: React.FC<PropertyFormStep4Props> = ({
   formData,
   errors,
   updateField,
-  validateField,
   isSubmitting: _isSubmitting,
   cniFile,
   cniPreviewUrl,
@@ -55,10 +53,6 @@ export const PropertyFormStep4Pricing: React.FC<PropertyFormStep4Props> = ({
   onStartVerification,
   onRetryVerification
 }) => {
-  const handleBlur = (field: keyof PropertyData) => {
-    validateField(field);
-  };
-
   return (
     <div className="space-y-6">
       {/* Prix */}
@@ -120,7 +114,6 @@ export const PropertyFormStep4Pricing: React.FC<PropertyFormStep4Props> = ({
               type="text"
               value={formData['ownerName']}
               onChange={(e) => updateField('ownerName', e.target.value)}
-              onBlur={() => handleBlur('ownerName')}
               placeholder="Votre nom et prénom"
               className={`
                 w-full px-4 py-3.5 rounded-xl border-2 transition-all font-medium text-[#2C1810]
@@ -139,7 +132,6 @@ export const PropertyFormStep4Pricing: React.FC<PropertyFormStep4Props> = ({
               type="email"
               value={formData['ownerEmail']}
               onChange={(e) => updateField('ownerEmail', e.target.value)}
-              onBlur={() => handleBlur('ownerEmail')}
               placeholder="votre@email.com"
               className={`
                 w-full px-4 py-3.5 rounded-xl border-2 transition-all font-medium text-[#2C1810]
@@ -158,7 +150,6 @@ export const PropertyFormStep4Pricing: React.FC<PropertyFormStep4Props> = ({
               type="tel"
               value={formData['ownerPhone']}
               onChange={(e) => updateField('ownerPhone', e.target.value)}
-              onBlur={() => handleBlur('ownerPhone')}
               placeholder="+225 XX XX XX XX"
               className={`
                 w-full px-4 py-3.5 rounded-xl border-2 transition-all font-medium text-[#2C1810]
