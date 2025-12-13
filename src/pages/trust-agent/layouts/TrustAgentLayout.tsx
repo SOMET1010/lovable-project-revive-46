@@ -12,6 +12,7 @@ import {
   History,
   Calendar,
   LogOut,
+  Building,
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { Badge } from '@/shared/ui/badge';
@@ -24,6 +25,7 @@ const navItems = [
   { path: '/trust-agent/missions', label: 'Mes Missions', icon: ClipboardList },
   { path: '/trust-agent/certifications/users', label: 'Certifier Utilisateurs', icon: UserCheck },
   { path: '/trust-agent/certifications/properties', label: 'Certifier Propriétés', icon: Home },
+  { path: '/trust-agent/properties', label: 'Gestion des Propriétés', icon: Building },
   { path: '/trust-agent/history', label: 'Historique', icon: History },
 ];
 

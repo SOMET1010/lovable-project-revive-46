@@ -129,8 +129,9 @@ const enrichPropertyWithOwner = async (
       // Backward compatibility for component code
       bedrooms_count: property.bedrooms,
       bathrooms_count: property.bathrooms,
-      // Price field compatibility
+      // Price field compatibility - standardized to monthly_rent
       price: property.monthly_rent || property.price,
+      monthly_rent: property.monthly_rent || property.price,
     } as PropertyWithOwnerScore;
   }
 

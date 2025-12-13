@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
+import { adminApi } from '@/features/admin/services/admin.api';
 import {
   Users,
   Search,
@@ -13,8 +12,6 @@ import {
   RefreshCw,
   Download,
   Upload,
-  ChevronDown,
-  ChevronUp,
   User,
   Building,
   Phone,
@@ -56,7 +53,6 @@ const CITIES = [
 ];
 
 export default function AdminUsers() {
-  const { user: _currentUser } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
@@ -72,64 +68,58 @@ export default function AdminUsers() {
     dateRange: '30d',
   });
 
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof UserProfile | null;
-    direction: 'asc' | 'desc';
-  }>({ key: null, direction: 'asc' });
+  // Note: le tri est géré côté serveur via adminApi, pas de tri côté client pour l'instant
 
-  useEffect(() => {
-    loadUsers();
-  }, [filters, currentPage, sortConfig]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
 
-      let query = supabase
-        .from('profiles')
-        .select('id, email, full_name, phone, user_type, city, created_at, updated_at', {
-          count: 'exact',
-        });
+      // Convertir les filtres de la page vers le format attendu par adminApi
+      const apiFilters: {
+        user_type?: string;
+        is_verified?: boolean;
+        search?: string;
+      } = {};
 
       if (filters.search) {
-        query = query.or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`);
+        apiFilters.search = filters.search;
       }
       if (filters.user_type) {
-        query = query.eq('user_type', filters.user_type);
+        apiFilters.user_type = filters.user_type;
       }
-      if (filters.city) {
-        query = query.eq('city', filters.city);
-      }
+      // Note: le filtre city n'est pas supporté par adminApi.getUsers actuellement
+      // On pourrait l'ajouter plus tard
 
-      if (sortConfig.key) {
-        query = query.order(sortConfig.key, { ascending: sortConfig.direction === 'asc' });
-      } else {
-        query = query.order('created_at', { ascending: false });
-      }
+      const { users: apiUsers, total } = await adminApi.getUsers(
+        currentPage,
+        usersPerPage,
+        apiFilters
+      );
 
-      const from = (currentPage - 1) * usersPerPage;
-      const to = from + usersPerPage - 1;
-      query = query.range(from, to);
+      // Convertir les utilisateurs de l'API vers le format de la page
+      const convertedUsers: UserProfile[] = apiUsers.map((user) => ({
+        id: user.id,
+        email: user.email,
+        full_name: user.full_name,
+        phone: null, // Non disponible dans l'API actuelle
+        user_type: user.user_type,
+        city: null, // Non disponible dans l'API actuelle
+        created_at: user.created_at,
+        updated_at: null, // Non disponible
+      }));
 
-      const { data, error, count } = await query;
-
-      if (error) throw error;
-
-      setUsers(data || []);
-      setTotalUsers(count || 0);
+      setUsers(convertedUsers);
+      setTotalUsers(total);
     } catch (err) {
       console.error('Error loading users:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, currentPage, usersPerPage]);
 
-  const handleSort = (key: keyof UserProfile) => {
-    setSortConfig({
-      key,
-      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc',
-    });
-  };
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const handleSelectUser = (userId: string) => {
     setSelectedUsers((prev) =>
@@ -146,16 +136,15 @@ export default function AdminUsers() {
 
     try {
       if (action === 'delete') {
-        const { error } = await supabase.from('profiles').delete().in('id', selectedUsers);
-
-        if (error) throw error;
+        // Supprimer chaque utilisateur avec une raison
+        for (const userId of selectedUsers) {
+          await adminApi.deleteUser(userId, 'Suppression en masse par administrateur');
+        }
       } else {
-        const { error } = await supabase
-          .from('profiles')
-          .update({ user_type: action })
-          .in('id', selectedUsers);
-
-        if (error) throw error;
+        // Changer le rôle de chaque utilisateur
+        for (const userId of selectedUsers) {
+          await adminApi.changeUserRole(userId, action);
+        }
       }
 
       setSelectedUsers([]);
@@ -331,19 +320,8 @@ export default function AdminUsers() {
                     className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
                   />
                 </th>
-                <th
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('email')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Utilisateur</span>
-                    {sortConfig.key === 'email' &&
-                      (sortConfig.direction === 'asc' ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      ))}
-                  </div>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Utilisateur
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Type
@@ -351,19 +329,8 @@ export default function AdminUsers() {
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ville
                 </th>
-                <th
-                  className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleSort('created_at')}
-                >
-                  <div className="flex items-center space-x-1">
-                    <span>Inscrit le</span>
-                    {sortConfig.key === 'created_at' &&
-                      (sortConfig.direction === 'asc' ? (
-                        <ChevronUp className="w-4 h-4" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4" />
-                      ))}
-                  </div>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Inscrit le
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions

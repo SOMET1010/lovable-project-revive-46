@@ -38,6 +38,24 @@ export interface SystemStats {
   verification_requests: number;
 }
 
+export interface PlatformStats {
+  total_users: number;
+  total_properties: number;
+  total_leases: number;
+  active_leases: number;
+  total_payments: number;
+  total_visits: number;
+  pending_verifications: number;
+  pending_maintenance: number;
+  total_revenue: number;
+  monthly_growth: number;
+  error_rate: number;
+  uptime: number;
+  total_conversations?: number;
+  total_messages?: number;
+  total_feedbacks?: number;
+}
+
 /**
  * API d'administration sécurisée
  */
@@ -48,11 +66,7 @@ export const adminApi = {
   getSystemSettings: async (category?: string): Promise<SystemSetting[]> => {
     await requirePermission('canAccessAdminPanel')();
 
-    let query = supabase
-      .from('system_settings')
-      .select('*')
-      .order('category')
-      .order('setting_key');
+    let query = supabase.from('system_settings').select('*').order('category').order('setting_key');
 
     if (category) {
       query = query.eq('category', category);
@@ -70,14 +84,16 @@ export const adminApi = {
   updateSystemSetting: async (id: string, setting_value: Json): Promise<SystemSetting> => {
     await requirePermission('canAccessAdminPanel')();
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
 
     const { data, error } = await supabase
       .from('system_settings')
       .update({
         setting_value,
-        updated_by: user.id
+        updated_by: user.id,
       })
       .eq('id', id)
       .select()
@@ -90,11 +106,15 @@ export const adminApi = {
   /**
    * Récupère la liste des utilisateurs avec pagination
    */
-  getUsers: async (page = 1, limit = 50, filters?: {
-    user_type?: string;
-    is_verified?: boolean;
-    search?: string;
-  }): Promise<{ users: UserProfile[]; total: number }> => {
+  getUsers: async (
+    page = 1,
+    limit = 50,
+    filters?: {
+      user_type?: string;
+      is_verified?: boolean;
+      search?: string;
+    }
+  ): Promise<{ users: UserProfile[]; total: number }> => {
     await requirePermission('canManageUsers')();
 
     let query = supabase
@@ -120,7 +140,7 @@ export const adminApi = {
 
     return {
       users: data as UserProfile[],
-      total: count || 0
+      total: count || 0,
     };
   },
 
@@ -135,7 +155,7 @@ export const adminApi = {
       .update({
         is_verified: true,
         verified_by: verifiedBy || (await supabase.auth.getUser()).data.user?.id,
-        verified_at: new Date().toISOString()
+        verified_at: new Date().toISOString(),
       })
       .eq('id', userId)
       .select()
@@ -156,7 +176,7 @@ export const adminApi = {
       .update({
         is_suspended: true,
         suspension_reason: reason,
-        suspended_at: new Date().toISOString()
+        suspended_at: new Date().toISOString(),
       })
       .eq('id', userId)
       .select()
@@ -177,7 +197,7 @@ export const adminApi = {
       .update({
         is_suspended: false,
         suspension_reason: null,
-        suspended_at: null
+        suspended_at: null,
       })
       .eq('id', userId)
       .select()
@@ -198,7 +218,7 @@ export const adminApi = {
       .update({
         user_type: newRole,
         role_changed_at: new Date().toISOString(),
-        role_changed_by: (await supabase.auth.getUser()).data.user?.id
+        role_changed_by: (await supabase.auth.getUser()).data.user?.id,
       })
       .eq('id', userId)
       .select()
@@ -214,13 +234,15 @@ export const adminApi = {
   getSystemStats: async (): Promise<SystemStats> => {
     await requirePermission('canAccessAdminPanel')();
 
-    const [usersRes, propertiesRes, contractsRes, listingsRes, applicationsRes] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact' }),
-      supabase.from('properties').select('id', { count: 'exact' }),
-      supabase.from('contracts').select('id', { count: 'exact' }),
-      supabase.from('properties').select('id', { count: 'exact' }).eq('is_active', true),
-      supabase.from('applications').select('id', { count: 'exact' }).eq('status', 'pending')
-    ]);
+    const [usersRes, propertiesRes, contractsRes, listingsRes, applicationsRes] = await Promise.all(
+      [
+        supabase.from('profiles').select('id', { count: 'exact' }),
+        supabase.from('properties').select('id', { count: 'exact' }),
+        supabase.from('contracts').select('id', { count: 'exact' }),
+        supabase.from('properties').select('id', { count: 'exact' }).eq('is_active', true),
+        supabase.from('applications').select('id', { count: 'exact' }).eq('status', 'pending'),
+      ]
+    );
 
     return {
       total_users: usersRes.count || 0,
@@ -228,7 +250,7 @@ export const adminApi = {
       total_contracts: contractsRes.count || 0,
       active_listings: listingsRes.count || 0,
       pending_applications: applicationsRes.count || 0,
-      verification_requests: 0 // À implémenter avec la table appropriée
+      verification_requests: 0, // À implémenter avec la table appropriée
     };
   },
 
@@ -243,7 +265,7 @@ export const adminApi = {
       .update({
         deleted_at: new Date().toISOString(),
         deletion_reason: reason,
-        deleted_by: (await supabase.auth.getUser()).data.user?.id
+        deleted_by: (await supabase.auth.getUser()).data.user?.id,
       })
       .eq('id', userId);
 
@@ -253,12 +275,16 @@ export const adminApi = {
   /**
    * Récupère les logs d'audit
    */
-  getAuditLogs: async (page = 1, limit = 100, filters?: {
-    user_id?: string;
-    action?: string;
-    date_from?: string;
-    date_to?: string;
-  }): Promise<{ logs: any[]; total: number }> => {
+  getAuditLogs: async (
+    page = 1,
+    limit = 100,
+    filters?: {
+      user_id?: string;
+      action?: string;
+      date_from?: string;
+      date_to?: string;
+    }
+  ): Promise<{ logs: unknown[]; total: number }> => {
     await requireRole(['admin'])();
 
     let query = supabase
@@ -287,7 +313,38 @@ export const adminApi = {
 
     return {
       logs: data || [],
-      total: count || 0
+      total: count || 0,
     };
-  }
+  },
+
+  /**
+   * Récupère les statistiques de plateforme via RPC
+   */
+  getPlatformStats: async (): Promise<PlatformStats> => {
+    await requirePermission('canAccessAdminPanel')();
+
+    const { data, error } = await supabase.rpc('get_platform_stats');
+
+    if (error) throw error;
+
+    // Convertir les données JSON en PlatformStats
+    return data as PlatformStats;
+  },
+
+  /**
+   * Récupère les logs d'audit admin (table admin_audit_logs)
+   */
+  getAdminAuditLogs: async (limit = 20): Promise<unknown[]> => {
+    await requireRole(['admin'])();
+
+    const { data, error } = await supabase
+      .from('admin_audit_logs')
+      .select('id, action, entity_type, user_email, created_at, details')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+
+    return data || [];
+  },
 };

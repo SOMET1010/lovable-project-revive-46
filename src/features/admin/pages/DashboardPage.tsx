@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
+import { adminApi } from '@/features/admin/services/admin.api';
 import {
   Users,
   Home,
@@ -80,13 +81,7 @@ export default function AdminDashboard() {
   const [selectedTimeRange, setSelectedTimeRange] = useState('24h');
   const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      checkAdminAccess();
-    }
-  }, [user]);
-
-  const checkAdminAccess = async () => {
+  const checkAdminAccess = useCallback(async () => {
     try {
       const { data: hasAdminRole, error } = await supabase.rpc('has_role', {
         _user_id: user?.id ?? '',
@@ -106,27 +101,23 @@ export default function AdminDashboard() {
       console.error('Error checking admin access:', err);
       navigate('/');
     }
-  };
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      checkAdminAccess();
+    }
+  }, [user, checkAdminAccess]);
 
   const loadDashboardData = async () => {
     try {
-      const { data: statsData, error: statsError } = await supabase.rpc('get_platform_stats');
+      // Utiliser adminApi pour les statistiques
+      const statsData = await adminApi.getPlatformStats();
+      setStats(statsData);
 
-      if (statsError) throw statsError;
-
-      if (statsData && typeof statsData === 'object' && !Array.isArray(statsData)) {
-        setStats(statsData as unknown as PlatformStats);
-      }
-
-      const { data: activitiesData } = await supabase
-        .from('admin_audit_logs')
-        .select('id, action, entity_type, user_email, created_at, details')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (activitiesData) {
-        setActivities(activitiesData);
-      }
+      // Utiliser adminApi pour les logs d'audit admin
+      const activitiesData = await adminApi.getAdminAuditLogs(20);
+      setActivities(activitiesData as RecentActivity[]);
 
       setAlerts([
         {
