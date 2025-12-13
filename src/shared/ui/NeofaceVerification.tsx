@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
   Camera, CheckCircle2, XCircle, Loader2, RefreshCw, 
   ShieldCheck, ScanFace, Lock
@@ -6,6 +6,7 @@ import {
 import { Button } from './Button';
 import { supabase } from '@/integrations/supabase/client';
 import SelfieCaptureComponent from './SelfieCaptureComponent';
+import { usePolling } from '@/shared/hooks/usePolling';
 
 // --- TYPES ---
 
@@ -21,6 +22,12 @@ interface NeofaceVerificationProps {
   cniPhotoUrl: string;
   onVerified: (verificationData: VerificationData) => void;
   onFailed: (error: string) => void;
+}
+
+interface VerificationResult {
+  status: 'verified' | 'failed';
+  matching_score?: number;
+  message?: string;
 }
 
 type VerificationStatus = 
@@ -52,7 +59,43 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const [matchingScore, setMatchingScore] = useState<number | null>(null);
   const [progressMessage, setProgressMessage] = useState<string>('');
   const [pollCount, setPollCount] = useState(0);
-  const pollingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // --- CALLBACK HANDLERS (stable references) ---
+  
+  const handleSuccess = useCallback((data: { matching_score?: number }) => {
+    setStatus('success');
+    setMatchingScore(data.matching_score ?? null);
+    setProgressMessage('Identité confirmée !');
+    
+    onVerified({
+      document_id: documentId!,
+      matching_score: data.matching_score,
+      verified_at: new Date().toISOString(),
+      provider: 'neoface'
+    });
+  }, [documentId, onVerified]);
+
+  const handlePollingError = useCallback((err: Error) => {
+    setStatus('error');
+    setError(err.message);
+    onFailed(err.message);
+  }, [onFailed]);
+
+  const handlePollingTimeout = useCallback(() => {
+    setStatus('error');
+    setError('Délai d\'attente dépassé. Veuillez réessayer.');
+    onFailed('Timeout de vérification');
+  }, [onFailed]);
+
+  // --- HOOK POLLING GÉNÉRIQUE ---
+  
+  const polling = usePolling<VerificationResult>({
+    onSuccess: handleSuccess,
+    onError: handlePollingError,
+    onTimeout: handlePollingTimeout,
+    intervalMs: POLL_INTERVAL_MS,
+    maxAttempts: MAX_POLL_ATTEMPTS,
+  });
 
   // --- ÉTAPE 1: Upload du document ---
 
@@ -118,11 +161,33 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         setError(msg);
         onFailed(msg);
       } else if (data?.status === 'waiting') {
-        // NeoFace traite de manière asynchrone, démarrer le polling
+        // NeoFace traite de manière asynchrone, démarrer le polling avec le hook
         setStatus('polling');
         setPollCount(0);
         setProgressMessage('Analyse biométrique en cours...');
-        startPolling();
+        
+        polling.start(async () => {
+          setPollCount(prev => prev + 1);
+          setProgressMessage(`Analyse en cours... (${pollCount + 1}/${MAX_POLL_ATTEMPTS})`);
+          
+          const { data: statusData, error: statusError } = await supabase.functions.invoke('neoface-verify', {
+            body: { 
+              action: 'check_status', 
+              document_id: documentId,
+              verification_id: verificationId,
+              user_id: userId
+            },
+          });
+          
+          if (statusError) throw new Error(statusError.message);
+          
+          if (statusData?.status === 'verified' || statusData?.status === 'failed') {
+            return statusData as VerificationResult;
+          }
+          
+          // Continue polling (return null)
+          return null;
+        });
       } else {
         throw new Error('Réponse inattendue du serveur.');
       }
@@ -133,76 +198,10 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       setError(msg);
       onFailed(msg);
     }
-  };
-
-  // --- POLLING pour état "waiting" ---
-
-  const startPolling = () => {
-    if (pollingRef.current) clearTimeout(pollingRef.current);
-    pollVerificationStatus(1);
-  };
-
-  const pollVerificationStatus = async (attempt: number) => {
-    if (attempt > MAX_POLL_ATTEMPTS) {
-      setStatus('error');
-      setError('Délai d\'attente dépassé. Veuillez réessayer.');
-      onFailed('Timeout de vérification');
-      return;
-    }
-
-    setPollCount(attempt);
-    setProgressMessage(`Analyse en cours... (${attempt}/${MAX_POLL_ATTEMPTS})`);
-
-    try {
-      const { data, error: invokeError } = await supabase.functions.invoke('neoface-verify', {
-        body: { 
-          action: 'check_status', 
-          document_id: documentId,
-          verification_id: verificationId,
-          user_id: userId
-        },
-      });
-
-      if (invokeError) throw new Error(invokeError.message);
-
-      if (data?.status === 'verified') {
-        handleSuccess(data);
-      } else if (data?.status === 'failed') {
-        const msg = data.message || "La correspondance faciale a échoué.";
-        setStatus('error');
-        setError(msg);
-        onFailed(msg);
-      } else if (data?.status === 'waiting') {
-        // Continuer le polling
-        pollingRef.current = setTimeout(() => {
-          pollVerificationStatus(attempt + 1);
-        }, POLL_INTERVAL_MS);
-      } else {
-        throw new Error('Réponse inattendue du serveur.');
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Erreur lors de la vérification';
-      setStatus('error');
-      setError(msg);
-      onFailed(msg);
-    }
-  };
-
-  const handleSuccess = (data: { matching_score?: number }) => {
-    setStatus('success');
-    setMatchingScore(data.matching_score ?? null);
-    setProgressMessage('Identité confirmée !');
-    
-    onVerified({
-      document_id: documentId!,
-      matching_score: data.matching_score,
-      verified_at: new Date().toISOString(),
-      provider: 'neoface'
-    });
   };
 
   const handleRetry = () => {
-    if (pollingRef.current) clearTimeout(pollingRef.current);
+    polling.stop();
     setStatus('idle');
     setError(null);
     setDocumentId(null);
