@@ -96,7 +96,7 @@ export default function BiometricVerificationPage() {
   const stepLabels = ['Instructions', 'Photo CNI', 'Vérification'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FDF6E3] via-white to-[#FDF6E3]">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#FDF6E3] via-white to-[#FDF6E3] flex flex-col">
       {/* Header Premium Ivorian */}
       <div className="bg-gradient-to-r from-[#3C2A1E] to-[#5D4037] text-white py-8">
         <div className="container mx-auto px-4">
@@ -119,7 +119,7 @@ export default function BiometricVerificationPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-2xl">
+      <div className="flex-1 w-full mx-auto px-4 lg:px-8 py-10 max-w-5xl">
         {/* Stepper */}
         <div className="mb-8">
           <FormStepper

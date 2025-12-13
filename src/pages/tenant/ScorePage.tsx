@@ -7,7 +7,6 @@ import {
   History,
   CheckCircle,
   XCircle,
-  ArrowRight,
   TrendingUp,
   Award,
   AlertCircle,
@@ -143,7 +142,7 @@ const ScorePage: React.FC = () => {
                       <Button
                         variant="outline"
                         size="small"
-                        onClick={() => navigate('/profil')}
+                        onClick={() => navigate('/locataire/profil')}
                         className="w-full"
                       >
                         Modifier le profil
