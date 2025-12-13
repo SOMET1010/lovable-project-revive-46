@@ -46,3 +46,6 @@ export type { Agency, MandatePermissions, MandateScope, AgencyMandate, CreateMan
 
 // Native platform hooks
 export * from './native';
+
+// Polling hook for async operations
+export { usePolling } from './usePolling';
