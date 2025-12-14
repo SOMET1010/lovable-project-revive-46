@@ -1,8 +1,8 @@
 import { lazy, Suspense } from 'react';
 import { Map, MapPin } from 'lucide-react';
 
-// Utiliser uniquement LeafletMap via MapboxMapGated (OpenStreetMap gratuit)
-const MapboxMapGated = lazy(() => import('./MapboxMapGated'));
+// Utiliser uniquement LeafletMap via MapGated (OpenStreetMap gratuit)
+const MapGated = lazy(() => import('./MapGated'));
 
 interface Property {
   id: string;
@@ -42,7 +42,7 @@ interface MapWrapperProps {
 export default function MapWrapper(props: MapWrapperProps) {
   return (
     <Suspense fallback={<MapLoadingSkeleton height={props.height} />}>
-      <MapboxMapGated {...props} />
+      <MapGated {...props} />
     </Suspense>
   );
 }

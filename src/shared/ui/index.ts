@@ -100,7 +100,7 @@ export type { FormStepperProps, FormStepContentProps } from './FormStepper';
 
 // Feature-gated components
 export { FeatureGate } from './FeatureGate';
-export { default as MapboxMapGated } from './MapboxMapGated';
+export { default as MapGated, default as MapboxMapGated } from './MapGated';
 export { default as ElectronicSignatureGated } from './ElectronicSignatureGated';
 export { default as MobileMoneyGated } from './MobileMoneyGated';
 

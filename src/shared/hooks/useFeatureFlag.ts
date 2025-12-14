@@ -14,8 +14,7 @@ export interface FeatureFlag {
 export const FEATURE_FLAGS = {
   ONECI_VERIFICATION: 'oneci_verification',
   CNAM_VERIFICATION: 'cnam_verification',
-  MAPBOX_MAPS: 'mapbox_maps',
-  AZURE_MAPS: 'azure_maps',
+  OSM_MAPS: 'osm_maps',
   FACIAL_VERIFICATION: 'facial_verification',
   CRYPTONEO_SIGNATURE: 'cryptoneo_signature',
   AI_CHATBOT: 'ai_chatbot',

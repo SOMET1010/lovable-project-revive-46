@@ -94,16 +94,10 @@ class ApiKeysConfig {
   };
 
   readonly maps = {
-    mapbox: {
-      key: import.meta.env['VITE_MAPBOX_PUBLIC_TOKEN'] || '',
-      endpoint: 'https://api.mapbox.com',
-      isConfigured: !!import.meta.env['VITE_MAPBOX_PUBLIC_TOKEN'],
-    } as MapConfig,
-
-    googleMaps: {
-      key: import.meta.env['VITE_GOOGLE_MAPS_API_KEY'] || '',
-      endpoint: 'https://maps.googleapis.com',
-      isConfigured: !!import.meta.env['VITE_GOOGLE_MAPS_API_KEY'],
+    osm: {
+      key: '', // Aucune clé requise - OpenStreetMap est gratuit
+      endpoint: 'https://nominatim.openstreetmap.org',
+      isConfigured: true, // Toujours configuré (gratuit)
     } as MapConfig,
   };
 
@@ -199,9 +193,7 @@ class ApiKeysConfig {
       warnings.push('CryptoNeo - La signature électronique ne sera pas disponible');
     }
 
-    if (!this.maps.mapbox.isConfigured) {
-      warnings.push('Mapbox - Les cartes ne seront pas affichées correctement');
-    }
+    // OpenStreetMap ne nécessite pas de configuration (gratuit)
 
     return {
       isValid: missing.length === 0,
@@ -216,8 +208,7 @@ class ApiKeysConfig {
       azureOpenAI: this.azure.openai.isConfigured,
       azureAIServices: this.azure.aiServices.isConfigured,
       azureSpeech: this.azure.speech.isConfigured,
-      mapbox: this.maps.mapbox.isConfigured,
-      googleMaps: this.maps.googleMaps.isConfigured,
+      openStreetMap: true, // Toujours disponible (gratuit)
       inTouchPayment: this.payment.inTouch.isConfigured,
       neofaceVerification: this.verification.neoface.isConfigured,
       smilelessVerification: this.verification.smileless.isConfigured,
