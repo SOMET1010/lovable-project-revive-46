@@ -68,20 +68,22 @@ export default function Layout() {
       {shouldShowHeaderFooter && <SUTAChatWidget mode="floating" position="bottom-right" />}
       <ChunkLoadErrorBoundary>
         <Suspense fallback={<GlobalLoadingSkeleton variant={skeletonVariant} />}>
-          {/* Add padding-bottom on mobile for bottom navigation */}
-          <main 
-            id="main-content" 
-            role="main"
-            tabIndex={-1}
-            className={shouldShowHeaderFooter ? 'min-h-screen pb-20 md:pb-0 focus:outline-none' : 'focus:outline-none'}
-          >
-            <PageTransition key={location.pathname}>
-              <Outlet />
-            </PageTransition>
-          </main>
+          {/* Wrapper synchronisant main + footer pour éviter le flash du footer */}
+          <div className="flex flex-col min-h-screen">
+            <main 
+              id="main-content" 
+              role="main"
+              tabIndex={-1}
+              className={shouldShowHeaderFooter ? 'flex-1 pb-20 md:pb-0 focus:outline-none' : 'flex-1 focus:outline-none'}
+            >
+              <PageTransition key={location.pathname}>
+                <Outlet />
+              </PageTransition>
+            </main>
+            {shouldShowHeaderFooter && <FooterPremium />}
+          </div>
         </Suspense>
       </ChunkLoadErrorBoundary>
-      {shouldShowHeaderFooter && <FooterPremium />}
       {/* Mobile Bottom Navigation */}
       {shouldShowHeaderFooter && <BottomNavigation />}
       {/* Cookie Consent Banner */}

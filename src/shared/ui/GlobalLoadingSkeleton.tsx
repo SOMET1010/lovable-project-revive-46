@@ -6,7 +6,7 @@ interface GlobalLoadingSkeletonProps {
 
 export function GlobalLoadingSkeleton({ variant = 'default' }: GlobalLoadingSkeletonProps) {
   return (
-    <div className="min-h-screen bg-background animate-fade-in">
+    <div className="min-h-screen bg-background animate-fade-in flex flex-col">
       {/* Header Skeleton */}
       <div className="h-16 bg-card border-b border-border px-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -23,12 +23,27 @@ export function GlobalLoadingSkeleton({ variant = 'default' }: GlobalLoadingSkel
       </div>
 
       {/* Content Skeleton based on variant */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 flex-1">
         {variant === 'default' && <DefaultSkeleton />}
         {variant === 'dashboard' && <DashboardSkeleton />}
         {variant === 'property' && <PropertySkeleton />}
         {variant === 'list' && <ListSkeleton />}
         {variant === 'form' && <FormSkeleton />}
+      </div>
+
+      {/* Footer Skeleton */}
+      <div className="bg-card border-t border-border py-8 mt-auto">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="space-y-3">
+                <Skeleton width={100} height={20} />
+                <Skeleton width={120} height={14} />
+                <Skeleton width={80} height={14} />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
