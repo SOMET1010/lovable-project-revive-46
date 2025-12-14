@@ -77,7 +77,6 @@
     "leaflet": "^1.9.4",
     "lovable-tagger": "^1.1.11",
     "lucide-react": "^0.344.0",
-    "mapbox-gl": "^3.16.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-ga4": "^2.1.0",

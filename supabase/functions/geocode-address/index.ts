@@ -5,6 +5,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Nominatim API - gratuit, pas de clé requise
+const NOMINATIM_BASE_URL = 'https://nominatim.openstreetmap.org';
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -13,51 +16,44 @@ serve(async (req) => {
   try {
     const { address, city } = await req.json();
     
-    console.log('Geocoding request:', { address, city });
+    console.log('Geocoding request (Nominatim):', { address, city });
 
-    if (!address || !city) {
+    if (!address && !city) {
       return new Response(
-        JSON.stringify({ error: 'Address and city are required' }),
+        JSON.stringify({ error: 'Address or city required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const MAPBOX_TOKEN = Deno.env.get('MAPBOX_PUBLIC_TOKEN');
-    
-    if (!MAPBOX_TOKEN) {
-      console.error('MAPBOX_PUBLIC_TOKEN not configured');
-      return new Response(
-        JSON.stringify({ error: 'Geocoding service not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Build search query for Nominatim
+    const searchQuery = encodeURIComponent(`${address || ''}, ${city || ''}, Côte d'Ivoire`.trim());
+    const url = `${NOMINATIM_BASE_URL}/search?q=${searchQuery}&countrycodes=ci&format=json&limit=1&addressdetails=1`;
 
-    // Build search query
-    const searchQuery = encodeURIComponent(`${address}, ${city}, Côte d'Ivoire`);
-    
-    // Call Mapbox Geocoding API
-    const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${searchQuery}.json?access_token=${MAPBOX_TOKEN}&country=CI&limit=1`;
-    
-    const response = await fetch(geocodeUrl);
-    
+    // Nominatim requires User-Agent header
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'MonToit-App/1.0 (contact@montoit.ci)',
+        'Accept-Language': 'fr',
+      },
+    });
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Mapbox API error:', response.status, errorText);
+      console.error('Nominatim API error:', response.status);
       throw new Error('Geocoding API error');
     }
 
     const data = await response.json();
-    
-    console.log('Mapbox response:', data);
+    console.log('Nominatim response:', data);
 
-    if (data.features && data.features.length > 0) {
-      const [longitude, latitude] = data.features[0].center;
-      
+    if (Array.isArray(data) && data.length > 0) {
+      const result = data[0];
       return new Response(
         JSON.stringify({
-          latitude,
-          longitude,
-          formatted_address: data.features[0].place_name
+          latitude: parseFloat(result.lat),
+          longitude: parseFloat(result.lon),
+          formatted_address: result.display_name,
+          city: result.address?.city || result.address?.town || result.address?.village,
+          neighborhood: result.address?.suburb || result.address?.neighbourhood,
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
@@ -68,7 +64,7 @@ serve(async (req) => {
         JSON.stringify({
           latitude: 5.3599,
           longitude: -4.0305,
-          formatted_address: `${address}, ${city}, Côte d'Ivoire`
+          formatted_address: `${address || ''}, ${city || 'Abidjan'}, Côte d'Ivoire`
         }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
