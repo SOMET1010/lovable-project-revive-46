@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapPin, Building2, Home, Loader2, ArrowRight, Warehouse, Tent } from 'lucide-react';
-import MapboxMapGated from '@/shared/ui/MapboxMapGated';
+import MapGated from '@/shared/ui/MapGated';
 import { useHomeMapProperties } from '../hooks/useHomeMapProperties';
 
 // --- CONFIGURATION PREMIUM ---
@@ -138,7 +138,7 @@ export default function HomeMapSection() {
         {/* --- CARTE PREMIUM --- */}
         <div className="relative h-[600px] rounded-[32px] overflow-hidden shadow-2xl border-4 border-white ring-1 ring-[#EFEBE9]">
           {/* Map Component */}
-          <MapboxMapGated
+          <MapGated
             center={[-3.9962, 5.3600]}
             zoom={11}
             properties={mapProperties}

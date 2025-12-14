@@ -46,7 +46,7 @@ export default function AdminApiKeys() {
     moov_money: { icon: Smartphone, color: 'bg-blue-50 text-blue-600', name: 'Moov Money' },
     wave: { icon: Smartphone, color: 'bg-indigo-50 text-indigo-600', name: 'Wave' },
     cryptoneo: { icon: Shield, color: 'bg-green-50 text-green-600', name: 'CryptoNeo' },
-    mapbox: { icon: Globe, color: 'bg-red-50 text-red-600', name: 'Mapbox' },
+    osm: { icon: Globe, color: 'bg-green-50 text-green-600', name: 'OpenStreetMap' },
     firebase: { icon: Zap, color: 'bg-yellow-50 text-yellow-600', name: 'Firebase' },
     sentry: { icon: AlertCircle, color: 'bg-gray-50 text-gray-600', name: 'Sentry' },
     supabase: { icon: Database, color: 'bg-green-50 text-green-600', name: 'Supabase' }
@@ -115,13 +115,10 @@ export default function AdminApiKeys() {
         },
         {
           id: '4',
-          service_name: 'mapbox',
-          display_name: 'Mapbox Maps',
-          description: 'Service de cartes et géolocalisation',
-          keys: { 
-            public_token: 'pk.eyJ1IjoibW9udG9pdCIsImEiOiJjbGl...',
-            secret_token: 'sk.eyJ1IjoibW9udG9pdCIsImEiOiJjbGl...'
-          },
+          service_name: 'osm',
+          display_name: 'OpenStreetMap (Nominatim)',
+          description: 'Cartes et géocodage gratuits - Aucune clé requise',
+          keys: {},
           is_active: true,
           environment: 'production',
           last_used_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),

@@ -47,8 +47,7 @@ function FeatureComingSoon({ featureName }: { featureName: string }) {
   const featureLabels: Record<string, string> = {
     oneci_verification: 'Vérification ONECI (CNI)',
     cnam_verification: 'Vérification CNAM',
-    mapbox_maps: 'Cartes Mapbox',
-    azure_maps: 'Cartes Azure',
+    osm_maps: 'Cartes OpenStreetMap',
     facial_verification: 'Vérification biométrique',
     cryptoneo_signature: 'Signature électronique',
     ai_chatbot: 'Assistant IA',

@@ -70,8 +70,7 @@ const pageSize = APP_CONFIG.pagination.defaultPageSize;
 ### Optionnels
 - **Azure OpenAI** : Chatbot IA
 - **Azure AI Services** : Vision, Speech, etc.
-- **Mapbox** : Cartes interactives
-- **Google Maps** : Alternative pour les cartes
+- **OpenStreetMap/Nominatim** : Cartes interactives et géocodage (gratuit, pas de clé requise)
 - **IN TOUCH** : Paiements Mobile Money
 - **NeoFace/Smileless** : Vérification faciale
 - **CryptoNeo** : Signature électronique

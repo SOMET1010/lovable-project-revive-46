@@ -1,59 +1,38 @@
 import { ReactNode, useState, useEffect } from 'react';
-import { useFeatureFlag } from '@/shared/hooks/useFeatureFlag';
 import { Map, AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 
 interface MapProviderProps {
-  mapboxComponent: ReactNode;
-  azureMapsComponent?: ReactNode;
+  children: ReactNode;
   fallback?: ReactNode;
   showProviderInfo?: boolean;
 }
 
 /**
- * Provider intelligent pour les cartes
- * Gère le basculement automatique entre Mapbox et Azure Maps
+ * Provider simplifié pour les cartes OpenStreetMap
+ * OpenStreetMap est gratuit et toujours disponible
  */
 export function MapProvider({
-  mapboxComponent,
-  azureMapsComponent,
+  children,
   fallback,
   showProviderInfo = false,
 }: MapProviderProps) {
-  const { isEnabled: mapboxEnabled, isLoading: mapboxLoading } = useFeatureFlag('mapbox_maps');
-  const { isEnabled: azureEnabled, isLoading: azureLoading } = useFeatureFlag('azure_maps');
   const [mapError, setMapError] = useState(false);
-  const [activeProvider, setActiveProvider] = useState<'mapbox' | 'azure' | 'none'>('none');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (mapboxLoading || azureLoading) return;
-
-    if (mapboxEnabled && !mapError) {
-      setActiveProvider('mapbox');
-    } else if (azureEnabled) {
-      setActiveProvider('azure');
-    } else {
-      setActiveProvider('none');
-    }
-  }, [mapboxEnabled, azureEnabled, mapboxLoading, azureLoading, mapError]);
-
-  const handleMapError = () => {
-    setMapError(true);
-    if (azureEnabled && activeProvider === 'mapbox') {
-      setActiveProvider('azure');
-    } else {
-      setActiveProvider('none');
-    }
-  };
+    // Simule un court chargement initial
+    const timer = setTimeout(() => setIsLoading(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleRetry = () => {
     setMapError(false);
-    if (mapboxEnabled) {
-      setActiveProvider('mapbox');
-    }
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 100);
   };
 
-  if (mapboxLoading || azureLoading) {
+  if (isLoading) {
     return (
       <div className="w-full h-full min-h-[400px] bg-muted rounded-xl flex items-center justify-center">
         <div className="text-center">
@@ -64,35 +43,30 @@ export function MapProvider({
     );
   }
 
-  if (activeProvider === 'none') {
+  if (mapError) {
     return fallback || <MapFallback onRetry={handleRetry} />;
   }
 
   return (
     <div className="relative w-full h-full">
-      {/* Provider Info Badge */}
+      {/* Provider Info Badge - OpenStreetMap */}
       {showProviderInfo && (
         <div className="absolute top-3 left-3 z-10 bg-background/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-border">
           <div className="flex items-center gap-2 text-sm">
             <Map className="w-4 h-4 text-primary" />
-            <span className="text-muted-foreground">
-              {activeProvider === 'mapbox' ? 'Mapbox' : 'Azure Maps'}
-            </span>
+            <span className="text-muted-foreground">OpenStreetMap</span>
           </div>
         </div>
       )}
 
-      {/* Map Content with Error Boundary */}
-      <MapErrorBoundary onError={handleMapError}>
-        {activeProvider === 'mapbox' && mapboxComponent}
-        {activeProvider === 'azure' && azureMapsComponent}
-      </MapErrorBoundary>
+      {/* Map Content */}
+      {children}
     </div>
   );
 }
 
 /**
- * Fallback quand aucune carte n'est disponible
+ * Fallback quand la carte n'est pas disponible
  */
 function MapFallback({ onRetry }: { onRetry: () => void }) {
   return (
@@ -113,43 +87,6 @@ function MapFallback({ onRetry }: { onRetry: () => void }) {
       </div>
     </div>
   );
-}
-
-/**
- * Error Boundary pour les erreurs de rendu de carte
- */
-import { Component, ErrorInfo } from 'react';
-
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  onError: () => void;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-}
-
-class MapErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError(_: Error): ErrorBoundaryState {
-    return { hasError: true };
-  }
-
-  override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Map error:', error, errorInfo);
-    this.props.onError();
-  }
-
-  override render() {
-    if (this.state.hasError) {
-      return null;
-    }
-    return this.props.children;
-  }
 }
 
 export default MapProvider;
