@@ -6,6 +6,11 @@ export interface PlaceSuggestion {
   mainText: string;
   secondaryText: string;
   description: string;
+  // Nominatim includes coordinates directly in autocomplete response
+  latitude?: number;
+  longitude?: number;
+  city?: string;
+  neighborhood?: string;
 }
 
 export interface PlaceDetails {
@@ -14,6 +19,23 @@ export interface PlaceDetails {
   formattedAddress: string;
   city?: string;
   neighborhood?: string;
+}
+
+interface NominatimPrediction {
+  place_id: string;
+  description: string;
+  structured_formatting?: {
+    main_text: string;
+    secondary_text: string;
+  };
+  geometry?: {
+    lat: number;
+    lng: number;
+  };
+  address_data?: {
+    city?: string;
+    neighborhood?: string;
+  };
 }
 
 interface UsePlacesAutocompleteOptions {
@@ -27,13 +49,15 @@ export function usePlacesAutocomplete(options: UsePlacesAutocompleteOptions = {}
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isReady] = useState(true); // Always ready since we use edge function
+  const [isReady] = useState(true); // Always ready - Nominatim requires no API key
   const [error, setError] = useState<string | null>(null);
   
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  // Store full prediction data for getDetails
+  const predictionsCache = useRef<Map<string, NominatimPrediction>>(new Map());
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Fetch suggestions from edge function
+  // Fetch suggestions from Nominatim via edge function
   const fetchSuggestions = useCallback(async (input: string) => {
     if (!input || input.length < 2) {
       setSuggestions([]);
@@ -61,18 +85,33 @@ export function usePlacesAutocomplete(options: UsePlacesAutocompleteOptions = {}
       if (invokeError) throw invokeError;
 
       if (data?.predictions) {
-        setSuggestions(data.predictions.map((p: { place_id: string; structured_formatting: { main_text: string; secondary_text: string }; description: string }) => ({
-          placeId: p.place_id,
-          mainText: p.structured_formatting?.main_text || p.description,
-          secondaryText: p.structured_formatting?.secondary_text || '',
-          description: p.description,
-        })));
+        // Cache predictions for getDetails
+        predictionsCache.current.clear();
+        
+        const mappedSuggestions = data.predictions.map((p: NominatimPrediction) => {
+          // Store in cache
+          predictionsCache.current.set(p.place_id, p);
+          
+          return {
+            placeId: p.place_id,
+            mainText: p.structured_formatting?.main_text || p.description.split(',')[0] || '',
+            secondaryText: p.structured_formatting?.secondary_text || '',
+            description: p.description,
+            // Nominatim includes coordinates directly
+            latitude: p.geometry?.lat,
+            longitude: p.geometry?.lng,
+            city: p.address_data?.city,
+            neighborhood: p.address_data?.neighborhood,
+          };
+        });
+        
+        setSuggestions(mappedSuggestions);
       } else {
         setSuggestions([]);
       }
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
-        console.error('Places autocomplete error:', err);
+        console.error('Nominatim autocomplete error:', err);
         setError('Erreur de recherche');
         setSuggestions([]);
       }
@@ -94,8 +133,22 @@ export function usePlacesAutocomplete(options: UsePlacesAutocompleteOptions = {}
     }, debounceMs);
   }, [fetchSuggestions, debounceMs]);
 
-  // Get place details (coordinates)
+  // Get place details - Nominatim already provides coordinates in autocomplete
+  // This checks cache first, then falls back to API call
   const getDetails = useCallback(async (placeId: string): Promise<PlaceDetails | null> => {
+    // Check cache first (Nominatim includes coordinates in autocomplete response)
+    const cached = predictionsCache.current.get(placeId);
+    if (cached?.geometry) {
+      return {
+        latitude: cached.geometry.lat,
+        longitude: cached.geometry.lng,
+        formattedAddress: cached.description,
+        city: cached.address_data?.city,
+        neighborhood: cached.address_data?.neighborhood,
+      };
+    }
+
+    // Fallback to API call if not in cache
     try {
       const { data, error: invokeError } = await supabase.functions.invoke('get-place-details', {
         body: { 
@@ -129,6 +182,7 @@ export function usePlacesAutocomplete(options: UsePlacesAutocompleteOptions = {}
   // Clear suggestions
   const clearSuggestions = useCallback(() => {
     setSuggestions([]);
+    predictionsCache.current.clear();
   }, []);
 
   // Cleanup on unmount

@@ -1,7 +1,6 @@
-import { FEATURE_FLAGS, useFeatureFlag } from '@/shared/hooks/useFeatureFlag';
 import LeafletMap from './LeafletMap';
 import { MapPin, Loader2 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 
 interface Property {
   id: string;
@@ -18,7 +17,7 @@ interface Property {
   surface_area?: number;
 }
 
-interface MapboxMapGatedProps {
+interface MapGatedProps {
   center?: [number, number];
   zoom?: number;
   properties?: Property[];
@@ -65,7 +64,7 @@ function MapLoading({ height = '400px' }: { height?: string }) {
 
 /**
  * Composant carte principal utilisant OpenStreetMap (Leaflet)
- * Wrapper avec feature flag pour activer/désactiver les cartes
+ * 100% gratuit - pas de token requis
  */
 export default function MapboxMapGated({ 
   height, 
@@ -73,10 +72,16 @@ export default function MapboxMapGated({
   onMarkerClick,
   center,
   zoom,
-}: MapboxMapGatedProps) {
-  const { isEnabled, isLoading, error } = useFeatureFlag(FEATURE_FLAGS.MAPBOX_MAPS);
+}: MapGatedProps) {
+  const [isReady, setIsReady] = useState(false);
 
-  // Convertir les propriétés pour Leaflet (format différent)
+  // Simuler un court délai de chargement pour le rendu initial
+  useEffect(() => {
+    const timer = setTimeout(() => setIsReady(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Convertir les propriétés pour Leaflet
   const leafletProperties = useMemo(() => {
     if (!properties) return [];
     return properties.map(p => ({
@@ -93,31 +98,23 @@ export default function MapboxMapGated({
     }));
   }, [properties]);
 
-  // Log pour diagnostic (DEV only)
-  if (import.meta.env.DEV) {
-    console.log('[MapboxMapGated] Feature flag state:', { 
-      feature: FEATURE_FLAGS.MAPBOX_MAPS,
-      isEnabled, 
-      isLoading,
-      error: error?.message,
-      propertiesCount: properties?.length || 0
-    });
-  }
+  // Vérifier si on a des propriétés avec coordonnées valides
+  const hasValidProperties = leafletProperties.some(
+    p => p.latitude && p.longitude && 
+         !isNaN(p.latitude) && !isNaN(p.longitude)
+  );
 
-  // État de chargement du feature flag
-  if (isLoading) {
+  // État de chargement
+  if (!isReady) {
     return <MapLoading height={height} />;
   }
 
-  // Feature flag désactivé
-  if (!isEnabled && !error) {
-    if (import.meta.env.DEV) {
-      console.log('[MapboxMapGated] Feature disabled, showing fallback');
-    }
+  // Pas de propriétés valides
+  if (!hasValidProperties && !center) {
     return <MapFallback height={height} />;
   }
 
-  // Afficher la carte Leaflet (OpenStreetMap)
+  // Afficher la carte Leaflet (OpenStreetMap - 100% gratuit)
   return (
     <LeafletMap
       properties={leafletProperties}
@@ -132,3 +129,6 @@ export default function MapboxMapGated({
     />
   );
 }
+
+// Export alias pour compatibilité
+export { MapboxMapGated as MapGated };
