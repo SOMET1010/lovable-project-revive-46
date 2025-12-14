@@ -67,7 +67,7 @@ export default defineConfig(({ mode }) => ({
           vendor: ['react', 'react-dom', 'react-router-dom'],
           supabase: ['@supabase/supabase-js'],
           ui: ['lucide-react', 'sonner', 'class-variance-authority', 'clsx', 'tailwind-merge'],
-          maps: ['mapbox-gl'],
+          maps: ['leaflet'],
           charts: ['recharts'],
         },
       },
@@ -76,6 +76,6 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
-    include: ['mapbox-gl'],
+    include: ['leaflet'],
   },
 }));
