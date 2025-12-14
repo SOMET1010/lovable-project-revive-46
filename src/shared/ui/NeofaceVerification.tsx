@@ -1,12 +1,13 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { 
   Camera, CheckCircle2, XCircle, Loader2, RefreshCw, 
-  ShieldCheck, ScanFace, Lock
+  ShieldCheck, ScanFace, Lock, AlertTriangle
 } from 'lucide-react';
 import { Button } from './Button';
 import { supabase } from '@/integrations/supabase/client';
 import SelfieCaptureComponent from './SelfieCaptureComponent';
 import { usePolling } from '@/shared/hooks/usePolling';
+import { validateCNIImage, loadCNIValidationModels } from '@/shared/services/cniPrevalidation';
 
 // --- TYPES ---
 
@@ -32,6 +33,7 @@ interface VerificationResult {
 
 type VerificationStatus = 
   | 'idle' 
+  | 'prevalidating'     // Pré-validation locale face-api.js (GRATUIT)
   | 'uploading' 
   | 'capturing_selfie'  // Capture selfie locale avec caméra navigateur
   | 'verifying'         // Envoi du selfie et vérification
@@ -59,6 +61,15 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const [matchingScore, setMatchingScore] = useState<number | null>(null);
   const [progressMessage, setProgressMessage] = useState<string>('');
   const [pollCount, setPollCount] = useState(0);
+  const [cniValidated, setCniValidated] = useState<boolean | null>(null);
+  const [modelsReady, setModelsReady] = useState(false);
+
+  // Pré-charger les modèles face-api au montage (pendant que l'utilisateur lit)
+  useEffect(() => {
+    loadCNIValidationModels().then(loaded => {
+      setModelsReady(loaded);
+    });
+  }, []);
 
   // --- CALLBACK HANDLERS (stable references) ---
   
@@ -100,11 +111,30 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   // --- ÉTAPE 1: Upload du document ---
 
   const initializeVerification = async () => {
-    setStatus('uploading');
     setError(null);
-    setProgressMessage('Analyse et sécurisation de votre document...');
+    
+    // ÉTAPE 0: Pré-validation locale GRATUITE avec face-api.js
+    setStatus('prevalidating');
+    setProgressMessage('Analyse préliminaire de votre document...');
     
     try {
+      const preValidation = await validateCNIImage(cniPhotoUrl);
+      
+      if (!preValidation.valid) {
+        // Arrêt immédiat - PAS d'appel API payant NeoFace
+        setCniValidated(false);
+        setStatus('error');
+        setError(preValidation.error || 'Document invalide');
+        onFailed(preValidation.error || 'Document invalide');
+        return; // ← Économie d'un appel API
+      }
+      
+      setCniValidated(true);
+      setProgressMessage('Document validé. Envoi sécurisé...');
+      
+      // ÉTAPE 1: Upload vers NeoFace (payant) - seulement si pré-validation OK
+      setStatus('uploading');
+      
       const { data, error: invokeError } = await supabase.functions.invoke('neoface-verify', {
         body: { action: 'upload_document', cni_photo_url: cniPhotoUrl, user_id: userId },
       });
@@ -209,6 +239,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     setMatchingScore(null);
     setProgressMessage('');
     setPollCount(0);
+    setCniValidated(null);
   };
 
   // --- RENDER ---
@@ -264,14 +295,33 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
               </p>
             </div>
 
-            {/* CNI Preview */}
+            {/* CNI Preview avec indicateur de validation */}
             {cniPhotoUrl && (
               <div className="relative w-32 mx-auto rounded-lg overflow-hidden border border-border shadow-sm">
                 <img src={cniPhotoUrl} alt="CNI" className="w-full h-20 object-cover opacity-80" />
                 <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                  <CheckCircle2 className="w-6 h-6 text-white drop-shadow-md" />
+                  {cniValidated === true && (
+                    <div className="bg-green-500 p-1.5 rounded-full">
+                      <CheckCircle2 className="w-5 h-5 text-white" />
+                    </div>
+                  )}
+                  {cniValidated === false && (
+                    <div className="bg-red-500 p-1.5 rounded-full">
+                      <XCircle className="w-5 h-5 text-white" />
+                    </div>
+                  )}
+                  {cniValidated === null && (
+                    <CheckCircle2 className="w-6 h-6 text-white drop-shadow-md" />
+                  )}
                 </div>
               </div>
+            )}
+            
+            {/* Indicateur modèles chargés */}
+            {modelsReady && (
+              <p className="text-xs text-green-600 flex items-center justify-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Pré-validation activée
+              </p>
             )}
 
             <Button 
@@ -280,6 +330,24 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
             >
               <ScanFace className="w-5 h-5" /> Démarrer la vérification
             </Button>
+          </div>
+        )}
+
+        {/* ÉTAT PRÉ-VALIDATION (face-api.js local - GRATUIT) */}
+        {status === 'prevalidating' && (
+          <div className="text-center space-y-6 py-8 animate-fade-in">
+            <div className="relative w-16 h-16 mx-auto">
+              <div className="absolute inset-0 bg-amber-500/20 rounded-full animate-pulse" />
+              <div className="relative w-16 h-16 rounded-full flex items-center justify-center bg-amber-50 border border-amber-200">
+                <ScanFace className="w-8 h-8 text-amber-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-[#2C1810] font-medium">{progressMessage}</p>
+              <p className="text-[#6B5A4E] text-sm mt-2 flex items-center justify-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> Vérification gratuite côté navigateur
+              </p>
+            </div>
           </div>
         )}
 
