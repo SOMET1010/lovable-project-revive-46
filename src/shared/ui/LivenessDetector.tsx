@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, ArrowUp, RefreshCw, WifiOff, Clock } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, ArrowUp, RefreshCw, WifiOff, Sparkles, Shield } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
-import { useFaceDetection, type LivenessChallenge } from '@/shared/hooks/useFaceDetection';
+import { useFaceDetection, type LivenessChallenge, type LivenessResult } from '@/shared/hooks/useFaceDetection';
 
 const getChallengeLabel = (challenge: LivenessChallenge): string => {
   switch (challenge) {
@@ -32,8 +32,6 @@ const getChallengeLabelShort = (challenge: LivenessChallenge): string => {
       return '';
   }
 };
-
-import type { LivenessResult } from '@/shared/hooks/useFaceDetection';
 
 interface LivenessDetectorProps {
   onComplete: (data: { 
@@ -75,12 +73,66 @@ const ChallengeIcon: React.FC<{ challenge: LivenessChallenge; isActive: boolean;
   }
 };
 
-// Timer color based on remaining time
-const getTimerColor = (timeLeft: number): string => {
-  if (timeLeft <= 3) return 'text-red-500 animate-pulse';
-  if (timeLeft <= 5) return 'text-amber-500';
-  return 'text-white';
+// SVG Circular Timer Component
+const CircularTimer: React.FC<{ timeLeft: number; maxTime: number }> = ({ timeLeft, maxTime }) => {
+  const radius = 28;
+  const circumference = 2 * Math.PI * radius;
+  const progress = (timeLeft / maxTime) * circumference;
+  
+  const getColor = () => {
+    if (timeLeft <= 3) return '#EF4444'; // red
+    if (timeLeft <= 5) return '#F59E0B'; // amber
+    return '#22C55E'; // green
+  };
+
+  return (
+    <div className="relative w-16 h-16">
+      <svg className="absolute inset-0 w-full h-full -rotate-90">
+        {/* Background circle */}
+        <circle
+          cx="32"
+          cy="32"
+          r={radius}
+          fill="none"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="4"
+        />
+        {/* Progress circle */}
+        <circle
+          cx="32"
+          cy="32"
+          r={radius}
+          fill="none"
+          stroke={getColor()}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeDasharray={`${progress} ${circumference}`}
+          className="transition-all duration-1000 ease-linear"
+        />
+      </svg>
+      {/* Center number */}
+      <div 
+        className="absolute inset-0 flex items-center justify-center text-2xl font-bold"
+        style={{ color: getColor() }}
+      >
+        {timeLeft}
+      </div>
+    </div>
+  );
 };
+
+// Confetti particle component
+const ConfettiParticle: React.FC<{ delay: number; color: string }> = ({ delay, color }) => (
+  <div
+    className="absolute w-2 h-2 rounded-full animate-confetti-fall"
+    style={{
+      backgroundColor: color,
+      left: `${Math.random() * 100}%`,
+      animationDelay: `${delay}ms`,
+      animationDuration: `${2000 + Math.random() * 1000}ms`,
+    }}
+  />
+);
 
 export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
   onComplete,
@@ -92,6 +144,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const hasCompletedRef = useRef(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const {
     modelsLoaded,
@@ -110,6 +163,8 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     timeLeft,
     isFailed,
     livenessResult,
+    isFlashing,
+    flashColor,
   } = useFaceDetection({
     videoRef,
     enabled: cameraReady && !hasCompletedRef.current,
@@ -120,9 +175,9 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     if (!faceDetected) return 'border-white/50';
     switch (faceDistance) {
       case 'too_far':
-        return 'border-amber-400 animate-pulse';
+        return 'border-amber-400';
       case 'too_close':
-        return 'border-red-400 animate-pulse';
+        return 'border-red-400';
       case 'optimal':
         return 'border-green-400';
       default:
@@ -180,6 +235,16 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     };
   }, [onError]);
 
+  // Trigger confetti on success
+  useEffect(() => {
+    if (isLivenessComplete && livenessResult?.isLive) {
+      setShowConfetti(true);
+      const timer = setTimeout(() => setShowConfetti(false), 3000);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [isLivenessComplete, livenessResult]);
+
   // Notify parent when liveness is complete with screenshot and score
   useEffect(() => {
     if (isLivenessComplete && livenessResult && !hasCompletedRef.current) {
@@ -190,12 +255,15 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
 
   const handleRetry = () => {
     hasCompletedRef.current = false;
-    resetChallenges(); // This now also resets timeLeft and isFailed
+    setShowConfetti(false);
+    resetChallenges();
   };
 
   const handleRetryModels = () => {
     retryLoadModels();
   };
+
+  const CHALLENGE_TIMEOUT = 10;
 
   if (cameraError) {
     return (
@@ -258,6 +326,14 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           style={{ transform: 'scaleX(-1)' }}
         />
 
+        {/* Flash overlay for anti-reflet test */}
+        {isFlashing && flashColor && (
+          <div 
+            className="absolute inset-0 z-40 transition-opacity duration-100"
+            style={{ backgroundColor: flashColor, opacity: 0.9 }}
+          />
+        )}
+
         {/* Loading overlay */}
         {(modelsLoading || !cameraReady) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/80 z-10">
@@ -276,41 +352,49 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
         {/* Face guide overlay */}
         {cameraReady && modelsLoaded && !isLivenessComplete && !isFailed && (
           <>
-            {/* Timer display */}
+            {/* Circular Timer */}
             {currentChallenge && faceDetected && faceDistance === 'optimal' && (
-              <div className="absolute top-4 left-0 right-0 text-center z-20">
-                <div className={cn(
-                  'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm',
-                  getTimerColor(timeLeft)
-                )}>
-                  <Clock className="w-5 h-5" />
-                  <span className="text-3xl font-bold tabular-nums">
-                    {timeLeft}s
-                  </span>
-                </div>
+              <div className="absolute top-4 left-0 right-0 flex justify-center z-20">
+                <CircularTimer timeLeft={timeLeft} maxTime={CHALLENGE_TIMEOUT} />
               </div>
             )}
 
-            {/* Face outline guide with dynamic color based on distance */}
+            {/* Premium oval guide with corner markers */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              {/* Outer pulsing circle */}
+              <div className={cn(
+                'absolute w-52 h-[272px] rounded-[50%] border-2 border-dashed transition-all duration-500',
+                faceDetected ? 'border-green-400/30 animate-pulse' : 'border-white/20'
+              )} />
+              
+              {/* Main oval with dynamic color */}
               <div
                 className={cn(
-                  'w-48 h-64 rounded-[50%] border-4 transition-all duration-300',
+                  'relative w-48 h-64 rounded-[50%] border-4 transition-all duration-300',
+                  'shadow-[0_0_30px_rgba(255,255,255,0.2)]',
                   getOvalStyle()
                 )}
-              />
+              >
+                {/* Corner markers */}
+                <div className="absolute -top-2 -left-2 w-6 h-6 border-t-4 border-l-4 rounded-tl-xl border-current opacity-70" />
+                <div className="absolute -top-2 -right-2 w-6 h-6 border-t-4 border-r-4 rounded-tr-xl border-current opacity-70" />
+                <div className="absolute -bottom-2 -left-2 w-6 h-6 border-b-4 border-l-4 rounded-bl-xl border-current opacity-70" />
+                <div className="absolute -bottom-2 -right-2 w-6 h-6 border-b-4 border-r-4 rounded-br-xl border-current opacity-70" />
+              </div>
             </div>
 
-            {/* Current challenge instruction - only show when distance is optimal */}
+            {/* Current challenge instruction */}
             {currentChallenge && faceDetected && faceDistance === 'optimal' && (
-              <div className="absolute bottom-6 left-4 right-4 bg-black/70 rounded-xl p-4 backdrop-blur-sm">
+              <div className="absolute bottom-6 left-4 right-4 bg-black/70 rounded-xl p-4 backdrop-blur-sm border border-white/10">
                 <div className="flex items-center justify-center gap-3">
-                  <ChallengeIcon
-                    challenge={currentChallenge}
-                    isActive={true}
-                    isComplete={false}
-                  />
-                  <span className="text-white font-medium text-lg animate-pulse">
+                  <div className="w-10 h-10 rounded-full bg-[#F16522]/20 flex items-center justify-center">
+                    <ChallengeIcon
+                      challenge={currentChallenge}
+                      isActive={true}
+                      isComplete={false}
+                    />
+                  </div>
+                  <span className="text-white font-medium text-lg">
                     {getChallengeLabel(currentChallenge)}
                   </span>
                 </div>
@@ -319,7 +403,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
 
             {/* Distance guidance message */}
             {faceDetected && getDistanceMessage() && (
-              <div className="absolute bottom-6 left-4 right-4 bg-amber-500/90 rounded-xl p-4">
+              <div className="absolute bottom-6 left-4 right-4 bg-amber-500/90 rounded-xl p-4 backdrop-blur-sm">
                 <p className="text-white text-center font-medium">
                   {getDistanceMessage()}
                 </p>
@@ -328,7 +412,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
 
             {/* Face not detected warning */}
             {!faceDetected && (
-              <div className="absolute bottom-6 left-4 right-4 bg-amber-500/90 rounded-xl p-4">
+              <div className="absolute bottom-6 left-4 right-4 bg-[#2C1810]/80 rounded-xl p-4 backdrop-blur-sm border border-white/10">
                 <p className="text-white text-center font-medium">
                   Placez votre visage dans le cadre
                 </p>
@@ -340,7 +424,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
         {/* Failed overlay - time's up */}
         {isFailed && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/90 z-20">
-            <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+            <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-4 animate-pulse">
               <AlertCircle className="w-12 h-12 text-red-500" />
             </div>
             <p className="text-white text-xl font-bold mb-2">
@@ -360,24 +444,74 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           </div>
         )}
 
-        {/* Liveness complete overlay with score */}
+        {/* Premium Success overlay with score */}
         {isLivenessComplete && livenessResult && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-500/20 z-10">
-            <CheckCircle2 className="w-16 h-16 text-green-500 mb-3 animate-bounce" />
-            <p className="text-white text-xl font-bold mb-2">
-              Vérification réussie !
-            </p>
-            {/* Liveness Score Display */}
-            <div className={cn(
-              'text-5xl font-bold mb-1',
-              livenessResult.score >= 80 ? 'text-green-400' :
-              livenessResult.score >= 60 ? 'text-amber-400' : 'text-red-400'
-            )}>
-              {livenessResult.score}/100
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-green-500/30 to-green-600/40 z-10 backdrop-blur-sm">
+            {/* Confetti */}
+            {showConfetti && (
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                {['#F16522', '#22C55E', '#3B82F6', '#EAB308', '#EC4899'].map((color, i) => (
+                  Array.from({ length: 10 }).map((_, j) => (
+                    <ConfettiParticle key={`${i}-${j}`} delay={j * 100 + i * 50} color={color} />
+                  ))
+                ))}
+              </div>
+            )}
+
+            {/* Concentric animated circles */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-40 h-40 rounded-full border-4 border-green-400/20 animate-ping" style={{ animationDuration: '2s' }} />
+              <div className="absolute w-32 h-32 rounded-full border-4 border-green-400/30 animate-ping" style={{ animationDuration: '2s', animationDelay: '0.3s' }} />
             </div>
-            <p className="text-white/80 text-sm">
-              {livenessResult.isLive ? 'Score de vivacité confirmé' : 'Score insuffisant'}
-            </p>
+            
+            {/* Animated checkmark */}
+            <div className="relative z-10 w-20 h-20 rounded-full bg-green-500 flex items-center justify-center mb-4 shadow-[0_0_40px_rgba(34,197,94,0.5)]" style={{ animation: 'scale-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)' }}>
+              <CheckCircle2 className="w-12 h-12 text-white" />
+            </div>
+            
+            {/* Score display with animation */}
+            <div 
+              className={cn(
+                'text-6xl font-bold mb-2',
+                livenessResult.score >= 80 ? 'text-green-400' :
+                livenessResult.score >= 60 ? 'text-amber-400' : 'text-red-400'
+              )}
+              style={{ animation: 'scale-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both' }}
+            >
+              {livenessResult.score}
+              <span className="text-3xl text-white/70">/100</span>
+            </div>
+            
+            {/* Verification badge */}
+            <div 
+              className="flex items-center gap-2 px-4 py-2 bg-white/20 rounded-full backdrop-blur-sm mb-3"
+              style={{ animation: 'fade-in 0.3s ease-out 0.4s both' }}
+            >
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-white font-medium">
+                {livenessResult.isLive ? 'Identité vérifiée' : 'Vérification incomplète'}
+              </span>
+            </div>
+
+            {/* Flash test badge */}
+            {livenessResult.flashTest?.passed && (
+              <div 
+                className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/30 rounded-full text-sm text-blue-200 backdrop-blur-sm"
+                style={{ animation: 'fade-in 0.3s ease-out 0.6s both' }}
+              >
+                <Sparkles className="w-4 h-4" />
+                Test anti-reflet réussi
+              </div>
+            )}
+
+            {/* Security shield badge */}
+            <div 
+              className="mt-4 flex items-center gap-2 text-white/60 text-xs"
+              style={{ animation: 'fade-in 0.3s ease-out 0.8s both' }}
+            >
+              <Shield className="w-4 h-4" />
+              Vérification sécurisée niveau bancaire
+            </div>
           </div>
         )}
       </div>
@@ -387,12 +521,12 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
         {/* Progress bar */}
         <div className="h-2 bg-[#EFEBE9] rounded-full overflow-hidden mb-4">
           <div
-            className="h-full bg-[#F16522] transition-all duration-500 ease-out"
+            className="h-full bg-gradient-to-r from-[#F16522] to-[#FF8A50] transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        {/* Challenge steps - uses randomized challenges array */}
+        {/* Challenge steps */}
         <div className="flex justify-between items-center mb-6">
           {challenges.map((challenge: LivenessChallenge, index: number) => {
             const isComplete = completedChallenges.includes(challenge);
@@ -410,8 +544,8 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
                 <div
                   className={cn(
                     'w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300',
-                    isComplete && 'bg-green-500',
-                    isActive && !isComplete && 'bg-[#F16522]',
+                    isComplete && 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]',
+                    isActive && !isComplete && 'bg-[#F16522] shadow-[0_0_15px_rgba(241,101,34,0.4)]',
                     !isActive && !isComplete && 'bg-[#EFEBE9]'
                   )}
                 >
@@ -445,7 +579,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           <Button
             variant="outline"
             onClick={handleRetry}
-            className="w-full border-[#2C1810]/30 text-[#2C1810]"
+            className="w-full border-[#2C1810]/30 text-[#2C1810] hover:bg-[#FAF7F4]"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
             Recommencer
