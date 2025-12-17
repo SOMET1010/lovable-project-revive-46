@@ -97,7 +97,16 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
     }
   }, [mode, startCamera]);
 
-  const handleLivenessComplete = useCallback((data: { videoRef: React.RefObject<HTMLVideoElement | null>; screenshot: string | null }) => {
+  const handleLivenessComplete = useCallback((data: { 
+    videoRef: React.RefObject<HTMLVideoElement | null>; 
+    screenshot: string | null;
+    livenessResult: unknown;
+  }) => {
+    // Log liveness result for debugging
+    if (import.meta.env.DEV && data.livenessResult) {
+      console.log('[SelfieCapture] Liveness result:', data.livenessResult);
+    }
+
     // Use the pre-captured screenshot if available
     if (data.screenshot) {
       setCapturedImage(data.screenshot);

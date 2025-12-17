@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type React from 'react';
 import * as faceapi from '@vladmandic/face-api';
 
 // Inline types and utils to avoid import issues
@@ -12,6 +11,44 @@ export type LivenessChallenge = 'blink' | 'turn_left' | 'turn_right' | 'look_up'
 export type FaceDistance = 'too_far' | 'too_close' | 'optimal' | 'unknown';
 
 const LIVENESS_CHALLENGES: LivenessChallenge[] = ['blink', 'turn_left', 'turn_right', 'look_up'];
+
+// ============= Liveness Score Configuration =============
+const LIVENESS_SCORE_CONFIG = {
+  MIN_EAR_VARIANCE: 0.005,    // Variance minimale attendue (photo = 0)
+  MIN_YAW_VARIANCE: 2.0,      // Variance minimale de rotation
+  MAX_DETECTION_GAPS: 3,      // Gaps de détection max acceptés
+  SAMPLE_SIZE: 20,            // Nombre de frames à analyser
+  MIN_JERK_VALUE: 0.5,        // Jerk minimal pour mouvement naturel
+};
+
+// Interface des métriques de vivacité collectées pendant le test
+interface LivenessMetrics {
+  earSamples: number[];           // Historique EAR pour variabilité
+  yawSamples: number[];           // Historique Yaw pour fluidité
+  pitchSamples: number[];         // Historique Pitch
+  positionSamples: Point[];       // Positions du nez (stabilité)
+  detectionGaps: number;          // Compteur de disparitions de visage
+  challengeStartTime: number;     // Début du test (pour durée)
+}
+
+// Interface du score final de vivacité
+export interface LivenessResult {
+  score: number;                   // 0-100
+  isLive: boolean;                 // true si score >= 60
+  penalties: {
+    staticEyes: number;            // Pénalité yeux statiques
+    linearMovement: number;        // Pénalité mouvement linéaire
+    detectionInstability: number;  // Pénalité instabilité
+    slowCompletion: number;        // Pénalité temps long
+  };
+  metadata: {
+    duration: number;              // Durée totale en secondes
+    earVariance: number;           // Variance EAR mesurée
+    yawVariance: number;           // Variance Yaw mesurée
+    movementJerk: number;          // Jerk du mouvement
+    samplesCollected: number;      // Nombre d'échantillons
+  };
+}
 
 // Shuffle array (Fisher-Yates)
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -87,6 +124,30 @@ const calculateFaceDistance = (eyeDist: number, videoWidth: number): FaceDistanc
   return 'optimal';
 };
 
+// ============= Statistical Functions for Liveness Score =============
+
+// Calculate variance (écart-type simplifié)
+const calculateVariance = (samples: number[]): number => {
+  if (samples.length < 2) return 0;
+  const mean = samples.reduce((a, b) => a + b, 0) / samples.length;
+  const squaredDiffs = samples.map(x => Math.pow(x - mean, 2));
+  return Math.sqrt(squaredDiffs.reduce((a, b) => a + b, 0) / samples.length);
+};
+
+// Calculate movement "jerk" (detects robotic/linear movements)
+// Natural movements have micro-variations, deepfakes are often too "smooth"
+const calculateMovementJerk = (samples: number[]): number => {
+  if (samples.length < 3) return 0;
+  
+  let jerkSum = 0;
+  for (let i = 2; i < samples.length; i++) {
+    const accel1 = (samples[i]! - samples[i - 1]!);
+    const accel2 = (samples[i - 1]! - samples[i - 2]!);
+    jerkSum += Math.abs(accel1 - accel2);
+  }
+  return jerkSum / (samples.length - 2);
+};
+
 interface UseFaceDetectionOptions {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   enabled?: boolean;
@@ -120,6 +181,7 @@ interface UseFaceDetectionReturn extends FaceDetectionState {
   takeScreenshot: () => string | null;
   timeLeft: number;
   isFailed: boolean;
+  livenessResult: LivenessResult | null;
 }
 
 // Model URLs - local first, CDN fallback
@@ -193,6 +255,16 @@ const loadModelsWithFallback = async (): Promise<{ source: 'local' | 'cdn' }> =>
   }
 };
 
+// Initial metrics state
+const getInitialMetrics = (): LivenessMetrics => ({
+  earSamples: [],
+  yawSamples: [],
+  pitchSamples: [],
+  positionSamples: [],
+  detectionGaps: 0,
+  challengeStartTime: 0,
+});
+
 export const useFaceDetection = ({
   videoRef,
   enabled = true,
@@ -219,6 +291,9 @@ export const useFaceDetection = ({
   const [timeLeft, setTimeLeft] = useState(CHALLENGE_TIMEOUT);
   const [isFailed, setIsFailed] = useState(false);
 
+  // Liveness score result
+  const [livenessResult, setLivenessResult] = useState<LivenessResult | null>(null);
+
   // Randomized challenges for each session (anti-replay)
   const [challenges, setChallenges] = useState<LivenessChallenge[]>(() => 
     shuffleArray(LIVENESS_CHALLENGES)
@@ -230,6 +305,9 @@ export const useFaceDetection = ({
   const animationRef = useRef<number | null>(null);
   const lastDetectionRef = useRef<number>(0);
   const screenshotTakenRef = useRef(false);
+  
+  // Liveness metrics collection ref
+  const livenessMetricsRef = useRef<LivenessMetrics>(getInitialMetrics());
   
   // Strict blink tracking: must close THEN open
   const blinkStateRef = useRef<{
@@ -264,6 +342,73 @@ export const useFaceDetection = ({
     }
     return null;
   }, [videoRef]);
+
+  // Calculate liveness score based on collected metrics
+  const calculateLivenessScore = useCallback((): LivenessResult => {
+    const metrics = livenessMetricsRef.current;
+    const now = performance.now();
+    
+    // Calculate statistics
+    const earVariance = calculateVariance(metrics.earSamples);
+    const yawVariance = calculateVariance(metrics.yawSamples);
+    const movementJerk = calculateMovementJerk(metrics.yawSamples);
+    const duration = metrics.challengeStartTime > 0 
+      ? (now - metrics.challengeStartTime) / 1000 
+      : 0;
+    
+    // Initialize penalties
+    const penalties = {
+      staticEyes: 0,
+      linearMovement: 0,
+      detectionInstability: 0,
+      slowCompletion: 0,
+    };
+    
+    let score = 100;
+    
+    // 1. Penalty for static eyes (detects photos)
+    if (earVariance < LIVENESS_SCORE_CONFIG.MIN_EAR_VARIANCE) {
+      penalties.staticEyes = 50;
+      score -= 50;
+    } else if (earVariance < LIVENESS_SCORE_CONFIG.MIN_EAR_VARIANCE * 2) {
+      penalties.staticEyes = 25;
+      score -= 25;
+    }
+    
+    // 2. Penalty for linear/robotic movement (detects deepfakes/videos)
+    if (yawVariance < LIVENESS_SCORE_CONFIG.MIN_YAW_VARIANCE) {
+      penalties.linearMovement = 20;
+      score -= 20;
+    }
+    
+    // 3. Penalty for detection instability (video injection)
+    if (metrics.detectionGaps > LIVENESS_SCORE_CONFIG.MAX_DETECTION_GAPS) {
+      const excessGaps = metrics.detectionGaps - LIVENESS_SCORE_CONFIG.MAX_DETECTION_GAPS;
+      penalties.detectionInstability = Math.min(30, excessGaps * 5);
+      score -= penalties.detectionInstability;
+    }
+    
+    // 4. Penalty if user took too long (difficult conditions)
+    if (timeLeft < 2) {
+      penalties.slowCompletion = 10;
+      score -= 10;
+    }
+    
+    const finalScore = Math.max(0, Math.min(100, score));
+    
+    return {
+      score: finalScore,
+      isLive: finalScore >= 60,
+      penalties,
+      metadata: {
+        duration,
+        earVariance,
+        yawVariance,
+        movementJerk,
+        samplesCollected: metrics.earSamples.length,
+      },
+    };
+  }, [timeLeft]);
 
   // Retry loading models
   const retryLoadModels = useCallback(() => {
@@ -326,13 +471,17 @@ export const useFaceDetection = ({
   const resetChallenges = useCallback(() => {
     setCompletedChallenges([]);
     setCurrentChallengeIndex(0);
-    setTimeLeft(CHALLENGE_TIMEOUT); // Reset timer
-    setIsFailed(false); // Reset failed state
+    setTimeLeft(CHALLENGE_TIMEOUT);
+    setIsFailed(false);
+    setLivenessResult(null);
+    // Reset liveness metrics
+    livenessMetricsRef.current = getInitialMetrics();
     // Re-randomize challenges on reset
     setChallenges(shuffleArray(LIVENESS_CHALLENGES));
     blinkStateRef.current = { startedAt: null, eyesWereClosed: false };
     headTurnStartRef.current = null;
     lookUpStartRef.current = null;
+    screenshotTakenRef.current = false;
   }, []);
 
   // Challenge timer countdown
@@ -355,6 +504,18 @@ export const useFaceDetection = ({
 
     return () => clearInterval(timer);
   }, [currentChallengeIndex, enabled, state.modelsLoaded, isLivenessComplete, isFailed, currentChallenge]);
+
+  // Calculate liveness score when complete
+  useEffect(() => {
+    if (isLivenessComplete && !livenessResult) {
+      const result = calculateLivenessScore();
+      setLivenessResult(result);
+      
+      if (import.meta.env.DEV) {
+        console.log('[Liveness] Score calculated:', result);
+      }
+    }
+  }, [isLivenessComplete, livenessResult, calculateLivenessScore]);
 
   // Face detection loop
   useEffect(() => {
@@ -430,6 +591,31 @@ export const useFaceDetection = ({
             eyeDistanceRatio,
           }));
 
+          // ============= Collect Liveness Metrics =============
+          const metrics = livenessMetricsRef.current;
+          
+          // Initialize start time if first sample
+          if (metrics.challengeStartTime === 0) {
+            metrics.challengeStartTime = now;
+          }
+          
+          // Collect samples (FIFO if max size reached)
+          if (metrics.earSamples.length < LIVENESS_SCORE_CONFIG.SAMPLE_SIZE) {
+            metrics.earSamples.push(avgEAR);
+            metrics.yawSamples.push(headYaw);
+            metrics.pitchSamples.push(headPitch);
+            metrics.positionSamples.push(noseTip);
+          } else {
+            metrics.earSamples.shift();
+            metrics.earSamples.push(avgEAR);
+            metrics.yawSamples.shift();
+            metrics.yawSamples.push(headYaw);
+            metrics.pitchSamples.shift();
+            metrics.pitchSamples.push(headPitch);
+            metrics.positionSamples.shift();
+            metrics.positionSamples.push(noseTip);
+          }
+
           // Block challenge validation if face distance is not optimal
           if (faceDistance !== 'optimal') {
             animationRef.current = requestAnimationFrame(detectFace);
@@ -489,6 +675,9 @@ export const useFaceDetection = ({
             }
           }
         } else {
+          // Face not detected - count as detection gap
+          livenessMetricsRef.current.detectionGaps++;
+          
           setState(prev => ({
             ...prev,
             faceDetected: false,
@@ -515,7 +704,7 @@ export const useFaceDetection = ({
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [enabled, state.modelsLoaded, videoRef, detectionInterval, currentChallenge, completeChallenge, isLivenessComplete]);
+  }, [enabled, state.modelsLoaded, videoRef, detectionInterval, currentChallenge, completeChallenge, isLivenessComplete, isFailed]);
 
   // Auto-capture screenshot when liveness is complete
   useEffect(() => {
@@ -541,5 +730,6 @@ export const useFaceDetection = ({
     takeScreenshot,
     timeLeft,
     isFailed,
+    livenessResult,
   };
 };
