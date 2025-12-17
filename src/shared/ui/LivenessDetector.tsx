@@ -33,8 +33,14 @@ const getChallengeLabelShort = (challenge: LivenessChallenge): string => {
   }
 };
 
+import type { LivenessResult } from '@/shared/hooks/useFaceDetection';
+
 interface LivenessDetectorProps {
-  onComplete: (data: { videoRef: React.RefObject<HTMLVideoElement | null>; screenshot: string | null }) => void;
+  onComplete: (data: { 
+    videoRef: React.RefObject<HTMLVideoElement | null>; 
+    screenshot: string | null;
+    livenessResult: LivenessResult | null;
+  }) => void;
   onError?: (error: string) => void;
   className?: string;
 }
@@ -103,6 +109,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     screenshot,
     timeLeft,
     isFailed,
+    livenessResult,
   } = useFaceDetection({
     videoRef,
     enabled: cameraReady && !hasCompletedRef.current,
@@ -173,13 +180,13 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     };
   }, [onError]);
 
-  // Notify parent when liveness is complete with screenshot
+  // Notify parent when liveness is complete with screenshot and score
   useEffect(() => {
-    if (isLivenessComplete && !hasCompletedRef.current) {
+    if (isLivenessComplete && livenessResult && !hasCompletedRef.current) {
       hasCompletedRef.current = true;
-      onComplete({ videoRef, screenshot });
+      onComplete({ videoRef, screenshot, livenessResult });
     }
-  }, [isLivenessComplete, onComplete, screenshot]);
+  }, [isLivenessComplete, livenessResult, onComplete, screenshot]);
 
   const handleRetry = () => {
     hasCompletedRef.current = false;
@@ -353,12 +360,23 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           </div>
         )}
 
-        {/* Liveness complete overlay */}
-        {isLivenessComplete && (
+        {/* Liveness complete overlay with score */}
+        {isLivenessComplete && livenessResult && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-500/20 z-10">
-            <CheckCircle2 className="w-20 h-20 text-green-500 mb-4 animate-bounce" />
-            <p className="text-white text-xl font-bold">
+            <CheckCircle2 className="w-16 h-16 text-green-500 mb-3 animate-bounce" />
+            <p className="text-white text-xl font-bold mb-2">
               Vérification réussie !
+            </p>
+            {/* Liveness Score Display */}
+            <div className={cn(
+              'text-5xl font-bold mb-1',
+              livenessResult.score >= 80 ? 'text-green-400' :
+              livenessResult.score >= 60 ? 'text-amber-400' : 'text-red-400'
+            )}>
+              {livenessResult.score}/100
+            </div>
+            <p className="text-white/80 text-sm">
+              {livenessResult.isLive ? 'Score de vivacité confirmé' : 'Score insuffisant'}
             </p>
           </div>
         )}
