@@ -8,9 +8,19 @@ interface Point {
   y: number;
 }
 
-type LivenessChallenge = 'blink' | 'turn_left' | 'turn_right';
+export type LivenessChallenge = 'blink' | 'turn_left' | 'turn_right' | 'look_up';
 
-const LIVENESS_CHALLENGES: LivenessChallenge[] = ['blink', 'turn_left', 'turn_right'];
+const LIVENESS_CHALLENGES: LivenessChallenge[] = ['blink', 'turn_left', 'turn_right', 'look_up'];
+
+// Shuffle array (Fisher-Yates)
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+  }
+  return shuffled;
+};
 
 const euclideanDistance = (p1: Point, p2: Point): number => {
   return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
@@ -31,11 +41,6 @@ const calculateEAR = (eyePoints: Point[]): number => {
   return (v1 + v2) / (2.0 * h);
 };
 
-const detectBlink = (leftEAR: number, rightEAR: number, threshold: number = 0.20): boolean => {
-  const avgEAR = (leftEAR + rightEAR) / 2;
-  return avgEAR < threshold;
-};
-
 const getCenterPoint = (points: Point[]): Point => {
   if (points.length === 0) return { x: 0, y: 0 };
   const sum = points.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
@@ -53,7 +58,20 @@ const calculateHeadYaw = (noseTip: Point, leftEyeCenter: Point, rightEyeCenter: 
   return (noseOffset / eyeDistance) * 45;
 };
 
-const detectHeadTurn = (yaw: number, threshold: number = 12): 'left' | 'right' | 'center' => {
+// Calculate head pitch (vertical tilt)
+const calculateHeadPitch = (noseTip: Point, leftEyeCenter: Point, rightEyeCenter: Point): number => {
+  const eyeCenter = {
+    x: (leftEyeCenter.x + rightEyeCenter.x) / 2,
+    y: (leftEyeCenter.y + rightEyeCenter.y) / 2,
+  };
+  const eyeDistance = euclideanDistance(leftEyeCenter, rightEyeCenter);
+  if (eyeDistance === 0) return 0;
+  const noseOffset = noseTip.y - eyeCenter.y;
+  return (noseOffset / eyeDistance) * 45;
+};
+
+// Increased threshold to 18° for more stability
+const detectHeadTurn = (yaw: number, threshold: number = 18): 'left' | 'right' | 'center' => {
   if (yaw > threshold) return 'right';
   if (yaw < -threshold) return 'left';
   return 'center';
@@ -73,6 +91,7 @@ interface FaceDetectionState {
   leftEAR: number;
   rightEAR: number;
   headYaw: number;
+  headPitch: number;
   isBlinking: boolean;
   headDirection: 'left' | 'right' | 'center';
 }
@@ -84,6 +103,7 @@ interface UseFaceDetectionReturn extends FaceDetectionState {
   progress: number;
   resetChallenges: () => void;
   retryLoadModels: () => void;
+  challenges: LivenessChallenge[];
 }
 
 // Model URLs - local first, CDN fallback
@@ -92,6 +112,17 @@ const CDN_MODEL_URL = 'https://vladmandic.github.io/face-api/model';
 
 // Timeout for model loading (15 seconds)
 const MODEL_LOAD_TIMEOUT = 15000;
+
+// Blink validation thresholds
+const BLINK_EAR_THRESHOLD = 0.20;
+const BLINK_MIN_DURATION = 50; // ms
+const BLINK_MAX_DURATION = 500; // ms
+
+// Head movement thresholds
+const HEAD_TURN_THRESHOLD = 18; // degrees (increased from 12)
+const HEAD_TURN_HOLD_TIME = 400; // ms
+const LOOK_UP_THRESHOLD = -8; // negative pitch = looking up
+const LOOK_UP_HOLD_TIME = 400; // ms
 
 // Load models with timeout
 const loadModelsFromUrl = async (url: string, timeout: number): Promise<void> => {
@@ -152,18 +183,33 @@ export const useFaceDetection = ({
     leftEAR: 0.3,
     rightEAR: 0.3,
     headYaw: 0,
+    headPitch: 0,
     isBlinking: false,
     headDirection: 'center',
   });
 
+  // Randomized challenges for each session (anti-replay)
+  const [challenges, setChallenges] = useState<LivenessChallenge[]>(() => 
+    shuffleArray(LIVENESS_CHALLENGES)
+  );
   const [completedChallenges, setCompletedChallenges] = useState<LivenessChallenge[]>([]);
   const [currentChallengeIndex, setCurrentChallengeIndex] = useState(0);
   const [loadAttempt, setLoadAttempt] = useState(0);
 
   const animationRef = useRef<number | null>(null);
   const lastDetectionRef = useRef<number>(0);
-  const blinkStartRef = useRef<number | null>(null);
+  
+  // Strict blink tracking: must close THEN open
+  const blinkStateRef = useRef<{
+    startedAt: number | null;
+    eyesWereClosed: boolean;
+  }>({ startedAt: null, eyesWereClosed: false });
+  
   const headTurnStartRef = useRef<{ direction: 'left' | 'right'; time: number } | null>(null);
+  const lookUpStartRef = useRef<number | null>(null);
+  
+  // Active flag for cleanup
+  const isActiveRef = useRef(true);
 
   // Retry loading models
   const retryLoadModels = useCallback(() => {
@@ -208,12 +254,12 @@ export const useFaceDetection = ({
     loadModels();
   }, [state.modelsLoaded, state.modelsLoading, loadAttempt]);
 
-  const currentChallenge = currentChallengeIndex < LIVENESS_CHALLENGES.length
-    ? LIVENESS_CHALLENGES[currentChallengeIndex]
+  const currentChallenge = currentChallengeIndex < challenges.length
+    ? challenges[currentChallengeIndex]
     : null;
 
-  const isLivenessComplete = completedChallenges.length === LIVENESS_CHALLENGES.length;
-  const progress = (completedChallenges.length / LIVENESS_CHALLENGES.length) * 100;
+  const isLivenessComplete = completedChallenges.length === challenges.length;
+  const progress = (completedChallenges.length / challenges.length) * 100;
 
   const completeChallenge = useCallback((challenge: LivenessChallenge) => {
     if (!completedChallenges.includes(challenge)) {
@@ -225,8 +271,11 @@ export const useFaceDetection = ({
   const resetChallenges = useCallback(() => {
     setCompletedChallenges([]);
     setCurrentChallengeIndex(0);
-    blinkStartRef.current = null;
+    // Re-randomize challenges on reset
+    setChallenges(shuffleArray(LIVENESS_CHALLENGES));
+    blinkStateRef.current = { startedAt: null, eyesWereClosed: false };
     headTurnStartRef.current = null;
+    lookUpStartRef.current = null;
   }, []);
 
   // Face detection loop
@@ -235,9 +284,12 @@ export const useFaceDetection = ({
       return;
     }
 
+    isActiveRef.current = true;
     const video = videoRef.current;
 
     const detectFace = async () => {
+      if (!isActiveRef.current) return;
+      
       const now = performance.now();
       if (now - lastDetectionRef.current < detectionInterval) {
         animationRef.current = requestAnimationFrame(detectFace);
@@ -263,7 +315,6 @@ export const useFaceDetection = ({
           const positions = landmarks.positions;
 
           // Get eye landmarks (face_landmark_68 indices)
-          // Left eye: 36-41, Right eye: 42-47
           const leftEyePoints: Point[] = positions.slice(36, 42).map(p => ({ x: p.x, y: p.y }));
           const rightEyePoints: Point[] = positions.slice(42, 48).map(p => ({ x: p.x, y: p.y }));
 
@@ -274,12 +325,14 @@ export const useFaceDetection = ({
           // Calculate metrics
           const leftEAR = calculateEAR(leftEyePoints);
           const rightEAR = calculateEAR(rightEyePoints);
-          const isBlinking = detectBlink(leftEAR, rightEAR, 0.21);
+          const avgEAR = (leftEAR + rightEAR) / 2;
+          const isBlinking = avgEAR < BLINK_EAR_THRESHOLD;
 
           const leftEyeCenter = getCenterPoint(leftEyePoints);
           const rightEyeCenter = getCenterPoint(rightEyePoints);
           const headYaw = calculateHeadYaw(noseTip, leftEyeCenter, rightEyeCenter);
-          const headDirection = detectHeadTurn(headYaw, 12);
+          const headPitch = calculateHeadPitch(noseTip, leftEyeCenter, rightEyeCenter);
+          const headDirection = detectHeadTurn(headYaw, HEAD_TURN_THRESHOLD);
 
           setState(prev => ({
             ...prev,
@@ -287,27 +340,33 @@ export const useFaceDetection = ({
             leftEAR,
             rightEAR,
             headYaw,
+            headPitch,
             isBlinking,
             headDirection,
           }));
 
           // Check current challenge completion
           if (currentChallenge === 'blink') {
-            if (isBlinking) {
-              if (!blinkStartRef.current) {
-                blinkStartRef.current = now;
-              } else if (now - blinkStartRef.current > 80) {
-                completeChallenge('blink');
-                blinkStartRef.current = null;
+            // Strict blink validation: must close THEN open
+            if (avgEAR < BLINK_EAR_THRESHOLD) {
+              // Eyes are closed
+              if (!blinkStateRef.current.startedAt) {
+                blinkStateRef.current.startedAt = now;
               }
-            } else {
-              blinkStartRef.current = null;
+              blinkStateRef.current.eyesWereClosed = true;
+            } else if (blinkStateRef.current.eyesWereClosed && blinkStateRef.current.startedAt) {
+              // Eyes were closed and now open
+              const duration = now - blinkStateRef.current.startedAt;
+              if (duration >= BLINK_MIN_DURATION && duration <= BLINK_MAX_DURATION) {
+                completeChallenge('blink');
+              }
+              blinkStateRef.current = { startedAt: null, eyesWereClosed: false };
             }
           } else if (currentChallenge === 'turn_left') {
             if (headDirection === 'left') {
               if (!headTurnStartRef.current || headTurnStartRef.current.direction !== 'left') {
                 headTurnStartRef.current = { direction: 'left', time: now };
-              } else if (now - headTurnStartRef.current.time > 400) {
+              } else if (now - headTurnStartRef.current.time > HEAD_TURN_HOLD_TIME) {
                 completeChallenge('turn_left');
                 headTurnStartRef.current = null;
               }
@@ -318,12 +377,24 @@ export const useFaceDetection = ({
             if (headDirection === 'right') {
               if (!headTurnStartRef.current || headTurnStartRef.current.direction !== 'right') {
                 headTurnStartRef.current = { direction: 'right', time: now };
-              } else if (now - headTurnStartRef.current.time > 400) {
+              } else if (now - headTurnStartRef.current.time > HEAD_TURN_HOLD_TIME) {
                 completeChallenge('turn_right');
                 headTurnStartRef.current = null;
               }
             } else {
               headTurnStartRef.current = null;
+            }
+          } else if (currentChallenge === 'look_up') {
+            // Negative pitch = looking up (anti-photo measure)
+            if (headPitch < LOOK_UP_THRESHOLD) {
+              if (!lookUpStartRef.current) {
+                lookUpStartRef.current = now;
+              } else if (now - lookUpStartRef.current > LOOK_UP_HOLD_TIME) {
+                completeChallenge('look_up');
+                lookUpStartRef.current = null;
+              }
+            } else {
+              lookUpStartRef.current = null;
             }
           }
         } else {
@@ -338,12 +409,15 @@ export const useFaceDetection = ({
         // Silently handle detection errors to avoid console spam
       }
 
-      animationRef.current = requestAnimationFrame(detectFace);
+      if (isActiveRef.current) {
+        animationRef.current = requestAnimationFrame(detectFace);
+      }
     };
 
     animationRef.current = requestAnimationFrame(detectFace);
 
     return () => {
+      isActiveRef.current = false;
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -358,5 +432,6 @@ export const useFaceDetection = ({
     progress,
     resetChallenges,
     retryLoadModels,
+    challenges,
   };
 };

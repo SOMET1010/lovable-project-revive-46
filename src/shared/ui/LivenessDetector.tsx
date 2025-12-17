@@ -1,11 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, RefreshCw, WifiOff } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, ArrowUp, RefreshCw, WifiOff } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
-import { useFaceDetection } from '@/shared/hooks/useFaceDetection';
-
-type LivenessChallenge = 'blink' | 'turn_left' | 'turn_right';
-
-const LIVENESS_CHALLENGES: LivenessChallenge[] = ['blink', 'turn_left', 'turn_right'];
+import { useFaceDetection, type LivenessChallenge } from '@/shared/hooks/useFaceDetection';
 
 const getChallengeLabel = (challenge: LivenessChallenge): string => {
   switch (challenge) {
@@ -15,6 +11,23 @@ const getChallengeLabel = (challenge: LivenessChallenge): string => {
       return 'Tournez la tête à gauche';
     case 'turn_right':
       return 'Tournez la tête à droite';
+    case 'look_up':
+      return 'Regardez vers le haut';
+    default:
+      return '';
+  }
+};
+
+const getChallengeLabelShort = (challenge: LivenessChallenge): string => {
+  switch (challenge) {
+    case 'blink':
+      return 'Cligner';
+    case 'turn_left':
+      return 'Gauche';
+    case 'turn_right':
+      return 'Droite';
+    case 'look_up':
+      return 'Haut';
     default:
       return '';
   }
@@ -49,6 +62,8 @@ const ChallengeIcon: React.FC<{ challenge: LivenessChallenge; isActive: boolean;
       return <ArrowLeft className={iconClass} />;
     case 'turn_right':
       return <ArrowRight className={iconClass} />;
+    case 'look_up':
+      return <ArrowUp className={iconClass} />;
     default:
       return null;
   }
@@ -76,6 +91,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     progress,
     resetChallenges,
     retryLoadModels,
+    challenges,
   } = useFaceDetection({
     videoRef,
     enabled: cameraReady && !hasCompletedRef.current,
@@ -272,31 +288,31 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           />
         </div>
 
-        {/* Challenge steps */}
+        {/* Challenge steps - uses randomized challenges array */}
         <div className="flex justify-between items-center mb-6">
-          {LIVENESS_CHALLENGES.map((challenge: LivenessChallenge, index: number) => {
+          {challenges.map((challenge: LivenessChallenge, index: number) => {
             const isComplete = completedChallenges.includes(challenge);
             const isActive = currentChallenge === challenge;
 
             return (
               <div
-                key={challenge}
+                key={`${challenge}-${index}`}
                 className={cn(
-                  'flex flex-col items-center gap-2 p-3 rounded-xl transition-all duration-300',
+                  'flex flex-col items-center gap-2 p-2 sm:p-3 rounded-xl transition-all duration-300 flex-1',
                   isComplete && 'bg-green-100',
                   isActive && !isComplete && 'bg-[#F16522]/10'
                 )}
               >
                 <div
                   className={cn(
-                    'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300',
+                    'w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300',
                     isComplete && 'bg-green-500',
                     isActive && !isComplete && 'bg-[#F16522]',
                     !isActive && !isComplete && 'bg-[#EFEBE9]'
                   )}
                 >
                   {isComplete ? (
-                    <CheckCircle2 className="w-6 h-6 text-white" />
+                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                   ) : (
                     <ChallengeIcon
                       challenge={challenge}
@@ -313,7 +329,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
                     !isActive && !isComplete && 'text-[#5D4037]/50'
                   )}
                 >
-                  {index + 1}. {challenge === 'blink' ? 'Cligner' : challenge === 'turn_left' ? 'Gauche' : 'Droite'}
+                  {index + 1}. {getChallengeLabelShort(challenge)}
                 </span>
               </div>
             );
