@@ -19,14 +19,26 @@ export default function BiometricVerificationPage() {
     score?: number;
     message?: string;
   } | null>(null);
+  
+  // États pour le choix de photo CNI existante
+  const [existingCniUrl, setExistingCniUrl] = useState<string | null>(null);
+  const [showCniChoice, setShowCniChoice] = useState(false);
 
   useEffect(() => {
-    // Pre-fill with existing CNI photo if available
+    // Stocker la photo existante SANS pré-remplir
     const cniUrl = profile?.cni_photo_url;
     if (cniUrl) {
-      setCniPhotoUrl(cniUrl);
+      setExistingCniUrl(cniUrl);
+      setShowCniChoice(true);
     }
   }, [profile]);
+  
+  // Reset le choix quand on revient à l'étape 2
+  useEffect(() => {
+    if (step === 2 && existingCniUrl && !cniPhotoUrl) {
+      setShowCniChoice(true);
+    }
+  }, [step, existingCniUrl, cniPhotoUrl]);
 
   // Compress image before upload to prevent 413 errors
   const compressImage = async (file: File, maxWidth = 1920, quality = 0.8): Promise<Blob> => {
@@ -258,50 +270,95 @@ export default function BiometricVerificationPage() {
                 <p className="text-[#5D4037] mt-1">Téléchargez une photo claire de votre carte d'identité</p>
               </div>
 
-              {cniPhotoUrl ? (
-                <div className="space-y-4">
-                  <div className="flex justify-center relative">
+              {/* Modal de choix si photo existante */}
+              {showCniChoice && existingCniUrl && !cniPhotoUrl && (
+                <div className="bg-[#FDF6E3] rounded-2xl p-6 mb-6 border-2 border-[#F16522]/20">
+                  <h3 className="text-lg font-bold text-[#3C2A1E] mb-4 text-center">
+                    📸 Une photo CNI existe déjà
+                  </h3>
+                  
+                  {/* Aperçu de la photo existante */}
+                  <div className="flex justify-center mb-4">
                     <img
-                      src={cniPhotoUrl}
-                      alt="Photo CNI"
-                      className="max-w-xs rounded-xl border-2 border-[#3C2A1E]/20 shadow-md"
+                      src={existingCniUrl}
+                      alt="Photo CNI existante"
+                      className="max-w-[200px] rounded-xl border-2 border-[#3C2A1E]/20 shadow-md"
                     />
                   </div>
-                  <p className="text-center text-sm text-green-600 font-medium">
-                    ✓ Photo prête pour la vérification
-                  </p>
-                  {/* Replace photo button */}
-                  <label className="block">
-                    <div className="flex items-center justify-center gap-2 py-2 px-4 border border-[#F16522] text-[#F16522] rounded-lg cursor-pointer hover:bg-[#F16522]/10 transition-colors text-sm font-medium">
-                      <RefreshCw className="h-4 w-4" />
-                      {isUploading ? 'Compression...' : 'Remplacer la photo (si erreur taille)'}
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      disabled={isUploading}
-                    />
-                  </label>
+                  
+                  {/* Boutons de choix */}
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={() => {
+                        setCniPhotoUrl(existingCniUrl);
+                        setShowCniChoice(false);
+                      }}
+                      className="w-full py-3 bg-[#F16522] text-white rounded-xl font-semibold hover:bg-[#D95318] transition-colors shadow-md"
+                    >
+                      ✓ Utiliser cette photo
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        setShowCniChoice(false);
+                      }}
+                      className="w-full py-3 border-2 border-[#3C2A1E]/20 text-[#3C2A1E] rounded-xl font-semibold hover:bg-[#3C2A1E]/5 transition-colors"
+                    >
+                      📷 Télécharger une nouvelle photo
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <label className="block">
-                  <div className="border-2 border-dashed border-[#3C2A1E]/20 rounded-xl p-8 text-center cursor-pointer hover:border-[#F16522]/50 hover:bg-[#F16522]/5 transition-all">
-                    <Upload className="h-12 w-12 text-[#5D4037] mx-auto mb-3" />
-                    <p className="font-medium text-[#3C2A1E]">
-                      {isUploading ? 'Téléchargement...' : 'Cliquez pour télécharger'}
-                    </p>
-                    <p className="text-sm text-[#5D4037] mt-1">PNG, JPG (max 5MB recommandé)</p>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    disabled={isUploading}
-                  />
-                </label>
+              )}
+
+              {/* Zone d'upload ou photo sélectionnée */}
+              {(!showCniChoice || cniPhotoUrl) && (
+                <>
+                  {cniPhotoUrl ? (
+                    <div className="space-y-4">
+                      <div className="flex justify-center relative">
+                        <img
+                          src={cniPhotoUrl}
+                          alt="Photo CNI"
+                          className="max-w-xs rounded-xl border-2 border-[#3C2A1E]/20 shadow-md"
+                        />
+                      </div>
+                      <p className="text-center text-sm text-green-600 font-medium">
+                        ✓ Photo prête pour la vérification
+                      </p>
+                      {/* Replace photo button */}
+                      <label className="block">
+                        <div className="flex items-center justify-center gap-2 py-2 px-4 border border-[#F16522] text-[#F16522] rounded-lg cursor-pointer hover:bg-[#F16522]/10 transition-colors text-sm font-medium">
+                          <RefreshCw className="h-4 w-4" />
+                          {isUploading ? 'Compression...' : 'Remplacer la photo'}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          disabled={isUploading}
+                        />
+                      </label>
+                    </div>
+                  ) : (
+                    <label className="block">
+                      <div className="border-2 border-dashed border-[#3C2A1E]/20 rounded-xl p-8 text-center cursor-pointer hover:border-[#F16522]/50 hover:bg-[#F16522]/5 transition-all">
+                        <Upload className="h-12 w-12 text-[#5D4037] mx-auto mb-3" />
+                        <p className="font-medium text-[#3C2A1E]">
+                          {isUploading ? 'Téléchargement...' : 'Cliquez pour télécharger'}
+                        </p>
+                        <p className="text-sm text-[#5D4037] mt-1">PNG, JPG (max 5MB recommandé)</p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        disabled={isUploading}
+                      />
+                    </label>
+                  )}
+                </>
               )}
 
               <div className="flex gap-4 mt-8">
@@ -319,7 +376,7 @@ export default function BiometricVerificationPage() {
                   >
                     Continuer
                   </button>
-                  {!cniPhotoUrl && (
+                  {!cniPhotoUrl && !showCniChoice && (
                     <p className="mt-2 text-xs text-[#5D4037]">
                       Téléchargez votre CNI pour continuer.
                     </p>
