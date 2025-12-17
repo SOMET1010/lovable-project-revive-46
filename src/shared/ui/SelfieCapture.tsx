@@ -97,10 +97,17 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
     }
   }, [mode, startCamera]);
 
-  const handleLivenessComplete = useCallback((videoRefFromLiveness: React.RefObject<HTMLVideoElement | null>) => {
-    // Capture from the liveness video directly
-    if (videoRefFromLiveness.current && canvasRef.current) {
-      const video = videoRefFromLiveness.current;
+  const handleLivenessComplete = useCallback((data: { videoRef: React.RefObject<HTMLVideoElement | null>; screenshot: string | null }) => {
+    // Use the pre-captured screenshot if available
+    if (data.screenshot) {
+      setCapturedImage(data.screenshot);
+      setMode('preview');
+      return;
+    }
+
+    // Fallback: capture from the liveness video directly
+    if (data.videoRef.current && canvasRef.current) {
+      const video = data.videoRef.current;
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
 

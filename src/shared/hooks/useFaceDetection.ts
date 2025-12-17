@@ -9,6 +9,7 @@ interface Point {
 }
 
 export type LivenessChallenge = 'blink' | 'turn_left' | 'turn_right' | 'look_up';
+export type FaceDistance = 'too_far' | 'too_close' | 'optimal' | 'unknown';
 
 const LIVENESS_CHALLENGES: LivenessChallenge[] = ['blink', 'turn_left', 'turn_right', 'look_up'];
 
@@ -77,6 +78,15 @@ const detectHeadTurn = (yaw: number, threshold: number = 18): 'left' | 'right' |
   return 'center';
 };
 
+// Calculate face distance based on eye distance relative to video width
+const calculateFaceDistance = (eyeDist: number, videoWidth: number): FaceDistance => {
+  if (videoWidth === 0) return 'unknown';
+  const ratio = eyeDist / videoWidth;
+  if (ratio < FACE_MIN_DISTANCE_RATIO) return 'too_far';
+  if (ratio > FACE_MAX_DISTANCE_RATIO) return 'too_close';
+  return 'optimal';
+};
+
 interface UseFaceDetectionOptions {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   enabled?: boolean;
@@ -94,6 +104,8 @@ interface FaceDetectionState {
   headPitch: number;
   isBlinking: boolean;
   headDirection: 'left' | 'right' | 'center';
+  faceDistance: FaceDistance;
+  eyeDistanceRatio: number;
 }
 
 interface UseFaceDetectionReturn extends FaceDetectionState {
@@ -104,6 +116,8 @@ interface UseFaceDetectionReturn extends FaceDetectionState {
   resetChallenges: () => void;
   retryLoadModels: () => void;
   challenges: LivenessChallenge[];
+  screenshot: string | null;
+  takeScreenshot: () => string | null;
 }
 
 // Model URLs - local first, CDN fallback
@@ -123,6 +137,10 @@ const HEAD_TURN_THRESHOLD = 18; // degrees (increased from 12)
 const HEAD_TURN_HOLD_TIME = 400; // ms
 const LOOK_UP_THRESHOLD = -8; // negative pitch = looking up
 const LOOK_UP_HOLD_TIME = 400; // ms
+
+// Face distance thresholds (based on eye distance relative to video width)
+const FACE_MIN_DISTANCE_RATIO = 0.15; // Too far if < 15%
+const FACE_MAX_DISTANCE_RATIO = 0.40; // Too close if > 40%
 
 // Load models with timeout
 const loadModelsFromUrl = async (url: string, timeout: number): Promise<void> => {
@@ -186,7 +204,11 @@ export const useFaceDetection = ({
     headPitch: 0,
     isBlinking: false,
     headDirection: 'center',
+    faceDistance: 'unknown',
+    eyeDistanceRatio: 0,
   });
+
+  const [screenshot, setScreenshot] = useState<string | null>(null);
 
   // Randomized challenges for each session (anti-replay)
   const [challenges, setChallenges] = useState<LivenessChallenge[]>(() => 
@@ -198,6 +220,7 @@ export const useFaceDetection = ({
 
   const animationRef = useRef<number | null>(null);
   const lastDetectionRef = useRef<number>(0);
+  const screenshotTakenRef = useRef(false);
   
   // Strict blink tracking: must close THEN open
   const blinkStateRef = useRef<{
@@ -210,6 +233,28 @@ export const useFaceDetection = ({
   
   // Active flag for cleanup
   const isActiveRef = useRef(true);
+
+  // Screenshot capture function
+  const takeScreenshot = useCallback((): string | null => {
+    const video = videoRef.current;
+    if (!video || video.videoWidth === 0 || video.videoHeight === 0) return null;
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      
+      if (ctx) {
+        // Draw without mirror effect for backend processing
+        ctx.drawImage(video, 0, 0);
+        return canvas.toDataURL('image/jpeg', 0.85);
+      }
+    } catch (_error) {
+      // Silently handle canvas errors
+    }
+    return null;
+  }, [videoRef]);
 
   // Retry loading models
   const retryLoadModels = useCallback(() => {
@@ -330,6 +375,11 @@ export const useFaceDetection = ({
 
           const leftEyeCenter = getCenterPoint(leftEyePoints);
           const rightEyeCenter = getCenterPoint(rightEyePoints);
+          const eyeDist = euclideanDistance(leftEyeCenter, rightEyeCenter);
+          const videoWidth = video.videoWidth || 640;
+          const faceDistance = calculateFaceDistance(eyeDist, videoWidth);
+          const eyeDistanceRatio = videoWidth > 0 ? eyeDist / videoWidth : 0;
+          
           const headYaw = calculateHeadYaw(noseTip, leftEyeCenter, rightEyeCenter);
           const headPitch = calculateHeadPitch(noseTip, leftEyeCenter, rightEyeCenter);
           const headDirection = detectHeadTurn(headYaw, HEAD_TURN_THRESHOLD);
@@ -343,9 +393,17 @@ export const useFaceDetection = ({
             headPitch,
             isBlinking,
             headDirection,
+            faceDistance,
+            eyeDistanceRatio,
           }));
 
-          // Check current challenge completion
+          // Block challenge validation if face distance is not optimal
+          if (faceDistance !== 'optimal') {
+            animationRef.current = requestAnimationFrame(detectFace);
+            return;
+          }
+
+          // Check current challenge completion (only if distance is optimal)
           if (currentChallenge === 'blink') {
             // Strict blink validation: must close THEN open
             if (avgEAR < BLINK_EAR_THRESHOLD) {
@@ -403,6 +461,8 @@ export const useFaceDetection = ({
             faceDetected: false,
             isBlinking: false,
             headDirection: 'center',
+            faceDistance: 'unknown',
+            eyeDistanceRatio: 0,
           }));
         }
       } catch (_error) {
@@ -424,6 +484,17 @@ export const useFaceDetection = ({
     };
   }, [enabled, state.modelsLoaded, videoRef, detectionInterval, currentChallenge, completeChallenge, isLivenessComplete]);
 
+  // Auto-capture screenshot when liveness is complete
+  useEffect(() => {
+    if (isLivenessComplete && !screenshotTakenRef.current) {
+      screenshotTakenRef.current = true;
+      const img = takeScreenshot();
+      if (img) {
+        setScreenshot(img);
+      }
+    }
+  }, [isLivenessComplete, takeScreenshot]);
+
   return {
     ...state,
     currentChallenge: currentChallenge ?? null,
@@ -433,5 +504,7 @@ export const useFaceDetection = ({
     resetChallenges,
     retryLoadModels,
     challenges,
+    screenshot,
+    takeScreenshot,
   };
 };
