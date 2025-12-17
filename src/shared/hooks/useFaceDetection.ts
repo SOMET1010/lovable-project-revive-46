@@ -118,6 +118,8 @@ interface UseFaceDetectionReturn extends FaceDetectionState {
   challenges: LivenessChallenge[];
   screenshot: string | null;
   takeScreenshot: () => string | null;
+  timeLeft: number;
+  isFailed: boolean;
 }
 
 // Model URLs - local first, CDN fallback
@@ -126,6 +128,9 @@ const CDN_MODEL_URL = 'https://vladmandic.github.io/face-api/model';
 
 // Timeout for model loading (15 seconds)
 const MODEL_LOAD_TIMEOUT = 15000;
+
+// Challenge timer (seconds per challenge)
+const CHALLENGE_TIMEOUT = 10;
 
 // Blink validation thresholds
 const BLINK_EAR_THRESHOLD = 0.20;
@@ -209,6 +214,10 @@ export const useFaceDetection = ({
   });
 
   const [screenshot, setScreenshot] = useState<string | null>(null);
+
+  // Timer states
+  const [timeLeft, setTimeLeft] = useState(CHALLENGE_TIMEOUT);
+  const [isFailed, setIsFailed] = useState(false);
 
   // Randomized challenges for each session (anti-replay)
   const [challenges, setChallenges] = useState<LivenessChallenge[]>(() => 
@@ -310,12 +319,15 @@ export const useFaceDetection = ({
     if (!completedChallenges.includes(challenge)) {
       setCompletedChallenges(prev => [...prev, challenge]);
       setCurrentChallengeIndex(prev => prev + 1);
+      setTimeLeft(CHALLENGE_TIMEOUT); // Reset timer for next challenge
     }
   }, [completedChallenges]);
 
   const resetChallenges = useCallback(() => {
     setCompletedChallenges([]);
     setCurrentChallengeIndex(0);
+    setTimeLeft(CHALLENGE_TIMEOUT); // Reset timer
+    setIsFailed(false); // Reset failed state
     // Re-randomize challenges on reset
     setChallenges(shuffleArray(LIVENESS_CHALLENGES));
     blinkStateRef.current = { startedAt: null, eyesWereClosed: false };
@@ -323,9 +335,30 @@ export const useFaceDetection = ({
     lookUpStartRef.current = null;
   }, []);
 
+  // Challenge timer countdown
+  useEffect(() => {
+    // Don't run timer if: disabled, models not loaded, complete, failed, or no current challenge
+    if (!enabled || !state.modelsLoaded || isLivenessComplete || isFailed || !currentChallenge) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setIsFailed(true); // Challenge failed - time's up
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [currentChallengeIndex, enabled, state.modelsLoaded, isLivenessComplete, isFailed, currentChallenge]);
+
   // Face detection loop
   useEffect(() => {
-    if (!enabled || !state.modelsLoaded || !videoRef.current || isLivenessComplete) {
+    if (!enabled || !state.modelsLoaded || !videoRef.current || isLivenessComplete || isFailed) {
       return;
     }
 
@@ -506,5 +539,7 @@ export const useFaceDetection = ({
     challenges,
     screenshot,
     takeScreenshot,
+    timeLeft,
+    isFailed,
   };
 };

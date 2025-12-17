@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, ArrowUp, RefreshCw, WifiOff } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, ArrowUp, RefreshCw, WifiOff, Clock } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { useFaceDetection, type LivenessChallenge } from '@/shared/hooks/useFaceDetection';
 
@@ -69,6 +69,13 @@ const ChallengeIcon: React.FC<{ challenge: LivenessChallenge; isActive: boolean;
   }
 };
 
+// Timer color based on remaining time
+const getTimerColor = (timeLeft: number): string => {
+  if (timeLeft <= 3) return 'text-red-500 animate-pulse';
+  if (timeLeft <= 5) return 'text-amber-500';
+  return 'text-white';
+};
+
 export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
   onComplete,
   onError,
@@ -94,6 +101,8 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     retryLoadModels,
     challenges,
     screenshot,
+    timeLeft,
+    isFailed,
   } = useFaceDetection({
     videoRef,
     enabled: cameraReady && !hasCompletedRef.current,
@@ -174,7 +183,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
 
   const handleRetry = () => {
     hasCompletedRef.current = false;
-    resetChallenges();
+    resetChallenges(); // This now also resets timeLeft and isFailed
   };
 
   const handleRetryModels = () => {
@@ -258,8 +267,23 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
         )}
 
         {/* Face guide overlay */}
-        {cameraReady && modelsLoaded && !isLivenessComplete && (
+        {cameraReady && modelsLoaded && !isLivenessComplete && !isFailed && (
           <>
+            {/* Timer display */}
+            {currentChallenge && faceDetected && faceDistance === 'optimal' && (
+              <div className="absolute top-4 left-0 right-0 text-center z-20">
+                <div className={cn(
+                  'inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/60 backdrop-blur-sm',
+                  getTimerColor(timeLeft)
+                )}>
+                  <Clock className="w-5 h-5" />
+                  <span className="text-3xl font-bold tabular-nums">
+                    {timeLeft}s
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Face outline guide with dynamic color based on distance */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div
@@ -304,6 +328,29 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
               </div>
             )}
           </>
+        )}
+
+        {/* Failed overlay - time's up */}
+        {isFailed && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/90 z-20">
+            <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+              <AlertCircle className="w-12 h-12 text-red-500" />
+            </div>
+            <p className="text-white text-xl font-bold mb-2">
+              Temps écoulé !
+            </p>
+            <p className="text-white/70 text-sm text-center mb-6 px-8">
+              Vous n'avez pas complété le défi à temps.
+              Veuillez réessayer dans de meilleures conditions.
+            </p>
+            <Button
+              onClick={handleRetry}
+              className="bg-[#F16522] hover:bg-[#D55A1B] text-white px-8"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Réessayer
+            </Button>
+          </div>
         )}
 
         {/* Liveness complete overlay */}
