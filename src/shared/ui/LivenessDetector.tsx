@@ -34,7 +34,7 @@ const getChallengeLabelShort = (challenge: LivenessChallenge): string => {
 };
 
 interface LivenessDetectorProps {
-  onComplete: (videoRef: React.RefObject<HTMLVideoElement | null>) => void;
+  onComplete: (data: { videoRef: React.RefObject<HTMLVideoElement | null>; screenshot: string | null }) => void;
   onError?: (error: string) => void;
   className?: string;
 }
@@ -85,6 +85,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     modelsLoading,
     modelsError,
     faceDetected,
+    faceDistance,
     currentChallenge,
     completedChallenges,
     isLivenessComplete,
@@ -92,10 +93,39 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     resetChallenges,
     retryLoadModels,
     challenges,
+    screenshot,
   } = useFaceDetection({
     videoRef,
     enabled: cameraReady && !hasCompletedRef.current,
   });
+
+  // Dynamic oval styling based on face distance
+  const getOvalStyle = (): string => {
+    if (!faceDetected) return 'border-white/50';
+    switch (faceDistance) {
+      case 'too_far':
+        return 'border-amber-400 animate-pulse';
+      case 'too_close':
+        return 'border-red-400 animate-pulse';
+      case 'optimal':
+        return 'border-green-400';
+      default:
+        return 'border-white/50';
+    }
+  };
+
+  // Distance guidance message
+  const getDistanceMessage = (): string | null => {
+    if (!faceDetected) return null;
+    switch (faceDistance) {
+      case 'too_far':
+        return 'Rapprochez-vous de la caméra';
+      case 'too_close':
+        return 'Éloignez-vous de la caméra';
+      default:
+        return null;
+    }
+  };
 
   // Initialize camera
   useEffect(() => {
@@ -134,13 +164,13 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     };
   }, [onError]);
 
-  // Notify parent when liveness is complete
+  // Notify parent when liveness is complete with screenshot
   useEffect(() => {
     if (isLivenessComplete && !hasCompletedRef.current) {
       hasCompletedRef.current = true;
-      onComplete(videoRef);
+      onComplete({ videoRef, screenshot });
     }
-  }, [isLivenessComplete, onComplete]);
+  }, [isLivenessComplete, onComplete, screenshot]);
 
   const handleRetry = () => {
     hasCompletedRef.current = false;
@@ -230,18 +260,18 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
         {/* Face guide overlay */}
         {cameraReady && modelsLoaded && !isLivenessComplete && (
           <>
-            {/* Face outline guide */}
+            {/* Face outline guide with dynamic color based on distance */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div
                 className={cn(
                   'w-48 h-64 rounded-[50%] border-4 transition-all duration-300',
-                  faceDetected ? 'border-green-400' : 'border-white/50'
+                  getOvalStyle()
                 )}
               />
             </div>
 
-            {/* Current challenge instruction */}
-            {currentChallenge && faceDetected && (
+            {/* Current challenge instruction - only show when distance is optimal */}
+            {currentChallenge && faceDetected && faceDistance === 'optimal' && (
               <div className="absolute bottom-6 left-4 right-4 bg-black/70 rounded-xl p-4 backdrop-blur-sm">
                 <div className="flex items-center justify-center gap-3">
                   <ChallengeIcon
@@ -253,6 +283,15 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
                     {getChallengeLabel(currentChallenge)}
                   </span>
                 </div>
+              </div>
+            )}
+
+            {/* Distance guidance message */}
+            {faceDetected && getDistanceMessage() && (
+              <div className="absolute bottom-6 left-4 right-4 bg-amber-500/90 rounded-xl p-4">
+                <p className="text-white text-center font-medium">
+                  {getDistanceMessage()}
+                </p>
               </div>
             )}
 
