@@ -197,5 +197,5 @@ img {
 }
 
 .animate-confetti-fall {
-  animation: confetti-fall linear forwards;
+  animation: confetti-fall 2s linear forwards;
 }

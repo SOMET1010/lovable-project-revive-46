@@ -135,7 +135,7 @@ export default function ProfileCompletionPage() {
         setAvatarPreview(profile.avatar_url);
       }
       // Pre-fill CNI if exists
-      const cniUrl = (profile as { cni_photo_url?: string })?.cni_photo_url;
+      const cniUrl = profile.cni_photo_url;
       if (cniUrl) setCniPhotoUrl(cniUrl);
     }
   }, [profile]);

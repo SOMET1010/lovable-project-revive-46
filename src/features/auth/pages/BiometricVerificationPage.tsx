@@ -22,7 +22,7 @@ export default function BiometricVerificationPage() {
 
   useEffect(() => {
     // Pre-fill with existing CNI photo if available
-    const cniUrl = (profile as { cni_photo_url?: string })?.cni_photo_url;
+    const cniUrl = profile?.cni_photo_url;
     if (cniUrl) {
       setCniPhotoUrl(cniUrl);
     }
@@ -311,13 +311,20 @@ export default function BiometricVerificationPage() {
                 >
                   Retour
                 </button>
-                <button
-                  onClick={nextStep}
-                  disabled={!cniPhotoUrl}
-                  className="flex-1 py-3 bg-[#F16522] text-white rounded-xl font-semibold hover:bg-[#D95318] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Continuer
-                </button>
+                <div className="flex-1">
+                  <button
+                    onClick={nextStep}
+                    disabled={!cniPhotoUrl}
+                    className="w-full py-3 bg-[#F16522] text-white rounded-xl font-semibold hover:bg-[#D95318] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Continuer
+                  </button>
+                  {!cniPhotoUrl && (
+                    <p className="mt-2 text-xs text-[#5D4037]">
+                      Téléchargez votre CNI pour continuer.
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
