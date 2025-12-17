@@ -21,6 +21,15 @@ const LIVENESS_SCORE_CONFIG = {
   MIN_JERK_VALUE: 0.5,        // Jerk minimal pour mouvement naturel
 };
 
+// ============= Flash Anti-Reflet Configuration =============
+const FLASH_CONFIG = {
+  FLASH_DURATION: 200,           // Durée du flash en ms
+  CAPTURE_DELAY: 100,            // Délai avant capture post-flash
+  MIN_BRIGHTNESS_DELTA: 0.06,    // Delta luminosité minimum attendu (6%)
+  MAX_BRIGHTNESS_DELTA: 0.60,    // Delta max (évite saturation)
+  FLASH_COLORS: ['#FFFFFF', '#00FF00', '#FF0000'] as const, // Couleurs aléatoires
+};
+
 // Interface des métriques de vivacité collectées pendant le test
 interface LivenessMetrics {
   earSamples: number[];           // Historique EAR pour variabilité
@@ -29,6 +38,15 @@ interface LivenessMetrics {
   positionSamples: Point[];       // Positions du nez (stabilité)
   detectionGaps: number;          // Compteur de disparitions de visage
   challengeStartTime: number;     // Début du test (pour durée)
+}
+
+// Interface résultat du test anti-reflet
+export interface FlashResult {
+  color: string;                  // Couleur utilisée
+  brightnessBefore: number;       // Luminosité moyenne avant
+  brightnessAfter: number;        // Luminosité moyenne après
+  delta: number;                  // Différence
+  passed: boolean;                // Test réussi ?
 }
 
 // Interface du score final de vivacité
@@ -40,6 +58,7 @@ export interface LivenessResult {
     linearMovement: number;        // Pénalité mouvement linéaire
     detectionInstability: number;  // Pénalité instabilité
     slowCompletion: number;        // Pénalité temps long
+    flashTestFailed: number;       // Pénalité test anti-reflet échoué
   };
   metadata: {
     duration: number;              // Durée totale en secondes
@@ -48,6 +67,7 @@ export interface LivenessResult {
     movementJerk: number;          // Jerk du mouvement
     samplesCollected: number;      // Nombre d'échantillons
   };
+  flashTest?: FlashResult;        // Résultat du test anti-reflet
 }
 
 // Shuffle array (Fisher-Yates)
@@ -182,6 +202,37 @@ interface UseFaceDetectionReturn extends FaceDetectionState {
   timeLeft: number;
   isFailed: boolean;
   livenessResult: LivenessResult | null;
+  // Flash anti-reflet
+  isFlashing: boolean;
+  flashColor: string | null;
+  runFlashTest: () => Promise<FlashResult | null>;
+}
+
+// Calculate brightness of a region (ITU-R BT.601 formula)
+const calculateRegionBrightness = (
+  ctx: CanvasRenderingContext2D,
+  x: number, y: number,
+  width: number, height: number
+): number => {
+  try {
+    const imageData = ctx.getImageData(x, y, width, height);
+    const data = imageData.data;
+    
+    let totalBrightness = 0;
+    const pixelCount = data.length / 4;
+    
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i]!;
+      const g = data[i + 1]!;
+      const b = data[i + 2]!;
+      // ITU-R BT.601 perceived brightness
+      totalBrightness += (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    }
+    
+    return totalBrightness / pixelCount;
+  } catch {
+    return 0;
+  }
 }
 
 // Model URLs - local first, CDN fallback
@@ -294,6 +345,11 @@ export const useFaceDetection = ({
   // Liveness score result
   const [livenessResult, setLivenessResult] = useState<LivenessResult | null>(null);
 
+  // Flash anti-reflet state
+  const [isFlashing, setIsFlashing] = useState(false);
+  const [flashColor, setFlashColor] = useState<string | null>(null);
+  const [_flashResult, setFlashResult] = useState<FlashResult | null>(null);
+
   // Randomized challenges for each session (anti-replay)
   const [challenges, setChallenges] = useState<LivenessChallenge[]>(() => 
     shuffleArray(LIVENESS_CHALLENGES)
@@ -343,8 +399,81 @@ export const useFaceDetection = ({
     return null;
   }, [videoRef]);
 
+  // Flash anti-reflet test
+  const runFlashTest = useCallback(async (): Promise<FlashResult | null> => {
+    const video = videoRef.current;
+    if (!video || video.videoWidth === 0) return null;
+
+    try {
+      // 1. Capture frame BEFORE flash
+      const canvasBefore = document.createElement('canvas');
+      canvasBefore.width = video.videoWidth;
+      canvasBefore.height = video.videoHeight;
+      const ctxBefore = canvasBefore.getContext('2d');
+      if (!ctxBefore) return null;
+      ctxBefore.drawImage(video, 0, 0);
+      
+      // Face region (center of image, 40% width)
+      const faceX = Math.floor(video.videoWidth * 0.3);
+      const faceY = Math.floor(video.videoHeight * 0.2);
+      const faceW = Math.floor(video.videoWidth * 0.4);
+      const faceH = Math.floor(video.videoHeight * 0.5);
+      
+      const brightnessBefore = calculateRegionBrightness(ctxBefore, faceX, faceY, faceW, faceH);
+
+      // 2. Choose random color and flash
+      const color = FLASH_CONFIG.FLASH_COLORS[
+        Math.floor(Math.random() * FLASH_CONFIG.FLASH_COLORS.length)
+      ]!;
+      setFlashColor(color);
+      setIsFlashing(true);
+
+      // 3. Wait for flash duration + reflection delay
+      await new Promise(r => setTimeout(r, FLASH_CONFIG.FLASH_DURATION + FLASH_CONFIG.CAPTURE_DELAY));
+
+      // 4. Capture frame AFTER flash
+      const canvasAfter = document.createElement('canvas');
+      canvasAfter.width = video.videoWidth;
+      canvasAfter.height = video.videoHeight;
+      const ctxAfter = canvasAfter.getContext('2d');
+      if (!ctxAfter) {
+        setIsFlashing(false);
+        setFlashColor(null);
+        return null;
+      }
+      ctxAfter.drawImage(video, 0, 0);
+      
+      const brightnessAfter = calculateRegionBrightness(ctxAfter, faceX, faceY, faceW, faceH);
+
+      // 5. End flash
+      setIsFlashing(false);
+      setFlashColor(null);
+
+      // 6. Calculate delta
+      const delta = brightnessAfter - brightnessBefore;
+      const passed = delta >= FLASH_CONFIG.MIN_BRIGHTNESS_DELTA && 
+                     delta <= FLASH_CONFIG.MAX_BRIGHTNESS_DELTA;
+
+      const result: FlashResult = { color, brightnessBefore, brightnessAfter, delta, passed };
+      setFlashResult(result);
+      
+      if (import.meta.env.DEV) {
+        console.log('[Flash Test]', result);
+      }
+      
+      return result;
+    } catch (error) {
+      setIsFlashing(false);
+      setFlashColor(null);
+      if (import.meta.env.DEV) {
+        console.error('[Flash Test Error]', error);
+      }
+      return null;
+    }
+  }, [videoRef]);
+
   // Calculate liveness score based on collected metrics
-  const calculateLivenessScore = useCallback((): LivenessResult => {
+  const calculateLivenessScore = useCallback((flashTestResult?: FlashResult | null): LivenessResult => {
     const metrics = livenessMetricsRef.current;
     const now = performance.now();
     
@@ -362,6 +491,7 @@ export const useFaceDetection = ({
       linearMovement: 0,
       detectionInstability: 0,
       slowCompletion: 0,
+      flashTestFailed: 0,
     };
     
     let score = 100;
@@ -394,6 +524,12 @@ export const useFaceDetection = ({
       score -= 10;
     }
     
+    // 5. Penalty if flash test failed (detects screens/photos)
+    if (flashTestResult && !flashTestResult.passed) {
+      penalties.flashTestFailed = 25;
+      score -= 25;
+    }
+    
     const finalScore = Math.max(0, Math.min(100, score));
     
     return {
@@ -407,6 +543,7 @@ export const useFaceDetection = ({
         movementJerk,
         samplesCollected: metrics.earSamples.length,
       },
+      flashTest: flashTestResult || undefined,
     };
   }, [timeLeft]);
 
@@ -474,6 +611,9 @@ export const useFaceDetection = ({
     setTimeLeft(CHALLENGE_TIMEOUT);
     setIsFailed(false);
     setLivenessResult(null);
+    setFlashResult(null);
+    setIsFlashing(false);
+    setFlashColor(null);
     // Reset liveness metrics
     livenessMetricsRef.current = getInitialMetrics();
     // Re-randomize challenges on reset
@@ -505,17 +645,22 @@ export const useFaceDetection = ({
     return () => clearInterval(timer);
   }, [currentChallengeIndex, enabled, state.modelsLoaded, isLivenessComplete, isFailed, currentChallenge]);
 
-  // Calculate liveness score when complete
+  // Run flash test and calculate score when all challenges complete
   useEffect(() => {
     if (isLivenessComplete && !livenessResult) {
-      const result = calculateLivenessScore();
-      setLivenessResult(result);
-      
-      if (import.meta.env.DEV) {
-        console.log('[Liveness] Score calculated:', result);
-      }
+      // Run flash test then calculate score
+      const calculateWithFlash = async () => {
+        const flashTestResult = await runFlashTest();
+        const result = calculateLivenessScore(flashTestResult);
+        setLivenessResult(result);
+        
+        if (import.meta.env.DEV) {
+          console.log('[Liveness] Score calculated:', result);
+        }
+      };
+      calculateWithFlash();
     }
-  }, [isLivenessComplete, livenessResult, calculateLivenessScore]);
+  }, [isLivenessComplete, livenessResult, calculateLivenessScore, runFlashTest]);
 
   // Face detection loop
   useEffect(() => {
@@ -731,5 +876,9 @@ export const useFaceDetection = ({
     timeLeft,
     isFailed,
     livenessResult,
+    // Flash anti-reflet
+    isFlashing,
+    flashColor,
+    runFlashTest,
   };
 };
