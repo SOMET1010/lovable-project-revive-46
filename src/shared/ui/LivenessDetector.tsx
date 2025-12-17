@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, RefreshCw } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, RefreshCw, WifiOff } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { useFaceDetection } from '@/shared/hooks/useFaceDetection';
 
@@ -75,6 +75,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     isLivenessComplete,
     progress,
     resetChallenges,
+    retryLoadModels,
   } = useFaceDetection({
     videoRef,
     enabled: cameraReady && !hasCompletedRef.current,
@@ -130,6 +131,10 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     resetChallenges();
   };
 
+  const handleRetryModels = () => {
+    retryLoadModels();
+  };
+
   if (cameraError) {
     return (
       <div className={cn('flex flex-col items-center justify-center p-8 bg-red-50 rounded-2xl', className)}>
@@ -146,30 +151,34 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
 
   if (modelsError) {
     return (
-      <div className={cn('flex flex-col items-center justify-center p-8 bg-red-50 rounded-2xl', className)}>
-        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-        <p className="text-red-800 font-medium text-center mb-4">
-          Erreur de chargement des modèles
+      <div className={cn('flex flex-col items-center justify-center p-8 bg-amber-50 rounded-2xl border border-amber-200', className)}>
+        <WifiOff className="w-12 h-12 text-amber-600 mb-4" />
+        <p className="text-[#2C1810] font-semibold text-center mb-2 text-lg">
+          Connexion lente détectée
         </p>
-        <p className="text-sm text-red-600 text-center mb-6">
-          {modelsError}
+        <p className="text-sm text-[#5D4037] text-center mb-6 max-w-xs">
+          Le chargement des modèles de détection faciale a pris trop de temps. 
+          Vérifiez votre connexion internet et réessayez.
         </p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <Button
-            onClick={() => window.location.reload()}
+            onClick={handleRetryModels}
             className="w-full bg-[#F16522] hover:bg-[#D55A1B] text-white"
           >
             <RefreshCw className="w-4 h-4 mr-2" />
-            Réessayer
+            Réessayer le chargement
           </Button>
           <Button
             variant="outline"
             onClick={() => onError?.('skip_liveness')}
-            className="w-full border-[#2C1810]/30 text-[#2C1810]"
+            className="w-full border-[#2C1810]/30 text-[#2C1810] hover:bg-[#FAF7F4]"
           >
             Continuer sans vérification de vivacité
           </Button>
         </div>
+        <p className="text-xs text-[#5D4037]/70 text-center mt-4">
+          La vérification de vivacité renforce la sécurité mais n'est pas obligatoire.
+        </p>
       </div>
     );
   }
@@ -191,9 +200,14 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
         {(modelsLoading || !cameraReady) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/80 z-10">
             <Loader2 className="w-12 h-12 text-[#F16522] animate-spin mb-4" />
-            <p className="text-white text-sm">
+            <p className="text-white text-sm text-center px-4">
               {modelsLoading ? 'Chargement de la détection faciale...' : 'Démarrage de la caméra...'}
             </p>
+            {modelsLoading && (
+              <p className="text-white/60 text-xs mt-2">
+                Cela peut prendre quelques secondes
+              </p>
+            )}
           </div>
         )}
 
