@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 export default function BiometricVerificationPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const { step, slideDirection, nextStep, prevStep, goToStep } = useFormStepper(3);
+  const { step, slideDirection, nextStep, prevStep, goToStep } = useFormStepper(1, 3);
   
   const [cniPhotoUrl, setCniPhotoUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
