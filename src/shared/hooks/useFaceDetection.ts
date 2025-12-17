@@ -83,10 +83,61 @@ interface UseFaceDetectionReturn extends FaceDetectionState {
   isLivenessComplete: boolean;
   progress: number;
   resetChallenges: () => void;
+  retryLoadModels: () => void;
 }
 
-// Use CDN for reliable model loading - vladmandic's official models
-const MODEL_URL = 'https://vladmandic.github.io/face-api/model';
+// Model URLs - local first, CDN fallback
+const LOCAL_MODEL_URL = '/models/face-api';
+const CDN_MODEL_URL = 'https://vladmandic.github.io/face-api/model';
+
+// Timeout for model loading (15 seconds)
+const MODEL_LOAD_TIMEOUT = 15000;
+
+// Load models with timeout
+const loadModelsFromUrl = async (url: string, timeout: number): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      reject(new Error(`Timeout loading models from ${url}`));
+    }, timeout);
+
+    Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri(url),
+      faceapi.nets.faceLandmark68TinyNet.loadFromUri(url),
+    ])
+      .then(() => {
+        clearTimeout(timeoutId);
+        resolve();
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        reject(error);
+      });
+  });
+};
+
+// Try loading models with fallback strategy
+const loadModelsWithFallback = async (): Promise<{ source: 'local' | 'cdn' }> => {
+  // Try local first
+  try {
+    await loadModelsFromUrl(LOCAL_MODEL_URL, MODEL_LOAD_TIMEOUT);
+    return { source: 'local' };
+  } catch (_localError) {
+    if (import.meta.env.DEV) {
+      console.warn('Local models not available, trying CDN...');
+    }
+  }
+
+  // Fallback to CDN
+  try {
+    await loadModelsFromUrl(CDN_MODEL_URL, MODEL_LOAD_TIMEOUT);
+    return { source: 'cdn' };
+  } catch (_cdnError) {
+    if (import.meta.env.DEV) {
+      console.error('CDN models also failed');
+    }
+    throw new Error('models_unavailable');
+  }
+};
 
 export const useFaceDetection = ({
   videoRef,
@@ -107,24 +158,37 @@ export const useFaceDetection = ({
 
   const [completedChallenges, setCompletedChallenges] = useState<LivenessChallenge[]>([]);
   const [currentChallengeIndex, setCurrentChallengeIndex] = useState(0);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   const animationRef = useRef<number | null>(null);
   const lastDetectionRef = useRef<number>(0);
   const blinkStartRef = useRef<number | null>(null);
   const headTurnStartRef = useRef<{ direction: 'left' | 'right'; time: number } | null>(null);
 
-  // Load face-api models
+  // Retry loading models
+  const retryLoadModels = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      modelsLoaded: false,
+      modelsLoading: false,
+      modelsError: null,
+    }));
+    setLoadAttempt(prev => prev + 1);
+  }, []);
+
+  // Load face-api models with fallback
   useEffect(() => {
     const loadModels = async () => {
       if (state.modelsLoaded || state.modelsLoading) return;
 
-      setState(prev => ({ ...prev, modelsLoading: true }));
+      setState(prev => ({ ...prev, modelsLoading: true, modelsError: null }));
 
       try {
-        await Promise.all([
-          faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-          faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
-        ]);
+        const result = await loadModelsWithFallback();
+        
+        if (import.meta.env.DEV) {
+          console.log(`Face-api models loaded from ${result.source}`);
+        }
 
         setState(prev => ({
           ...prev,
@@ -132,20 +196,17 @@ export const useFaceDetection = ({
           modelsLoading: false,
           modelsError: null,
         }));
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error('Error loading face-api models:', error);
-        }
+      } catch (_error) {
         setState(prev => ({
           ...prev,
           modelsLoading: false,
-          modelsError: 'Impossible de charger les modèles de détection faciale. Vérifiez votre connexion internet et réessayez.',
+          modelsError: 'slow_connection',
         }));
       }
     };
 
     loadModels();
-  }, [state.modelsLoaded, state.modelsLoading]);
+  }, [state.modelsLoaded, state.modelsLoading, loadAttempt]);
 
   const currentChallenge = currentChallengeIndex < LIVENESS_CHALLENGES.length
     ? LIVENESS_CHALLENGES[currentChallengeIndex]
@@ -273,7 +334,7 @@ export const useFaceDetection = ({
             headDirection: 'center',
           }));
         }
-      } catch (error) {
+      } catch (_error) {
         // Silently handle detection errors to avoid console spam
       }
 
@@ -296,5 +357,6 @@ export const useFaceDetection = ({
     isLivenessComplete,
     progress,
     resetChallenges,
+    retryLoadModels,
   };
 };
