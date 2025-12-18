@@ -167,6 +167,8 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     livenessResult,
     isFlashing,
     flashColor,
+    currentCdnAttempt,
+    totalCdnSources,
   } = useFaceDetection({
     videoRef,
     enabled: cameraReady && !hasCompletedRef.current,
@@ -373,7 +375,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           />
         )}
 
-        {/* Loading overlay with enhanced feedback */}
+        {/* Loading overlay with enhanced CDN feedback */}
         {(modelsLoading || !cameraReady) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/80 z-10">
             <Loader2 className="w-12 h-12 text-[#F16522] animate-spin mb-4" />
@@ -381,20 +383,37 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
               {modelsLoading ? 'Chargement de la détection faciale...' : 'Démarrage de la caméra...'}
             </p>
             
-            {/* Progressive feedback based on loading time */}
-            {modelsLoading && loadingTime < 10 && (
+            {/* CDN progress indicator */}
+            {modelsLoading && totalCdnSources > 0 && (
+              <div className="mt-3 flex items-center gap-2">
+                {Array.from({ length: totalCdnSources }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      'w-2 h-2 rounded-full transition-all duration-300',
+                      i < currentCdnAttempt ? 'bg-red-400' : // Failed
+                      i === currentCdnAttempt ? 'bg-[#F16522] animate-pulse' : // Current
+                      'bg-white/30' // Pending
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+            {modelsLoading && (
               <p className="text-white/60 text-xs mt-2">
-                Cela peut prendre quelques secondes
+                Serveur {currentCdnAttempt + 1}/{totalCdnSources}
               </p>
             )}
+            
+            {/* Progressive feedback based on loading time */}
             {modelsLoading && loadingTime >= 10 && loadingTime < 20 && (
-              <p className="text-amber-300 text-xs mt-2 animate-pulse">
-                Chargement long, patientez... ({loadingTime}s)
+              <p className="text-amber-300 text-xs mt-1 animate-pulse">
+                Connexion lente... ({loadingTime}s)
               </p>
             )}
             {modelsLoading && loadingTime >= 20 && (
-              <p className="text-amber-400 text-xs mt-2 animate-pulse">
-                Connexion lente détectée ({loadingTime}s)
+              <p className="text-amber-400 text-xs mt-1 animate-pulse">
+                Dernière tentative ({loadingTime}s)
               </p>
             )}
             
