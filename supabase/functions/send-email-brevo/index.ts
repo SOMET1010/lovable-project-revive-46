@@ -218,8 +218,11 @@ Deno.serve(async (req: Request) => {
     // Parse request body
     const body = await req.json();
 
+    console.log('[send-email-brevo] Request body:', JSON.stringify(body, null, 2));
+
     // Special case for OTP requests
     const isOTPRequest = body.type === 'otp' && body.otp;
+    console.log('[send-email-brevo] Is OTP request:', isOTPRequest);
 
     let emailData: EmailRequest;
 
@@ -255,9 +258,6 @@ Deno.serve(async (req: Request) => {
     }
 
   
-    // Determine if we're in sandbox mode
-    const isSandbox = Deno.env.get('DENO_ENV') === 'development';
-
     // Prepare Brevo request with configurable sender
     const brevoPayload: any = {
       sender: {
@@ -270,12 +270,13 @@ Deno.serve(async (req: Request) => {
       }],
     };
 
-    // Add headers only if needed
-    if (isSandbox) {
-      brevoPayload.headers = {
-        'X-Sib-Sandbox': 'drop'
-      };
-    }
+    // Log configuration for debugging
+    console.log('[send-email-brevo] Sender configuration:', {
+      name: brevoPayload.sender.name,
+      email: brevoPayload.sender.email,
+      recipient: emailData.to,
+      recipientName: emailData.toName
+    });
 
     // Use template if provided
     if (emailData.templateId) {
@@ -301,8 +302,9 @@ Deno.serve(async (req: Request) => {
       body: JSON.stringify(brevoPayload),
     });
 
-    // Log response status
+    // Log response status and details
     console.log('[send-email-brevo] Brevo response status:', brevoResponse.status);
+    console.log('[send-email-brevo] Brevo response headers:', Object.fromEntries(brevoResponse.headers.entries()));
 
     if (!brevoResponse.ok) {
       // Try to parse error as JSON

@@ -26,7 +26,6 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { supabase } from '@/services/supabase/client';
-import { callEdgeFunction } from '@/api/client';
 import { InputWithIcon } from '@/shared/ui';
 import { PhoneInputWithCountry } from '@/shared/components/PhoneInputWithCountry';
 import OTPInput from '@/shared/components/modern/OTPInput';
@@ -214,32 +213,24 @@ export default function ModernAuthPage() {
     sessionStorage.setItem(`otp:${targetEmail}`, code);
 
     try {
-      const { data, error } = await callEdgeFunction('send-email', {
-        to: targetEmail,
-        template: 'email-verification',
-        data: {
+      const { data, error } = await supabase.functions.invoke('send-email-brevo', {
+        body: {
+          type: 'otp',
+          to: targetEmail,
           otp: code,
-          email: targetEmail,
-          name: fullName || targetEmail,
-          expiresIn: '10 minutes',
+          toName: fullName || targetEmail.split('@')[0],
         },
-      }, {
-        maxRetries: 3,
-        timeout: 30000, // 30 secondes
       });
 
-      if (error as Error | null) {
+      if (error) {
         console.error('Error sending OTP email:', error);
+        throw new Error(error.message || 'Envoi du code impossible');
+      }
 
-        // Message plus convivial pour les timeouts
-        if (
-          (error as Error).message?.includes('mis trop de temps') ||
-          (error as Error).message?.includes('timeout')
-        ) {
-          throw new Error('Le service d\'envoi d\'email est temporairement surchargé. Veuillez réessayer dans quelques instants.');
-        }
-
-        throw new Error((error as Error).message || 'Envoi du code impossible');
+      // Vérifier la réponse de Brevo
+      if (data?.status !== 'ok') {
+        console.error('Brevo error:', data);
+        throw new Error(data?.reason || 'Erreur lors de l\'envoi de l\'email');
       }
 
       return { code, viaFallback: false };
