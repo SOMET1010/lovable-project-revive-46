@@ -167,7 +167,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
     livenessResult,
     isFlashing,
     flashColor,
-    currentCdnAttempt,
+    // Note: currentCdnAttempt removed - parallel race shows all dots pulsing
     totalCdnSources,
   } = useFaceDetection({
     videoRef,
@@ -375,7 +375,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           />
         )}
 
-        {/* Loading overlay with enhanced CDN feedback */}
+        {/* Loading overlay with parallel CDN race feedback */}
         {(modelsLoading || !cameraReady) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/80 z-10">
             <Loader2 className="w-12 h-12 text-[#F16522] animate-spin mb-4" />
@@ -383,42 +383,43 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
               {modelsLoading ? 'Chargement de la détection faciale...' : 'Démarrage de la caméra...'}
             </p>
             
-            {/* CDN progress indicator */}
+            {/* Parallel CDN race indicator */}
             {modelsLoading && totalCdnSources > 0 && (
               <div className="mt-3 flex items-center gap-2">
                 {Array.from({ length: totalCdnSources }).map((_, i) => (
                   <div
                     key={i}
-                    className={cn(
-                      'w-2 h-2 rounded-full transition-all duration-300',
-                      i < currentCdnAttempt ? 'bg-red-400' : // Failed
-                      i === currentCdnAttempt ? 'bg-[#F16522] animate-pulse' : // Current
-                      'bg-white/30' // Pending
-                    )}
+                    className="w-2 h-2 rounded-full bg-[#F16522] animate-pulse"
+                    style={{ animationDelay: `${i * 150}ms` }}
                   />
                 ))}
               </div>
             )}
             {modelsLoading && (
               <p className="text-white/60 text-xs mt-2">
-                Serveur {currentCdnAttempt + 1}/{totalCdnSources}
+                Recherche du serveur optimal...
               </p>
             )}
             
             {/* Progressive feedback based on loading time */}
-            {modelsLoading && loadingTime >= 10 && loadingTime < 20 && (
-              <p className="text-amber-300 text-xs mt-1 animate-pulse">
-                Connexion lente... ({loadingTime}s)
+            {modelsLoading && loadingTime >= 5 && loadingTime < 15 && (
+              <p className="text-white/50 text-xs mt-1">
+                {loadingTime}s...
               </p>
             )}
-            {modelsLoading && loadingTime >= 20 && (
+            {modelsLoading && loadingTime >= 15 && loadingTime < 30 && (
+              <p className="text-amber-300 text-xs mt-1 animate-pulse">
+                Patience, connexion lente ({loadingTime}s)
+              </p>
+            )}
+            {modelsLoading && loadingTime >= 30 && (
               <p className="text-amber-400 text-xs mt-1 animate-pulse">
-                Dernière tentative ({loadingTime}s)
+                Dernière tentative... ({loadingTime}s)
               </p>
             )}
             
-            {/* Skip button after 8 seconds */}
-            {modelsLoading && loadingTime >= 8 && (
+            {/* Skip button after 5 seconds */}
+            {modelsLoading && loadingTime >= 5 && (
               <Button
                 variant="outline"
                 size="small"

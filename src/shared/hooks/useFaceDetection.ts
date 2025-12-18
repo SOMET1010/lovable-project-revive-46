@@ -245,8 +245,8 @@ const MODEL_SOURCES = [
   { name: 'vladmandic', url: 'https://vladmandic.github.io/face-api/model' },
 ] as const;
 
-// Timeout per CDN attempt (10s each, 3 CDNs = 30s max total)
-const PER_CDN_TIMEOUT = 10000;
+// Global timeout for parallel race (45s total for all CDNs)
+const GLOBAL_RACE_TIMEOUT = 45000;
 
 // Challenge timer (seconds per challenge)
 const CHALLENGE_TIMEOUT = 10;
@@ -266,60 +266,69 @@ const LOOK_UP_HOLD_TIME = 400; // ms
 const FACE_MIN_DISTANCE_RATIO = 0.15; // Too far if < 15%
 const FACE_MAX_DISTANCE_RATIO = 0.40; // Too close if > 40%
 
-// Load models with timeout from a specific URL
-const loadModelsFromUrl = async (url: string, timeout: number): Promise<void> => {
-  return new Promise((resolve, reject) => {
-    const timeoutId = setTimeout(() => {
-      reject(new Error(`Timeout loading models from ${url}`));
-    }, timeout);
-
-    Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri(url),
-      faceapi.nets.faceLandmark68TinyNet.loadFromUri(url),
-    ])
-      .then(() => {
-        clearTimeout(timeoutId);
-        resolve();
-      })
-      .catch((error) => {
-        clearTimeout(timeoutId);
-        reject(error);
-      });
-  });
+// Load models from a specific URL (no internal timeout - controlled by race)
+const loadModelsFromUrl = async (url: string): Promise<void> => {
+  await Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri(url),
+    faceapi.nets.faceLandmark68TinyNet.loadFromUri(url),
+  ]);
 };
 
 // Progress callback type for UI feedback
-type LoadProgressCallback = (cdnIndex: number, cdnName: string) => void;
+type LoadProgressCallback = (activeCdns: string[], winnerId: number | null) => void;
 
-// Try loading models with cascade fallback through multiple CDNs
+// Race all CDNs in parallel - first to succeed wins
 const loadModelsWithFallback = async (
   onProgress?: LoadProgressCallback
 ): Promise<{ source: string }> => {
-  for (let i = 0; i < MODEL_SOURCES.length; i++) {
-    const source = MODEL_SOURCES[i]!;
-    
-    // Notify UI of current attempt
-    onProgress?.(i, source.name);
-    
-    if (import.meta.env.DEV) {
-      console.log(`[FaceAPI] Trying CDN ${i + 1}/${MODEL_SOURCES.length}: ${source.name}...`);
-    }
-    
+  // Track which CDNs are still trying
+  const activeCdns = MODEL_SOURCES.map(s => s.name);
+  onProgress?.(activeCdns, null);
+  
+  if (import.meta.env.DEV) {
+    console.log(`[FaceAPI] Racing ${MODEL_SOURCES.length} CDNs in parallel...`);
+  }
+  
+  // Create a promise for each CDN
+  const loadPromises = MODEL_SOURCES.map(async (source, index): Promise<{ source: string; index: number }> => {
     try {
-      await loadModelsFromUrl(source.url, PER_CDN_TIMEOUT);
+      await loadModelsFromUrl(source.url);
       if (import.meta.env.DEV) {
-        console.log(`[FaceAPI] ✓ Loaded from ${source.name}`);
+        console.log(`[FaceAPI] ✓ ${source.name} won the race!`);
       }
-      return { source: source.name };
+      return { source: source.name, index };
     } catch (error) {
       if (import.meta.env.DEV) {
         console.warn(`[FaceAPI] ✗ ${source.name} failed:`, error instanceof Error ? error.message : error);
       }
-      // Continue to next CDN
+      throw error; // Re-throw so Promise.allSettled can track it
     }
-  }
+  });
   
-  throw new Error('models_unavailable');
+  // Global timeout promise
+  const timeoutPromise = new Promise<{ source: string; index: number }>((_, reject) => {
+    setTimeout(() => {
+      reject(new Error('GLOBAL_TIMEOUT'));
+    }, GLOBAL_RACE_TIMEOUT);
+  });
+  
+  try {
+    // Race all CDNs against the global timeout - first fulfilled promise wins
+    const result = await Promise.race([
+      // Use Promise.race on all load promises wrapped to catch individual failures
+      ...loadPromises.map(p => p.catch(() => new Promise<never>(() => {}))), // Failed promises hang forever
+      timeoutPromise,
+    ]);
+    
+    onProgress?.([], result.index);
+    return { source: result.source };
+  } catch {
+    // Timeout reached
+    if (import.meta.env.DEV) {
+      console.error('[FaceAPI] Global timeout reached');
+    }
+    throw new Error('models_unavailable');
+  }
 };
 
 // Initial metrics state
@@ -373,9 +382,6 @@ export const useFaceDetection = ({
   const [completedChallenges, setCompletedChallenges] = useState<LivenessChallenge[]>([]);
   const [currentChallengeIndex, setCurrentChallengeIndex] = useState(0);
   const [loadAttempt, setLoadAttempt] = useState(0);
-  
-  // CDN loading progress tracking
-  const [currentCdnAttempt, setCurrentCdnAttempt] = useState(0);
 
   const animationRef = useRef<number | null>(null);
   const lastDetectionRef = useRef<number>(0);
@@ -590,11 +596,8 @@ export const useFaceDetection = ({
       setState(prev => ({ ...prev, modelsLoading: true, modelsError: null }));
 
       try {
-        const result = await loadModelsWithFallback((cdnIndex, cdnName) => {
-          setCurrentCdnAttempt(cdnIndex);
-          if (import.meta.env.DEV) {
-            console.log(`[FaceAPI] Trying CDN ${cdnIndex + 1}: ${cdnName}`);
-          }
+        const result = await loadModelsWithFallback((_activeCdns, _winnerId) => {
+          // All CDNs racing in parallel, no sequential tracking needed
         });
         
         if (import.meta.env.DEV) {
@@ -914,8 +917,8 @@ export const useFaceDetection = ({
     isFlashing,
     flashColor,
     runFlashTest,
-    // CDN loading progress
-    currentCdnAttempt,
+    // CDN loading progress (all CDNs race in parallel)
+    currentCdnAttempt: 0, // Not used in parallel mode
     totalCdnSources: MODEL_SOURCES.length,
   };
 };
