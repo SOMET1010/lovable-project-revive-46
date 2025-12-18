@@ -2,8 +2,8 @@
  * Badge affichant le numéro de version actuel
  */
 
-import { Badge } from '@/components/ui/badge';
-import { GitBranch, History } from 'lucide-react';
+import { Badge } from '@/shared/ui/badge';
+import { GitBranch } from 'lucide-react';
 
 interface VersionBadgeProps {
   version: string | null;
@@ -18,7 +18,7 @@ export function VersionBadge({ version, onClick, showIcon = true, className }: V
   return (
     <Badge
       variant="outline"
-      className={`cursor-pointer hover:bg-accent transition-colors font-mono ${className}`}
+      className={`cursor-pointer hover:bg-accent transition-colors font-mono ${className || ''}`}
       onClick={onClick}
     >
       {showIcon && <GitBranch className="h-3 w-3 mr-1" />}
