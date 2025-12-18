@@ -2725,6 +2725,81 @@ export type Database = {
         }
         Relationships: []
       }
+      project_versions: {
+        Row: {
+          auto_description: string | null
+          change_summary: Json | null
+          change_type: string | null
+          changes_data: Json | null
+          changes_logic: Json | null
+          changes_security: Json | null
+          changes_structure: Json | null
+          changes_ui: Json | null
+          created_at: string | null
+          created_by: string | null
+          custom_files: Json | null
+          id: string
+          impact_score: number | null
+          is_checkpoint: boolean | null
+          is_current: boolean | null
+          manual_notes: string | null
+          project_id: string
+          specification_snapshot: Json
+          version_major: number
+          version_minor: number
+          version_number: string
+          version_patch: number
+        }
+        Insert: {
+          auto_description?: string | null
+          change_summary?: Json | null
+          change_type?: string | null
+          changes_data?: Json | null
+          changes_logic?: Json | null
+          changes_security?: Json | null
+          changes_structure?: Json | null
+          changes_ui?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          custom_files?: Json | null
+          id?: string
+          impact_score?: number | null
+          is_checkpoint?: boolean | null
+          is_current?: boolean | null
+          manual_notes?: string | null
+          project_id: string
+          specification_snapshot?: Json
+          version_major?: number
+          version_minor?: number
+          version_number: string
+          version_patch?: number
+        }
+        Update: {
+          auto_description?: string | null
+          change_summary?: Json | null
+          change_type?: string | null
+          changes_data?: Json | null
+          changes_logic?: Json | null
+          changes_security?: Json | null
+          changes_structure?: Json | null
+          changes_ui?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          custom_files?: Json | null
+          id?: string
+          impact_score?: number | null
+          is_checkpoint?: boolean | null
+          is_current?: boolean | null
+          manual_notes?: string | null
+          project_id?: string
+          specification_snapshot?: Json
+          version_major?: number
+          version_minor?: number
+          version_number?: string
+          version_patch?: number
+        }
+        Relationships: []
+      }
       properties: {
         Row: {
           address: string | null
@@ -3956,6 +4031,47 @@ export type Database = {
         }
         Relationships: []
       }
+      version_tags: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          tag_color: string | null
+          tag_name: string
+          tag_type: string | null
+          version_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          tag_color?: string | null
+          tag_name: string
+          tag_type?: string | null
+          version_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          tag_color?: string | null
+          tag_name?: string
+          tag_type?: string | null
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "version_tags_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "project_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       visit_requests: {
         Row: {
           cancellation_reason: string | null
@@ -4371,6 +4487,15 @@ export type Database = {
         Returns: string
       }
       auto_expire_mandates: { Args: never; Returns: number }
+      auto_increment_version: {
+        Args: { p_change_type?: string; p_project_id: string }
+        Returns: {
+          new_major: number
+          new_minor: number
+          new_patch: number
+          version_string: string
+        }[]
+      }
       calculate_late_penalty: {
         Args: {
           p_amount: number
@@ -4425,12 +4550,35 @@ export type Database = {
         }
         Returns: number
       }
+      calculate_version_diff: {
+        Args: { p_version_a: string; p_version_b: string }
+        Returns: Json
+      }
       check_feature_flag: {
         Args: { flag_key: string; user_id?: string }
         Returns: boolean
       }
       cleanup_expired_verification_codes: { Args: never; Returns: number }
+      cleanup_old_versions: {
+        Args: {
+          p_max_age_days?: number
+          p_max_versions?: number
+          p_project_id: string
+        }
+        Returns: number
+      }
       cleanup_old_webhook_logs: { Args: never; Returns: number }
+      create_version_snapshot: {
+        Args: {
+          p_change_type?: string
+          p_custom_files?: Json
+          p_description?: string
+          p_is_checkpoint?: boolean
+          p_project_id: string
+          p_specification: Json
+        }
+        Returns: string
+      }
       expire_old_quotes: { Args: never; Returns: number }
       generate_otp: { Args: never; Returns: string }
       generate_receipt_number: { Args: never; Returns: string }
@@ -4508,6 +4656,7 @@ export type Database = {
         Args: { _user_id?: string }
         Returns: Database["public"]["Enums"]["app_role"][]
       }
+      get_version_stats: { Args: { p_project_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
