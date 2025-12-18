@@ -206,6 +206,9 @@ interface UseFaceDetectionReturn extends FaceDetectionState {
   isFlashing: boolean;
   flashColor: string | null;
   runFlashTest: () => Promise<FlashResult | null>;
+  // CDN loading progress
+  currentCdnAttempt: number;
+  totalCdnSources: number;
 }
 
 // Calculate brightness of a region (ITU-R BT.601 formula)
@@ -235,12 +238,15 @@ const calculateRegionBrightness = (
   }
 }
 
-// Model URLs - local first, CDN fallback
-const LOCAL_MODEL_URL = '/models/face-api';
-const CDN_MODEL_URL = 'https://vladmandic.github.io/face-api/model';
+// Model URLs - multiple CDNs for reliability (fastest first)
+const MODEL_SOURCES = [
+  { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model' },
+  { name: 'unpkg', url: 'https://unpkg.com/@vladmandic/face-api/model' },
+  { name: 'vladmandic', url: 'https://vladmandic.github.io/face-api/model' },
+] as const;
 
-// Timeout for model loading (30 seconds for slow connections)
-const MODEL_LOAD_TIMEOUT = 30000;
+// Timeout per CDN attempt (10s each, 3 CDNs = 30s max total)
+const PER_CDN_TIMEOUT = 10000;
 
 // Challenge timer (seconds per challenge)
 const CHALLENGE_TIMEOUT = 10;
@@ -260,7 +266,7 @@ const LOOK_UP_HOLD_TIME = 400; // ms
 const FACE_MIN_DISTANCE_RATIO = 0.15; // Too far if < 15%
 const FACE_MAX_DISTANCE_RATIO = 0.40; // Too close if > 40%
 
-// Load models with timeout
+// Load models with timeout from a specific URL
 const loadModelsFromUrl = async (url: string, timeout: number): Promise<void> => {
   return new Promise((resolve, reject) => {
     const timeoutId = setTimeout(() => {
@@ -282,28 +288,38 @@ const loadModelsFromUrl = async (url: string, timeout: number): Promise<void> =>
   });
 };
 
-// Try loading models with fallback strategy
-const loadModelsWithFallback = async (): Promise<{ source: 'local' | 'cdn' }> => {
-  // Try local first
-  try {
-    await loadModelsFromUrl(LOCAL_MODEL_URL, MODEL_LOAD_TIMEOUT);
-    return { source: 'local' };
-  } catch (_localError) {
-    if (import.meta.env.DEV) {
-      console.warn('Local models not available, trying CDN...');
-    }
-  }
+// Progress callback type for UI feedback
+type LoadProgressCallback = (cdnIndex: number, cdnName: string) => void;
 
-  // Fallback to CDN
-  try {
-    await loadModelsFromUrl(CDN_MODEL_URL, MODEL_LOAD_TIMEOUT);
-    return { source: 'cdn' };
-  } catch (_cdnError) {
+// Try loading models with cascade fallback through multiple CDNs
+const loadModelsWithFallback = async (
+  onProgress?: LoadProgressCallback
+): Promise<{ source: string }> => {
+  for (let i = 0; i < MODEL_SOURCES.length; i++) {
+    const source = MODEL_SOURCES[i]!;
+    
+    // Notify UI of current attempt
+    onProgress?.(i, source.name);
+    
     if (import.meta.env.DEV) {
-      console.error('CDN models also failed');
+      console.log(`[FaceAPI] Trying CDN ${i + 1}/${MODEL_SOURCES.length}: ${source.name}...`);
     }
-    throw new Error('models_unavailable');
+    
+    try {
+      await loadModelsFromUrl(source.url, PER_CDN_TIMEOUT);
+      if (import.meta.env.DEV) {
+        console.log(`[FaceAPI] ✓ Loaded from ${source.name}`);
+      }
+      return { source: source.name };
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn(`[FaceAPI] ✗ ${source.name} failed:`, error instanceof Error ? error.message : error);
+      }
+      // Continue to next CDN
+    }
   }
+  
+  throw new Error('models_unavailable');
 };
 
 // Initial metrics state
@@ -357,6 +373,9 @@ export const useFaceDetection = ({
   const [completedChallenges, setCompletedChallenges] = useState<LivenessChallenge[]>([]);
   const [currentChallengeIndex, setCurrentChallengeIndex] = useState(0);
   const [loadAttempt, setLoadAttempt] = useState(0);
+  
+  // CDN loading progress tracking
+  const [currentCdnAttempt, setCurrentCdnAttempt] = useState(0);
 
   const animationRef = useRef<number | null>(null);
   const lastDetectionRef = useRef<number>(0);
@@ -571,7 +590,12 @@ export const useFaceDetection = ({
       setState(prev => ({ ...prev, modelsLoading: true, modelsError: null }));
 
       try {
-        const result = await loadModelsWithFallback();
+        const result = await loadModelsWithFallback((cdnIndex, cdnName) => {
+          setCurrentCdnAttempt(cdnIndex);
+          if (import.meta.env.DEV) {
+            console.log(`[FaceAPI] Trying CDN ${cdnIndex + 1}: ${cdnName}`);
+          }
+        });
         
         if (import.meta.env.DEV) {
           console.log(`[FaceAPI] Models loaded from ${result.source}`);
@@ -890,5 +914,8 @@ export const useFaceDetection = ({
     isFlashing,
     flashColor,
     runFlashTest,
+    // CDN loading progress
+    currentCdnAttempt,
+    totalCdnSources: MODEL_SOURCES.length,
   };
 };
