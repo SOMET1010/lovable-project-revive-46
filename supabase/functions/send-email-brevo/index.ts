@@ -258,11 +258,11 @@ Deno.serve(async (req: Request) => {
     // Determine if we're in sandbox mode
     const isSandbox = Deno.env.get('DENO_ENV') === 'development';
 
-    // Prepare Brevo request
+    // Prepare Brevo request with configurable sender
     const brevoPayload: any = {
       sender: {
-        name: 'Mon Toit',
-        email: 'no-reply@montoit.ci',
+        name: Deno.env.get('BREVO_SENDER_NAME') || 'Mon Toit',
+        email: Deno.env.get('BREVO_SENDER_EMAIL') || 'no-reply@montoit.ci',
       },
       to: [{
         email: emailData.to,
