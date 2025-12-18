@@ -131,61 +131,16 @@ Deno.serve(async (req: Request) => {
     }
 
     // ========== ENVOYER L'OTP VIA SMS/WHATSAPP ==========
-    const functionUrl = method === 'sms'
-      ? `${supabaseUrl}/functions/v1/send-sms-hybrid`
-      : `${supabaseUrl}/functions/v1/send-whatsapp-hybrid`;
+    // Utiliser directement Brevo pour éviter les erreurs de providers
+    const functionUrl = `${supabaseUrl}/functions/v1/send-sms-brevo`;
 
-    const message = `Votre code Mon Toit est : ${otp}\n\nCe code expire dans 10 minutes. Ne le partagez avec personne.`;
-    const e164Phone = `+${normalizedPhone.replace(/^\+/, '')}`;
+    const message = `MonToit: Votre code de verification est ${otp}. Valide 10min. Ne partagez jamais ce code.`;
+    const e164Phone = `+${normalizedPhone}`; // Garder le format E.164 complet pour Brevo
 
-    edgeLogger.info('Sending OTP', { method, phone: normalizedPhone });
+    edgeLogger.info('Sending OTP via Brevo', { method, phone: normalizedPhone });
 
-    // Helper pour fallback Brevo SMS direct
-    const sendViaBrevoSms = async () => {
-      const brevoUrl = `${supabaseUrl}/functions/v1/send-sms-brevo`;
-      const brevoResp = await fetch(brevoUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phone: e164Phone,
-          message,
-          tag: 'AUTH_OTP',
-        }),
-      });
-
-      const brevoResult = await brevoResp.json() as { status?: string; reason?: string };
-      if (!brevoResp.ok || brevoResult.status !== 'ok') {
-        throw new Error(brevoResult.reason || 'Brevo SMS fallback failed');
-      }
-      return { provider: 'brevo-sms' };
-    };
-
-    // Helper pour fallback Brevo WhatsApp direct
-    const sendViaBrevoWhatsapp = async () => {
-      const brevoUrl = `${supabaseUrl}/functions/v1/send-whatsapp-brevo`;
-      const brevoResp = await fetch(brevoUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          phoneNumber: normalizedPhone,
-          message,
-        }),
-      });
-
-      const brevoResult = await brevoResp.json() as { error?: string };
-      if (!brevoResp.ok) {
-        throw new Error(brevoResult?.error || 'Brevo WhatsApp fallback failed');
-      }
-      return { provider: 'brevo-whatsapp' };
-    };
-
-    let provider = method === 'sms' ? 'sms-hybrid' : 'whatsapp-hybrid';
+    // Envoyer directement via Brevo SMS
+    let provider = 'brevo-sms';
 
     const sendResponse = await fetch(functionUrl, {
       method: 'POST',
@@ -194,36 +149,39 @@ Deno.serve(async (req: Request) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        phoneNumber: normalizedPhone,
+        phone: e164Phone,
         message: message,
+        tag: 'AUTH_OTP',
       }),
     });
 
-    const sendResult = await sendResponse.json() as { provider?: string; error?: string };
+    const sendResult = await sendResponse.json() as { status?: string; reason?: string; messageId?: string };
 
-    if (!sendResponse.ok) {
-      edgeLogger.error('OTP send failed - primary provider', { error: sendResult.error, phone: normalizedPhone.slice(-4), provider });
+    if (!sendResponse.ok || sendResult.status !== 'ok') {
+      edgeLogger.error('SMS send failed', {
+        error: sendResult.reason || 'Unknown error',
+        phone: normalizedPhone.slice(-4),
+        provider,
+        status: sendResponse.status
+      });
 
-      try {
-        const fallbackResult = method === 'sms' ? await sendViaBrevoSms() : await sendViaBrevoWhatsapp();
-        provider = fallbackResult.provider;
-        edgeLogger.info('OTP sent via Brevo fallback', { method, phone: normalizedPhone, provider });
-      } catch (fallbackErr: any) {
-        edgeLogger.error('OTP send failed - Brevo fallback', { error: fallbackErr?.message, phone: normalizedPhone.slice(-4) });
-        return new Response(
-          JSON.stringify({
-            error: 'Service SMS indisponible. Veuillez réessayer plus tard.',
-            code: 'SMS_SEND_FAILED'
-          }),
-          {
-            status: 503,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
-      }
+      return new Response(
+        JSON.stringify({
+          error: sendResult.reason || 'Service SMS indisponible. Veuillez réessayer plus tard.',
+          code: 'SMS_SEND_FAILED'
+        }),
+        {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
     } else {
-      provider = sendResult.provider || provider;
-      edgeLogger.info('OTP sent successfully', { method, phone: normalizedPhone, provider });
+      edgeLogger.info('SMS sent successfully', {
+        method,
+        phone: normalizedPhone,
+        provider,
+        messageId: sendResult.messageId
+      });
     }
 
     return new Response(

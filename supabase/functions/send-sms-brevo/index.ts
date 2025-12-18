@@ -109,6 +109,8 @@ Deno.serve(async (req: Request) => {
 
     // Get Brevo API key from environment (never from client)
     const brevoApiKey = Deno.env.get('BREVO_API_KEY');
+    const brevoSenderEmail = Deno.env.get('BREVO_SENDER_EMAIL')
+    const brevoSenderName = Deno.env.get('BREVO_SENDER_NAME')
     if (!brevoApiKey) {
       console.error('[send-sms-brevo] BREVO_API_KEY not configured');
       return new Response(
@@ -118,13 +120,22 @@ Deno.serve(async (req: Request) => {
     }
 
     // Prepare Brevo request
+    // Utiliser un sender numérique au lieu d'un nom alphanumérique
+    // Les noms alphanumériques nécessitent une validation spéciale
     const brevoPayload = {
-      sender: 'ANSUT',
+      sender: brevoSenderName, // Sender numérique Brevo par défaut pour les tests
       recipient: phone,
       content: message,
       type: 'transactional',
       ...(tag && { tag }),
     };
+
+    console.log('[send-sms-brevo] SMS Payload:', {
+      sender: brevoPayload.sender,
+      recipient: phone.substring(0, 6) + '****',
+      contentLength: message.length,
+      type: brevoPayload.type
+    });
 
     console.log('[send-sms-brevo] Sending SMS to:', phone.substring(0, 6) + '****');
 
