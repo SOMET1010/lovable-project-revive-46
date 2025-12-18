@@ -239,8 +239,8 @@ const calculateRegionBrightness = (
 const LOCAL_MODEL_URL = '/models/face-api';
 const CDN_MODEL_URL = 'https://vladmandic.github.io/face-api/model';
 
-// Timeout for model loading (15 seconds)
-const MODEL_LOAD_TIMEOUT = 15000;
+// Timeout for model loading (30 seconds for slow connections)
+const MODEL_LOAD_TIMEOUT = 30000;
 
 // Challenge timer (seconds per challenge)
 const CHALLENGE_TIMEOUT = 10;
@@ -558,18 +558,23 @@ export const useFaceDetection = ({
     setLoadAttempt(prev => prev + 1);
   }, []);
 
+  // Ref to prevent double loading (avoids dependency on modelsLoading state)
+  const modelsLoadingRef = useRef(false);
+
   // Load face-api models with fallback
   useEffect(() => {
     const loadModels = async () => {
-      if (state.modelsLoaded || state.modelsLoading) return;
-
+      // Use ref to prevent race conditions
+      if (state.modelsLoaded || modelsLoadingRef.current) return;
+      
+      modelsLoadingRef.current = true;
       setState(prev => ({ ...prev, modelsLoading: true, modelsError: null }));
 
       try {
         const result = await loadModelsWithFallback();
         
         if (import.meta.env.DEV) {
-          console.log(`Face-api models loaded from ${result.source}`);
+          console.log(`[FaceAPI] Models loaded from ${result.source}`);
         }
 
         setState(prev => ({
@@ -579,16 +584,21 @@ export const useFaceDetection = ({
           modelsError: null,
         }));
       } catch (_error) {
+        if (import.meta.env.DEV) {
+          console.error('[FaceAPI] Failed to load models');
+        }
         setState(prev => ({
           ...prev,
           modelsLoading: false,
           modelsError: 'slow_connection',
         }));
+      } finally {
+        modelsLoadingRef.current = false;
       }
     };
 
     loadModels();
-  }, [state.modelsLoaded, state.modelsLoading, loadAttempt]);
+  }, [state.modelsLoaded, loadAttempt]); // Removed state.modelsLoading from deps
 
   const currentChallenge = currentChallengeIndex < challenges.length
     ? challenges[currentChallengeIndex]

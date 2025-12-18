@@ -145,6 +145,8 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
   const [cameraReady, setCameraReady] = useState(false);
   const hasCompletedRef = useRef(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [loadingTime, setLoadingTime] = useState(0);
+  const loadingTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const {
     modelsLoaded,
@@ -234,6 +236,43 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
       }
     };
   }, [onError]);
+
+  // Track loading time for user feedback
+  useEffect(() => {
+    if (modelsLoading && !modelsLoaded) {
+      setLoadingTime(0);
+      loadingTimerRef.current = setInterval(() => {
+        setLoadingTime(prev => prev + 1);
+      }, 1000);
+    } else {
+      if (loadingTimerRef.current) {
+        clearInterval(loadingTimerRef.current);
+        loadingTimerRef.current = null;
+      }
+      setLoadingTime(0);
+    }
+    
+    return () => {
+      if (loadingTimerRef.current) {
+        clearInterval(loadingTimerRef.current);
+      }
+    };
+  }, [modelsLoading, modelsLoaded]);
+
+  // Check video stream health
+  useEffect(() => {
+    if (!cameraReady || !streamRef.current) return;
+    
+    const checkStream = () => {
+      const tracks = streamRef.current?.getVideoTracks();
+      if (!tracks || tracks.length === 0 || !tracks[0]?.enabled) {
+        setCameraError('Le flux vidéo a été interrompu');
+      }
+    };
+    
+    const interval = setInterval(checkStream, 2000);
+    return () => clearInterval(interval);
+  }, [cameraReady]);
 
   // Trigger confetti on success
   useEffect(() => {
@@ -334,17 +373,41 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           />
         )}
 
-        {/* Loading overlay */}
+        {/* Loading overlay with enhanced feedback */}
         {(modelsLoading || !cameraReady) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/80 z-10">
             <Loader2 className="w-12 h-12 text-[#F16522] animate-spin mb-4" />
             <p className="text-white text-sm text-center px-4">
               {modelsLoading ? 'Chargement de la détection faciale...' : 'Démarrage de la caméra...'}
             </p>
-            {modelsLoading && (
+            
+            {/* Progressive feedback based on loading time */}
+            {modelsLoading && loadingTime < 10 && (
               <p className="text-white/60 text-xs mt-2">
                 Cela peut prendre quelques secondes
               </p>
+            )}
+            {modelsLoading && loadingTime >= 10 && loadingTime < 20 && (
+              <p className="text-amber-300 text-xs mt-2 animate-pulse">
+                Chargement long, patientez... ({loadingTime}s)
+              </p>
+            )}
+            {modelsLoading && loadingTime >= 20 && (
+              <p className="text-amber-400 text-xs mt-2 animate-pulse">
+                Connexion lente détectée ({loadingTime}s)
+              </p>
+            )}
+            
+            {/* Skip button after 8 seconds */}
+            {modelsLoading && loadingTime >= 8 && (
+              <Button
+                variant="outline"
+                size="small"
+                onClick={() => onError?.('skip_liveness')}
+                className="mt-4 border-white/30 text-white hover:bg-white/10"
+              >
+                Continuer sans vérification
+              </Button>
             )}
           </div>
         )}
