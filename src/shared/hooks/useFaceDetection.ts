@@ -238,12 +238,12 @@ const calculateRegionBrightness = (
   }
 }
 
-// Model URLs - GitHub raw files are most reliable
+// Model URLs - local first for instant loading, CDNs as fallback
 const MODEL_SOURCES = [
+  { name: 'local', url: '/models/face-api' },
   { name: 'github', url: 'https://raw.githubusercontent.com/vladmandic/face-api/master/model' },
   { name: 'vladmandic', url: 'https://vladmandic.github.io/face-api/model' },
   { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model' },
-  { name: 'unpkg', url: 'https://unpkg.com/@vladmandic/face-api@1.7.15/model' },
 ] as const;
 
 // Global timeout for parallel race (30s - reduced since local is priority)
