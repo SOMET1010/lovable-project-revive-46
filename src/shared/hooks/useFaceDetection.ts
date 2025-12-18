@@ -238,15 +238,16 @@ const calculateRegionBrightness = (
   }
 }
 
-// Model URLs - multiple CDNs for reliability (fastest first)
+// Model URLs - local first for instant loading, CDNs as fallback
 const MODEL_SOURCES = [
+  { name: 'local', url: '/models/face-api' },
   { name: 'jsdelivr', url: 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model' },
   { name: 'unpkg', url: 'https://unpkg.com/@vladmandic/face-api/model' },
   { name: 'vladmandic', url: 'https://vladmandic.github.io/face-api/model' },
 ] as const;
 
-// Global timeout for parallel race (45s total for all CDNs)
-const GLOBAL_RACE_TIMEOUT = 45000;
+// Global timeout for parallel race (30s - reduced since local is priority)
+const GLOBAL_RACE_TIMEOUT = 30000;
 
 // Challenge timer (seconds per challenge)
 const CHALLENGE_TIMEOUT = 10;
@@ -274,59 +275,83 @@ const loadModelsFromUrl = async (url: string): Promise<void> => {
   ]);
 };
 
-// Progress callback type for UI feedback
-type LoadProgressCallback = (activeCdns: string[], winnerId: number | null) => void;
+// Progress callback type for UI feedback  
+type LoadProgressCallback = (
+  activeCdns: string[], 
+  winnerId: number | null,
+  downloadProgress?: { loaded: number; total: number; source: string }
+) => void;
 
-// Race all CDNs in parallel - first to succeed wins
+// Race all sources in parallel using Promise.any - first to SUCCEED wins
 const loadModelsWithFallback = async (
   onProgress?: LoadProgressCallback
 ): Promise<{ source: string }> => {
-  // Track which CDNs are still trying
   const activeCdns = MODEL_SOURCES.map(s => s.name);
   onProgress?.(activeCdns, null);
   
   if (import.meta.env.DEV) {
-    console.log(`[FaceAPI] Racing ${MODEL_SOURCES.length} CDNs in parallel...`);
+    console.log(`[FaceAPI] Racing ${MODEL_SOURCES.length} sources (local first)...`);
   }
   
-  // Create a promise for each CDN
-  const loadPromises = MODEL_SOURCES.map(async (source, index): Promise<{ source: string; index: number }> => {
-    try {
-      await loadModelsFromUrl(source.url);
-      if (import.meta.env.DEV) {
-        console.log(`[FaceAPI] ✓ ${source.name} won the race!`);
-      }
-      return { source: source.name, index };
-    } catch (error) {
-      if (import.meta.env.DEV) {
-        console.warn(`[FaceAPI] ✗ ${source.name} failed:`, error instanceof Error ? error.message : error);
-      }
-      throw error; // Re-throw so Promise.allSettled can track it
-    }
-  });
-  
-  // Global timeout promise
-  const timeoutPromise = new Promise<{ source: string; index: number }>((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('GLOBAL_TIMEOUT'));
-    }, GLOBAL_RACE_TIMEOUT);
-  });
+  // AbortController for proper timeout management
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), GLOBAL_RACE_TIMEOUT);
   
   try {
-    // Race all CDNs against the global timeout - first fulfilled promise wins
-    const result = await Promise.race([
-      // Use Promise.race on all load promises wrapped to catch individual failures
-      ...loadPromises.map(p => p.catch(() => new Promise<never>(() => {}))), // Failed promises hang forever
-      timeoutPromise,
-    ]);
+    // Polyfill for Promise.any (ES2021) - first to SUCCEED wins
+    const promiseAny = <T>(promises: Promise<T>[]): Promise<T> => {
+      return new Promise((resolve, reject) => {
+        let rejectionCount = 0;
+        const errors: Error[] = [];
+        
+        promises.forEach((promise, index) => {
+          Promise.resolve(promise)
+            .then(resolve)
+            .catch((error) => {
+              errors[index] = error;
+              rejectionCount++;
+              if (rejectionCount === promises.length) {
+                reject(new Error('All promises rejected'));
+              }
+            });
+        });
+      });
+    };
+
+    const result = await promiseAny(
+      MODEL_SOURCES.map(async (source, index): Promise<{ source: string; index: number }> => {
+        if (controller.signal.aborted) {
+          throw new Error('Aborted');
+        }
+        
+        if (import.meta.env.DEV) {
+          console.log(`[FaceAPI] Trying ${source.name}...`);
+        }
+        
+        onProgress?.(activeCdns, null, { loaded: 0, total: 100, source: source.name });
+        
+        await loadModelsFromUrl(source.url);
+        
+        if (import.meta.env.DEV) {
+          console.log(`[FaceAPI] ✓ ${source.name} succeeded!`);
+        }
+        
+        controller.abort();
+        clearTimeout(timeoutId);
+        
+        onProgress?.([], index, { loaded: 100, total: 100, source: source.name });
+        return { source: source.name, index };
+      })
+    );
     
-    onProgress?.([], result.index);
     return { source: result.source };
-  } catch {
-    // Timeout reached
+  } catch (error) {
+    clearTimeout(timeoutId);
+    
     if (import.meta.env.DEV) {
-      console.error('[FaceAPI] Global timeout reached');
+      console.error('[FaceAPI] All sources failed:', error instanceof Error ? error.message : 'Unknown');
     }
+    
     throw new Error('models_unavailable');
   }
 };

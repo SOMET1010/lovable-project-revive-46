@@ -375,7 +375,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           />
         )}
 
-        {/* Loading overlay with parallel CDN race feedback */}
+        {/* Loading overlay with parallel source race feedback */}
         {(modelsLoading || !cameraReady) && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/80 z-10">
             <Loader2 className="w-12 h-12 text-[#F16522] animate-spin mb-4" />
@@ -383,38 +383,51 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
               {modelsLoading ? 'Chargement de la détection faciale...' : 'Démarrage de la caméra...'}
             </p>
             
-            {/* Parallel CDN race indicator */}
+            {/* Progress bar with percentage */}
+            {modelsLoading && (
+              <div className="w-48 mt-4">
+                <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-[#F16522] rounded-full transition-all duration-300"
+                    style={{ 
+                      width: loadingTime < 3 ? `${Math.min(loadingTime * 30, 80)}%` : '90%',
+                      animation: 'pulse 2s ease-in-out infinite'
+                    }}
+                  />
+                </div>
+                <p className="text-white/60 text-xs text-center mt-2">
+                  {loadingTime < 1 ? 'Recherche du serveur optimal...' : 
+                   loadingTime < 3 ? 'Téléchargement des modèles...' :
+                   `Chargement en cours... ${loadingTime}s`}
+                </p>
+              </div>
+            )}
+            
+            {/* Parallel source race indicator */}
             {modelsLoading && totalCdnSources > 0 && (
               <div className="mt-3 flex items-center gap-2">
                 {Array.from({ length: totalCdnSources }).map((_, i) => (
                   <div
                     key={i}
-                    className="w-2 h-2 rounded-full bg-[#F16522] animate-pulse"
+                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      i === 0 ? 'bg-green-400' : 'bg-[#F16522]'
+                    } animate-pulse`}
                     style={{ animationDelay: `${i * 150}ms` }}
+                    title={i === 0 ? 'Local (priorité)' : `CDN ${i}`}
                   />
                 ))}
               </div>
             )}
-            {modelsLoading && (
-              <p className="text-white/60 text-xs mt-2">
-                Recherche du serveur optimal...
-              </p>
-            )}
             
             {/* Progressive feedback based on loading time */}
             {modelsLoading && loadingTime >= 5 && loadingTime < 15 && (
-              <p className="text-white/50 text-xs mt-1">
-                {loadingTime}s...
+              <p className="text-amber-300 text-xs mt-2 animate-pulse">
+                Connexion plus lente que prévu...
               </p>
             )}
-            {modelsLoading && loadingTime >= 15 && loadingTime < 30 && (
-              <p className="text-amber-300 text-xs mt-1 animate-pulse">
-                Patience, connexion lente ({loadingTime}s)
-              </p>
-            )}
-            {modelsLoading && loadingTime >= 30 && (
+            {modelsLoading && loadingTime >= 15 && (
               <p className="text-amber-400 text-xs mt-1 animate-pulse">
-                Dernière tentative... ({loadingTime}s)
+                Patience, chargement via CDN de secours ({loadingTime}s)
               </p>
             )}
             
