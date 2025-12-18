@@ -2,21 +2,20 @@
  * Modal d'historique des versions avec timeline visuelle
  */
 
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useState, ChangeEvent } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/ui/dialog';
+import Button from '@/shared/ui/Button';
+import Input from '@/shared/ui/Input';
+import { Badge } from '@/shared/ui/badge';
 import { 
-  History, Search, Download, Trash2, Tag, 
+  History, Search, Download, Tag, 
   GitBranch, CheckCircle, AlertCircle, Clock,
-  Plus, Minus, Edit3, Shield, Database, Layout, Code
+  Plus, Edit3, Code
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { useVersioning } from '../hooks/useVersioning';
-import type { ProjectVersion, ChangeType, ChangeCategory } from '../types/versioning.types';
+import type { ProjectVersion, ChangeType } from '../types/versioning.types';
 
 interface VersionHistoryModalProps {
   projectId: string;
@@ -37,14 +36,6 @@ const CHANGE_TYPE_CONFIG: Record<ChangeType, { label: string; color: string; ico
   initial: { label: 'Initial', color: 'bg-emerald-500', icon: <GitBranch className="h-3 w-3" /> },
 };
 
-const CATEGORY_ICONS: Record<ChangeCategory, React.ReactNode> = {
-  structure: <Database className="h-3 w-3" />,
-  data: <Database className="h-3 w-3" />,
-  logic: <Code className="h-3 w-3" />,
-  ui: <Layout className="h-3 w-3" />,
-  security: <Shield className="h-3 w-3" />,
-};
-
 export function VersionHistoryModal({
   projectId,
   open,
@@ -52,7 +43,7 @@ export function VersionHistoryModal({
   onCompare,
   onRestore,
 }: VersionHistoryModalProps) {
-  const { versions, currentVersion, stats, isLoading, exportHistory, setFilter, filter } = useVersioning(projectId);
+  const { versions, stats, isLoading, exportHistory, setFilter, filter } = useVersioning(projectId);
   const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
 
   const handleSelectForCompare = (versionId: string) => {
@@ -61,14 +52,14 @@ export function VersionHistoryModal({
         return prev.filter(id => id !== versionId);
       }
       if (prev.length >= 2) {
-        return [prev[1], versionId];
+        return [prev[1] as string, versionId];
       }
       return [...prev, versionId];
     });
   };
 
   const handleCompare = () => {
-    if (selectedForCompare.length === 2 && onCompare) {
+    if (selectedForCompare.length === 2 && onCompare && selectedForCompare[0] && selectedForCompare[1]) {
       onCompare(selectedForCompare[0], selectedForCompare[1]);
     }
   };
@@ -87,6 +78,10 @@ export function VersionHistoryModal({
     if (summary.removed?.length) parts.push(`-${summary.removed.length}`);
     
     return parts.join(' ');
+  };
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setFilter({ search: e.target.value });
   };
 
   return (
@@ -112,13 +107,13 @@ export function VersionHistoryModal({
               placeholder="Rechercher une version..."
               className="pl-9"
               value={filter.search || ''}
-              onChange={(e) => setFilter({ search: e.target.value })}
+              onChange={handleSearchChange}
             />
           </div>
           
           <Button
             variant="outline"
-            size="sm"
+            size="small"
             onClick={() => exportHistory()}
           >
             <Download className="h-4 w-4 mr-1" />
@@ -126,14 +121,14 @@ export function VersionHistoryModal({
           </Button>
 
           {selectedForCompare.length === 2 && (
-            <Button size="sm" onClick={handleCompare}>
+            <Button size="small" onClick={handleCompare}>
               Comparer
             </Button>
           )}
         </div>
 
         {/* Timeline des versions */}
-        <ScrollArea className="h-[500px] pr-4">
+        <div className="overflow-y-auto max-h-[500px] pr-4">
           {isLoading ? (
             <div className="flex items-center justify-center h-32">
               <Clock className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -147,7 +142,7 @@ export function VersionHistoryModal({
               {/* Ligne de timeline */}
               <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border" />
               
-              {versions.map((version, index) => {
+              {versions.map((version) => {
                 const config = CHANGE_TYPE_CONFIG[version.change_type] || CHANGE_TYPE_CONFIG.patch;
                 const isSelected = selectedForCompare.includes(version.id);
                 const isCurrent = version.is_current;
@@ -166,7 +161,7 @@ export function VersionHistoryModal({
                     <div className={`p-4 rounded-lg border ${isCurrent ? 'border-primary bg-primary/5' : 'bg-card'}`}>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-mono font-semibold">
                               {version.version_number}
                             </span>
@@ -190,7 +185,7 @@ export function VersionHistoryModal({
                             {version.auto_description || version.manual_notes || 'Aucune description'}
                           </p>
                           
-                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               {formatDate(version.created_at)}
@@ -211,7 +206,7 @@ export function VersionHistoryModal({
                           
                           {/* Tags */}
                           {version.tags && version.tags.length > 0 && (
-                            <div className="flex gap-1 mt-2">
+                            <div className="flex gap-1 mt-2 flex-wrap">
                               {version.tags.map(tag => (
                                 <Badge
                                   key={tag.id}
@@ -229,8 +224,8 @@ export function VersionHistoryModal({
                         {/* Actions */}
                         <div className="flex items-center gap-1">
                           <Button
-                            variant={isSelected ? 'default' : 'ghost'}
-                            size="sm"
+                            variant={isSelected ? 'primary' : 'ghost'}
+                            size="small"
                             onClick={() => handleSelectForCompare(version.id)}
                           >
                             {isSelected ? 'Sélectionné' : 'Comparer'}
@@ -239,7 +234,7 @@ export function VersionHistoryModal({
                           {!isCurrent && onRestore && (
                             <Button
                               variant="ghost"
-                              size="sm"
+                              size="small"
                               onClick={() => onRestore(version.id)}
                             >
                               Restaurer
@@ -253,7 +248,7 @@ export function VersionHistoryModal({
               })}
             </div>
           )}
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );
