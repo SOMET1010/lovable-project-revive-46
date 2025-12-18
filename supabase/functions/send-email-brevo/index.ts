@@ -268,11 +268,14 @@ Deno.serve(async (req: Request) => {
         email: emailData.to,
         ...(emailData.toName && { name: emailData.toName }),
       }],
-      headers: {
-        // Enable sandbox mode for development
-        ...(isSandbox && { 'X-Sib-Sandbox': 'drop' }),
-      },
     };
+
+    // Add headers only if needed
+    if (isSandbox) {
+      brevoPayload.headers = {
+        'X-Sib-Sandbox': 'drop'
+      };
+    }
 
     // Use template if provided
     if (emailData.templateId) {
