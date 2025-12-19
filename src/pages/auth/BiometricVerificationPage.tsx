@@ -14,11 +14,13 @@ import NeofaceVerification from '@/shared/ui/NeofaceVerification';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { STORAGE_BUCKETS } from '@/services/upload/uploadService';
+import { getPublicUrl, addCacheBuster } from '@/services/storage/storageService';
 
 export default function BiometricVerificationPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const { step, slideDirection, nextStep, prevStep, goToStep } = useFormStepper(3);
+  const { step, slideDirection, nextStep, prevStep, goToStep, resetStepper } = useFormStepper(1, 3);
 
   const [cniPhotoUrl, setCniPhotoUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -43,18 +45,63 @@ export default function BiometricVerificationPage() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/cni-${Date.now()}.${fileExt}`;
+      const primaryBucket =
+        import.meta.env.VITE_SUPABASE_VERIFICATION_BUCKET || STORAGE_BUCKETS.VERIFICATIONS;
+      const fallbackBucket = STORAGE_BUCKETS.AVATARS; // pour éviter l'erreur si le bucket de vérif est absent en local
 
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file);
+      const attemptUpload = async (bucketName: string) => {
+        const { error } = await supabase.storage
+          .from(bucketName)
+          .upload(fileName, file, { upsert: true });
+        return { bucketName, error };
+      };
+
+      let { bucketName, error: uploadError } = await attemptUpload(primaryBucket);
+
+      if (
+        uploadError &&
+        uploadError.message.toLowerCase().includes('bucket not found') &&
+        fallbackBucket
+      ) {
+        console.warn(
+          `[BiometricVerification] Bucket ${primaryBucket} absent, fallback sur ${fallbackBucket}`
+        );
+        const fallbackResult = await attemptUpload(fallbackBucket);
+        bucketName = fallbackResult.bucketName;
+        uploadError = fallbackResult.error;
+      }
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName);
+      // Créer une URL signée pour l'accès à l'image (fonctionne en local et production)
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from(bucketName)
+        .createSignedUrl(fileName, 60 * 60); // URL valide pour 1 heure
 
-      setCniPhotoUrl(urlData.publicUrl);
+      let imageUrl: string;
+      if (signedUrlError) {
+        console.error('[BiometricVerification] Erreur création URL signée:', signedUrlError);
+        // Fallback sur l'URL publique
+        const publicUrl = getPublicUrl(bucketName, fileName);
+        imageUrl = addCacheBuster(publicUrl);
+        console.log('[BiometricVerification] Fallback sur URL publique:', imageUrl);
+      } else {
+        imageUrl = signedUrlData.signedUrl;
+        console.log('[BiometricVerification] URL signée créée:', imageUrl);
+      }
+
+      console.log('[BiometricVerification] Bucket utilisé:', bucketName);
+      console.log('[BiometricVerification] Fichier:', fileName);
+
+      setCniPhotoUrl(imageUrl);
       toast.success('Photo CNI téléchargée');
     } catch (err) {
       console.error('[BiometricVerification] Upload error:', err);
-      toast.error('Erreur lors du téléchargement');
+      const message =
+        err instanceof Error && err.message.includes('Bucket not found')
+          ? 'Bucket de vérification introuvable. Créez-le (ex: "verifications") ou configurez VITE_SUPABASE_VERIFICATION_BUCKET. Fallback sur avatars si disponible.'
+          : 'Erreur lors du téléchargement';
+      toast.error(message);
     } finally {
       setIsUploading(false);
     }
@@ -77,7 +124,7 @@ export default function BiometricVerificationPage() {
           facial_verification_date: new Date().toISOString(),
           facial_verification_score: verificationData?.matching_score || null,
         })
-        .eq('user_id', user?.id || '');
+        .eq('id', user?.id || '');
     } catch (err) {
       console.error('[BiometricVerification] Profile update error:', err);
     }
@@ -91,6 +138,7 @@ export default function BiometricVerificationPage() {
       message: error,
     });
     toast.error(`Vérification échouée: ${error}`);
+    resetStepper();
   };
 
   const stepLabels = ['Instructions', 'Photo CNI', 'Vérification'];
@@ -224,11 +272,23 @@ export default function BiometricVerificationPage() {
                       src={cniPhotoUrl}
                       alt="Photo CNI"
                       className="max-w-xs rounded-xl border-2 border-[#3C2A1E]/20 shadow-md"
+                      onError={(e) => {
+                        console.error('[BiometricVerification] Erreur de chargement de l\'image CNI:', e);
+                        console.error('[BiometricVerification] URL qui a échoué:', cniPhotoUrl);
+                      }}
+                      onLoad={(e) => {
+                        console.log('[BiometricVerification] Image CNI chargée avec succès');
+                      }}
                     />
                   </div>
                   <p className="text-center text-sm text-green-600 font-medium">
                     ✓ Photo prête pour la vérification
                   </p>
+                  {/* Debug info - à retirer en prod */}
+                  <details className="text-xs text-gray-500 text-center">
+                    <summary>URL (debug)</summary>
+                    <p className="break-all mt-2">{cniPhotoUrl}</p>
+                  </details>
                 </div>
               ) : (
                 <label className="block">

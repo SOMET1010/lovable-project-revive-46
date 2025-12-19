@@ -1,6 +1,6 @@
 import { useState, useEffect, ChangeEvent, useCallback } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
   User,
@@ -13,7 +13,6 @@ import {
   CreditCard,
   Star,
   Calendar,
-  Scan,
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
@@ -51,6 +50,7 @@ interface TenantProfile {
 export default function EnhancedProfilePage() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'infos');
   const [profile, setProfile] = useState<TenantProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,6 +63,7 @@ export default function EnhancedProfilePage() {
     address: '',
     bio: '',
   });
+  const facialStatus = profile?.facial_verification_status;
 
   const loadProfile = useCallback(async () => {
     if (!user) return;
@@ -115,6 +116,12 @@ export default function EnhancedProfilePage() {
       loadProfile();
     }
   }, [user, loadProfile]);
+
+  useEffect(() => {
+    if (profile?.avatar_url) {
+      // No-op: avatar already synced via profile load
+    }
+  }, [profile?.avatar_url]);
 
   const handleSaveProfile = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -398,13 +405,26 @@ export default function EnhancedProfilePage() {
                 />
                 <VerificationItem
                   title="Reconnaissance faciale"
-                  description="Vérification biométrique avec NEOFACE"
-                  verified={profile?.facial_verification_status === 'verified'}
+                  description="Vérification biométrique NeoFace avec contrôle de vivacité"
+                  verified={facialStatus === 'verified'}
                   score={profile?.facial_verification_score}
-                  onVerify={() => (window.location.href = '/verification-biometrique')}
-                  showButton={profile?.facial_verification_status !== 'verified'}
-                  status={profile?.facial_verification_status || 'pending'}
+                  onVerify={() => navigate('/verification-biometrique')}
+                  showButton={facialStatus !== 'verified'}
+                  status={facialStatus || 'pending'}
                 />
+              </div>
+              <div className="rounded-xl border border-[#F16522]/20 bg-[#FDF6E3] p-5 flex items-center justify-between">
+                <div>
+                  <h4 className="text-md font-semibold text-[#2C1810]">Vérification faciale</h4>
+                  <p className="text-sm text-[#5D4037]">
+                    Lancez la vérification NeoFace dans la vue dédiée (3 étapes : document, selfie,
+                    résultat).
+                  </p>
+                </div>
+                <Button onClick={() => navigate('/verification-biometrique')} className="gap-2">
+                  <Camera className="w-4 h-4" />
+                  Ouvrir la vérification
+                </Button>
               </div>
 
               {!profile?.oneci_verified && (
@@ -413,51 +433,6 @@ export default function EnhancedProfilePage() {
                   <FeatureGate feature="oneci">
                     {user && <ONECIForm userId={user.id} />}
                   </FeatureGate>
-                </div>
-              )}
-
-              {(!profile?.facial_verification_status ||
-                profile?.facial_verification_status !== 'verified') && (
-                <div className="mt-8">
-                  <h4 className="text-md font-semibold mb-4">Vérification faciale</h4>
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <Scan className="w-6 h-6 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h5 className="font-semibold text-gray-900 mb-2">
-                          Sécurisez votre compte avec la reconnaissance faciale
-                        </h5>
-                        <p className="text-sm text-gray-600 mb-4">
-                          Notre technologie IA vérifie votre identité en comparant votre selfie avec
-                          votre pièce d'identité. Ce processus renforce la sécurité et la confiance
-                          sur la plateforme.
-                        </p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                          <span className="flex items-center gap-1 align-middle">
-                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                            Instantané
-                          </span>
-                          <span className="flex items-center gap-1 align-middle">
-                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                            Sécurisé
-                          </span>
-                          <span className="flex items-center gap-1 align-middle">
-                            <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                            Sans contact
-                          </span>
-                        </div>
-                        <Button
-                          onClick={() => (window.location.href = '/verification-biometrique')}
-                          className="flex items-center gap-2"
-                        >
-                          <Scan className="w-4 h-4 flex-shrink-0" />
-                          Faire la vérification faciale
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>

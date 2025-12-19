@@ -49,11 +49,11 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // 1. Récupérer le profil (CORRECTION: user_id au lieu de id)
+    // 1. Récupérer le profil (la clé primaire est id = user.id)
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('user_id', applicantId)
+      .eq('id', applicantId)
       .maybeSingle();
 
     if (profileError) {
@@ -282,7 +282,7 @@ serve(async (req) => {
         reliability_score: historyScore,
         updated_at: new Date().toISOString()
       })
-      .eq('user_id', applicantId);
+      .eq('id', applicantId);
 
     if (updateError) {
       console.error('Error updating trust_score:', updateError);

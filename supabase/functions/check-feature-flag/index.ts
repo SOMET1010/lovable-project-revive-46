@@ -48,7 +48,30 @@ Deno.serve(async (req) => {
       user_id: user?.id || null,
     });
 
-    if (error) throw error;
+    if (error) {
+      // Si la fonction n'existe pas en local, on désactive proprement le flag au lieu d'une 500
+      const isMissingFn =
+        (error as any)?.code === "PGRST202" ||
+        (error as any)?.message?.includes("Could not find the function");
+
+      if (isMissingFn) {
+        console.warn("check_feature_flag RPC missing, returning false by default");
+        return new Response(
+          JSON.stringify({
+            key: flagKey,
+            enabled: false,
+            user_id: user?.id || null,
+            warning: "RPC check_feature_flag manquante",
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      throw error;
+    }
 
     return new Response(
       JSON.stringify({
@@ -71,4 +94,3 @@ Deno.serve(async (req) => {
     );
   }
 });
-

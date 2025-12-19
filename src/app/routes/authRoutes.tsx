@@ -10,6 +10,7 @@ const ResetPassword = lazyWithRetry(() => import('@/pages/auth/ResetPasswordPage
 const ProfileSelection = lazyWithRetry(() => import('@/pages/auth/ProfileSelectionPage'));
 const ProfileCompletion = lazyWithRetry(() => import('@/pages/auth/ProfileCompletionPage'));
 const BiometricVerification = lazyWithRetry(() => import('@/pages/auth/BiometricVerificationPage'));
+const NeoFaceReturn = lazyWithRetry(() => import('@/pages/auth/NeoFaceReturnPage'));
 
 export const authRoutes: RouteObject[] = [
   { path: 'connexion', element: <ModernAuth /> },
@@ -40,6 +41,14 @@ export const authRoutes: RouteObject[] = [
     element: (
       <ProtectedRoute>
         <BiometricVerification />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: 'neoface-return',
+    element: (
+      <ProtectedRoute>
+        <NeoFaceReturn />
       </ProtectedRoute>
     ),
   },
