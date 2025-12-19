@@ -33,7 +33,9 @@ export default defineConfig({
       'default',
       'html',
       'json',
-      ['junit', { outputFile: './test-results/security-results.xml' }],
+      // Note: Le reporter JUnit nécessite le package 'vitest-reporter-junit'
+      // Décommenter la ligne suivante après installation:
+      // ['junit', { outputFile: './test-results/security-results.xml' }],
     ],
 
     // Couverture de code pour les modules de sécurité

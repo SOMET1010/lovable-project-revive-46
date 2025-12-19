@@ -20,10 +20,19 @@
     "test:coverage": "vitest run --coverage",
     "test:memory": "vitest run tests/memory-leaks-validation.test.ts",
     "test:memory:watch": "vitest tests/memory-leaks-validation.test.ts --watch",
-    "memory-check": "node check-memory-leaks.js",
-    "memory-check:file": "node check-memory-leaks.js --file",
+    "memory-check": "node check-memory-leaks.cjs",
+    "memory-check:file": "node check-memory-leaks.cjs --file",
     "memory-audit": "npm run memory-check && npm run test:memory",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "test:security": "vitest --config vitest.security.config.ts",
+    "test:security:watch": "vitest --config vitest.security.config.ts --watch",
+    "test:security:coverage": "vitest --config vitest.security.config.ts --coverage",
+    "test:security:ui": "vitest --config vitest.security.config.ts --ui",
+    "test:security:run": "vitest --config vitest.security.config.ts --run",
+    "test:security:report": "vitest --config vitest.security.config.ts --reporter=html --outputFile=security-report.html",
+    "test:integration:security": "vitest --config vitest.security.config.ts src/tests/security.integration.test.ts",
+    "test:penetration": "node src/tests/penetration-test.cjs",
+    "test:security:all": "npm run test:security:run && npm run test:integration:security && npm run test:penetration"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
