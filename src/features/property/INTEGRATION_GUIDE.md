@@ -13,6 +13,7 @@ const routes = [
 path: '/add-property',
 element: (
 <Suspense fallback={<div className="flex items-center justify-center min-h-screen">
+
 <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
 </div>}>
 <AddPropertyPage />
@@ -26,6 +27,7 @@ element: (
 // Exemple de lien dans un composant de navigation
 const NavigationExample = () => {
 return (
+
 <nav>
 <a href="/add-property" className="btn-primary">
 Ajouter une Propriété
@@ -45,6 +47,7 @@ Ajouter une Propriété
 // Exemple de composant dashboard
 const DashboardExample = () => {
 return (
+
 <div className="container mx-auto px-4 py-8">
 <div className="flex justify-between items-center mb-8">
 <h1 className="text-3xl font-bold">Mon Tableau de Bord</h1>
@@ -185,6 +188,7 @@ console.error('❌ Erreur d\'import:', error);
 // Dans votre composant Header ou Navigation
 const HeaderWithAddProperty = () => {
 return (
+
 <header className="bg-white shadow">
 <div className="container mx-auto px-4">
 <nav className="flex justify-between items-center py-4">

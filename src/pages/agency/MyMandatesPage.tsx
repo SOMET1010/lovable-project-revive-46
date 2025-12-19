@@ -142,7 +142,7 @@ export default function MyMandatesPage() {
   return (
     <>
       <div className="bg-card border-b border-border rounded-2xl shadow-sm">
-      <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">

@@ -273,7 +273,10 @@ export default function BiometricVerificationPage() {
                       alt="Photo CNI"
                       className="max-w-xs rounded-xl border-2 border-[#3C2A1E]/20 shadow-md"
                       onError={(e) => {
-                        console.error('[BiometricVerification] Erreur de chargement de l\'image CNI:', e);
+                        console.error(
+                          "[BiometricVerification] Erreur de chargement de l'image CNI:",
+                          e
+                        );
                         console.error('[BiometricVerification] URL qui a échoué:', cniPhotoUrl);
                       }}
                       onLoad={(e) => {

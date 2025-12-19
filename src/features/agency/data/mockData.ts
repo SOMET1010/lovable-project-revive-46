@@ -7,12 +7,12 @@ export const mockAgencyData = {
   verification_status: 'verified',
   commission_rate: 5.0,
   logo: '/images/agency-logo.png',
-  address: '123 Avenue de l\'Immobilier, Abidjan',
+  address: "123 Avenue de l'Immobilier, Abidjan",
   phone: '+225 27 20 123 456',
   email: 'contact@montoit-premium.ci',
   website: 'https://montoit-premium.ci',
-  description: 'Agence immobilière premium spécialisée dans le luxe et l\'immobilier commercial',
-  established_date: '2020-01-15'
+  description: "Agence immobilière premium spécialisée dans le luxe et l'immobilier commercial",
+  established_date: '2020-01-15',
 };
 
 export const mockStats = {
@@ -23,7 +23,7 @@ export const mockStats = {
   monthlyCommissions: 320000,
   pendingRegistrations: 3,
   conversionsThisMonth: 8,
-  avgDealValue: 1850000
+  avgDealValue: 1850000,
 };
 
 export const mockTeamMembers = [
@@ -38,8 +38,8 @@ export const mockTeamMembers = [
       full_name: 'Marie Dubois',
       email: 'marie.dubois@montoit-premium.ci',
       phone: '+225 07 12 34 56',
-      avatar_url: '/images/avatars/marie.jpg'
-    }
+      avatar_url: '/images/avatars/marie.jpg',
+    },
   },
   {
     id: 'member-2',
@@ -52,8 +52,8 @@ export const mockTeamMembers = [
       full_name: 'Jean-Claude Kouassi',
       email: 'jc.kouassi@montoit-premium.ci',
       phone: '+225 05 98 76 54',
-      avatar_url: '/images/avatars/jean-claude.jpg'
-    }
+      avatar_url: '/images/avatars/jean-claude.jpg',
+    },
   },
   {
     id: 'member-3',
@@ -66,8 +66,8 @@ export const mockTeamMembers = [
       full_name: 'Aminata Traoré',
       email: 'aminata.traore@montoit-premium.ci',
       phone: '+225 01 23 45 67',
-      avatar_url: '/images/avatars/aminata.jpg'
-    }
+      avatar_url: '/images/avatars/aminata.jpg',
+    },
   },
   {
     id: 'member-4',
@@ -80,9 +80,9 @@ export const mockTeamMembers = [
       full_name: 'Kouadio Jean-Baptiste',
       email: 'kouadio.jb@montoit-premium.ci',
       phone: '+225 07 89 01 23',
-      avatar_url: '/images/avatars/kouadio.jpg'
-    }
-  }
+      avatar_url: '/images/avatars/kouadio.jpg',
+    },
+  },
 ];
 
 export const mockPropertyAssignments = [
@@ -100,11 +100,11 @@ export const mockPropertyAssignments = [
       address: 'Riviera Golf, Abidjan',
       bedrooms: 5,
       bathrooms: 4,
-      area: 450
+      area: 450,
     },
     profiles: {
-      full_name: 'Aminata Traoré'
-    }
+      full_name: 'Aminata Traoré',
+    },
   },
   {
     id: 'assignment-2',
@@ -120,11 +120,11 @@ export const mockPropertyAssignments = [
       address: 'Plateau, Abidjan',
       bedrooms: 3,
       bathrooms: 2,
-      area: 120
+      area: 120,
     },
     profiles: {
-      full_name: 'Kouadio Jean-Baptiste'
-    }
+      full_name: 'Kouadio Jean-Baptiste',
+    },
   },
   {
     id: 'assignment-3',
@@ -140,12 +140,12 @@ export const mockPropertyAssignments = [
       address: 'Cocody Centre, Abidjan',
       bedrooms: 0,
       bathrooms: 2,
-      area: 200
+      area: 200,
     },
     profiles: {
-      full_name: 'Aminata Traoré'
-    }
-  }
+      full_name: 'Aminata Traoré',
+    },
+  },
 ];
 
 export const mockCommissions = [
@@ -158,8 +158,8 @@ export const mockCommissions = [
     agent_id: 'user-3',
     transaction_type: 'sale',
     profiles: {
-      full_name: 'Aminata Traoré'
-    }
+      full_name: 'Aminata Traoré',
+    },
   },
   {
     id: 'commission-2',
@@ -169,8 +169,8 @@ export const mockCommissions = [
     agent_id: 'user-4',
     transaction_type: 'sale',
     profiles: {
-      full_name: 'Kouadio Jean-Baptiste'
-    }
+      full_name: 'Kouadio Jean-Baptiste',
+    },
   },
   {
     id: 'commission-3',
@@ -181,9 +181,9 @@ export const mockCommissions = [
     agent_id: 'user-3',
     transaction_type: 'rental',
     profiles: {
-      full_name: 'Aminata Traoré'
-    }
-  }
+      full_name: 'Aminata Traoré',
+    },
+  },
 ];
 
 export const mockRegistrationRequests = [
@@ -200,11 +200,12 @@ export const mockRegistrationRequests = [
     previous_agency: 'Immobilier Plus',
     education_level: 'Master en Gestion Immobilière',
     specializations: ['Villas de luxe', 'Immobilier commercial'],
-    motivation: 'Je souhaite rejoindre une agence premium pour développer mes compétences dans le secteur haut de gamme.',
+    motivation:
+      'Je souhaite rejoindre une agence premium pour développer mes compétences dans le secteur haut de gamme.',
     portfolio_properties: 25,
     expected_salary: 2500000,
     availability: 'Immédiat',
-    languages: ['Français', 'Dioula', 'Baoulé']
+    languages: ['Français', 'Dioula', 'Baoulé'],
   },
   {
     id: 'registration-2',
@@ -219,11 +220,12 @@ export const mockRegistrationRequests = [
     previous_agency: 'Premier Contact',
     education_level: 'Licence en Économie',
     specializations: ['Appartements', 'Maisons familiales'],
-    motivation: 'Passionné par l\'immobilier, je cherche une équipe dynamique pour progresser ensemble.',
+    motivation:
+      "Passionné par l'immobilier, je cherche une équipe dynamique pour progresser ensemble.",
     portfolio_properties: 12,
     expected_salary: 1800000,
     availability: 'Dans 2 semaines',
-    languages: ['Français', 'Malinké', 'Soussou']
+    languages: ['Français', 'Malinké', 'Soussou'],
   },
   {
     id: 'registration-3',
@@ -237,13 +239,14 @@ export const mockRegistrationRequests = [
     certifications: ['MBA Immobilier', 'Certification Management', 'Expert en évaluation'],
     previous_agency: 'Abidjan Properties',
     education_level: 'MBA en Immobilier et Finance',
-    specializations: ['Immobilier de bureaux', 'Gestion d\'équipe', 'Stratégie commerciale'],
-    motivation: 'Fort de mon expérience en management, je souhaite prendre la direction d\'une équipe performante.',
+    specializations: ['Immobilier de bureaux', "Gestion d'équipe", 'Stratégie commerciale'],
+    motivation:
+      "Fort de mon expérience en management, je souhaite prendre la direction d'une équipe performante.",
     portfolio_properties: 150,
     expected_salary: 4000000,
     availability: 'Dans 1 mois',
-    languages: ['Français', 'Anglais', 'Baoulé']
-  }
+    languages: ['Français', 'Anglais', 'Baoulé'],
+  },
 ];
 
 export const mockPerformanceData = [
@@ -252,17 +255,17 @@ export const mockPerformanceData = [
   { label: 'Août', value: 38 },
   { label: 'Septembre', value: 61 },
   { label: 'Octobre', value: 48 },
-  { label: 'Novembre', value: 67 }
+  { label: 'Novembre', value: 67 },
 ];
 
 export const mockNotifications = [
   {
     id: 'notification-1',
     type: 'registration_request',
-    title: 'Nouvelle demande d\'inscription',
-    message: 'Fatou Koné a soumis une demande d\'inscription en tant qu\'agent',
+    title: "Nouvelle demande d'inscription",
+    message: "Fatou Koné a soumis une demande d'inscription en tant qu'agent",
     created_at: '2024-11-28T10:30:00Z',
-    read_at: null
+    read_at: null,
   },
   {
     id: 'notification-2',
@@ -270,7 +273,7 @@ export const mockNotifications = [
     title: 'Commission versée',
     message: 'Une commission de 8,5M FCFA a été versée à Aminata Traoré',
     created_at: '2024-11-30T11:30:00Z',
-    read_at: null
+    read_at: null,
   },
   {
     id: 'notification-3',
@@ -278,8 +281,8 @@ export const mockNotifications = [
     title: 'Nouvelle attribution',
     message: 'Appartement T3 Centre-Ville attribué à Kouadio Jean-Baptiste',
     created_at: '2024-11-05T14:30:00Z',
-    read_at: '2024-11-05T14:35:00Z'
-  }
+    read_at: '2024-11-05T14:35:00Z',
+  },
 ];
 
 // Fonction utilitaire pour simuler des données en temps réel
@@ -288,7 +291,7 @@ export const generateRealtimeStats = () => ({
   portfolioProperties: mockStats.portfolioProperties + Math.floor(Math.random() * 3),
   monthlyCommissions: mockStats.monthlyCommissions + Math.floor(Math.random() * 50000),
   conversionRate: Math.min(25, mockStats.conversionRate + (Math.random() - 0.5) * 2),
-  lastUpdated: new Date().toISOString()
+  lastUpdated: new Date().toISOString(),
 });
 
 // Configuration des couleurs pour les graphiques
@@ -297,7 +300,7 @@ export const chartColors = {
   success: '#059669',
   warning: '#D97706',
   info: '#2563EB',
-  neutral: '#6B7280'
+  neutral: '#6B7280',
 };
 
 // Types TypeScript pour les données

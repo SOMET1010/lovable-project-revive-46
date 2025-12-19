@@ -167,7 +167,7 @@ const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
                   )}
                   ONECI
                 </Badge>
-                                <Badge variant={details.verification.facial ? 'success' : 'secondary'}>
+                <Badge variant={details.verification.facial ? 'success' : 'secondary'}>
                   {details.verification.facial ? (
                     <CheckCircle className="h-3 w-3 mr-1" />
                   ) : (

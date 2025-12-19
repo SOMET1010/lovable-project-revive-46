@@ -94,8 +94,8 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       bucket = authMatch[1];
       path = authMatch[2];
     } else {
-      console.error('[NeoFace UI] Format d\'URL non reconnu:', cniPhotoUrl);
-      throw new Error('Format d\'URL de stockage non reconnu');
+      console.error("[NeoFace UI] Format d'URL non reconnu:", cniPhotoUrl);
+      throw new Error("Format d'URL de stockage non reconnu");
     }
 
     console.log('[NeoFace UI] Bucket détecté:', bucket);
@@ -145,7 +145,8 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         if (attempts >= maxRetries) {
           return {
             status: 'failed',
-            message: 'Vérification échouée: problème de connexion avec NeoFace. Veuillez réessayer plus tard.',
+            message:
+              'Vérification échouée: problème de connexion avec NeoFace. Veuillez réessayer plus tard.',
             document_id: docId,
             provider: 'neoface',
           };
@@ -198,7 +199,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         }
         setStatus('error');
         setError('La fenêtre de vérification a été fermée. Veuillez réessayer.');
-        onFailed('Fenêtre fermée par l\'utilisateur');
+        onFailed("Fenêtre fermée par l'utilisateur");
       }
     }, 1000);
 
@@ -313,19 +314,21 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       // NOTE: NeoFace utilise X-Frame-Options: DENY, donc impossible d'utiliser iframe/popup
       // On doit rediriger l'utilisateur vers la page NeoFace
       // On stocke les infos de vérification pour les récupérer au retour
-      sessionStorage.setItem('neoface_verification', JSON.stringify({
-        document_id: uploadData.document_id,
-        verification_id: uploadData.verification_id,
-        user_id: userId,
-        timestamp: Date.now()
-      }));
+      sessionStorage.setItem(
+        'neoface_verification',
+        JSON.stringify({
+          document_id: uploadData.document_id,
+          verification_id: uploadData.verification_id,
+          user_id: userId,
+          timestamp: Date.now(),
+        })
+      );
 
       // Rediriger vers la page NeoFace
       window.location.href = uploadData.selfie_url;
 
       // Le code ci-dessous ne sera pas exécuté à cause de la redirection
       // startPolling sera appelé quand l'utilisateur reviendra sur la page
-
     } catch (err) {
       let errorMessage = err instanceof Error ? err.message : 'Erreur lors de la vérification';
       console.error('[NeoFace UI] Erreur lors de la vérification:', err);
@@ -424,7 +427,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
                 alt="Photo CNI"
                 className="max-w-xs rounded-xl border-2 border-[#3C2A1E]/20 shadow-md"
                 onError={(e) => {
-                  console.error('[NeoFace] Erreur de chargement de l\'image:', e);
+                  console.error("[NeoFace] Erreur de chargement de l'image:", e);
                   e.currentTarget.src = '';
                   e.currentTarget.style.display = 'none';
                 }}

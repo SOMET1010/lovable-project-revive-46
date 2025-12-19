@@ -36,7 +36,8 @@ export const passwordPolicy: PasswordPolicy = {
     requireUppercase: 'Le mot de passe doit contenir au moins une majuscule',
     requireLowercase: 'Le mot de passe doit contenir au moins une minuscule',
     requireNumbers: 'Le mot de passe doit contenir au moins un chiffre',
-    requireSpecialChars: 'Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*()_+-=[]{}|;:,.<>)',
+    requireSpecialChars:
+      'Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*()_+-=[]{}|;:,.<>)',
     forbiddenPatterns: 'Le mot de passe contient un motif non autorisé',
   },
 };
@@ -153,5 +154,8 @@ export function generateSecurePassword(length: number = 12): string {
   }
 
   // Mélanger le mot de passe
-  return password.split('').sort(() => Math.random() - 0.5).join('');
+  return password
+    .split('')
+    .sort(() => Math.random() - 0.5)
+    .join('');
 }

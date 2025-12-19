@@ -56,9 +56,7 @@ export default function OwnerDashboardLayout({ children, title }: OwnerDashboard
         </header>
 
         <main className="flex-1 overflow-auto w-full">
-          <div className="w-full px-4 lg:px-10 xl:px-12 py-6">
-            {children || <Outlet />}
-          </div>
+          <div className="w-full px-4 lg:px-10 xl:px-12 py-6">{children || <Outlet />}</div>
         </main>
       </div>
     </div>

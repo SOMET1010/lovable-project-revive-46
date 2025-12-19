@@ -16,7 +16,9 @@ export function getPublicUrl(bucket: string, path: string): string {
 export function getAuthenticatedImageUrl(bucket: string, path: string): string {
   // Pour les images qui nécessitent une authentification
   // Utiliser une fonction Edge pour servir l'image avec le bon token
-  const { data: { session } } = supabase.auth.getSession();
+  const {
+    data: { session },
+  } = supabase.auth.getSession();
 
   if (!session) {
     console.error('[Storage] No session found');
@@ -39,9 +41,7 @@ export function getAuthenticatedImageUrl(bucket: string, path: string): string {
 // Fonction pour créer un cache buster
 export function addCacheBuster(url: string): string {
   const cacheBuster = `v=${Date.now()}`;
-  return url.includes('?')
-    ? `${url}&${cacheBuster}`
-    : `${url}?${cacheBuster}`;
+  return url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
 }
 
 // Fonction pour obtenir l'URL de l'avatar avec fallback
@@ -51,11 +51,7 @@ export async function getAvatarUrl(userId: string, avatarPath?: string): Promise
   }
 
   // Essayer de récupérer l'avatar depuis le profil
-  const { data } = await supabase
-    .from('profiles')
-    .select('avatar_url')
-    .eq('id', userId)
-    .single();
+  const { data } = await supabase.from('profiles').select('avatar_url').eq('id', userId).single();
 
   if (data?.avatar_url) {
     return addCacheBuster(getPublicUrl('avatars', data.avatar_url));

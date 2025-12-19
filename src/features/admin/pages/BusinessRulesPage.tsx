@@ -277,8 +277,7 @@ export default function BusinessRulesPage() {
                           onClick={() => handleSave(rule)}
                           disabled={updateMutation.isPending}
                           className="p-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
-                        >
-                        </button>
+                        ></button>
                         <button
                           onClick={() => setEditingRule(null)}
                           className="p-2 border border-border rounded-lg hover:bg-muted"

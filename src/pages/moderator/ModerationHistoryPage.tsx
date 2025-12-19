@@ -95,7 +95,10 @@ const ModerationHistoryPage: React.FC = () => {
       dispute: { label: 'Litige', color: 'bg-red-100 text-red-800' },
       review: { label: 'Avis', color: 'bg-green-100 text-green-800' },
     };
-    const badge = badges[type as keyof typeof badges] || { label: type, color: 'bg-gray-100 text-gray-800' };
+    const badge = badges[type as keyof typeof badges] || {
+      label: type,
+      color: 'bg-gray-100 text-gray-800',
+    };
     return <span className={`text-xs ${badge.color} px-2 py-1 rounded`}>{badge.label}</span>;
   };
 
@@ -106,7 +109,9 @@ const ModerationHistoryPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Historique des modérations</h1>
-              <p className="mt-2 text-gray-600">Consultez l'historique de toutes les actions de modération</p>
+              <p className="mt-2 text-gray-600">
+                Consultez l'historique de toutes les actions de modération
+              </p>
             </div>
             <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
               <Download className="w-4 h-4 mr-2" />
@@ -187,9 +192,7 @@ const ModerationHistoryPage: React.FC = () => {
                       </div>
                     </div>
                     <div className="ml-4">
-                      <button className="text-gray-400 hover:text-gray-600">
-                        →
-                      </button>
+                      <button className="text-gray-400 hover:text-gray-600">→</button>
                     </div>
                   </div>
                 </div>

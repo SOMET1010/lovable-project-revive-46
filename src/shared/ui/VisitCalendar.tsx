@@ -28,7 +28,7 @@ export function VisitCalendar({
   slots,
   selectedSlot,
   onSelectSlot,
-  loading = false
+  loading = false,
 }: VisitCalendarProps) {
   const [weekOffset, setWeekOffset] = useState(0);
   const today = new Date();
@@ -42,15 +42,15 @@ export function VisitCalendar({
   // Grouper les créneaux par jour
   const slotsByDay = useMemo(() => {
     const grouped: Record<string, VisitSlot[]> = {};
-    slots.forEach(slot => {
+    slots.forEach((slot) => {
       const day = format(parseISO(slot.start_time), 'yyyy-MM-dd');
       if (!grouped[day]) grouped[day] = [];
       grouped[day]?.push(slot);
     });
     // Trier chaque jour par heure
-    Object.keys(grouped).forEach(day => {
-      grouped[day]?.sort((a, b) => 
-        new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+    Object.keys(grouped).forEach((day) => {
+      grouped[day]?.sort(
+        (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
       );
     });
     return grouped;
@@ -84,17 +84,18 @@ export function VisitCalendar({
       {/* Header navigation */}
       <div className="flex items-center justify-between p-4 border-b border-border">
         <button
-          onClick={() => setWeekOffset(w => w - 1)}
+          onClick={() => setWeekOffset((w) => w - 1)}
           disabled={weekOffset === 0}
           className="p-2 hover:bg-muted rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
         <h3 className="font-semibold text-foreground">
-          {format(weekStart, 'dd MMM', { locale: fr })} - {format(addDays(weekStart, 6), 'dd MMM yyyy', { locale: fr })}
+          {format(weekStart, 'dd MMM', { locale: fr })} -{' '}
+          {format(addDays(weekStart, 6), 'dd MMM yyyy', { locale: fr })}
         </h3>
         <button
-          onClick={() => setWeekOffset(w => w + 1)}
+          onClick={() => setWeekOffset((w) => w + 1)}
           disabled={weekOffset >= 4}
           className="p-2 hover:bg-muted rounded-lg disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
@@ -108,10 +109,10 @@ export function VisitCalendar({
         {weekDays.map((day, i) => {
           const isToday = isSameDay(day, today);
           const isPast = !isAfter(day, today) && !isToday;
-          
+
           return (
-            <div 
-              key={i} 
+            <div
+              key={i}
               className={cn(
                 'p-2 text-center border-b border-r border-border last:border-r-0',
                 isPast && 'opacity-50'
@@ -120,10 +121,7 @@ export function VisitCalendar({
               <p className="text-xs text-muted-foreground uppercase">
                 {format(day, 'EEE', { locale: fr })}
               </p>
-              <p className={cn(
-                'text-lg font-semibold',
-                isToday && 'text-primary'
-              )}>
+              <p className={cn('text-lg font-semibold', isToday && 'text-primary')}>
                 {format(day, 'd')}
               </p>
             </div>
@@ -137,7 +135,7 @@ export function VisitCalendar({
           const isPast = !isAfter(day, today) && !isSameDay(day, today);
 
           return (
-            <div 
+            <div
               key={dayIndex}
               className={cn(
                 'min-h-[120px] p-2 border-r border-border last:border-r-0',
@@ -150,7 +148,7 @@ export function VisitCalendar({
                 </p>
               ) : (
                 <div className="space-y-1">
-                  {daySlots.map(slot => {
+                  {daySlots.map((slot) => {
                     const isPastSlot = isSlotPast(slot);
                     const isSelected = selectedSlot === slot.id;
                     const isAvailable = !slot.is_booked && !isPastSlot;
@@ -163,25 +161,23 @@ export function VisitCalendar({
                         className={cn(
                           'w-full text-left px-2 py-1.5 rounded-lg text-xs transition-all',
                           isSelected && 'ring-2 ring-primary bg-primary/10',
-                          isAvailable && !isSelected && 'bg-green-50 hover:bg-green-100 text-green-700',
+                          isAvailable &&
+                            !isSelected &&
+                            'bg-green-50 hover:bg-green-100 text-green-700',
                           slot.is_booked && 'bg-orange-50 text-orange-600 cursor-not-allowed',
                           isPastSlot && 'bg-muted text-muted-foreground cursor-not-allowed'
                         )}
                       >
                         <div className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          <span className="font-medium">
-                            {formatTime(slot.start_time)}
-                          </span>
+                          <span className="font-medium">{formatTime(slot.start_time)}</span>
                           {slot.visit_type === 'virtual' ? (
                             <Video className="w-3 h-3 text-blue-500" />
                           ) : (
                             <MapPin className="w-3 h-3 text-green-600" />
                           )}
                         </div>
-                        {slot.is_booked && (
-                          <p className="text-[10px] opacity-70">Réservé</p>
-                        )}
+                        {slot.is_booked && <p className="text-[10px] opacity-70">Réservé</p>}
                       </button>
                     );
                   })}

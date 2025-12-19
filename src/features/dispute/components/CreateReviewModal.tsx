@@ -1,5 +1,14 @@
 import { useState, ChangeEvent } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Textarea, Label } from '@/shared/ui';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  Button,
+  Textarea,
+  Label,
+} from '@/shared/ui';
 import { Star, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -18,12 +27,12 @@ const CRITERIA = {
   property: ['cleanliness', 'accuracy', 'value', 'location'],
   owner: ['communication', 'responsiveness', 'fairness'],
   tenant: ['payment', 'care', 'communication'],
-  provider: ['quality', 'punctuality', 'value', 'communication']
+  provider: ['quality', 'punctuality', 'value', 'communication'],
 };
 
 const CRITERIA_LABELS: Record<string, string> = {
   cleanliness: 'Propreté',
-  accuracy: 'Exactitude de l\'annonce',
+  accuracy: "Exactitude de l'annonce",
   value: 'Rapport qualité/prix',
   location: 'Emplacement',
   communication: 'Communication',
@@ -32,7 +41,7 @@ const CRITERIA_LABELS: Record<string, string> = {
   payment: 'Paiements à temps',
   care: 'Soin du logement',
   quality: 'Qualité du travail',
-  punctuality: 'Ponctualité'
+  punctuality: 'Ponctualité',
 };
 
 export default function CreateReviewModal({
@@ -41,7 +50,7 @@ export default function CreateReviewModal({
   propertyId,
   revieweeId,
   reviewType,
-  onSuccess
+  onSuccess,
 }: CreateReviewModalProps) {
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,7 +62,7 @@ export default function CreateReviewModal({
   const criteria = CRITERIA[reviewType] || [];
 
   const handleCriteriaRating = (criterion: string, rating: number) => {
-    setCriteriaRatings(prev => ({ ...prev, [criterion]: rating }));
+    setCriteriaRatings((prev) => ({ ...prev, [criterion]: rating }));
   };
 
   const handleSubmit = async () => {
@@ -75,32 +84,30 @@ export default function CreateReviewModal({
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('reviews')
-        .insert({
-          reviewer_id: user.id,
-          reviewee_id: revieweeId || null,
-          property_id: propertyId || null,
-          review_type: reviewType,
-          rating: globalRating,
-          comment,
-          criteria_ratings: criteriaRatings,
-          moderation_status: 'pending'
-        });
+      const { error } = await supabase.from('reviews').insert({
+        reviewer_id: user.id,
+        reviewee_id: revieweeId || null,
+        property_id: propertyId || null,
+        review_type: reviewType,
+        rating: globalRating,
+        comment,
+        criteria_ratings: criteriaRatings,
+        moderation_status: 'pending',
+      });
 
       if (error) throw error;
 
       toast.success('Avis soumis avec succès ! Il sera visible après modération.');
       onOpenChange(false);
       onSuccess?.();
-      
+
       // Reset form
       setGlobalRating(0);
       setCriteriaRatings({});
       setComment('');
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error('Erreur lors de l\'envoi de l\'avis');
+      toast.error("Erreur lors de l'envoi de l'avis");
     } finally {
       setIsSubmitting(false);
     }
@@ -111,16 +118,16 @@ export default function CreateReviewModal({
   };
 
   const renderStars = (
-    rating: number, 
-    onRate: (r: number) => void, 
-    hover?: number, 
+    rating: number,
+    onRate: (r: number) => void,
+    hover?: number,
     onHover?: (r: number) => void,
     size: 'sm' | 'md' | 'lg' = 'md'
   ) => {
     const sizeClasses = {
       sm: 'w-5 h-5',
       md: 'w-7 h-7',
-      lg: 'w-9 h-9'
+      lg: 'w-9 h-9',
     };
 
     return (
@@ -136,9 +143,7 @@ export default function CreateReviewModal({
           >
             <Star
               className={`${sizeClasses[size]} ${
-                star <= (hover || rating)
-                  ? 'fill-yellow-400 text-yellow-400'
-                  : 'text-gray-300'
+                star <= (hover || rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
               }`}
             />
           </button>
@@ -200,9 +205,11 @@ export default function CreateReviewModal({
               rows={4}
               className="resize-none"
             />
-            <p className={`text-xs text-right ${
-              comment.length < 50 ? 'text-destructive' : 'text-muted-foreground'
-            }`}>
+            <p
+              className={`text-xs text-right ${
+                comment.length < 50 ? 'text-destructive' : 'text-muted-foreground'
+              }`}
+            >
               {comment.length}/50 minimum
             </p>
           </div>
@@ -241,7 +248,7 @@ export default function CreateReviewModal({
                 Envoi...
               </>
             ) : (
-              'Publier l\'avis'
+              "Publier l'avis"
             )}
           </Button>
         </DialogFooter>

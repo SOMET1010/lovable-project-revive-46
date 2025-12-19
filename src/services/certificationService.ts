@@ -40,10 +40,7 @@ export class CertificationService {
    */
   static async getCertifiedUsers(filters?: CertificationFilters): Promise<CertificationUser[]> {
     try {
-      let query = supabase
-        .from('profiles')
-        .select('*')
-        .order('updated_at', { ascending: false });
+      let query = supabase.from('profiles').select('*').order('updated_at', { ascending: false });
 
       // Apply filters
       if (filters?.search) {
@@ -62,10 +59,18 @@ export class CertificationService {
             query = query.eq('is_verified', true);
             break;
           case 'partial':
-            query = query.and('is_verified.eq.false').or('oneci_verified.eq.true,cnam_verified.eq.true,facial_verification_status.neq.none');
+            query = query
+              .and('is_verified.eq.false')
+              .or(
+                'oneci_verified.eq.true,cnam_verified.eq.true,facial_verification_status.neq.none'
+              );
             break;
           case 'none':
-            query = query.eq('is_verified', false).eq('oneci_verified', false).eq('cnam_verified', false).eq('facial_verification_status', 'none');
+            query = query
+              .eq('is_verified', false)
+              .eq('oneci_verified', false)
+              .eq('cnam_verified', false)
+              .eq('facial_verification_status', 'none');
             break;
         }
       }
@@ -95,19 +100,24 @@ export class CertificationService {
       let filteredData = data || [];
 
       if (filters?.verification_types && filters.verification_types.length > 0) {
-        filteredData = filteredData.filter(user => {
+        filteredData = filteredData.filter((user) => {
           const hasIdentity = user.is_verified;
           const hasONECI = user.oneci_verified;
           const hasCNAM = user.cnam_verified;
           const hasFacial = user.facial_verification_status !== 'none';
 
-          return filters.verification_types!.some(type => {
+          return filters.verification_types!.some((type) => {
             switch (type) {
-              case 'identity': return hasIdentity;
-              case 'oneci': return hasONECI;
-              case 'cnam': return hasCNAM;
-              case 'facial': return hasFacial;
-              default: return false;
+              case 'identity':
+                return hasIdentity;
+              case 'oneci':
+                return hasONECI;
+              case 'cnam':
+                return hasCNAM;
+              case 'facial':
+                return hasFacial;
+              default:
+                return false;
             }
           });
         });
@@ -127,25 +137,30 @@ export class CertificationService {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('is_verified, oneci_verified, cnam_verified, facial_verification_status, user_type, city');
+        .select(
+          'is_verified, oneci_verified, cnam_verified, facial_verification_status, user_type, city'
+        );
 
       if (error) throw error;
 
       const stats = {
         total: data?.length || 0,
-        verified: data?.filter(u => u.is_verified).length || 0,
-        partial: data?.filter(u =>
-          (u.oneci_verified || u.cnam_verified || u.facial_verification_status !== 'none') && !u.is_verified
-        ).length || 0,
-        oneci: data?.filter(u => u.oneci_verified).length || 0,
-        cnam: data?.filter(u => u.cnam_verified).length || 0,
-        facial: data?.filter(u => u.facial_verification_status !== 'none').length || 0,
+        verified: data?.filter((u) => u.is_verified).length || 0,
+        partial:
+          data?.filter(
+            (u) =>
+              (u.oneci_verified || u.cnam_verified || u.facial_verification_status !== 'none') &&
+              !u.is_verified
+          ).length || 0,
+        oneci: data?.filter((u) => u.oneci_verified).length || 0,
+        cnam: data?.filter((u) => u.cnam_verified).length || 0,
+        facial: data?.filter((u) => u.facial_verification_status !== 'none').length || 0,
         by_user_type: {} as Record<string, number>,
         by_city: {} as Record<string, number>,
       };
 
       // Group by user type
-      data?.forEach(user => {
+      data?.forEach((user) => {
         const userType = user.user_type || 'unknown';
         stats.by_user_type[userType] = (stats.by_user_type[userType] || 0) + 1;
 
@@ -190,7 +205,7 @@ export class CertificationService {
 
       return {
         ...profile,
-        user_verifications: verifications || []
+        user_verifications: verifications || [],
       } as CertificationUser;
     } catch (error) {
       console.error('Error fetching user certification details:', error);
@@ -218,9 +233,7 @@ export class CertificationService {
       const updateData = {
         ...certificationData,
         updated_at: new Date().toISOString(),
-        oneci_verification_date: certificationData.oneci_verified
-          ? new Date().toISOString()
-          : null,
+        oneci_verification_date: certificationData.oneci_verified ? new Date().toISOString() : null,
       };
 
       // Update profile
@@ -244,18 +257,20 @@ export class CertificationService {
       });
 
       // Add verification record if needed
-      if (certificationData.is_verified && !certificationData.oneci_verified && !certificationData.cnam_verified) {
-        await supabase
-          .from('user_verifications')
-          .insert({
-            user_id: userId,
-            verification_type: 'identity',
-            status: 'verifie',
-            metadata: {
-              certified_by: certifiedBy,
-              notes: certificationData.notes,
-            },
-          });
+      if (
+        certificationData.is_verified &&
+        !certificationData.oneci_verified &&
+        !certificationData.cnam_verified
+      ) {
+        await supabase.from('user_verifications').insert({
+          user_id: userId,
+          verification_type: 'identity',
+          status: 'verifie',
+          metadata: {
+            certified_by: certifiedBy,
+            notes: certificationData.notes,
+          },
+        });
       }
     } catch (error) {
       console.error('Error updating certification:', error);
@@ -296,7 +311,7 @@ export class CertificationService {
         'Dernière mise à jour',
       ];
 
-      const rows = users.map(user => [
+      const rows = users.map((user) => [
         user.id,
         user.full_name || '',
         user.email,
@@ -313,7 +328,7 @@ export class CertificationService {
       ]);
 
       const csvContent = [headers, ...rows]
-        .map(row => row.map(cell => `"${cell}"`).join(','))
+        .map((row) => row.map((cell) => `"${cell}"`).join(','))
         .join('\n');
 
       return new Blob([csvContent], {

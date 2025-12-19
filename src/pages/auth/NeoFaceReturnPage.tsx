@@ -19,23 +19,28 @@ export default function NeoFaceReturnPage() {
     console.log('[NeoFace Return] Paramètres reçus:', {
       documentId,
       success,
-      score
+      score,
     });
 
     // Stocker les infos pour la page principale
     if (documentId) {
-      sessionStorage.setItem('neoface_result', JSON.stringify({
-        document_id: documentId,
-        success: success === 'true',
-        score: score ? parseFloat(score) : null,
-        timestamp: Date.now()
-      }));
+      sessionStorage.setItem(
+        'neoface_result',
+        JSON.stringify({
+          document_id: documentId,
+          success: success === 'true',
+          score: score ? parseFloat(score) : null,
+          timestamp: Date.now(),
+        })
+      );
     }
 
     // Déterminer le statut
     if (success === 'true') {
       setStatus('success');
-      setMessage(`Vérification réussie${score ? ` avec un score de ${(parseFloat(score) * 100).toFixed(1)}%` : ''} !`);
+      setMessage(
+        `Vérification réussie${score ? ` avec un score de ${(parseFloat(score) * 100).toFixed(1)}%` : ''} !`
+      );
     } else if (success === 'false') {
       setStatus('error');
       setMessage('La vérification a échoué. Veuillez réessayer.');

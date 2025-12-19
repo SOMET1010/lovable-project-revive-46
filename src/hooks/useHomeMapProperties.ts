@@ -145,7 +145,6 @@ export function useHomeMapProperties() {
         return profile?.is_verified === true;
       });
 
-      
       // Convert to MapProperty (without owner_id)
       const validProperties: MapProperty[] = verifiedProperties.map((p) => ({
         id: p.id,
@@ -176,7 +175,7 @@ export function useHomeMapProperties() {
     setError(null);
 
     try {
-    let query = supabase
+      let query = supabase
         .from('properties')
         .select(
           'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms_count, surface_area, status, owner_id'

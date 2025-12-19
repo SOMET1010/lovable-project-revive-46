@@ -4,19 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import Button from '@/shared/ui/Button';
-import { 
-  Calendar, RefreshCw, Plus, Check,
-  AlertTriangle, ChevronRight, Loader2
+import {
+  Calendar,
+  RefreshCw,
+  Plus,
+  Check,
+  AlertTriangle,
+  ChevronRight,
+  Loader2,
 } from 'lucide-react';
 import { format, addYears, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/shared/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui';
 
 interface LeaseRenewal {
   id: string;
@@ -67,7 +66,7 @@ export default function LeaseRenewalsPage() {
     proposedEndDate: '',
     proposedRent: '',
     rentIncreasePercent: '',
-    notes: ''
+    notes: '',
   });
 
   // Fetch renewals
@@ -76,7 +75,8 @@ export default function LeaseRenewalsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lease_renewals')
-        .select(`
+        .select(
+          `
           *,
           lease_contracts (
             contract_number,
@@ -85,26 +85,31 @@ export default function LeaseRenewalsPage() {
             tenant_id,
             properties (title, address)
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       // Fetch tenant names separately
-      const tenantIds = [...new Set(data?.map(r => r.lease_contracts?.tenant_id).filter(Boolean) as string[])];
+      const tenantIds = [
+        ...new Set(data?.map((r) => r.lease_contracts?.tenant_id).filter(Boolean) as string[]),
+      ];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, full_name')
         .in('user_id', tenantIds);
-      
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
-      
-      return data?.map(r => ({
+
+      const profileMap = new Map(profiles?.map((p) => [p.user_id, p.full_name]) || []);
+
+      return data?.map((r) => ({
         ...r,
-        tenant_name: r.lease_contracts?.tenant_id ? profileMap.get(r.lease_contracts.tenant_id) : undefined
+        tenant_name: r.lease_contracts?.tenant_id
+          ? profileMap.get(r.lease_contracts.tenant_id)
+          : undefined,
       })) as LeaseRenewal[];
     },
-    enabled: !!user?.id
+    enabled: !!user?.id,
   });
 
   // Fetch expiring leases (no renewal yet)
@@ -112,10 +117,11 @@ export default function LeaseRenewalsPage() {
     queryKey: ['expiring-leases', user?.id],
     queryFn: async () => {
       const in90Days = format(new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
-      
+
       const { data, error } = await supabase
         .from('lease_contracts')
-        .select(`
+        .select(
+          `
           id,
           contract_number,
           end_date,
@@ -123,50 +129,54 @@ export default function LeaseRenewalsPage() {
           tenant_id,
           property_id,
           properties (title, address)
-        `)
+        `
+        )
         .eq('owner_id', user?.id ?? '')
         .eq('status', 'active')
         .lte('end_date', in90Days)
         .order('end_date', { ascending: true });
-      
+
       if (error) throw error;
-      
+
       // Fetch tenant names separately
-      const tenantIds = [...new Set(data?.map(l => l.tenant_id).filter(Boolean) as string[])];
+      const tenantIds = [...new Set(data?.map((l) => l.tenant_id).filter(Boolean) as string[])];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, full_name')
         .in('user_id', tenantIds);
-      
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
-      
+
+      const profileMap = new Map(profiles?.map((p) => [p.user_id, p.full_name]) || []);
+
       // Filter out leases that already have pending renewals
-      const renewalLeaseIds = renewals?.filter(r => r.status === 'pending').map(r => r.lease_id) || [];
-      return (data?.map(l => ({
-        ...l,
-        tenant_name: profileMap.get(l.tenant_id)
-      })) as ExpiringLease[]).filter(l => !renewalLeaseIds.includes(l.id));
+      const renewalLeaseIds =
+        renewals?.filter((r) => r.status === 'pending').map((r) => r.lease_id) || [];
+      return (
+        data?.map((l) => ({
+          ...l,
+          tenant_name: profileMap.get(l.tenant_id),
+        })) as ExpiringLease[]
+      ).filter((l) => !renewalLeaseIds.includes(l.id));
     },
-    enabled: !!user?.id && !!renewals
+    enabled: !!user?.id && !!renewals,
   });
 
   // Create renewal mutation
   const createRenewal = useMutation({
     mutationFn: async () => {
       if (!selectedLease) return;
-      
-      const { error } = await supabase
-        .from('lease_renewals')
-        .insert({
-          lease_id: selectedLease.id,
-          original_end_date: selectedLease.end_date,
-          proposed_end_date: renewalForm.proposedEndDate,
-          proposed_rent: renewalForm.proposedRent ? parseFloat(renewalForm.proposedRent) : null,
-          rent_increase_percent: renewalForm.rentIncreasePercent ? parseFloat(renewalForm.rentIncreasePercent) : null,
-          owner_notes: renewalForm.notes,
-          status: 'pending'
-        });
-      
+
+      const { error } = await supabase.from('lease_renewals').insert({
+        lease_id: selectedLease.id,
+        original_end_date: selectedLease.end_date,
+        proposed_end_date: renewalForm.proposedEndDate,
+        proposed_rent: renewalForm.proposedRent ? parseFloat(renewalForm.proposedRent) : null,
+        rent_increase_percent: renewalForm.rentIncreasePercent
+          ? parseFloat(renewalForm.rentIncreasePercent)
+          : null,
+        owner_notes: renewalForm.notes,
+        status: 'pending',
+      });
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -175,26 +185,32 @@ export default function LeaseRenewalsPage() {
       setShowCreateModal(false);
       setSelectedLease(null);
       setRenewalForm({ proposedEndDate: '', proposedRent: '', rentIncreasePercent: '', notes: '' });
-    }
+    },
   });
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, { bg: string; text: string; label: string }> = {
       pending: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'En attente' },
-      tenant_accepted: { bg: 'bg-green-100', text: 'text-green-700', label: 'Accepté par locataire' },
+      tenant_accepted: {
+        bg: 'bg-green-100',
+        text: 'text-green-700',
+        label: 'Accepté par locataire',
+      },
       tenant_rejected: { bg: 'bg-red-100', text: 'text-red-700', label: 'Refusé par locataire' },
       finalized: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Finalisé' },
-      expired: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Expiré' }
+      expired: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Expiré' },
     };
     const style = styles[status] ?? styles['pending'];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}>
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}
+      >
         {style?.label ?? status}
       </span>
     );
   };
 
-  const formatCurrency = (amount: number) => 
+  const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('fr-CI', { style: 'currency', currency: 'XOF' }).format(amount);
 
   const openCreateModal = (lease: ExpiringLease) => {
@@ -203,7 +219,7 @@ export default function LeaseRenewalsPage() {
       proposedEndDate: format(addYears(new Date(lease.end_date), 1), 'yyyy-MM-dd'),
       proposedRent: lease.monthly_rent.toString(),
       rentIncreasePercent: '0',
-      notes: ''
+      notes: '',
     });
     setShowCreateModal(true);
   };
@@ -215,7 +231,9 @@ export default function LeaseRenewalsPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-[#2C1810]">Renouvellements de baux</h1>
-            <p className="text-[#2C1810]/60">Gérez les renouvellements de vos contrats de location</p>
+            <p className="text-[#2C1810]/60">
+              Gérez les renouvellements de vos contrats de location
+            </p>
           </div>
         </div>
 
@@ -232,28 +250,35 @@ export default function LeaseRenewalsPage() {
               {expiringLeases.map((lease) => {
                 const daysLeft = differenceInDays(new Date(lease.end_date), new Date());
                 return (
-                  <div 
+                  <div
                     key={lease.id}
                     className="flex items-center justify-between p-4 bg-white rounded-xl"
                   >
                     <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-lg ${daysLeft <= 30 ? 'bg-red-100' : 'bg-amber-100'}`}>
-                        <Calendar className={`h-5 w-5 ${daysLeft <= 30 ? 'text-red-600' : 'text-amber-600'}`} />
+                      <div
+                        className={`p-2 rounded-lg ${daysLeft <= 30 ? 'bg-red-100' : 'bg-amber-100'}`}
+                      >
+                        <Calendar
+                          className={`h-5 w-5 ${daysLeft <= 30 ? 'text-red-600' : 'text-amber-600'}`}
+                        />
                       </div>
                       <div>
                         <p className="font-medium text-[#2C1810]">
                           {lease.properties?.title || lease.contract_number}
                         </p>
                         <p className="text-sm text-[#2C1810]/60">
-                          {lease.tenant_name} • Expire le {format(new Date(lease.end_date), 'dd MMMM yyyy', { locale: fr })}
+                          {lease.tenant_name} • Expire le{' '}
+                          {format(new Date(lease.end_date), 'dd MMMM yyyy', { locale: fr })}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`text-sm font-medium ${daysLeft <= 30 ? 'text-red-600' : 'text-amber-600'}`}>
+                      <span
+                        className={`text-sm font-medium ${daysLeft <= 30 ? 'text-red-600' : 'text-amber-600'}`}
+                      >
                         {daysLeft}j restants
                       </span>
-                      <Button 
+                      <Button
                         size="small"
                         className="bg-[#F16522] hover:bg-[#F16522]/90 rounded-lg"
                         onClick={() => openCreateModal(lease)}
@@ -282,7 +307,7 @@ export default function LeaseRenewalsPage() {
             ) : renewals && renewals.length > 0 ? (
               <div className="space-y-4">
                 {renewals.map((renewal) => (
-                  <div 
+                  <div
                     key={renewal.id}
                     className="flex items-center justify-between p-4 bg-white border border-[#EFEBE9] rounded-xl hover:shadow-md transition-shadow"
                   >
@@ -292,14 +317,14 @@ export default function LeaseRenewalsPage() {
                       </div>
                       <div>
                         <p className="font-medium text-[#2C1810]">
-                          {renewal.lease_contracts?.properties?.title || renewal.lease_contracts?.contract_number}
+                          {renewal.lease_contracts?.properties?.title ||
+                            renewal.lease_contracts?.contract_number}
                         </p>
-                        <p className="text-sm text-[#2C1810]/60">
-                          {renewal.tenant_name}
-                        </p>
+                        <p className="text-sm text-[#2C1810]/60">{renewal.tenant_name}</p>
                         <div className="flex items-center gap-4 mt-1 text-xs text-[#2C1810]/40">
                           <span>
-                            Fin actuelle: {format(new Date(renewal.original_end_date), 'dd/MM/yyyy')}
+                            Fin actuelle:{' '}
+                            {format(new Date(renewal.original_end_date), 'dd/MM/yyyy')}
                           </span>
                           <ChevronRight className="h-3 w-3" />
                           <span className="text-[#F16522]">
@@ -337,7 +362,7 @@ export default function LeaseRenewalsPage() {
             <DialogHeader>
               <DialogTitle className="text-[#2C1810]">Proposer un renouvellement</DialogTitle>
             </DialogHeader>
-            
+
             {selectedLease && (
               <div className="space-y-4">
                 <div className="p-4 bg-[#FAF7F4] rounded-xl">
@@ -355,7 +380,9 @@ export default function LeaseRenewalsPage() {
                   <input
                     type="date"
                     value={renewalForm.proposedEndDate}
-                    onChange={(e) => setRenewalForm(prev => ({ ...prev, proposedEndDate: e.target.value }))}
+                    onChange={(e) =>
+                      setRenewalForm((prev) => ({ ...prev, proposedEndDate: e.target.value }))
+                    }
                     className="w-full p-3 border border-[#EFEBE9] rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-transparent"
                   />
                 </div>
@@ -368,7 +395,9 @@ export default function LeaseRenewalsPage() {
                     <input
                       type="number"
                       value={renewalForm.proposedRent}
-                      onChange={(e) => setRenewalForm(prev => ({ ...prev, proposedRent: e.target.value }))}
+                      onChange={(e) =>
+                        setRenewalForm((prev) => ({ ...prev, proposedRent: e.target.value }))
+                      }
                       className="w-full p-3 border border-[#EFEBE9] rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-transparent"
                     />
                   </div>
@@ -383,10 +412,10 @@ export default function LeaseRenewalsPage() {
                       onChange={(e) => {
                         const percent = parseFloat(e.target.value) || 0;
                         const newRent = selectedLease.monthly_rent * (1 + percent / 100);
-                        setRenewalForm(prev => ({ 
-                          ...prev, 
+                        setRenewalForm((prev) => ({
+                          ...prev,
                           rentIncreasePercent: e.target.value,
-                          proposedRent: Math.round(newRent).toString()
+                          proposedRent: Math.round(newRent).toString(),
                         }));
                       }}
                       className="w-full p-3 border border-[#EFEBE9] rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-transparent"
@@ -400,7 +429,7 @@ export default function LeaseRenewalsPage() {
                   </label>
                   <textarea
                     value={renewalForm.notes}
-                    onChange={(e) => setRenewalForm(prev => ({ ...prev, notes: e.target.value }))}
+                    onChange={(e) => setRenewalForm((prev) => ({ ...prev, notes: e.target.value }))}
                     rows={3}
                     className="w-full p-3 border border-[#EFEBE9] rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-transparent resize-none"
                     placeholder="Message pour le locataire..."
@@ -410,10 +439,14 @@ export default function LeaseRenewalsPage() {
             )}
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateModal(false)} className="rounded-xl">
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateModal(false)}
+                className="rounded-xl"
+              >
                 Annuler
               </Button>
-              <Button 
+              <Button
                 className="bg-[#F16522] hover:bg-[#F16522]/90 rounded-xl"
                 onClick={() => createRenewal.mutate()}
                 disabled={createRenewal.isPending}

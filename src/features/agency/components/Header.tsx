@@ -48,8 +48,6 @@ export default function Header({
     <header className="bg-white/95 backdrop-blur-xl border-b border-neutral-200 sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-
-
           {/* Barre de recherche centrale */}
           <div className="hidden md:flex flex-1 max-w-lg mx-8">
             <div className="relative w-full">

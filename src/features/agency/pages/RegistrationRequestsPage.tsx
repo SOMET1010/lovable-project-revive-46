@@ -1,14 +1,30 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { 
-  Button, Input, Card, CardContent, Badge, Textarea,
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter 
+import {
+  Button,
+  Input,
+  Card,
+  CardContent,
+  Badge,
+  Textarea,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from '@/shared/ui';
 import { toast } from 'sonner';
-import { 
-  UserPlus, Search, CheckCircle, XCircle,
-  Mail, Phone, Briefcase, FileText, Eye
+import {
+  UserPlus,
+  Search,
+  CheckCircle,
+  XCircle,
+  Mail,
+  Phone,
+  Briefcase,
+  FileText,
+  Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -80,14 +96,13 @@ export default function RegistrationRequestsPage() {
 
       if (error) throw error;
 
-      const requestsData = (data || []).map(req => ({
+      const requestsData = (data || []).map((req) => ({
         ...req,
         specialties: parseJsonArray(req.specialties),
         certifications: parseJsonArray(req.certifications),
       }));
 
       setRequests(requestsData);
-
     } catch (error) {
       console.error('Error loading requests:', error);
       toast.error('Erreur lors du chargement');
@@ -112,10 +127,9 @@ export default function RegistrationRequestsPage() {
       toast.success('Candidature approuvée ! Agent créé.');
       if (agencyId) loadRequests(agencyId);
       setShowDetailModal(false);
-
     } catch (error) {
       console.error('Error approving:', error);
-      toast.error('Erreur lors de l\'approbation');
+      toast.error("Erreur lors de l'approbation");
     } finally {
       setProcessing(false);
     }
@@ -142,7 +156,6 @@ export default function RegistrationRequestsPage() {
       setShowRejectModal(false);
       setShowDetailModal(false);
       setRejectionReason('');
-
     } catch (error) {
       console.error('Error rejecting:', error);
       toast.error('Erreur lors du rejet');
@@ -151,15 +164,15 @@ export default function RegistrationRequestsPage() {
     }
   };
 
-  const filteredRequests = requests.filter(req => {
-    const matchesSearch = 
+  const filteredRequests = requests.filter((req) => {
+    const matchesSearch =
       req.applicant_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       req.applicant_email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || req.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
-  const pendingCount = requests.filter(r => r.status === 'pending').length;
+  const pendingCount = requests.filter((r) => r.status === 'pending').length;
 
   const getStatusBadge = (status: string | null) => {
     const styles: Record<string, string> = {
@@ -264,7 +277,12 @@ export default function RegistrationRequestsPage() {
                           </span>
                         </div>
                         <p className="text-sm text-[#2C1810]/60 mt-2">
-                          Reçue le {request.created_at ? format(new Date(request.created_at), 'dd MMMM yyyy à HH:mm', { locale: fr }) : '-'}
+                          Reçue le{' '}
+                          {request.created_at
+                            ? format(new Date(request.created_at), 'dd MMMM yyyy à HH:mm', {
+                                locale: fr,
+                              })
+                            : '-'}
                         </p>
                       </div>
                     </div>
@@ -326,7 +344,9 @@ export default function RegistrationRequestsPage() {
                     <UserPlus className="w-8 h-8 text-[#F16522]" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-[#2C1810]">{selectedRequest.applicant_name}</h3>
+                    <h3 className="text-xl font-semibold text-[#2C1810]">
+                      {selectedRequest.applicant_name}
+                    </h3>
                     {getStatusBadge(selectedRequest.status)}
                   </div>
                 </div>
@@ -351,7 +371,9 @@ export default function RegistrationRequestsPage() {
                     <p className="text-sm text-[#2C1810]/60 mb-2">Spécialités</p>
                     <div className="flex flex-wrap gap-2">
                       {selectedRequest.specialties.map((spec, i) => (
-                        <Badge key={i} variant="outline">{spec}</Badge>
+                        <Badge key={i} variant="outline">
+                          {spec}
+                        </Badge>
                       ))}
                     </div>
                   </div>
@@ -360,14 +382,16 @@ export default function RegistrationRequestsPage() {
                 {selectedRequest.motivation && (
                   <div>
                     <p className="text-sm text-[#2C1810]/60 mb-1">Motivation</p>
-                    <p className="text-[#2C1810] bg-[#FAF7F4] p-3 rounded-lg">{selectedRequest.motivation}</p>
+                    <p className="text-[#2C1810] bg-[#FAF7F4] p-3 rounded-lg">
+                      {selectedRequest.motivation}
+                    </p>
                   </div>
                 )}
 
                 {selectedRequest.cv_url && (
-                  <a 
-                    href={selectedRequest.cv_url} 
-                    target="_blank" 
+                  <a
+                    href={selectedRequest.cv_url}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center px-4 py-2 border border-[#EFEBE9] rounded-md text-[#2C1810] hover:bg-[#FAF7F4] transition-colors"
                   >
@@ -415,12 +439,15 @@ export default function RegistrationRequestsPage() {
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-[#2C1810]/70">
-                Veuillez indiquer la raison du rejet. Cette information sera conservée pour référence.
+                Veuillez indiquer la raison du rejet. Cette information sera conservée pour
+                référence.
               </p>
               <Textarea
                 placeholder="Raison du rejet..."
                 value={rejectionReason}
-                onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setRejectionReason(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                  setRejectionReason(e.target.value)
+                }
                 rows={4}
               />
             </div>
@@ -428,8 +455,8 @@ export default function RegistrationRequestsPage() {
               <Button variant="outline" onClick={() => setShowRejectModal(false)}>
                 Annuler
               </Button>
-              <Button 
-                variant="danger" 
+              <Button
+                variant="danger"
                 onClick={handleReject}
                 disabled={processing || !rejectionReason.trim()}
               >

@@ -8,14 +8,7 @@ import { Badge } from '@/shared/ui/badge';
 import { Button } from '@/shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/shared/ui/alert';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 import {
   BarChart,
   Bar,
@@ -79,14 +72,18 @@ export default function SecurityMonitoringPage() {
       const headers = ['Timestamp', 'Type', 'Severity', 'User ID', 'IP Address', 'Details'];
       const csvContent = [
         headers.join(','),
-        ...events.map(event => [
-          event.created_at,
-          event.type,
-          event.severity,
-          event.user_id || '',
-          event.ip_address || '',
-          JSON.stringify(event.details || {})
-        ].map(field => `"${field}"`).join(','))
+        ...events.map((event) =>
+          [
+            event.created_at,
+            event.type,
+            event.severity,
+            event.user_id || '',
+            event.ip_address || '',
+            JSON.stringify(event.details || {}),
+          ]
+            .map((field) => `"${field}"`)
+            .join(',')
+        ),
       ].join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -99,7 +96,7 @@ export default function SecurityMonitoringPage() {
 
       toast.success('Export réussi');
     } catch (error: any) {
-      toast.error('Erreur lors de l\'export');
+      toast.error("Erreur lors de l'export");
     }
   };
 
@@ -126,7 +123,7 @@ export default function SecurityMonitoringPage() {
     { name: 'Medium', value: metrics?.eventsBySeverity?.MEDIUM || 0, color: '#F59E0B' },
     { name: 'High', value: metrics?.eventsBySeverity?.HIGH || 0, color: '#EF4444' },
     { name: 'Critical', value: metrics?.eventsBySeverity?.CRITICAL || 0, color: '#7C3AED' },
-  ].filter(item => item.value > 0);
+  ].filter((item) => item.value > 0);
 
   return (
     <div className="space-y-6">
@@ -161,11 +158,10 @@ export default function SecurityMonitoringPage() {
       {(metrics?.eventsBySeverity?.CRITICAL || 0) > 0 && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4 text-red-600" />
-          <AlertTitle className="text-red-800">
-            Alertes critiques détectées
-          </AlertTitle>
+          <AlertTitle className="text-red-800">Alertes critiques détectées</AlertTitle>
           <AlertDescription className="text-red-700">
-            {metrics.eventsBySeverity.CRITICAL} événement(s) critique(s) nécessitent une attention immédiate.
+            {metrics.eventsBySeverity.CRITICAL} événement(s) critique(s) nécessitent une attention
+            immédiate.
           </AlertDescription>
         </Alert>
       )}
@@ -179,9 +175,7 @@ export default function SecurityMonitoringPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.totalEvents || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Dernières {timeRange}h
-            </p>
+            <p className="text-xs text-muted-foreground">Dernières {timeRange}h</p>
           </CardContent>
         </Card>
 
@@ -194,9 +188,7 @@ export default function SecurityMonitoringPage() {
             <div className="text-2xl font-bold text-red-600">
               {metrics?.eventsBySeverity?.CRITICAL || 0}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Nécessitent une action
-            </p>
+            <p className="text-xs text-muted-foreground">Nécessitent une action</p>
           </CardContent>
         </Card>
 
@@ -207,9 +199,7 @@ export default function SecurityMonitoringPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.blockedIPs?.length || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Actuellement bloquées
-            </p>
+            <p className="text-xs text-muted-foreground">Actuellement bloquées</p>
           </CardContent>
         </Card>
 
@@ -220,9 +210,7 @@ export default function SecurityMonitoringPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{metrics?.topOffenders?.[0]?.count || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Max événements
-            </p>
+            <p className="text-xs text-muted-foreground">Max événements</p>
           </CardContent>
         </Card>
       </div>
@@ -241,9 +229,7 @@ export default function SecurityMonitoringPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Événements par heure</CardTitle>
-                <CardDescription>
-                  Distribution des événements de sécurité
-                </CardDescription>
+                <CardDescription>Distribution des événements de sécurité</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -262,9 +248,7 @@ export default function SecurityMonitoringPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Événements par type</CardTitle>
-                <CardDescription>
-                  Répartition des types d'événements
-                </CardDescription>
+                <CardDescription>Répartition des types d'événements</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -293,9 +277,7 @@ export default function SecurityMonitoringPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Événements par sévérité</CardTitle>
-                <CardDescription>
-                  Niveau de gravité des événements
-                </CardDescription>
+                <CardDescription>Niveau de gravité des événements</CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -314,18 +296,14 @@ export default function SecurityMonitoringPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Détail par type</CardTitle>
-                <CardDescription>
-                  Nombre d'événements par catégorie
-                </CardDescription>
+                <CardDescription>Nombre d'événements par catégorie</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {Object.entries(metrics?.eventsByType || {}).map(([type, count]) => (
                     <div key={type} className="flex items-center justify-between">
                       <span className="text-sm font-medium">{type}</span>
-                      <Badge variant={count > 10 ? "destructive" : "secondary"}>
-                        {count}
-                      </Badge>
+                      <Badge variant={count > 10 ? 'destructive' : 'secondary'}>{count}</Badge>
                     </div>
                   ))}
                 </div>
@@ -368,9 +346,7 @@ export default function SecurityMonitoringPage() {
           <Card>
             <CardHeader>
               <CardTitle>IPs Bloquées</CardTitle>
-              <CardDescription>
-                Adresses IP actuellement bloquées
-              </CardDescription>
+              <CardDescription>Adresses IP actuellement bloquées</CardDescription>
             </CardHeader>
             <CardContent>
               {metrics?.blockedIPs?.length > 0 ? (
@@ -406,9 +382,7 @@ export default function SecurityMonitoringPage() {
           <Card>
             <CardHeader>
               <CardTitle>Top Offenders</CardTitle>
-              <CardDescription>
-                Utilisateurs et IPs avec le plus d'événements
-              </CardDescription>
+              <CardDescription>Utilisateurs et IPs avec le plus d'événements</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -435,11 +409,9 @@ export default function SecurityMonitoringPage() {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="font-mono">
-                        {offender.ip || offender.userId}
-                      </TableCell>
+                      <TableCell className="font-mono">{offender.ip || offender.userId}</TableCell>
                       <TableCell>
-                        <Badge variant={offender.count > 10 ? "destructive" : "secondary"}>
+                        <Badge variant={offender.count > 10 ? 'destructive' : 'secondary'}>
                           {offender.count}
                         </Badge>
                       </TableCell>

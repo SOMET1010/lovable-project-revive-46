@@ -7,8 +7,7 @@ import { Upload, FileText, Loader2, Trash2, CheckCircle2, AlertCircle } from 'lu
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-
-export type DocumentType = 
+export type DocumentType =
   | 'work_certificate'
   | 'pay_slip'
   | 'bank_statement'
@@ -39,7 +38,7 @@ const DOCUMENT_LABELS: Record<DocumentType, string> = {
   work_certificate: 'Attestation de travail',
   pay_slip: 'Fiche de paie',
   bank_statement: 'Relevé bancaire',
-  tax_return: 'Avis d\'imposition',
+  tax_return: "Avis d'imposition",
   employment_contract: 'Contrat de travail',
   business_license: 'Registre commerce',
   student_card: 'Carte étudiant',
@@ -80,16 +79,14 @@ export default function DocumentUpload({
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}/${selectedType}-${Date.now()}.${fileExt}`;
-      
+
       const { error: uploadError } = await supabase.storage
         .from('property-documents')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from('property-documents')
-        .getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('property-documents').getPublicUrl(fileName);
 
       const { data: newDoc, error: dbError } = await supabase
         .from('user_documents')
@@ -118,14 +115,11 @@ export default function DocumentUpload({
 
   const handleDelete = async (docId: string) => {
     try {
-      const { error } = await supabase
-        .from('user_documents')
-        .delete()
-        .eq('id', docId);
+      const { error } = await supabase.from('user_documents').delete().eq('id', docId);
 
       if (error) throw error;
 
-      onDocumentsChange(documents.filter(d => d.id !== docId));
+      onDocumentsChange(documents.filter((d) => d.id !== docId));
       toast.success('Document supprimé');
     } catch (err) {
       console.error('Delete error:', err);
@@ -155,10 +149,12 @@ export default function DocumentUpload({
 
       {/* Upload zone */}
       <label className="block cursor-pointer">
-        <div className={`
+        <div
+          className={`
           border-2 border-dashed rounded-xl p-6 text-center transition-all
           ${uploading ? 'border-[#F16522] bg-[#F16522]/5' : 'border-[#EFEBE9] hover:border-[#F16522] hover:bg-[#FAF7F4]'}
-        `}>
+        `}
+        >
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="w-8 h-8 animate-spin text-[#F16522]" />
@@ -196,9 +192,11 @@ export default function DocumentUpload({
                 className="flex items-center justify-between p-3 bg-white rounded-xl border border-[#EFEBE9]"
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                    doc.verified ? 'bg-green-100' : 'bg-[#FAF7F4]'
-                  }`}>
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      doc.verified ? 'bg-green-100' : 'bg-[#FAF7F4]'
+                    }`}
+                  >
                     {doc.verified ? (
                       <CheckCircle2 className="w-5 h-5 text-green-600" />
                     ) : (
@@ -209,9 +207,7 @@ export default function DocumentUpload({
                     <p className="text-sm font-medium text-[#2C1810]">
                       {DOCUMENT_LABELS[doc.document_type]}
                     </p>
-                    <p className="text-xs text-[#A69B95]">
-                      {doc.document_name || 'Document'}
-                    </p>
+                    <p className="text-xs text-[#A69B95]">{doc.document_name || 'Document'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -240,7 +236,8 @@ export default function DocumentUpload({
       <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl text-blue-700 text-xs">
         <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
         <p>
-          Les justificatifs permettent d'augmenter votre score de confiance et vos chances d'obtenir un logement.
+          Les justificatifs permettent d'augmenter votre score de confiance et vos chances d'obtenir
+          un logement.
         </p>
       </div>
     </div>

@@ -1,17 +1,25 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { Button, Textarea, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui';
+import {
+  Button,
+  Textarea,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/shared/ui';
 import { toast } from 'sonner';
-import { 
-  Star, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Star,
+  CheckCircle,
+  XCircle,
   Clock,
   AlertTriangle,
   User,
   Home,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -63,28 +71,26 @@ export default function ReviewModerationPage() {
       setReviews(data || []);
 
       // Load stats
-      const { data: allReviews } = await supabase
-        .from('reviews')
-        .select('moderation_status');
+      const { data: allReviews } = await supabase.from('reviews').select('moderation_status');
 
       if (allReviews) {
         setStats({
-          pending: allReviews.filter(r => r.moderation_status === 'pending').length,
-          approved: allReviews.filter(r => r.moderation_status === 'approved').length,
-          rejected: allReviews.filter(r => r.moderation_status === 'rejected').length
+          pending: allReviews.filter((r) => r.moderation_status === 'pending').length,
+          approved: allReviews.filter((r) => r.moderation_status === 'approved').length,
+          rejected: allReviews.filter((r) => r.moderation_status === 'rejected').length,
         });
       }
 
       // Load profiles
       const userIds = new Set<string>();
-      data?.forEach(r => {
+      data?.forEach((r) => {
         userIds.add(r.reviewer_id);
         if (r.reviewee_id) userIds.add(r.reviewee_id);
       });
 
       if (userIds.size > 0) {
         const { data: profilesData } = await supabase.rpc('get_public_profiles_safe', {
-          profile_user_ids: Array.from(userIds)
+          profile_user_ids: Array.from(userIds),
         });
 
         if (profilesData) {
@@ -109,7 +115,7 @@ export default function ReviewModerationPage() {
         .update({
           moderation_status: 'approved',
           moderated_by: user?.id,
-          moderated_at: new Date().toISOString()
+          moderated_at: new Date().toISOString(),
         })
         .eq('id', review.id);
 
@@ -119,7 +125,7 @@ export default function ReviewModerationPage() {
       loadReviews();
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error('Erreur lors de l\'approbation');
+      toast.error("Erreur lors de l'approbation");
     }
   };
 
@@ -133,7 +139,7 @@ export default function ReviewModerationPage() {
           moderation_status: 'rejected',
           moderation_notes: moderationNotes,
           moderated_by: user?.id,
-          moderated_at: new Date().toISOString()
+          moderated_at: new Date().toISOString(),
         })
         .eq('id', selectedReview.id);
 
@@ -224,10 +230,7 @@ export default function ReviewModerationPage() {
             const reviewee = review.reviewee_id ? profiles[review.reviewee_id] : null;
 
             return (
-              <div
-                key={review.id}
-                className="bg-white rounded-xl border border-[#EFEBE9] p-6"
-              >
+              <div key={review.id} className="bg-white rounded-xl border border-[#EFEBE9] p-6">
                 <div className="flex items-start justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-[#EFEBE9] flex items-center justify-center">
@@ -238,7 +241,10 @@ export default function ReviewModerationPage() {
                         {reviewer?.full_name || 'Utilisateur'}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {review.created_at && format(new Date(review.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                        {review.created_at &&
+                          format(new Date(review.created_at), 'dd MMM yyyy à HH:mm', {
+                            locale: fr,
+                          })}
                       </p>
                     </div>
                   </div>
@@ -304,7 +310,8 @@ export default function ReviewModerationPage() {
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-amber-800">
-                  L'auteur de l'avis sera notifié du rejet. Précisez la raison pour aider à améliorer les futurs avis.
+                  L'auteur de l'avis sera notifié du rejet. Précisez la raison pour aider à
+                  améliorer les futurs avis.
                 </p>
               </div>
             </div>

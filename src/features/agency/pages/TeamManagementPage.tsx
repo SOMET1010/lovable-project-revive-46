@@ -2,10 +2,24 @@ import { useState, useEffect, ChangeEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { 
-  Button, Input, Card, CardContent, Badge, Label, Textarea,
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+import {
+  Button,
+  Input,
+  Card,
+  CardContent,
+  Badge,
+  Label,
+  Textarea,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/shared/ui';
 import {
   DropdownMenu,
@@ -14,10 +28,18 @@ import {
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { 
-  Users, Plus, Search, UserPlus, MoreVertical, 
-  TrendingUp, Phone, Mail, Calendar, Target,
-  Award
+import {
+  Users,
+  Plus,
+  Search,
+  UserPlus,
+  MoreVertical,
+  TrendingUp,
+  Phone,
+  Mail,
+  Calendar,
+  Target,
+  Award,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -99,16 +121,18 @@ export default function TeamManagementPage() {
     try {
       const { data, error } = await supabase
         .from('agency_agents')
-        .select(`
+        .select(
+          `
           *,
           profiles:user_id(full_name, avatar_url)
-        `)
+        `
+        )
         .eq('agency_id', agencyIdParam)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      const agentsData = (data || []).map(agent => ({
+      const agentsData = (data || []).map((agent) => ({
         ...agent,
         specialties: parseJsonArray(agent.specialties),
       }));
@@ -118,11 +142,10 @@ export default function TeamManagementPage() {
       // Calculate stats
       setStats({
         total: agentsData.length,
-        active: agentsData.filter(a => a.status === 'active').length,
-        pending: agentsData.filter(a => a.status === 'pending').length,
+        active: agentsData.filter((a) => a.status === 'active').length,
+        pending: agentsData.filter((a) => a.status === 'pending').length,
         totalRevenue: 0,
       });
-
     } catch (error) {
       console.error('Error loading agents:', error);
       toast.error('Erreur lors du chargement des agents');
@@ -135,29 +158,33 @@ export default function TeamManagementPage() {
     if (!agencyId) return;
 
     try {
-      const { error } = await supabase
-        .from('agency_agents')
-        .insert({
-          agency_id: agencyId,
-          email: newAgent.email,
-          phone: newAgent.phone,
-          role: newAgent.role,
-          commission_split: newAgent.commission_split,
-          target_monthly: newAgent.target_monthly,
-          bio: newAgent.bio,
-          status: 'pending',
-        });
+      const { error } = await supabase.from('agency_agents').insert({
+        agency_id: agencyId,
+        email: newAgent.email,
+        phone: newAgent.phone,
+        role: newAgent.role,
+        commission_split: newAgent.commission_split,
+        target_monthly: newAgent.target_monthly,
+        bio: newAgent.bio,
+        status: 'pending',
+      });
 
       if (error) throw error;
 
       toast.success('Agent ajouté avec succès');
       setShowAddModal(false);
-      setNewAgent({ email: '', phone: '', role: 'agent', commission_split: 50, target_monthly: 0, bio: '' });
+      setNewAgent({
+        email: '',
+        phone: '',
+        role: 'agent',
+        commission_split: 50,
+        target_monthly: 0,
+        bio: '',
+      });
       loadAgents(agencyId);
-
     } catch (error) {
       console.error('Error adding agent:', error);
-      toast.error('Erreur lors de l\'ajout de l\'agent');
+      toast.error("Erreur lors de l'ajout de l'agent");
     }
   };
 
@@ -172,17 +199,16 @@ export default function TeamManagementPage() {
 
       toast.success('Statut mis à jour');
       if (agencyId) loadAgents(agencyId);
-
     } catch (error) {
       console.error('Error updating status:', error);
       toast.error('Erreur lors de la mise à jour');
     }
   };
 
-  const filteredAgents = agents.filter(agent => {
-    const matchesSearch = 
-      (agent.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (agent.email?.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredAgents = agents.filter((agent) => {
+    const matchesSearch =
+      agent.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      agent.email?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || agent.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -216,7 +242,11 @@ export default function TeamManagementPage() {
       agent: 'Agent',
     };
     const r = role || 'agent';
-    return <Badge variant="outline" className={styles[r] || styles['agent']}>{labels[r] || r}</Badge>;
+    return (
+      <Badge variant="outline" className={styles[r] || styles['agent']}>
+        {labels[r] || r}
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -328,7 +358,9 @@ export default function TeamManagementPage() {
             <CardContent className="p-12 text-center">
               <Users className="w-12 h-12 mx-auto text-[#2C1810]/20 mb-4" />
               <h3 className="text-lg font-semibold text-[#2C1810] mb-2">Aucun agent</h3>
-              <p className="text-[#2C1810]/60 mb-4">Commencez par ajouter des agents à votre équipe</p>
+              <p className="text-[#2C1810]/60 mb-4">
+                Commencez par ajouter des agents à votre équipe
+              </p>
               <Button onClick={() => setShowAddModal(true)} variant="outline">
                 <Plus className="w-4 h-4 mr-2" />
                 Ajouter un agent
@@ -338,13 +370,20 @@ export default function TeamManagementPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAgents.map((agent) => (
-              <Card key={agent.id} className="bg-white border-[#EFEBE9] hover:shadow-lg transition-shadow">
+              <Card
+                key={agent.id}
+                className="bg-white border-[#EFEBE9] hover:shadow-lg transition-shadow"
+              >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 rounded-full bg-[#F16522]/10 flex items-center justify-center">
                         {agent.profiles?.avatar_url ? (
-                          <img src={agent.profiles.avatar_url} alt="" className="w-12 h-12 rounded-full object-cover" />
+                          <img
+                            src={agent.profiles.avatar_url}
+                            alt=""
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
                         ) : (
                           <Users className="w-6 h-6 text-[#F16522]" />
                         )}
@@ -366,7 +405,9 @@ export default function TeamManagementPage() {
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => navigate(`/dashboard/agence/agent/${agent.id}`)}>
+                        <DropdownMenuItem
+                          onClick={() => navigate(`/dashboard/agence/agent/${agent.id}`)}
+                        >
                           Voir le profil
                         </DropdownMenuItem>
                         {agent.status !== 'active' && (
@@ -375,7 +416,9 @@ export default function TeamManagementPage() {
                           </DropdownMenuItem>
                         )}
                         {agent.status === 'active' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(agent.id, 'suspended')}>
+                          <DropdownMenuItem
+                            onClick={() => handleUpdateStatus(agent.id, 'suspended')}
+                          >
                             Suspendre
                           </DropdownMenuItem>
                         )}
@@ -398,7 +441,9 @@ export default function TeamManagementPage() {
                     )}
                     <div className="flex items-center gap-2 text-[#2C1810]/70">
                       <Calendar className="w-4 h-4" />
-                      <span>Depuis {format(new Date(agent.hire_date), 'MMMM yyyy', { locale: fr })}</span>
+                      <span>
+                        Depuis {format(new Date(agent.hire_date), 'MMMM yyyy', { locale: fr })}
+                      </span>
                     </div>
                   </div>
 
@@ -432,7 +477,9 @@ export default function TeamManagementPage() {
                 <Input
                   type="email"
                   value={newAgent.email}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAgent({ ...newAgent, email: e.target.value })}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setNewAgent({ ...newAgent, email: e.target.value })
+                  }
                   placeholder="agent@example.com"
                 />
               </div>
@@ -440,13 +487,18 @@ export default function TeamManagementPage() {
                 <Label>Téléphone</Label>
                 <Input
                   value={newAgent.phone}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAgent({ ...newAgent, phone: e.target.value })}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setNewAgent({ ...newAgent, phone: e.target.value })
+                  }
                   placeholder="+225 07 XX XX XX XX"
                 />
               </div>
               <div>
                 <Label>Rôle</Label>
-                <Select value={newAgent.role} onValueChange={(v) => setNewAgent({ ...newAgent, role: v })}>
+                <Select
+                  value={newAgent.role}
+                  onValueChange={(v) => setNewAgent({ ...newAgent, role: v })}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -463,7 +515,9 @@ export default function TeamManagementPage() {
                   <Input
                     type="number"
                     value={newAgent.commission_split}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAgent({ ...newAgent, commission_split: Number(e.target.value) })}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      setNewAgent({ ...newAgent, commission_split: Number(e.target.value) })
+                    }
                   />
                 </div>
                 <div>
@@ -471,7 +525,9 @@ export default function TeamManagementPage() {
                   <Input
                     type="number"
                     value={newAgent.target_monthly}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setNewAgent({ ...newAgent, target_monthly: Number(e.target.value) })}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                      setNewAgent({ ...newAgent, target_monthly: Number(e.target.value) })
+                    }
                   />
                 </div>
               </div>
@@ -479,14 +535,18 @@ export default function TeamManagementPage() {
                 <Label>Bio (optionnel)</Label>
                 <Textarea
                   value={newAgent.bio}
-                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNewAgent({ ...newAgent, bio: e.target.value })}
+                  onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+                    setNewAgent({ ...newAgent, bio: e.target.value })
+                  }
                   placeholder="Présentation de l'agent..."
                   rows={3}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAddModal(false)}>Annuler</Button>
+              <Button variant="outline" onClick={() => setShowAddModal(false)}>
+                Annuler
+              </Button>
               <Button onClick={handleAddAgent} className="bg-[#F16522] hover:bg-[#D14E12]">
                 Ajouter
               </Button>

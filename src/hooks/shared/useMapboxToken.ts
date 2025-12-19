@@ -10,10 +10,14 @@ export function useMapboxToken() {
     queryKey: ['mapbox-token'],
     enabled: !envToken, // skip network call if we already have the token locally
     queryFn: async () => {
-      const { data, error } = await callEdgeFunction('get-mapbox-token', {}, {
-        maxRetries: 2,
-        timeout: 15000,
-      });
+      const { data, error } = await callEdgeFunction(
+        'get-mapbox-token',
+        {},
+        {
+          maxRetries: 2,
+          timeout: 15000,
+        }
+      );
 
       if (error) {
         console.error('Failed to fetch Mapbox token:', error);

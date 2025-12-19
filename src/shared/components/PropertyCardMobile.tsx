@@ -63,14 +63,12 @@ export default function PropertyCardMobile({
         <button
           onClick={handleFavorite}
           className={`absolute top-3 right-3 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-200 ${
-            liked 
-              ? 'bg-[#F16522] text-white' 
-              : 'bg-white/80 text-[#6B5A4E] hover:bg-white'
+            liked ? 'bg-[#F16522] text-white' : 'bg-white/80 text-[#6B5A4E] hover:bg-white'
           }`}
           aria-label={liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
         >
-          <Heart 
-            className={`h-5 w-5 transition-transform duration-200 ${liked ? 'fill-current scale-110' : ''}`} 
+          <Heart
+            className={`h-5 w-5 transition-transform duration-200 ${liked ? 'fill-current scale-110' : ''}`}
           />
         </button>
 

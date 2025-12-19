@@ -11,7 +11,10 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link } from 'react-router-dom';
-import { ApplicationWithDetails, getOwnerApplications } from '@/services/applications/applicationService';
+import {
+  ApplicationWithDetails,
+  getOwnerApplications,
+} from '@/services/applications/applicationService';
 
 export default function CandidaturesPage() {
   const { user } = useAuth();

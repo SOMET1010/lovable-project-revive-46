@@ -37,12 +37,12 @@ export interface FeatureFlags {
  * Configuration par défaut des features
  *
  * IMPORTANT :
-  * - COMMERCIAL_PROPERTIES est désactivé (Mon Toit = résidentiel uniquement)
+ * - COMMERCIAL_PROPERTIES est désactivé (Mon Toit = résidentiel uniquement)
  * - AI_SEARCH est désactivé (non implémenté)
  */
 export const FEATURES: FeatureFlags = {
   // Vérifications d'identité
-    ONECI_VERIFICATION: true, // ✅ Activé - Vérification ONECI/SNEDAI
+  ONECI_VERIFICATION: true, // ✅ Activé - Vérification ONECI/SNEDAI
   FACE_VERIFICATION: true, // ✅ Activé - Biométrie faciale
 
   // Fonctionnalités de recherche

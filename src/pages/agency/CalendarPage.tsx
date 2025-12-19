@@ -189,12 +189,15 @@ export default function AgencyCalendarPage() {
                     minute: '2-digit',
                   })
                 : 'Date à confirmer';
-              const statusClass = STATUS_COLORS[visit.status || 'en_attente'] || STATUS_COLORS.en_attente;
+              const statusClass =
+                STATUS_COLORS[visit.status || 'en_attente'] || STATUS_COLORS.en_attente;
               return (
                 <div key={visit.id} className="p-6 hover:bg-[#FAF7F4] transition-colors">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${statusClass}`}>
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center ${statusClass}`}
+                      >
                         <CalendarIcon className="h-6 w-6" />
                       </div>
                       <div>
@@ -260,7 +263,9 @@ function StatCard({
           : 'bg-[#FFF5F0] text-[#F16522]';
   return (
     <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium">
-      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${classes}`}>
+      <div
+        className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${classes}`}
+      >
         {label}
       </div>
       <p className="text-3xl font-bold text-[#2C1810] mt-2">{value}</p>

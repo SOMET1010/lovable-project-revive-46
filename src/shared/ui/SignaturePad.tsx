@@ -30,7 +30,7 @@ export function SignaturePad({
   readOnly = false,
   label,
   required = false,
-  className = ''
+  className = '',
 }: SignaturePadProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -91,10 +91,10 @@ export function SignaturePad({
   // Redraw all strokes when canvas size changes
   useEffect(() => {
     if (strokes.length === 0) return;
-    
+
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -102,105 +102,114 @@ export function SignaturePad({
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
 
-    strokes.forEach(stroke => {
+    strokes.forEach((stroke) => {
       drawStroke(ctx, stroke);
     });
   }, [canvasSize, strokes, backgroundColor]);
 
-  const drawStroke = useCallback((ctx: CanvasRenderingContext2D, points: Point[]) => {
-    if (points.length < 2) return;
+  const drawStroke = useCallback(
+    (ctx: CanvasRenderingContext2D, points: Point[]) => {
+      if (points.length < 2) return;
 
-    ctx.strokeStyle = penColor;
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+      ctx.strokeStyle = penColor;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
-    ctx.beginPath();
-    ctx.moveTo(points[0]?.x ?? 0, points[0]?.y ?? 0);
+      ctx.beginPath();
+      ctx.moveTo(points[0]?.x ?? 0, points[0]?.y ?? 0);
 
-    // Use quadratic curves for smoother lines
-    for (let i = 1; i < points.length - 1; i++) {
-      const curr = points[i];
-      const next = points[i + 1];
-      if (!curr || !next) continue;
-      
-      const midX = (curr.x + next.x) / 2;
-      const midY = (curr.y + next.y) / 2;
-      ctx.quadraticCurveTo(curr.x, curr.y, midX, midY);
-    }
+      // Use quadratic curves for smoother lines
+      for (let i = 1; i < points.length - 1; i++) {
+        const curr = points[i];
+        const next = points[i + 1];
+        if (!curr || !next) continue;
 
-    const lastPt = points[points.length - 1];
-    if (lastPt) {
-      ctx.lineTo(lastPt.x, lastPt.y);
-    }
-    ctx.stroke();
-  }, [penColor]);
+        const midX = (curr.x + next.x) / 2;
+        const midY = (curr.y + next.y) / 2;
+        ctx.quadraticCurveTo(curr.x, curr.y, midX, midY);
+      }
+
+      const lastPt = points[points.length - 1];
+      if (lastPt) {
+        ctx.lineTo(lastPt.x, lastPt.y);
+      }
+      ctx.stroke();
+    },
+    [penColor]
+  );
 
   const getPointFromEvent = useCallback((e: React.TouchEvent | React.MouseEvent): Point => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
-    
+
     if ('touches' in e && e.touches[0]) {
       return {
         x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top
+        y: e.touches[0].clientY - rect.top,
       };
     }
-    
+
     if ('clientX' in e) {
       return {
         x: e.clientX - rect.left,
-        y: e.clientY - rect.top
+        y: e.clientY - rect.top,
       };
     }
 
     return { x: 0, y: 0 };
   }, []);
 
-  const startDrawing = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (readOnly) return;
-    
-    e.preventDefault();
-    const point = getPointFromEvent(e);
-    setIsDrawing(true);
-    setLastPoint(point);
-    setCurrentStroke([point]);
-    setIsEmpty(false);
-  }, [readOnly, getPointFromEvent]);
+  const startDrawing = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      if (readOnly) return;
 
-  const draw = useCallback((e: React.TouchEvent | React.MouseEvent) => {
-    if (!isDrawing || readOnly) return;
-    
-    e.preventDefault();
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+      e.preventDefault();
+      const point = getPointFromEvent(e);
+      setIsDrawing(true);
+      setLastPoint(point);
+      setCurrentStroke([point]);
+      setIsEmpty(false);
+    },
+    [readOnly, getPointFromEvent]
+  );
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx || !lastPoint) return;
+  const draw = useCallback(
+    (e: React.TouchEvent | React.MouseEvent) => {
+      if (!isDrawing || readOnly) return;
 
-    const point = getPointFromEvent(e);
+      e.preventDefault();
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    ctx.strokeStyle = penColor;
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
+      const ctx = canvas.getContext('2d');
+      if (!ctx || !lastPoint) return;
 
-    ctx.beginPath();
-    ctx.moveTo(lastPoint.x, lastPoint.y);
-    ctx.lineTo(point.x, point.y);
-    ctx.stroke();
+      const point = getPointFromEvent(e);
 
-    setLastPoint(point);
-    setCurrentStroke(prev => [...prev, point]);
-  }, [isDrawing, readOnly, lastPoint, penColor, getPointFromEvent]);
+      ctx.strokeStyle = penColor;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(lastPoint.x, lastPoint.y);
+      ctx.lineTo(point.x, point.y);
+      ctx.stroke();
+
+      setLastPoint(point);
+      setCurrentStroke((prev) => [...prev, point]);
+    },
+    [isDrawing, readOnly, lastPoint, penColor, getPointFromEvent]
+  );
 
   const stopDrawing = useCallback(() => {
     if (isDrawing && currentStroke.length > 0) {
-      setStrokes(prev => [...prev, currentStroke]);
+      setStrokes((prev) => [...prev, currentStroke]);
       setCurrentStroke([]);
-      
+
       // Notify parent of signature change
       const canvas = canvasRef.current;
       if (canvas && onSignatureChange) {
@@ -220,7 +229,7 @@ export function SignaturePad({
 
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
-    
+
     setStrokes([]);
     setCurrentStroke([]);
     setIsEmpty(true);
@@ -243,7 +252,7 @@ export function SignaturePad({
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, canvasSize.width, canvasSize.height);
 
-    newStrokes.forEach(stroke => {
+    newStrokes.forEach((stroke) => {
       drawStroke(ctx, stroke);
     });
 
@@ -263,17 +272,17 @@ export function SignaturePad({
           {required && <span className="text-destructive ml-1">*</span>}
         </label>
       )}
-      
+
       <div className="relative">
         <canvas
           ref={canvasRef}
           className={`border rounded-lg touch-none ${
             readOnly ? 'cursor-default' : 'cursor-crosshair'
           } ${isEmpty && required ? 'border-destructive/50' : 'border-border'}`}
-          style={{ 
+          style={{
             backgroundColor,
             width: '100%',
-            maxWidth: canvasSize.width
+            maxWidth: canvasSize.width,
           }}
           onMouseDown={startDrawing}
           onMouseMove={draw}
@@ -284,12 +293,10 @@ export function SignaturePad({
           onTouchEnd={stopDrawing}
           aria-label={label || 'Zone de signature'}
         />
-        
+
         {isEmpty && !readOnly && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-muted-foreground/50 text-sm">
-              Signez ici
-            </p>
+            <p className="text-muted-foreground/50 text-sm">Signez ici</p>
           </div>
         )}
       </div>

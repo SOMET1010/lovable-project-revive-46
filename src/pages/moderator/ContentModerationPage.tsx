@@ -67,9 +67,8 @@ const ContentModerationPage: React.FC = () => {
   ];
 
   const filteredContent = mockContent.filter((content) => {
-    const matchesSearch = content.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase()) ||
+    const matchesSearch =
+      content.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       content.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatus === 'all' || content.status === selectedStatus;
     const matchesType = selectedType === 'all' || content.type === selectedType;
@@ -107,13 +106,21 @@ const ContentModerationPage: React.FC = () => {
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'property':
-        return <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Propriété</span>;
+        return (
+          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Propriété</span>
+        );
       case 'review':
-        return <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Avis</span>;
+        return (
+          <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Avis</span>
+        );
       case 'profile':
-        return <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Profil</span>;
+        return (
+          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Profil</span>
+        );
       case 'message':
-        return <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">Message</span>;
+        return (
+          <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">Message</span>
+        );
       default:
         return null;
     }
@@ -124,12 +131,8 @@ const ContentModerationPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Modération de contenu
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Examinez et modérez le contenu signalé
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Modération de contenu</h1>
+          <p className="mt-2 text-gray-600">Examinez et modérez le contenu signalé</p>
         </div>
 
         {/* Filters */}
@@ -210,12 +213,8 @@ const ContentModerationPage: React.FC = () => {
                           </span>
                         )}
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-1">
-                        {content.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                        {content.content}
-                      </p>
+                      <h3 className="text-lg font-medium text-gray-900 mb-1">{content.title}</h3>
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{content.content}</p>
                       <div className="flex items-center space-x-4 text-sm text-gray-500">
                         <span>Par: {content.author}</span>
                         <span>•</span>

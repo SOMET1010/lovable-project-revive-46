@@ -334,7 +334,9 @@ export default function ContratsPage() {
                         <FileText className="h-6 w-6 text-[#F16522]" />
                       </div>
                       <div>
-                        <h3 className="font-bold text-[#2C1810] text-lg">{contract.contract_number}</h3>
+                        <h3 className="font-bold text-[#2C1810] text-lg">
+                          {contract.contract_number}
+                        </h3>
                         <p className="text-[#6B5A4E]">
                           {contract.property_title} • {contract.property_city}
                         </p>
@@ -342,7 +344,11 @@ export default function ContratsPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <InfoRow icon={<User className="h-4 w-4 text-[#6B5A4E]" />} label="Locataire" value={contract.tenant_name} />
+                      <InfoRow
+                        icon={<User className="h-4 w-4 text-[#6B5A4E]" />}
+                        label="Locataire"
+                        value={contract.tenant_name}
+                      />
                       <InfoRow
                         icon={<Calendar className="h-4 w-4 text-[#6B5A4E]" />}
                         label="Période"
@@ -432,15 +438,7 @@ function StatCard({
   );
 }
 
-function InfoRow({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function InfoRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center gap-2">
       {icon}

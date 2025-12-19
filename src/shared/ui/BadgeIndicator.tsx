@@ -27,10 +27,10 @@ const colorClasses: Record<BadgeColor, string> = {
   primary: 'bg-primary-500',
 };
 
-export function BadgeIndicator({ 
-  count, 
-  color = 'primary', 
-  pulse = false, 
+export function BadgeIndicator({
+  count,
+  color = 'primary',
+  pulse = false,
   max = 99,
   size = 'md',
   className,
@@ -40,7 +40,7 @@ export function BadgeIndicator({
   const displayCount = count > max ? `${max}+` : count.toString();
 
   return (
-    <span 
+    <span
       className={cn(
         'text-white font-bold rounded-full min-w-[20px] text-center inline-flex items-center justify-center',
         colorClasses[color],

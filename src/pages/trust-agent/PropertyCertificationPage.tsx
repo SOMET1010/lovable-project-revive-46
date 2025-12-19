@@ -52,12 +52,15 @@ export default function PropertyCertificationPage() {
   const [certifying, setCertifying] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [hasAnsutColumns, setHasAnsutColumns] = useState(
-    false  // Forcer à false pour redétecter à chaque chargement
+    false // Forcer à false pour redétecter à chaque chargement
   );
 
   // Debug: Afficher l'état initial
   console.log('Initial hasAnsutColumns:', hasAnsutColumns);
-  console.log('localStorage has_ansut_columns:', typeof window !== 'undefined' ? localStorage.getItem('has_ansut_columns') : 'N/A');
+  console.log(
+    'localStorage has_ansut_columns:',
+    typeof window !== 'undefined' ? localStorage.getItem('has_ansut_columns') : 'N/A'
+  );
 
   const [checklist, setChecklist] = useState<ChecklistItem[]>([
     { id: 'electricity', label: 'Installation électrique conforme', icon: Zap, checked: false },
@@ -196,7 +199,7 @@ export default function PropertyCertificationPage() {
     }
     if (!allChecksPassed) {
       console.log('❌ Not all checks passed');
-      const unchecked = checklist.filter(c => !c.checked);
+      const unchecked = checklist.filter((c) => !c.checked);
       console.log('Unchecked items:', unchecked);
       toast.error('Cochez tous les points de conformité avant de certifier.');
       return;
@@ -515,9 +518,7 @@ export default function PropertyCertificationPage() {
                     ) : !allChecksPassed ? (
                       `${checklist.filter((c) => !c.checked).length} vérification(s) manquante(s)`
                     ) : (
-                      <>
-                        Certifier cette propriété
-                      </>
+                      <>Certifier cette propriété</>
                     )}
                   </Button>
                 </CardContent>

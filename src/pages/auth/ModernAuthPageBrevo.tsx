@@ -113,7 +113,12 @@ export default function ModernAuthPageBrevo() {
   };
 
   // Gestion du téléphone
-  const handlePhoneChange = (display: string, fullNumber: string, dialCode: string, isValid: boolean) => {
+  const handlePhoneChange = (
+    display: string,
+    fullNumber: string,
+    dialCode: string,
+    isValid: boolean
+  ) => {
     setPhoneDisplay(display);
     setPhoneNumber(fullNumber);
     setRecipient(fullNumber);
@@ -242,11 +247,7 @@ export default function ModernAuthPageBrevo() {
           {/* Titre */}
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-extrabold text-[#2C1810]">
-              {needsName
-                ? 'Bienvenue !'
-                : otpSent
-                  ? 'Vérification'
-                  : 'Bienvenue chez vous'}
+              {needsName ? 'Bienvenue !' : otpSent ? 'Vérification' : 'Bienvenue chez vous'}
             </h1>
             <p className="text-[#6B5A4E]">
               {needsName
@@ -377,8 +378,8 @@ export default function ModernAuthPageBrevo() {
 
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl">
                     <p className="text-sm text-blue-700">
-                      📧 Un code de vérification sera envoyé à votre email.
-                      Vérifiez vos spams si vous ne le recevez pas.
+                      📧 Un code de vérification sera envoyé à votre email. Vérifiez vos spams si
+                      vous ne le recevez pas.
                     </p>
                   </div>
                 </>
@@ -411,12 +412,7 @@ export default function ModernAuthPageBrevo() {
                 <ArrowLeft className="h-4 w-4" /> Modifier mes informations
               </button>
 
-              <OTPInput
-                value={otpCode}
-                onChange={setOtpCode}
-                length={6}
-                autoFocus
-              />
+              <OTPInput value={otpCode} onChange={setOtpCode} length={6} autoFocus />
 
               <button
                 onClick={handleVerifyOTP}

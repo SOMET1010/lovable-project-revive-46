@@ -453,7 +453,9 @@ export default function MandateDetailPage() {
                     </div>
                     <div>
                       <p className="font-medium text-neutral-900">Propriétaire</p>
-                      <p className="text-sm text-neutral-500">ID: {mandate.owner_id.slice(0, 8)}...</p>
+                      <p className="text-sm text-neutral-500">
+                        ID: {mandate.owner_id.slice(0, 8)}...
+                      </p>
                     </div>
                   </div>
                 )}

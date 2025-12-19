@@ -104,7 +104,7 @@ export default function ProfilePage() {
         user_type: data.user_type,
         is_verified: data.is_verified,
         oneci_verified: data.oneci_verified,
-                trust_score: data.trust_score,
+        trust_score: data.trust_score,
       };
 
       setProfile(profileData);
@@ -128,7 +128,10 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       // Mettre à jour les informations du profil
-      const { error: updateError } = await supabase.from('profiles').update(formData).eq('id', user.id);
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update(formData)
+        .eq('id', user.id);
       if (updateError) throw updateError;
 
       // Calculer et mettre à jour le score de confiance

@@ -1,16 +1,24 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { 
-  Button, Input, Card, CardContent,
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+import {
+  Button,
+  Input,
+  Card,
+  CardContent,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/shared/ui';
 import { toast } from 'sonner';
-import { 
-  Building2, Search, Plus, UserPlus, X, Home, 
-  MapPin, Coins, User
-} from 'lucide-react';
+import { Building2, Search, Plus, UserPlus, X, Home, MapPin, Coins, User } from 'lucide-react';
 
 interface Assignment {
   id: string;
@@ -92,11 +100,13 @@ export default function PropertyAssignmentsPage() {
   const loadAssignments = async (agencyIdParam: string) => {
     const { data, error } = await supabase
       .from('property_assignments')
-      .select(`
+      .select(
+        `
         *,
         properties:property_id(id, title, city, neighborhood, monthly_rent, main_image),
         agent:agent_id(id, email, profiles:user_id(full_name, avatar_url))
-      `)
+      `
+      )
       .eq('agency_id', agencyIdParam)
       .eq('status', 'active')
       .order('created_at', { ascending: false });
@@ -106,7 +116,7 @@ export default function PropertyAssignmentsPage() {
       return;
     }
 
-    setAssignments(data as Assignment[] || []);
+    setAssignments((data as Assignment[]) || []);
   };
 
   const loadAgents = async (agencyIdParam: string) => {
@@ -116,7 +126,7 @@ export default function PropertyAssignmentsPage() {
       .eq('agency_id', agencyIdParam)
       .eq('status', 'active');
 
-    setAgents(data as Agent[] || []);
+    setAgents((data as Agent[]) || []);
   };
 
   const loadUnassignedProperties = async (agencyIdParam: string) => {
@@ -127,7 +137,8 @@ export default function PropertyAssignmentsPage() {
       .eq('agency_id', agencyIdParam)
       .eq('status', 'active');
 
-    const propertyIds = mandates?.map(m => m.property_id).filter((id): id is string => id !== null) || [];
+    const propertyIds =
+      mandates?.map((m) => m.property_id).filter((id): id is string => id !== null) || [];
 
     if (propertyIds.length === 0) {
       setUnassignedProperties([]);
@@ -140,8 +151,8 @@ export default function PropertyAssignmentsPage() {
       .eq('agency_id', agencyIdParam)
       .eq('status', 'active');
 
-    const assignedIds = assigned?.map(a => a.property_id) || [];
-    const unassignedIds = propertyIds.filter(id => !assignedIds.includes(id));
+    const assignedIds = assigned?.map((a) => a.property_id) || [];
+    const unassignedIds = propertyIds.filter((id) => !assignedIds.includes(id));
 
     if (unassignedIds.length === 0) {
       setUnassignedProperties([]);
@@ -163,16 +174,14 @@ export default function PropertyAssignmentsPage() {
     }
 
     try {
-      const { error } = await supabase
-        .from('property_assignments')
-        .insert({
-          agency_id: agencyId,
-          property_id: selectedProperty,
-          agent_id: selectedAgent,
-          assigned_by: user?.id,
-          assignment_type: 'exclusive',
-          status: 'active',
-        });
+      const { error } = await supabase.from('property_assignments').insert({
+        agency_id: agencyId,
+        property_id: selectedProperty,
+        agent_id: selectedAgent,
+        assigned_by: user?.id,
+        assignment_type: 'exclusive',
+        status: 'active',
+      });
 
       if (error) throw error;
 
@@ -180,15 +189,11 @@ export default function PropertyAssignmentsPage() {
       setShowAssignModal(false);
       setSelectedProperty('');
       setSelectedAgent('');
-      
-      await Promise.all([
-        loadAssignments(agencyId),
-        loadUnassignedProperties(agencyId),
-      ]);
 
+      await Promise.all([loadAssignments(agencyId), loadUnassignedProperties(agencyId)]);
     } catch (error) {
       console.error('Error assigning:', error);
-      toast.error('Erreur lors de l\'assignation');
+      toast.error("Erreur lors de l'assignation");
     }
   };
 
@@ -204,21 +209,18 @@ export default function PropertyAssignmentsPage() {
       if (error) throw error;
 
       toast.success('Assignation retirée');
-      await Promise.all([
-        loadAssignments(agencyId),
-        loadUnassignedProperties(agencyId),
-      ]);
-
+      await Promise.all([loadAssignments(agencyId), loadUnassignedProperties(agencyId)]);
     } catch (error) {
       console.error('Error removing:', error);
       toast.error('Erreur');
     }
   };
 
-  const filteredAssignments = assignments.filter(a => 
-    a.properties?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.properties?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.agent?.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAssignments = assignments.filter(
+    (a) =>
+      a.properties?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.properties?.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.agent?.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {
@@ -238,8 +240,8 @@ export default function PropertyAssignmentsPage() {
             <h1 className="text-3xl font-bold text-[#2C1810]">Attributions des propriétés</h1>
             <p className="text-[#2C1810]/60 mt-1">Gérez l'assignation des propriétés aux agents</p>
           </div>
-          <Button 
-            onClick={() => setShowAssignModal(true)} 
+          <Button
+            onClick={() => setShowAssignModal(true)}
             className="bg-[#F16522] hover:bg-[#D14E12]"
             disabled={unassignedProperties.length === 0 || agents.length === 0}
           >
@@ -297,7 +299,9 @@ export default function PropertyAssignmentsPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-[#2C1810]">
-                    {assignments.reduce((sum, a) => sum + (a.properties?.monthly_rent || 0), 0).toLocaleString()}
+                    {assignments
+                      .reduce((sum, a) => sum + (a.properties?.monthly_rent || 0), 0)
+                      .toLocaleString()}
                   </p>
                   <p className="text-sm text-[#2C1810]/60">Loyers/mois</p>
                 </div>
@@ -338,8 +342,8 @@ export default function PropertyAssignmentsPage() {
               <Card key={assignment.id} className="bg-white border-[#EFEBE9] overflow-hidden">
                 <div className="h-40 bg-[#FAF7F4] relative">
                   {assignment.properties?.main_image ? (
-                    <img 
-                      src={assignment.properties.main_image} 
+                    <img
+                      src={assignment.properties.main_image}
                       alt={assignment.properties.title}
                       className="w-full h-full object-cover"
                     />
@@ -358,17 +362,24 @@ export default function PropertyAssignmentsPage() {
                   </Button>
                 </div>
                 <CardContent className="p-4">
-                  <h3 className="font-semibold text-[#2C1810] mb-1">{assignment.properties?.title}</h3>
+                  <h3 className="font-semibold text-[#2C1810] mb-1">
+                    {assignment.properties?.title}
+                  </h3>
                   <div className="flex items-center gap-1 text-sm text-[#2C1810]/60 mb-3">
                     <MapPin className="w-3 h-3" />
                     {assignment.properties?.city}
-                    {assignment.properties?.neighborhood && `, ${assignment.properties.neighborhood}`}
+                    {assignment.properties?.neighborhood &&
+                      `, ${assignment.properties.neighborhood}`}
                   </div>
                   <div className="flex items-center justify-between pt-3 border-t border-[#EFEBE9]">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-[#F16522]/10 flex items-center justify-center">
                         {assignment.agent?.profiles?.avatar_url ? (
-                          <img src={assignment.agent.profiles.avatar_url} alt="" className="w-8 h-8 rounded-full" />
+                          <img
+                            src={assignment.agent.profiles.avatar_url}
+                            alt=""
+                            className="w-8 h-8 rounded-full"
+                          />
                         ) : (
                           <User className="w-4 h-4 text-[#F16522]" />
                         )}
@@ -426,7 +437,9 @@ export default function PropertyAssignmentsPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAssignModal(false)}>Annuler</Button>
+              <Button variant="outline" onClick={() => setShowAssignModal(false)}>
+                Annuler
+              </Button>
               <Button onClick={handleAssign} className="bg-[#F16522] hover:bg-[#D14E12]">
                 Assigner
               </Button>

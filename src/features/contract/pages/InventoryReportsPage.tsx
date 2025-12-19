@@ -4,9 +4,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import Button from '@/shared/ui/Button';
-import { 
-  ClipboardList, Plus, Camera, FileText, Check, X, 
-  Loader2, Home, Calendar, Eye, Download, Edit
+import {
+  ClipboardList,
+  Plus,
+  Camera,
+  FileText,
+  Check,
+  X,
+  Loader2,
+  Home,
+  Calendar,
+  Eye,
+  Download,
+  Edit,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -47,49 +57,61 @@ export default function InventoryReportsPage() {
     queryFn: async () => {
       let query = supabase
         .from('inventory_reports')
-        .select(`
+        .select(
+          `
           *,
           properties (title, address, images),
           lease_contracts (
             contract_number,
             tenant_id
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
-      
+
       if (filter !== 'all') {
         query = query.eq('report_type', filter);
       }
-      
+
       const { data, error } = await query;
       if (error) throw error;
-      
+
       // Fetch tenant names separately
-      const tenantIds = [...new Set(data?.map(r => r.lease_contracts?.tenant_id).filter(Boolean) as string[])];
+      const tenantIds = [
+        ...new Set(data?.map((r) => r.lease_contracts?.tenant_id).filter(Boolean) as string[]),
+      ];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, full_name')
         .in('user_id', tenantIds);
-      
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
-      
-      return data?.map(r => ({
+
+      const profileMap = new Map(profiles?.map((p) => [p.user_id, p.full_name]) || []);
+
+      return data?.map((r) => ({
         ...r,
-        tenant_name: r.lease_contracts?.tenant_id ? profileMap.get(r.lease_contracts.tenant_id) : undefined
+        tenant_name: r.lease_contracts?.tenant_id
+          ? profileMap.get(r.lease_contracts.tenant_id)
+          : undefined,
       })) as InventoryReport[];
     },
-    enabled: !!user?.id
+    enabled: !!user?.id,
   });
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, { bg: string; text: string; label: string }> = {
       draft: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Brouillon' },
-      pending_signatures: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'En attente de signatures' },
-      completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Complété' }
+      pending_signatures: {
+        bg: 'bg-amber-100',
+        text: 'text-amber-700',
+        label: 'En attente de signatures',
+      },
+      completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Complété' },
     };
     const style = styles[status] ?? styles['draft'];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}>
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}
+      >
         {style?.label ?? status}
       </span>
     );
@@ -107,7 +129,7 @@ export default function InventoryReportsPage() {
     );
   };
 
-  const formatCurrency = (amount: number) => 
+  const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('fr-CI', { style: 'currency', currency: 'XOF' }).format(amount);
 
   return (
@@ -119,7 +141,7 @@ export default function InventoryReportsPage() {
             <h1 className="text-2xl font-bold text-[#2C1810]">États des lieux</h1>
             <p className="text-[#2C1810]/60">Gérez les états des lieux d'entrée et de sortie</p>
           </div>
-          
+
           <Link to="/dashboard/etats-des-lieux/nouveau">
             <Button className="bg-[#F16522] hover:bg-[#F16522]/90 rounded-xl">
               <Plus className="h-4 w-4 mr-2" />
@@ -158,15 +180,15 @@ export default function InventoryReportsPage() {
             ) : reports && reports.length > 0 ? (
               <div className="space-y-4">
                 {reports.map((report) => (
-                  <div 
+                  <div
                     key={report.id}
                     className="flex items-center gap-4 p-4 bg-white border border-[#EFEBE9] rounded-xl hover:shadow-md transition-shadow"
                   >
                     {/* Property Image */}
                     <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
                       {report.properties?.images?.[0] ? (
-                        <img 
-                          src={report.properties.images[0]} 
+                        <img
+                          src={report.properties.images[0]}
                           alt={report.properties?.title}
                           className="w-full h-full object-cover"
                         />
@@ -270,7 +292,7 @@ export default function InventoryReportsPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-[#2C1810]">
-                      {reports.filter(r => r.status === 'completed').length}
+                      {reports.filter((r) => r.status === 'completed').length}
                     </p>
                     <p className="text-sm text-[#2C1810]/60">Complétés</p>
                   </div>
@@ -285,7 +307,7 @@ export default function InventoryReportsPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-[#2C1810]">
-                      {reports.filter(r => r.status === 'draft').length}
+                      {reports.filter((r) => r.status === 'draft').length}
                     </p>
                     <p className="text-sm text-[#2C1810]/60">Brouillons</p>
                   </div>
@@ -300,7 +322,9 @@ export default function InventoryReportsPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-[#2C1810]">
-                      {formatCurrency(reports.reduce((sum, r) => sum + (r.total_damages_cost || 0), 0))}
+                      {formatCurrency(
+                        reports.reduce((sum, r) => sum + (r.total_damages_cost || 0), 0)
+                      )}
                     </p>
                     <p className="text-sm text-[#2C1810]/60">Total dégâts</p>
                   </div>

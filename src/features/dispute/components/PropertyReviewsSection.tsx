@@ -27,14 +27,16 @@ interface PropertyReviewsSectionProps {
   canReview?: boolean;
 }
 
-export default function PropertyReviewsSection({ 
-  propertyId, 
+export default function PropertyReviewsSection({
+  propertyId,
   ownerId,
-  canReview = false 
+  canReview = false,
 }: PropertyReviewsSectionProps) {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [profiles, setProfiles] = useState<Record<string, { full_name: string; avatar_url: string | null; is_verified: boolean }>>({});
+  const [profiles, setProfiles] = useState<
+    Record<string, { full_name: string; avatar_url: string | null; is_verified: boolean }>
+  >({});
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState('recent');
   const [filterRating, setFilterRating] = useState('all');
@@ -74,9 +76,9 @@ export default function PropertyReviewsSection({
       if (error) throw error;
 
       const reviewsData = data || [];
-      
+
       // Map data with proper types
-      const mappedReviews: Review[] = reviewsData.map(r => ({
+      const mappedReviews: Review[] = reviewsData.map((r) => ({
         id: r.id,
         rating: r.rating,
         comment: r.comment,
@@ -85,9 +87,9 @@ export default function PropertyReviewsSection({
         response: r.response,
         response_at: r.response_at,
         helpful_count: r.helpful_count,
-        criteria_ratings: r.criteria_ratings as Record<string, number> | null
+        criteria_ratings: r.criteria_ratings as Record<string, number> | null,
       }));
-      
+
       setReviews(mappedReviews);
 
       // Calculate stats
@@ -95,7 +97,7 @@ export default function PropertyReviewsSection({
         const total = mappedReviews.length;
         const sum = mappedReviews.reduce((acc, r) => acc + r.rating, 0);
         const distribution = [0, 0, 0, 0, 0];
-        mappedReviews.forEach(r => {
+        mappedReviews.forEach((r) => {
           const index = r.rating - 1;
           if (r.rating >= 1 && r.rating <= 5 && distribution[index] !== undefined) {
             distribution[index] = (distribution[index] ?? 0) + 1;
@@ -104,26 +106,36 @@ export default function PropertyReviewsSection({
         setStats({
           average: sum / total,
           total,
-          distribution
+          distribution,
         });
       }
 
       // Load reviewer profiles
-      const reviewerIds = mappedReviews.map(r => r.reviewer_id);
+      const reviewerIds = mappedReviews.map((r) => r.reviewer_id);
       if (reviewerIds.length > 0) {
         const { data: profilesData } = await supabase.rpc('get_public_profiles_safe', {
-          profile_user_ids: reviewerIds
+          profile_user_ids: reviewerIds,
         });
 
         if (profilesData) {
-          const profilesMap: Record<string, { full_name: string; avatar_url: string | null; is_verified: boolean }> = {};
-          profilesData.forEach((p: { user_id: string; full_name: string; avatar_url: string | null; is_verified: boolean }) => {
-            profilesMap[p.user_id] = {
-              full_name: p.full_name,
-              avatar_url: p.avatar_url,
-              is_verified: p.is_verified
-            };
-          });
+          const profilesMap: Record<
+            string,
+            { full_name: string; avatar_url: string | null; is_verified: boolean }
+          > = {};
+          profilesData.forEach(
+            (p: {
+              user_id: string;
+              full_name: string;
+              avatar_url: string | null;
+              is_verified: boolean;
+            }) => {
+              profilesMap[p.user_id] = {
+                full_name: p.full_name,
+                avatar_url: p.avatar_url,
+                is_verified: p.is_verified,
+              };
+            }
+          );
           setProfiles(profilesMap);
         }
       }
@@ -136,8 +148,11 @@ export default function PropertyReviewsSection({
 
   const handleHelpful = async (reviewId: string) => {
     try {
-      const currentReview = reviews.find(r => r.id === reviewId);
-      await supabase.from('reviews').update({ helpful_count: (currentReview?.helpful_count || 0) + 1 }).eq('id', reviewId);
+      const currentReview = reviews.find((r) => r.id === reviewId);
+      await supabase
+        .from('reviews')
+        .update({ helpful_count: (currentReview?.helpful_count || 0) + 1 })
+        .eq('id', reviewId);
       loadReviews();
     } catch (error) {
       console.error('Erreur:', error);
@@ -164,13 +179,9 @@ export default function PropertyReviewsSection({
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="flex items-center gap-6">
             <div className="text-center">
-              <div className="text-4xl font-bold text-[#2C1810]">
-                {stats.average.toFixed(1)}
-              </div>
+              <div className="text-4xl font-bold text-[#2C1810]">{stats.average.toFixed(1)}</div>
               {renderStars(Math.round(stats.average))}
-              <p className="text-sm text-muted-foreground mt-1">
-                {stats.total} avis
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">{stats.total} avis</p>
             </div>
 
             {/* Distribution */}
@@ -274,7 +285,7 @@ export default function PropertyReviewsSection({
                   reviewer_name: profile?.full_name,
                   reviewer_avatar: profile?.avatar_url,
                   is_verified: profile?.is_verified,
-                  criteria_ratings: review.criteria_ratings || undefined
+                  criteria_ratings: review.criteria_ratings || undefined,
                 }}
                 onHelpful={handleHelpful}
               />

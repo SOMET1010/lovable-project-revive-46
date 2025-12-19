@@ -62,7 +62,7 @@ interface Property {
   owner_avatar_url?: string | null;
   owner_is_verified?: boolean | null;
   owner_oneci_verified?: boolean | null;
-    // Managing agency (if anonymous)
+  // Managing agency (if anonymous)
   managing_agency_name?: string | null;
 }
 
@@ -409,7 +409,7 @@ export default function PropertyDetailPage() {
             trust_score: profileData.trust_score ?? null,
             is_verified: profileData.is_verified ?? null,
             oneci_verified: profileData.oneci_verified ?? null,
-                      };
+          };
         }
       }
 
@@ -444,7 +444,7 @@ export default function PropertyDetailPage() {
         owner_avatar_url: ownerProfile?.avatar_url ?? null,
         owner_is_verified: ownerProfile?.is_verified ?? null,
         owner_oneci_verified: ownerProfile?.oneci_verified ?? null,
-                managing_agency_name: managingAgencyName,
+        managing_agency_name: managingAgencyName,
       } as unknown as Property;
       setProperty(propertyData);
     } catch (error) {

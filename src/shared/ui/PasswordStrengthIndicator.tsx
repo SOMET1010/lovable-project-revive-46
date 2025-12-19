@@ -9,7 +9,7 @@ interface PasswordStrengthIndicatorProps {
 export function PasswordStrengthIndicator({
   password,
   showErrors = true,
-  showSuggestions = true
+  showSuggestions = true,
 }: PasswordStrengthIndicatorProps) {
   const validation = validatePassword(password);
 

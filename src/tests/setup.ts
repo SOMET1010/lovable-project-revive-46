@@ -53,7 +53,9 @@ vi.mock('@/services/supabase/client', () => ({
         upload: vi.fn(() => Promise.resolve({ data: { path: 'test' }, error: null })),
         getPublicUrl: vi.fn(() => ({ data: { publicUrl: 'http://test.com' } })),
         remove: vi.fn(() => Promise.resolve({ error: null })),
-        createSignedUrl: vi.fn(() => Promise.resolve({ data: { signedUrl: 'http://signed.com' }, error: null })),
+        createSignedUrl: vi.fn(() =>
+          Promise.resolve({ data: { signedUrl: 'http://signed.com' }, error: null })
+        ),
       })),
     },
     functions: {
@@ -184,5 +186,5 @@ export function createMockContract(overrides: any = {}) {
 
 // Helper function pour attendre (async/await helper)
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

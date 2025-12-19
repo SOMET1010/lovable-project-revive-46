@@ -11,7 +11,13 @@ import { supabase } from '@/services/supabase/client';
 interface SecurityEvent {
   id: string;
   timestamp: Date;
-  type: 'AUTH_FAILURE' | 'RATE_LIMIT_EXCEEDED' | 'UNAUTHORIZED_ACCESS' | 'MALICIOUS_UPLOAD' | 'PRIVILEGE_ESCALATION' | 'SUSPICIOUS_ACTIVITY';
+  type:
+    | 'AUTH_FAILURE'
+    | 'RATE_LIMIT_EXCEEDED'
+    | 'UNAUTHORIZED_ACCESS'
+    | 'MALICIOUS_UPLOAD'
+    | 'PRIVILEGE_ESCALATION'
+    | 'SUSPICIOUS_ACTIVITY';
   severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
   userId?: string;
   ip?: string;
@@ -106,8 +112,8 @@ export class SecurityMonitoringService {
       },
       {
         id: 'unauthorized-access-attempts',
-        name: 'Tentatives d\'accès non autorisées',
-        description: 'Détecte les tentatives d\'accès à des ressources protégées',
+        name: "Tentatives d'accès non autorisées",
+        description: "Détecte les tentatives d'accès à des ressources protégées",
         condition: {
           eventTypes: ['UNAUTHORIZED_ACCESS'],
           timeWindow: 10,
@@ -120,7 +126,7 @@ export class SecurityMonitoringService {
       },
       {
         id: 'privilege-escalation',
-        name: 'Tentatives d\'élévation de privilèges',
+        name: "Tentatives d'élévation de privilèges",
         description: 'Détecte les tentatives de modification de rôle non autorisées',
         condition: {
           eventTypes: ['PRIVILEGE_ESCALATION'],
@@ -135,7 +141,7 @@ export class SecurityMonitoringService {
       {
         id: 'malicious-uploads',
         name: 'Téléchargements de fichiers malveillants',
-        description: 'Détecte les tentatives d\'upload de fichiers dangereux',
+        description: "Détecte les tentatives d'upload de fichiers dangereux",
         condition: {
           eventTypes: ['MALICIOUS_UPLOAD'],
           timeWindow: 5,
@@ -236,7 +242,6 @@ export class SecurityMonitoringService {
 
       // Mettre à jour les métriques
       await this.updateMetrics(aggregatedEvents);
-
     } catch (error) {
       console.error('Error processing security events:', error);
       // Remettre les événements dans le buffer en cas d'erreur
@@ -266,13 +271,16 @@ export class SecurityMonitoringService {
 
     // Pattern 1: Plusieurs échecs d'auth du même IP
     const authFailuresByIP = events
-      .filter(e => e.type === 'AUTH_FAILURE')
-      .reduce((acc, event) => {
-        const key = event.ip || 'unknown';
-        acc[key] = acc[key] || [];
-        acc[key].push(event);
-        return acc;
-      }, {} as Record<string, SecurityEvent[]>);
+      .filter((e) => e.type === 'AUTH_FAILURE')
+      .reduce(
+        (acc, event) => {
+          const key = event.ip || 'unknown';
+          acc[key] = acc[key] || [];
+          acc[key].push(event);
+          return acc;
+        },
+        {} as Record<string, SecurityEvent[]>
+      );
 
     Object.entries(authFailuresByIP).forEach(([ip, failures]) => {
       if (failures.length >= 5) {
@@ -287,13 +295,16 @@ export class SecurityMonitoringService {
 
     // Pattern 2: Tentatives d'accès depuis différentes IPs pour le même utilisateur
     const accessByUser = events
-      .filter(e => e.type === 'UNAUTHORIZED_ACCESS' && e.userId)
-      .reduce((acc, event) => {
-        const key = event.userId!;
-        acc[key] = acc[key] || new Set();
-        acc[key].add(event.ip || 'unknown');
-        return acc;
-      }, {} as Record<string, Set<string>>);
+      .filter((e) => e.type === 'UNAUTHORIZED_ACCESS' && e.userId)
+      .reduce(
+        (acc, event) => {
+          const key = event.userId!;
+          acc[key] = acc[key] || new Set();
+          acc[key].add(event.ip || 'unknown');
+          return acc;
+        },
+        {} as Record<string, Set<string>>
+      );
 
     Object.entries(accessByUser).forEach(([userId, ips]) => {
       if (ips.size >= 3) {
@@ -301,7 +312,7 @@ export class SecurityMonitoringService {
           type: 'ACCOUNT_TAKEOVER_ATTEMPT',
           severity: 'CRITICAL',
           description: `Tentatives d'accès depuis multiples IPs pour l'utilisateur: ${userId}`,
-          events: events.filter(e => e.userId === userId),
+          events: events.filter((e) => e.userId === userId),
         });
       }
     });
@@ -344,7 +355,7 @@ export class SecurityMonitoringService {
    * Vérifie les règles d'alerte
    */
   private async checkAlertRules(): Promise<void> {
-    for (const rule of this.alertRules.filter(r => r.enabled)) {
+    for (const rule of this.alertRules.filter((r) => r.enabled)) {
       const matchingEvents = this.getEventsForRule(rule);
 
       if (matchingEvents.length >= rule.condition.threshold) {
@@ -358,22 +369,22 @@ export class SecurityMonitoringService {
    */
   private getEventsForRule(rule: AlertRule): SecurityEvent[] {
     const now = Date.now();
-    const windowStart = now - (rule.condition.timeWindow * 60 * 1000);
+    const windowStart = now - rule.condition.timeWindow * 60 * 1000;
 
-    let events = this.eventBuffer.filter(e => e.timestamp.getTime() >= windowStart);
+    let events = this.eventBuffer.filter((e) => e.timestamp.getTime() >= windowStart);
 
     if (rule.condition.eventTypes) {
-      events = events.filter(e => rule.condition.eventTypes!.includes(e.type));
+      events = events.filter((e) => rule.condition.eventTypes!.includes(e.type));
     }
 
     // Appliquer l'agrégation
     switch (rule.condition.aggregation) {
       case 'unique_ips':
-        const uniqueIPs = new Set(events.map(e => e.ip));
+        const uniqueIPs = new Set(events.map((e) => e.ip));
         return Array.from(uniqueIPs).length >= rule.condition.threshold ? events : [];
 
       case 'unique_users':
-        const uniqueUsers = new Set(events.map(e => e.userId).filter(Boolean));
+        const uniqueUsers = new Set(events.map((e) => e.userId).filter(Boolean));
         return Array.from(uniqueUsers).length >= rule.condition.threshold ? events : [];
 
       default:
@@ -420,7 +431,10 @@ export class SecurityMonitoringService {
     });
 
     // Logger le blocage
-    SecurityLogger.logSecurityEvent('IP_BLOCKED', undefined, ip, { reason, duration: durationMinutes });
+    SecurityLogger.logSecurityEvent('IP_BLOCKED', undefined, ip, {
+      reason,
+      duration: durationMinutes,
+    });
   }
 
   /**
@@ -461,7 +475,7 @@ export class SecurityMonitoringService {
       const eventsToPersist = this.eventBuffer.splice(0, 100); // Limiter à 100 par batch
 
       await supabase.from('security_events').insert(
-        eventsToPersist.map(event => ({
+        eventsToPersist.map((event) => ({
           id: event.id,
           type: event.type,
           severity: event.severity,
@@ -577,9 +591,10 @@ export class SecurityMonitoringService {
       };
 
       // Agréger par type
-      events.forEach(event => {
+      events.forEach((event) => {
         metrics.eventsByType[event.type] = (metrics.eventsByType[event.type] || 0) + 1;
-        metrics.eventsBySeverity[event.severity] = (metrics.eventsBySeverity[event.severity] || 0) + 1;
+        metrics.eventsBySeverity[event.severity] =
+          (metrics.eventsBySeverity[event.severity] || 0) + 1;
 
         const hour = new Date(event.created_at).getHours();
         metrics.eventsByHour[hour] = (metrics.eventsByHour[hour] || 0) + 1;
@@ -587,7 +602,7 @@ export class SecurityMonitoringService {
 
       // Calculer les top offenders
       const offenderMap = new Map<string, number>();
-      events.forEach(event => {
+      events.forEach((event) => {
         const key = event.ip || event.userId || 'unknown';
         offenderMap.set(key, (offenderMap.get(key) || 0) + 1);
       });
@@ -608,7 +623,6 @@ export class SecurityMonitoringService {
         });
 
       return metrics;
-
     } catch (error) {
       console.error('Error fetching security metrics:', error);
       throw error;
@@ -628,7 +642,6 @@ export class SecurityMonitoringService {
         .order('created_at', { ascending: true });
 
       return events || [];
-
     } catch (error) {
       console.error('Error exporting security events:', error);
       throw error;

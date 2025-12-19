@@ -6,19 +6,19 @@ import type { Json } from '@/integrations/supabase/types';
 // Priorités par défaut pour chaque service
 const DEFAULT_PRIORITIES: Record<string, Record<string, number>> = {
   sms: {
-    'brevo': 1,
-    'intouch': 2,
-    'sinch': 3,
+    brevo: 1,
+    intouch: 2,
+    sinch: 3,
   },
   whatsapp: {
-    'intouch': 1,
-    'brevo': 2,
-    'sinch': 3,
+    intouch: 1,
+    brevo: 2,
+    sinch: 3,
   },
   email: {
-    'resend': 1,
-    'brevo': 2,
-    'sendgrid': 3,
+    resend: 1,
+    brevo: 2,
+    sendgrid: 3,
   },
 };
 
@@ -42,7 +42,7 @@ export function useServiceConfigurations() {
         .select('*')
         .order('service_name')
         .order('priority');
-      
+
       if (error) throw error;
       return data as ServiceConfiguration[];
     },
@@ -51,16 +51,22 @@ export function useServiceConfigurations() {
 
 export function useUpdateServiceConfiguration() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: { is_enabled?: boolean | null; priority?: number | null } }) => {
+    mutationFn: async ({
+      id,
+      updates,
+    }: {
+      id: string;
+      updates: { is_enabled?: boolean | null; priority?: number | null };
+    }) => {
       const { data, error } = await supabase
         .from('service_configurations')
         .update(updates)
         .eq('id', id)
         .select()
         .single();
-      
+
       if (error) throw error;
       return data;
     },
@@ -76,20 +82,17 @@ export function useUpdateServiceConfiguration() {
 
 export function useUpdateProviderPriorities() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (updates: { id: string; priority: number }[]) => {
       const promises = updates.map(({ id, priority }) =>
-        supabase
-          .from('service_configurations')
-          .update({ priority })
-          .eq('id', id)
+        supabase.from('service_configurations').update({ priority }).eq('id', id)
       );
-      
+
       const results = await Promise.all(promises);
-      const errors = results.filter(r => r.error);
+      const errors = results.filter((r) => r.error);
       if (errors.length > 0) throw new Error('Erreur lors de la mise à jour des priorités');
-      
+
       return true;
     },
     onSuccess: () => {
@@ -104,35 +107,32 @@ export function useUpdateProviderPriorities() {
 
 export function useResetProviderPriorities() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (serviceName: string) => {
       const { data: configs, error: fetchError } = await supabase
         .from('service_configurations')
         .select('*')
         .eq('service_name', serviceName);
-      
+
       if (fetchError) throw fetchError;
       if (!configs?.length) return;
-      
+
       const serviceDefaults = DEFAULT_PRIORITIES[serviceName.toLowerCase()] ?? {};
-      
-      const updates = configs.map(config => ({
+
+      const updates = configs.map((config) => ({
         id: config.id,
-        priority: serviceDefaults[config.provider.toLowerCase()] ?? 99
+        priority: serviceDefaults[config.provider.toLowerCase()] ?? 99,
       }));
-      
+
       const promises = updates.map(({ id, priority }) =>
-        supabase
-          .from('service_configurations')
-          .update({ priority })
-          .eq('id', id)
+        supabase.from('service_configurations').update({ priority }).eq('id', id)
       );
-      
+
       const results = await Promise.all(promises);
-      const errors = results.filter(r => r.error);
+      const errors = results.filter((r) => r.error);
       if (errors.length > 0) throw new Error('Erreur lors de la réinitialisation');
-      
+
       return true;
     },
     onSuccess: () => {

@@ -8,11 +8,11 @@
 import { supabase } from '@/services/supabase/client';
 
 export interface OTPRequest {
-  recipient: string;          // Email ou numéro de téléphone
+  recipient: string; // Email ou numéro de téléphone
   method: 'email' | 'sms' | 'whatsapp';
   userName?: string;
   purpose?: 'auth' | 'verification' | 'reset'; // Usage de l'OTP
-  expiresIn?: number;         // En minutes (défaut: 10)
+  expiresIn?: number; // En minutes (défaut: 10)
 }
 
 export interface OTPVerification {
@@ -24,7 +24,7 @@ export interface OTPVerification {
 export interface OTPResult {
   success: boolean;
   error?: string;
-  otp?: string;              // Uniquement en dev
+  otp?: string; // Uniquement en dev
   messageId?: string;
 }
 
@@ -45,7 +45,7 @@ class OTPUnifiedService {
     // Utiliser crypto.getRandomValues pour une meilleure sécurité
     const array = new Uint8Array(6);
     crypto.getRandomValues(array);
-    return Array.from(array, byte => (byte % 10).toString()).join('');
+    return Array.from(array, (byte) => (byte % 10).toString()).join('');
   }
 
   /**
@@ -89,17 +89,15 @@ class OTPUnifiedService {
     try {
       const expiresAt = new Date(Date.now() + expiresIn * 60 * 1000);
 
-      const { error } = await supabase
-        .from('otp_codes')
-        .insert({
-          recipient,
-          code,
-          method,
-          purpose,
-          expires_at: expiresAt.toISOString(),
-          attempts: 0,
-          created_at: new Date().toISOString(),
-        });
+      const { error } = await supabase.from('otp_codes').insert({
+        recipient,
+        code,
+        method,
+        purpose,
+        expires_at: expiresAt.toISOString(),
+        attempts: 0,
+        created_at: new Date().toISOString(),
+      });
 
       if (error) {
         console.error('Erreur stockage OTP:', error);
@@ -116,7 +114,11 @@ class OTPUnifiedService {
   /**
    * Envoie un OTP par email via Brevo
    */
-  private async sendEmailOTP(recipient: string, otp: string, userName?: string): Promise<OTPResult> {
+  private async sendEmailOTP(
+    recipient: string,
+    otp: string,
+    userName?: string
+  ): Promise<OTPResult> {
     try {
       const { data, error } = await supabase.functions.invoke('send-email-brevo', {
         body: {
@@ -131,7 +133,7 @@ class OTPUnifiedService {
         console.error('Erreur envoi OTP email:', error);
         return {
           success: false,
-          error: error.message || 'Erreur lors de l\'envoi de l\'email',
+          error: error.message || "Erreur lors de l'envoi de l'email",
         };
       }
 
@@ -144,7 +146,7 @@ class OTPUnifiedService {
       console.error('Exception envoi OTP email:', error);
       return {
         success: false,
-        error: 'Erreur lors de l\'envoi de l\'email',
+        error: "Erreur lors de l'envoi de l'email",
       };
     }
   }
@@ -168,7 +170,7 @@ class OTPUnifiedService {
         console.error('Erreur envoi OTP SMS:', error);
         return {
           success: false,
-          error: error.message || 'Erreur lors de l\'envoi du SMS',
+          error: error.message || "Erreur lors de l'envoi du SMS",
         };
       }
 
@@ -181,7 +183,7 @@ class OTPUnifiedService {
       console.error('Exception envoi OTP SMS:', error);
       return {
         success: false,
-        error: 'Erreur lors de l\'envoi du SMS',
+        error: "Erreur lors de l'envoi du SMS",
       };
     }
   }
@@ -206,7 +208,7 @@ class OTPUnifiedService {
         console.error('Erreur envoi OTP WhatsApp:', error);
         return {
           success: false,
-          error: error.message || 'Erreur lors de l\'envoi WhatsApp',
+          error: error.message || "Erreur lors de l'envoi WhatsApp",
         };
       }
 
@@ -219,7 +221,7 @@ class OTPUnifiedService {
       console.error('Exception envoi OTP WhatsApp:', error);
       return {
         success: false,
-        error: 'Erreur lors de l\'envoi WhatsApp',
+        error: "Erreur lors de l'envoi WhatsApp",
       };
     }
   }
@@ -228,7 +230,13 @@ class OTPUnifiedService {
    * Envoie un code OTP
    */
   async sendOTP(request: OTPRequest): Promise<OTPResult> {
-    const { recipient, method, userName, purpose = 'auth', expiresIn = this.DEFAULT_EXPIRY } = request;
+    const {
+      recipient,
+      method,
+      userName,
+      purpose = 'auth',
+      expiresIn = this.DEFAULT_EXPIRY,
+    } = request;
 
     // Validation de base
     if (!recipient || !method) {
@@ -404,7 +412,9 @@ class OTPUnifiedService {
       }
 
       const lastAttempt = new Date(data[0].created_at);
-      const remainingTime = Math.ceil((lastAttempt.getTime() + windowMinutes * 60 * 1000 - Date.now()) / 1000);
+      const remainingTime = Math.ceil(
+        (lastAttempt.getTime() + windowMinutes * 60 * 1000 - Date.now()) / 1000
+      );
 
       return { allowed: false, remainingTime: Math.max(0, remainingTime) };
     } catch (error) {

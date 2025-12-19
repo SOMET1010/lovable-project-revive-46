@@ -37,9 +37,12 @@ class AuthBrevoService {
     const { method } = data;
 
     // Déterminer le destinataire (email ou téléphone)
-    const recipient = 'email' in data && data.email ? data.email :
-                      'phone' in data && data.phone ? data.phone :
-                      (data as SignInData).recipient;
+    const recipient =
+      'email' in data && data.email
+        ? data.email
+        : 'phone' in data && data.phone
+          ? data.phone
+          : (data as SignInData).recipient;
 
     if (!recipient) {
       return {
@@ -71,7 +74,7 @@ class AuthBrevoService {
     if (!otpResult.success) {
       return {
         success: false,
-        error: otpResult.error || 'Erreur lors de l\'envoi du code de vérification',
+        error: otpResult.error || "Erreur lors de l'envoi du code de vérification",
       };
     }
 
@@ -165,16 +168,14 @@ class AuthBrevoService {
 
       // Créer le profil dans la table profiles
       if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            email: isEmail ? recipient : null,
-            phone: !isEmail ? recipient : null,
-            full_name: fullName,
-            user_type: null,
-            created_at: new Date().toISOString(),
-          });
+        const { error: profileError } = await supabase.from('profiles').insert({
+          id: authData.user.id,
+          email: isEmail ? recipient : null,
+          phone: !isEmail ? recipient : null,
+          full_name: fullName,
+          user_type: null,
+          created_at: new Date().toISOString(),
+        });
 
         if (profileError) {
           console.error('Erreur création profil:', profileError);
@@ -199,10 +200,7 @@ class AuthBrevoService {
   /**
    * Crée une session utilisateur
    */
-  private async createSession(
-    recipient: string,
-    method: 'email' | 'phone'
-  ): Promise<AuthResult> {
+  private async createSession(recipient: string, method: 'email' | 'phone'): Promise<AuthResult> {
     try {
       // Récupérer le profil utilisateur
       const isEmail = method === 'email';
@@ -252,7 +250,10 @@ class AuthBrevoService {
   /**
    * Met à jour le profil utilisateur avec le rôle
    */
-  async updateProfileRole(userId: string, role: 'locataire' | 'proprietaire' | 'agence'): Promise<AuthResult> {
+  async updateProfileRole(
+    userId: string,
+    role: 'locataire' | 'proprietaire' | 'agence'
+  ): Promise<AuthResult> {
     try {
       const { error } = await supabase
         .from('profiles')
@@ -331,12 +332,14 @@ class AuthBrevoService {
    */
   private generateTemporaryToken(userId: string, type: 'access' | 'refresh' = 'access'): string {
     const timestamp = Date.now();
-    const payload = btoa(JSON.stringify({
-      userId,
-      type,
-      exp: timestamp + (type === 'access' ? 3600 : 86400) * 1000, // 1h ou 24h
-      iat: timestamp,
-    }));
+    const payload = btoa(
+      JSON.stringify({
+        userId,
+        type,
+        exp: timestamp + (type === 'access' ? 3600 : 86400) * 1000, // 1h ou 24h
+        iat: timestamp,
+      })
+    );
 
     return `tmp.${payload}.${timestamp}`;
   }

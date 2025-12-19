@@ -4,18 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import Button from '@/shared/ui/Button';
-import { 
-  LogOut, Calendar, Check, 
-  Loader2, AlertTriangle, FileText
-} from 'lucide-react';
+import { LogOut, Calendar, Check, Loader2, AlertTriangle, FileText } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/shared/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui';
 
 interface DepartureNotice {
   id: string;
@@ -64,7 +55,7 @@ const DEPARTURE_REASONS = [
   { value: 'breach_of_contract', label: 'Violation du contrat' },
   { value: 'property_sale', label: 'Vente du bien' },
   { value: 'personal_use', label: 'Reprise pour usage personnel' },
-  { value: 'other', label: 'Autre' }
+  { value: 'other', label: 'Autre' },
 ];
 
 export default function DepartureNoticesPage() {
@@ -75,7 +66,7 @@ export default function DepartureNoticesPage() {
   const [noticeForm, setNoticeForm] = useState({
     departureDate: '',
     reason: '',
-    reasonDetails: ''
+    reasonDetails: '',
   });
 
   // Fetch notices
@@ -84,7 +75,8 @@ export default function DepartureNoticesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('departure_notices')
-        .select(`
+        .select(
+          `
           *,
           lease_contracts (
             contract_number,
@@ -94,26 +86,31 @@ export default function DepartureNoticesPage() {
             tenant_id,
             properties (title, address)
           )
-        `)
+        `
+        )
         .order('created_at', { ascending: false });
-      
+
       if (error) throw error;
-      
+
       // Fetch tenant names separately
-      const tenantIds = [...new Set(data?.map(n => n.lease_contracts?.tenant_id).filter(Boolean) as string[])];
+      const tenantIds = [
+        ...new Set(data?.map((n) => n.lease_contracts?.tenant_id).filter(Boolean) as string[]),
+      ];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, full_name')
         .in('user_id', tenantIds);
-      
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
-      
-      return data?.map(n => ({
+
+      const profileMap = new Map(profiles?.map((p) => [p.user_id, p.full_name]) || []);
+
+      return data?.map((n) => ({
         ...n,
-        tenant_name: n.lease_contracts?.tenant_id ? profileMap.get(n.lease_contracts.tenant_id) : undefined
+        tenant_name: n.lease_contracts?.tenant_id
+          ? profileMap.get(n.lease_contracts.tenant_id)
+          : undefined,
       })) as DepartureNotice[];
     },
-    enabled: !!user?.id
+    enabled: !!user?.id,
   });
 
   // Fetch active leases for creating new notice
@@ -122,7 +119,8 @@ export default function DepartureNoticesPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('lease_contracts')
-        .select(`
+        .select(
+          `
           id,
           contract_number,
           monthly_rent,
@@ -130,46 +128,45 @@ export default function DepartureNoticesPage() {
           tenant_id,
           property_id,
           properties (title, address)
-        `)
+        `
+        )
         .eq('owner_id', user?.id ?? '')
         .eq('status', 'active');
-      
+
       if (error) throw error;
-      
+
       // Fetch tenant names separately
-      const tenantIds = [...new Set(data?.map(l => l.tenant_id).filter(Boolean) as string[])];
+      const tenantIds = [...new Set(data?.map((l) => l.tenant_id).filter(Boolean) as string[])];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, full_name')
         .in('user_id', tenantIds);
-      
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
-      
-      return data?.map(l => ({
+
+      const profileMap = new Map(profiles?.map((p) => [p.user_id, p.full_name]) || []);
+
+      return data?.map((l) => ({
         ...l,
-        tenant_name: profileMap.get(l.tenant_id)
+        tenant_name: profileMap.get(l.tenant_id),
       })) as ActiveLease[];
     },
-    enabled: !!user?.id
+    enabled: !!user?.id,
   });
 
   // Create notice mutation
   const createNotice = useMutation({
     mutationFn: async () => {
       if (!selectedLease) return;
-      
-      const { error } = await supabase
-        .from('departure_notices')
-        .insert({
-          lease_id: selectedLease.id,
-          initiated_by: 'owner',
-          notice_date: format(new Date(), 'yyyy-MM-dd'),
-          departure_date: noticeForm.departureDate,
-          reason: noticeForm.reason,
-          reason_details: noticeForm.reasonDetails || null,
-          status: 'pending'
-        });
-      
+
+      const { error } = await supabase.from('departure_notices').insert({
+        lease_id: selectedLease.id,
+        initiated_by: 'owner',
+        notice_date: format(new Date(), 'yyyy-MM-dd'),
+        departure_date: noticeForm.departureDate,
+        reason: noticeForm.reason,
+        reason_details: noticeForm.reasonDetails || null,
+        status: 'pending',
+      });
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -177,7 +174,7 @@ export default function DepartureNoticesPage() {
       setShowCreateModal(false);
       setSelectedLease(null);
       setNoticeForm({ departureDate: '', reason: '', reasonDetails: '' });
-    }
+    },
   });
 
   // Acknowledge notice mutation
@@ -188,34 +185,40 @@ export default function DepartureNoticesPage() {
         .update({
           acknowledged_at: new Date().toISOString(),
           acknowledged_by: user?.id,
-          status: 'acknowledged'
+          status: 'acknowledged',
         })
         .eq('id', noticeId);
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['departure-notices'] });
-    }
+    },
   });
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, { bg: string; text: string; label: string }> = {
       pending: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'En attente' },
       acknowledged: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Accusé réception' },
-      inventory_scheduled: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'État des lieux prévu' },
+      inventory_scheduled: {
+        bg: 'bg-purple-100',
+        text: 'text-purple-700',
+        label: 'État des lieux prévu',
+      },
       completed: { bg: 'bg-green-100', text: 'text-green-700', label: 'Terminé' },
-      cancelled: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Annulé' }
+      cancelled: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Annulé' },
     };
     const style = styles[status] ?? styles['pending'];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}>
+      <span
+        className={`px-3 py-1 rounded-full text-xs font-medium ${style?.bg ?? ''} ${style?.text ?? ''}`}
+      >
         {style?.label ?? status}
       </span>
     );
   };
 
-  const formatCurrency = (amount: number) => 
+  const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('fr-CI', { style: 'currency', currency: 'XOF' }).format(amount);
 
   const openCreateModal = (lease: ActiveLease) => {
@@ -226,7 +229,7 @@ export default function DepartureNoticesPage() {
     setNoticeForm({
       departureDate: format(defaultDate, 'yyyy-MM-dd'),
       reason: '',
-      reasonDetails: ''
+      reasonDetails: '',
     });
     setShowCreateModal(true);
   };
@@ -251,20 +254,13 @@ export default function DepartureNoticesPage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {activeLeases.map((lease) => (
-                  <div 
-                    key={lease.id}
-                    className="p-4 bg-white border border-[#EFEBE9] rounded-xl"
-                  >
-                    <p className="font-medium text-[#2C1810] truncate">
-                      {lease.properties?.title}
-                    </p>
-                    <p className="text-sm text-[#2C1810]/60">
-                      {lease.tenant_name}
-                    </p>
+                  <div key={lease.id} className="p-4 bg-white border border-[#EFEBE9] rounded-xl">
+                    <p className="font-medium text-[#2C1810] truncate">{lease.properties?.title}</p>
+                    <p className="text-sm text-[#2C1810]/60">{lease.tenant_name}</p>
                     <p className="text-xs text-[#2C1810]/40 mt-1">
                       Loyer: {formatCurrency(lease.monthly_rent)}
                     </p>
-                    <Button 
+                    <Button
                       variant="outline"
                       size="small"
                       className="mt-3 w-full rounded-lg"
@@ -293,31 +289,44 @@ export default function DepartureNoticesPage() {
             ) : notices && notices.length > 0 ? (
               <div className="space-y-4">
                 {notices.map((notice) => {
-                  const daysUntilDeparture = differenceInDays(new Date(notice.departure_date), new Date());
-                  
+                  const daysUntilDeparture = differenceInDays(
+                    new Date(notice.departure_date),
+                    new Date()
+                  );
+
                   return (
-                    <div 
+                    <div
                       key={notice.id}
                       className="p-4 bg-white border border-[#EFEBE9] rounded-xl"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
-                          <div className={`p-3 rounded-xl ${
-                            notice.initiated_by === 'tenant' ? 'bg-blue-50' : 'bg-amber-50'
-                          }`}>
-                            <LogOut className={`h-6 w-6 ${
-                              notice.initiated_by === 'tenant' ? 'text-blue-600' : 'text-amber-600'
-                            }`} />
+                          <div
+                            className={`p-3 rounded-xl ${
+                              notice.initiated_by === 'tenant' ? 'bg-blue-50' : 'bg-amber-50'
+                            }`}
+                          >
+                            <LogOut
+                              className={`h-6 w-6 ${
+                                notice.initiated_by === 'tenant'
+                                  ? 'text-blue-600'
+                                  : 'text-amber-600'
+                              }`}
+                            />
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               {getStatusBadge(notice.status)}
-                              <span className={`text-xs px-2 py-0.5 rounded ${
-                                notice.initiated_by === 'tenant' 
-                                  ? 'bg-blue-50 text-blue-600' 
-                                  : 'bg-amber-50 text-amber-600'
-                              }`}>
-                                {notice.initiated_by === 'tenant' ? 'Par le locataire' : 'Par le propriétaire'}
+                              <span
+                                className={`text-xs px-2 py-0.5 rounded ${
+                                  notice.initiated_by === 'tenant'
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'bg-amber-50 text-amber-600'
+                                }`}
+                              >
+                                {notice.initiated_by === 'tenant'
+                                  ? 'Par le locataire'
+                                  : 'Par le propriétaire'}
                               </span>
                             </div>
                             <p className="font-medium text-[#2C1810]">
@@ -331,9 +340,11 @@ export default function DepartureNoticesPage() {
                                 <Calendar className="h-3 w-3" />
                                 Préavis: {format(new Date(notice.notice_date), 'dd/MM/yyyy')}
                               </span>
-                              <span className={`flex items-center gap-1 ${
-                                daysUntilDeparture <= 30 ? 'text-red-600' : ''
-                              }`}>
+                              <span
+                                className={`flex items-center gap-1 ${
+                                  daysUntilDeparture <= 30 ? 'text-red-600' : ''
+                                }`}
+                              >
                                 <LogOut className="h-3 w-3" />
                                 Départ: {format(new Date(notice.departure_date), 'dd/MM/yyyy')}
                                 {daysUntilDeparture > 0 && ` (${daysUntilDeparture}j)`}
@@ -341,7 +352,9 @@ export default function DepartureNoticesPage() {
                             </div>
                             {notice.reason && (
                               <p className="text-sm text-[#2C1810]/60 mt-2">
-                                Motif: {DEPARTURE_REASONS.find(r => r.value === notice.reason)?.label || notice.reason}
+                                Motif:{' '}
+                                {DEPARTURE_REASONS.find((r) => r.value === notice.reason)?.label ||
+                                  notice.reason}
                               </p>
                             )}
                           </div>
@@ -356,9 +369,9 @@ export default function DepartureNoticesPage() {
                               </p>
                             </div>
                           )}
-                          
+
                           {notice.status === 'pending' && notice.initiated_by === 'tenant' && (
-                            <Button 
+                            <Button
                               size="small"
                               className="bg-[#F16522] hover:bg-[#F16522]/90 rounded-lg"
                               onClick={() => acknowledgeNotice.mutate(notice.id)}
@@ -368,13 +381,9 @@ export default function DepartureNoticesPage() {
                               Accuser réception
                             </Button>
                           )}
-                          
+
                           {notice.status === 'acknowledged' && (
-                            <Button 
-                              variant="outline"
-                              size="small"
-                              className="rounded-lg"
-                            >
+                            <Button variant="outline" size="small" className="rounded-lg">
                               <FileText className="h-4 w-4 mr-1" />
                               Planifier état des lieux
                             </Button>
@@ -400,7 +409,7 @@ export default function DepartureNoticesPage() {
             <DialogHeader>
               <DialogTitle className="text-[#2C1810]">Donner un préavis de départ</DialogTitle>
             </DialogHeader>
-            
+
             {selectedLease && (
               <div className="space-y-4">
                 <div className="p-4 bg-[#FAF7F4] rounded-xl">
@@ -414,7 +423,8 @@ export default function DepartureNoticesPage() {
                 <div className="p-4 bg-amber-50 rounded-xl flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
                   <p className="text-sm text-amber-800">
-                    En Côte d'Ivoire, le délai de préavis légal est généralement de 3 mois pour les baux d'habitation.
+                    En Côte d'Ivoire, le délai de préavis légal est généralement de 3 mois pour les
+                    baux d'habitation.
                   </p>
                 </div>
 
@@ -425,7 +435,9 @@ export default function DepartureNoticesPage() {
                   <input
                     type="date"
                     value={noticeForm.departureDate}
-                    onChange={(e) => setNoticeForm(prev => ({ ...prev, departureDate: e.target.value }))}
+                    onChange={(e) =>
+                      setNoticeForm((prev) => ({ ...prev, departureDate: e.target.value }))
+                    }
                     className="w-full p-3 border border-[#EFEBE9] rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-transparent"
                   />
                 </div>
@@ -436,7 +448,7 @@ export default function DepartureNoticesPage() {
                   </label>
                   <select
                     value={noticeForm.reason}
-                    onChange={(e) => setNoticeForm(prev => ({ ...prev, reason: e.target.value }))}
+                    onChange={(e) => setNoticeForm((prev) => ({ ...prev, reason: e.target.value }))}
                     className="w-full p-3 border border-[#EFEBE9] rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-transparent"
                   >
                     <option value="">Sélectionnez un motif</option>
@@ -454,7 +466,9 @@ export default function DepartureNoticesPage() {
                   </label>
                   <textarea
                     value={noticeForm.reasonDetails}
-                    onChange={(e) => setNoticeForm(prev => ({ ...prev, reasonDetails: e.target.value }))}
+                    onChange={(e) =>
+                      setNoticeForm((prev) => ({ ...prev, reasonDetails: e.target.value }))
+                    }
                     rows={3}
                     className="w-full p-3 border border-[#EFEBE9] rounded-xl focus:ring-2 focus:ring-[#F16522] focus:border-transparent resize-none"
                     placeholder="Informations supplémentaires..."
@@ -464,10 +478,14 @@ export default function DepartureNoticesPage() {
             )}
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateModal(false)} className="rounded-xl">
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateModal(false)}
+                className="rounded-xl"
+              >
                 Annuler
               </Button>
-              <Button 
+              <Button
                 className="bg-[#F16522] hover:bg-[#F16522]/90 rounded-xl"
                 onClick={() => createNotice.mutate()}
                 disabled={createNotice.isPending}

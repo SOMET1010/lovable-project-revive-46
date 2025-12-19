@@ -19,7 +19,7 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  
+
   const [mode, setMode] = useState<'liveness' | 'capture' | 'preview'>('liveness');
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +39,7 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
 
     try {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
 
       const constraints: MediaStreamConstraints = {
@@ -62,10 +62,12 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
       setIsStarting(false);
     } catch (err) {
       console.error('[SelfieCapture] Camera error:', err);
-      
+
       if (err instanceof Error) {
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          setError('Accès à la caméra refusé. Veuillez autoriser l\'accès dans les paramètres de votre navigateur.');
+          setError(
+            "Accès à la caméra refusé. Veuillez autoriser l'accès dans les paramètres de votre navigateur."
+          );
         } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
           setError('Aucune caméra détectée sur cet appareil.');
         } else if (err.name === 'NotReadableError') {
@@ -74,9 +76,9 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
           setError(`Erreur caméra: ${err.message}`);
         }
       } else {
-        setError('Erreur lors de l\'accès à la caméra.');
+        setError("Erreur lors de l'accès à la caméra.");
       }
-      
+
       setIsStarting(false);
     }
   }, [facingMode]);
@@ -85,7 +87,7 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
   useEffect(() => {
     return () => {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
@@ -97,28 +99,31 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
     }
   }, [mode, startCamera]);
 
-  const handleLivenessComplete = useCallback((videoRefFromLiveness: React.RefObject<HTMLVideoElement | null>) => {
-    // Capture from the liveness video directly
-    if (videoRefFromLiveness.current && canvasRef.current) {
-      const video = videoRefFromLiveness.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
+  const handleLivenessComplete = useCallback(
+    (videoRefFromLiveness: React.RefObject<HTMLVideoElement | null>) => {
+      // Capture from the liveness video directly
+      if (videoRefFromLiveness.current && canvasRef.current) {
+        const video = videoRefFromLiveness.current;
+        const canvas = canvasRef.current;
+        const context = canvas.getContext('2d');
 
-      if (context && video.videoWidth > 0) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        if (context && video.videoWidth > 0) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
 
-        // Mirror for selfie
-        context.translate(canvas.width, 0);
-        context.scale(-1, 1);
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          // Mirror for selfie
+          context.translate(canvas.width, 0);
+          context.scale(-1, 1);
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const imageData = canvas.toDataURL('image/jpeg', 0.9);
-        setCapturedImage(imageData);
-        setMode('preview');
+          const imageData = canvas.toDataURL('image/jpeg', 0.9);
+          setCapturedImage(imageData);
+          setMode('preview');
+        }
       }
-    }
-  }, []);
+    },
+    []
+  );
 
   const handleLivenessError = useCallback((errorMsg: string) => {
     setError(errorMsg);
@@ -172,7 +177,14 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
         <p className="text-red-800 font-medium mb-2">Erreur de caméra</p>
         <p className="text-red-600 text-sm mb-4">{error}</p>
         <div className="flex gap-2 justify-center">
-          <Button onClick={() => { setError(null); setMode('liveness'); }} variant="outline" className="border-red-300 text-red-700">
+          <Button
+            onClick={() => {
+              setError(null);
+              setMode('liveness');
+            }}
+            variant="outline"
+            className="border-red-300 text-red-700"
+          >
             <RefreshCw className="mr-2 h-4 w-4" />
             Réessayer
           </Button>
@@ -189,7 +201,7 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
     return (
       <div className="space-y-4">
         <canvas ref={canvasRef} className="hidden" />
-        
+
         {/* Liveness header */}
         <div className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-4 text-center mb-4">
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -201,12 +213,13 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
           </p>
         </div>
 
-        <LivenessDetector
-          onComplete={handleLivenessComplete}
-          onError={handleLivenessError}
-        />
+        <LivenessDetector onComplete={handleLivenessComplete} onError={handleLivenessError} />
 
-        <Button onClick={onCancel} variant="outline" className="w-full border-[#2C1810]/30 text-[#2C1810]">
+        <Button
+          onClick={onCancel}
+          variant="outline"
+          className="w-full border-[#2C1810]/30 text-[#2C1810]"
+        >
           <X className="mr-2 h-4 w-4" />
           Annuler
         </Button>
@@ -221,11 +234,7 @@ const SelfieCapture: React.FC<SelfieCaptureProps> = ({
         <canvas ref={canvasRef} className="hidden" />
 
         <div className="relative rounded-xl overflow-hidden bg-black aspect-[4/3]">
-          <img
-            src={capturedImage}
-            alt="Selfie capturé"
-            className="w-full h-full object-cover"
-          />
+          <img src={capturedImage} alt="Selfie capturé" className="w-full h-full object-cover" />
 
           {isProcessing && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/70 z-20">

@@ -8,7 +8,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { messagingApi, type Conversation, type Message } from '@/features/messaging/services/messaging.api';
+import {
+  messagingApi,
+  type Conversation,
+  type Message,
+} from '@/features/messaging/services/messaging.api';
 import { useRateLimiter } from '@/shared/services/rateLimiter.service';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/services/supabase/client';
@@ -62,7 +66,7 @@ export function useSecureMessaging() {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Erreur lors de l\'envoi du message');
+      toast.error(error.message || "Erreur lors de l'envoi du message");
     },
   });
 
@@ -231,10 +235,7 @@ export function useSecureUnreadCount() {
   const { checkRateLimit } = useRateLimiter();
   const { user } = useAuthStore();
 
-  const {
-    data: unreadCount = 0,
-    isLoading: isLoadingUnread,
-  } = useQuery({
+  const { data: unreadCount = 0, isLoading: isLoadingUnread } = useQuery({
     queryKey: ['unread-count'],
     queryFn: async () => {
       // Limiter les appels à cette fonction

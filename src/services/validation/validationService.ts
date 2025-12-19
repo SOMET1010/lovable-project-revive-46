@@ -257,7 +257,6 @@ export const ValidationService = {
     return { isValid: true };
   },
 
-  
   // ============================================
   // VALIDATIONS DE FORMULAIRES COMPLETS
   // ============================================

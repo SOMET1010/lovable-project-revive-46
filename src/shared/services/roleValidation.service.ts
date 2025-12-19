@@ -101,7 +101,9 @@ const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
  * Vérifie le rôle de l'utilisateur actuel
  */
 export async function getCurrentUserRole(): Promise<UserRole | null> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return null;
 
   const { data: profile } = await supabase
@@ -110,7 +112,7 @@ export async function getCurrentUserRole(): Promise<UserRole | null> {
     .eq('id', user.id)
     .single();
 
-  return profile?.user_type as UserRole || null;
+  return (profile?.user_type as UserRole) || null;
 }
 
 /**
@@ -140,17 +142,15 @@ export async function isResourceOwner(
   resourceType: 'property' | 'contract' | 'application' | 'message',
   resourceId: string
 ): Promise<boolean> {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return false;
 
   let query;
   switch (resourceType) {
     case 'property':
-      query = supabase
-        .from('properties')
-        .select('owner_id')
-        .eq('id', resourceId)
-        .single();
+      query = supabase.from('properties').select('owner_id').eq('id', resourceId).single();
       break;
     case 'contract':
       query = supabase
@@ -285,7 +285,9 @@ export async function canCreateContractForProperty(propertyId: string): Promise<
 /**
  * Middleware de validation de propriété
  */
-export function requireOwnership(resourceType: 'property' | 'contract' | 'application' | 'message') {
+export function requireOwnership(
+  resourceType: 'property' | 'contract' | 'application' | 'message'
+) {
   return async (resourceId: string) => {
     const isOwner = await isResourceOwner(resourceType, resourceId);
     if (!isOwner) {

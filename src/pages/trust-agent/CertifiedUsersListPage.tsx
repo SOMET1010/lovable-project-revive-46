@@ -36,10 +36,20 @@ interface CertifiedUser {
   // Additional verification fields
   oneci_number?: string | null;
   oneci_verification_date?: string | null;
-    bio?: string | null;
+  bio?: string | null;
 }
 
-type FilterType = 'all' | 'verified' | 'partial' | 'oneci' | 'facial' | 'locataire' | 'proprietaire' | 'agence' | 'admin_ansut' | 'trust_agent';
+type FilterType =
+  | 'all'
+  | 'verified'
+  | 'partial'
+  | 'oneci'
+  | 'facial'
+  | 'locataire'
+  | 'proprietaire'
+  | 'agence'
+  | 'admin_ansut'
+  | 'trust_agent';
 
 export default function CertifiedUsersListPage() {
   const [users, setUsers] = useState<CertifiedUser[]>([]);
@@ -75,36 +85,37 @@ export default function CertifiedUsersListPage() {
     // Apply filter
     switch (activeFilter) {
       case 'verified':
-        filtered = users.filter(u => u.is_verified);
+        filtered = users.filter((u) => u.is_verified);
         break;
       case 'partial':
-        filtered = users.filter(u =>
-          (u.oneci_verified || u.facial_verification_status !== 'none') && !u.is_verified
+        filtered = users.filter(
+          (u) => (u.oneci_verified || u.facial_verification_status !== 'none') && !u.is_verified
         );
         break;
       case 'oneci':
-        filtered = users.filter(u => u.oneci_verified);
+        filtered = users.filter((u) => u.oneci_verified);
         break;
       case 'facial':
-        filtered = users.filter(u => u.facial_verification_status !== 'none');
+        filtered = users.filter((u) => u.facial_verification_status !== 'none');
         break;
       case 'locataire':
       case 'proprietaire':
       case 'agence':
       case 'admin_ansut':
       case 'trust_agent':
-        filtered = users.filter(u => u.user_type === activeFilter);
+        filtered = users.filter((u) => u.user_type === activeFilter);
         break;
     }
 
     // Apply search
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(u =>
-        u.full_name?.toLowerCase().includes(query) ||
-        u.email.toLowerCase().includes(query) ||
-        u.phone?.includes(query) ||
-        u.city?.toLowerCase().includes(query)
+      filtered = filtered.filter(
+        (u) =>
+          u.full_name?.toLowerCase().includes(query) ||
+          u.email.toLowerCase().includes(query) ||
+          u.phone?.includes(query) ||
+          u.city?.toLowerCase().includes(query)
       );
     }
 
@@ -165,7 +176,7 @@ export default function CertifiedUsersListPage() {
     try {
       const csvContent = [
         ['Nom', 'Email', 'Téléphone', 'Ville', 'Statut', 'ONECI', 'Facial', 'Trust Score'],
-        ...filteredUsers.map(u => [
+        ...filteredUsers.map((u) => [
           u.full_name || '',
           u.email,
           u.phone || '',
@@ -173,9 +184,11 @@ export default function CertifiedUsersListPage() {
           getVerificationStatus(u).label,
           u.oneci_verified ? 'Oui' : 'Non',
           u.facial_verification_status !== 'none' ? 'Oui' : 'Non',
-          `${getVerificationScore(u)}%`
-        ])
-      ].map(row => row.join(',')).join('\n');
+          `${getVerificationScore(u)}%`,
+        ]),
+      ]
+        .map((row) => row.join(','))
+        .join('\n');
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
@@ -186,7 +199,7 @@ export default function CertifiedUsersListPage() {
       toast.success('Export réussi');
     } catch (error) {
       console.error('Export error:', error);
-      toast.error('Erreur lors de l\'export');
+      toast.error("Erreur lors de l'export");
     }
   };
 
@@ -230,7 +243,7 @@ export default function CertifiedUsersListPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Vérifiés</p>
-                  <p className="text-2xl font-bold">{users.filter(u => u.is_verified).length}</p>
+                  <p className="text-2xl font-bold">{users.filter((u) => u.is_verified).length}</p>
                 </div>
               </div>
             </CardContent>
@@ -244,7 +257,9 @@ export default function CertifiedUsersListPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">ONECI</p>
-                  <p className="text-2xl font-bold">{users.filter(u => u.oneci_verified).length}</p>
+                  <p className="text-2xl font-bold">
+                    {users.filter((u) => u.oneci_verified).length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -258,7 +273,9 @@ export default function CertifiedUsersListPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Facial</p>
-                  <p className="text-2xl font-bold">{users.filter(u => u.facial_verification_status !== 'none').length}</p>
+                  <p className="text-2xl font-bold">
+                    {users.filter((u) => u.facial_verification_status !== 'none').length}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -286,13 +303,35 @@ export default function CertifiedUsersListPage() {
 
             <div className="flex flex-wrap gap-2">
               {/* Verification Filters */}
-              <div className="w-full text-sm font-medium text-muted-foreground mb-2">Filtres de vérification:</div>
+              <div className="w-full text-sm font-medium text-muted-foreground mb-2">
+                Filtres de vérification:
+              </div>
               {[
                 { id: 'all', label: 'Tous', count: users.length },
-                { id: 'verified', label: 'Vérifiés', count: users.filter(u => u.is_verified).length },
-                { id: 'partial', label: 'Partiels', count: users.filter(u => (u.oneci_verified || u.facial_verification_status !== 'none') && !u.is_verified).length },
-                { id: 'oneci', label: 'ONECI', count: users.filter(u => u.oneci_verified).length },
-                { id: 'facial', label: 'Facial', count: users.filter(u => u.facial_verification_status !== 'none').length },
+                {
+                  id: 'verified',
+                  label: 'Vérifiés',
+                  count: users.filter((u) => u.is_verified).length,
+                },
+                {
+                  id: 'partial',
+                  label: 'Partiels',
+                  count: users.filter(
+                    (u) =>
+                      (u.oneci_verified || u.facial_verification_status !== 'none') &&
+                      !u.is_verified
+                  ).length,
+                },
+                {
+                  id: 'oneci',
+                  label: 'ONECI',
+                  count: users.filter((u) => u.oneci_verified).length,
+                },
+                {
+                  id: 'facial',
+                  label: 'Facial',
+                  count: users.filter((u) => u.facial_verification_status !== 'none').length,
+                },
               ].map((filter) => (
                 <Button
                   key={filter.id}
@@ -305,13 +344,35 @@ export default function CertifiedUsersListPage() {
               ))}
 
               {/* User Type Filters */}
-              <div className="w-full text-sm font-medium text-muted-foreground mb-2 mt-4">Filtres par type d'utilisateur:</div>
+              <div className="w-full text-sm font-medium text-muted-foreground mb-2 mt-4">
+                Filtres par type d'utilisateur:
+              </div>
               {[
-                { id: 'locataire', label: 'Locataires', count: users.filter(u => u.user_type === 'locataire').length },
-                { id: 'proprietaire', label: 'Propriétaires', count: users.filter(u => u.user_type === 'proprietaire').length },
-                { id: 'agence', label: 'Agences', count: users.filter(u => u.user_type === 'agence').length },
-                { id: 'admin_ansut', label: 'Admins', count: users.filter(u => u.user_type === 'admin_ansut').length },
-                { id: 'trust_agent', label: 'Agents', count: users.filter(u => u.user_type === 'trust_agent').length },
+                {
+                  id: 'locataire',
+                  label: 'Locataires',
+                  count: users.filter((u) => u.user_type === 'locataire').length,
+                },
+                {
+                  id: 'proprietaire',
+                  label: 'Propriétaires',
+                  count: users.filter((u) => u.user_type === 'proprietaire').length,
+                },
+                {
+                  id: 'agence',
+                  label: 'Agences',
+                  count: users.filter((u) => u.user_type === 'agence').length,
+                },
+                {
+                  id: 'admin_ansut',
+                  label: 'Admins',
+                  count: users.filter((u) => u.user_type === 'admin_ansut').length,
+                },
+                {
+                  id: 'trust_agent',
+                  label: 'Agents',
+                  count: users.filter((u) => u.user_type === 'trust_agent').length,
+                },
               ].map((filter) => (
                 <Button
                   key={filter.id}
@@ -365,9 +426,7 @@ export default function CertifiedUsersListPage() {
                               <Badge className={getUserTypeColor(user.user_type)}>
                                 {getUserTypeLabel(user.user_type)}
                               </Badge>
-                              <Badge className={status.color}>
-                                {status.label}
-                              </Badge>
+                              <Badge className={status.color}>{status.label}</Badge>
                             </div>
 
                             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
@@ -397,7 +456,7 @@ export default function CertifiedUsersListPage() {
                                   ONECI
                                 </Badge>
                               )}
-                                                            {user.facial_verification_status === 'verified' && (
+                              {user.facial_verification_status === 'verified' && (
                                 <Badge variant="secondary" className="gap-1">
                                   <CheckCircle2 className="h-3 w-3" />
                                   Facial
@@ -416,7 +475,9 @@ export default function CertifiedUsersListPage() {
                             variant="outline"
                             size="sm"
                             className="mt-2"
-                            onClick={() => window.location.href = `/trust-agent/certification/${user.id}`}
+                            onClick={() =>
+                              (window.location.href = `/trust-agent/certification/${user.id}`)
+                            }
                           >
                             <Eye className="h-3 w-3 mr-1" />
                             Voir

@@ -67,8 +67,8 @@ export class SecureUploadService {
 
     // Signatures communes de fichiers
     const signatures: Record<string, number[]> = {
-      'image/jpeg': [0xFF, 0xD8, 0xFF],
-      'image/png': [0x89, 0x50, 0x4E, 0x47],
+      'image/jpeg': [0xff, 0xd8, 0xff],
+      'image/png': [0x89, 0x50, 0x4e, 0x47],
       'image/webp': [0x52, 0x49, 0x46, 0x46],
       'application/pdf': [0x25, 0x50, 0x44, 0x46],
     };
@@ -94,7 +94,9 @@ export class SecureUploadService {
     resourceType?: string,
     resourceId?: string
   ): Promise<void> {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
 
     // Vérifications par bucket
@@ -260,7 +262,9 @@ export class SecureUploadService {
       }
 
       // 6. Enregistrement des métadonnées pour audit
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       const metadata = {
         uploaded_by: user?.id || '',
         uploaded_at: new Date().toISOString(),
@@ -286,7 +290,7 @@ export class SecureUploadService {
       return {
         url: '',
         path: '',
-        error: error.message || 'Erreur lors de l\'upload sécurisé',
+        error: error.message || "Erreur lors de l'upload sécurisé",
       };
     }
   }
@@ -300,7 +304,9 @@ export class SecureUploadService {
   ): Promise<{ error?: string }> {
     try {
       // Vérifier que l'utilisateur a le droit de supprimer ce fichier
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!user) throw new Error('Utilisateur non authentifié');
 
       // Récupérer les métadonnées du fichier

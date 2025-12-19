@@ -356,12 +356,12 @@ describe('Security Integration Tests', () => {
   it('should handle concurrent requests safely', async () => {
     // Scénario: Plusieurs requêtes simultanées pour la même opération
     const userId = 'concurrent-user';
-    const promises = Array(10).fill(null).map(() =>
-      rateLimiter.checkLimit(userId, 'test:concurrent')
-    );
+    const promises = Array(10)
+      .fill(null)
+      .map(() => rateLimiter.checkLimit(userId, 'test:concurrent'));
 
     const results = await Promise.all(promises);
-    const allowedCount = results.filter(r => r.allowed).length;
+    const allowedCount = results.filter((r) => r.allowed).length;
 
     // Certains devraient être bloqués selon la configuration
     expect(allowedCount).toBeLessThanOrEqual(10);

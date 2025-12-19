@@ -98,9 +98,7 @@ export default function CalendarPage() {
               Retour au dashboard
             </Button>
           </Link>
-          <Button onClick={() => handlePlanMission(new Date())}>
-            Nouvelle Mission
-          </Button>
+          <Button onClick={() => handlePlanMission(new Date())}>Nouvelle Mission</Button>
         </div>
 
         {/* Stats bar */}

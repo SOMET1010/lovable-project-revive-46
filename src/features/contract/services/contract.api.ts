@@ -6,7 +6,11 @@
  */
 
 import { supabase } from '@/services/supabase/client';
-import { requirePermission, requireOwnership, hasRole } from '@/shared/services/roleValidation.service';
+import {
+  requirePermission,
+  requireOwnership,
+  hasRole,
+} from '@/shared/services/roleValidation.service';
 import type { Database } from '@/shared/lib/database.types';
 
 type ContractInsert = Database['public']['Tables']['lease_contracts']['Insert'];
@@ -63,12 +67,12 @@ export const contractApi = {
    * Récupère tous les contrats accessibles par l'utilisateur
    */
   getAll: async (filters?: ContractFilters): Promise<ContractWithDetails[]> => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
 
-    let query = supabase
-      .from('lease_contracts')
-      .select(`
+    let query = supabase.from('lease_contracts').select(`
         *,
         properties!lease_contracts_property_id_fkey (
           title,
@@ -125,11 +129,9 @@ export const contractApi = {
         query = query.eq('tenant_id', user.id);
       } else if (profile?.user_type === 'agency') {
         // Pour les agences, vérifier qu'elles gèrent la propriété
-        query = query.in('property_id',
-          supabase
-            .from('properties')
-            .select('id')
-            .eq('agency_id', user.id)
+        query = query.in(
+          'property_id',
+          supabase.from('properties').select('id').eq('agency_id', user.id)
         );
       } else {
         return []; // Pas de contrats accessibles
@@ -150,7 +152,8 @@ export const contractApi = {
 
     const { data, error } = await supabase
       .from('lease_contracts')
-      .select(`
+      .select(
+        `
         *,
         properties!lease_contracts_property_id_fkey (
           title,
@@ -167,7 +170,8 @@ export const contractApi = {
           email,
           phone
         )
-      `)
+      `
+      )
       .eq('id', id)
       .single();
 
@@ -182,7 +186,9 @@ export const contractApi = {
     await requirePermission('canManageContracts')();
 
     // Vérifier que l'utilisateur a le droit de créer un contrat pour cette propriété
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
 
     // Si ce n'est pas un admin, vérifier que c'est le propriétaire ou l'agence
@@ -211,7 +217,8 @@ export const contractApi = {
         status: 'brouillon',
         created_at: new Date().toISOString(),
       })
-      .select(`
+      .select(
+        `
         *,
         properties!lease_contracts_property_id_fkey (
           title,
@@ -228,7 +235,8 @@ export const contractApi = {
           email,
           phone
         )
-      `)
+      `
+      )
       .single();
 
     if (error) throw error;
@@ -261,7 +269,8 @@ export const contractApi = {
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .select(`
+      .select(
+        `
         *,
         properties!lease_contracts_property_id_fkey (
           title,
@@ -278,7 +287,8 @@ export const contractApi = {
           email,
           phone
         )
-      `)
+      `
+      )
       .single();
 
     if (error) throw error;
@@ -322,8 +332,13 @@ export const contractApi = {
   /**
    * Signe un contrat (pour le propriétaire ou le locataire)
    */
-  signContract: async (id: string, signatureType: 'owner' | 'tenant'): Promise<ContractWithDetails> => {
-    const { data: { user } } = await supabase.auth.getUser();
+  signContract: async (
+    id: string,
+    signatureType: 'owner' | 'tenant'
+  ): Promise<ContractWithDetails> => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
 
     const contract = await this.getById(id);
@@ -338,7 +353,7 @@ export const contractApi = {
 
     // Vérifier que le contrat est en attente de signature
     if (contract.status !== 'en_attente_signature') {
-      throw new Error('Ce contrat n\'est pas en attente de signature');
+      throw new Error("Ce contrat n'est pas en attente de signature");
     }
 
     // Mettre à jour la signature
@@ -360,7 +375,8 @@ export const contractApi = {
       .from('lease_contracts')
       .update(updateData)
       .eq('id', id)
-      .select(`
+      .select(
+        `
         *,
         properties!lease_contracts_property_id_fkey (
           title,
@@ -377,17 +393,15 @@ export const contractApi = {
           email,
           phone
         )
-      `)
+      `
+      )
       .single();
 
     if (error) throw error;
 
     // Si le contrat est activé, mettre à jour le statut de la propriété
     if (updateData.status === 'actif') {
-      await supabase
-        .from('properties')
-        .update({ status: 'loue' })
-        .eq('id', contract.property_id);
+      await supabase.from('properties').update({ status: 'loue' }).eq('id', contract.property_id);
     }
 
     return data as ContractWithDetails;
@@ -413,7 +427,8 @@ export const contractApi = {
         terminated_at: new Date().toISOString(),
       })
       .eq('id', id)
-      .select(`
+      .select(
+        `
         *,
         properties!lease_contracts_property_id_fkey (
           title,
@@ -430,7 +445,8 @@ export const contractApi = {
           email,
           phone
         )
-      `)
+      `
+      )
       .single();
 
     if (error) throw error;
@@ -468,10 +484,10 @@ export const contractApi = {
 
     const stats = {
       total: data?.length || 0,
-      actifs: data?.filter(c => c.status === 'actif').length || 0,
-      brouillons: data?.filter(c => c.status === 'brouillon').length || 0,
-      en_attente: data?.filter(c => c.status === 'en_attente_signature').length || 0,
-      resilies: data?.filter(c => c.status === 'resilie').length || 0,
+      actifs: data?.filter((c) => c.status === 'actif').length || 0,
+      brouillons: data?.filter((c) => c.status === 'brouillon').length || 0,
+      en_attente: data?.filter((c) => c.status === 'en_attente_signature').length || 0,
+      resilies: data?.filter((c) => c.status === 'resilie').length || 0,
     };
 
     return stats;

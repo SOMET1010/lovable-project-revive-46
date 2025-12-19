@@ -32,7 +32,7 @@ describe('Security Integration Tests', () => {
         try {
           await supabase.auth.signInWithPassword({
             email: attackerEmail,
-            password: 'wrongpassword'
+            password: 'wrongpassword',
           });
           successfulLogins++;
         } catch (error: any) {
@@ -55,7 +55,7 @@ describe('Security Integration Tests', () => {
       try {
         await supabase.auth.signInWithPassword({
           email: existingEmail,
-          password: 'wrong'
+          password: 'wrong',
         });
       } catch (error: any) {
         const existingErrorMsg = error.message;
@@ -64,7 +64,7 @@ describe('Security Integration Tests', () => {
       try {
         await supabase.auth.signInWithPassword({
           email: nonExistingEmail,
-          password: 'wrong'
+          password: 'wrong',
         });
       } catch (error: any) {
         const nonExistingErrorMsg = error.message;
@@ -107,7 +107,7 @@ describe('Security Integration Tests', () => {
 
       // Le RLS devrait filtrer les résultats
       if (applications) {
-        expect(applications.filter(app => app.tenant_id !== tenant1Id)).toHaveLength(0);
+        expect(applications.filter((app) => app.tenant_id !== tenant1Id)).toHaveLength(0);
       }
     });
 
@@ -182,7 +182,7 @@ describe('Security Integration Tests', () => {
         ?>
       `;
       const file = new File([maliciousContent], 'malicious.php', {
-        type: 'application/x-php'
+        type: 'application/x-php',
       });
 
       // Tenter d'uploader un fichier malveillant
@@ -192,7 +192,7 @@ describe('Security Integration Tests', () => {
 
         const response = await fetch('/api/upload', {
           method: 'POST',
-          body: formData
+          body: formData,
         });
 
         const result = await response.json();
@@ -235,8 +235,8 @@ describe('Security Integration Tests', () => {
       // Test depuis une origine non autorisée
       const response = await fetch('/api/test', {
         headers: {
-          'Origin': 'https://malicious-site.com'
-        }
+          Origin: 'https://malicious-site.com',
+        },
       });
 
       // Ne devrait pas inclure l'origine dans les headers
@@ -251,16 +251,18 @@ describe('Security Integration Tests', () => {
       let rejectedRequests = 0;
 
       // Faire beaucoup de requêtes rapidement
-      const promises = Array(200).fill(null).map(async () => {
-        try {
-          const response = await fetch(endpoint);
-          if (response.status === 429) {
+      const promises = Array(200)
+        .fill(null)
+        .map(async () => {
+          try {
+            const response = await fetch(endpoint);
+            if (response.status === 429) {
+              rejectedRequests++;
+            }
+          } catch (error) {
             rejectedRequests++;
           }
-        } catch (error) {
-          rejectedRequests++;
-        }
-      });
+        });
 
       await Promise.all(promises);
       expect(rejectedRequests).toBeGreaterThan(0);
@@ -269,13 +271,13 @@ describe('Security Integration Tests', () => {
     it('should handle large payloads safely', async () => {
       // Tenter d'envoyer un payload très volumineux
       const largePayload = {
-        data: 'x'.repeat(10 * 1024 * 1024) // 10MB
+        data: 'x'.repeat(10 * 1024 * 1024), // 10MB
       };
 
       const response = await fetch('/api/test', {
         method: 'POST',
         body: JSON.stringify(largePayload),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
 
       // La requête devrait être rejetée
@@ -290,7 +292,7 @@ describe('Security Integration Tests', () => {
         event: 'MULTIPLE_LOGIN_FAILURES',
         userId: 'user-123',
         ip: '192.168.1.100',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       // Vérifier que l'événement est loggé
@@ -305,7 +307,7 @@ describe('Security Integration Tests', () => {
         targetUserId: 'user-789',
         oldValue: 'tenant',
         newValue: 'owner',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       expect(auditEntry.action).toBe('ROLE_CHANGE');
@@ -367,7 +369,7 @@ describe('Security Integration Tests', () => {
       const response = await fetch('/api/update-profile', {
         method: 'POST',
         body: JSON.stringify({ name: 'Hacked' }),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
       });
 
       // Devrait rejeter la requête si le middleware CSRF est actif

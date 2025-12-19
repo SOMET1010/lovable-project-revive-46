@@ -3,9 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
 import { toast } from 'sonner';
-import { 
-  FileBarChart, Download, TrendingUp, Users, Building2,
-  Coins, Calendar, RefreshCw, Trophy
+import {
+  FileBarChart,
+  Download,
+  TrendingUp,
+  Users,
+  Building2,
+  Coins,
+  Calendar,
+  RefreshCw,
+  Trophy,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -94,7 +101,6 @@ export default function AgencyReportsPage() {
       if (response.error) throw response.error;
 
       setReport(response.data.report);
-
     } catch (error) {
       console.error('Error generating report:', error);
       toast.error('Erreur lors de la génération du rapport');
@@ -120,14 +126,16 @@ export default function AgencyReportsPage() {
       [],
       ['Performance par agent'],
       ['Nom', 'Revenus', 'Commissions', 'Transactions', 'Propriétés'],
-      ...report.agent_performance.map(a => [
+      ...report.agent_performance.map((a) => [
         a.name,
         a.total_revenue,
         a.total_commissions,
         a.transaction_count,
         a.properties_assigned,
       ]),
-    ].map(row => row.join(',')).join('\n');
+    ]
+      .map((row) => row.join(','))
+      .join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -145,15 +153,18 @@ export default function AgencyReportsPage() {
     );
   }
 
-  const revenueData = report?.agent_performance.slice(0, 5).map(a => ({
-    name: a.name.split(' ')[0],
-    revenue: a.total_revenue,
-  })) || [];
+  const revenueData =
+    report?.agent_performance.slice(0, 5).map((a) => ({
+      name: a.name.split(' ')[0],
+      revenue: a.total_revenue,
+    })) || [];
 
-  const pieData = report ? [
-    { name: 'Part agence', value: report.summary.agency_share },
-    { name: 'Part agents', value: report.summary.agent_share },
-  ] : [];
+  const pieData = report
+    ? [
+        { name: 'Part agence', value: report.summary.agency_share },
+        { name: 'Part agents', value: report.summary.agent_share },
+      ]
+    : [];
 
   return (
     <div className="min-h-screen bg-[#FAF7F4] py-8">
@@ -162,13 +173,11 @@ export default function AgencyReportsPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-[#2C1810]">Rapports</h1>
-            <p className="text-[#2C1810]/60 mt-1">
-              Analyse des performances de l'agence
-            </p>
+            <p className="text-[#2C1810]/60 mt-1">Analyse des performances de l'agence</p>
           </div>
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => agencyId && generateReport(agencyId)}
               disabled={generating}
             >
@@ -188,7 +197,8 @@ export default function AgencyReportsPage() {
             <div className="flex items-center gap-2 text-[#2C1810]/60 mb-6">
               <Calendar className="w-4 h-4" />
               <span>
-                Période : {format(new Date(report.agency.period.start), 'dd MMMM', { locale: fr })} - {format(new Date(report.agency.period.end), 'dd MMMM yyyy', { locale: fr })}
+                Période : {format(new Date(report.agency.period.start), 'dd MMMM', { locale: fr })}{' '}
+                - {format(new Date(report.agency.period.end), 'dd MMMM yyyy', { locale: fr })}
               </span>
             </div>
 
@@ -231,7 +241,9 @@ export default function AgencyReportsPage() {
                       <Users className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-xl font-bold text-[#2C1810]">{report.summary.total_agents}</p>
+                      <p className="text-xl font-bold text-[#2C1810]">
+                        {report.summary.total_agents}
+                      </p>
                       <p className="text-sm text-[#2C1810]/60">Agents actifs</p>
                     </div>
                   </div>
@@ -244,7 +256,9 @@ export default function AgencyReportsPage() {
                       <Building2 className="w-5 h-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-xl font-bold text-[#2C1810]">{report.summary.total_properties}</p>
+                      <p className="text-xl font-bold text-[#2C1810]">
+                        {report.summary.total_properties}
+                      </p>
                       <p className="text-sm text-[#2C1810]/60">Propriétés</p>
                     </div>
                   </div>
@@ -269,8 +283,11 @@ export default function AgencyReportsPage() {
                         <CartesianGrid strokeDasharray="3 3" stroke="#EFEBE9" />
                         <XAxis dataKey="name" stroke="#2C1810" fontSize={12} />
                         <YAxis stroke="#2C1810" fontSize={12} />
-                        <Tooltip 
-                          formatter={(value: number) => [`${value.toLocaleString()} FCFA`, 'Revenus']}
+                        <Tooltip
+                          formatter={(value: number) => [
+                            `${value.toLocaleString()} FCFA`,
+                            'Revenus',
+                          ]}
                         />
                         <Bar dataKey="revenue" fill="#F16522" radius={[4, 4, 0, 0]} />
                       </BarChart>
@@ -300,7 +317,9 @@ export default function AgencyReportsPage() {
                           outerRadius={100}
                           paddingAngle={5}
                           dataKey="value"
-                          label={({ name, percent }) => `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`}
+                          label={({ name, percent }) =>
+                            `${name}: ${((percent ?? 0) * 100).toFixed(0)}%`
+                          }
                         >
                           {pieData.map((_, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -332,12 +351,24 @@ export default function AgencyReportsPage() {
                     <table className="w-full">
                       <thead className="bg-[#FAF7F4]">
                         <tr>
-                          <th className="text-left p-3 text-sm font-medium text-[#2C1810]/70">Rang</th>
-                          <th className="text-left p-3 text-sm font-medium text-[#2C1810]/70">Agent</th>
-                          <th className="text-right p-3 text-sm font-medium text-[#2C1810]/70">Revenus</th>
-                          <th className="text-right p-3 text-sm font-medium text-[#2C1810]/70">Commissions</th>
-                          <th className="text-right p-3 text-sm font-medium text-[#2C1810]/70">Transactions</th>
-                          <th className="text-right p-3 text-sm font-medium text-[#2C1810]/70">Propriétés</th>
+                          <th className="text-left p-3 text-sm font-medium text-[#2C1810]/70">
+                            Rang
+                          </th>
+                          <th className="text-left p-3 text-sm font-medium text-[#2C1810]/70">
+                            Agent
+                          </th>
+                          <th className="text-right p-3 text-sm font-medium text-[#2C1810]/70">
+                            Revenus
+                          </th>
+                          <th className="text-right p-3 text-sm font-medium text-[#2C1810]/70">
+                            Commissions
+                          </th>
+                          <th className="text-right p-3 text-sm font-medium text-[#2C1810]/70">
+                            Transactions
+                          </th>
+                          <th className="text-right p-3 text-sm font-medium text-[#2C1810]/70">
+                            Propriétés
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -356,15 +387,21 @@ export default function AgencyReportsPage() {
                             <td className="p-3 text-right text-green-600">
                               {agent.total_commissions.toLocaleString()} F
                             </td>
-                            <td className="p-3 text-right text-[#2C1810]">{agent.transaction_count}</td>
-                            <td className="p-3 text-right text-[#2C1810]">{agent.properties_assigned}</td>
+                            <td className="p-3 text-right text-[#2C1810]">
+                              {agent.transaction_count}
+                            </td>
+                            <td className="p-3 text-right text-[#2C1810]">
+                              {agent.properties_assigned}
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
                 ) : (
-                  <p className="text-center text-[#2C1810]/60 py-8">Aucun agent avec des transactions ce mois</p>
+                  <p className="text-center text-[#2C1810]/60 py-8">
+                    Aucun agent avec des transactions ce mois
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -373,7 +410,9 @@ export default function AgencyReportsPage() {
           <Card className="bg-white border-[#EFEBE9]">
             <CardContent className="p-12 text-center">
               <FileBarChart className="w-12 h-12 mx-auto text-[#2C1810]/20 mb-4" />
-              <h3 className="text-lg font-semibold text-[#2C1810] mb-2">Aucun rapport disponible</h3>
+              <h3 className="text-lg font-semibold text-[#2C1810] mb-2">
+                Aucun rapport disponible
+              </h3>
               <p className="text-[#2C1810]/60">Générez votre premier rapport</p>
             </CardContent>
           </Card>

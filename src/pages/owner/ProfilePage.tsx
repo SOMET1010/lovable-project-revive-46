@@ -3,8 +3,18 @@ import { useAuth } from '@/app/providers/AuthProvider';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  User, Phone, MapPin, Shield, Camera, Save, CheckCircle, AlertCircle,
-  Building2, Home, FileText, TrendingUp
+  User,
+  Phone,
+  MapPin,
+  Shield,
+  Camera,
+  Save,
+  CheckCircle,
+  AlertCircle,
+  Building2,
+  Home,
+  FileText,
+  TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import Input from '@/shared/ui/Input';
@@ -96,10 +106,7 @@ export default function OwnerProfilePage() {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase
-        .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
+      const { error } = await supabase.from('profiles').update(updates).eq('id', user.id);
 
       if (error) throw error;
 
@@ -123,8 +130,7 @@ export default function OwnerProfilePage() {
       const bucket = STORAGE_BUCKETS.PROFILE_IMAGES;
 
       // Create bucket if needed
-      const { data: existingBuckets, error: bucketError } =
-        await supabase.storage.listBuckets();
+      const { data: existingBuckets, error: bucketError } = await supabase.storage.listBuckets();
       if (bucketError) throw bucketError;
 
       const bucketExists = (existingBuckets || []).some((b) => b.name === bucket);
@@ -140,9 +146,7 @@ export default function OwnerProfilePage() {
         .upload(fileName, file, { upsert: true });
       if (uploadError) throw uploadError;
 
-      const { data: publicUrlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(fileName);
+      const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
       const publicUrl = publicUrlData?.publicUrl;
       if (!publicUrl) throw new Error('URL publique introuvable');
@@ -178,9 +182,7 @@ export default function OwnerProfilePage() {
         .upload(fileName, file, { upsert: true });
       if (uploadError) throw uploadError;
 
-      const { data: publicUrlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(fileName);
+      const { data: publicUrlData } = supabase.storage.from(bucket).getPublicUrl(fileName);
 
       const publicUrl = publicUrlData?.publicUrl;
       if (!publicUrl) throw new Error('URL publique introuvable');
@@ -192,7 +194,7 @@ export default function OwnerProfilePage() {
       if (updateError) throw updateError;
 
       await loadProfile();
-      toast.success('Logo de l\'agence mis à jour');
+      toast.success("Logo de l'agence mis à jour");
     } catch (err) {
       console.error('Error uploading logo:', err);
       toast.error('Échec du téléchargement du logo');
@@ -202,9 +204,10 @@ export default function OwnerProfilePage() {
     }
   };
 
-  const displayName = (profile?.full_name && profile.full_name.trim()) ||
-                     (profile?.agency_name && profile.agency_name.trim()) ||
-                     'Utilisateur';
+  const displayName =
+    (profile?.full_name && profile.full_name.trim()) ||
+    (profile?.agency_name && profile.agency_name.trim()) ||
+    'Utilisateur';
 
   const tabs = [
     { id: 'infos', label: 'Informations', icon: User },
@@ -227,315 +230,290 @@ export default function OwnerProfilePage() {
 
   return (
     <div className="w-full">
-        {/* Profile Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center gap-6">
-            <div className="relative">
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={displayName}
-                  className="w-20 h-20 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center">
-                  <User className="w-8 h-8 text-primary-600" />
-                </div>
-              )}
-              <label className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm cursor-pointer">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarUpload}
-                  className="hidden"
-                  id="avatar-upload"
-                />
-                <Camera className="w-4 h-4 text-gray-600" />
-              </label>
-              {uploadingAvatar && (
-                <span className="absolute -bottom-5 right-0 text-xs text-muted-foreground">
-                  Upload...
+      {/* Profile Header */}
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="flex items-center gap-6">
+          <div className="relative">
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={displayName}
+                className="w-20 h-20 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center">
+                <User className="w-8 h-8 text-primary-600" />
+              </div>
+            )}
+            <label className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-sm cursor-pointer">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                id="avatar-upload"
+              />
+              <Camera className="w-4 h-4 text-gray-600" />
+            </label>
+            {uploadingAvatar && (
+              <span className="absolute -bottom-5 right-0 text-xs text-muted-foreground">
+                Upload...
+              </span>
+            )}
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">{displayName}</h2>
+            <p className="text-gray-600">
+              {profile?.user_type === 'proprietaire' ? 'Propriétaire' : 'Agence immobilière'}
+            </p>
+            {profile?.trust_score && (
+              <div className="flex items-center gap-2 mt-2">
+                <Shield className="w-4 h-4 text-green-600" />
+                <span className="text-sm font-medium">
+                  Score de confiance: {profile.trust_score}%
                 </span>
-              )}
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold">{displayName}</h2>
-              <p className="text-gray-600">
-                {profile?.user_type === 'proprietaire' ? 'Propriétaire' : 'Agence immobilière'}
-              </p>
-              {profile?.trust_score && (
-                <div className="flex items-center gap-2 mt-2">
-                  <Shield className="w-4 h-4 text-green-600" />
-                  <span className="text-sm font-medium">
-                    Score de confiance: {profile.trust_score}%
-                  </span>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Tabs Navigation */}
-        <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="border-b">
-            <nav className="flex -mb-px">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium text-sm ${
-                    activeTab === tab.id
-                      ? 'border-primary-500 text-primary-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
-          </div>
+      {/* Tabs Navigation */}
+      <div className="bg-white rounded-lg shadow-sm mb-6">
+        <div className="border-b">
+          <nav className="flex -mb-px">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 py-3 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+          </nav>
         </div>
+      </div>
 
-        {/* Tab Content */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          {activeTab === 'infos' && (
-            <form onSubmit={handleSaveProfile} className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom complet
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.full_name}
-                    onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                    placeholder="Votre nom complet"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email
-                  </label>
-                  <Input
-                    type="email"
-                    value={profile?.email || ''}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Téléphone
-                  </label>
-                  <Input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    placeholder="Votre numéro de téléphone"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Ville
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    placeholder="Votre ville"
-                  />
-                </div>
+      {/* Tab Content */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        {activeTab === 'infos' && (
+          <form onSubmit={handleSaveProfile} className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
+                <Input
+                  type="text"
+                  value={formData.full_name}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  placeholder="Votre nom complet"
+                />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <Input type="email" value={profile?.email || ''} disabled className="bg-gray-50" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Téléphone</label>
+                <Input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="Votre numéro de téléphone"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ville</label>
+                <Input
+                  type="text"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  placeholder="Votre ville"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+              <Input
+                type="text"
+                value={formData.address}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                placeholder="Votre adresse complète"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+              <textarea
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                rows={4}
+                value={formData.bio}
+                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                placeholder="Parlez-vous brièvement..."
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit" disabled={saving} className="flex items-center gap-2">
+                {saving ? 'Enregistrement...' : 'Enregistrer'}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        {activeTab === 'agency' && (
+          <div className="space-y-6">
+            {isOwnerOnly && (
+              <div className="p-4 border border-amber-200 bg-amber-50 rounded-lg">
+                <p className="font-semibold text-amber-800 mb-1">Fonctionnalité agence</p>
+                <p className="text-amber-700 text-sm">
+                  Vous êtes identifié comme propriétaire. Pour activer les fonctionnalités agence
+                  (logo, identité et coordonnées d'agence), complétez vos informations ci-dessous ou
+                  créez un compte agence dédié.
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate('/agence/inscription')}
+                    className="whitespace-nowrap"
+                  >
+                    Créer un compte agence
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => navigate('/proprietaire/mes-mandats')}
+                    className="whitespace-nowrap"
+                  >
+                    Voir mes mandats
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSaveProfile} className="space-y-6">
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Adresse
+                  Nom de l'agence
                 </label>
                 <Input
                   type="text"
-                  value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                  placeholder="Votre adresse complète"
+                  value={formData.agency_name}
+                  onChange={(e) => setFormData({ ...formData, agency_name: e.target.value })}
+                  placeholder="Nom de votre agence"
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bio
+                  Logo de l'agence
+                </label>
+                <div className="flex items-center gap-4">
+                  {profile?.agency_logo ? (
+                    <img
+                      src={profile.agency_logo}
+                      alt="Logo agence"
+                      className="w-16 h-16 rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                      <Building2 className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  <div>
+                    <label className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                      <Camera className="w-4 h-4" />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                        id="logo-upload"
+                      />
+                      {uploadingLogo ? 'Upload...' : 'Changer le logo'}
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description de l'agence
                 </label>
                 <textarea
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
                   rows={4}
-                  value={formData.bio}
-                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                  placeholder="Parlez-vous brièvement..."
+                  value={formData.agency_description}
+                  onChange={(e) => setFormData({ ...formData, agency_description: e.target.value })}
+                  placeholder="Décrivez votre agence..."
                 />
               </div>
               <div className="flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={saving}
-                  className="flex items-center gap-2"
-                >
+                <Button type="submit" disabled={saving} className="flex items-center gap-2">
                   {saving ? 'Enregistrement...' : 'Enregistrer'}
                 </Button>
               </div>
             </form>
-          )}
+          </div>
+        )}
 
-          {activeTab === 'agency' && (
-            <div className="space-y-6">
-              {isOwnerOnly && (
-                <div className="p-4 border border-amber-200 bg-amber-50 rounded-lg">
-                  <p className="font-semibold text-amber-800 mb-1">Fonctionnalité agence</p>
-                  <p className="text-amber-700 text-sm">
-                    Vous êtes identifié comme propriétaire. Pour activer les fonctionnalités agence
-                    (logo, identité et coordonnées d'agence), complétez vos informations ci-dessous
-                    ou créez un compte agence dédié.
-                  </p>
-                  <div className="mt-3 flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => navigate('/agence/inscription')}
-                      className="whitespace-nowrap"
-                    >
-                      Créer un compte agence
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => navigate('/proprietaire/mes-mandats')}
-                      className="whitespace-nowrap"
-                    >
-                      Voir mes mandats
-                    </Button>
-                  </div>
-                </div>
-              )}
+        {activeTab === 'verification' && (
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Statut de vérification</h3>
+            <VerificationItem
+              title="Email vérifié"
+              description="Votre adresse email a été vérifiée"
+              verified={true}
+            />
+            <VerificationItem
+              title="Vérification ONECI"
+              description="Carte d'identité vérifiée"
+              verified={profile?.oneci_verified}
+            />
+          </div>
+        )}
 
-              <form onSubmit={handleSaveProfile} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nom de l'agence
-                  </label>
-                  <Input
-                    type="text"
-                    value={formData.agency_name}
-                    onChange={(e) => setFormData({ ...formData, agency_name: e.target.value })}
-                    placeholder="Nom de votre agence"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Logo de l'agence
-                  </label>
-                  <div className="flex items-center gap-4">
-                    {profile?.agency_logo ? (
-                      <img
-                        src={profile.agency_logo}
-                        alt="Logo agence"
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-                        <Building2 className="w-8 h-8 text-gray-400" />
-                      </div>
-                    )}
-                    <div>
-                      <label className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
-                        <Camera className="w-4 h-4" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleLogoUpload}
-                          className="hidden"
-                          id="logo-upload"
-                        />
-                        {uploadingLogo ? 'Upload...' : 'Changer le logo'}
-                      </label>
-                    </div>
+        {activeTab === 'stats' && (
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold">Statistiques</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Biens publiés</p>
+                    <p className="text-2xl font-bold">{profile?.properties_count || 0}</p>
                   </div>
+                  <Home className="w-8 h-8 text-blue-500" />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Description de l'agence
-                  </label>
-                  <textarea
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    rows={4}
-                    value={formData.agency_description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, agency_description: e.target.value })
-                    }
-                    placeholder="Décrivez votre agence..."
-                  />
-                </div>
-                <div className="flex justify-end">
-                  <Button
-                    type="submit"
-                    disabled={saving}
-                    className="flex items-center gap-2"
-                  >
-                    {saving ? 'Enregistrement...' : 'Enregistrer'}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {activeTab === 'verification' && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Statut de vérification</h3>
-              <VerificationItem
-                title="Email vérifié"
-                description="Votre adresse email a été vérifiée"
-                verified={true}
-              />
-              <VerificationItem
-                title="Vérification ONECI"
-                description="Carte d'identité vérifiée"
-                verified={profile?.oneci_verified}
-              />
-            </div>
-          )}
-
-          {activeTab === 'stats' && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold">Statistiques</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Biens publiés</p>
-                      <p className="text-2xl font-bold">{profile?.properties_count || 0}</p>
-                    </div>
-                    <Home className="w-8 h-8 text-blue-500" />
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Revenus totaux</p>
+                    <p className="text-2xl font-bold">
+                      {profile?.total_revenue
+                        ? `${profile.total_revenue.toLocaleString()} FCFA`
+                        : '0 FCFA'}
+                    </p>
                   </div>
+                  <TrendingUp className="w-8 h-8 text-green-500" />
                 </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Revenus totaux</p>
-                      <p className="text-2xl font-bold">
-                        {profile?.total_revenue ? `${profile.total_revenue.toLocaleString()} FCFA` : '0 FCFA'}
-                      </p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-green-500" />
+              </div>
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600">Score de confiance</p>
+                    <p className="text-2xl font-bold">{profile?.trust_score || 0}%</p>
                   </div>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Score de confiance</p>
-                      <p className="text-2xl font-bold">{profile?.trust_score || 0}%</p>
-                    </div>
-                    <Shield className="w-8 h-8 text-purple-500" />
-                  </div>
+                  <Shield className="w-8 h-8 text-purple-500" />
                 </div>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
+    </div>
   );
 }
 

@@ -2,14 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/services/supabase/client';
-import {
-  Home,
-  FileText,
-  Building2,
-  AlertCircle,
-  CheckCircle,
-  Loader2
-} from 'lucide-react';
+import { Home, FileText, Building2, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 interface Mandate {
   id: string;
@@ -67,7 +60,8 @@ export default function AgencyAddPropertyPage() {
     try {
       const { data, error } = await supabase
         .from('mandates')
-        .select(`
+        .select(
+          `
           *,
           properties:property_id (
             id,
@@ -76,7 +70,8 @@ export default function AgencyAddPropertyPage() {
           owner:owner_id (
             full_name
           )
-        `)
+        `
+        )
         .eq('agency_id', user?.id)
         .in('status', ['active', 'pending'])
         .order('created_at', { ascending: false });
@@ -104,7 +99,7 @@ export default function AgencyAddPropertyPage() {
 
   const handleMandateSelect = (mandate: Mandate) => {
     setSelectedMandate(mandate);
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       mandate_id: mandate.id,
       title: mandate.property_title || '',
@@ -122,7 +117,7 @@ export default function AgencyAddPropertyPage() {
     try {
       // Vérifier si le mandat permet d'ajouter des propriétés
       if (!selectedMandate.permissions.includes('add_properties')) {
-        alert('Ce mandat ne permet pas d\'ajouter de nouvelles propriétés');
+        alert("Ce mandat ne permet pas d'ajouter de nouvelles propriétés");
         return;
       }
 
@@ -207,9 +202,7 @@ export default function AgencyAddPropertyPage() {
               {mandates.length === 0 ? (
                 <div className="text-center py-8 bg-yellow-50 rounded-lg">
                   <AlertCircle className="w-12 h-12 text-yellow-400 mx-auto mb-3" />
-                  <h3 className="text-lg font-medium text-yellow-800 mb-2">
-                    Aucun mandat actif
-                  </h3>
+                  <h3 className="text-lg font-medium text-yellow-800 mb-2">Aucun mandat actif</h3>
                   <p className="text-yellow-700 mb-4">
                     Vous devez avoir un mandat actif pour ajouter une propriété
                   </p>
@@ -235,18 +228,18 @@ export default function AgencyAddPropertyPage() {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-medium text-gray-900">
-                            {mandate.owner_name}
-                          </p>
+                          <p className="font-medium text-gray-900">{mandate.owner_name}</p>
                           <p className="text-sm text-gray-600">
                             {mandate.property_title || 'Nouvelle propriété'}
                           </p>
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          mandate.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            mandate.status === 'active'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
                           {mandate.status === 'active' ? 'Actif' : 'En attente'}
                         </span>
                       </div>
@@ -318,9 +311,7 @@ export default function AgencyAddPropertyPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Ville *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Ville *</label>
                     <input
                       type="text"
                       required
@@ -352,7 +343,9 @@ export default function AgencyAddPropertyPage() {
                       type="number"
                       min="0"
                       value={formData.surface_area}
-                      onChange={(e) => setFormData({ ...formData, surface_area: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, surface_area: Number(e.target.value) })
+                      }
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                       placeholder="75"
                     />
@@ -365,7 +358,9 @@ export default function AgencyAddPropertyPage() {
                       type="number"
                       min="0"
                       value={formData.rooms_count}
-                      onChange={(e) => setFormData({ ...formData, rooms_count: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rooms_count: Number(e.target.value) })
+                      }
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                       placeholder="3"
                     />
@@ -378,7 +373,9 @@ export default function AgencyAddPropertyPage() {
                       type="number"
                       min="0"
                       value={formData.bedrooms_count}
-                      onChange={(e) => setFormData({ ...formData, bedrooms_count: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bedrooms_count: Number(e.target.value) })
+                      }
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                       placeholder="2"
                     />
@@ -391,7 +388,9 @@ export default function AgencyAddPropertyPage() {
                       type="number"
                       min="0"
                       value={formData.bathrooms_count}
-                      onChange={(e) => setFormData({ ...formData, bathrooms_count: Number(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bathrooms_count: Number(e.target.value) })
+                      }
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                       placeholder="1"
                     />

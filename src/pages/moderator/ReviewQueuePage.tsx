@@ -85,9 +85,7 @@ const ReviewQueuePage: React.FC = () => {
             <div className="bg-white rounded-lg shadow">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    File d'attente active
-                  </h2>
+                  <h2 className="text-lg font-semibold text-gray-900">File d'attente active</h2>
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-gray-500">Auto-rafraîchissement</span>
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -98,9 +96,7 @@ const ReviewQueuePage: React.FC = () => {
                 {queueItems.map((item, index) => (
                   <div key={item.id} className="p-6 hover:bg-gray-50 transition-colors">
                     <div className="flex items-start space-x-4">
-                      <div className="flex-shrink-0 mt-1">
-                        {getTypeIcon(item.type)}
-                      </div>
+                      <div className="flex-shrink-0 mt-1">{getTypeIcon(item.type)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-3 mb-1">
                           <h3 className="text-sm font-medium text-gray-900 truncate">
@@ -114,13 +110,11 @@ const ReviewQueuePage: React.FC = () => {
                             {item.priority === 'high'
                               ? 'Haute'
                               : item.priority === 'medium'
-                              ? 'Moyenne'
-                              : 'Basse'}
+                                ? 'Moyenne'
+                                : 'Basse'}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">
-                          Soumis par {item.submittedBy}
-                        </p>
+                        <p className="text-sm text-gray-600 mb-2">Soumis par {item.submittedBy}</p>
                         <div className="flex items-center space-x-4 text-xs text-gray-500">
                           <span className="flex items-center">
                             <Clock className="w-3 h-3 mr-1" />

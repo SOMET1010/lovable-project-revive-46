@@ -1,5 +1,14 @@
 import { useState, useEffect } from 'react';
-import { FileCheck, Eye, Building, Clock, CheckCircle, XCircle, Download, AlertTriangle } from 'lucide-react';
+import {
+  FileCheck,
+  Eye,
+  Building,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Download,
+  AlertTriangle,
+} from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -71,8 +80,9 @@ export default function DocumentValidationPage() {
         // Charger le profil du propriétaire
         let ownerName = 'Propriétaire';
         if (property.owner_id) {
-          const { data: ownerData } = await supabase
-            .rpc('get_public_profile', { profile_user_id: property.owner_id });
+          const { data: ownerData } = await supabase.rpc('get_public_profile', {
+            profile_user_id: property.owner_id,
+          });
           ownerName = ownerData?.[0]?.full_name || 'Propriétaire';
         }
 
@@ -124,13 +134,15 @@ export default function DocumentValidationPage() {
       if (docError) throw docError;
 
       // Créer une notification pour le propriétaire
-      await supabase.from('notifications').insert([{
-        user_id: property.owner_id,
-        title: 'Propriété validée !',
-        message: `Votre propriété "${property.title}" a été validée et est maintenant visible sur la plateforme.`,
-        type: 'success',
-        action_url: `/propriete/${property.id}`,
-      }]);
+      await supabase.from('notifications').insert([
+        {
+          user_id: property.owner_id,
+          title: 'Propriété validée !',
+          message: `Votre propriété "${property.title}" a été validée et est maintenant visible sur la plateforme.`,
+          type: 'success',
+          action_url: `/propriete/${property.id}`,
+        },
+      ]);
 
       toast.success('Propriété validée avec succès');
       loadPendingProperties();
@@ -166,23 +178,25 @@ export default function DocumentValidationPage() {
       // Mettre à jour le statut des documents avec le motif
       const { error: docError } = await supabase
         .from('property_documents')
-        .update({ 
-          status: 'rejected', 
+        .update({
+          status: 'rejected',
           rejection_reason: rejectionReason,
-          verified_at: new Date().toISOString()
+          verified_at: new Date().toISOString(),
         })
         .eq('property_id', selectedProperty.id);
 
       if (docError) throw docError;
 
       // Créer une notification pour le propriétaire
-      await supabase.from('notifications').insert([{
-        user_id: selectedProperty.owner_id,
-        title: 'Documents refusés',
-        message: `Les documents de votre propriété "${selectedProperty.title}" ont été refusés. Motif : ${rejectionReason}`,
-        type: 'warning',
-        action_url: `/dashboard/ajouter-propriete`,
-      }]);
+      await supabase.from('notifications').insert([
+        {
+          user_id: selectedProperty.owner_id,
+          title: 'Documents refusés',
+          message: `Les documents de votre propriété "${selectedProperty.title}" ont été refusés. Motif : ${rejectionReason}`,
+          type: 'warning',
+          action_url: `/dashboard/ajouter-propriete`,
+        },
+      ]);
 
       toast.success('Propriété rejetée');
       setShowRejectModal(false);
@@ -227,7 +241,8 @@ export default function DocumentValidationPage() {
           <div>
             <h1 className="text-2xl font-bold text-foreground">Validation des Documents</h1>
             <p className="text-muted-foreground">
-              {properties.length} propriété{properties.length > 1 ? 's' : ''} en attente de validation
+              {properties.length} propriété{properties.length > 1 ? 's' : ''} en attente de
+              validation
             </p>
           </div>
         </div>
@@ -260,7 +275,11 @@ export default function DocumentValidationPage() {
                 <div className="flex items-start gap-4">
                   <div className="w-24 h-24 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                     {property.main_image ? (
-                      <img src={property.main_image} alt={property.title} className="w-full h-full object-cover" />
+                      <img
+                        src={property.main_image}
+                        alt={property.title}
+                        className="w-full h-full object-cover"
+                      />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Building className="h-8 w-8 text-muted-foreground" />
@@ -269,8 +288,12 @@ export default function DocumentValidationPage() {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold">{property.title}</h3>
-                    <p className="text-muted-foreground">{property.city} {property.neighborhood && `• ${property.neighborhood}`}</p>
-                    <p className="text-primary font-bold mt-1">{property.monthly_rent.toLocaleString()} FCFA/mois</p>
+                    <p className="text-muted-foreground">
+                      {property.city} {property.neighborhood && `• ${property.neighborhood}`}
+                    </p>
+                    <p className="text-primary font-bold mt-1">
+                      {property.monthly_rent.toLocaleString()} FCFA/mois
+                    </p>
                     <p className="text-sm text-muted-foreground mt-1">
                       Par {property.owner_name} • {formatDate(property.created_at)}
                     </p>
@@ -308,7 +331,7 @@ export default function DocumentValidationPage() {
                 {property.documents.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                     {property.documents.map((doc) => (
-                      <div 
+                      <div
                         key={doc.id}
                         className="bg-card rounded-lg p-3 border flex items-center gap-3"
                       >
@@ -368,8 +391,8 @@ export default function DocumentValidationPage() {
               <h3 className="text-lg font-semibold">Rejeter la propriété</h3>
             </div>
             <p className="text-muted-foreground mb-4">
-              Vous êtes sur le point de rejeter "{selectedProperty.title}". 
-              Le propriétaire sera notifié avec votre motif.
+              Vous êtes sur le point de rejeter "{selectedProperty.title}". Le propriétaire sera
+              notifié avec votre motif.
             </p>
             <textarea
               value={rejectionReason}

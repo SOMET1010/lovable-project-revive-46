@@ -116,7 +116,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
         } catch (healthError) {
-          logger.warn('Health check failed, continuing with profile load', healthError instanceof Error ? healthError : undefined);
+          logger.warn(
+            'Health check failed, continuing with profile load',
+            healthError instanceof Error ? healthError : undefined
+          );
         }
       }
 
@@ -342,10 +345,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updatesToSend.user_type = translateUserType(updatesToSend.user_type);
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(updatesToSend)
-      .eq('id', user.id);
+    const { error } = await supabase.from('profiles').update(updatesToSend).eq('id', user.id);
 
     if (error) throw error;
     await loadProfile(user.id);

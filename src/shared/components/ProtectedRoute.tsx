@@ -11,7 +11,11 @@ import { Shield, AlertTriangle, Lock } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { useAuthStore } from '@/store/authStore';
-import { getCurrentUserRole, hasPermission, hasRole } from '@/shared/services/roleValidation.service';
+import {
+  getCurrentUserRole,
+  hasPermission,
+  hasRole,
+} from '@/shared/services/roleValidation.service';
 import { LoadingSpinner } from '@/shared/ui/loading-spinner';
 
 interface ProtectedRouteProps {
@@ -90,10 +94,7 @@ export function ProtectedRoute({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-gray-600">{error}</p>
-            <Button
-              onClick={() => window.location.reload()}
-              className="w-full"
-            >
+            <Button onClick={() => window.location.reload()} className="w-full">
               Réessayer
             </Button>
           </CardContent>
@@ -118,7 +119,8 @@ export function ProtectedRoute({
             <p>
               {requiredRole && (
                 <span>
-                  Rôle requis: {Array.isArray(requiredRole) ? requiredRole.join(' ou ') : requiredRole}
+                  Rôle requis:{' '}
+                  {Array.isArray(requiredRole) ? requiredRole.join(' ou ') : requiredRole}
                 </span>
               )}
               {requiredPermission && (
@@ -130,11 +132,7 @@ export function ProtectedRoute({
             </p>
             <p>Votre rôle actuel: {userRole || 'Non défini'}</p>
           </div>
-          <Button
-            onClick={() => window.history.back()}
-            variant="outline"
-            className="w-full"
-          >
+          <Button onClick={() => window.history.back()} variant="outline" className="w-full">
             Retour
           </Button>
         </CardContent>
@@ -211,7 +209,13 @@ export function ProtectedRoute({
 /**
  * Composant pour les routes nécessitant une connexion simple
  */
-export function AuthenticatedRoute({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) {
+export function AuthenticatedRoute({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) {
   const { user, isLoading } = useAuthStore();
   const location = useLocation();
 
@@ -230,7 +234,13 @@ export function AuthenticatedRoute({ children, fallback }: { children: React.Rea
 /**
  * Composant pour les routes publiques (redirige si déjà connecté)
  */
-export function PublicRoute({ children, redirectTo = '/dashboard' }: { children: React.ReactNode; redirectTo?: string }) {
+export function PublicRoute({
+  children,
+  redirectTo = '/dashboard',
+}: {
+  children: React.ReactNode;
+  redirectTo?: string;
+}) {
   const { user, isLoading } = useAuthStore();
 
   if (isLoading) {
@@ -248,33 +258,21 @@ export function PublicRoute({ children, redirectTo = '/dashboard' }: { children:
  * Composant pour les routes admin
  */
 export function AdminRoute({ children }: { children: React.ReactNode }) {
-  return (
-    <ProtectedRoute requiredRole="admin">
-      {children}
-    </ProtectedRoute>
-  );
+  return <ProtectedRoute requiredRole="admin">{children}</ProtectedRoute>;
 }
 
 /**
  * Composant pour les routes propriétaires
  */
 export function OwnerRoute({ children }: { children: React.ReactNode }) {
-  return (
-    <ProtectedRoute requiredRole={['owner', 'agency']}>
-      {children}
-    </ProtectedRoute>
-  );
+  return <ProtectedRoute requiredRole={['owner', 'agency']}>{children}</ProtectedRoute>;
 }
 
 /**
  * Composant pour les routes locataires
  */
 export function TenantRoute({ children }: { children: React.ReactNode }) {
-  return (
-    <ProtectedRoute requiredRole="tenant">
-      {children}
-    </ProtectedRoute>
-  );
+  return <ProtectedRoute requiredRole="tenant">{children}</ProtectedRoute>;
 }
 
 /**

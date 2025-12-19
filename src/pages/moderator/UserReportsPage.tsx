@@ -22,7 +22,7 @@ const UserReportsPage: React.FC = () => {
       reportedUser: 'fake_agent123',
       reporter: 'system_auto',
       reason: 'Profil suspect',
-      description: 'Photos volées d\'une autre agence',
+      description: "Photos volées d'une autre agence",
       status: 'under_review',
       createdAt: '2025-12-12 12:15',
       priority: 'medium',
@@ -79,11 +79,23 @@ const UserReportsPage: React.FC = () => {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded font-medium">Haute</span>;
+        return (
+          <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded font-medium">
+            Haute
+          </span>
+        );
       case 'medium':
-        return <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">Moyenne</span>;
+        return (
+          <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
+            Moyenne
+          </span>
+        );
       case 'low':
-        return <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium">Basse</span>;
+        return (
+          <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded font-medium">
+            Basse
+          </span>
+        );
       default:
         return null;
     }

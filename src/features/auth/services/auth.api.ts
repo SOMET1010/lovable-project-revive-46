@@ -6,7 +6,12 @@
 
 import { supabase } from '@/services/supabase/client';
 import type { Database } from '@/shared/lib/database.types';
-import { hasPermission, requirePermission, requireRole, hasRole } from '@/shared/services/roleValidation.service';
+import {
+  hasPermission,
+  requirePermission,
+  requireRole,
+  hasRole,
+} from '@/shared/services/roleValidation.service';
 import { rateLimiter, getCurrentUserId } from '@/shared/services/rateLimiter.service';
 import { validatePassword } from '@/shared/utils/passwordPolicy';
 
@@ -42,7 +47,9 @@ export const authApi = {
     const rateLimitResult = await rateLimiter.checkLimit(identifier, 'auth:register');
 
     if (!rateLimitResult.allowed) {
-      throw new Error(rateLimitResult.message || 'Trop de tentatives d\'inscription. Réessayez plus tard.');
+      throw new Error(
+        rateLimitResult.message || "Trop de tentatives d'inscription. Réessayez plus tard."
+      );
     }
 
     // Validation du mot de passe
@@ -76,7 +83,9 @@ export const authApi = {
     const rateLimitResult = await rateLimiter.checkLimit(identifier, 'auth:login');
 
     if (!rateLimitResult.allowed) {
-      throw new Error(rateLimitResult.message || 'Trop de tentatives de connexion. Réessayez plus tard.');
+      throw new Error(
+        rateLimitResult.message || 'Trop de tentatives de connexion. Réessayez plus tard.'
+      );
     }
 
     const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -123,7 +132,9 @@ export const authApi = {
     const rateLimitResult = await rateLimiter.checkLimit(identifier, 'auth:reset-password');
 
     if (!rateLimitResult.allowed) {
-      throw new Error(rateLimitResult.message || 'Trop de demandes de réinitialisation. Réessayez plus tard.');
+      throw new Error(
+        rateLimitResult.message || 'Trop de demandes de réinitialisation. Réessayez plus tard.'
+      );
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -194,7 +205,9 @@ export const authApi = {
    */
   updateProfile: async (userId: string, updates: ProfileUpdate) => {
     // Vérifier que l'utilisateur est autorisé à modifier ce profil
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) throw new Error('Utilisateur non authentifié');
 
     // Vérifier si l'utilisateur modifie son propre profil

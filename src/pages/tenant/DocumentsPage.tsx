@@ -11,7 +11,7 @@ import {
   Clock,
   XCircle,
   AlertCircle,
-  Plus
+  Plus,
 } from 'lucide-react';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
 
@@ -29,9 +29,9 @@ interface Document {
 }
 
 const documentTypes = {
-  identity: { label: 'Pièce d\'identité', icon: '🆔', required: true },
+  identity: { label: "Pièce d'identité", icon: '🆔', required: true },
   income: { label: 'Justificatif de revenus', icon: '💰', required: true },
-  guarantee: { label: "Justificatif de garantie", icon: '🛡️', required: false },
+  guarantee: { label: 'Justificatif de garantie', icon: '🛡️', required: false },
   contract: { label: 'Contrat de location', icon: '📄', required: false },
   other: { label: 'Autre document', icon: '📁', required: false },
 };
@@ -41,20 +41,20 @@ const statusConfig = {
     icon: Clock,
     color: 'text-yellow-600',
     bgColor: 'bg-yellow-100',
-    label: 'En attente de vérification'
+    label: 'En attente de vérification',
   },
   verified: {
     icon: CheckCircle,
     color: 'text-green-600',
     bgColor: 'bg-green-100',
-    label: 'Vérifié'
+    label: 'Vérifié',
   },
   rejected: {
     icon: XCircle,
     color: 'text-red-600',
     bgColor: 'bg-red-100',
-    label: 'Rejeté'
-  }
+    label: 'Rejeté',
+  },
 };
 
 export default function DocumentsPage() {
@@ -120,9 +120,9 @@ export default function DocumentsPage() {
       if (uploadError) throw uploadError;
 
       // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('user-documents')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('user-documents').getPublicUrl(fileName);
 
       // Get current documents
       const { data: profile } = await supabase
@@ -142,7 +142,7 @@ export default function DocumentsPage() {
         file_type: file.type,
         file_size: file.size,
         status: 'pending',
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       };
 
       // Update documents array
@@ -171,7 +171,7 @@ export default function DocumentsPage() {
 
     try {
       // Get document info
-      const document = documents.find(d => d.id === documentId);
+      const document = documents.find((d) => d.id === documentId);
       if (!document) return;
 
       // Delete from storage
@@ -183,7 +183,7 @@ export default function DocumentsPage() {
       if (deleteError) console.error('Storage delete error:', deleteError);
 
       // Remove document from array
-      const updatedDocs = documents.filter(d => d.id !== documentId);
+      const updatedDocs = documents.filter((d) => d.id !== documentId);
 
       // Update profiles table
       const { error: updateError } = await supabase
@@ -212,15 +212,15 @@ export default function DocumentsPage() {
       month: 'long',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
   const getDocumentStats = () => {
     const total = documents.length;
-    const verified = documents.filter(d => d.status === 'verified').length;
-    const pending = documents.filter(d => d.status === 'pending').length;
-    const rejected = documents.filter(d => d.status === 'rejected').length;
+    const verified = documents.filter((d) => d.status === 'verified').length;
+    const pending = documents.filter((d) => d.status === 'pending').length;
+    const rejected = documents.filter((d) => d.status === 'rejected').length;
 
     return { total, verified, pending, rejected };
   };
@@ -354,9 +354,7 @@ export default function DocumentsPage() {
             <div className="p-12 text-center">
               <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Aucun document</h3>
-              <p className="text-gray-600">
-                Commencez par ajouter vos documents justificatifs
-              </p>
+              <p className="text-gray-600">Commencez par ajouter vos documents justificatifs</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200">
@@ -370,9 +368,7 @@ export default function DocumentsPage() {
                           <FileText className="w-10 h-10 text-gray-400" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-medium text-gray-900">
-                            {document.name}
-                          </h3>
+                          <h3 className="text-sm font-medium text-gray-900">{document.name}</h3>
                           <div className="flex items-center space-x-4 mt-1">
                             <span className="text-sm text-gray-500">
                               {documentTypes[document.type].label}
@@ -390,7 +386,9 @@ export default function DocumentsPage() {
                         </div>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig[document.status].bgColor} ${statusConfig[document.status].color}`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig[document.status].bgColor} ${statusConfig[document.status].color}`}
+                        >
                           <StatusIcon className="w-3 h-3 mr-1" />
                           {statusConfig[document.status].label}
                         </span>

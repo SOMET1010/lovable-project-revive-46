@@ -9,14 +9,9 @@ interface SortableProviderCardProps {
 }
 
 export function SortableProviderCard({ provider, onToggle }: SortableProviderCardProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: provider.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: provider.id,
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),

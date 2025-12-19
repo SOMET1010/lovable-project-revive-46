@@ -22,7 +22,10 @@ export default function AgencyAnalyticsPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const { data: propsData } = await supabase.from('properties').select('id').eq('owner_id', user.id);
+      const { data: propsData } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('owner_id', user.id);
       const propertyIds = (propsData || []).map((p) => p.id);
 
       const [{ data: contracts }, { data: applications }, { data: visits }] = await Promise.all([
@@ -34,7 +37,10 @@ export default function AgencyAnalyticsPage() {
               .in('property_id', propertyIds)
               .eq('status', 'en_attente')
           : Promise.resolve({ data: [] }),
-        supabase.from('visit_requests').select('id, confirmed_date, status').eq('owner_id', user.id),
+        supabase
+          .from('visit_requests')
+          .select('id, confirmed_date, status')
+          .eq('owner_id', user.id),
       ]);
 
       const propsCount = propertyIds.length;

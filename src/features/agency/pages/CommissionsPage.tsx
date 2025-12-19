@@ -1,14 +1,28 @@
 import { useState, useEffect, ChangeEvent } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { 
-  Button, Input, Card, CardContent, Badge,
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue 
+import {
+  Button,
+  Input,
+  Card,
+  CardContent,
+  Badge,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/shared/ui';
 import { toast } from 'sonner';
-import { 
-  Coins, Search, Download, TrendingUp, Clock,
-  CheckCircle, Filter, Users
+import {
+  Coins,
+  Search,
+  Download,
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  Filter,
+  Users,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -78,11 +92,13 @@ export default function CommissionsPage() {
     try {
       const { data, error } = await supabase
         .from('agency_transactions')
-        .select(`
+        .select(
+          `
           *,
           agent:agent_id(profiles:user_id(full_name)),
           properties:property_id(title)
-        `)
+        `
+        )
         .eq('agency_id', agencyIdParam)
         .order('transaction_date', { ascending: false });
 
@@ -94,12 +110,20 @@ export default function CommissionsPage() {
       const totalGross = data?.reduce((sum, t) => sum + (t.gross_amount || 0), 0) || 0;
       const totalAgencyShare = data?.reduce((sum, t) => sum + (t.agency_share || 0), 0) || 0;
       const totalAgentShare = data?.reduce((sum, t) => sum + (t.agent_share || 0), 0) || 0;
-      const pending = data?.filter(t => t.status === 'pending').reduce((sum, t) => sum + (t.gross_amount || 0), 0) || 0;
-      const validated = data?.filter(t => t.status === 'validated').reduce((sum, t) => sum + (t.gross_amount || 0), 0) || 0;
-      const paid = data?.filter(t => t.status === 'paid').reduce((sum, t) => sum + (t.gross_amount || 0), 0) || 0;
+      const pending =
+        data
+          ?.filter((t) => t.status === 'pending')
+          .reduce((sum, t) => sum + (t.gross_amount || 0), 0) || 0;
+      const validated =
+        data
+          ?.filter((t) => t.status === 'validated')
+          .reduce((sum, t) => sum + (t.gross_amount || 0), 0) || 0;
+      const paid =
+        data
+          ?.filter((t) => t.status === 'paid')
+          .reduce((sum, t) => sum + (t.gross_amount || 0), 0) || 0;
 
       setStats({ totalGross, totalAgencyShare, totalAgentShare, pending, validated, paid });
-
     } catch (error) {
       console.error('Error loading transactions:', error);
       toast.error('Erreur lors du chargement');
@@ -123,7 +147,6 @@ export default function CommissionsPage() {
 
       toast.success('Transaction validée');
       if (agencyId) loadTransactions(agencyId);
-
     } catch (error) {
       console.error('Error validating:', error);
       toast.error('Erreur lors de la validation');
@@ -144,7 +167,6 @@ export default function CommissionsPage() {
 
       toast.success('Transaction marquée comme payée');
       if (agencyId) loadTransactions(agencyId);
-
     } catch (error) {
       console.error('Error marking paid:', error);
       toast.error('Erreur');
@@ -153,16 +175,20 @@ export default function CommissionsPage() {
 
   const handleExport = () => {
     const csv = [
-      ['Date', 'Type', 'Description', 'Montant brut', 'Part agence', 'Part agent', 'Statut'].join(','),
-      ...transactions.map(tx => [
-        tx.transaction_date || '',
-        tx.transaction_type,
-        `"${tx.description || ''}"`,
-        tx.gross_amount,
-        tx.agency_share,
-        tx.agent_share ?? 0,
-        tx.status || '',
-      ].join(','))
+      ['Date', 'Type', 'Description', 'Montant brut', 'Part agence', 'Part agent', 'Statut'].join(
+        ','
+      ),
+      ...transactions.map((tx) =>
+        [
+          tx.transaction_date || '',
+          tx.transaction_type,
+          `"${tx.description || ''}"`,
+          tx.gross_amount,
+          tx.agency_share,
+          tx.agent_share ?? 0,
+          tx.status || '',
+        ].join(',')
+      ),
     ].join('\n');
 
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -173,8 +199,8 @@ export default function CommissionsPage() {
     a.click();
   };
 
-  const filteredTransactions = transactions.filter(tx => {
-    const matchesSearch = 
+  const filteredTransactions = transactions.filter((tx) => {
+    const matchesSearch =
       tx.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       tx.agent?.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === 'all' || tx.status === statusFilter;
@@ -228,7 +254,9 @@ export default function CommissionsPage() {
               <div className="flex items-center gap-2">
                 <Coins className="w-5 h-5 text-[#F16522]" />
                 <div>
-                  <p className="text-lg font-bold text-[#2C1810]">{stats.totalGross.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-[#2C1810]">
+                    {stats.totalGross.toLocaleString()}
+                  </p>
                   <p className="text-xs text-[#2C1810]/60">Total brut</p>
                 </div>
               </div>
@@ -239,7 +267,9 @@ export default function CommissionsPage() {
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-green-600" />
                 <div>
-                  <p className="text-lg font-bold text-[#2C1810]">{stats.totalAgencyShare.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-[#2C1810]">
+                    {stats.totalAgencyShare.toLocaleString()}
+                  </p>
                   <p className="text-xs text-[#2C1810]/60">Part agence</p>
                 </div>
               </div>
@@ -250,7 +280,9 @@ export default function CommissionsPage() {
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-lg font-bold text-[#2C1810]">{stats.totalAgentShare.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-[#2C1810]">
+                    {stats.totalAgentShare.toLocaleString()}
+                  </p>
                   <p className="text-xs text-[#2C1810]/60">Part agents</p>
                 </div>
               </div>
@@ -261,7 +293,9 @@ export default function CommissionsPage() {
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-yellow-600" />
                 <div>
-                  <p className="text-lg font-bold text-[#2C1810]">{stats.pending.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-[#2C1810]">
+                    {stats.pending.toLocaleString()}
+                  </p>
                   <p className="text-xs text-[#2C1810]/60">En attente</p>
                 </div>
               </div>
@@ -272,7 +306,9 @@ export default function CommissionsPage() {
               <div className="flex items-center gap-2">
                 <Filter className="w-5 h-5 text-blue-600" />
                 <div>
-                  <p className="text-lg font-bold text-[#2C1810]">{stats.validated.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-[#2C1810]">
+                    {stats.validated.toLocaleString()}
+                  </p>
                   <p className="text-xs text-[#2C1810]/60">Validées</p>
                 </div>
               </div>
@@ -330,23 +366,37 @@ export default function CommissionsPage() {
                   <thead className="bg-[#FAF7F4]">
                     <tr>
                       <th className="text-left p-4 text-sm font-medium text-[#2C1810]/70">Date</th>
-                      <th className="text-left p-4 text-sm font-medium text-[#2C1810]/70">Description</th>
+                      <th className="text-left p-4 text-sm font-medium text-[#2C1810]/70">
+                        Description
+                      </th>
                       <th className="text-left p-4 text-sm font-medium text-[#2C1810]/70">Agent</th>
                       <th className="text-right p-4 text-sm font-medium text-[#2C1810]/70">Brut</th>
-                      <th className="text-right p-4 text-sm font-medium text-[#2C1810]/70">Agence</th>
-                      <th className="text-right p-4 text-sm font-medium text-[#2C1810]/70">Agent</th>
-                      <th className="text-center p-4 text-sm font-medium text-[#2C1810]/70">Statut</th>
-                      <th className="text-right p-4 text-sm font-medium text-[#2C1810]/70">Actions</th>
+                      <th className="text-right p-4 text-sm font-medium text-[#2C1810]/70">
+                        Agence
+                      </th>
+                      <th className="text-right p-4 text-sm font-medium text-[#2C1810]/70">
+                        Agent
+                      </th>
+                      <th className="text-center p-4 text-sm font-medium text-[#2C1810]/70">
+                        Statut
+                      </th>
+                      <th className="text-right p-4 text-sm font-medium text-[#2C1810]/70">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredTransactions.map((tx) => (
                       <tr key={tx.id} className="border-t border-[#EFEBE9] hover:bg-[#FAF7F4]/50">
                         <td className="p-4 text-sm">
-                          {tx.transaction_date ? format(new Date(tx.transaction_date), 'dd MMM yyyy', { locale: fr }) : '-'}
+                          {tx.transaction_date
+                            ? format(new Date(tx.transaction_date), 'dd MMM yyyy', { locale: fr })
+                            : '-'}
                         </td>
                         <td className="p-4">
-                          <p className="font-medium text-[#2C1810]">{tx.description || tx.transaction_type}</p>
+                          <p className="font-medium text-[#2C1810]">
+                            {tx.description || tx.transaction_type}
+                          </p>
                           {tx.properties && (
                             <p className="text-sm text-[#2C1810]/60">{tx.properties.title}</p>
                           )}
@@ -363,18 +413,24 @@ export default function CommissionsPage() {
                         <td className="p-4 text-right text-blue-600 font-medium">
                           {(tx.agent_share ?? 0).toLocaleString()} F
                         </td>
-                        <td className="p-4 text-center">
-                          {getStatusBadge(tx.status)}
-                        </td>
+                        <td className="p-4 text-center">{getStatusBadge(tx.status)}</td>
                         <td className="p-4 text-right">
                           <div className="flex justify-end gap-2">
                             {tx.status === 'pending' && (
-                              <Button size="small" variant="outline" onClick={() => handleValidate(tx.id)}>
+                              <Button
+                                size="small"
+                                variant="outline"
+                                onClick={() => handleValidate(tx.id)}
+                              >
                                 Valider
                               </Button>
                             )}
                             {tx.status === 'validated' && (
-                              <Button size="small" onClick={() => handleMarkPaid(tx.id)} className="bg-green-600 hover:bg-green-700">
+                              <Button
+                                size="small"
+                                onClick={() => handleMarkPaid(tx.id)}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
                                 Marquer payée
                               </Button>
                             )}

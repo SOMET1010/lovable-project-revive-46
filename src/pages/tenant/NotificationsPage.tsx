@@ -15,7 +15,7 @@ import {
   CreditCard,
   AlertCircle,
   CheckCircle,
-  Info
+  Info,
 } from 'lucide-react';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
 
@@ -38,7 +38,7 @@ const notificationConfig = {
   success: { icon: CheckCircle, color: 'text-green-600', bgColor: 'bg-green-100' },
   warning: { icon: AlertCircle, color: 'text-yellow-600', bgColor: 'bg-yellow-100' },
   error: { icon: X, color: 'text-red-600', bgColor: 'bg-red-100' },
-  system: { icon: Bell, color: 'text-gray-600', bgColor: 'bg-gray-100' }
+  system: { icon: Bell, color: 'text-gray-600', bgColor: 'bg-gray-100' },
 };
 
 const categoryConfig = {
@@ -47,7 +47,7 @@ const categoryConfig = {
   lease: { label: 'Location', icon: Home },
   message: { label: 'Message', icon: MessageSquare },
   system: { label: 'Système', icon: Bell },
-  property: { label: 'Propriété', icon: Home }
+  property: { label: 'Propriété', icon: Home },
 };
 
 export default function NotificationsPage() {
@@ -94,25 +94,26 @@ export default function NotificationsPage() {
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(n =>
-        n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        n.message.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (n) =>
+          n.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          n.message.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Filter by category
     if (selectedCategory !== 'all') {
-      filtered = filtered.filter(n => n.category === selectedCategory);
+      filtered = filtered.filter((n) => n.category === selectedCategory);
     }
 
     // Filter by type
     if (selectedType !== 'all') {
-      filtered = filtered.filter(n => n.type === selectedType);
+      filtered = filtered.filter((n) => n.type === selectedType);
     }
 
     // Filter unread only
     if (showUnreadOnly) {
-      filtered = filtered.filter(n => !n.is_read);
+      filtered = filtered.filter((n) => !n.is_read);
     }
 
     setFilteredNotifications(filtered);
@@ -124,14 +125,14 @@ export default function NotificationsPage() {
         .from('notifications')
         .update({
           is_read: true,
-          read_at: new Date().toISOString()
+          read_at: new Date().toISOString(),
         })
         .eq('id', notificationId);
 
       if (error) throw error;
 
-      setNotifications(prev =>
-        prev.map(n =>
+      setNotifications((prev) =>
+        prev.map((n) =>
           n.id === notificationId ? { ...n, is_read: true, read_at: new Date().toISOString() } : n
         )
       );
@@ -146,15 +147,17 @@ export default function NotificationsPage() {
         .from('notifications')
         .update({
           is_read: true,
-          read_at: new Date().toISOString()
+          read_at: new Date().toISOString(),
         })
         .eq('user_id', user?.id)
         .eq('is_read', false);
 
       if (error) throw error;
 
-      setNotifications(prev =>
-        prev.map(n => (!n.is_read ? { ...n, is_read: true, read_at: new Date().toISOString() } : n))
+      setNotifications((prev) =>
+        prev.map((n) =>
+          !n.is_read ? { ...n, is_read: true, read_at: new Date().toISOString() } : n
+        )
       );
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -170,7 +173,7 @@ export default function NotificationsPage() {
 
       if (error) throw error;
 
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     } catch (error) {
       console.error('Error archiving notification:', error);
     }
@@ -183,27 +186,33 @@ export default function NotificationsPage() {
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
-      return "Aujourd'hui à " + notificationDate.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      return (
+        "Aujourd'hui à " +
+        notificationDate.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      );
     } else if (diffDays === 1) {
-      return "Hier à " + notificationDate.toLocaleTimeString('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      return (
+        'Hier à ' +
+        notificationDate.toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      );
     } else if (diffDays < 7) {
       return `Il y a ${diffDays} jours`;
     } else {
       return notificationDate.toLocaleDateString('fr-FR', {
         day: 'numeric',
         month: 'long',
-        year: 'numeric'
+        year: 'numeric',
       });
     }
   };
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
   if (!user) {
     return (
@@ -304,7 +313,8 @@ export default function NotificationsPage() {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">
-              {filteredNotifications.length} notification{filteredNotifications.length > 1 ? 's' : ''}
+              {filteredNotifications.length} notification
+              {filteredNotifications.length > 1 ? 's' : ''}
             </h2>
           </div>
           {loading ? (
@@ -315,16 +325,20 @@ export default function NotificationsPage() {
             <div className="p-12 text-center">
               <Bell className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {searchTerm || selectedCategory !== 'all' || selectedType !== 'all' || showUnreadOnly
+                {searchTerm ||
+                selectedCategory !== 'all' ||
+                selectedType !== 'all' ||
+                showUnreadOnly
                   ? 'Aucune notification trouvée'
-                  : 'Aucune notification'
-                }
+                  : 'Aucune notification'}
               </h3>
               <p className="text-gray-600">
-                {searchTerm || selectedCategory !== 'all' || selectedType !== 'all' || showUnreadOnly
+                {searchTerm ||
+                selectedCategory !== 'all' ||
+                selectedType !== 'all' ||
+                showUnreadOnly
                   ? 'Essayez de modifier vos filtres'
-                  : 'Vous n\'avez pas de notifications pour le moment'
-                }
+                  : "Vous n'avez pas de notifications pour le moment"}
               </p>
             </div>
           ) : (
@@ -341,14 +355,20 @@ export default function NotificationsPage() {
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-start space-x-4">
-                        <div className={`p-2 rounded-lg ${notificationConfig[notification.type].bgColor}`}>
-                          <Icon className={`w-5 h-5 ${notificationConfig[notification.type].color}`} />
+                        <div
+                          className={`p-2 rounded-lg ${notificationConfig[notification.type].bgColor}`}
+                        >
+                          <Icon
+                            className={`w-5 h-5 ${notificationConfig[notification.type].color}`}
+                          />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center space-x-2 mb-1">
-                            <h3 className={`text-sm font-medium text-gray-900 ${
-                              !notification.is_read ? 'font-semibold' : ''
-                            }`}>
+                            <h3
+                              className={`text-sm font-medium text-gray-900 ${
+                                !notification.is_read ? 'font-semibold' : ''
+                              }`}
+                            >
                               {notification.title}
                             </h3>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">

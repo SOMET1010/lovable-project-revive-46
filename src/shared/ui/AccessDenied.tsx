@@ -21,14 +21,10 @@ export default function AccessDenied({
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-[#2C1810] mb-3">
-          Accès refusé
-        </h1>
+        <h1 className="text-2xl font-bold text-[#2C1810] mb-3">Accès refusé</h1>
 
         {/* Message */}
-        <p className="text-[#6B5A4E] mb-8 leading-relaxed">
-          {message}
-        </p>
+        <p className="text-[#6B5A4E] mb-8 leading-relaxed">{message}</p>
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -41,7 +37,7 @@ export default function AccessDenied({
               Retour
             </button>
           )}
-          
+
           {showHomeButton && (
             <Link
               to="/"

@@ -11,7 +11,7 @@ interface Achievement {
 
 interface AchievementBadgesProps {
   oneciVerified: boolean;
-    faceVerified: boolean;
+  faceVerified: boolean;
   tenantScore: number;
   paymentCount?: number;
   className?: string;
@@ -33,7 +33,7 @@ export default function AchievementBadges({
       earned: oneciVerified,
       color: 'from-green-400 to-emerald-500',
     },
-        {
+    {
       id: 'face_confirmed',
       title: 'Visage Confirmé',
       description: 'Vérification biométrique réussie',

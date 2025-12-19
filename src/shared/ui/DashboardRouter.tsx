@@ -52,7 +52,12 @@ export default function DashboardRouter() {
       const userTypeFromMetadata = user.user_metadata?.user_type || user.user_metadata?.role;
       if (userTypeFromMetadata) {
         const fallbackRoute = getDashboardRoute(userTypeFromMetadata);
-        console.log('DashboardRouter - Using metadata user type:', userTypeFromMetadata, 'redirecting to:', fallbackRoute);
+        console.log(
+          'DashboardRouter - Using metadata user type:',
+          userTypeFromMetadata,
+          'redirecting to:',
+          fallbackRoute
+        );
         navigate(fallbackRoute, { replace: true });
         return;
       }

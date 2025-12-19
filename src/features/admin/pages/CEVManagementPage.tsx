@@ -75,7 +75,7 @@ export default function AdminCEVManagement() {
       setLoading(true);
 
       // Fetch real CEV requests from database
-       
+
       const { data: cevRequests, error } = await supabase
         .from('cev_requests' as any)
         .select(

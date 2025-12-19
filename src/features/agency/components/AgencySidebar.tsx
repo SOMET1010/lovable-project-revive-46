@@ -27,12 +27,7 @@ export default function AgencySidebar({ isOpen, onClose }: AgencySidebarProps) {
   return (
     <>
       {/* Mobile Overlay */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onClose}
-        />
-      )}
+      {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={onClose} />}
 
       {/* Sidebar */}
       <aside
@@ -52,7 +47,7 @@ export default function AgencySidebar({ isOpen, onClose }: AgencySidebarProps) {
               <p className="text-xs text-neutral-500">Espace Agence</p>
             </div>
           </Link>
-          <button 
+          <button
             onClick={onClose}
             className="lg:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
           >
@@ -66,7 +61,7 @@ export default function AgencySidebar({ isOpen, onClose }: AgencySidebarProps) {
             {agentItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              
+
               return (
                 <li key={item.href}>
                   <Link
@@ -82,9 +77,9 @@ export default function AgencySidebar({ isOpen, onClose }: AgencySidebarProps) {
                     <Icon className={cn('h-5 w-5', active ? 'text-primary-500' : '')} />
                     <span className="flex-1">{item.label}</span>
                     {item.badgeCount !== undefined && item.badgeCount > 0 && (
-                      <BadgeIndicator 
-                        count={item.badgeCount} 
-                        color={item.badgeColor} 
+                      <BadgeIndicator
+                        count={item.badgeCount}
+                        color={item.badgeColor}
                         pulse={item.badgePulse}
                       />
                     )}
@@ -102,7 +97,7 @@ export default function AgencySidebar({ isOpen, onClose }: AgencySidebarProps) {
             {bottomItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
-              
+
               return (
                 <li key={item.href}>
                   <Link
@@ -133,7 +128,7 @@ export default function AgencySidebar({ isOpen, onClose }: AgencySidebarProps) {
             <Settings className="h-5 w-5 text-neutral-400" />
             <span className="font-medium">Configurations</span>
           </Link>
-          
+
           <div className="mt-3 bg-primary-50 rounded-xl p-4">
             <p className="text-sm font-medium text-primary-700 mb-1">Gérer vos mandats</p>
             <p className="text-xs text-primary-600 mb-3">Créez un nouveau mandat de gestion</p>

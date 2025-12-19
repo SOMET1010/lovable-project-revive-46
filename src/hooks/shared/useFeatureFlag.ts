@@ -40,7 +40,9 @@ export function useFeatureFlag(
 
       // If the Edge Function is not available, return default value
       if (response.status === 503 || response.status === 404) {
-        console.warn(`Feature flag service unavailable for key: ${flagKey}, using default value (false)`);
+        console.warn(
+          `Feature flag service unavailable for key: ${flagKey}, using default value (false)`
+        );
         return { enabled: false, key: flagKey };
       }
 
@@ -105,12 +107,17 @@ export function useFeatureFlagsByCategory(category: string) {
 
       // If the Edge Function is not available, return empty array
       if (response.status === 503 || response.status === 404) {
-        console.warn(`Feature flags service unavailable for category: ${category}, returning empty array`);
+        console.warn(
+          `Feature flags service unavailable for category: ${category}, returning empty array`
+        );
         return [];
       }
 
       if (!response.ok) {
-        console.error(`Failed to fetch feature flags for category ${category}:`, response.statusText);
+        console.error(
+          `Failed to fetch feature flags for category ${category}:`,
+          response.statusText
+        );
         return [];
       }
 

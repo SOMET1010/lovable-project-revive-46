@@ -27,7 +27,7 @@ export function PaymentReceiptModal({ open, onOpenChange, payment }: PaymentRece
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-payment-receipt', {
-        body: { paymentId: payment.id }
+        body: { paymentId: payment.id },
       });
 
       if (error) throw error;
@@ -74,7 +74,7 @@ export function PaymentReceiptModal({ open, onOpenChange, payment }: PaymentRece
                   {new Date(payment.paid_date).toLocaleDateString('fr-CI', {
                     day: 'numeric',
                     month: 'long',
-                    year: 'numeric'
+                    year: 'numeric',
                   })}
                 </p>
               )}
@@ -135,8 +135,8 @@ export function PaymentReceiptModal({ open, onOpenChange, payment }: PaymentRece
 
           {/* Info */}
           <p className="text-xs text-center text-muted-foreground">
-            Ce reçu est un document officiel généré par Mon Toit. 
-            Il peut être utilisé comme justificatif de paiement.
+            Ce reçu est un document officiel généré par Mon Toit. Il peut être utilisé comme
+            justificatif de paiement.
           </p>
         </div>
       </DialogContent>

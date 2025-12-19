@@ -66,7 +66,7 @@ export default function GuarantorForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.full_name.trim()) {
       toast.error('Le nom du garant est requis');
       return;
@@ -116,7 +116,7 @@ export default function GuarantorForm({
       toast.success('Garant ajouté');
     } catch (err) {
       console.error('Error adding guarantor:', err);
-      toast.error('Erreur lors de l\'ajout');
+      toast.error("Erreur lors de l'ajout");
     } finally {
       setLoading(false);
     }
@@ -124,14 +124,11 @@ export default function GuarantorForm({
 
   const handleDelete = async (guarantorId: string) => {
     try {
-      const { error } = await supabase
-        .from('guarantors')
-        .delete()
-        .eq('id', guarantorId);
+      const { error } = await supabase.from('guarantors').delete().eq('id', guarantorId);
 
       if (error) throw error;
 
-      onGuarantorsChange(guarantors.filter(g => g.id !== guarantorId));
+      onGuarantorsChange(guarantors.filter((g) => g.id !== guarantorId));
       toast.success('Garant supprimé');
     } catch (err) {
       console.error('Error deleting guarantor:', err);
@@ -140,7 +137,7 @@ export default function GuarantorForm({
   };
 
   const sendInvitation = async (_guarantorId: string) => {
-    toast.info('Fonctionnalité d\'invitation à venir');
+    toast.info("Fonctionnalité d'invitation à venir");
   };
 
   return (
@@ -152,7 +149,7 @@ export default function GuarantorForm({
             const statusKey = (guarantor.status as StatusKey) || 'pending';
             const statusInfo = STATUS_CONFIG[statusKey] || STATUS_CONFIG['pending'];
             const StatusIcon = statusInfo.Icon;
-            
+
             return (
               <div
                 key={guarantor.id}
@@ -162,10 +159,13 @@ export default function GuarantorForm({
                   <div>
                     <h4 className="font-semibold text-[#2C1810]">{guarantor.full_name}</h4>
                     <p className="text-sm text-[#6B5A4E]">
-                      {RELATIONSHIPS.find(r => r.value === guarantor.relationship)?.label || 'Garant'}
+                      {RELATIONSHIPS.find((r) => r.value === guarantor.relationship)?.label ||
+                        'Garant'}
                     </p>
                   </div>
-                  <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}>
+                  <div
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${statusInfo.color}`}
+                  >
                     <StatusIcon className="w-3 h-3" />
                     {statusInfo.label}
                   </div>
@@ -233,9 +233,12 @@ export default function GuarantorForm({
 
       {/* Add form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="p-4 bg-white rounded-xl border border-[#EFEBE9] space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 bg-white rounded-xl border border-[#EFEBE9] space-y-4"
+        >
           <h4 className="font-semibold text-[#2C1810]">Nouveau garant</h4>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-medium text-[#6B5A4E] mb-1">Nom complet *</label>
@@ -256,7 +259,9 @@ export default function GuarantorForm({
                 className="w-full px-3 py-2 border border-[#EFEBE9] rounded-lg focus:ring-2 focus:ring-[#F16522] focus:border-transparent text-sm"
               >
                 {RELATIONSHIPS.map((rel) => (
-                  <option key={rel.value} value={rel.value}>{rel.label}</option>
+                  <option key={rel.value} value={rel.value}>
+                    {rel.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -295,7 +300,9 @@ export default function GuarantorForm({
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#6B5A4E] mb-1">Revenus mensuels (FCFA)</label>
+              <label className="block text-xs font-medium text-[#6B5A4E] mb-1">
+                Revenus mensuels (FCFA)
+              </label>
               <input
                 type="number"
                 value={formData.monthly_income}
@@ -308,7 +315,11 @@ export default function GuarantorForm({
 
           <div className="flex items-center gap-2 pt-2">
             <Button type="submit" disabled={loading} className="bg-[#F16522] hover:bg-[#E55A1B]">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
+              {loading ? (
+                <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              ) : (
+                <UserPlus className="w-4 h-4 mr-2" />
+              )}
               Ajouter
             </Button>
             <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>

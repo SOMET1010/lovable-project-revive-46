@@ -7,9 +7,7 @@ const ModeratorSettingsPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Paramètres de modération</h1>
-          <p className="mt-2 text-gray-600">
-            Configurez vos préférences et règles de modération
-          </p>
+          <p className="mt-2 text-gray-600">Configurez vos préférences et règles de modération</p>
         </div>
 
         <div className="space-y-6">
@@ -25,7 +23,9 @@ const ModeratorSettingsPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-900">Notifications push</p>
-                  <p className="text-sm text-gray-500">Recevoir des notifications pour nouveaux signalements</p>
+                  <p className="text-sm text-gray-500">
+                    Recevoir des notifications pour nouveaux signalements
+                  </p>
                 </div>
                 <input
                   type="checkbox"
@@ -47,7 +47,9 @@ const ModeratorSettingsPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-900">Alertes haute priorité</p>
-                  <p className="text-sm text-gray-500">Notifications immédiates pour contenus urgents</p>
+                  <p className="text-sm text-gray-500">
+                    Notifications immédiates pour contenus urgents
+                  </p>
                 </div>
                 <input
                   type="checkbox"

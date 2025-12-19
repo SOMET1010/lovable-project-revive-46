@@ -3,10 +3,20 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button, Card, CardContent, CardHeader, CardTitle, Badge } from '@/shared/ui';
 import { toast } from 'sonner';
-import { 
-  ArrowLeft, User, Phone, Mail, Calendar, Target,
-  TrendingUp, Building2, FileText, Award, Edit,
-  Coins, Home
+import {
+  ArrowLeft,
+  User,
+  Phone,
+  Mail,
+  Calendar,
+  Target,
+  TrendingUp,
+  Building2,
+  FileText,
+  Award,
+  Edit,
+  Coins,
+  Home,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -84,10 +94,12 @@ export default function AgentDetailPage() {
       // Load agent
       const { data: agentData, error: agentError } = await supabase
         .from('agency_agents')
-        .select(`
+        .select(
+          `
           *,
           profiles:user_id(full_name, avatar_url)
-        `)
+        `
+        )
         .eq('id', agentId)
         .single();
 
@@ -102,7 +114,9 @@ export default function AgentDetailPage() {
       // Load transactions
       const { data: txData } = await supabase
         .from('agency_transactions')
-        .select('id, transaction_type, description, gross_amount, agent_share, status, transaction_date')
+        .select(
+          'id, transaction_type, description, gross_amount, agent_share, status, transaction_date'
+        )
         .eq('agent_id', agentId)
         .order('transaction_date', { ascending: false })
         .limit(20);
@@ -112,23 +126,30 @@ export default function AgentDetailPage() {
       // Calculate commission stats
       const totalGross = txData?.reduce((sum, t) => sum + (t.gross_amount || 0), 0) || 0;
       const totalAgentShare = txData?.reduce((sum, t) => sum + (t.agent_share || 0), 0) || 0;
-      const pendingAmount = txData?.filter(t => t.status === 'pending').reduce((sum, t) => sum + (t.agent_share || 0), 0) || 0;
-      const paidAmount = txData?.filter(t => t.status === 'paid').reduce((sum, t) => sum + (t.agent_share || 0), 0) || 0;
+      const pendingAmount =
+        txData
+          ?.filter((t) => t.status === 'pending')
+          .reduce((sum, t) => sum + (t.agent_share || 0), 0) || 0;
+      const paidAmount =
+        txData
+          ?.filter((t) => t.status === 'paid')
+          .reduce((sum, t) => sum + (t.agent_share || 0), 0) || 0;
 
       setCommissionStats({ totalGross, totalAgentShare, pendingAmount, paidAmount });
 
       // Load assignments
       const { data: assignData } = await supabase
         .from('property_assignments')
-        .select(`
+        .select(
+          `
           id, status,
           properties:property_id(id, title, city, monthly_rent)
-        `)
+        `
+        )
         .eq('agent_id', agentId)
         .eq('status', 'active');
 
-      setAssignments(assignData as Assignment[] || []);
-
+      setAssignments((assignData as Assignment[]) || []);
     } catch (error) {
       console.error('Error loading agent:', error);
       toast.error('Erreur lors du chargement');
@@ -176,7 +197,11 @@ export default function AgentDetailPage() {
         <div className="flex flex-col md:flex-row gap-6 mb-8">
           <div className="w-24 h-24 rounded-full bg-[#F16522]/10 flex items-center justify-center flex-shrink-0">
             {agent.profiles?.avatar_url ? (
-              <img src={agent.profiles.avatar_url} alt="" className="w-24 h-24 rounded-full object-cover" />
+              <img
+                src={agent.profiles.avatar_url}
+                alt=""
+                className="w-24 h-24 rounded-full object-cover"
+              />
             ) : (
               <User className="w-12 h-12 text-[#F16522]" />
             )}
@@ -188,7 +213,13 @@ export default function AgentDetailPage() {
                   {agent.profiles?.full_name || agent.email || 'Agent'}
                 </h1>
                 <div className="flex gap-2 mt-2">
-                  <Badge className={agent.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                  <Badge
+                    className={
+                      agent.status === 'active'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }
+                  >
                     {agent.status === 'active' ? 'Actif' : agent.status}
                   </Badge>
                   <Badge variant="outline">{agent.role}</Badge>
@@ -229,7 +260,9 @@ export default function AgentDetailPage() {
                   <Coins className="w-5 h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#2C1810]">{commissionStats.totalAgentShare.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-[#2C1810]">
+                    {commissionStats.totalAgentShare.toLocaleString()}
+                  </p>
                   <p className="text-xs text-[#2C1810]/60">Total commissions</p>
                 </div>
               </div>
@@ -242,7 +275,9 @@ export default function AgentDetailPage() {
                   <Target className="w-5 h-5 text-yellow-600" />
                 </div>
                 <div>
-                  <p className="text-lg font-bold text-[#2C1810]">{commissionStats.pendingAmount.toLocaleString()}</p>
+                  <p className="text-lg font-bold text-[#2C1810]">
+                    {commissionStats.pendingAmount.toLocaleString()}
+                  </p>
                   <p className="text-xs text-[#2C1810]/60">En attente</p>
                 </div>
               </div>
@@ -292,9 +327,14 @@ export default function AgentDetailPage() {
                 ) : (
                   <div className="space-y-3">
                     {assignments.map((assignment) => (
-                      <div key={assignment.id} className="flex items-center justify-between p-3 bg-[#FAF7F4] rounded-lg">
+                      <div
+                        key={assignment.id}
+                        className="flex items-center justify-between p-3 bg-[#FAF7F4] rounded-lg"
+                      >
                         <div>
-                          <p className="font-medium text-[#2C1810]">{assignment.properties?.title}</p>
+                          <p className="font-medium text-[#2C1810]">
+                            {assignment.properties?.title}
+                          </p>
                           <p className="text-sm text-[#2C1810]/60">{assignment.properties?.city}</p>
                         </div>
                         <p className="font-semibold text-[#F16522]">
@@ -321,16 +361,28 @@ export default function AgentDetailPage() {
                 ) : (
                   <div className="space-y-3">
                     {transactions.slice(0, 10).map((tx) => (
-                      <div key={tx.id} className="flex items-center justify-between p-3 border-b border-[#EFEBE9] last:border-0">
+                      <div
+                        key={tx.id}
+                        className="flex items-center justify-between p-3 border-b border-[#EFEBE9] last:border-0"
+                      >
                         <div>
-                          <p className="font-medium text-[#2C1810]">{tx.description || tx.transaction_type}</p>
+                          <p className="font-medium text-[#2C1810]">
+                            {tx.description || tx.transaction_type}
+                          </p>
                           <p className="text-sm text-[#2C1810]/60">
-                            {tx.transaction_date ? format(new Date(tx.transaction_date), 'dd MMM yyyy', { locale: fr }) : '-'}
+                            {tx.transaction_date
+                              ? format(new Date(tx.transaction_date), 'dd MMM yyyy', { locale: fr })
+                              : '-'}
                           </p>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-green-600">+{(tx.agent_share ?? 0).toLocaleString()} FCFA</p>
-                          <Badge variant="outline" className={tx.status === 'paid' ? 'text-green-600' : 'text-yellow-600'}>
+                          <p className="font-semibold text-green-600">
+                            +{(tx.agent_share ?? 0).toLocaleString()} FCFA
+                          </p>
+                          <Badge
+                            variant="outline"
+                            className={tx.status === 'paid' ? 'text-green-600' : 'text-yellow-600'}
+                          >
                             {tx.status === 'paid' ? 'Payé' : 'En attente'}
                           </Badge>
                         </div>
@@ -352,7 +404,9 @@ export default function AgentDetailPage() {
               <CardContent className="space-y-4">
                 <div>
                   <p className="text-sm text-[#2C1810]/60">Objectif mensuel</p>
-                  <p className="font-semibold text-[#2C1810]">{(agent.target_monthly ?? 0).toLocaleString()} FCFA</p>
+                  <p className="font-semibold text-[#2C1810]">
+                    {(agent.target_monthly ?? 0).toLocaleString()} FCFA
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-[#2C1810]/60">Part commission</p>
@@ -379,7 +433,9 @@ export default function AgentDetailPage() {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {agent.specialties.map((spec, i) => (
-                      <Badge key={i} variant="outline">{spec}</Badge>
+                      <Badge key={i} variant="outline">
+                        {spec}
+                      </Badge>
                     ))}
                   </div>
                 </CardContent>

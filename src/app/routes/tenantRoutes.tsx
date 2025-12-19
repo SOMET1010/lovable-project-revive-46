@@ -51,14 +51,15 @@ const PaymentHistory = lazyWithRetry(() => import('@/pages/tenant/PaymentHistory
 const MessagesPage = lazyWithRetry(() => import('@/pages/messaging/MessagesPage'));
 
 // Tenant layout with sidebar
-const TenantDashboardLayout = lazyWithRetry(() => import('@/features/tenant/components/TenantDashboardLayout'));
+const TenantDashboardLayout = lazyWithRetry(
+  () => import('@/features/tenant/components/TenantDashboardLayout')
+);
 // TenantSidebarLayout is used for universal routes that need role-based layout switching
 const TenantSidebarLayout = lazyWithRetry(
   () => import('@/features/tenant/components/TenantSidebarLayout')
 );
 
 export const tenantRoutes: RouteObject[] = [
-
   // Profile
   {
     path: 'profil',

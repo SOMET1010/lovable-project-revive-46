@@ -199,7 +199,7 @@
   right: 0;
   z-index: 50;
   background-color: white;
-  border-top: 1px solid #EFEBE9;
+  border-top: 1px solid #efebe9;
   box-shadow: 0 -4px 20px rgba(44, 24, 16, 0.08);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -214,11 +214,11 @@
   padding: 8px 0;
   transition: all 0.2s ease;
   position: relative;
-  color: #A69B95;
+  color: #a69b95;
 }
 
 .bottom-nav-item.active {
-  color: #F16522;
+  color: #f16522;
 }
 
 .bottom-nav-item.active::after {
@@ -229,7 +229,7 @@
   transform: translateX(-50%);
   width: 32px;
   height: 4px;
-  background-color: #F16522;
+  background-color: #f16522;
   border-radius: 9999px;
 }
 
@@ -261,7 +261,7 @@
   min-width: 18px;
   height: 18px;
   padding: 0 4px;
-  background-color: #25D366;
+  background-color: #25d366;
   color: white;
   font-size: 10px;
   font-weight: 700;
@@ -283,7 +283,7 @@
   top: 4px;
   width: 48px;
   height: 48px;
-  background: linear-gradient(135deg, #F16522 0%, #FF8C4B 100%);
+  background: linear-gradient(135deg, #f16522 0%, #ff8c4b 100%);
   border-radius: 50%;
   box-shadow: 0 4px 12px rgba(241, 101, 34, 0.35);
   z-index: -1;
@@ -294,7 +294,7 @@
 }
 
 .bottom-nav-item.publish span {
-  color: #F16522;
+  color: #f16522;
 }
 
 /* Hide bottom nav on landscape mode when keyboard is open */

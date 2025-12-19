@@ -1,5 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { CheckCircle2, AlertCircle, Loader2, Eye, ArrowLeft, ArrowRight, RefreshCw } from 'lucide-react';
+import {
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Eye,
+  ArrowLeft,
+  ArrowRight,
+  RefreshCw,
+} from 'lucide-react';
 import { Button } from '@/shared/ui/Button';
 import { useFaceDetection } from '@/shared/hooks/useFaceDetection';
 
@@ -30,11 +38,11 @@ const cn = (...classes: (string | boolean | undefined)[]): string => {
   return classes.filter(Boolean).join(' ');
 };
 
-const ChallengeIcon: React.FC<{ challenge: LivenessChallenge; isActive: boolean; isComplete: boolean }> = ({
-  challenge,
-  isActive,
-  isComplete,
-}) => {
+const ChallengeIcon: React.FC<{
+  challenge: LivenessChallenge;
+  isActive: boolean;
+  isComplete: boolean;
+}> = ({ challenge, isActive, isComplete }) => {
   const iconClass = cn(
     'w-6 h-6 transition-all duration-300',
     isComplete && 'text-green-500',
@@ -112,7 +120,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
 
     return () => {
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, [onError]);
@@ -132,28 +140,34 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
 
   if (cameraError) {
     return (
-      <div className={cn('flex flex-col items-center justify-center p-8 bg-red-50 rounded-2xl', className)}>
+      <div
+        className={cn(
+          'flex flex-col items-center justify-center p-8 bg-red-50 rounded-2xl',
+          className
+        )}
+      >
         <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
         <p className="text-red-800 font-medium text-center mb-4">
           Impossible d'accéder à la caméra
         </p>
-        <p className="text-sm text-red-600 text-center">
-          {cameraError}
-        </p>
+        <p className="text-sm text-red-600 text-center">{cameraError}</p>
       </div>
     );
   }
 
   if (modelsError) {
     return (
-      <div className={cn('flex flex-col items-center justify-center p-8 bg-red-50 rounded-2xl', className)}>
+      <div
+        className={cn(
+          'flex flex-col items-center justify-center p-8 bg-red-50 rounded-2xl',
+          className
+        )}
+      >
         <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
         <p className="text-red-800 font-medium text-center mb-4">
           Erreur de chargement des modèles
         </p>
-        <p className="text-sm text-red-600 text-center mb-6">
-          {modelsError}
-        </p>
+        <p className="text-sm text-red-600 text-center mb-6">{modelsError}</p>
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <Button
             onClick={() => window.location.reload()}
@@ -192,7 +206,9 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#2C1810]/80 z-10">
             <Loader2 className="w-12 h-12 text-[#F16522] animate-spin mb-4" />
             <p className="text-white text-sm">
-              {modelsLoading ? 'Chargement de la détection faciale...' : 'Démarrage de la caméra...'}
+              {modelsLoading
+                ? 'Chargement de la détection faciale...'
+                : 'Démarrage de la caméra...'}
             </p>
           </div>
         )}
@@ -214,11 +230,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
             {currentChallenge && faceDetected && (
               <div className="absolute bottom-6 left-4 right-4 bg-black/70 rounded-xl p-4 backdrop-blur-sm">
                 <div className="flex items-center justify-center gap-3">
-                  <ChallengeIcon
-                    challenge={currentChallenge}
-                    isActive={true}
-                    isComplete={false}
-                  />
+                  <ChallengeIcon challenge={currentChallenge} isActive={true} isComplete={false} />
                   <span className="text-white font-medium text-lg animate-pulse">
                     {getChallengeLabel(currentChallenge)}
                   </span>
@@ -241,9 +253,7 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
         {isLivenessComplete && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-green-500/20 z-10">
             <CheckCircle2 className="w-20 h-20 text-green-500 mb-4 animate-bounce" />
-            <p className="text-white text-xl font-bold">
-              Vérification réussie !
-            </p>
+            <p className="text-white text-xl font-bold">Vérification réussie !</p>
           </div>
         )}
       </div>
@@ -299,7 +309,12 @@ export const LivenessDetector: React.FC<LivenessDetectorProps> = ({
                     !isActive && !isComplete && 'text-[#5D4037]/50'
                   )}
                 >
-                  {index + 1}. {challenge === 'blink' ? 'Cligner' : challenge === 'turn_left' ? 'Gauche' : 'Droite'}
+                  {index + 1}.{' '}
+                  {challenge === 'blink'
+                    ? 'Cligner'
+                    : challenge === 'turn_left'
+                      ? 'Gauche'
+                      : 'Droite'}
                 </span>
               </div>
             );

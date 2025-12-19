@@ -23,7 +23,7 @@ export function useSecureAuth() {
       // Vérifier le rate limit côté client
       const rateLimitResult = await checkRateLimit('auth:register');
       if (!rateLimitResult.allowed) {
-        throw new Error(rateLimitResult.message || 'Trop de tentatives d\'inscription');
+        throw new Error(rateLimitResult.message || "Trop de tentatives d'inscription");
       }
 
       setIsLoading(true);
@@ -42,7 +42,7 @@ export function useSecureAuth() {
       }
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Erreur lors de l\'inscription');
+      toast.error(error.message || "Erreur lors de l'inscription");
     },
   });
 
@@ -90,7 +90,7 @@ export function useSecureAuth() {
       toast.success('Email de réinitialisation envoyé');
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Erreur lors de l\'envoi');
+      toast.error(error.message || "Erreur lors de l'envoi");
     },
   });
 
@@ -108,14 +108,20 @@ export function useSecureAuth() {
   });
 
   // Fonction pour l'inscription
-  const signUp = useCallback(async (data: SignUpData) => {
-    return signUpMutation.mutateAsync(data);
-  }, [signUpMutation]);
+  const signUp = useCallback(
+    async (data: SignUpData) => {
+      return signUpMutation.mutateAsync(data);
+    },
+    [signUpMutation]
+  );
 
   // Fonction pour la connexion
-  const signIn = useCallback(async (data: SignInData) => {
-    return signInMutation.mutateAsync(data);
-  }, [signInMutation]);
+  const signIn = useCallback(
+    async (data: SignInData) => {
+      return signInMutation.mutateAsync(data);
+    },
+    [signInMutation]
+  );
 
   // Fonction pour la déconnexion
   const signOut = useCallback(async () => {
@@ -123,9 +129,12 @@ export function useSecureAuth() {
   }, [signOutMutation]);
 
   // Fonction pour la réinitialisation du mot de passe
-  const resetPassword = useCallback(async (email: string) => {
-    return resetPasswordMutation.mutateAsync(email);
-  }, [resetPasswordMutation]);
+  const resetPassword = useCallback(
+    async (email: string) => {
+      return resetPasswordMutation.mutateAsync(email);
+    },
+    [resetPasswordMutation]
+  );
 
   return {
     signUp,
@@ -172,9 +181,12 @@ export function useSecureProfile() {
     },
   });
 
-  const updateProfile = useCallback((updates: any, profileId?: string) => {
-    return updateProfileMutation.mutateAsync({ updates, profileId });
-  }, [updateProfileMutation]);
+  const updateProfile = useCallback(
+    (updates: any, profileId?: string) => {
+      return updateProfileMutation.mutateAsync({ updates, profileId });
+    },
+    [updateProfileMutation]
+  );
 
   return {
     updateProfile,

@@ -72,7 +72,7 @@ class BrevoOTPService {
    */
   private getHeaders(): HeadersInit {
     const headers: HeadersInit = {
-      'accept': 'application/json',
+      accept: 'application/json',
       'content-type': 'application/json',
       'api-key': this.config.apiKey,
     };
@@ -97,10 +97,12 @@ class BrevoOTPService {
           name: 'Mon Toit',
           email: 'no-reply@montoit.ci',
         },
-        to: [{
-          email: otpData.recipient,
-          name: otpData.userName || '',
-        }],
+        to: [
+          {
+            email: otpData.recipient,
+            name: otpData.userName || '',
+          },
+        ],
       };
 
       const response = await fetch(`${this.config.baseUrl}/smtp/email`, {
@@ -119,7 +121,7 @@ class BrevoOTPService {
       console.error('Erreur envoi OTP email Brevo:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erreur lors de l\'envoi de l\'email',
+        error: error instanceof Error ? error.message : "Erreur lors de l'envoi de l'email",
       };
     }
   }
@@ -153,7 +155,7 @@ class BrevoOTPService {
       console.error('Erreur envoi OTP SMS Brevo:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erreur lors de l\'envoi du SMS',
+        error: error instanceof Error ? error.message : "Erreur lors de l'envoi du SMS",
       };
     }
   }
@@ -192,7 +194,7 @@ class BrevoOTPService {
       console.error('Erreur envoi OTP WhatsApp Brevo:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Erreur lors de l\'envoi WhatsApp',
+        error: error instanceof Error ? error.message : "Erreur lors de l'envoi WhatsApp",
       };
     }
   }
@@ -310,7 +312,7 @@ class BrevoOTPService {
       default:
         return {
           success: false,
-          error: 'Méthode d\'envoi non supportée',
+          error: "Méthode d'envoi non supportée",
         };
     }
   }

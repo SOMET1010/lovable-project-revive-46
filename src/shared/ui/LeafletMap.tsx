@@ -86,7 +86,6 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
       maxZoom: 19,
     }).addTo(mapRef.current);
 
-    
     setMapLoaded(true);
 
     return () => {

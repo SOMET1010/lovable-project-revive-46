@@ -82,7 +82,6 @@ export default function OwnerDashboardPage() {
         .order('created_at', { ascending: false });
 
       const props = (propertiesData || []).map((p: any) => ({
-         
         ...p,
         monthly_rent: p.price ?? p.monthly_rent ?? 0,
       })) as Property[];

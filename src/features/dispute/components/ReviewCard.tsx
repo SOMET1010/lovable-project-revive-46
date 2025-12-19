@@ -28,7 +28,7 @@ const CRITERIA_LABELS: Record<string, string> = {
   accuracy: 'Exactitude',
   value: 'Rapport qualité/prix',
   location: 'Emplacement',
-  checkin: 'Arrivée'
+  checkin: 'Arrivée',
 };
 
 export default function ReviewCard({ review, onHelpful, showResponse = true }: ReviewCardProps) {
@@ -67,9 +67,7 @@ export default function ReviewCard({ review, onHelpful, showResponse = true }: R
               <span className="font-medium text-[#2C1810]">
                 {review.reviewer_name || 'Utilisateur'}
               </span>
-              {review.is_verified && (
-                <CheckCircle className="w-4 h-4 text-green-500" />
-              )}
+              {review.is_verified && <CheckCircle className="w-4 h-4 text-green-500" />}
             </div>
             <p className="text-xs text-muted-foreground">
               {format(new Date(review.created_at), 'dd MMMM yyyy', { locale: fr })}
@@ -85,18 +83,14 @@ export default function ReviewCard({ review, onHelpful, showResponse = true }: R
           {Object.entries(review.criteria_ratings).map(([key, value]) => (
             <div key={key} className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">{CRITERIA_LABELS[key] || key}</span>
-              <div className="flex items-center gap-1">
-                {renderStars(value as number, 'sm')}
-              </div>
+              <div className="flex items-center gap-1">{renderStars(value as number, 'sm')}</div>
             </div>
           ))}
         </div>
       )}
 
       {/* Comment */}
-      {review.comment && (
-        <p className="text-[#2C1810] mb-4">{review.comment}</p>
-      )}
+      {review.comment && <p className="text-[#2C1810] mb-4">{review.comment}</p>}
 
       {/* Response */}
       {showResponse && review.response && (

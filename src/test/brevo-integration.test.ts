@@ -92,7 +92,7 @@ describe('OTP Unified Service', () => {
       expect(result.messageId).toBe('whatsapp-message-id');
     });
 
-    it('devrait gérer les erreurs d\'envoi', async () => {
+    it("devrait gérer les erreurs d'envoi", async () => {
       const { supabase } = await import('@/services/supabase/client');
       (supabase.functions.invoke as any).mockResolvedValueOnce({
         data: { status: 'error', reason: 'API Error' },
@@ -194,7 +194,7 @@ describe('Auth Brevo Service', () => {
   });
 
   describe('initiateAuth', () => {
-    it('devrait initier l\'authentification par email', async () => {
+    it("devrait initier l'authentification par email", async () => {
       const result = await authBrevoService.initiateAuth({
         email: 'test@example.com',
         method: 'email',
@@ -205,7 +205,7 @@ describe('Auth Brevo Service', () => {
       expect(result.otpSent).toBe(true);
     });
 
-    it('devrait initier l\'authentification par téléphone', async () => {
+    it("devrait initier l'authentification par téléphone", async () => {
       const result = await authBrevoService.initiateAuth({
         phone: '+2250700000000',
         method: 'phone',
@@ -228,10 +228,7 @@ describe('Auth Brevo Service', () => {
         })),
       });
 
-      const result = await authBrevoService.updateProfileRole(
-        'user-id',
-        'locataire'
-      );
+      const result = await authBrevoService.updateProfileRole('user-id', 'locataire');
 
       expect(result.success).toBe(true);
     });
@@ -243,7 +240,7 @@ describe('useBrevoAuth Hook', () => {
   // Note: Les tests de hooks React nécessiteraient @testing-library/react
   // Ceci est un exemple de structure de test
 
-  it('devrait gérer le flux d\'envoi OTP', () => {
+  it("devrait gérer le flux d'envoi OTP", () => {
     // Test avec React Testing Library
     // 1. Rendre le composant avec le hook
     // 2. Simuler la saisie utilisateur
@@ -263,7 +260,7 @@ describe('useBrevoAuth Hook', () => {
 
 // Tests E2E (Playwright)
 describe('Tests E2E - Authentification OTP', () => {
-  it('devrait compléter le flux d\'inscription par email', async () => {
+  it("devrait compléter le flux d'inscription par email", async () => {
     // Test E2E avec Playwright
     // 1. Visiter la page d'inscription
     // 2. Choisir méthode email
@@ -274,7 +271,7 @@ describe('Tests E2E - Authentification OTP', () => {
     // 7. Vérifier redirection dashboard
   });
 
-  it('devrait compléter le flux d\'inscription par téléphone', async () => {
+  it("devrait compléter le flux d'inscription par téléphone", async () => {
     // Test E2E avec Playwright
     // 1. Visiter la page d'inscription
     // 2. Choisir méthode téléphone

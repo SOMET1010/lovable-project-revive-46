@@ -157,7 +157,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
   },
 });
 
-
 // Handle auth errors more gracefully
 supabase.auth.onAuthStateChange((event, session) => {
   // Only perform cleanup on actual sign out, not on token refresh

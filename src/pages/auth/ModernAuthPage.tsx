@@ -230,7 +230,7 @@ export default function ModernAuthPage() {
       // Vérifier la réponse de Brevo
       if (data?.status !== 'ok') {
         console.error('Brevo error:', data);
-        throw new Error(data?.reason || 'Erreur lors de l\'envoi de l\'email');
+        throw new Error(data?.reason || "Erreur lors de l'envoi de l'email");
       }
 
       return { code, viaFallback: false };

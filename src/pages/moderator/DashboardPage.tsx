@@ -32,7 +32,7 @@ const ModeratorDashboard: React.FC = () => {
       changeType: 'decrease' as const,
     },
     {
-      title: 'Modérations aujourd\'hui',
+      title: "Modérations aujourd'hui",
       value: '42',
       icon: <CheckCircle className="w-6 h-6 text-green-600" />,
       color: 'bg-green-100',
@@ -51,7 +51,7 @@ const ModeratorDashboard: React.FC = () => {
 
   const quickActions = [
     {
-      title: 'Voir la file d\'attente',
+      title: "Voir la file d'attente",
       description: 'Contenu en attente de modération',
       icon: <Clock className="w-5 h-5" />,
       action: () => navigate('/moderator/queue'),
@@ -73,7 +73,7 @@ const ModeratorDashboard: React.FC = () => {
     },
     {
       title: 'Historique',
-      description: 'Voir l\'historique des modérations',
+      description: "Voir l'historique des modérations",
       icon: <BarChart3 className="w-5 h-5" />,
       action: () => navigate('/moderator/history'),
       color: 'bg-gray-500 text-white',
@@ -108,7 +108,7 @@ const ModeratorDashboard: React.FC = () => {
     {
       id: 4,
       type: 'signalement',
-      title: 'Signalement d\'utilisateur',
+      title: "Signalement d'utilisateur",
       description: 'Compte suspect - Comportement frauduleux',
       time: 'il y a 1 heure',
       status: 'pending',
@@ -120,12 +120,8 @@ const ModeratorDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Tableau de bord Modérateur
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Gérez la modération de contenu et les signalements
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Tableau de bord Modérateur</h1>
+          <p className="mt-2 text-gray-600">Gérez la modération de contenu et les signalements</p>
         </div>
 
         {/* Stats Grid */}
@@ -134,34 +130,20 @@ const ModeratorDashboard: React.FC = () => {
             <div key={index} className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">
-                    {stat.title}
-                  </p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {stat.value}
-                  </p>
+                  <p className="text-sm font-medium text-gray-600">{stat.title}</p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
                   <div className="flex items-center mt-2">
                     {stat.changeType === 'increase' ? (
-                      <span className="text-green-600 text-sm font-medium">
-                        ↑ {stat.change}
-                      </span>
+                      <span className="text-green-600 text-sm font-medium">↑ {stat.change}</span>
                     ) : stat.changeType === 'decrease' ? (
-                      <span className="text-red-600 text-sm font-medium">
-                        ↓ {stat.change}
-                      </span>
+                      <span className="text-red-600 text-sm font-medium">↓ {stat.change}</span>
                     ) : (
-                      <span className="text-gray-500 text-sm font-medium">
-                        {stat.change}
-                      </span>
+                      <span className="text-gray-500 text-sm font-medium">{stat.change}</span>
                     )}
-                    <span className="text-gray-500 text-sm ml-1">
-                      vs hier
-                    </span>
+                    <span className="text-gray-500 text-sm ml-1">vs hier</span>
                   </div>
                 </div>
-                <div className={`${stat.color} p-3 rounded-lg`}>
-                  {stat.icon}
-                </div>
+                <div className={`${stat.color} p-3 rounded-lg`}>{stat.icon}</div>
               </div>
             </div>
           ))}
@@ -169,9 +151,7 @@ const ModeratorDashboard: React.FC = () => {
 
         {/* Quick Actions */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            Actions rapides
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Actions rapides</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickActions.map((action, index) => (
               <button
@@ -193,49 +173,36 @@ const ModeratorDashboard: React.FC = () => {
         {/* Recent Activity */}
         <div className="bg-white rounded-lg shadow">
           <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Activité récente
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">Activité récente</h2>
           </div>
           <div className="divide-y divide-gray-200">
             {recentActivity.map((activity) => (
-              <div
-                key={activity.id}
-                className="px-6 py-4 hover:bg-gray-50 cursor-pointer"
-              >
+              <div key={activity.id} className="px-6 py-4 hover:bg-gray-50 cursor-pointer">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center">
-                      <h3 className="text-sm font-medium text-gray-900">
-                        {activity.title}
-                      </h3>
+                      <h3 className="text-sm font-medium text-gray-900">{activity.title}</h3>
                       <span
                         className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${
                           activity.status === 'pending'
                             ? 'bg-yellow-100 text-yellow-800'
                             : activity.status === 'approved'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-red-100 text-red-800'
                         }`}
                       >
                         {activity.status === 'pending'
                           ? 'En attente'
                           : activity.status === 'approved'
-                          ? 'Approuvé'
-                          : 'Rejeté'}
+                            ? 'Approuvé'
+                            : 'Rejeté'}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-gray-600">
-                      {activity.description}
-                    </p>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {activity.time}
-                    </p>
+                    <p className="mt-1 text-sm text-gray-600">{activity.description}</p>
+                    <p className="mt-1 text-xs text-gray-500">{activity.time}</p>
                   </div>
                   <div className="ml-4">
-                    <button className="text-gray-400 hover:text-gray-600">
-                      →
-                    </button>
+                    <button className="text-gray-400 hover:text-gray-600">→</button>
                   </div>
                 </div>
               </div>
