@@ -44,6 +44,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profileError, setProfileError] = useState<ProfileError | null>(null);
 
   useEffect(() => {
+    // Set a timeout to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Auth loading timeout - forcing loading to false');
+        setLoading(false);
+      }
+    }, 10000); // 10 seconds timeout
+
     supabase.auth
       .getSession()
       .then(({ data: { session } }: { data: { session: Session | null } }) => {
@@ -60,23 +68,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       (async () => {
+        console.log('Auth state changed:', _event, session?.user?.id);
         setSession(session);
         setUser(session?.user ?? null);
         if (session?.user) {
           await loadProfile(session.user.id);
         } else {
           setProfile(null);
+          setProfileError(null);
           setLoading(false);
         }
       })();
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(loadingTimeout);
+    };
   }, []);
 
   const loadProfile = async (userId: string, retryCount = 0) => {
-    const MAX_RETRIES = 5;
-    const RETRY_DELAY = 1500;
+    const MAX_RETRIES = 3; // Reduced retries to avoid long loading times
+    const RETRY_DELAY = 1000;
 
     try {
       logger.debug('Loading user profile', {
@@ -85,17 +98,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         maxRetries: MAX_RETRIES + 1,
       });
 
+      // Skip health check on retries to speed up the process
       if (retryCount === 0) {
-        const healthCheck = await testDatabaseConnection();
-        if (!healthCheck.success) {
-          logger.error('Database connection failed', undefined, { message: healthCheck.message });
-          setProfileError({
-            type: 'network',
-            message: 'Problème de connexion à la base de données',
-            details: healthCheck.message,
-          });
-          setLoading(false);
-          return;
+        try {
+          const healthCheck = await testDatabaseConnection();
+          if (!healthCheck.success) {
+            logger.error('Database connection failed', undefined, { message: healthCheck.message });
+            // Don't set error immediately on first attempt, allow retry
+            if (retryCount >= MAX_RETRIES) {
+              setProfileError({
+                type: 'network',
+                message: 'Problème de connexion à la base de données',
+                details: healthCheck.message,
+              });
+              setLoading(false);
+            }
+            return;
+          }
+        } catch (healthError) {
+          logger.warn('Health check failed, continuing with profile load', healthError instanceof Error ? healthError : undefined);
         }
       }
 

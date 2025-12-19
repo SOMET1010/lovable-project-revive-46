@@ -15,12 +15,10 @@ export default function DashboardRouter() {
 
   useEffect(() => {
     console.log('DashboardRouter - authLoading:', authLoading, 'rolesLoading:', rolesLoading);
-    console.log('DashboardRouter - user:', user, 'profile:', profile);
+    console.log('DashboardRouter - user:', user?.id, 'profile:', profile?.id);
 
-    // Wait for both auth and roles to load
+    // Wait for both auth and roles to load, but with a timeout
     if (authLoading || rolesLoading) return;
-
-    console.log('DashboardRouter - Checking user...');
 
     // Not logged in - redirect to login
     if (!user) {
@@ -47,8 +45,20 @@ export default function DashboardRouter() {
     // Redirect based on user_type from profile using centralized logic
     const userType = profile?.user_type || profile?.active_role;
 
+    // If no user type but we have a user, try to continue with a default
     if (!userType) {
-      console.log('DashboardRouter - No user type defined, redirecting to role selection');
+      console.warn('DashboardRouter - No user type defined for user:', user.id);
+      // Instead of redirecting to inscription, try to get user metadata
+      const userTypeFromMetadata = user.user_metadata?.user_type || user.user_metadata?.role;
+      if (userTypeFromMetadata) {
+        const fallbackRoute = getDashboardRoute(userTypeFromMetadata);
+        console.log('DashboardRouter - Using metadata user type:', userTypeFromMetadata, 'redirecting to:', fallbackRoute);
+        navigate(fallbackRoute, { replace: true });
+        return;
+      }
+
+      // Final fallback - redirect to role selection
+      console.log('DashboardRouter - No user type found, redirecting to role selection');
       navigate('/inscription', { replace: true });
       return;
     }

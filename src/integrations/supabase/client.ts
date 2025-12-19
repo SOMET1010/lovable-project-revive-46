@@ -73,24 +73,42 @@ export const SUPABASE_API_URL = SUPABASE_URL;
 // Function to get session without circular dependency
 const getSession = () => {
   try {
-    // Check multiple possible localStorage keys for session
-    const keys = ['supabase.auth.token', 'sb-auth-token', 'supabase.auth'];
+    // Supabase stores the session in a project-scoped key: sb-<project-ref>-auth-token
+    const projectRef = (() => {
+      try {
+        return new URL(SUPABASE_URL).hostname.split('.')[0];
+      } catch {
+        return null;
+      }
+    })();
+    const keys = [
+      projectRef ? `sb-${projectRef}-auth-token` : null,
+      'supabase.auth.token',
+      'sb-auth-token',
+      'supabase.auth',
+    ].filter(Boolean) as string[];
+
+    const parseSession = (raw: string) => {
+      try {
+        const data = JSON.parse(raw);
+        if (data?.currentSession?.access_token) return data.currentSession;
+        if (data?.access_token) return data;
+        if (Array.isArray(data)) {
+          const found = data.find((item) => item?.access_token);
+          if (found) return found;
+        }
+      } catch {
+        // Ignore parse errors and continue
+      }
+      return null;
+    };
 
     for (const key of keys) {
       const sessionStr = localStorage.getItem(key);
-      if (sessionStr) {
-        try {
-          const sessionData = JSON.parse(sessionStr);
-          // Handle different session formats
-          if (Array.isArray(sessionData) && sessionData[0]?.access_token) {
-            return sessionData[0];
-          } else if (sessionData?.access_token) {
-            return sessionData;
-          }
-        } catch (e) {
-          // Continue to next key
-        }
-      }
+      if (!sessionStr) continue;
+
+      const session = parseSession(sessionStr);
+      if (session) return session;
     }
   } catch (e) {
     // Ignore errors
@@ -140,11 +158,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 });
 
 
-// Handle auth errors more aggressively
+// Handle auth errors more gracefully
 supabase.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
-    if (!session) {
-      aggressiveTokenCleanup();
-    }
+  // Only perform cleanup on actual sign out, not on token refresh
+  if (event === 'SIGNED_OUT' && !session) {
+    console.log('User signed out, performing token cleanup');
+    aggressiveTokenCleanup();
   }
 });
