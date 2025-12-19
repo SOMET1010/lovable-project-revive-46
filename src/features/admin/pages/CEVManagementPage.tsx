@@ -75,7 +75,7 @@ export default function AdminCEVManagement() {
       setLoading(true);
 
       // Fetch real CEV requests from database
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const { data: cevRequests, error } = await supabase
         .from('cev_requests' as any)
         .select(

@@ -6,9 +6,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { supabase } from '@/services/supabase/client';
 
 describe('Security Integration Tests', () => {
-  let testUsers: any[] = [];
-  let testProperties: any[] = [];
-  let testContracts: any[] = [];
+  const testUsers: any[] = [];
+  const testProperties: any[] = [];
+  const testContracts: any[] = [];
 
   beforeAll(async () => {
     // Créer des données de test

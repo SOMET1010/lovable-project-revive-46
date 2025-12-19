@@ -140,7 +140,7 @@ Deno.serve(async (req: Request) => {
     edgeLogger.info('Sending OTP via Brevo', { method, phone: normalizedPhone });
 
     // Envoyer directement via Brevo SMS
-    let provider = 'brevo-sms';
+    const provider = 'brevo-sms';
 
     const sendResponse = await fetch(functionUrl, {
       method: 'POST',
