@@ -17,9 +17,9 @@ interface Favorite {
     city: string;
     neighborhood: string | null;
     property_type: string;
-    rooms_count: number | null;
-    bedrooms_count: number | null;
-    bathrooms_count: number | null;
+    rooms: number | null;
+    bedrooms: number | null;
+    bathrooms: number | null;
     surface_area: number | null;
     price: number;
     status: string | null;
@@ -54,9 +54,9 @@ export default function Favorites() {
             city,
             neighborhood,
             property_type,
-            rooms_count,
-            bedrooms_count,
-            bathrooms_count,
+            rooms,
+            bedrooms,
+            bathrooms,
             surface_area,
             price,
             status,
@@ -198,7 +198,7 @@ export default function Favorites() {
                     <div className="flex items-center space-x-1">
                       <Bed className="w-4 h-4" />
                       <span>
-                        {favorite.property?.bedrooms_count ?? favorite.property?.rooms_count ?? 0}
+                        {favorite.property?.bedrooms ?? favorite.property?.rooms ?? 0}
                       </span>
                     </div>
                     <div className="flex items-center space-x-1">

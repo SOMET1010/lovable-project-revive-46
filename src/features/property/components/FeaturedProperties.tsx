@@ -112,16 +112,16 @@ function PropertyCard({
 
         {/* Features */}
         <div className="flex items-center gap-4 text-sm text-[var(--earth-700)] pt-4 border-t border-[var(--sand-200)]">
-          {property.bedrooms_count && (
+          {property.bedrooms && (
             <div className="flex items-center gap-1.5">
               <Bed className="h-4 w-4 text-[var(--terracotta-400)]" />
-              <span>{property.bedrooms_count} ch.</span>
+              <span>{property.bedrooms} ch.</span>
             </div>
           )}
-          {property.bathrooms_count && (
+          {property.bathrooms && (
             <div className="flex items-center gap-1.5">
               <Bath className="h-4 w-4 text-[var(--terracotta-400)]" />
-              <span>{property.bathrooms_count} sdb</span>
+              <span>{property.bathrooms} sdb</span>
             </div>
           )}
           {property.surface_area && (

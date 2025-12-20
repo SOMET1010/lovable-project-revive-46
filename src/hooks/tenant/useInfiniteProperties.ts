@@ -83,7 +83,7 @@ export function useInfiniteProperties(
     if (bedrooms?.trim()) {
       const beds = parseInt(bedrooms, 10);
       if (!isNaN(beds) && beds > 0) {
-        query = query.eq('bedrooms_count', beds);
+        query = query.eq('bedrooms', beds);
       }
     }
 

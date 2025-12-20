@@ -24,9 +24,9 @@ interface PropertyFormData {
   price: number;
   description: string;
   surface_area: number;
-  rooms_count: number;
-  bedrooms_count: number;
-  bathrooms_count: number;
+  rooms: number;
+  bedrooms: number;
+  bathrooms: number;
 }
 
 export default function AgencyAddPropertyPage() {
@@ -45,9 +45,9 @@ export default function AgencyAddPropertyPage() {
     price: 0,
     description: '',
     surface_area: 0,
-    rooms_count: 0,
-    bedrooms_count: 0,
-    bathrooms_count: 0,
+    rooms: 0,
+    bedrooms: 0,
+    bathrooms: 0,
   });
 
   useEffect(() => {
@@ -372,9 +372,9 @@ export default function AgencyAddPropertyPage() {
                     <input
                       type="number"
                       min="0"
-                      value={formData.bedrooms_count}
+                      value={formData.bedrooms}
                       onChange={(e) =>
-                        setFormData({ ...formData, bedrooms_count: Number(e.target.value) })
+                        setFormData({ ...formData, bedrooms: Number(e.target.value) })
                       }
                       className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                       placeholder="2"
