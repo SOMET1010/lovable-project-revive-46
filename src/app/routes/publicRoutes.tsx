@@ -2,6 +2,8 @@
 import { RouteObject } from 'react-router-dom';
 import { lazyWithRetry } from '@/shared/utils/lazyLoad';
 import SearchErrorBoundary from '@/features/tenant/components/SearchErrorBoundary';
+import ProtectedRoute from '@/shared/ui/ProtectedRoute';
+import { TENANT_ROLES, OWNER_ROLES, PROPERTY_MANAGER_ROLES, AGENCY_ROLES } from '@/shared/constants/roles';
 
 // TEST: Import direct de HomePage pour déboguer le problème de lazy loading
 import Home from '@/pages/public/HomePage';
@@ -22,6 +24,9 @@ const ContactPage = lazyWithRetry(() => import('@/pages/auth/ContactPage'));
 const HelpPage = lazyWithRetry(() => import('@/pages/auth/HelpPage'));
 const FAQPage = lazyWithRetry(() => import('@/pages/auth/FAQPage'));
 const HowItWorksPage = lazyWithRetry(() => import('@/pages/auth/HowItWorksPage'));
+
+// Contract detail page (shared across all user types)
+const ContractDetail = lazyWithRetry(() => import('@/pages/tenant/ContractDetailPage'));
 
 export const publicRoutes: RouteObject[] = [
   // Home - IMPORT DIRECT pour test
@@ -54,6 +59,16 @@ export const publicRoutes: RouteObject[] = [
   { path: 'propriete/:id', element: <PropertyDetail /> },
   { path: 'properties/:id', element: <PropertyDetail /> },
   { path: 'proprietes/:id', element: <PropertyDetail /> },
+
+  // Contract detail (global route - accessible to all authenticated users with appropriate roles)
+  {
+    path: 'contrat/:id',
+    element: (
+      <ProtectedRoute allowedRoles={[...TENANT_ROLES, ...OWNER_ROLES, ...PROPERTY_MANAGER_ROLES, ...AGENCY_ROLES]}>
+        <ContractDetail />
+      </ProtectedRoute>
+    ),
+  },
 
   // 404 fallback
   { path: '*', element: <NotFound /> },

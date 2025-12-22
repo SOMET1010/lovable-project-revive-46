@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { ROUTES } from '@/shared/config/routes.config';
 import {
   downloadContract,
   regenerateContract,
@@ -298,7 +299,7 @@ export default function OwnerContractsPage() {
               </div>
             </div>
             <Link
-              to="/proprietaire/creer-contrat"
+              to={ROUTES.CONTRACTS.CREATE.split(':')[0]}
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
             >
               <Plus className="h-5 w-5" />
@@ -384,7 +385,7 @@ export default function OwnerContractsPage() {
                 : 'Créez votre premier contrat de bail'}
             </p>
             <Link
-              to="/proprietaire/creer-contrat"
+              to={ROUTES.CONTRACTS.CREATE.split(':')[0]}
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
             >
               <Plus className="h-5 w-5 mr-2" />

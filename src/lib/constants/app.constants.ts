@@ -26,10 +26,10 @@ export const ROUTES = {
   PROFILE: '/profil',
   MESSAGES: '/messages',
   CONTRACTS: {
-    LIST: '/mes-contrats',
-    DETAIL: '/contrat/:id',
-    CREATE: '/creer-contrat/:propertyId/:tenantId',
-    SIGN: '/signer-bail/:id',
+    LIST: '/proprietaire/contrats',
+    DETAIL: '/proprietaire/contrat/:id',
+    CREATE: '/proprietaire/creer-contrat/:propertyId',
+    SIGN: '/proprietaire/signer-bail/:id',
   },
   PAYMENTS: {
     MAKE: '/effectuer-paiement',

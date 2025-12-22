@@ -61,11 +61,16 @@ export const ROUTES = {
   },
 
   CONTRACTS: {
-    LIST: '/mes-contrats',
-    DETAIL: '/contrat/:id',
-    DETAIL_ENHANCED: '/contrat/:id/detaille',
-    CREATE: '/creer-contrat/:propertyId',
-    SIGN: '/signer-bail/:id',
+    LIST: '/proprietaire/contrats',
+    DETAIL: '/proprietaire/contrat/:id',
+    DETAIL_ENHANCED: '/proprietaire/contrat/:id/detaille',
+    CREATE: '/proprietaire/creer-contrat/:propertyId',
+    SIGN: '/proprietaire/signer-bail/:id',
+  },
+
+  AGENCY_CONTRACTS: {
+    LIST: '/agences/contrats',
+    CREATE: '/agences/creer-contrat/:propertyId',
   },
 
   PAYMENTS: {

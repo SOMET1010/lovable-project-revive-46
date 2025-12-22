@@ -18,6 +18,7 @@ import {
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { ROUTES } from '@/shared/config/routes.config';
 
 const cn = (...inputs: (string | undefined | null | false)[]) => twMerge(clsx(inputs));
 
@@ -32,8 +33,8 @@ const navItems = [
   { label: 'Mes biens', href: '/proprietaire/mes-biens', icon: Building2 },
   { label: 'Ajouter un bien', href: '/proprietaire/ajouter-propriete', icon: PlusCircle },
   { label: 'Mes candidatures', href: '/proprietaire/candidatures', icon: Users },
-  { label: 'Mes contrats', href: '/proprietaire/contrats', icon: FileText },
-  { label: 'Créer un contrat', href: '/proprietaire/creer-contrat', icon: FilePlus2 },
+  { label: 'Mes contrats', href: ROUTES.CONTRACTS.LIST, icon: FileText },
+  { label: 'Créer un contrat', href: ROUTES.CONTRACTS.CREATE.split(':')[0], icon: FilePlus2 },
   { label: 'Mandats agence', href: '/proprietaire/mes-mandats', icon: Handshake },
   { label: 'Visites', href: '/proprietaire/visites', icon: Calendar },
   { label: 'Mon profil', href: '/proprietaire/profil', icon: UserCircle2 },

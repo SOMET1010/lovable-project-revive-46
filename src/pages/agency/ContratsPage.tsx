@@ -15,6 +15,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { Link } from 'react-router-dom';
+import { ROUTES } from '@/shared/config/routes.config';
 
 interface Contract {
   id: string;
@@ -315,7 +316,7 @@ export default function ContratsPage() {
               Exporter
             </button>
             <Link
-              to="/agences/creer-contrat"
+              to={ROUTES.AGENCY_CONTRACTS.CREATE.split(':')[0]}
               className="px-4 py-2 bg-white border border-[#F16522] text-[#F16522] rounded-xl font-medium hover:bg-[#FFF5F0] transition-colors"
             >
               + Nouveau contrat

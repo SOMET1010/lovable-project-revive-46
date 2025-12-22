@@ -13,6 +13,8 @@ const OwnerApplications = lazyWithRetry(() => import('@/pages/owner/OwnerApplica
 const MyProperties = lazyWithRetry(() => import('@/pages/owner/MyPropertiesPage'));
 const OwnerProfilePage = lazyWithRetry(() => import('@/pages/owner/ProfilePage'));
 const OwnerVisitsPage = lazyWithRetry(() => import('@/pages/owner/VisitsPage'));
+// Import ContractDetail from tenant pages (can be reused)
+const ContractDetail = lazyWithRetry(() => import('@/pages/tenant/ContractDetailPage'));
 
 // Application form (for owner viewing applications)
 const ApplicationForm = lazyWithRetry(() => import('@/pages/tenant/ApplicationFormPage'));
@@ -66,6 +68,14 @@ export const ownerRoutes: RouteObject[] = [
       {
         path: 'contrats',
         element: <OwnerContracts />,
+      },
+      {
+        path: 'contrat/:id',
+        element: (
+          <ProtectedRoute allowedRoles={[...PROPERTY_MANAGER_ROLES]}>
+            <ContractDetail />
+          </ProtectedRoute>
+        ),
       },
 
       // Properties

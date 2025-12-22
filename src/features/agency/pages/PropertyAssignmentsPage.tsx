@@ -160,7 +160,7 @@ export default function PropertyAssignmentsPage() {
     }
 
     const { data: properties } = await supabase
-      .from('properties')
+      .from('properties_with_monthly_rent')
       .select('id, title, city, monthly_rent')
       .in('id', unassignedIds);
 

@@ -71,7 +71,7 @@ export async function generateAndUploadContract(leaseId: string): Promise<string
 
   // 2. Récupérer les profils du propriétaire et du locataire
   const { data: profiles, error: profilesError } = await supabase
-    .from('profiles')
+    .from('profiles_with_user_id')
     .select('user_id, full_name, email, phone')
     .in('user_id', [contract.owner_id, contract.tenant_id]);
 

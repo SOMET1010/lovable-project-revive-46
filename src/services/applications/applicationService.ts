@@ -110,7 +110,7 @@ export async function getOwnerApplications(
   // Récupérer les détails des propriétés
   const uniquePropertyIds = [...new Set(applications.map((a) => a.property_id))];
   const { data: propertiesData } = await supabase
-    .from('properties')
+    .from('properties_with_monthly_rent')
     .select('id, title, city, neighborhood, monthly_rent, main_image')
     .in('id', uniquePropertyIds);
 
@@ -460,7 +460,7 @@ export async function getTenantApplications(
   // Récupérer les détails des propriétés
   const uniquePropertyIds = [...new Set(applications.map((a) => a.property_id))];
   const { data: propertiesData } = await supabase
-    .from('properties')
+    .from('properties_with_monthly_rent')
     .select('id, title, city, neighborhood, monthly_rent, main_image, owner_id')
     .in('id', uniquePropertyIds);
 

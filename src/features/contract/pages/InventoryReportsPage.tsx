@@ -81,7 +81,7 @@ export default function InventoryReportsPage() {
         ...new Set(data?.map((r) => r.lease_contracts?.tenant_id).filter(Boolean) as string[]),
       ];
       const { data: profiles } = await supabase
-        .from('profiles')
+        .from('profiles_with_user_id')
         .select('user_id, full_name')
         .in('user_id', tenantIds);
 

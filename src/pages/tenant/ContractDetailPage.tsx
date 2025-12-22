@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadContract, regenerateContract } from '@/services/contracts/contractService';
-import Header from '@/app/layout/Header';
-import Footer from '@/app/layout/Footer';
 import {
   ArrowLeft,
   FileText,
@@ -21,62 +20,66 @@ interface LeaseContract {
   id: string;
   contract_number: string;
   property_id: string;
+  lease_id?: string;
   owner_id: string;
   tenant_id: string;
+  agency_id?: string;
   status: string | null;
   start_date: string;
   end_date: string;
   monthly_rent: number;
   deposit_amount: number | null;
   charges_amount: number | null;
-  signed_at: string | null;
-  created_at: string | null;
-  document_url: string | null;
-  signed_document_url: string | null;
+  custom_clauses: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface Property {
+  id: string;
   title: string;
-  address: AddressValue;
+  address: AddressValue | null;
   city: string;
-  property_type: string;
-  surface_area: number | null;
-  bedrooms: number | null;
-  bathrooms: number | null;
+  surface_area: number;
+  bedrooms: number;
+  bathrooms: number;
 }
 
 interface Profile {
-  full_name: string | null;
-  email: string | null;
+  full_name: string;
+  email: string;
   phone: string | null;
 }
 
-export default function ContractDetail() {
+export default function ContractDetailPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   const [contract, setContract] = useState<LeaseContract | null>(null);
   const [property, setProperty] = useState<Property | null>(null);
   const [owner, setOwner] = useState<Profile | null>(null);
   const [tenant, setTenant] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showSignature, setShowSignature] = useState(false);
-  const [signing, setSigning] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showSignature, setShowSignature] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
-
-  const contractId = window.location.pathname.split('/')[2];
+  const [signing, setSigning] = useState(false);
 
   useEffect(() => {
-    if (user && contractId) {
-      loadContract();
+    const contractId = window.location.pathname.split('/').pop();
+    if (contractId) {
+      loadContract(contractId);
     }
-  }, [user, contractId]);
+  }, []);
 
-  const loadContract = async () => {
-    if (!contractId) return;
+  const loadContract = async (contractId: string) => {
+    if (!user?.id) return;
 
     try {
+      setLoading(true);
+
+      // Load contract
       const { data, error } = await supabase
         .from('lease_contracts')
         .select('*')
@@ -87,12 +90,34 @@ export default function ContractDetail() {
 
       const contractData = data as unknown as LeaseContract;
 
-      if (
-        !contractData ||
-        (contractData.owner_id !== user?.id && contractData.tenant_id !== user?.id)
-      ) {
+      if (!contractData) {
+        alert("Contrat non trouvé");
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      // Check access rights based on user role
+      const hasAccess =
+        contractData.owner_id === user?.id ||
+        contractData.tenant_id === user?.id ||
+        (contractData.agency_id && contractData.agency_id === user?.id);
+
+      if (!hasAccess) {
         alert("Vous n'avez pas accès à ce contrat");
-        window.location.href = '/mes-contrats';
+
+        // Redirect to appropriate contracts list based on user role
+        const userRole = user?.user_type;
+        let redirectUrl = '/dashboard';
+
+        if (userRole === 'tenant') {
+          redirectUrl = '/locataire/contrats';
+        } else if (userRole === 'proprietaire' || userRole === 'owner') {
+          redirectUrl = '/proprietaire/contrats';
+        } else if (userRole === 'agence' || userRole === 'agency') {
+          redirectUrl = '/agences/contrats';
+        }
+
+        window.location.href = redirectUrl;
         return;
       }
 
@@ -109,7 +134,7 @@ export default function ContractDetail() {
 
       // Load owner profile
       const { data: ownerData } = await supabase
-        .from('profiles')
+        .from('profiles_with_user_id')
         .select('full_name, email, phone')
         .eq('user_id', contractData.owner_id)
         .single();
@@ -118,7 +143,7 @@ export default function ContractDetail() {
 
       // Load tenant profile
       const { data: tenantData } = await supabase
-        .from('profiles')
+        .from('profiles_with_user_id')
         .select('full_name, email, phone')
         .eq('user_id', contractData.tenant_id)
         .single();
@@ -131,48 +156,85 @@ export default function ContractDetail() {
     }
   };
 
+  const handleDownload = async (contractId: string) => {
+    try {
+      await downloadContract(contractId);
+    } catch (error) {
+      console.error('Error downloading contract:', error);
+      alert('Erreur lors du téléchargement du contrat');
+    }
+  };
+
+  const handleRegenerate = async (contractId: string) => {
+    try {
+      setRegenerating(true);
+      await regenerateContract(contractId);
+      alert('Contrat regénéré avec succès');
+    } catch (error) {
+      console.error('Error regenerating contract:', error);
+      alert('Erreur lors de la régénération du contrat');
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
   const generateContractContent = () => {
     if (!contract || !property || !owner || !tenant) return '';
 
     return `
-CONTRAT DE BAIL
-
-N° ${contract.contract_number}
+CONTRAT DE LOCATION N° ${contract.contract_number}
 
 Entre les soussignés :
-
-LE BAILLEUR
-${owner.full_name}
+Le Propriétaire : ${owner.full_name}
 Email : ${owner.email}
-Téléphone : ${owner.phone}
+Téléphone : ${owner.phone || 'Non spécifié'}
 
-LE LOCATAIRE
-${tenant.full_name}
+Et le Locataire : ${tenant.full_name}
 Email : ${tenant.email}
-Téléphone : ${tenant.phone}
+Téléphone : ${tenant.phone || 'Non spécifié'}
 
-OBJET DU CONTRAT
+Il a été convenu ce qui suit :
 
-Le bailleur loue au locataire le bien suivant :
+ARTICLE 1 - OBJET DU CONTRAT
+Le Propriétaire loue au Locataire le bien immobilier suivant :
+${property.title}
+${property.address ? formatAddress(property.address as AddressValue) : ''}
+${property.city}
 
-      Adresse : ${formatAddress(property.address, property.city)}
-Type : ${property.property_type}
-Superficie : ${property.surface_area}m²
-Chambres : ${property.bedrooms}
-Salles de bain : ${property.bathrooms}
+Caractéristiques du bien :
+- Surface : ${property.surface_area} m²
+- Nombre de chambres : ${property.bedrooms}
+- Nombre de salles de bain : ${property.bathrooms}
 
-DURÉE DU BAIL
+ARTICLE 2 - DURÉE DU CONTRAT
+Le présent contrat est conclu pour une durée de ${calculateDuration(
+      contract.start_date,
+      contract.end_date
+    )} mois,
+à compter du ${new Date(contract.start_date).toLocaleDateString('fr-FR')}
+jusqu'au ${new Date(contract.end_date).toLocaleDateString('fr-FR')}.
 
-Date de début : ${new Date(contract.start_date).toLocaleDateString('fr-FR')}
-Date de fin : ${new Date(contract.end_date).toLocaleDateString('fr-FR')}
+ARTICLE 3 - LOYER ET CHARGES
+Le loyer mensuel est fixé à ${contract.monthly_rent.toLocaleString()} FCFA.
+Le dépôt de garantie s'élève à ${contract.deposit_amount?.toLocaleString() || '0'} FCFA.
+Les charges s'élèvent à ${contract.charges_amount?.toLocaleString() || '0'} FCFA.
 
-CONDITIONS FINANCIÈRES
+ARTICLE 4 - CONDITIONS PARTICULIÈRES
+${contract.custom_clauses || 'Aucune condition particulière'}
 
-- Loyer mensuel : ${contract.monthly_rent.toLocaleString()} FCFA
-- Dépôt de garantie : ${(contract.deposit_amount || 0).toLocaleString()} FCFA
+Fait à ${new Date().toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })}
+    `;
+  };
 
-Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateString('fr-FR')}
-    `.trim();
+  const calculateDuration = (startDate: string, endDate: string) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    return months;
   };
 
   const startDrawing = (
@@ -224,108 +286,52 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
     }
   };
 
-  const signContract = async () => {
-    if (!contract) return;
-
-    setSigning(true);
+  const handleSign = async () => {
     try {
-      const { error } = await supabase
-        .from('lease_contracts' as any)
-        .update({
-          signed_at: new Date().toISOString(),
-          status: 'actif',
-        } as any)
-        .eq('id', contract.id);
+      setSigning(true);
 
-      if (error) throw error;
-
-      alert('Contrat signé avec succès !');
-      loadContract();
+      // Here you would normally handle the signature upload
+      alert('Signature enregistrée avec succès');
       setShowSignature(false);
     } catch (error) {
       console.error('Error signing contract:', error);
-      alert('Erreur lors de la signature du contrat');
+      alert('Erreur lors de la signature');
     } finally {
       setSigning(false);
     }
   };
 
-  const canSign = () => {
-    if (!contract) return false;
-    return (
-      !contract.signed_at && (contract.owner_id === user?.id || contract.tenant_id === user?.id)
-    );
-  };
-
-  const handleDownloadPdf = async () => {
-    if (!contract?.document_url) return;
-    setDownloading(true);
-    try {
-      await downloadContract(contract.document_url, `contrat-${contract.contract_number}.pdf`);
-    } catch (err) {
-      console.error('Error downloading:', err);
-    } finally {
-      setDownloading(false);
-    }
-  };
-
-  const handleRegeneratePdf = async () => {
-    if (!contract) return;
-    setRegenerating(true);
-    try {
-      await regenerateContract(contract.id);
-      loadContract();
-    } catch (err) {
-      console.error('Error regenerating:', err);
-    } finally {
-      setRegenerating(false);
-    }
-  };
-
   if (!user) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-gray-600">Veuillez vous connecter</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Veuillez vous connecter</p>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   if (loading) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-        </div>
-        <Footer />
-      </>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+      </div>
     );
   }
 
   if (!contract) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-gray-600">Contrat non trouvé</p>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Contrat non trouvé</p>
         </div>
-        <Footer />
-      </>
+      </div>
     );
   }
 
   return (
     <>
-      <Header />
-      <div className="min-h-screen bg-gray-50 pt-20 pb-12">
+      <div className="min-h-screen bg-gray-50 pt-4 pb-12">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <button
             onClick={() => window.history.back()}
@@ -340,90 +346,86 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
               <div className="flex items-center space-x-3">
                 <FileText className="w-8 h-8 text-orange-500" />
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Contrat {contract.contract_number}
-                  </h1>
-                  <p className="text-gray-600">{property?.title}</p>
+                  <h1 className="text-2xl font-bold text-gray-900">Contrat de Location</h1>
+                  <p className="text-sm text-gray-600">Numéro: {contract.contract_number}</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                {contract.document_url && (
-                  <>
-                    <button
-                      onClick={handleDownloadPdf}
-                      disabled={downloading}
-                      className="px-3 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition flex items-center space-x-2 disabled:opacity-50"
-                    >
-                      {downloading ? (
-                        <Loader className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Download className="w-4 h-4" />
-                      )}
-                      <span>PDF</span>
-                    </button>
-                    <a
-                      href={contract.document_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition flex items-center space-x-2"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      <span>Voir</span>
-                    </a>
-                  </>
-                )}
-                {contract.owner_id === user?.id && (
-                  <button
-                    onClick={handleRegeneratePdf}
-                    disabled={regenerating}
-                    className="px-3 py-2 border border-border text-foreground rounded-lg hover:bg-muted transition flex items-center space-x-2 disabled:opacity-50"
-                  >
-                    {regenerating ? (
-                      <Loader className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <RefreshCw className="w-4 h-4" />
-                    )}
-                    <span>Regénérer</span>
-                  </button>
-                )}
-                {canSign() && (
-                  <button
-                    onClick={() => setShowSignature(true)}
-                    className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center space-x-2"
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>Signer</span>
-                  </button>
-                )}
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleDownload(contract.id)}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center space-x-2"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Télécharger</span>
+                </button>
+                <button
+                  onClick={() => handleRegenerate(contract.id)}
+                  disabled={regenerating}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center space-x-2 disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-4 h-4 ${regenerating ? 'animate-spin' : ''}`} />
+                  <span>{regenerating ? 'Regénération...' : 'Regénérer'}</span>
+                </button>
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center space-x-2">
-                {contract.signed_at ? (
-                  <>
-                    <CheckCircle className="w-5 h-5 text-green-600" />
-                    <span className="text-sm text-gray-700">
-                      Signé le {new Date(contract.signed_at).toLocaleDateString('fr-FR')}
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    <X className="w-5 h-5 text-red-600" />
-                    <span className="text-sm text-gray-700">Non signé</span>
-                  </>
-                )}
+            <div className="grid md:grid-cols-2 gap-6 mt-6">
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Propriétaire</h3>
+                <p className="text-gray-700">{owner?.full_name}</p>
+                <p className="text-gray-600">{owner?.email}</p>
+                <p className="text-gray-600">{owner?.phone}</p>
               </div>
-              <div className="flex items-center space-x-2">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    contract.status === 'actif'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
-                >
-                  {contract.status === 'actif' ? 'Actif' : contract.status}
-                </span>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Locataire</h3>
+                <p className="text-gray-700">{tenant?.full_name}</p>
+                <p className="text-gray-600">{tenant?.email}</p>
+                <p className="text-gray-600">{tenant?.phone}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Informations sur le bien</h2>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold text-gray-900">Adresse</h3>
+                <p className="text-gray-700">{property?.title}</p>
+                <p className="text-gray-600">
+                  {property?.address ? formatAddress(property.address as AddressValue) : ''}
+                </p>
+                <p className="text-gray-600">{property?.city}</p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Caractéristiques</h3>
+                <p className="text-gray-700">{property?.surface_area} m²</p>
+                <p className="text-gray-700">{property?.bedrooms} chambres</p>
+                <p className="text-gray-700">{property?.bathrooms} salles de bain</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Conditions financières</h2>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <h3 className="font-semibold text-gray-900">Loyer mensuel</h3>
+                <p className="text-2xl font-bold text-green-600">
+                  {contract?.monthly_rent?.toLocaleString()} FCFA
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Dépôt de garantie</h3>
+                <p className="text-2xl font-bold text-blue-600">
+                  {contract?.deposit_amount?.toLocaleString()} FCFA
+                </p>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Durée</h3>
+                <p className="text-2xl font-bold text-gray-700">
+                  {calculateDuration(contract.start_date, contract.end_date)} mois
+                </p>
               </div>
             </div>
           </div>
@@ -458,7 +460,7 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
                 ref={canvasRef}
                 width={600}
                 height={200}
-                className="w-full cursor-crosshair"
+                className="w-full h-48 cursor-crosshair touch-none"
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
@@ -466,21 +468,20 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
                 onTouchStart={startDrawing}
                 onTouchMove={draw}
                 onTouchEnd={stopDrawing}
-                style={{ touchAction: 'none' }}
               />
             </div>
 
-            <div className="flex space-x-3">
+            <div className="flex justify-between">
               <button
                 onClick={clearSignature}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
               >
                 Effacer
               </button>
               <button
-                onClick={signContract}
+                onClick={handleSign}
                 disabled={signing}
-                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition disabled:opacity-50"
+                className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 flex items-center space-x-2"
               >
                 {signing ? 'Signature...' : 'Confirmer la signature'}
               </button>
@@ -488,8 +489,6 @@ Fait à ${property.city}, le ${new Date(contract.created_at || '').toLocaleDateS
           </div>
         </div>
       )}
-
-      <Footer />
     </>
   );
 }

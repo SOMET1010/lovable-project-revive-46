@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { ROUTES } from '@/shared/config/routes.config';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -36,8 +37,8 @@ const navItems: NavItem[] = [
   { label: 'Mes biens', href: '/agences/biens', icon: Home },
   { label: 'Ajouter un bien', href: '/agences/ajouter-bien', icon: PlusCircle },
   { label: 'Mes candidatures', href: '/agences/candidatures', icon: Users },
-  { label: 'Mes contrats', href: '/agences/contrats', icon: FileText },
-  { label: 'Créer un contrat', href: '/agences/creer-contrat', icon: FilePlus2 },
+  { label: 'Mes contrats', href: ROUTES.AGENCY_CONTRACTS.LIST, icon: FileText },
+  { label: 'Créer un contrat', href: ROUTES.AGENCY_CONTRACTS.CREATE.split(':')[0], icon: FilePlus2 },
   { label: 'Messages', href: '/agences/messages', icon: MessageSquare },
   { label: 'Visites', href: '/agences/visites', icon: CalendarIcon },
   { label: 'Analytics', href: '/agences/analytics', icon: BarChart3 },
