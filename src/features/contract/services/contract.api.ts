@@ -209,6 +209,21 @@ export const contractApi = {
     // Générer un numéro de contrat unique
     const contractNumber = `CTR-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+    // Empêcher la création de doublons pour le même locataire et la même propriété
+    const { count: existingContracts, error: existingError } = await supabase
+      .from('lease_contracts')
+      .select('id', { count: 'exact', head: true })
+      .eq('property_id', contract.property_id)
+      .eq('tenant_id', contract.tenant_id)
+      .in('status', ['brouillon', 'en_attente_signature', 'actif']);
+
+    if (existingError) throw existingError;
+    if ((existingContracts ?? 0) > 0) {
+      throw new Error(
+        'Un contrat existe déjà pour ce locataire sur ce bien (brouillon/en attente/actif).'
+      );
+    }
+
     const { data, error } = await supabase
       .from('lease_contracts')
       .insert({

@@ -114,6 +114,13 @@ export async function generateAndUploadContract(leaseId: string): Promise<string
   const fileName = `contrat-${contract.contract_number.replace(/[^a-zA-Z0-9-]/g, '')}.pdf`;
   const filePath = `${leaseId}/${fileName}`;
 
+  // Ajout de logs pour debug
+  console.log('Tentative d\'upload:', { fileName, filePath, bucket: 'lease-documents' });
+
+  // Vérifier que l'utilisateur est authentifié
+  const { data: { session } } = await supabase.auth.getSession();
+  console.log('Session utilisateur:', !!session, session?.user?.role);
+
   const { error: uploadError } = await supabase.storage
     .from('lease-documents')
     .upload(filePath, pdfBlob, {
@@ -122,8 +129,11 @@ export async function generateAndUploadContract(leaseId: string): Promise<string
     });
 
   if (uploadError) {
+    console.error('Erreur upload détaillée:', uploadError);
     throw new Error(`Erreur lors de l'upload du PDF: ${uploadError.message}`);
   }
+
+  console.log('Upload réussi pour:', filePath);
 
   // 6. Créer une URL signée valide 1 an
   const { data: urlData, error: urlError } = await supabase.storage

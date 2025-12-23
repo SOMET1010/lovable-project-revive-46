@@ -382,14 +382,14 @@ export const uploadPDFToStorage = async (
   const pdfBlob = pdf.output('blob');
   const fileName = `leases/${leaseId}/contract_${Date.now()}.pdf`;
 
-  const { error } = await supabaseClient.storage.from('contracts').upload(fileName, pdfBlob, {
+  const { error } = await supabaseClient.storage.from('lease-documents').upload(fileName, pdfBlob, {
     contentType: 'application/pdf',
     upsert: true,
   });
 
   if (error) throw error;
 
-  const { data: urlData } = supabaseClient.storage.from('contracts').getPublicUrl(fileName);
+  const { data: urlData } = supabaseClient.storage.from('lease-documents').getPublicUrl(fileName);
 
   return urlData.publicUrl;
 };

@@ -243,6 +243,23 @@ export default function CreateContractPage() {
     setError('');
 
     try {
+      const { count: existingContracts, error: existingError } = await supabase
+        .from('lease_contracts')
+        .select('id', { count: 'exact', head: true })
+        .eq('property_id', selectedProperty)
+        .eq('tenant_id', selectedTenant)
+        .in('status', ['brouillon', 'en_attente_signature', 'actif']);
+
+      if (existingError) throw existingError;
+
+      if ((existingContracts ?? 0) > 0) {
+        setError(
+          'Un contrat existe déjà pour ce locataire sur ce bien (brouillon/en attente/actif).'
+        );
+        setSubmitting(false);
+        return;
+      }
+
       const contractNumber = generateContractNumber();
 
       const { data, error: insertError } = await supabase

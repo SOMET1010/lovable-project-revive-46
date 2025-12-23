@@ -31,6 +31,7 @@ interface LeaseContract {
   deposit_amount: number | null;
   charges_amount: number | null;
   custom_clauses: string | null;
+  document_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -158,7 +159,13 @@ export default function ContractDetailPage() {
 
   const handleDownload = async (contractId: string) => {
     try {
-      await downloadContract(contractId);
+      if (!contract?.document_url) {
+        alert('Aucun PDF disponible pour ce contrat. Veuillez d abord régénérer le contrat.');
+        return;
+      }
+
+      const filename = `contrat-${contract.contract_number}.pdf`;
+      await downloadContract(contract.document_url, filename);
     } catch (error) {
       console.error('Error downloading contract:', error);
       alert('Erreur lors du téléchargement du contrat');
