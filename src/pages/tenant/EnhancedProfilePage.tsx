@@ -421,9 +421,11 @@ export default function EnhancedProfilePage() {
                     résultat).
                   </p>
                 </div>
-                <Button onClick={() => navigate('/verification-biometrique')} className="gap-2">
-                  <Camera className="w-4 h-4" />
-                  Ouvrir la vérification
+                <Button onClick={() => navigate('/verification-biometrique')}>
+                  <span className="inline-flex items-center gap-2">
+                    <Camera className="w-4 h-4" />
+                    <span>Ouvrir la vérification</span>
+                  </span>
                 </Button>
               </div>
 
@@ -607,33 +609,36 @@ function VerificationItem({
             onClick={onVerify}
             variant="outline"
             size="small"
-            className="flex items-center gap-2.5 whitespace-nowrap px-5 py-2.5"
+            className="whitespace-nowrap px-5 py-2.5"
           >
-            <svg
-              className="w-4 h-4 flex-shrink-0"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {status === 'failed' ? (
-                // Icône de rafraîchissement pour "Réessayer"
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              ) : (
-                // Icône de vérification pour "Faire la vérification"
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              )}
-            </svg>
-            {status === 'failed' ? 'Réessayer' : 'Faire la vérification'}
+            <span className="inline-flex items-center gap-2.5">
+              <svg
+                className="h-4 w-4 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                {status === 'failed' ? (
+                  // Icône de rafraîchissement pour "Réessayer"
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                ) : (
+                  // Icône de vérification pour "Faire la vérification"
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                )}
+              </svg>
+              <span>{status === 'failed' ? 'Réessayer' : 'Faire la vérification'}</span>
+            </span>
           </Button>
         )}
       </div>

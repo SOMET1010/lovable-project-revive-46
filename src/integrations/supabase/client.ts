@@ -133,19 +133,25 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
       // Check if user is logged in
       const session = getSession();
 
-      if (!session) {
-        // Remove Authorization header for public requests
-        const newOptions = { ...options };
-        if (newOptions.headers) {
-          const headers = new Headers(newOptions.headers as HeadersInit);
-          headers.delete('Authorization');
-          headers.delete('authorization');
-          newOptions.headers = headers;
-        }
-        return fetch(url, newOptions);
+      const newOptions = { ...options };
+      const headers = new Headers(newOptions.headers as HeadersInit);
+      const urlString =
+        typeof url === 'string' ? url : url instanceof URL ? url.toString() : url.url;
+      const isFunctionCall = urlString.includes('/functions/v1/');
+
+      if (isFunctionCall) {
+        headers.delete('x-connect-timeout');
+        headers.delete('x-read-timeout');
       }
 
-      return fetch(url, options);
+      if (!session) {
+        // Remove Authorization header for public requests
+        headers.delete('Authorization');
+        headers.delete('authorization');
+      }
+
+      newOptions.headers = headers;
+      return fetch(url, newOptions);
     },
   },
   db: {

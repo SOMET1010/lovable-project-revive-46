@@ -153,9 +153,9 @@ export default function HeroPremium() {
 
             {/* Search bar - 2x2 grid on mobile */}
             <div className="bg-white rounded-2xl shadow-2xl p-2 sm:p-3">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-[1.1fr_1.8fr_1.1fr_1.1fr] gap-2">
                 {/* Property type select */}
-                <div className="relative">
+                <div className="relative min-w-0">
                   <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
                   <select
                     value={propertyType}
@@ -172,7 +172,7 @@ export default function HeroPremium() {
                 </div>
 
                 {/* City select */}
-                <div className="relative">
+                <div className="relative min-w-0">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
                   <input
                     type="text"
@@ -180,7 +180,7 @@ export default function HeroPremium() {
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     placeholder="Ville, commune ou quartier"
-                    className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
+                    className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-3 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-text focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
                     aria-label="Ville, commune ou quartier"
                   />
                   <datalist id="hero-city-suggestions">
@@ -191,8 +191,8 @@ export default function HeroPremium() {
                 </div>
 
                 {/* Budget select */}
-                <div>
-                  <div className="relative">
+                <div className="min-w-0">
+                  <div className="relative min-w-0">
                     <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
                     <select
                       value={budgetMode === 'custom' ? customBudgetValue : maxBudget}
