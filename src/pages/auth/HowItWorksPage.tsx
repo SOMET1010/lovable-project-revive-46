@@ -2,7 +2,6 @@ import {
   Search,
   Shield,
   FileText,
-  CreditCard,
   Home as HomeIcon,
   Users,
   CheckCircle,
@@ -12,6 +11,8 @@ import {
   Award,
   Lock,
   Zap,
+  MapPin,
+  MessageCircle,
 } from 'lucide-react';
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
@@ -63,7 +64,7 @@ function StepCard({
         <div className="bg-[#2C1810] rounded-[20px] p-8 shadow-2xl transform hover:scale-105 transition-all duration-300">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 text-white">
             <div className="text-6xl mb-4">
-              {number === 1 ? '🔍' : number === 2 ? '🛡️' : number === 3 ? '✍️' : '💳'}
+              {number === 1 ? '🔍' : number === 2 ? '📋' : number === 3 ? '📩' : '📝'}
             </div>
             <div className="text-sm uppercase tracking-wider text-[#E8D4C5] mb-2">
               Étape {number}
@@ -83,60 +84,51 @@ export default function HowItWorksPage() {
   const tenantSteps = [
     {
       number: 1,
-      title: 'Recherchez votre bien idéal',
-      description: `Explorez notre catalogue de plus de ${propertiesCount} propriétés disponibles dans 5 villes principales de Côte d'Ivoire. Utilisez nos filtres avancés pour trouver exactement ce que vous cherchez.`,
+      title: 'Recherchez',
+      description: 'Parcourez les logements disponibles selon vos critères.',
       icon: <Search className="h-8 w-8 text-white" />,
       features: [
-        `${propertiesCount}+ propriétés vérifiées disponibles`,
-        'Couverture dans 5 villes (Abidjan, Yamoussoukro, Bouaké, Daloa, San-Pédro)',
-        'Filtres avancés : prix, chambres, type de bien, équipements',
-        'Sauvegardez vos favoris et créez des alertes personnalisées',
-        'Photos haute qualité et visites virtuelles',
+        'Recherche par ville, commune ou quartier',
+        'Filtres par type de bien et budget',
+        `${propertiesCount}+ logements disponibles`,
       ],
       imagePosition: 'right' as const,
     },
     {
       number: 2,
-      title: 'Vérifiez votre identité',
-      description:
-        "Créez un dossier locataire complet et sécurisé. La vérification d'identité ONECI et la vérification biométrique renforcent la confiance entre vous et les propriétaires.",
-      icon: <Shield className="h-8 w-8 text-white" />,
+      title: 'Explorez',
+      description: 'Consultez les informations du propriétaire et les caractéristiques du logement.',
+      icon: <MapPin className="h-8 w-8 text-white" />,
       features: [
-        'Inscription gratuite en 2 minutes',
-        "Vérification d'identité ONECI (Numéro National d'Identification)",
-        'Vérification biométrique faciale avec NeoFace',
-        'Score locataire automatique (0-100 points)',
-        'Badge "Identité Vérifiée" sur votre profil',
+        'Fiches logement avec photos et description',
+        'Caractéristiques principales (surface, pièces, prix)',
+        'Informations du propriétaire quand disponibles',
       ],
       imagePosition: 'left' as const,
     },
     {
       number: 3,
-      title: 'Visitez et postulez',
+      title: "Manifestez votre intérêt",
       description:
-        'Planifiez des visites en ligne et soumettez votre candidature avec tous vos documents vérifiés. Les propriétaires vous répondent rapidement.',
-      icon: <FileText className="h-8 w-8 text-white" />,
+        'Contactez le propriétaire ou préparez votre dossier en ligne (bientôt disponible).',
+      icon: <MessageCircle className="h-8 w-8 text-white" />,
       features: [
-        'Planification de visite en ligne (frais : 2 000 FCFA)',
-        'Soumission de candidature avec documents',
-        'Justificatifs de revenus vérifiés',
-        'Réponse du propriétaire sous 48h maximum',
-        "Suivi de l'état de votre candidature en temps réel",
+        'Prise de contact avec le propriétaire (si activée)',
+        'Préparation de dossier en ligne (bientôt disponible)',
+        "Suivi des échanges en cours d'intégration",
       ],
       imagePosition: 'right' as const,
     },
     {
       number: 4,
-      title: 'Signez et payez en toute sécurité',
+      title: 'Finalisez votre location',
       description:
-        'Signature électronique certifiée CEV avec valeur juridique et paiement 100% sécurisé via Mobile Money ou virement bancaire.',
-      icon: <CreditCard className="h-8 w-8 text-white" />,
+        'Les étapes de validation et de signature seront prochainement intégrées.',
+      icon: <FileText className="h-8 w-8 text-white" />,
       features: [
-        'Contrat généré automatiquement (conforme Code Civil ivoirien)',
-        'Signature électronique CEV via CryptoNeo (valeur juridique)',
-        'Paiement Mobile Money (Orange, MTN, Moov, Wave)',
-        'Virement bancaire via InTouch',
-        'Reçus automatiques et historique complet',
+        'Validation du dossier en préparation',
+        'Signature en ligne à venir',
+        'Paiement intégré en cours de déploiement',
       ],
       imagePosition: 'left' as const,
     },
@@ -144,74 +136,70 @@ export default function HowItWorksPage() {
 
   const ownerSteps = [
     {
-      title: 'Inscrivez-vous gratuitement',
+      title: 'Créez votre compte',
       description: 'Créez votre compte propriétaire ou agence en quelques minutes.',
       features: [
         'Profil propriétaire/agence',
-        'Vérification identité ONECI',
-        'Tableau de bord complet',
+        'Coordonnées de contact',
+        'Tableau de bord de base',
       ],
     },
     {
       title: 'Publiez votre bien',
       description: 'Ajoutez votre propriété avec photos et description détaillée.',
       features: [
-        '1ère annonce gratuite',
-        'Upload photos HD',
-        'Visibilité immédiate',
-        'Modification illimitée',
+        "Ajout d'annonce",
+        'Gestion des photos',
+        'Mise en ligne après validation',
+        'Modification des informations',
       ],
     },
     {
-      title: 'Recevez les candidatures',
-      description: 'Consultez les profils vérifiés et choisissez votre locataire idéal.',
+      title: 'Recevez des demandes',
+      description: "Recevez des messages d'intérêt et échangez avec les locataires.",
       features: [
-        'Notifications temps réel',
-        'Score locataire visible',
-        'Documents vérifiés',
-        'Historique locatif',
+        'Contact direct (si activé)',
+        'Suivi des demandes',
+        'Historique de base',
+        'Réponses aux demandes',
       ],
     },
     {
-      title: 'Signez le contrat',
-      description: 'Génération automatique et signature électronique certifiée.',
+      title: 'Préparez la location',
+      description: 'Les étapes de contrat et de validation seront intégrées progressivement.',
       features: [
-        'Génération automatique',
-        'Signature CEV légale',
-        'Archivage sécurisé',
-        'Renouvellement auto',
+        'Contrat en préparation',
+        'Signature en ligne à venir',
+        'Archivage en cours',
       ],
     },
     {
-      title: 'Encaissez vos loyers',
-      description: 'Recevez vos paiements automatiquement chaque mois.',
-      features: ['Paiement automatique', 'Virement sous 48h', 'Commission 5%', 'Reçus fiscaux'],
+      title: 'Suivez vos paiements',
+      description: 'Le suivi des paiements sera disponible prochainement.',
+      features: ['Paiements intégrés à venir', 'Historique en préparation', 'Notifications en cours'],
     },
   ];
 
   const securityFeatures = [
     {
       icon: <Shield className="h-6 w-6" />,
-      title: 'Certification ANSUT',
-      description:
-        "Conforme aux normes de l'Autorité Nationale des Services Universels de Télécommunications",
+      title: 'Certification ANSUT (en cours)',
+      description: "Démarche de conformité en cours de déploiement.",
     },
     {
       icon: <Lock className="h-6 w-6" />,
-      title: 'Sécurité Maximum',
-      description:
-        'Chiffrement SSL 256-bit et protection des données personnelles (conformité RGPD)',
+      title: 'Sécurité des données',
+      description: 'Chiffrement et protection des données personnelles.',
     },
     {
       icon: <Award className="h-6 w-6" />,
-      title: 'Signature Électronique',
-      description: "Signature CEV via CryptoNeo avec valeur juridique reconnue par l'État ivoirien",
+      title: 'Signature électronique (à venir)',
+      description: 'Intégration de la signature en ligne en préparation.',
     },
     {
       icon: <Zap className="h-6 w-6" />,
-      title: 'Traitement Rapide',
-      description:
-        'Candidatures traitées en 48h, paiements virés en 48h, contrats générés instantanément',
+      title: 'Automatisations (à venir)',
+      description: 'Traitements et notifications en cours de déploiement.',
     },
   ];
 
@@ -219,13 +207,13 @@ export default function HowItWorksPage() {
     <div className="min-h-screen bg-[#FAF7F4]">
       <SEOHead
         title="Comment ça marche | Mon Toit"
-        description="Découvrez comment trouver votre logement en 4 étapes simples : recherche, vérification d'identité, signature électronique et paiement sécurisé. Guide complet de la plateforme Mon Toit en Côte d'Ivoire."
+        description="Découvrez le parcours MVP en 4 étapes : recherchez, explorez, manifestez votre intérêt et finalisez votre location (certaines étapes arrivent bientôt)."
         keywords="guide, comment ça marche, location immobilière, côte d'ivoire, étapes, processus"
       />
 
       <PageHeader
         title="Comment ça marche ?"
-        subtitle="Trouvez votre logement en 4 étapes simples et sécurisées"
+        subtitle="Trouvez un logement en 4 étapes clés"
         icon={<Sparkles className="h-8 w-8 text-white" />}
         breadcrumbs={[{ label: 'Comment ça marche', href: '/comment-ca-marche' }]}
       />
@@ -238,11 +226,11 @@ export default function HowItWorksPage() {
             <span>Pour les Locataires</span>
           </div>
           <h2 className="text-4xl font-bold text-[#2C1810] mb-4">
-            4 étapes pour trouver votre logement idéal
+            4 étapes pour démarrer votre recherche
           </h2>
           <p className="text-xl text-[#6B5A4E] max-w-3xl mx-auto">
-            De la recherche au paiement, nous vous accompagnons à chaque étape avec des outils
-            modernes et sécurisés
+            Un parcours simple pour explorer les logements et manifester votre intérêt. Les
+            fonctionnalités avancées sont déployées progressivement.
           </p>
         </div>
 
@@ -260,9 +248,11 @@ export default function HowItWorksPage() {
               <Users className="h-5 w-5" />
               <span>Pour les Propriétaires</span>
             </div>
-            <h2 className="text-4xl font-bold text-white mb-4">Louez votre bien en 5 étapes</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Parcours propriétaire en 5 étapes
+            </h2>
             <p className="text-xl text-[#E8D4C5] max-w-3xl mx-auto">
-              Gérez vos locations en toute simplicité avec notre plateforme automatisée
+              Un parcours clair, avec des fonctionnalités qui évoluent progressivement
             </p>
           </div>
 
@@ -293,17 +283,17 @@ export default function HowItWorksPage() {
         {/* Section Sécurité */}
         <div className="mb-20 animate-fade-in">
           <div className="text-center mb-12">
-            <div className="inline-flex items-center space-x-2 bg-[#2C1810]/10 text-[#2C1810] px-6 py-3 rounded-full font-semibold mb-6">
-              <Shield className="h-5 w-5" />
-              <span>Sécurité & Conformité</span>
-            </div>
-            <h2 className="text-4xl font-bold text-[#2C1810] mb-4">
-              Votre sécurité est notre priorité
-            </h2>
-            <p className="text-xl text-[#6B5A4E] max-w-3xl mx-auto">
-              Certification ANSUT, vérification d'identité et signature électronique légale
-            </p>
+          <div className="inline-flex items-center space-x-2 bg-[#2C1810]/10 text-[#2C1810] px-6 py-3 rounded-full font-semibold mb-6">
+            <Shield className="h-5 w-5" />
+            <span>Sécurité & Conformité</span>
           </div>
+          <h2 className="text-4xl font-bold text-[#2C1810] mb-4">
+            Votre sécurité est notre priorité
+          </h2>
+          <p className="text-xl text-[#6B5A4E] max-w-3xl mx-auto">
+            Les fonctionnalités avancées de conformité et de signature arrivent progressivement
+          </p>
+        </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {securityFeatures.map((feature, index) => (
@@ -326,15 +316,15 @@ export default function HowItWorksPage() {
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
               <div className="text-5xl font-bold mb-2 text-[#F16522]">{propertiesCount}+</div>
-              <div className="text-xl text-[#E8D4C5]">Propriétés Vérifiées</div>
+              <div className="text-xl text-[#E8D4C5]">Propriétés disponibles</div>
             </div>
             <div>
               <div className="text-5xl font-bold mb-2 text-[#F16522]">5</div>
               <div className="text-xl text-[#E8D4C5]">Villes Couvertes</div>
             </div>
             <div>
-              <div className="text-5xl font-bold mb-2 text-[#F16522]">100%</div>
-              <div className="text-xl text-[#E8D4C5]">Paiements Sécurisés</div>
+              <div className="text-5xl font-bold mb-2 text-[#F16522]">En cours</div>
+              <div className="text-xl text-[#E8D4C5]">Modules en déploiement</div>
             </div>
           </div>
         </div>

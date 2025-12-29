@@ -1,4 +1,4 @@
-import { Search, Shield, FileCheck, Key } from 'lucide-react';
+import { Search, MapPin, MessageCircle, FileText } from 'lucide-react';
 import { useScrollAnimation, getAnimationClasses } from '@/hooks/shared/useScrollAnimation';
 import { Link } from 'react-router-dom';
 
@@ -7,25 +7,26 @@ const steps = [
     icon: Search,
     number: '01',
     title: 'Recherchez',
-    description: "Parcourez notre catalogue de logements vérifiés dans toute la Côte d'Ivoire",
+    description: 'Parcourez les logements disponibles selon vos critères.',
   },
   {
-    icon: Shield,
+    icon: MapPin,
     number: '02',
-    title: 'Vérifiez',
-    description: 'Consultez les documents certifiés et le score de confiance du propriétaire',
+    title: 'Explorez',
+    description: 'Consultez les informations du propriétaire et les caractéristiques du logement.',
   },
   {
-    icon: FileCheck,
+    icon: MessageCircle,
     number: '03',
-    title: 'Postulez',
-    description: 'Soumettez votre candidature en quelques clics avec votre dossier complet',
+    title: "Manifestez votre intérêt",
+    description:
+      'Contactez le propriétaire ou préparez votre dossier en ligne (bientôt disponible).',
   },
   {
-    icon: Key,
+    icon: FileText,
     number: '04',
-    title: 'Emménagez',
-    description: 'Signez électroniquement votre bail et recevez vos clés en toute sécurité',
+    title: 'Finalisez votre location',
+    description: 'Les étapes de validation et de signature seront prochainement intégrées.',
   },
 ];
 
@@ -49,13 +50,13 @@ export default function HowItWorksCompact() {
           className={`text-center mb-10 md:mb-12 ${getAnimationClasses(isVisible, 'fadeUp', 0)}`}
         >
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#FF6C2F]/10 text-[#FF6C2F] text-sm font-medium mb-3">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6C2F]" />4 étapes simples
+            <span className="w-1.5 h-1.5 rounded-full bg-[#FF6C2F]" />4 étapes clés
           </span>
           <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-3">
             Comment ça marche ?
           </h2>
           <p className="text-muted-foreground text-base max-w-2xl mx-auto">
-            Trouvez votre logement idéal en toute confiance grâce à notre processus simplifié
+            Un parcours simple pour explorer les logements et manifester votre intérêt
           </p>
         </div>
 

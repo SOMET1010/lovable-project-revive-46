@@ -1,12 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, MapPin, Wallet, Search, Star, Check } from 'lucide-react';
-import {
-  RESIDENTIAL_PROPERTY_TYPES,
-  CITIES,
-  ABIDJAN_COMMUNES,
-} from '@/lib/constants/app.constants';
+import { RESIDENTIAL_PROPERTY_TYPES } from '@/lib/constants/app.constants';
 import { useHomeStats } from '@/hooks/shared/useHomeStats';
+import { ABIDJAN_NEIGHBORHOODS, CITY_NAMES } from '@/shared/data/cities';
+import { CITY_COORDINATES } from '@/shared/data/cityCoordinates';
 
 // Animated counter component
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
@@ -66,8 +64,17 @@ export default function HeroPremium() {
   const [budgetMode, setBudgetMode] = useState<'preset' | 'custom'>('preset');
   const [customMaxBudget, setCustomMaxBudget] = useState('');
 
-  // Get neighborhoods based on selected city
-  const neighborhoods = city === 'Abidjan' ? ABIDJAN_COMMUNES : [];
+  const citySuggestions = useMemo(() => {
+    const staticCities = [
+      ...CITY_NAMES,
+      ...ABIDJAN_NEIGHBORHOODS,
+      ...Object.keys(CITY_COORDINATES),
+    ];
+    const all = staticCities.map((name) => name.trim()).filter(Boolean);
+    return Array.from(new Set(all)).sort((a, b) =>
+      a.localeCompare(b, 'fr', { sensitivity: 'base' })
+    );
+  }, []);
 
   const handleSearch = () => {
     const params = new URLSearchParams();
@@ -167,27 +174,20 @@ export default function HeroPremium() {
                 {/* City select */}
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
-                  <select
+                  <input
+                    type="text"
+                    list="hero-city-suggestions"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
+                    placeholder="Ville, commune ou quartier"
                     className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
-                  >
-                    <option value="">Ville</option>
-                    {CITIES.map((cityName) => (
-                      <option key={cityName} value={cityName}>
-                        {cityName}
-                      </option>
+                    aria-label="Ville, commune ou quartier"
+                  />
+                  <datalist id="hero-city-suggestions">
+                    {citySuggestions.map((cityName) => (
+                      <option key={cityName} value={cityName} />
                     ))}
-                    {neighborhoods.length > 0 && (
-                      <optgroup label="Communes d'Abidjan">
-                        {neighborhoods.map((commune) => (
-                          <option key={commune} value={commune}>
-                            {commune}
-                          </option>
-                        ))}
-                      </optgroup>
-                    )}
-                  </select>
+                  </datalist>
                 </div>
 
                 {/* Budget select */}

@@ -63,7 +63,8 @@ export function useInfiniteProperties(
       .eq('status', 'disponible');
 
     if (city?.trim()) {
-      query = query.ilike('city', `%${city.trim()}%`);
+      const searchValue = city.trim();
+      query = query.or(`city.ilike.%${searchValue}%,neighborhood.ilike.%${searchValue}%`);
     }
     if (propertyType?.trim()) {
       query = query.eq('property_type', propertyType.trim());

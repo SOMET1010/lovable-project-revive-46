@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -28,6 +28,8 @@ import { useInfiniteProperties } from '../../hooks/tenant/useInfiniteProperties'
 import { useAvailableCities } from '../../hooks/tenant/useAvailableCities';
 import { useSaveSearch } from '../../hooks/tenant/useSaveSearch';
 import SaveSearchDialog from '../../features/tenant/components/SaveSearchDialog';
+import { ABIDJAN_NEIGHBORHOODS, CITY_NAMES } from '@/shared/data/cities';
+import { CITY_COORDINATES } from '@/shared/data/cityCoordinates';
 
 // Premium Ivorian Color Palette
 const COLORS = {
@@ -88,6 +90,18 @@ export default function SearchPropertiesPage() {
 
   // Available cities and types with counts
   const { cities: availableCities, propertyTypes: availableTypes } = useAvailableCities();
+  const citySuggestions = useMemo(() => {
+    const dynamicCities = availableCities.map((item) => item.city);
+    const staticCities = [
+      ...CITY_NAMES,
+      ...ABIDJAN_NEIGHBORHOODS,
+      ...Object.keys(CITY_COORDINATES),
+    ];
+    const all = [...dynamicCities, ...staticCities].map((name) => name.trim()).filter(Boolean);
+    return Array.from(new Set(all)).sort((a, b) =>
+      a.localeCompare(b, 'fr', { sensitivity: 'base' })
+    );
+  }, [availableCities]);
 
   // Save search hook
   const { saveSearch, isAuthenticated } = useSaveSearch();
@@ -263,21 +277,21 @@ export default function SearchPropertiesPage() {
                     Localisation
                   </span>
                 </div>
-                <select
+                <input
+                  type="text"
+                  list="city-suggestions"
                   value={city}
-                  onChange={(e) => {
-                    setCity(e.target.value);
-                  }}
-                  className="w-full border-0 p-0 h-6 font-bold focus:ring-0 bg-transparent cursor-pointer"
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Ville, commune ou quartier"
+                  className="w-full border-0 p-0 h-6 font-bold focus:ring-0 bg-transparent"
                   style={{ color: COLORS.chocolat }}
-                >
-                  <option value="">Toutes les villes</option>
-                  {availableCities.map(({ city: cityName, count }) => (
-                    <option key={cityName} value={cityName}>
-                      {cityName} ({count})
-                    </option>
+                  aria-label="Ville, commune ou quartier"
+                />
+                <datalist id="city-suggestions">
+                  {citySuggestions.map((cityName) => (
+                    <option key={cityName} value={cityName} />
                   ))}
-                </select>
+                </datalist>
               </div>
 
               {/* Type de bien */}
