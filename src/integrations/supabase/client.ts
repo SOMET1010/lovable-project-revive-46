@@ -137,8 +137,9 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
         // Remove Authorization header for public requests
         const newOptions = { ...options };
         if (newOptions.headers) {
-          const headers = { ...newOptions.headers } as Record<string, string>;
-          delete headers['Authorization'];
+          const headers = new Headers(newOptions.headers as HeadersInit);
+          headers.delete('Authorization');
+          headers.delete('authorization');
           newOptions.headers = headers;
         }
         return fetch(url, newOptions);

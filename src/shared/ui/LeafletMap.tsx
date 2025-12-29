@@ -208,7 +208,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
           .filter((p) => p.latitude && p.longitude)
           .map((p) => [p.latitude!, p.longitude!] as [number, number])
       );
-      activeMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+      activeMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 14, animate: false });
     }
   }, [validProperties, mapLoaded, onPropertyClick, getActiveMap]);
 
@@ -222,7 +222,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        activeMap.setView([latitude, longitude], 14);
+        activeMap.setView([latitude, longitude], 14, { animate: false });
 
         // Ajouter un marqueur pour la position de l'utilisateur
         L.circleMarker([latitude, longitude], {
@@ -281,7 +281,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({
                     .filter((p) => p.latitude && p.longitude)
                     .map((p) => [p.latitude!, p.longitude!] as [number, number])
                 );
-                mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14 });
+                mapRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 14, animate: false });
               }
             }}
             className="p-3 bg-white rounded-full shadow-lg hover:bg-gray-50 transition-colors"

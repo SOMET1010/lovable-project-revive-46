@@ -66,6 +66,16 @@
       
       // Catch all module loading errors
       window.addEventListener('error', function(e) {
+        // Ignore Leaflet internal errors that occur during cleanup/unmounting
+        // These are benign errors from map teardown when component unmounts during animations
+        if (e.message && (
+          e.message.includes('_leaflet_pos') ||
+          e.message.includes('leaflet') && e.message.includes('undefined')
+        )) {
+          // Silently ignore Leaflet cleanup errors - they're expected during unmount
+          return;
+        }
+
         console.error('❌ Global error caught:', e.message, e.filename, e.lineno, e.colno);
         var loader = document.getElementById('initial-loader');
         if (loader && e.message && loader.style.opacity !== '0') {

@@ -155,29 +155,7 @@ export function useInfiniteProperties(
       setError(null);
 
       try {
-        // Récupérer les IDs des propriétaires vérifiés
-        const { data: verifiedProfiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('is_verified', true);
-
-        if (profilesError) throw profilesError;
-
-        const verifiedOwnerIds = verifiedProfiles?.map((p) => p.id) || [];
-        console.log('useInfiniteProperties: verifiedOwnerIds count', verifiedOwnerIds.length);
-
         let query = buildQuery();
-        // Filtrer par propriétaires vérifiés si la liste n'est pas vide
-        if (verifiedOwnerIds.length > 0) {
-          query = query.in('owner_id', verifiedOwnerIds);
-        } else {
-          // Aucun propriétaire vérifié, donc aucune propriété à afficher
-          console.log('useInfiniteProperties: aucun propriétaire vérifié');
-          setProperties([]);
-          setTotalCount(0);
-          setHasMore(false);
-          return;
-        }
 
         const orderColumn =
           sortBy === 'price_asc' || sortBy === 'price_desc' ? 'price' : 'created_at';
@@ -206,28 +184,24 @@ export function useInfiniteProperties(
         }
 
         const enrichedData = await enrichWithOwnerData(data || []);
-        // Filtrer une seconde fois pour s'assurer (au cas où la jointure échoue)
-        const verifiedProperties = enrichedData.filter((p) => p.owner_is_verified === true);
-        console.log('useInfiniteProperties: raw data count', data?.length || 0);
-        console.log('useInfiniteProperties: enriched count', enrichedData.length);
-        console.log('useInfiniteProperties: verified count', verifiedProperties.length);
-        console.log('useInfiniteProperties: count from query', count);
-        const currentTotal = count || 0;
+        const pageData = enrichedData;
+        const safeCount = Number.isFinite(count) ? count : null;
+        const currentTotal = safeCount ?? 0;
 
         if (isLoadMore) {
           setProperties((prev) => {
-            const newTotal = prev.length + verifiedProperties.length;
-            // Update hasMore based on actual fetched count vs total
-            setHasMore(newTotal < currentTotal && verifiedProperties.length === pageSize);
-            return [...prev, ...verifiedProperties];
+            const newTotal = prev.length + pageData.length;
+            const hasMoreValue =
+              safeCount == null ? pageData.length === pageSize : newTotal < currentTotal;
+            setHasMore(hasMoreValue);
+            return [...prev, ...pageData];
           });
         } else {
-          setProperties(verifiedProperties);
-          setTotalCount(currentTotal);
-          // hasMore is true only if we got a full page AND there's more data
-          setHasMore(
-            verifiedProperties.length === pageSize && verifiedProperties.length < currentTotal
-          );
+          setProperties(pageData);
+          setTotalCount(safeCount ?? pageData.length);
+          const hasMoreValue =
+            safeCount == null ? pageData.length === pageSize : pageData.length < currentTotal;
+          setHasMore(hasMoreValue);
         }
 
         pageRef.current = page;

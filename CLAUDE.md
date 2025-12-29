@@ -45,7 +45,7 @@ npm run cap:open        # Open project in native IDE
 The application is organized by domain features in `src/features/`:
 - Each feature contains its own components, types, services, and hooks
 - New features should follow this pattern
-- Feature directories: admin, agency, auth, dashboard, messaging, property, tenant
+- Feature directories: admin, agency, auth, contract, dashboard, messaging, property, tenant, owner, trust-agent, verification
 
 ### State Management
 - **Zustand**: Simple client state (see `src/store/`)
