@@ -1,13 +1,8 @@
 import { ServiceManager, ServiceConfig } from '../_shared/serviceManager.ts';
 import { edgeLogger } from '../_shared/logger.ts';
 import { detectCloudflareBlock, formatCloudflareError } from '../_shared/cloudflareDetector.ts';
+import { getCorsHeaders } from '../_shared/cors.ts';
 import type { SMSRequest, SMSHandlerParams, SMSSuccessResponse } from '../_shared/types/sms.types.ts';
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get('ALLOWED_ORIGINS') || 'https://montoit.ansut.ci',
-  "Access-Control-Allow-Methods": "POST",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
 
 const BREVO_SMS_ENDPOINT = 'https://api.brevo.com/v3/transactionalSMS/sms';
 const FETCH_TIMEOUT_MS = 10000; // 10 seconds timeout
@@ -79,6 +74,7 @@ function validatePhoneNumber(phone: string): boolean {
 }
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 200,

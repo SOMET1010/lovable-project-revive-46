@@ -1,11 +1,6 @@
 import { edgeLogger } from "../_shared/logger.ts";
+import { getCorsHeaders } from "../_shared/cors.ts";
 import type { OTPRequest } from "../_shared/types/sms.types.ts";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get('ALLOWED_ORIGINS') || 'https://montoit.ansut.ci',
-  "Access-Control-Allow-Methods": "POST",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
-};
 
 const RATE_LIMIT_SECONDS = 60;
 
@@ -15,6 +10,7 @@ const RATE_LIMIT_SECONDS = 60;
  * - Account detection is done in verify-auth-otp after OTP validation
  */
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 200,

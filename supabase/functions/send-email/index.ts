@@ -1,8 +1,4 @@
-const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get('ALLOWED_ORIGINS') || '*',
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey",
-};
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 // Helper pour le développement local
 const isLocalDev = () => {
@@ -850,6 +846,10 @@ const emailTemplates: Record<string, { subject: string; html: (data: any) => str
 };
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req, {
+    allowMethods: 'POST, OPTIONS',
+    allowHeaders: 'Content-Type, Authorization, apikey, X-Client-Info',
+  });
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 200,

@@ -7,11 +7,7 @@
  * Architecture: Frontend → Supabase Edge Function → Brevo Email API
  */
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGINS') || 'https://montoit.ansut.ci',
-  'Access-Control-Allow-Methods': 'POST',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 interface EmailRequest {
   to: string;           // Email du destinataire
@@ -201,6 +197,7 @@ function generateOTPEmailTemplate(otp: string, userName?: string): string {
 const BREVO_EMAIL_ENDPOINT = 'https://api.brevo.com/v3/smtp/email';
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });

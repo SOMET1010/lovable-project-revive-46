@@ -1,12 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { edgeLogger } from '../_shared/logger.ts';
+import { getCorsHeaders } from '../_shared/cors.ts';
 import type { VerifyOTPRequest, OTPRecord } from '../_shared/types/sms.types.ts';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGINS') || 'https://montoit.ansut.ci',
-  'Access-Control-Allow-Methods': 'POST',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
 
 interface ProfileRecord {
   user_id: string;
@@ -87,6 +82,7 @@ function getOldPhoneFormat(normalizedPhone: string): string | null {
  * Supports both 12-digit (old) and 13-digit (new) phone formats
  */
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 200,

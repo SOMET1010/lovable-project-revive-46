@@ -9,12 +9,7 @@
  */
 
 import { detectCloudflareBlock, formatCloudflareError, getCloudflareUserMessage } from '../_shared/cloudflareDetector.ts';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGINS') || 'https://montoit.ansut.ci',
-  'Access-Control-Allow-Methods': 'POST',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+import { getCorsHeaders } from '../_shared/cors.ts';
 
 interface SmsRequest {
   phone: string;    // Format E.164: +2250700000000
@@ -78,6 +73,7 @@ function validatePayload(body: unknown): { valid: boolean; error?: string; data?
 const BREVO_SMS_ENDPOINT = 'https://api.brevo.com/v3/transactionalSMS/send';
 
 Deno.serve(async (req: Request) => {
+  const corsHeaders = getCorsHeaders(req);
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
