@@ -24,6 +24,8 @@ const ContactPage = lazyWithRetry(() => import('@/pages/auth/ContactPage'));
 const HelpPage = lazyWithRetry(() => import('@/pages/auth/HelpPage'));
 const FAQPage = lazyWithRetry(() => import('@/pages/auth/FAQPage'));
 const HowItWorksPage = lazyWithRetry(() => import('@/pages/auth/HowItWorksPage'));
+const CGVPage = lazyWithRetry(() => import('@/pages/auth/CGVPage'));
+const BlogPage = lazyWithRetry(() => import('@/pages/auth/BlogPage'));
 
 // Contract detail page (shared across all user types)
 const ContractDetail = lazyWithRetry(() => import('@/pages/tenant/ContractDetailPage'));
@@ -37,11 +39,13 @@ export const publicRoutes: RouteObject[] = [
   { path: 'conditions-utilisation', element: <TermsOfServicePage /> },
   { path: 'politique-confidentialite', element: <PrivacyPolicyPage /> },
   { path: 'mentions-legales', element: <TermsOfServicePage /> },
+  { path: 'cgv', element: <CGVPage /> },
   { path: 'contact', element: <ContactPage /> },
   { path: 'aide', element: <HelpPage /> },
   { path: 'faq', element: <FAQPage /> },
   { path: 'comment-ca-marche', element: <HowItWorksPage /> },
   { path: 'guide', element: <HowItWorksPage /> },
+  { path: 'blog', element: <BlogPage /> },
 
   // Property landing pages
   { path: 'ajouter-propriete', element: <AddPropertyLanding /> },

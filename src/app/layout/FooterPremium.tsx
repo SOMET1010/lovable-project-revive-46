@@ -109,10 +109,10 @@ function FooterContent() {
             {/* Réseaux Sociaux */}
             <div className="flex gap-4">
               {[
-                { Icon: Facebook, href: '#', label: 'Facebook' },
-                { Icon: Twitter, href: '#', label: 'Twitter' },
-                { Icon: Instagram, href: '#', label: 'Instagram' },
-                { Icon: Linkedin, href: '#', label: 'LinkedIn' },
+                { Icon: Facebook, href: 'https://facebook.com/montoit', label: 'Facebook' },
+                { Icon: Twitter, href: 'https://twitter.com/montoit', label: 'Twitter' },
+                { Icon: Instagram, href: 'https://instagram.com/montoit', label: 'Instagram' },
+                { Icon: Linkedin, href: 'https://www.linkedin.com/company/montoit', label: 'LinkedIn' },
               ].map(({ Icon, href, label }) => (
                 <a
                   key={label}
@@ -186,14 +186,16 @@ function FooterContent() {
 
             <form onSubmit={handleNewsletterSubmit} className="space-y-3 mb-8">
               <div className="relative">
-                <Mail className="absolute left-4 top-3.5 w-4 h-4 text-[#E8D4C5]/50" />
+                <span className="absolute left-4 inset-y-0 flex items-center pointer-events-none">
+                  <Mail className="w-4 h-4 text-[#E8D4C5]/50" />
+                </span>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="votre@email.com"
+                  placeholder="Votre email"
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder:text-[#E8D4C5]/30 focus:outline-none focus:border-[#F16522] focus:ring-1 focus:ring-[#F16522] transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-[#E8D4C5]/30 focus:outline-none focus:border-[#F16522] focus:ring-1 focus:ring-[#F16522] transition-all"
                 />
               </div>
               <button
@@ -257,13 +259,6 @@ function FooterContent() {
 
         {/* Badge Certifié + Version */}
         <div className="mt-6 flex flex-col md:flex-row justify-center items-center gap-4">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            <span className="text-xs text-[#E8D4C5]/70">Service Opérationnel</span>
-          </div>
           <span className="text-xs text-[#E8D4C5]/40">Fait avec ♥ à Abidjan</span>
           <span className="text-xs text-[#E8D4C5]/30 font-mono">v{APP_CONFIG.version}</span>
         </div>
