@@ -40,9 +40,23 @@ const COLORS = {
   border: '#EFEBE9',
 };
 
+const MAX_BUDGET_OPTIONS = [
+  { value: '100000', label: 'Max 100 000 FCFA' },
+  { value: '200000', label: 'Max 200 000 FCFA' },
+  { value: '500000', label: 'Max 500 000 FCFA' },
+  { value: '1000000', label: 'Max 1 000 000 FCFA' },
+  { value: '2000000', label: 'Max 2 000 000 FCFA' },
+];
+
+const CUSTOM_BUDGET_VALUE = 'custom';
+
+const isPresetMaxPrice = (value: string) =>
+  MAX_BUDGET_OPTIONS.some((option) => option.value === value);
+
 export default function SearchPropertiesPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const initialMaxPrice = searchParams.get('maxPrice') || '';
 
   // State for view mode
   const [activeView, setActiveView] = useState<'list' | 'map'>('map');
@@ -54,7 +68,13 @@ export default function SearchPropertiesPage() {
   const [city, setCity] = useState(searchParams.get('city') || '');
   const [propertyType, setPropertyType] = useState(searchParams.get('type') || '');
   const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
-  const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
+  const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
+  const [budgetMode, setBudgetMode] = useState<'preset' | 'custom'>(
+    initialMaxPrice && !isPresetMaxPrice(initialMaxPrice) ? 'custom' : 'preset'
+  );
+  const [customMaxPrice, setCustomMaxPrice] = useState(
+    initialMaxPrice && !isPresetMaxPrice(initialMaxPrice) ? initialMaxPrice : ''
+  );
   const [bedrooms, setBedrooms] = useState(searchParams.get('bedrooms') || '');
 
   // Applied filters (only update when form is submitted)
@@ -131,6 +151,8 @@ export default function SearchPropertiesPage() {
     setPropertyType('');
     setMinPrice('');
     setMaxPrice('');
+    setBudgetMode('preset');
+    setCustomMaxPrice('');
     setBedrooms('');
     setError(null);
     setSearchParams(new URLSearchParams());
@@ -296,18 +318,49 @@ export default function SearchPropertiesPage() {
                   </span>
                 </div>
                 <select
-                  value={maxPrice}
-                  onChange={(e) => setMaxPrice(e.target.value)}
+                  value={budgetMode === 'custom' ? CUSTOM_BUDGET_VALUE : maxPrice}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === CUSTOM_BUDGET_VALUE) {
+                      setBudgetMode('custom');
+                      if (customMaxPrice) {
+                        setMaxPrice(customMaxPrice);
+                      } else {
+                        setCustomMaxPrice('');
+                        setMaxPrice('');
+                      }
+                      return;
+                    }
+                    setBudgetMode('preset');
+                    setMaxPrice(value);
+                  }}
                   className="w-full border-0 p-0 h-6 font-bold focus:ring-0 bg-transparent cursor-pointer"
                   style={{ color: COLORS.chocolat }}
                 >
                   <option value="">Tout budget</option>
-                  <option value="100000">Max 100 000 FCFA</option>
-                  <option value="200000">Max 200 000 FCFA</option>
-                  <option value="500000">Max 500 000 FCFA</option>
-                  <option value="1000000">Max 1 000 000 FCFA</option>
-                  <option value="2000000">Max 2 000 000 FCFA</option>
+                  {MAX_BUDGET_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                  <option value={CUSTOM_BUDGET_VALUE}>Autre montant...</option>
                 </select>
+                {budgetMode === 'custom' && (
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    value={customMaxPrice}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setCustomMaxPrice(value);
+                      setMaxPrice(value);
+                    }}
+                    placeholder="Ex: 75 000"
+                    className="w-full mt-2 px-2 py-1.5 text-sm font-bold border border-[#EFEBE9] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F16522]/30"
+                    style={{ color: COLORS.chocolat }}
+                  />
+                )}
               </div>
 
               {/* Bouton Rechercher */}

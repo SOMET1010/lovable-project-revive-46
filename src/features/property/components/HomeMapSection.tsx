@@ -22,6 +22,8 @@ const BUDGET_OPTIONS = [
   { value: 1000000, label: '< 1M' },
 ];
 
+const CUSTOM_BUDGET_VALUE = 'custom';
+
 export default function HomeMapSection() {
   const navigate = useNavigate();
   const { properties, loading, totalCount, fetchInitialProperties } = useHomeMapProperties();
@@ -30,6 +32,8 @@ export default function HomeMapSection() {
     propertyType: 'all',
     maxPrice: 0,
   });
+  const [budgetMode, setBudgetMode] = useState<'preset' | 'custom'>('preset');
+  const [customMaxPrice, setCustomMaxPrice] = useState('');
 
   // Charger les propriétés initiales
   useEffect(() => {
@@ -113,8 +117,19 @@ export default function HomeMapSection() {
           {/* Budget (Select) */}
           <div className="w-full md:w-auto px-2">
             <select
-              value={filters.maxPrice}
-              onChange={(e) => setFilters((f) => ({ ...f, maxPrice: Number(e.target.value) }))}
+              value={budgetMode === 'custom' ? CUSTOM_BUDGET_VALUE : String(filters.maxPrice)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === CUSTOM_BUDGET_VALUE) {
+                  setBudgetMode('custom');
+                  const parsed = Number(customMaxPrice || 0);
+                  setFilters((f) => ({ ...f, maxPrice: Number.isFinite(parsed) ? parsed : 0 }));
+                  return;
+                }
+                setBudgetMode('preset');
+                const parsed = Number(value);
+                setFilters((f) => ({ ...f, maxPrice: Number.isFinite(parsed) ? parsed : 0 }));
+              }}
               className="w-full md:w-48 px-4 py-3 bg-[#FAF7F4] border-transparent rounded-xl text-sm font-bold text-[#2C1810] focus:ring-2 focus:ring-[#F16522]/20 focus:bg-white transition-all outline-none cursor-pointer"
             >
               {BUDGET_OPTIONS.map((option) => (
@@ -122,7 +137,24 @@ export default function HomeMapSection() {
                   {option.label}
                 </option>
               ))}
+              <option value={CUSTOM_BUDGET_VALUE}>Autre montant...</option>
             </select>
+            {budgetMode === 'custom' && (
+              <input
+                type="number"
+                inputMode="numeric"
+                min={0}
+                value={customMaxPrice}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCustomMaxPrice(value);
+                  const parsed = Number(value || 0);
+                  setFilters((f) => ({ ...f, maxPrice: Number.isFinite(parsed) ? parsed : 0 }));
+                }}
+                placeholder="Ex: 75 000"
+                className="w-full md:w-48 mt-2 px-4 py-2 bg-white border border-[#EFEBE9] rounded-xl text-sm font-bold text-[#2C1810] focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522]/40 transition-all outline-none"
+              />
+            )}
           </div>
         </div>
 

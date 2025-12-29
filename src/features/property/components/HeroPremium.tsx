@@ -63,6 +63,8 @@ export default function HeroPremium() {
   const [propertyType, setPropertyType] = useState('');
   const [city, setCity] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
+  const [budgetMode, setBudgetMode] = useState<'preset' | 'custom'>('preset');
+  const [customMaxBudget, setCustomMaxBudget] = useState('');
 
   // Get neighborhoods based on selected city
   const neighborhoods = city === 'Abidjan' ? ABIDJAN_COMMUNES : [];
@@ -85,6 +87,7 @@ export default function HeroPremium() {
     { value: '500000', label: '500 000 FCFA' },
     { value: '1000000', label: '1 000 000+ FCFA' },
   ];
+  const customBudgetValue = 'custom';
 
   return (
     <section className="relative bg-gradient-to-br from-[#2C1810] via-[#1a0f0a] to-[#0f0805] overflow-hidden">
@@ -188,20 +191,48 @@ export default function HeroPremium() {
                 </div>
 
                 {/* Budget select */}
-                <div className="relative">
-                  <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
-                  <select
-                    value={maxBudget}
-                    onChange={(e) => setMaxBudget(e.target.value)}
-                    className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
-                  >
-                    <option value="">Budget</option>
-                    {budgetOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
+                <div>
+                  <div className="relative">
+                    <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
+                    <select
+                      value={budgetMode === 'custom' ? customBudgetValue : maxBudget}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === customBudgetValue) {
+                          setBudgetMode('custom');
+                          setMaxBudget(customMaxBudget || '');
+                          return;
+                        }
+                        setBudgetMode('preset');
+                        setCustomMaxBudget('');
+                        setMaxBudget(value);
+                      }}
+                      className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
+                    >
+                      <option value="">Budget</option>
+                      {budgetOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                      <option value={customBudgetValue}>Autre montant...</option>
+                    </select>
+                  </div>
+                  {budgetMode === 'custom' && (
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      value={customMaxBudget}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setCustomMaxBudget(value);
+                        setMaxBudget(value);
+                      }}
+                      placeholder="Ex : 75 000 FCFA"
+                      className="w-full h-10 sm:h-11 mt-2 px-3 sm:px-4 bg-white border border-neutral-200 rounded-xl text-sm sm:text-base text-neutral-700 font-medium focus:ring-2 focus:ring-[#FF6C2F]/20 focus:border-[#FF6C2F]/40 focus:outline-none transition-all"
+                    />
+                  )}
                 </div>
 
                 {/* Search button */}
