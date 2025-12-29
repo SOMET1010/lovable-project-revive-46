@@ -42,7 +42,7 @@ export function useHomeMapProperties() {
       let query = supabase
         .from('properties')
         .select(
-          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms:bedrooms_count, surface_area, status'
+          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms, surface_area, status'
         )
         .eq('status', 'disponible')
         .not('latitude', 'is', null)
@@ -100,7 +100,7 @@ export function useHomeMapProperties() {
       let query = supabase
         .from('properties')
         .select(
-          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms:bedrooms_count, surface_area, status'
+          'id, title, latitude, longitude, price, property_type, city, neighborhood, main_image, bedrooms, surface_area, status'
         )
         .eq('status', 'disponible')
         .not('latitude', 'is', null)
