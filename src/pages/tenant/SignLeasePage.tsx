@@ -569,7 +569,7 @@ export default function SignLeasePage() {
                         certifiée.
                       </p>
                       <Link
-                        to="/profil?tab=verification"
+                        to="/locataire/profil?tab=verification"
                         className="text-[#F16522] font-medium hover:underline"
                       >
                         Vérifier mon profil →

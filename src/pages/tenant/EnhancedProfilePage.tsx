@@ -413,21 +413,6 @@ export default function EnhancedProfilePage() {
                   status={facialStatus || 'pending'}
                 />
               </div>
-              <div className="rounded-xl border border-[#F16522]/20 bg-[#FDF6E3] p-5 flex items-center justify-between">
-                <div>
-                  <h4 className="text-md font-semibold text-[#2C1810]">Vérification faciale</h4>
-                  <p className="text-sm text-[#5D4037]">
-                    Lancez la vérification NeoFace dans la vue dédiée (3 étapes : document, selfie,
-                    résultat).
-                  </p>
-                </div>
-                <Button onClick={() => navigate('/verification-biometrique')}>
-                  <span className="inline-flex items-center gap-2">
-                    <Camera className="w-4 h-4" />
-                    <span>Ouvrir la vérification</span>
-                  </span>
-                </Button>
-              </div>
 
               {!profile?.oneci_verified && (
                 <div className="mt-8" id="oneci-form">

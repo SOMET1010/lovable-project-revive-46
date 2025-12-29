@@ -288,10 +288,6 @@ export default function BiometricVerificationPage() {
                     ✓ Photo prête pour la vérification
                   </p>
                   {/* Debug info - à retirer en prod */}
-                  <details className="text-xs text-gray-500 text-center">
-                    <summary>URL (debug)</summary>
-                    <p className="break-all mt-2">{cniPhotoUrl}</p>
-                  </details>
                 </div>
               ) : (
                 <label className="block">
@@ -348,7 +344,7 @@ export default function BiometricVerificationPage() {
                     </p>
                   )}
                   <button
-                    onClick={() => navigate('/profil?tab=verification')}
+                    onClick={() => navigate('/locataire/profil?tab=verification')}
                     className="mt-6 px-8 py-3 bg-[#F16522] text-white rounded-xl font-semibold hover:bg-[#D95318] transition-colors"
                   >
                     Retour au profil

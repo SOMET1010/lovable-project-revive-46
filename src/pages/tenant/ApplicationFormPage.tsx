@@ -228,7 +228,9 @@ export default function ApplicationForm() {
   }
 
   const applicationScore = calculateApplicationScore();
-  const isVerified = profile?.is_verified ?? false;
+  const facialStatus = profile?.facial_verification_status?.toLowerCase() || '';
+  const isFaceVerified = facialStatus === 'verified' || facialStatus === 'verifie';
+  const isOneciVerified = profile?.oneci_verified ?? false;
 
   const stepLabels = ['Informations', 'Motivation'];
 
@@ -303,15 +305,15 @@ export default function ApplicationForm() {
           </div>
         )}
 
-        {!isVerified && (
+        {!isFaceVerified && (
           <div className="form-error-message mb-6 flex-col items-start gap-3">
             <div className="flex items-center gap-3">
               <Shield className="h-6 w-6" />
-              <strong>Vérification d'identité OBLIGATOIRE</strong>
+              <strong>Reconnaissance faciale OBLIGATOIRE</strong>
             </div>
-            <p>Vous devez compléter la vérification de votre identité avant de postuler.</p>
+            <p>Vous devez compléter la reconnaissance faciale (NeoFace) avant de postuler.</p>
             <Link to="/locataire/profil" className="form-button-primary mt-2">
-              Compléter ma vérification →
+              Compléter ma reconnaissance faciale →
             </Link>
           </div>
         )}
@@ -404,21 +406,39 @@ export default function ApplicationForm() {
                   style={{ borderColor: 'var(--form-border)' }}
                 >
                   <div>
+                    <span className="form-label-premium mb-0">Reconnaissance faciale (NeoFace)</span>
+                    <span className="text-xs block" style={{ color: 'var(--form-sable)' }}>
+                      Selfie + CNI (obligatoire pour postuler)
+                    </span>
+                  </div>
+                  <span
+                    className="font-bold px-4 py-2 rounded-full text-sm"
+                    style={{
+                      backgroundColor: isFaceVerified ? 'var(--form-success)' : 'var(--form-ivoire)',
+                      color: isFaceVerified ? 'white' : 'var(--form-sable)',
+                    }}
+                  >
+                    {isFaceVerified ? '✓ Vérifié' : '✗ Non vérifié'}
+                  </span>
+                </div>
+                <div
+                  className="flex items-center justify-between py-3 border-b"
+                  style={{ borderColor: 'var(--form-border)' }}
+                >
+                  <div>
                     <span className="form-label-premium mb-0">Vérification d'identité</span>
                     <span className="text-xs block" style={{ color: 'var(--form-sable)' }}>
                       Document CNI authentifié via ONECI/CNAM
                     </span>
                   </div>
                   <span
-                    className={`font-bold px-4 py-2 rounded-full text-sm ${
-                      isVerified ? 'text-white' : ''
-                    }`}
+                    className="font-bold px-4 py-2 rounded-full text-sm"
                     style={{
-                      backgroundColor: isVerified ? 'var(--form-success)' : 'var(--form-ivoire)',
-                      color: isVerified ? 'white' : 'var(--form-sable)',
+                      backgroundColor: isOneciVerified ? 'var(--form-success)' : 'var(--form-ivoire)',
+                      color: isOneciVerified ? 'white' : 'var(--form-sable)',
                     }}
                   >
-                    {isVerified ? '✓ Vérifié' : '✗ Non vérifié'}
+                    {isOneciVerified ? '✓ Vérifié' : '✗ Non vérifié'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-3">
@@ -546,13 +566,13 @@ export default function ApplicationForm() {
               </button>
               <button
                 type="submit"
-                disabled={submitting || !!error || !isVerified || existingApplication}
+                disabled={submitting || !!error || !isFaceVerified || existingApplication}
                 className="form-button-primary"
               >
                 <FileText className="h-5 w-5" />
                 <span>
-                  {!isVerified
-                    ? 'Vérification requise'
+                  {!isFaceVerified
+                    ? 'Reconnaissance faciale requise'
                     : submitting
                       ? 'Envoi en cours...'
                       : 'Envoyer ma candidature'}

@@ -47,14 +47,19 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
   const [matchingScore, setMatchingScore] = useState<number | null>(null);
   const [attempts, setAttempts] = useState(0);
   const [progress, setProgress] = useState('');
+  const [windowClosed, setWindowClosed] = useState(false);
   const selfieWindowRef = useRef<Window | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const windowCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     return () => {
       if (pollingIntervalRef.current) {
         clearInterval(pollingIntervalRef.current);
+      }
+      if (windowCheckIntervalRef.current) {
+        clearInterval(windowCheckIntervalRef.current);
       }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -165,9 +170,28 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     }
   };
 
+  const startWindowMonitor = () => {
+    if (windowCheckIntervalRef.current) {
+      clearInterval(windowCheckIntervalRef.current);
+    }
+
+    windowCheckIntervalRef.current = setInterval(() => {
+      if (selfieWindowRef.current?.closed) {
+        if (windowCheckIntervalRef.current) {
+          clearInterval(windowCheckIntervalRef.current);
+        }
+        windowCheckIntervalRef.current = null;
+        selfieWindowRef.current = null;
+        setWindowClosed(true);
+      }
+    }, 1000);
+  };
+
   const startPolling = (docId: string, verifyId: string) => {
     setStatus('polling');
     setProgress('Vérification en cours...');
+    const hasWindow = Boolean(selfieWindowRef.current && !selfieWindowRef.current.closed);
+    setWindowClosed(!hasWindow);
     let pollAttempts = 0;
     const maxAttempts = 100;
 
@@ -187,21 +211,9 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       5 * 60 * 1000
     );
 
-    // Vérifier si la fenêtre a été fermée par l'utilisateur
-    const windowCheckInterval = setInterval(() => {
-      if (selfieWindowRef.current?.closed) {
-        clearInterval(windowCheckInterval);
-        if (pollingIntervalRef.current) {
-          clearInterval(pollingIntervalRef.current);
-        }
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-        setStatus('error');
-        setError('La fenêtre de vérification a été fermée. Veuillez réessayer.');
-        onFailed("Fenêtre fermée par l'utilisateur");
-      }
-    }, 1000);
+    if (hasWindow) {
+      startWindowMonitor();
+    }
 
     pollingIntervalRef.current = setInterval(async () => {
       pollAttempts++;
@@ -212,12 +224,14 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
 
         if (statusData.status === 'verified') {
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+          if (windowCheckIntervalRef.current) clearInterval(windowCheckIntervalRef.current);
           if (timeoutRef.current) clearTimeout(timeoutRef.current);
           if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
             selfieWindowRef.current.close();
           }
 
           setStatus('success');
+          setWindowClosed(false);
           setMatchingScore(statusData.matching_score || null);
           setProgress('Identité vérifiée avec succès !');
 
@@ -229,12 +243,14 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           });
         } else if (statusData.status === 'failed') {
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+          if (windowCheckIntervalRef.current) clearInterval(windowCheckIntervalRef.current);
           if (timeoutRef.current) clearTimeout(timeoutRef.current);
           if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
             selfieWindowRef.current.close();
           }
 
           setStatus('error');
+          setWindowClosed(false);
           const errorMsg = statusData.message || 'La vérification a échoué';
           setError(errorMsg);
           onFailed(errorMsg);
@@ -244,8 +260,10 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
 
         if (pollAttempts >= maxAttempts) {
           if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+          if (windowCheckIntervalRef.current) clearInterval(windowCheckIntervalRef.current);
           if (timeoutRef.current) clearTimeout(timeoutRef.current);
           setStatus('error');
+          setWindowClosed(false);
           setError('Nombre maximum de tentatives atteint. Veuillez réessayer.');
         }
       } catch (err) {
@@ -268,6 +286,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         setError(message);
         onFailed(message);
         if (pollingIntervalRef.current) clearInterval(pollingIntervalRef.current);
+        if (windowCheckIntervalRef.current) clearInterval(windowCheckIntervalRef.current);
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
         if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
           selfieWindowRef.current.close();
@@ -283,10 +302,23 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       return;
     }
 
+    setWindowClosed(false);
     setIsVerifying(true);
     setStatus('uploading');
     setError(null);
     setProgress('Téléchargement du document en cours...');
+
+    const popupFeatures = 'width=840,height=720,left=120,top=80';
+    const popup = window.open('', 'NeofaceVerification', popupFeatures);
+    if (popup) {
+      selfieWindowRef.current = popup;
+      popup.document.title = 'Vérification NeoFace';
+      popup.document.body.innerHTML =
+        '<p style="font-family: Arial, sans-serif; padding: 24px; color: #3C2A1E;">Chargement de la vérification...</p>';
+      popup.focus();
+    } else {
+      setWindowClosed(true);
+    }
 
     try {
       const uploadData = await uploadDocument();
@@ -311,8 +343,8 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
 
       console.log('[NeoFace UI] Redirection vers:', uploadData.selfie_url);
 
-      // NOTE: NeoFace utilise X-Frame-Options: DENY, donc impossible d'utiliser iframe/popup
-      // On doit rediriger l'utilisateur vers la page NeoFace
+      // NOTE: NeoFace utilise X-Frame-Options: DENY, donc pas d'iframe.
+      // On ouvre une nouvelle fenêtre pour permettre au bouton "Quitter" de fonctionner.
       // On stocke les infos de vérification pour les récupérer au retour
       sessionStorage.setItem(
         'neoface_verification',
@@ -324,11 +356,34 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         })
       );
 
-      // Rediriger vers la page NeoFace
-      window.location.href = uploadData.selfie_url;
+      // Ouvrir NeoFace dans une nouvelle fenêtre pour permettre le bouton "Quitter"
+      const openSelfieWindow = () => {
+        if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
+          selfieWindowRef.current.location.href = uploadData.selfie_url;
+          selfieWindowRef.current.focus();
+          return true;
+        }
 
-      // Le code ci-dessous ne sera pas exécuté à cause de la redirection
-      // startPolling sera appelé quand l'utilisateur reviendra sur la page
+        const newWindow = window.open(uploadData.selfie_url, 'NeofaceVerification', popupFeatures);
+        if (newWindow) {
+          selfieWindowRef.current = newWindow;
+          newWindow.focus();
+          return true;
+        }
+        return false;
+      };
+
+      const opened = openSelfieWindow();
+      if (!opened) {
+        setWindowClosed(true);
+        setProgress(
+          'Fenêtre bloquée. Autorisez les popups, puis cliquez sur "Rouvrir la fenêtre".'
+        );
+      }
+
+      // Démarrer le polling immédiatement (pas besoin de retour manuel)
+      startPolling(uploadData.document_id, uploadData.verification_id);
+      setIsVerifying(false);
     } catch (err) {
       let errorMessage = err instanceof Error ? err.message : 'Erreur lors de la vérification';
       console.error('[NeoFace UI] Erreur lors de la vérification:', err);
@@ -345,7 +400,11 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
       setStatus('error');
       setError(errorMessage);
       onFailed(errorMessage);
+      setWindowClosed(false);
       setIsVerifying(false);
+      if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
+        selfieWindowRef.current.close();
+      }
     }
   };
 
@@ -388,12 +447,19 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     setAttempts(0);
     setProgress('');
     setIsVerifying(false);
+    setWindowClosed(false);
 
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
     }
+    if (windowCheckIntervalRef.current) {
+      clearInterval(windowCheckIntervalRef.current);
+    }
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+    }
+    if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
+      selfieWindowRef.current.close();
     }
   };
 
@@ -404,6 +470,12 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         'NeofaceVerification',
         'width=800,height=600,left=100,top=100'
       );
+      if (selfieWindowRef.current) {
+        setWindowClosed(false);
+        startWindowMonitor();
+      } else {
+        setWindowClosed(true);
+      }
     }
   };
 
@@ -473,14 +545,18 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           </div>
         )}
 
-        {status === 'waiting' && selfieUrl && (
+        {selfieUrl && (status === 'waiting' || windowClosed) && (
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
             <div className="flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-amber-900">Fenêtre de capture ouverte</p>
+                <p className="text-sm font-medium text-amber-900">
+                  {windowClosed ? 'Fenêtre fermée' : 'Fenêtre de capture ouverte'}
+                </p>
                 <p className="text-sm text-amber-700 mt-1">
-                  Suivez les instructions dans la fenêtre popup pour capturer votre selfie.
+                  {windowClosed
+                    ? "La fenêtre de vérification a été fermée. Vous pouvez la rouvrir pour terminer la capture."
+                    : 'Suivez les instructions dans la fenêtre popup pour capturer votre selfie.'}
                 </p>
                 <Button
                   onClick={handleReopenWindow}

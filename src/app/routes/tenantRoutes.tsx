@@ -69,7 +69,7 @@ export const tenantRoutes: RouteObject[] = [
       </ProtectedRoute>
     ),
   },
-  { path: 'verification', element: <Navigate to="/profil?tab=verification" replace /> },
+  { path: 'verification', element: <Navigate to="/locataire/profil?tab=verification" replace /> },
 
   // Favorites & saved searches (tenant only)
   {
