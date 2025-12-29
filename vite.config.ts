@@ -13,6 +13,17 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    allowedHosts: [
+      'localhost',
+      '.localhost',
+      '127.0.0.1',
+      'mon-toit.ansut.ci',
+      '.mon-toit.ansut.ci',
+      'montoit.ansut.ci',
+      '.montoit.ansut.ci',
+      'app.montoit.ci',
+      '.app.montoit.ci',
+    ],
   },
   resolve: {
     alias: {

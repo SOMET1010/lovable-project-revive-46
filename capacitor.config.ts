@@ -7,16 +7,16 @@ const config: CapacitorConfig = {
   appId: 'ci.montoit.app',
   appName: 'Mon Toit',
   webDir: 'dist',
-  
+
   // Configuration serveur uniquement en développement
   ...(isProduction ? {} : {
     server: {
       // Hot-reload depuis le sandbox Lovable (dev uniquement)
-      url: 'https://lovable-renewal.lovable.app',
+      url: 'https://mon-toit.ansut.ci',
       cleartext: true
     }
   }),
-  
+
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
@@ -43,7 +43,30 @@ const config: CapacitorConfig = {
       style: 'dark',
       backgroundColor: '#ffffff',
       overlaysWebView: false // iOS: don't overlay content
+    },
+    // Camera pour photos de propriétés, profil et vérification
+    Camera: {
+      permissions: ['camera', 'photos']
+    },
+    // Géolocalisation pour la carte et recherche proximité
+    Geolocation: {
+      permissions: ['location', 'coarseLocation']
+    },
+    // Stockage pour sauvegarder les photos localement
+    Filesystem: {
+      permissions: ['write', 'read']
     }
+  },
+
+  android: {
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: !isProduction
+  },
+
+  ios: {
+    contentInset: 'automatic',
+    scrollEnabled: true
   }
 };
 
