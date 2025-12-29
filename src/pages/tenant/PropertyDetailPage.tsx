@@ -41,7 +41,7 @@ interface Property {
   bedrooms: number | null;
   bathrooms: number | null;
   surface_area: number | null;
-  is_furnished: boolean | null;
+  furnished: boolean | null;
   has_parking: boolean | null;
   has_garden: boolean | null;
   has_ac: boolean | null;
@@ -50,7 +50,7 @@ interface Property {
   main_image: string | null;
   latitude: number | null;
   longitude: number | null;
-  view_count: number | null;
+  views_count: number | null;
   owner_id: string | null;
   created_at: string | null;
   updated_at: string | null;
@@ -249,7 +249,7 @@ function PropertyFeatures({ property }: PropertyFeaturesProps) {
     },
     {
       key: 'furnished',
-      available: property.is_furnished,
+      available: property.furnished,
       label: 'Meublé',
       icon: <CheckCircle className="h-5 w-5" />,
     },
@@ -528,10 +528,10 @@ export default function PropertyDetailPage() {
                         {property.city}, {property.neighborhood}
                       </span>
                     </div>
-                    {(property.view_count ?? 0) > 0 && (
+                    {(property.views_count ?? 0) > 0 && (
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-neutral-500">
-                          {property.view_count} vue{(property.view_count ?? 0) > 1 ? 's' : ''}
+                          {property.views_count} vue{(property.views_count ?? 0) > 1 ? 's' : ''}
                         </span>
                       </div>
                     )}
@@ -562,7 +562,7 @@ export default function PropertyDetailPage() {
 
               {(property.has_parking ||
                 property.has_garden ||
-                property.is_furnished ||
+                property.furnished ||
                 property.has_ac) && (
                 <div className="space-y-6">
                   <h2 className="text-2xl font-bold text-neutral-900">Équipements</h2>
@@ -579,7 +579,7 @@ export default function PropertyDetailPage() {
                         <span className="text-neutral-700 font-medium">Jardin</span>
                       </div>
                     )}
-                    {property.is_furnished && (
+                    {property.furnished && (
                       <div className="flex items-center gap-3 p-4 bg-neutral-50 rounded-lg border border-neutral-100">
                         <CheckCircle className="h-5 w-5 text-semantic-success flex-shrink-0" />
                         <span className="text-neutral-700 font-medium">Meublé</span>

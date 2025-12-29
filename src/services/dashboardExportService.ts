@@ -132,7 +132,7 @@ export const dashboardExportService = {
       p.city || '',
       `${p.price?.toLocaleString('fr-FR') || 0} FCFA`,
       p.status || '',
-      String(p.view_count || 0),
+      String(p.views_count || 0),
       String(p.favorites_count || 0),
       new Date(p.created_at).toLocaleDateString('fr-FR'),
     ]);

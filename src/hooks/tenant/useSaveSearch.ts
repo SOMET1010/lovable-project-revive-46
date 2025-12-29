@@ -10,7 +10,7 @@ interface SearchFilters {
   min_price?: number;
   max_price?: number;
   min_bedrooms?: number;
-  is_furnished?: boolean;
+  furnished?: boolean;
 }
 
 export function useSaveSearch() {

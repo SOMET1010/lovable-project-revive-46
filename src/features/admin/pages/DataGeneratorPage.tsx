@@ -171,7 +171,7 @@ export default function DataGeneratorPage() {
           status: prop.status,
           address: `${prop.neighborhood}, ${prop.city}`,
           deposit_amount: prop.monthly_rent * 2,
-          is_furnished: Math.random() > 0.5,
+          furnished: Math.random() > 0.5,
           has_parking: Math.random() > 0.3,
           has_garden: prop.property_type === 'house' && Math.random() > 0.5,
           has_ac: Math.random() > 0.4,

@@ -130,7 +130,7 @@ export function useInfiniteProperties(
       }
 
       if (filters.isFurnished !== null && filters.isFurnished !== undefined) {
-        query = query.eq('is_furnished', filters.isFurnished);
+        query = query.eq('furnished', filters.isFurnished);
       }
 
       if (filters.hasParking !== null && filters.hasParking !== undefined) {
@@ -229,7 +229,7 @@ export function useInfiniteProperties(
         }
 
         if (filters.isFurnished !== null && filters.isFurnished !== undefined) {
-          query = query.eq('is_furnished', filters.isFurnished);
+          query = query.eq('furnished', filters.isFurnished);
         }
 
         if (filters.hasParking !== null && filters.hasParking !== undefined) {

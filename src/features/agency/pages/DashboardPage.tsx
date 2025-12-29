@@ -24,7 +24,7 @@ interface Property {
   neighborhood: string | null;
   monthly_rent: number;
   status: string;
-  view_count: number;
+  views_count: number;
   main_image: string | null;
 }
 
@@ -262,7 +262,7 @@ export default function AgencyDashboardPage() {
                             {property.monthly_rent.toLocaleString()} FCFA
                           </span>
                           <span className="flex items-center gap-1 text-xs text-[#6B5A4E]">
-                            <Eye className="h-3 w-3" /> {property.view_count || 0} vues
+                            <Eye className="h-3 w-3" /> {property.views_count || 0} vues
                           </span>
                         </div>
                       </div>

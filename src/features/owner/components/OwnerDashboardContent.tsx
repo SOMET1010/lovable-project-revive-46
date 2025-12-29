@@ -23,7 +23,7 @@ interface Property {
   monthly_rent: number;
   status: string | null;
   main_image: string | null;
-  view_count: number | null;
+  views_count: number | null;
 }
 
 interface LeaseStats {
@@ -58,7 +58,7 @@ export default function OwnerDashboardContent() {
       // Fetch properties
       const { data: propertiesData, error: propertiesError } = await supabase
         .from('properties')
-        .select('id, title, city, neighborhood, monthly_rent, status, main_image, view_count')
+        .select('id, title, city, neighborhood, monthly_rent, status, main_image, views_count')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -253,7 +253,7 @@ export default function OwnerDashboardContent() {
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-[#EFEBE9]">
                       <div className="flex items-center gap-1 text-sm text-[#6B5A4E]">
                         <Eye className="h-4 w-4" />
-                        <span>{property.view_count || 0} vues</span>
+                        <span>{property.views_count || 0} vues</span>
                       </div>
 
                       <div className="flex items-center gap-2">

@@ -112,7 +112,7 @@ function PropertyCard({ property, onClick }: PropertyCardProps) {
         {/* Type Badge */}
         <div className="flex items-center justify-between">
           <span className="badge-premium badge-premium-orange">{property.property_type}</span>
-          {property.is_furnished && (
+          {property.furnished && (
             <span className="text-xs text-[var(--color-gris-texte)] font-medium">Meublé</span>
           )}
         </div>

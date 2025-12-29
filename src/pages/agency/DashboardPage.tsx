@@ -23,7 +23,7 @@ interface Property {
   neighborhood: string | null;
   monthly_rent: number;
   status: string;
-  view_count: number;
+  views_count: number;
   main_image: string | null;
 }
 
@@ -273,7 +273,7 @@ export default function AgencyDashboardPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="bg-white rounded-xl px-3 py-2 text-sm text-[#6B5A4E]">
-                          {property.view_count} vues
+                          {property.views_count} vues
                         </div>
                         <button className="flex items-center gap-2 text-[#F16522] hover:underline font-medium">
                           <Eye className="h-4 w-4" />

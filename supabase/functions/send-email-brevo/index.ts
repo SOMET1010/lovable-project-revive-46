@@ -5,6 +5,8 @@
  * Optimisé pour l'envoi de codes OTP et emails de vérification.
  *
  * Architecture: Frontend → Supabase Edge Function → Brevo Email API
+ *
+ * Updated: 2024-12-29 - Fixed CORS handling
  */
 
 import { getCorsHeaders } from '../_shared/cors.ts';

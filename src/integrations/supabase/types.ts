@@ -1325,11 +1325,10 @@ export type Database = {
           id: string;
           images: string[] | null;
           is_anonymous: boolean | null;
-          is_furnished: boolean | null;
+          furnished: boolean | null;
           latitude: number | null;
           longitude: number | null;
           main_image: string | null;
-          monthly_rent: number;
           neighborhood: string | null;
           owner_id: string | null;
           price: number | null;
@@ -1339,7 +1338,7 @@ export type Database = {
           surface_area: number | null;
           title: string;
           updated_at: string | null;
-          view_count: number | null;
+          views_count: number | null;
         };
         Insert: {
           address?: string | null;
@@ -1360,11 +1359,10 @@ export type Database = {
           id?: string;
           images?: string[] | null;
           is_anonymous?: boolean | null;
-          is_furnished?: boolean | null;
+          furnished?: boolean | null;
           latitude?: number | null;
           longitude?: number | null;
           main_image?: string | null;
-          monthly_rent: number;
           neighborhood?: string | null;
           owner_id?: string | null;
           price?: number | null;
@@ -1374,7 +1372,7 @@ export type Database = {
           surface_area?: number | null;
           title: string;
           updated_at?: string | null;
-          view_count?: number | null;
+          views_count?: number | null;
         };
         Update: {
           address?: string | null;
@@ -1395,11 +1393,10 @@ export type Database = {
           id?: string;
           images?: string[] | null;
           is_anonymous?: boolean | null;
-          is_furnished?: boolean | null;
+          furnished?: boolean | null;
           latitude?: number | null;
           longitude?: number | null;
           main_image?: string | null;
-          monthly_rent?: number;
           neighborhood?: string | null;
           owner_id?: string | null;
           price?: number | null;
@@ -1409,7 +1406,7 @@ export type Database = {
           surface_area?: number | null;
           title?: string;
           updated_at?: string | null;
-          view_count?: number | null;
+          views_count?: number | null;
         };
         Relationships: [
           {
@@ -2241,7 +2238,7 @@ export type Database = {
           id: string | null;
           images: string[] | null;
           is_anonymous: boolean | null;
-          is_furnished: boolean | null;
+          furnished: boolean | null;
           latitude: number | null;
           longitude: number | null;
           main_image: string | null;
@@ -2254,7 +2251,7 @@ export type Database = {
           surface_area: number | null;
           title: string | null;
           updated_at: string | null;
-          view_count: number | null;
+          views_count: number | null;
         };
         Insert: {
           address?: string | null;
@@ -2273,7 +2270,7 @@ export type Database = {
           id?: string | null;
           images?: string[] | null;
           is_anonymous?: boolean | null;
-          is_furnished?: boolean | null;
+          furnished?: boolean | null;
           latitude?: number | null;
           longitude?: number | null;
           main_image?: string | null;
@@ -2286,7 +2283,7 @@ export type Database = {
           surface_area?: number | null;
           title?: string | null;
           updated_at?: string | null;
-          view_count?: number | null;
+          views_count?: number | null;
         };
         Update: {
           address?: string | null;
@@ -2305,7 +2302,7 @@ export type Database = {
           id?: string | null;
           images?: string[] | null;
           is_anonymous?: boolean | null;
-          is_furnished?: boolean | null;
+          furnished?: boolean | null;
           latitude?: number | null;
           longitude?: number | null;
           main_image?: string | null;
@@ -2318,7 +2315,7 @@ export type Database = {
           surface_area?: number | null;
           title?: string | null;
           updated_at?: string | null;
-          view_count?: number | null;
+          views_count?: number | null;
         };
         Relationships: [];
       };

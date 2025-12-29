@@ -49,7 +49,7 @@ interface PropertyFormData {
   charges_amount: string;
   has_parking: boolean;
   has_garden: boolean;
-  is_furnished: boolean;
+  furnished: boolean;
   has_ac: boolean;
   is_anonymous: boolean;
 }
@@ -77,7 +77,7 @@ const INITIAL_FORM_DATA: PropertyFormData = {
   charges_amount: '0',
   has_parking: false,
   has_garden: false,
-  is_furnished: false,
+  furnished: false,
   has_ac: false,
   is_anonymous: false,
 };
@@ -188,7 +188,7 @@ export function AddPropertyContent() {
             charges_amount: data.charges_amount?.toString() || '',
             has_parking: data.has_parking ?? false,
             has_garden: data.has_garden ?? false,
-            is_furnished: data.is_furnished ?? false,
+            furnished: data.furnished ?? false,
             has_ac: data.has_ac ?? false,
             is_anonymous: data.is_anonymous ?? false,
           });
@@ -445,18 +445,18 @@ export function AddPropertyContent() {
         bedrooms: Number.isNaN(bedroomsValue) ? 0 : bedroomsValue,
         bathrooms: Number.isNaN(bathroomsValue) ? 0 : bathroomsValue,
         surface_area: normalizedSurface,
-        monthly_rent: monthlyRentValue,
+        price: monthlyRentValue,
         deposit_amount: normalizedDeposit,
         charges_amount: normalizedCharges,
         has_parking: !!formData.has_parking,
         has_garden: !!formData.has_garden,
-        is_furnished: !!formData.is_furnished,
+        furnished: !!formData.furnished,
         has_ac: !!formData.has_ac,
         is_anonymous: !!formData.is_anonymous,
         status: 'disponible' as const,
         images: [],
         main_image: null,
-        view_count: 0,
+        views_count: 0,
       };
 
       let data, error;
@@ -1240,7 +1240,7 @@ export function AddPropertyContent() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {[
-                    { name: 'is_furnished', label: 'Meublé', checked: formData.is_furnished },
+                    { name: 'furnished', label: 'Meublé', checked: formData.furnished },
                     { name: 'has_parking', label: 'Parking', checked: formData.has_parking },
                     { name: 'has_garden', label: 'Jardin', checked: formData.has_garden },
                     { name: 'has_ac', label: 'Climatisation', checked: formData.has_ac },

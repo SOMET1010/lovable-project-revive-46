@@ -10,7 +10,7 @@ interface SearchFilters {
   min_price?: number;
   max_price?: number;
   min_bedrooms?: number;
-  is_furnished?: boolean;
+  furnished?: boolean;
 }
 
 interface SavedSearch {
@@ -140,8 +140,8 @@ export default function SavedSearches() {
     if (filters.min_price) params.set('minPrice', filters.min_price.toString());
     if (filters.max_price) params.set('maxPrice', filters.max_price.toString());
     if (filters.min_bedrooms) params.set('bedrooms', filters.min_bedrooms.toString());
-    if (filters.is_furnished !== undefined)
-      params.set('furnished', filters.is_furnished.toString());
+    if (filters.furnished !== undefined)
+      params.set('furnished', filters.furnished.toString());
 
     navigate(`/recherche?${params.toString()}`);
   };
@@ -176,7 +176,7 @@ export default function SavedSearches() {
       }
     }
 
-    if (filters.is_furnished) parts.push('Meublé');
+    if (filters.furnished) parts.push('Meublé');
 
     return parts.join(' • ') || 'Recherche personnalisée';
   };

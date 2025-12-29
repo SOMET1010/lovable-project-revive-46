@@ -13,7 +13,7 @@ export interface PropertyExportData {
   city?: string;
   price?: number;
   status?: string;
-  view_count?: number;
+  views_count?: number;
   favorites_count?: number;
   created_at: string;
 }

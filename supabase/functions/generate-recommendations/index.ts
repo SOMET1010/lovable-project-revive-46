@@ -118,7 +118,7 @@ serve(async (req) => {
             }
 
             // Amenities (15 points total)
-            if (prefs.requires_furnished && property.is_furnished) {
+            if (prefs.requires_furnished && property.furnished) {
               score += 5;
               reasons.push('Meublé');
             }

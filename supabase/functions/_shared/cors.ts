@@ -1,5 +1,5 @@
 const DEFAULT_ALLOWED_ORIGINS = [
-  'https://montoit.ansut.ci',
+  'https://mon-toit.ansut.ci',
   'http://localhost:8080',
   'http://127.0.0.1:8080',
   'http://localhost:5173',

@@ -279,7 +279,7 @@ Deno.serve(async (req) => {
         surface_area: propData.surface,
         status: propData.status,
         moderation_status: propData.moderation,
-        is_furnished: Math.random() > 0.5,
+        furnished: Math.random() > 0.5,
         has_parking: Math.random() > 0.3,
         has_garden: propData.type === 'villa' && Math.random() > 0.5,
         has_ac: Math.random() > 0.6,
