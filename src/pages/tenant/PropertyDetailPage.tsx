@@ -62,6 +62,7 @@ interface Property {
   owner_avatar_url?: string | null;
   owner_is_verified?: boolean | null;
   owner_oneci_verified?: boolean | null;
+  owner_city?: string | null;
   // Managing agency (if anonymous)
   managing_agency_name?: string | null;
 }
@@ -393,22 +394,27 @@ export default function PropertyDetailPage() {
         trust_score: number | null;
         is_verified: boolean | null;
         oneci_verified: boolean | null;
+        city: string | null;
       } | null = null;
 
       if (data.owner_id) {
-        const { data: profileData } = await supabase
-          .from('public_profiles_view')
-          .select('full_name, avatar_url, trust_score, is_verified, oneci_verified')
-          .eq('id', data.owner_id)
-          .maybeSingle();
+        const { data: profileData, error: profileError } = await supabase.rpc('get_public_profile', {
+          profile_user_id: data.owner_id,
+        });
 
-        if (profileData) {
+        if (profileError) {
+          console.warn('Error fetching owner profile:', profileError.message);
+        }
+
+        const profileRow = profileData?.[0];
+        if (profileRow) {
           ownerProfile = {
-            full_name: profileData.full_name ?? null,
-            avatar_url: profileData.avatar_url ?? null,
-            trust_score: profileData.trust_score ?? null,
-            is_verified: profileData.is_verified ?? null,
-            oneci_verified: profileData.oneci_verified ?? null,
+            full_name: profileRow.full_name ?? null,
+            avatar_url: profileRow.avatar_url ?? null,
+            trust_score: profileRow.trust_score ?? null,
+            is_verified: profileRow.is_verified ?? null,
+            oneci_verified: profileRow.oneci_verified ?? null,
+            city: profileRow.city ?? null,
           };
         }
       }
@@ -444,6 +450,7 @@ export default function PropertyDetailPage() {
         owner_avatar_url: ownerProfile?.avatar_url ?? null,
         owner_is_verified: ownerProfile?.is_verified ?? null,
         owner_oneci_verified: ownerProfile?.oneci_verified ?? null,
+        owner_city: ownerProfile?.city ?? null,
         managing_agency_name: managingAgencyName,
       } as unknown as Property;
       setProperty(propertyData);
@@ -688,6 +695,7 @@ export default function PropertyDetailPage() {
                 trustScore={property.owner_trust_score}
                 isVerified={property.owner_is_verified ?? false}
                 oneciVerified={property.owner_oneci_verified ?? false}
+                city={property.owner_city}
                 showVerificationBadges={!property.is_anonymous}
                 variant="card"
                 size="lg"

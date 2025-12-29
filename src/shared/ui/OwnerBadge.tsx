@@ -22,6 +22,7 @@ export interface OwnerBadgeProps {
   propertyTitle?: string | null;
   onContact?: () => void;
   showContactButton?: boolean;
+  city?: string | null;
   // Gestion anonyme
   isAnonymous?: boolean;
   managedByAgencyName?: string | null;
@@ -77,6 +78,7 @@ export function OwnerBadge({
   propertyTitle,
   onContact,
   showContactButton = true,
+  city,
   isAnonymous = false,
   managedByAgencyName,
 }: OwnerBadgeProps) {
@@ -225,6 +227,9 @@ export function OwnerBadge({
             <div className={cn(sizes.name, 'font-semibold text-neutral-900 truncate')}>
               {name || 'Propriétaire'}
             </div>
+          )}
+          {city && (
+            <div className="text-sm text-neutral-500 truncate">{city}</div>
           )}
 
           {showScore && trustScore != null && (
