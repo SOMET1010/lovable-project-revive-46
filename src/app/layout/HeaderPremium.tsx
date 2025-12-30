@@ -255,7 +255,7 @@ export default function HeaderPremium() {
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
               <img
-                src="/logo-montoit.png"
+                src="/logo.png"
                 alt="Mon Toit"
                 className="h-10 w-10 object-contain transition-transform duration-300 ease-out group-hover:scale-110 group-hover:rotate-3"
               />

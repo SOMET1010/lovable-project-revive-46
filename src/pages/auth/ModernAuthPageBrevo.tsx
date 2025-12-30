@@ -34,19 +34,19 @@ const AUTH_SLIDES = [
   {
     image:
       'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop&q=80',
-    quote: 'Un parcours simple pour explorer les logements disponibles.',
+    quote: 'J\'ai trouvé mon appartement à Cocody en moins d\'une semaine. Vraiment efficace et sécurisé !',
     author: 'Sarah & Marc, Cocody',
   },
   {
     image:
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=80',
-    quote: 'Les étapes de location se déploient progressivement.',
+    quote: 'La signature numérique et le paiement par Mobile Money ont rendu ma location super simple.',
     author: 'Aïcha K., Plateau',
   },
   {
     image:
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&auto=format&fit=crop&q=80',
-    quote: 'Une plateforme en évolution, pensée pour les propriétaires.',
+    quote: 'Comme propriétaire, je peux gérer mes biens et mes locataires en toute confiance.',
     author: 'Konan D., Marcory',
   },
 ];
@@ -181,9 +181,7 @@ export default function ModernAuthPageBrevo() {
 
         {/* Logo Flottant */}
         <div className="absolute top-8 left-8 flex items-center gap-3 z-10">
-          <div className="w-11 h-11 bg-[#F16522] rounded-full flex items-center justify-center shadow-lg">
-            <Home className="w-6 h-6 text-white" />
-          </div>
+          <img src="/logo.png" alt="Mon Toit" className="w-11 h-11 object-contain" />
           <span className="text-2xl font-extrabold text-white tracking-tight">Mon Toit</span>
         </div>
 
@@ -219,12 +217,12 @@ export default function ModernAuthPageBrevo() {
         {/* Stats */}
         <div className="absolute bottom-16 right-12 z-10 flex gap-6">
           <div className="text-center">
-            <p className="text-2xl font-bold text-white">Catalogue</p>
-            <p className="text-sm text-[#E8D4C5]">en cours</p>
+            <p className="text-2xl font-bold text-white">1000+</p>
+            <p className="text-sm text-[#E8D4C5]">Propriétés</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-white">MVP</p>
-            <p className="text-sm text-[#E8D4C5]">en déploiement</p>
+            <p className="text-2xl font-bold text-white">Certifié</p>
+            <p className="text-sm text-[#E8D4C5]">ANSUT</p>
           </div>
         </div>
       </div>
@@ -238,9 +236,7 @@ export default function ModernAuthPageBrevo() {
         <div className="w-full max-w-md space-y-6 relative z-10">
           {/* Header Mobile Only */}
           <div className="lg:hidden flex items-center justify-center gap-2 mb-6">
-            <div className="w-9 h-9 bg-[#F16522] rounded-full flex items-center justify-center">
-              <Home className="w-5 h-5 text-white" />
-            </div>
+            <img src="/logo.png" alt="Mon Toit" className="w-9 h-9 object-contain" />
             <span className="text-2xl font-bold text-[#2C1810]">Mon Toit</span>
           </div>
 

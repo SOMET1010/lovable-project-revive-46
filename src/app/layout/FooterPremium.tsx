@@ -88,7 +88,7 @@ function FooterContent() {
                 {/* Gestion intelligente du logo avec Fallback */}
                 {!imgError ? (
                   <img
-                    src="/logo-montoit.png"
+                    src="/logo.png"
                     alt="Mon Toit Logo"
                     className="h-10 w-10 object-contain"
                     onError={() => setImgError(true)}

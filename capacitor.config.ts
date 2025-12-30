@@ -7,15 +7,12 @@ const config: CapacitorConfig = {
   appId: 'ci.montoit.app',
   appName: 'Mon Toit',
   webDir: 'dist',
-
   // Configuration serveur uniquement en développement
-  ...(isProduction ? {} : {
-    server: {
-      // Hot-reload depuis le sandbox Lovable (dev uniquement)
-      url: 'https://mon-toit.ansut.ci',
-      cleartext: true
-    }
-  }),
+  server: {
+    url: 'https://mon-toit.ansut.ci',
+    cleartext: false,
+    allowNavigation: ['mon-toit.ansut.ci']
+  },
 
   plugins: {
     SplashScreen: {

@@ -80,7 +80,7 @@ const showErrorInLoader = (error: unknown) => {
     const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
     loader.innerHTML = `
       <div style="text-align:center;padding:20px;font-family:Inter,sans-serif;">
-        <img src="/logo-montoit.png" alt="Mon Toit" style="width:60px;height:60px;margin-bottom:12px;opacity:0.5;" />
+        <img src="/logo.png" alt="Mon Toit" style="width:60px;height:60px;margin-bottom:12px;opacity:0.5;" />
         <div style="color:#dc2626;font-size:16px;margin-bottom:8px;">
           Erreur de chargement
         </div>

@@ -14,7 +14,7 @@ export default function SEOHead({
   title = "Mon Toit - Plateforme de Location Immobilière en Côte d'Ivoire",
   description = "Trouvez votre logement idéal en Côte d'Ivoire. Plateforme sécurisée et certifiée ANSUT avec paiement Mobile Money intégré. Plus de 1000 propriétés à Abidjan, Yamoussoukro, Bouaké.",
   keywords = "location, immobilier, Côte d'Ivoire, Abidjan, ANSUT, logement, appartement, maison, studio, villa, cocody, marcory, plateau, yopougon",
-  image = 'https://montoit.ci/logo-montoit.png',
+  image = 'https://montoit.ci/logo.png',
   url = 'https://montoit.ci',
   type = 'website',
   structuredData,
@@ -126,7 +126,7 @@ export function createOrganizationStructuredData() {
     name: 'Mon Toit',
     alternateName: 'Mon Toit CI',
     url: 'https://montoit.ci',
-    logo: 'https://montoit.ci/logo-montoit.png',
+    logo: 'https://montoit.ci/logo.png',
     description:
       "Plateforme immobilière pour un accès universel au logement en Côte d'Ivoire. Signature électronique certifiée ANSUT.",
     address: {
