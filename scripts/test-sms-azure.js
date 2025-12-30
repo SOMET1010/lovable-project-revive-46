@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Script de test pour l'envoi de SMS via Brevo
+ * Script de test pour l'envoi de SMS via Azure MTN
  */
 
 const testPhoneNumber = '+2250140984943';
@@ -9,14 +9,14 @@ const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL ||
 const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
 
 async function testSMS() {
-  console.log('🚀 Test d\'envoi de SMS via Brevo...');
+  console.log('🚀 Test d\'envoi de SMS via Azure MTN...');
   console.log(`📱 Numéro de test: ${testPhoneNumber}`);
   console.log('');
 
   try {
     // Test 1: SMS simple
     console.log('📤 Test 1: SMS simple');
-    const response1 = await fetch(`${supabaseUrl}/functions/v1/send-sms-brevo`, {
+    const response1 = await fetch(`${supabaseUrl}/functions/v1/send-sms-azure`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${supabaseKey}`,
@@ -24,7 +24,7 @@ async function testSMS() {
       },
       body: JSON.stringify({
         phone: testPhoneNumber,
-        message: 'Test SMS Brevo - MonToit ✅',
+        message: 'Test SMS Azure MTN - MonToit ✅',
         tag: 'TEST'
       })
     });
@@ -43,7 +43,7 @@ async function testSMS() {
     // Test 2: SMS avec code OTP
     console.log('📤 Test 2: SMS avec code OTP');
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    const response2 = await fetch(`${supabaseUrl}/functions/v1/send-sms-brevo`, {
+    const response2 = await fetch(`${supabaseUrl}/functions/v1/send-sms-azure`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${supabaseKey}`,
@@ -70,7 +70,7 @@ async function testSMS() {
 
     // Test 3: Test d'erreur (numéro invalide)
     console.log('📤 Test 3: Numéro invalide (doit échouer)');
-    const response3 = await fetch(`${supabaseUrl}/functions/v1/send-sms-brevo`, {
+    const response3 = await fetch(`${supabaseUrl}/functions/v1/send-sms-azure`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${supabaseKey}`,
@@ -98,8 +98,11 @@ async function testSMS() {
     console.log('Vérifiez que:');
     console.log('1. SUPABASE_URL est correctement configuré');
     console.log('2. SUPABASE_ANON_KEY est valide');
-    console.log('3. BREVO_API_KEY est configuré dans Supabase Edge Functions');
-    console.log('4. L\'Edge Function send-sms-brevo est déployée');
+    console.log('3. AZURE_SMS_URL est configuré dans Supabase Edge Functions');
+    console.log('4. AZURE_SMS_USERNAME est configuré dans Supabase Edge Functions');
+    console.log('5. AZURE_SMS_PASSWORD est configuré dans Supabase Edge Functions');
+    console.log('6. AZURE_SMS_FROM est configuré dans Supabase Edge Functions');
+    console.log('7. L\'Edge Function send-sms-azure est déployée');
   }
 }
 

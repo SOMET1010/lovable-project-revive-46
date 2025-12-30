@@ -100,7 +100,8 @@ export default function ModernAuthPage() {
   const [_countryDialCode, setCountryDialCode] = useState('+225');
   const [isPhoneValid, setIsPhoneValid] = useState(false);
   const [otp, setOtp] = useState('');
-  const [sendMethod, setSendMethod] = useState<'sms' | 'whatsapp'>('whatsapp');
+  // WhatsApp désactivé - SMS uniquement
+  const [sendMethod] = useState<'sms'>('sms');
   const [resendTimer, setResendTimer] = useState(0);
   const [devOtp, setDevOtp] = useState<string | null>(null);
 
@@ -355,7 +356,7 @@ export default function ModernAuthPage() {
         setDevOtp(data.otp);
         setSuccess(`🧪 Mode dev - Code: ${data.otp}`);
       } else {
-        setSuccess(`Code envoyé par ${sendMethod === 'sms' ? 'SMS' : 'WhatsApp'} !`);
+        setSuccess(`Code envoyé par SMS !`);
       }
 
       setPhoneStep('verify');
@@ -660,36 +661,10 @@ export default function ModernAuthPage() {
                     autoFocus
                   />
 
-                  {/* Send method selector */}
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setSendMethod('whatsapp')}
-                      className={`flex-1 py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
-                        sendMethod === 'whatsapp'
-                          ? 'bg-green-50 border-2 border-green-500 text-green-700'
-                          : 'bg-white border border-[#EFEBE9] text-[#6B5A4E] hover:border-[#A69B95]'
-                      }`}
-                    >
-                      <MessageCircle className="w-4 h-4" /> WhatsApp
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSendMethod('sms')}
-                      className={`flex-1 py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-all ${
-                        sendMethod === 'sms'
-                          ? 'bg-blue-50 border-2 border-blue-500 text-blue-700'
-                          : 'bg-white border border-[#EFEBE9] text-[#6B5A4E] hover:border-[#A69B95]'
-                      }`}
-                    >
-                      <Phone className="w-4 h-4" /> SMS
-                    </button>
-                  </div>
-
                   {/* Info */}
                   <div className="p-3 bg-[#F16522]/5 border border-[#F16522]/20 rounded-xl">
                     <p className="text-sm text-[#2C1810]">
-                      💡 Un code à 6 chiffres sera envoyé à votre numéro.
+                      💡 Un code à 6 chiffres sera envoyé par <span className="font-semibold">SMS</span> à votre numéro MTN.
                       <span className="font-medium"> Nouveau ?</span> Votre compte sera créé
                       automatiquement.
                     </p>

@@ -152,13 +152,13 @@ class OTPUnifiedService {
   }
 
   /**
-   * Envoie un OTP par SMS via Brevo
+   * Envoie un OTP par SMS via Azure MTN
    */
   private async sendSMSOTP(recipient: string, otp: string): Promise<OTPResult> {
     try {
       const message = `MonToit: Votre code de verification est ${otp}. Valide 10min. Ne partagez jamais ce code.`;
 
-      const { data, error } = await supabase.functions.invoke('send-sms-brevo', {
+      const { data, error } = await supabase.functions.invoke('send-sms-azure', {
         body: {
           phone: this.formatPhoneNumber(recipient),
           message,
@@ -177,7 +177,7 @@ class OTPUnifiedService {
       return {
         success: data?.status === 'ok',
         error: data?.status === 'error' ? data?.reason : undefined,
-        messageId: data?.brevoMessageId,
+        messageId: data?.messageId,
       };
     } catch (error) {
       console.error('Exception envoi OTP SMS:', error);
@@ -189,14 +189,14 @@ class OTPUnifiedService {
   }
 
   /**
-   * Envoie un OTP par WhatsApp (via SMS adapté)
+   * Envoie un OTP par WhatsApp (via SMS Azure MTN)
    */
   private async sendWhatsAppOTP(recipient: string, otp: string): Promise<OTPResult> {
     try {
       // Message optimisé pour WhatsApp
-      const message = `🏠 *MonToit CI*\n\nVotre code de vérification est: *${otp}*\n\n⏰ Valide 10 minutes\n🔒 Ne le partagez jamais`;
+      const message = `MonToit: Votre code de verification est ${otp}. Valide 10min. Ne partagez jamais ce code.`;
 
-      const { data, error } = await supabase.functions.invoke('send-sms-brevo', {
+      const { data, error } = await supabase.functions.invoke('send-sms-azure', {
         body: {
           phone: this.formatPhoneNumber(recipient),
           message,
@@ -215,7 +215,7 @@ class OTPUnifiedService {
       return {
         success: data?.status === 'ok',
         error: data?.status === 'error' ? data?.reason : undefined,
-        messageId: data?.brevoMessageId,
+        messageId: data?.messageId,
       };
     } catch (error) {
       console.error('Exception envoi OTP WhatsApp:', error);

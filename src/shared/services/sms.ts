@@ -3,8 +3,8 @@
  *
  * ARCHITECTURE SÉCURISÉE:
  * - Tous les appels SMS/WhatsApp passent par les Edge Functions Supabase
- * - La clé API Brevo n'est JAMAIS exposée côté client
- * - Seules les IP Supabase Edge Functions appellent Brevo
+ * - Les identifiants Azure SMS ne sont JAMAIS exposés côté client
+ * - Seules les IP Supabase Edge Functions appellent Azure MTN
  *
  * Usage:
  *   import { sendSms, sendWhatsApp } from '@/shared/services/sms';
@@ -20,7 +20,7 @@ interface SmsResult {
 }
 
 /**
- * Envoie un SMS via l'Edge Function send-sms-brevo
+ * Envoie un SMS via l'Edge Function send-sms-azure (Azure MTN)
  *
  * @param phone - Numéro au format E.164 (ex: +2250700000000)
  * @param message - Contenu du SMS (max 160 caractères)
@@ -28,7 +28,7 @@ interface SmsResult {
  */
 export async function sendSms(phone: string, message: string, tag?: string): Promise<SmsResult> {
   try {
-    const { data, error } = await supabase.functions.invoke('send-sms-brevo', {
+    const { data, error } = await supabase.functions.invoke('send-sms-azure', {
       body: { phone, message, tag },
     });
 
@@ -38,7 +38,7 @@ export async function sendSms(phone: string, message: string, tag?: string): Pro
     }
 
     if (data?.status === 'ok') {
-      return { success: true, messageId: data.brevoMessageId };
+      return { success: true, messageId: data.messageId };
     }
 
     return { success: false, error: data?.reason || 'Erreur inconnue' };

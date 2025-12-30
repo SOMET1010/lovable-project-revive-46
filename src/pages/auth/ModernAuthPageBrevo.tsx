@@ -341,7 +341,7 @@ export default function ModernAuthPageBrevo() {
 
                   <div className="p-3 bg-[#F16522]/5 border border-[#F16522]/20 rounded-xl">
                     <p className="text-sm text-[#2C1810]">
-                      💡 Un code à 6 chiffres sera envoyé à votre numéro.
+                      💡 Un code à 6 chiffres sera envoyé à votre numéro MTN.
                       <span className="font-medium"> Nouveau ?</span> Votre compte sera créé
                       automatiquement.
                     </p>
