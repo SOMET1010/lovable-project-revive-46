@@ -294,12 +294,6 @@ class OTPUnifiedService {
         };
     }
 
-    // En développement, inclure l'OTP pour faciliter les tests
-    const isDev = import.meta.env.DEV;
-    if (sendResult.success && isDev) {
-      sendResult.otp = otp;
-    }
-
     return sendResult;
   }
 

@@ -1,1 +1,1 @@
-supabase functions deploy send-sms-azure --project-ref wvqxmdmzyinlpmhtfhrc --no-verify-jwt)
+supabase functions deploy send-sms-azure --project-ref wvqxmdmzyinlpmhtfhrc --no-verify-jwt

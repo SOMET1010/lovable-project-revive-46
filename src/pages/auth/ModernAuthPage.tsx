@@ -28,6 +28,7 @@ import {
 import { supabase } from '@/services/supabase/client';
 import { InputWithIcon } from '@/shared/ui';
 import { PhoneInputWithCountry } from '@/shared/components/PhoneInputWithCountry';
+import { otpUnifiedService } from '@/services/brevo/otp-unified.service';
 import OTPInput from '@/shared/components/modern/OTPInput';
 import { getDashboardRoute } from '@/shared/utils/roleRoutes';
 
@@ -103,7 +104,6 @@ export default function ModernAuthPage() {
   // WhatsApp désactivé - SMS uniquement
   const [sendMethod] = useState<'sms'>('sms');
   const [resendTimer, setResendTimer] = useState(0);
-  const [devOtp, setDevOtp] = useState<string | null>(null);
 
   const isLocalDevEnv = () => {
     if (typeof window === 'undefined') return import.meta.env.DEV;
@@ -149,7 +149,6 @@ export default function ModernAuthPage() {
     setError('');
     setSuccess('');
     setOtp('');
-    setDevOtp(null);
     setEmailStep('form');
     setEmailOtp('');
     setPendingEmail('');
@@ -200,7 +199,6 @@ export default function ModernAuthPage() {
     setPhoneStep('enter');
     setOtp('');
     setFullName('');
-    setDevOtp(null);
     setError('');
     setSuccess('');
     setGeneratedOtp('');
@@ -334,30 +332,33 @@ export default function ModernAuthPage() {
   // ===================== PHONE - SEND OTP =====================
   const handleSendOTP = async () => {
     setError('');
-    setDevOtp(null);
     setLoading(true);
 
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke('send-auth-otp', {
-        body: { phoneNumber, method: sendMethod },
-      });
-
-      if (data?.rateLimited && data?.retryAfter) {
-        setResendTimer(data.retryAfter);
-        setError(`Patientez ${data.retryAfter} secondes`);
+      // Vérifier le rate limiting
+      const rateLimitCheck = await otpUnifiedService.checkRateLimit(phoneNumber, 'otp-send', 5, 3);
+      if (!rateLimitCheck.allowed && rateLimitCheck.remainingTime) {
+        setResendTimer(rateLimitCheck.remainingTime);
+        setError(`Patientez ${rateLimitCheck.remainingTime} secondes avant de réessayer`);
         setLoading(false);
         return;
       }
 
-      if (invokeError) throw new Error(invokeError.message || "Erreur lors de l'envoi du code");
-      if (data?.error) throw new Error(data.error);
+      // Envoyer l'OTP via le service unifié (utilise send-sms-azure pour SMS/WhatsApp)
+      const method = sendMethod === 'whatsapp' ? 'whatsapp' : 'sms';
+      const result = await otpUnifiedService.sendOTP({
+        recipient: phoneNumber,
+        method,
+        purpose: 'auth',
+        expiresIn: 10,
+      });
 
-      if (data?.otp) {
-        setDevOtp(data.otp);
-        setSuccess(`🧪 Mode dev - Code: ${data.otp}`);
-      } else {
-        setSuccess(`Code envoyé par SMS !`);
+      if (!result.success) {
+        throw new Error(result.error || "Erreur lors de l'envoi du code");
       }
+
+      const channelLabel = sendMethod === 'whatsapp' ? 'WhatsApp' : 'SMS';
+      setSuccess(`Code envoyé par ${channelLabel} !`);
 
       setPhoneStep('verify');
       setResendTimer(60);
@@ -376,7 +377,7 @@ export default function ModernAuthPage() {
 
     try {
       const siteUrl = window.location.origin;
-      const { data, error: invokeError } = await supabase.functions.invoke('verify-auth-otp', {
+      const { data, error: invokeError } = await supabase.functions.invoke('verify-otp-azure', {
         body: { phoneNumber, code: otp, fullName: withName ? fullName : undefined, siteUrl },
       });
 
@@ -696,12 +697,6 @@ export default function ModernAuthPage() {
                   >
                     <ArrowLeft className="h-4 w-4" /> Modifier le numéro
                   </button>
-
-                  {devOtp && (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm text-center">
-                      🧪 Mode dev - Code: <span className="font-bold">{devOtp}</span>
-                    </div>
-                  )}
 
                   <div className="flex justify-center gap-2">
                     {[0, 1, 2, 3, 4, 5].map((idx) => (
