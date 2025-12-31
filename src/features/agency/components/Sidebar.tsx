@@ -33,16 +33,14 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/agences/dashboard', icon: Building2 },
-  { label: 'Mes mandats', href: '/agences/mandats', icon: FileText },
   { label: 'Mes biens', href: '/agences/biens', icon: Home },
-  { label: 'Ajouter un bien', href: '/agences/ajouter-bien', icon: PlusCircle },
+  { label: 'Mes mandats', href: '/agences/mandats', icon: FileText },
   { label: 'Mes candidatures', href: '/agences/candidatures', icon: Users },
   { label: 'Mes contrats', href: ROUTES.AGENCY_CONTRACTS.LIST, icon: FileText },
   { label: 'Créer un contrat', href: ROUTES.AGENCY_CONTRACTS.CREATE.split(':')[0], icon: FilePlus2 },
-  { label: 'Messages', href: '/agences/messages', icon: MessageSquare },
   { label: 'Visites', href: '/agences/visites', icon: CalendarIcon },
-  { label: 'Analytics', href: '/agences/analytics', icon: BarChart3 },
   { label: 'Calendrier', href: '/agences/calendrier', icon: Calendar },
+  { label: 'Analytics', href: '/agences/analytics', icon: BarChart3 },
 ];
 
 const cn = (...inputs: (string | undefined | null | false)[]) => twMerge(clsx(inputs));
@@ -64,7 +62,7 @@ export default function Sidebar({ isOpen, onClose, currentPath }: SidebarProps) 
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed top-0 left-0 z-40 h-full w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto',
+          'fixed top-0 left-0 z-40 h-full w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >

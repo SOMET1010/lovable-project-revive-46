@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/services/supabase/client';
-import { FileText, Eye, Edit, X, CheckCircle } from 'lucide-react';
+import { FileText, Eye, Edit, X, CheckCircle, Pen } from 'lucide-react';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
 
@@ -40,6 +41,7 @@ interface Contract {
 
 export default function MyContracts() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'active' | 'pending' | 'expired'>('all');
@@ -144,7 +146,7 @@ export default function MyContracts() {
     );
   };
 
-  const getContractTypeLabel = () => 'Bail';
+  const getContractTypeLabel = (contract: Contract) => 'Bail';
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('fr-FR', {
@@ -266,7 +268,7 @@ export default function MyContracts() {
                       <div>
                         <p className="text-xs text-gray-500 mb-1">Type</p>
                         <p className="text-sm font-semibold text-gray-900">
-                          {getContractTypeLabel(contract.contract_type)}
+                          {getContractTypeLabel(contract)}
                         </p>
                       </div>
                       <div>
@@ -330,16 +332,47 @@ export default function MyContracts() {
 
                     <div className="flex flex-wrap gap-3">
                       <a
-                        href={`/contrat/${contract.id}`}
+                        href={`/locataire/contrat/${contract.id}`}
                         className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition flex items-center space-x-2"
                       >
                         <Eye className="w-4 h-4" />
                         <span>Voir le contrat</span>
                       </a>
 
+                      {/* Bouton Signer le contrat si pas encore signé par l'utilisateur */}
+                      {(() => {
+                        const needsToSign =
+                          (isOwner(contract) && !contract.owner_signed_at) ||
+                          (!isOwner(contract) && !contract.tenant_signed_at);
+
+                        // Afficher un badge de debug pour comprendre pourquoi le bouton ne s'affiche pas
+                        console.log('Contract debug:', {
+                          id: contract.id,
+                          userId: user?.id,
+                          isOwner: isOwner(contract),
+                          ownerSigned: !!contract.owner_signed_at,
+                          tenantSigned: !!contract.tenant_signed_at,
+                          needsToSign,
+                        });
+
+                        return needsToSign ? (
+                          <button
+                            onClick={() => navigate(
+                              isOwner(contract)
+                                ? `/proprietaire/signer-contrat/${contract.id}`
+                                : `/locataire/signer-bail/${contract.id}`
+                            )}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center space-x-2"
+                          >
+                            <Pen className="w-4 h-4" />
+                            <span>Signer le contrat</span>
+                          </button>
+                        ) : null;
+                      })()}
+
                       {contract.status === 'brouillon' && isOwner(contract) && (
                         <a
-                          href={`/contrat/${contract.id}/editer`}
+                          href={`/locataire/contrat/${contract.id}/editer`}
                           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center space-x-2"
                         >
                           <Edit className="w-4 h-4" />

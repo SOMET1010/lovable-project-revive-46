@@ -31,14 +31,12 @@ interface OwnerSidebarProps {
 const navItems = [
   { label: 'Tableau de bord', href: '/proprietaire/dashboard', icon: LayoutDashboard },
   { label: 'Mes biens', href: '/proprietaire/mes-biens', icon: Building2 },
-  { label: 'Ajouter un bien', href: '/proprietaire/ajouter-propriete', icon: PlusCircle },
-  { label: 'Mes candidatures', href: '/proprietaire/candidatures', icon: Users },
   { label: 'Mes contrats', href: ROUTES.CONTRACTS.LIST, icon: FileText },
-  { label: 'Créer un contrat', href: ROUTES.CONTRACTS.CREATE.split(':')[0], icon: FilePlus2 },
-  { label: 'Mandats agence', href: '/proprietaire/mes-mandats', icon: Handshake },
+  { label: 'Mes candidatures', href: '/proprietaire/candidatures', icon: Users },
   { label: 'Visites', href: '/proprietaire/visites', icon: Calendar },
-  { label: 'Mon profil', href: '/proprietaire/profil', icon: UserCircle2 },
+  { label: 'Mandats agence', href: '/proprietaire/mes-mandats', icon: Handshake },
   { label: 'Messages', href: '/proprietaire/messages', icon: MessageSquare, hasBadge: true },
+  { label: 'Mon profil', href: '/proprietaire/profil', icon: UserCircle2 },
 ];
 
 const bottomItems = [{ label: 'Rechercher', href: '/recherche', icon: Search }];
@@ -71,7 +69,7 @@ export function OwnerSidebar({ isOpen, onClose, unreadMessages = 0 }: OwnerSideb
 
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto',
+          'fixed top-0 left-0 z-50 h-full w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >

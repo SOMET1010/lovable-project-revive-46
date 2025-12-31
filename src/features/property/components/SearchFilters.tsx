@@ -9,6 +9,8 @@ import {
   Sofa,
   ParkingCircle,
   Wind,
+  Maximize,
+  Layers,
 } from 'lucide-react';
 import { useState } from 'react';
 import Button from '@/shared/ui/Button';
@@ -33,6 +35,12 @@ interface SearchFiltersProps {
   setBedrooms: (beds: string) => void;
   bathrooms: string;
   setBathrooms: (baths: string) => void;
+  minSurface: string;
+  setMinSurface: (surface: string) => void;
+  maxSurface: string;
+  setMaxSurface: (surface: string) => void;
+  floor: string;
+  setFloor: (floor: string) => void;
   isFurnished: boolean | null;
   setIsFurnished: (furnished: boolean | null) => void;
   hasParking: boolean | null;
@@ -58,6 +66,12 @@ export default function SearchFilters({
   setBedrooms,
   bathrooms,
   setBathrooms,
+  minSurface,
+  setMinSurface,
+  maxSurface,
+  setMaxSurface,
+  floor,
+  setFloor,
   isFurnished,
   setIsFurnished,
   hasParking,
@@ -274,6 +288,80 @@ export default function SearchFilters({
                     {num} {num === 1 ? 'salle de bain' : 'salles de bain'}
                   </option>
                 ))}
+              </select>
+            </div>
+
+            {/* Surface minimum */}
+            <div>
+              <label className="flex items-center text-sm font-medium text-gray-700 mb-2 gap-1">
+                <Maximize className="h-4 w-4" aria-hidden="true" />
+                <span>Surface minimum (m²)</span>
+              </label>
+              <select
+                value={minSurface}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setMinSurface(value);
+                  debouncedUpdateFilters(() => {});
+                }}
+                className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              >
+                <option value="">Indifférent</option>
+                {[20, 30, 40, 50, 60, 80, 100, 150, 200].map((surface) => (
+                  <option key={surface} value={surface}>
+                    {surface} m² et plus
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Surface maximum */}
+            <div>
+              <label className="flex items-center text-sm font-medium text-gray-700 mb-2 gap-1">
+                <Maximize className="h-4 w-4" aria-hidden="true" />
+                <span>Surface maximum (m²)</span>
+              </label>
+              <select
+                value={maxSurface}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setMaxSurface(value);
+                  debouncedUpdateFilters(() => {});
+                }}
+                className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              >
+                <option value="">Indifférent</option>
+                {[50, 75, 100, 150, 200, 300, 400, 500].map((surface) => (
+                  <option key={surface} value={surface}>
+                    {surface} m² maximum
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Étage */}
+            <div>
+              <label className="flex items-center text-sm font-medium text-gray-700 mb-2 gap-1">
+                <Layers className="h-4 w-4" aria-hidden="true" />
+                <span>Étage</span>
+              </label>
+              <select
+                value={floor}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFloor(value);
+                  debouncedUpdateFilters(() => {});
+                }}
+                className="w-full px-4 py-3 min-h-[48px] border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              >
+                <option value="">Indifférent</option>
+                <option value="0">Rez-de-chaussée</option>
+                <option value="1">1er étage</option>
+                <option value="2">2ème étage</option>
+                <option value="3">3ème étage</option>
+                <option value="4">4ème étage</option>
+                <option value="5">5ème étage</option>
+                <option value="dernier">Dernier étage</option>
               </select>
             </div>
           </div>

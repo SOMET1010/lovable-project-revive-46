@@ -251,7 +251,7 @@ export default function TenantDashboard() {
                   </div>
                   <div className="mt-6 flex flex-wrap gap-3">
                     <Link
-                      to={`/contrat/${activeLease.id}`}
+                      to={`/locataire/contrat/${activeLease.id}`}
                       className="inline-flex items-center border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-2 px-4 rounded-xl transition-colors"
                     >
                       <FileText className="h-4 w-4 mr-2" />
@@ -347,7 +347,7 @@ export default function TenantDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-[#2C1810]">Historique des Paiements</h2>
                   <Link
-                    to="/mes-paiements"
+                    to="/locataire/mes-paiements"
                     className="text-[#F16522] hover:underline text-sm font-medium"
                   >
                     Voir tout →
@@ -410,14 +410,14 @@ export default function TenantDashboard() {
                       Payer mon loyer
                     </Link>
                     <Link
-                      to="locataire/maintenance"
+                      to="/locataire/maintenance"
                       className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <Wrench className="h-5 w-5 mr-2" />
                       Demander une réparation
                     </Link>
                     <Link
-                      to={`/contrat/${activeLease.id}`}
+                      to={`/locataire/contrat/${activeLease.id}`}
                       className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                     >
                       <FileText className="h-5 w-5 mr-2" />

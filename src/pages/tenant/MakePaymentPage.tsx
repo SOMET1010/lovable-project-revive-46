@@ -20,7 +20,6 @@ import { AddressValue, formatAddress } from '@/shared/utils/address';
 
 interface PaymentFormData {
   property_id: string;
-  receiver_id: string;
   amount: number;
   payment_type: 'loyer' | 'depot_garantie' | 'charges' | 'frais_agence';
   payment_method: 'mobile_money' | 'carte_bancaire' | 'virement' | 'especes';
@@ -30,6 +29,7 @@ interface PaymentFormData {
 
 interface Contract {
   id: string;
+  lease_id: string | null;
   property_id: string;
   monthly_rent: number;
   deposit_amount: number | null;
@@ -57,7 +57,6 @@ export default function MakePayment() {
 
   const [formData, setFormData] = useState<PaymentFormData>({
     property_id: '',
-    receiver_id: '',
     amount: 0,
     payment_type: 'loyer',
     payment_method: 'mobile_money',
@@ -71,7 +70,7 @@ export default function MakePayment() {
     try {
       const { data: contractsData, error: contractsError } = await supabase
         .from('lease_contracts')
-        .select('id, property_id, monthly_rent, deposit_amount, owner_id')
+        .select('id, lease_id, property_id, monthly_rent, deposit_amount, owner_id')
         .eq('tenant_id', user.id)
         .eq('status', 'actif')
         .order('created_at', { ascending: false });
@@ -80,6 +79,7 @@ export default function MakePayment() {
 
       interface ContractRow {
         id: string;
+        lease_id: string | null;
         property_id: string;
         monthly_rent: number;
         deposit_amount: number | null;
@@ -88,6 +88,7 @@ export default function MakePayment() {
 
       const formattedContracts: Contract[] = (contractsData || []).map((contract: ContractRow) => ({
         id: contract.id,
+        lease_id: contract.lease_id,
         property_id: contract.property_id,
         monthly_rent: contract.monthly_rent,
         deposit_amount: contract.deposit_amount,
@@ -128,7 +129,6 @@ export default function MakePayment() {
     setFormData({
       ...formData,
       property_id: contract.property_id,
-      receiver_id: contract.owner_id,
       amount: contract.monthly_rent,
     });
     nextStep();
@@ -170,10 +170,9 @@ export default function MakePayment() {
       const { data: payment, error: paymentError } = await supabase
         .from('payments')
         .insert({
-          payer_id: user.id,
-          receiver_id: formData.receiver_id || null,
+          tenant_id: user.id,
           property_id: formData.property_id || null,
-          contract_id: selectedContract.id,
+          lease_id: selectedContract.lease_id,
           amount: formData.amount,
           payment_type: formData.payment_type,
           payment_method: formData.payment_method,
@@ -192,15 +191,15 @@ export default function MakePayment() {
         await supabase
           .from('payments')
           .update({
-            status: 'en_cours',
-            transaction_ref: `MM_${payment.id.substring(0, 8)}`,
+            status: 'en_attente', // remains pending until payment confirmation
+            transaction_id: `MM_${payment.id.substring(0, 8)}`,
           })
           .eq('id', payment.id);
       }
 
       setSuccess(true);
       setTimeout(() => {
-        navigate('/mes-paiements');
+        navigate('/locataire/mes-paiements');
       }, 2000);
     } catch (err: unknown) {
       console.error('Error processing payment:', err);

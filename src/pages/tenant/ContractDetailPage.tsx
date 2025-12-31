@@ -1,20 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadContract, regenerateContract } from '@/services/contracts/contractService';
-import {
-  ArrowLeft,
-  FileText,
-  Edit,
-  CheckCircle,
-  X,
-  Download,
-  RefreshCw,
-  Loader,
-  ExternalLink,
-} from 'lucide-react';
+import { ArrowLeft, FileText, Download, RefreshCw, X } from 'lucide-react';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
+import { saveContractSignature, canvasToBase64 } from '@/services/contracts/signatureService';
+import { toast } from 'sonner';
 
 interface LeaseContract {
   id: string;
@@ -41,20 +32,20 @@ interface Property {
   title: string;
   address: AddressValue | null;
   city: string;
-  surface_area: number;
-  bedrooms: number;
-  bathrooms: number;
+  property_type: string;
+  surface_area: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
 }
 
 interface Profile {
-  full_name: string;
-  email: string;
+  full_name: string | null;
+  email: string | null;
   phone: string | null;
 }
 
 export default function ContractDetailPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const [contract, setContract] = useState<LeaseContract | null>(null);
@@ -92,7 +83,7 @@ export default function ContractDetailPage() {
       const contractData = data as unknown as LeaseContract;
 
       if (!contractData) {
-        alert("Contrat non trouvé");
+        alert('Contrat non trouvé');
         window.location.href = '/dashboard';
         return;
       }
@@ -107,7 +98,7 @@ export default function ContractDetailPage() {
         alert("Vous n'avez pas accès à ce contrat");
 
         // Redirect to appropriate contracts list based on user role
-        const userRole = user?.user_type;
+        const userRole = (user as { user_type?: string })?.user_type;
         let redirectUrl = '/dashboard';
 
         if (userRole === 'tenant') {
@@ -131,22 +122,22 @@ export default function ContractDetailPage() {
         .eq('id', contractData.property_id)
         .single();
 
-      if (propData) setProperty(propData);
+      if (propData) setProperty({ ...propData, id: contractData.property_id });
 
       // Load owner profile
       const { data: ownerData } = await supabase
-        .from('profiles_with_user_id')
+        .from('profiles')
         .select('full_name, email, phone')
-        .eq('user_id', contractData.owner_id)
+        .eq('id', contractData.owner_id)
         .single();
 
       if (ownerData) setOwner(ownerData);
 
       // Load tenant profile
       const { data: tenantData } = await supabase
-        .from('profiles_with_user_id')
+        .from('profiles')
         .select('full_name, email, phone')
-        .eq('user_id', contractData.tenant_id)
+        .eq('id', contractData.tenant_id)
         .single();
 
       if (tenantData) setTenant(tenantData);
@@ -157,7 +148,7 @@ export default function ContractDetailPage() {
     }
   };
 
-  const handleDownload = async (contractId: string) => {
+  const handleDownload = async () => {
     try {
       if (!contract?.document_url) {
         alert('Aucun PDF disponible pour ce contrat. Veuillez d abord régénérer le contrat.');
@@ -240,7 +231,8 @@ Fait à ${new Date().toLocaleDateString('fr-FR', {
   const calculateDuration = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    const months =
+      (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
     return months;
   };
 
@@ -294,15 +286,70 @@ Fait à ${new Date().toLocaleDateString('fr-FR', {
   };
 
   const handleSign = async () => {
+    if (!contract || !user) {
+      alert('Contrat ou utilisateur non disponible');
+      return;
+    }
+
     try {
       setSigning(true);
 
-      // Here you would normally handle the signature upload
-      alert('Signature enregistrée avec succès');
+      // Convert canvas to base64
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        alert('Zone de signature non disponible');
+        return;
+      }
+
+      const signatureData = canvasToBase64(canvas);
+      const signatureType = contract.owner_id === user.id ? 'landlord' : 'tenant';
+
+      // Save the signature
+      await saveContractSignature({
+        contractId: contract.id,
+        userId: user.id,
+        signatureType: signatureType,
+        signatureData: signatureData,
+        signedAt: now,
+      });
+
+      // Update contract status based on who signed
+      const now = new Date().toISOString();
+      const updates: any = {
+        updated_at: now,
+      };
+
+      if (signatureType === 'landlord') {
+        updates.landlord_signed_at = now;
+        // If landlord signs first, contract becomes partially signed
+        if (!contract.tenant_signed_at) {
+          updates.status = 'partiellement_signe';
+        }
+      } else {
+        updates.tenant_signed_at = now;
+        // If tenant signs and landlord already signed, contract becomes active
+        if (contract.landlord_signed_at) {
+          updates.status = 'actif';
+          updates.is_electronically_signed = true;
+        }
+      }
+
+      // Update the contract in database
+      const { error } = await supabase
+        .from('lease_contracts')
+        .update(updates)
+        .eq('id', contract.id);
+
+      if (error) throw error;
+
+      toast.success('Signature enregistrée avec succès');
       setShowSignature(false);
+
+      // Reload contract to get updated status
+      await loadContract(window.location.pathname.split('/').pop() || '');
     } catch (error) {
       console.error('Error signing contract:', error);
-      alert('Erreur lors de la signature');
+      toast.error('Erreur lors de la signature');
     } finally {
       setSigning(false);
     }
@@ -359,7 +406,7 @@ Fait à ${new Date().toLocaleDateString('fr-FR', {
               </div>
               <div className="flex space-x-2">
                 <button
-                  onClick={() => handleDownload(contract.id)}
+                  onClick={handleDownload}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center space-x-2"
                 >
                   <Download className="w-4 h-4" />

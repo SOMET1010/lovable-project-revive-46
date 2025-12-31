@@ -321,13 +321,14 @@ export default function PaymentHistory() {
                     </div>
 
                     <div className="flex space-x-2">
-                      <button
-                        onClick={() => navigate(`/paiement/${payment.id}`)}
+                      {/* TODO: Create payment detail page and enable this button */}
+                      {/* <button
+                        onClick={() => navigate(`/locataire/paiement/${payment.id}`)}
                         className="p-2 text-terracotta-600 hover:bg-terracotta-50 rounded-lg transition"
                         title="Voir les détails"
                       >
                         <Eye className="w-5 h-5" />
-                      </button>
+                      </button> */}
                       <button
                         className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition"
                         title="Télécharger le reçu"

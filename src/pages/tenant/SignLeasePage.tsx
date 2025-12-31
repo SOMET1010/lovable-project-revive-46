@@ -45,7 +45,7 @@ interface LeaseContract {
   payment_day: number | null;
   status: string | null;
   signed_at: string | null;
-  landlord_signed_at: string | null;
+  owner_signed_at: string | null;
   tenant_signed_at: string | null;
   document_url: string | null;
   signed_document_url: string | null;
@@ -73,7 +73,7 @@ const STEP_LABELS = ['Détails du bail', 'Signature simple', 'Signature certifi�
 export default function SignLeasePage() {
   const { user, profile } = useAuth();
   const { id: leaseId } = useParams<{ id: string }>();
-  const { step, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(3);
+  const { step, slideDirection, goToStep, nextStep, prevStep } = useFormStepper(1, 3);
   const { triggerCertifiedSignatureConfetti } = useConfetti();
 
   const [lease, setLease] = useState<LeaseContract | null>(null);
@@ -121,12 +121,12 @@ export default function SignLeasePage() {
         supabase
           .from('profiles')
           .select('full_name, email, phone, is_verified, oneci_verified')
-          .eq('user_id', leaseData.owner_id)
+          .eq('id', leaseData.owner_id)
           .single(),
         supabase
           .from('profiles')
           .select('full_name, email, phone, is_verified, oneci_verified')
-          .eq('user_id', leaseData.tenant_id)
+          .eq('id', leaseData.tenant_id)
           .single(),
       ]);
 
@@ -149,23 +149,34 @@ export default function SignLeasePage() {
 
     try {
       const isOwner = lease.owner_id === user.id;
-      const updateField = isOwner ? 'landlord_signed_at' : 'tenant_signed_at';
+      const updateField = isOwner ? 'owner_signed_at' : 'tenant_signed_at';
 
       const updateData: Record<string, unknown> = {
         [updateField]: new Date().toISOString(),
       };
 
-      const otherSigned = isOwner ? lease.tenant_signed_at : lease.landlord_signed_at;
+      const otherSigned = isOwner ? lease.tenant_signed_at : lease.owner_signed_at;
+
+      // Update status based on signature state
+      // Valid statuses in DB: brouillon, en_attente_signature, actif, expire, resilie, annule
       if (otherSigned) {
-        updateData['status'] = 'pending_cryptoneo';
+        // Both parties have signed - contract is now active
+        updateData['status'] = 'actif';
       }
+      // If only one party signed, keep current status (en_attente_signature)
 
       const { error: updateError } = await supabase
         .from('lease_contracts')
         .update(updateData)
         .eq('id', lease.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        // If it's a permission error, provide helpful message
+        if (updateError.message.includes('permission') || updateError.code === '42501') {
+          throw new Error('Permission refusée. Contactez le support pour mettre à jour les signatures.');
+        }
+        throw updateError;
+      }
 
       try {
         await notifyLeaseSigned(lease.id, profile?.full_name || 'Utilisateur', isOwner);
@@ -181,7 +192,7 @@ export default function SignLeasePage() {
 
       // Auto-advance to step 3 if both parties have now signed
       if (otherSigned) {
-        setTimeout(() => goToStep(2), 1500);
+        setTimeout(() => goToStep(3), 1500);
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Erreur lors de la signature');
@@ -250,9 +261,9 @@ export default function SignLeasePage() {
   }
 
   const isOwner = lease.owner_id === user.id;
-  const hasUserSigned = isOwner ? !!lease.landlord_signed_at : !!lease.tenant_signed_at;
-  const hasOtherSigned = isOwner ? !!lease.tenant_signed_at : !!lease.landlord_signed_at;
-  const bothSigned = !!lease.landlord_signed_at && !!lease.tenant_signed_at;
+  const hasUserSigned = isOwner ? !!lease.owner_signed_at : !!lease.tenant_signed_at;
+  const hasOtherSigned = isOwner ? !!lease.tenant_signed_at : !!lease.owner_signed_at;
+  const bothSigned = !!lease.owner_signed_at && !!lease.tenant_signed_at;
   const isCertifiedSigned = lease.status === 'active' && lease.signed_document_url;
 
   return (
@@ -298,7 +309,7 @@ export default function SignLeasePage() {
           )}
 
           {/* Step 1: Contract Details */}
-          <FormStepContent step={0} currentStep={step} slideDirection={slideDirection}>
+          <FormStepContent step={1} currentStep={step} slideDirection={slideDirection}>
             <div className="space-y-6">
               {/* Signature Status Card */}
               <div className="form-section-premium">
@@ -311,13 +322,13 @@ export default function SignLeasePage() {
                   {/* Owner Signature */}
                   <div
                     className={`p-4 rounded-xl border-2 ${
-                      lease.landlord_signed_at
+                      lease.owner_signed_at
                         ? 'border-green-500 bg-green-50'
                         : 'border-[#E8DFD5] bg-[#F9F6F1]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      {lease.landlord_signed_at ? (
+                      {lease.owner_signed_at ? (
                         <CheckCircle className="w-6 h-6 text-green-600" />
                       ) : (
                         <Clock className="w-6 h-6 text-[#8B7355]" />
@@ -327,10 +338,10 @@ export default function SignLeasePage() {
                         <p className="text-sm text-[#8B7355]">
                           {ownerProfile?.full_name || 'Non renseigné'}
                         </p>
-                        {lease.landlord_signed_at && (
+                        {lease.owner_signed_at && (
                           <p className="text-xs text-green-600 mt-1">
                             Signé le{' '}
-                            {new Date(lease.landlord_signed_at).toLocaleDateString('fr-FR')}
+                            {new Date(lease.owner_signed_at).toLocaleDateString('fr-FR')}
                           </p>
                         )}
                       </div>
@@ -492,7 +503,7 @@ export default function SignLeasePage() {
           </FormStepContent>
 
           {/* Step 2: Simple Signature */}
-          <FormStepContent step={1} currentStep={step} slideDirection={slideDirection}>
+          <FormStepContent step={2} currentStep={step} slideDirection={slideDirection}>
             <div className="space-y-6">
               {/* Already signed message */}
               {hasUserSigned && (
@@ -603,7 +614,7 @@ export default function SignLeasePage() {
           </FormStepContent>
 
           {/* Step 3: Certified Signature */}
-          <FormStepContent step={2} currentStep={step} slideDirection={slideDirection}>
+          <FormStepContent step={3} currentStep={step} slideDirection={slideDirection}>
             <div className="space-y-6">
               {/* Already certified */}
               {isCertifiedSigned && (
@@ -615,7 +626,7 @@ export default function SignLeasePage() {
                   </p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Link
-                      to={`/contrat/${lease.id}`}
+                      to={`/locataire/contrat/${lease.id}`}
                       className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#4A2C17] text-white rounded-xl hover:bg-[#5D3A22] transition"
                     >
                       <FileText className="w-5 h-5" />

@@ -32,18 +32,18 @@ interface TenantSidebarProps {
 const navItems = [
   { label: 'Tableau de bord', href: '/locataire/dashboard', icon: LayoutDashboard },
   { label: 'Mon Espace', href: '/locataire/mon-espace', icon: Home },
-  { label: 'Mon Profil', href: '/locataire/profil', icon: User },
+  { label: 'Rechercher', href: '/recherche', icon: Search },
+  { label: 'Mes Favoris', href: '/locataire/favoris', icon: Heart },
   { label: 'Mes Candidatures', href: '/locataire/mes-candidatures', icon: Users },
+  { label: 'Mes Visites', href: '/locataire/mes-visites', icon: Calendar },
   { label: 'Mes Contrats', href: '/locataire/mes-contrats', icon: FileText },
   { label: 'Mes Paiements', href: '/locataire/mes-paiements', icon: CreditCard },
-  { label: 'Mes Visites', href: '/locataire/mes-visites', icon: Calendar },
   { label: 'Maintenance', href: '/locataire/maintenance', icon: Wrench },
-  { label: 'Mon Score', href: '/locataire/mon-score', icon: Award },
-  { label: 'Historique Locations', href: '/locataire/profil/historique-locations', icon: Home },
-  { label: 'Mes Favoris', href: '/locataire/favoris', icon: Heart },
-  { label: 'Mes Documents', href: '/locataire/documents', icon: Folder },
-  { label: 'Notifications', href: '/locataire/notifications', icon: Bell },
+  { label: 'Historique', href: '/locataire/profil/historique-locations', icon: Folder },
   { label: 'Messages', href: '/locataire/messages', icon: MessageSquare, hasBadge: true },
+  { label: 'Notifications', href: '/locataire/notifications', icon: Bell },
+  { label: 'Mon Profil', href: '/locataire/profil', icon: User },
+  { label: 'Mon Score', href: '/locataire/mon-score', icon: Award },
 ];
 
 const bottomItems = [{ label: 'Rechercher', href: '/recherche', icon: Search }];
@@ -78,7 +78,7 @@ export default function TenantSidebar({ isOpen, onClose, unreadMessages = 0 }: T
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-full w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-auto',
+          'fixed top-0 left-0 z-50 h-full w-72 bg-white border-r border-neutral-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
