@@ -213,15 +213,15 @@ export default function SavedSearches() {
   return (
     <div className="min-h-screen bg-background py-8">
       <div className="w-full px-4">
-        {/* Header Premium */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-3">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-              <Bookmark className="w-7 h-7 text-primary" />
+        {/* Header Banner */}
+        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center flex-shrink-0">
+              <Bookmark className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Recherches sauvegardées</h1>
-              <p className="text-muted-foreground">Gérez vos recherches et recevez des alertes</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">Recherches Sauvegardées</h1>
+              <p className="text-[#E8D4C5] mt-1">Gérez vos recherches et recevez des alertes</p>
             </div>
           </div>
         </div>

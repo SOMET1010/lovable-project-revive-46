@@ -212,40 +212,51 @@ export default function MyVisits() {
   return (
     <TenantDashboardLayout title="Mes Visites">
       <div className="w-full">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Mes visites</h1>
+        {/* Header Banner */}
+        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center flex-shrink-0">
+                <Calendar className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Mes Visites</h1>
+                <p className="text-[#E8D4C5] mt-1">Gérez vos visites programmées</p>
+              </div>
+            </div>
 
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setFilter('upcoming')}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                filter === 'upcoming'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              À venir
-            </button>
-            <button
-              onClick={() => setFilter('past')}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                filter === 'past'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Passées
-            </button>
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                filter === 'all'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Toutes
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilter('all')}
+                className={`px-4 py-2 rounded-xl font-semibold transition ${
+                  filter === 'all'
+                    ? 'bg-white text-[#F16522]'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                Toutes
+              </button>
+              <button
+                onClick={() => setFilter('upcoming')}
+                className={`px-4 py-2 rounded-xl font-semibold transition ${
+                  filter === 'upcoming'
+                    ? 'bg-white text-[#F16522]'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                À venir
+              </button>
+              <button
+                onClick={() => setFilter('past')}
+                className={`px-4 py-2 rounded-xl font-semibold transition ${
+                  filter === 'past'
+                    ? 'bg-white text-[#F16522]'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                Passées
+              </button>
+            </div>
           </div>
         </div>
 

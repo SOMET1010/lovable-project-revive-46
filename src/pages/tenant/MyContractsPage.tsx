@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { FileText, Eye, Edit, X, CheckCircle, Pen } from 'lucide-react';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
 import { AddressValue, formatAddress } from '@/shared/utils/address';
@@ -177,50 +177,61 @@ export default function MyContracts() {
   return (
     <TenantDashboardLayout title="Mes Contrats">
       <div className="w-full">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Mes contrats de bail</h1>
+        {/* Header Banner */}
+        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center flex-shrink-0">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Mes Contrats</h1>
+                <p className="text-[#E8D4C5] mt-1">Gérez vos contrats de bail</p>
+              </div>
+            </div>
 
-          <div className="flex space-x-2">
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                filter === 'all'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Tous
-            </button>
-            <button
-              onClick={() => setFilter('active')}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                filter === 'active'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Actifs
-            </button>
-            <button
-              onClick={() => setFilter('pending')}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                filter === 'pending'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              En attente
-            </button>
-            <button
-              onClick={() => setFilter('expired')}
-              className={`px-4 py-2 rounded-lg font-semibold transition ${
-                filter === 'expired'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white text-gray-700 hover:bg-gray-50'
-              }`}
-            >
-              Expirés
-            </button>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => setFilter('all')}
+                className={`px-4 py-2 rounded-xl font-semibold transition ${
+                  filter === 'all'
+                    ? 'bg-white text-[#F16522]'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                Tous
+              </button>
+              <button
+                onClick={() => setFilter('active')}
+                className={`px-4 py-2 rounded-xl font-semibold transition ${
+                  filter === 'active'
+                    ? 'bg-white text-[#F16522]'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                Actifs
+              </button>
+              <button
+                onClick={() => setFilter('pending')}
+                className={`px-4 py-2 rounded-xl font-semibold transition ${
+                  filter === 'pending'
+                    ? 'bg-white text-[#F16522]'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                En attente
+              </button>
+              <button
+                onClick={() => setFilter('expired')}
+                className={`px-4 py-2 rounded-xl font-semibold transition ${
+                  filter === 'expired'
+                    ? 'bg-white text-[#F16522]'
+                    : 'bg-white/10 text-white hover:bg-white/20'
+                }`}
+              >
+                Expirés
+              </button>
+            </div>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/app/providers/AuthProvider';
-import { supabase } from '@/services/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { Wrench, Plus, Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import TenantDashboardLayout from '../../features/tenant/components/TenantDashboardLayout';
 
@@ -140,18 +140,26 @@ export default function TenantMaintenance() {
   return (
     <TenantDashboardLayout title="Maintenance">
       <div className="w-full">
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2 flex items-center space-x-3">
-              <Wrench className="w-10 h-10 text-terracotta-600" />
-              <span>Mes demandes de maintenance</span>
-            </h1>
-            <p className="text-xl text-gray-600">Suivez l'état de vos demandes</p>
+        {/* Header Banner */}
+        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center flex-shrink-0">
+                <Wrench className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Maintenance</h1>
+                <p className="text-[#E8D4C5] mt-1">Suivez vos demandes de maintenance</p>
+              </div>
+            </div>
+            <Link
+              to="/locataire/maintenance/nouvelle"
+              className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2 self-start"
+            >
+              <Plus className="w-5 h-5" />
+              <span>Nouvelle demande</span>
+            </Link>
           </div>
-          <Link to="/maintenance/nouvelle" className="btn-primary flex items-center space-x-2">
-            <Plus className="w-4 h-4" />
-            <span>Nouvelle demande</span>
-          </Link>
         </div>
 
         <div className="flex space-x-2 mb-6">

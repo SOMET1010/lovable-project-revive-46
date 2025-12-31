@@ -10,8 +10,8 @@ interface Property {
   type: string;
   city: string;
   neighborhood: string;
-  monthly_rent: number;
-  status: 'available' | 'rented' | 'maintenance';
+  price: number;
+  status: 'disponible' | 'loue' | 'en_attente' | 'retire' | 'maintenance';
   created_at: string;
   applications_count?: number;
   views_count: number;
@@ -22,7 +22,7 @@ export default function MyPropertiesPage() {
   const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'available' | 'rented' | 'maintenance'>('all');
+  const [filter, setFilter] = useState<'all' | 'disponible' | 'loue' | 'en_attente' | 'maintenance'>('all');
 
   useEffect(() => {
     fetchProperties();
@@ -100,16 +100,22 @@ export default function MyPropertiesPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'available':
+      case 'disponible':
         return (
           <span className="px-3 py-1.5 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-200">
             Disponible
           </span>
         );
-      case 'rented':
+      case 'loue':
         return (
           <span className="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-200">
             Loué
+          </span>
+        );
+      case 'en_attente':
+        return (
+          <span className="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-semibold rounded-full border border-purple-200">
+            En attente
           </span>
         );
       case 'maintenance':
@@ -183,7 +189,7 @@ export default function MyPropertiesPage() {
               <span className="text-sm text-[#6B5A4E]">Disponibles</span>
             </div>
             <p className="text-3xl font-bold text-[#2C1810]">
-              {properties.filter((p) => p.status === 'available').length}
+              {properties.filter((p) => p.status === 'disponible').length}
             </p>
           </div>
 
@@ -195,7 +201,7 @@ export default function MyPropertiesPage() {
               <span className="text-sm text-[#6B5A4E]">Loués</span>
             </div>
             <p className="text-3xl font-bold text-[#2C1810]">
-              {properties.filter((p) => p.status === 'rented').length}
+              {properties.filter((p) => p.status === 'loue').length}
             </p>
           </div>
 
@@ -216,8 +222,8 @@ export default function MyPropertiesPage() {
         <div className="flex flex-wrap gap-2 mb-6">
           {[
             { value: 'all', label: 'Tous' },
-            { value: 'available', label: 'Disponibles' },
-            { value: 'rented', label: 'Loués' },
+            { value: 'disponible', label: 'Disponibles' },
+            { value: 'loue', label: 'Loués' },
             { value: 'maintenance', label: 'Maintenance' },
           ].map((item) => (
             <button
@@ -245,7 +251,15 @@ export default function MyPropertiesPage() {
               <p className="text-[#6B5A4E] mb-8 max-w-md mx-auto">
                 {filter === 'all'
                   ? "Vous n'avez pas encore ajouté de bien à votre portefeuille"
-                  : `Aucun bien ${filter === 'available' ? 'disponible' : filter === 'rented' ? 'loué' : 'en maintenance'}`}
+                  : `Aucun bien ${
+                      filter === 'disponible'
+                        ? 'disponible'
+                        : filter === 'loue'
+                          ? 'loué'
+                          : filter === 'en_attente'
+                            ? 'en attente'
+                            : 'en maintenance'
+                    }`}
               </p>
               {filter === 'all' && (
                 <Link
@@ -290,7 +304,7 @@ export default function MyPropertiesPage() {
                         </div>
                       </td>
                       <td className="p-6 font-semibold text-[#2C1810]">
-                        {property.monthly_rent?.toLocaleString()} FCFA
+                        {property.price?.toLocaleString('fr-FR')} FCFA
                       </td>
                       <td className="p-6">{getStatusBadge(property.status)}</td>
                       <td className="p-6 text-sm text-[#6B5A4E]">

@@ -242,15 +242,17 @@ export default function DocumentsPage() {
   return (
     <TenantDashboardLayout title="Mes Documents">
       <div className="w-full">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-4">
-            <FileText className="w-8 h-8 text-primary-500" />
-            <h1 className="text-3xl font-bold text-neutral-900">Mes documents</h1>
+        {/* Header Banner */}
+        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center flex-shrink-0">
+              <FileText className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-white">Mes Documents</h1>
+              <p className="text-[#E8D4C5] mt-1">Gérez vos documents justificatifs</p>
+            </div>
           </div>
-          <p className="text-neutral-600">
-            Gérez vos documents justificatifs pour vos demandes de location
-          </p>
         </div>
 
         {/* Stats Cards */}

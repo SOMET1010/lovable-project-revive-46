@@ -210,21 +210,21 @@ export default function OwnerApplicationsPage() {
   return (
     <>
       {/* Header */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-500">
-        <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
+      <div className="bg-[#2C1810]">
+        <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center">
               <Users className="h-7 w-7 text-white" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white">Candidatures</h1>
-              <p className="text-primary-100 mt-1">Gérez les candidatures pour vos biens</p>
+              <p className="text-[#E8D4C5] mt-1">Gérez les candidatures pour vos biens</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-8">
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
           <button

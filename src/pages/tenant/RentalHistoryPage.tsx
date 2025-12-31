@@ -296,22 +296,29 @@ const RentalHistoryPage: React.FC = () => {
   return (
     <TenantDashboardLayout title="Historique des Locations">
       <div className="w-full">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <History className="h-6 w-6 text-primary" />
-              Historique des Locations
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Ajoutez vos locations passées pour améliorer votre Trust Score
-            </p>
+        {/* Header Banner */}
+        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center flex-shrink-0">
+                <History className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Historique des Locations</h1>
+                <p className="text-[#E8D4C5] mt-1">
+                  Ajoutez vos locations passées pour améliorer votre Trust Score
+                </p>
+              </div>
+            </div>
+            {!showForm && (
+              <Button
+                onClick={() => setShowForm(true)}
+                className="bg-[#F16522] hover:bg-[#d9571d] gap-2 self-start"
+              >
+                Ajouter une location
+              </Button>
+            )}
           </div>
-          {!showForm && (
-            <Button onClick={() => setShowForm(true)} className="gap-2">
-              Ajouter une location
-            </Button>
-          )}
         </div>
 
         {/* Score Impact Card */}

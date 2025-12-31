@@ -630,11 +630,11 @@ export default function OwnerContractsPage() {
   return (
     <>
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#2C1810] to-[#4a2c1a]">
-        <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-6">
+      <div className="bg-[#2C1810]">
+        <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-lg">
+              <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center">
                 <FileText className="h-7 w-7 text-white" />
               </div>
               <div>
@@ -644,7 +644,7 @@ export default function OwnerContractsPage() {
             </div>
             <Link
               to={ROUTES.CONTRACTS.CREATE.split(':')[0]}
-              className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+              className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
             >
               <Plus className="h-5 w-5" />
               <span className="hidden sm:inline">Créer un contrat</span>
@@ -653,7 +653,7 @@ export default function OwnerContractsPage() {
         </div>
       </div>
 
-      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-10 py-8 space-y-8">
+      <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-8 space-y-8">
         {/* Stats Dashboard */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">

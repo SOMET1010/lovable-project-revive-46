@@ -229,30 +229,36 @@ export default function NotificationsPage() {
   return (
     <TenantDashboardLayout title="Notifications">
       <div className="w-full">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <Bell className="w-8 h-8 text-primary-500" />
-              <h1 className="text-3xl font-bold text-neutral-900">Notifications</h1>
-              {unreadCount > 0 && (
-                <span className="bg-primary-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                  {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
-                </span>
-              )}
+        {/* Header Banner */}
+        <div className="bg-[#2C1810] rounded-[20px] p-6 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-[#F16522] flex items-center justify-center flex-shrink-0">
+                <Bell className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+                  Notifications
+                  {unreadCount > 0 && (
+                    <span className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-medium">
+                      {unreadCount} non lue{unreadCount > 1 ? 's' : ''}
+                    </span>
+                  )}
+                </h1>
+                <p className="text-[#E8D4C5] mt-1">
+                  Restez informé des dernières actualités concernant vos demandes
+                </p>
+              </div>
             </div>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition font-medium text-sm"
+                className="bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2 self-start"
               >
                 Tout marquer comme lu
               </button>
             )}
           </div>
-          <p className="text-neutral-600">
-            Restez informé des dernières actualités concernant vos demandes
-          </p>
         </div>
 
         {/* Filters */}

@@ -141,16 +141,16 @@ export default function MyMandatesPage() {
 
   return (
     <>
-      <div className="bg-card border-b border-border rounded-2xl shadow-sm">
+      <div className="bg-[#2C1810] rounded-2xl shadow-sm">
         <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <FileText className="h-7 w-7 text-primary" />
+              <div className="w-14 h-14 rounded-xl bg-[#F16522] flex items-center justify-center">
+                <FileText className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Mes Mandats</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Mes Mandats</h1>
+                <p className="text-[#E8D4C5]">
                   {viewMode === 'owner'
                     ? 'Gérez vos mandats de gestion locative'
                     : 'Mandats de gestion qui vous sont confiés'}
@@ -161,7 +161,7 @@ export default function MyMandatesPage() {
             {viewMode === 'owner' && myProperties.length > 0 && (
               <button
                 onClick={() => setShowInviteDialog(true)}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-xl font-medium transition-colors"
+                className="flex items-center gap-2 bg-[#F16522] hover:bg-[#d9571d] text-white px-6 py-3 rounded-xl font-medium transition-colors"
               >
                 <Plus className="h-5 w-5" />
                 Inviter une agence

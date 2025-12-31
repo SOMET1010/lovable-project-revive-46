@@ -1,5 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Calendar, Clock, MapPin, User, Phone, Mail, Video, Home } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+  Phone,
+  Mail,
+  Video,
+  Home,
+  Check,
+  X,
+  MoreVertical,
+  ChevronRight,
+} from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { formatAddress } from '@/shared/utils/address';
@@ -46,16 +59,24 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  en_attente: 'bg-amber-100 text-amber-700',
-  confirmee: 'bg-green-100 text-green-700',
-  annulee: 'bg-red-100 text-red-700',
-  terminee: 'bg-blue-100 text-blue-700',
+  en_attente: 'bg-amber-50 text-amber-700 border-amber-200',
+  confirmee: 'bg-green-50 text-green-700 border-green-200',
+  annulee: 'bg-red-50 text-red-700 border-red-200',
+  terminee: 'bg-blue-50 text-blue-700 border-blue-200',
+};
+
+const STATUS_ICONS: Record<string, React.ReactNode> = {
+  en_attente: <Clock className="h-4 w-4" />,
+  confirmee: <Check className="h-4 w-4" />,
+  annulee: <X className="h-4 w-4" />,
+  terminee: <Calendar className="h-4 w-4" />,
 };
 
 function VisitsPage({ mode }: { mode: VisitsMode }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<Filter>('upcoming');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>('all');
   const [visits, setVisits] = useState<VisitRow[]>([]);
 
   useEffect(() => {
@@ -153,10 +174,55 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
       const date = new Date(`${v.visit_date}T${v.visit_time || '12:00'}`);
       return date >= new Date() && v.status !== 'annulee';
     }).length;
+    const pending = visits.filter((v) => v.status === 'en_attente').length;
+    const confirmed = visits.filter((v) => v.status === 'confirmee').length;
     const past = visits.length - upcoming;
     const cancelled = visits.filter((v) => v.status === 'annulee').length;
-    return { total: visits.length, upcoming, past, cancelled };
+    return { total: visits.length, upcoming, pending, confirmed, past, cancelled };
   }, [visits]);
+
+  const handleConfirmVisit = async (visitId: string) => {
+    setActionLoading(visitId);
+    try {
+      const { error } = await supabase
+        .from('visit_requests')
+        .update({ status: 'confirmee' })
+        .eq('id', visitId)
+        .eq('owner_id', user?.id);
+
+      if (error) throw error;
+      await loadVisits();
+    } catch (err) {
+      console.error('Erreur lors de la confirmation:', err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleCancelVisit = async (visitId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir annuler cette visite ?')) return;
+
+    setActionLoading(visitId);
+    try {
+      const { error } = await supabase
+        .from('visit_requests')
+        .update({ status: 'annulee' })
+        .eq('id', visitId)
+        .eq('owner_id', user?.id);
+
+      if (error) throw error;
+      await loadVisits();
+    } catch (err) {
+      console.error('Erreur lors de l\'annulation:', err);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const isUpcoming = (visit: VisitRow) => {
+    const visitDate = new Date(`${visit.visit_date}T${visit.visit_time || '12:00'}`);
+    return visitDate >= new Date() && visit.status !== 'annulee' && visit.status !== 'terminee';
+  };
 
   const title = mode === 'agency' ? 'Visites programmées' : 'Mes visites programmées';
   const subtitle =
@@ -180,6 +246,16 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
           </div>
           <div className="flex flex-wrap gap-2">
             <button
+              onClick={() => setFilter('all')}
+              className={`px-4 py-2 rounded-xl font-semibold ${
+                filter === 'all'
+                  ? 'bg-white text-[#F16522]'
+                  : 'bg-white/10 text-white hover:bg-white/20'
+              }`}
+            >
+              Toutes
+            </button>
+            <button
               onClick={() => setFilter('upcoming')}
               className={`px-4 py-2 rounded-xl font-semibold ${
                 filter === 'upcoming'
@@ -199,138 +275,211 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
             >
               Passées/annulées
             </button>
-            <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-xl font-semibold ${
-                filter === 'all'
-                  ? 'bg-white text-[#F16522]'
-                  : 'bg-white/10 text-white hover:bg-white/20'
-              }`}
-            >
-              Toutes
-            </button>
           </div>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total" value={stats.total} />
-        <StatCard label="À venir" value={stats.upcoming} />
-        <StatCard label="Passées" value={stats.past} />
-        <StatCard label="Annulées" value={stats.cancelled} />
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard label="Total" value={stats.total} icon={<Calendar className="h-5 w-5" />} color="gray" />
+        <StatCard label="À venir" value={stats.upcoming} icon={<Clock className="h-5 w-5" />} color="orange" />
+        <StatCard label="En attente" value={stats.pending} icon={<Clock className="h-5 w-5" />} color="amber" />
+        <StatCard label="Confirmées" value={stats.confirmed} icon={<Check className="h-5 w-5" />} color="green" />
+        <StatCard label="Annulées" value={stats.cancelled} icon={<X className="h-5 w-5" />} color="red" />
       </div>
 
       {/* List */}
-      <div className="bg-white rounded-[20px] border border-[#EFEBE9] overflow-hidden">
-        <div className="p-6 border-b border-[#EFEBE9] flex items-center justify-between">
+      <div className="bg-white rounded-[20px] border border-[#EFEBE9] overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-[#EFEBE9] flex items-center justify-between bg-gradient-to-r from-[#FBFAF9] to-white">
           <div>
-            <h2 className="text-xl font-bold text-[#2C1810]">Visites</h2>
+            <h2 className="text-xl font-bold text-[#2C1810]">Visites programmées</h2>
             <p className="text-[#6B5A4E] mt-1">
-              {filteredVisits.length} visite{filteredVisits.length > 1 ? 's' : ''} affichée
+              {filteredVisits.length} visite{filteredVisits.length > 1 ? 's' : ''} affichée{filteredVisits.length > 1 ? 's' : ''}
             </p>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center p-10">
+          <div className="flex items-center justify-center p-16">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]" />
           </div>
         ) : filteredVisits.length === 0 ? (
-          <div className="text-center py-12 px-6 text-[#6B5A4E]">
-            <Calendar className="h-12 w-12 text-[#6B5A4E] mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-[#2C1810] mb-2">Aucune visite</h3>
-            <p className="max-w-md mx-auto">
+          <div className="text-center py-16 px-6">
+            <div className="w-20 h-20 bg-[#FFF5F0] rounded-full flex items-center justify-center mx-auto mb-6">
+              <Calendar className="h-10 w-10 text-[#F16522]" />
+            </div>
+            <h3 className="text-xl font-semibold text-[#2C1810] mb-3">Aucune visite</h3>
+            <p className="text-[#6B5A4E] max-w-md mx-auto">
               {filter === 'upcoming'
                 ? 'Aucune visite programmée pour le moment.'
-                : 'Aucune visite correspondant à ce filtre.'}
+                : filter === 'all'
+                  ? 'Vous n\'avez aucune visite programmée.'
+                  : 'Aucune visite correspondant à ce filtre.'}
             </p>
           </div>
         ) : (
           <div className="divide-y divide-[#EFEBE9]">
             {filteredVisits.map((visit) => {
               const statusKey = visit.status || 'en_attente';
+              const upcoming = isUpcoming(visit);
               const formattedDate = new Date(
                 `${visit.visit_date}T${visit.visit_time || '12:00'}`
               ).toLocaleDateString('fr-FR', {
-                weekday: 'short',
+                weekday: 'long',
                 day: 'numeric',
-                month: 'short',
+                month: 'long',
+                year: 'numeric',
+              });
+              const formattedTime = new Date(
+                `${visit.visit_date}T${visit.visit_time || '12:00'}`
+              ).toLocaleTimeString('fr-FR', {
                 hour: '2-digit',
                 minute: '2-digit',
               });
 
               return (
-                <div key={visit.id} className="p-6 hover:bg-[#FAF7F4] transition-colors">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-[#F16522]/10 flex items-center justify-center">
-                          <Home className="h-6 w-6 text-[#F16522]" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-[#2C1810]">
-                            {visit.property?.title || 'Propriété'}
-                          </h3>
-                          <p className="text-[#6B5A4E] flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            {visit.property?.address
-                              ? formatAddress(visit.property.address)
-                              : visit.property?.city || 'Adresse non renseignée'}
-                          </p>
-                        </div>
+                <div
+                  key={visit.id}
+                  className={`p-6 transition-all ${
+                    upcoming ? 'bg-gradient-to-r from-[#FFF8F3] to-white hover:shadow-md' : 'hover:bg-[#FAF7F4]'
+                  }`}
+                >
+                  <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+                    {/* Left: Property info */}
+                    <div className="flex items-start gap-4 flex-1">
+                      {/* Property image or placeholder */}
+                      <div className="flex-shrink-0">
+                        {visit.property?.main_image ? (
+                          <img
+                            src={visit.property.main_image}
+                            alt={visit.property.title || 'Propriété'}
+                            className="w-24 h-24 xl:w-32 xl:h-32 rounded-2xl object-cover shadow-sm"
+                          />
+                        ) : (
+                          <div className="w-24 h-24 xl:w-32 xl:h-32 rounded-2xl bg-gradient-to-br from-[#F16522]/20 to-[#F16522]/5 flex items-center justify-center">
+                            <Home className="h-10 w-10 text-[#F16522]/60" />
+                          </div>
+                        )}
                       </div>
 
-                      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-[#6B5A4E]">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          <span>{formattedDate}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          <span>
-                            {visit.visit_type === 'virtuelle' ? 'Visite virtuelle' : 'En physique'}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-4 mb-2">
+                          <div>
+                            <h3 className="text-lg font-bold text-[#2C1810] mb-1">
+                              {visit.property?.title || 'Propriété'}
+                            </h3>
+                            <p className="text-[#6B5A4E] flex items-center gap-1.5 text-sm">
+                              <MapPin className="h-4 w-4 flex-shrink-0" />
+                              {visit.property?.address
+                                ? formatAddress(visit.property.address)
+                                : visit.property?.city || 'Adresse non renseignée'}
+                            </p>
+                          </div>
+                          <span
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border flex-shrink-0 ${STATUS_STYLES[statusKey] || STATUS_STYLES['en_attente']}`}
+                          >
+                            {STATUS_ICONS[statusKey] || STATUS_ICONS['en_attente']}
+                            {STATUS_LABELS[statusKey] || statusKey}
                           </span>
                         </div>
+
+                        <div className="flex flex-wrap gap-4 text-sm">
+                          <div className="flex items-center gap-2 text-[#2C1810] font-semibold">
+                            <Calendar className="h-4 w-4 text-[#F16522]" />
+                            <span>{formattedDate}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[#2C1810] font-semibold">
+                            <Clock className="h-4 w-4 text-[#F16522]" />
+                            <span>{formattedTime}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[#6B5A4E]">
+                            <Video
+                              className={`h-4 w-4 ${visit.visit_type === 'virtuelle' ? 'text-blue-500' : 'text-gray-400'}`}
+                            />
+                            <span>
+                              {visit.visit_type === 'virtuelle' ? 'Visite virtuelle' : 'Visite physique'}
+                            </span>
+                          </div>
+                        </div>
+
                         {visit.notes && (
-                          <div className="sm:col-span-2 flex items-center gap-2">
-                            <MessageIcon />
-                            <span className="truncate">{visit.notes}</span>
+                          <div className="mt-3 p-3 bg-[#FFF5F0] rounded-xl border border-[#F16522]/10">
+                            <p className="text-sm text-[#6B5A4E]">{visit.notes}</p>
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 min-w-[220px]">
-                      <span
-                        className={`inline-flex items-center gap-2 w-fit px-4 py-2 rounded-full text-sm font-semibold ${STATUS_STYLES[statusKey] || STATUS_STYLES['en_attente']}`}
-                      >
-                        {statusKey === 'en_attente' ? (
-                          <Clock className="h-4 w-4" />
-                        ) : (
-                          <Calendar className="h-4 w-4" />
-                        )}
-                        {STATUS_LABELS[statusKey] || statusKey}
-                      </span>
-
-                      <div className="bg-[#FAF7F4] border border-[#EFEBE9] rounded-xl p-3 space-y-2">
-                        <div className="flex items-center gap-2 text-[#2C1810] font-semibold">
-                          <User className="h-4 w-4" />
-                          <span>{visit.tenant?.full_name || 'Candidat inconnu'}</span>
+                    {/* Right: Tenant info & actions */}
+                    <div className="flex xl:flex-col gap-4 justify-between xl:justify-start xl:min-w-[280px]">
+                      {/* Tenant card */}
+                      <div className="bg-gradient-to-br from-[#FAF7F4] to-white border border-[#EFEBE9] rounded-xl p-4 xl:w-full">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-8 h-8 rounded-full bg-[#F16522] flex items-center justify-center">
+                            <User className="h-4 w-4 text-white" />
+                          </div>
+                          <span className="text-sm font-semibold text-[#6B5A4E]">Visiteur</span>
                         </div>
-                        {visit.tenant?.email && (
-                          <div className="flex items-center gap-2 text-sm text-[#6B5A4E]">
-                            <Mail className="h-4 w-4" />
-                            <span>{visit.tenant.email}</span>
-                          </div>
-                        )}
-                        {visit.tenant?.phone && (
-                          <div className="flex items-center gap-2 text-sm text-[#6B5A4E]">
-                            <Phone className="h-4 w-4" />
-                            <span>{visit.tenant.phone}</span>
-                          </div>
-                        )}
+                        <p className="text-[#2C1810] font-semibold mb-2">
+                          {visit.tenant?.full_name || 'Candidat inconnu'}
+                        </p>
+                        <div className="space-y-1.5">
+                          {visit.tenant?.email && (
+                            <a
+                              href={`mailto:${visit.tenant.email}`}
+                              className="flex items-center gap-2 text-sm text-[#6B5A4E] hover:text-[#F16522] transition-colors"
+                            >
+                              <Mail className="h-3.5 w-3.5" />
+                              <span className="truncate">{visit.tenant.email}</span>
+                            </a>
+                          )}
+                          {visit.tenant?.phone && (
+                            <a
+                              href={`tel:${visit.tenant.phone}`}
+                              className="flex items-center gap-2 text-sm text-[#6B5A4E] hover:text-[#F16522] transition-colors"
+                            >
+                              <Phone className="h-3.5 w-3.5" />
+                              <span>{visit.tenant.phone}</span>
+                            </a>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Actions */}
+                      {upcoming && visit.status !== 'annulee' && (
+                        <div className="flex xl:flex-col gap-2">
+                          {visit.status === 'en_attente' && (
+                            <button
+                              onClick={() => handleConfirmVisit(visit.id)}
+                              disabled={actionLoading === visit.id}
+                              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {actionLoading === visit.id ? (
+                                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                              ) : (
+                                <>
+                                  <Check className="h-4 w-4" />
+                                  Confirmer
+                                </>
+                              )}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleCancelVisit(visit.id)}
+                            disabled={actionLoading === visit.id}
+                            className="flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {actionLoading === visit.id ? (
+                              <div className="animate-spin h-4 w-4 border-2 border-red-600 border-t-transparent rounded-full" />
+                            ) : (
+                              <>
+                                <X className="h-4 w-4" />
+                                Annuler
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -343,18 +492,37 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({
+  label,
+  value,
+  icon,
+  color = 'gray',
+}: {
+  label: string;
+  value: number;
+  icon?: React.ReactNode;
+  color?: 'gray' | 'orange' | 'amber' | 'green' | 'red' | 'blue';
+}) {
+  const colors = {
+    gray: 'bg-gray-50 text-gray-600 border-gray-100',
+    orange: 'bg-[#FFF5F0] text-[#F16522] border-[#F16522]/10',
+    amber: 'bg-amber-50 text-amber-600 border-amber-100',
+    green: 'bg-green-50 text-green-600 border-green-100',
+    red: 'bg-red-50 text-red-600 border-red-100',
+    blue: 'bg-blue-50 text-blue-600 border-blue-100',
+  };
+
   return (
-    <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium">
-      <div className="flex items-center gap-2 text-sm text-[#6B5A4E] mb-2">{label}</div>
+    <div className="bg-white rounded-[20px] p-6 border border-[#EFEBE9] card-animate-in card-hover-premium hover:shadow-lg transition-shadow">
+      <div className="flex items-center justify-between mb-3">
+        <div className={`p-2.5 rounded-xl border ${colors[color]}`}>{icon}</div>
+      </div>
       <p className="text-3xl font-bold text-[#2C1810]">{value}</p>
+      <p className="text-sm text-[#6B5A4E] mt-1">{label}</p>
     </div>
   );
 }
 
-function MessageIcon() {
-  return <Video className="h-4 w-4 text-[#6B5A4E]" />;
-}
 
 export default function OwnerVisitsPage() {
   return <VisitsPage mode="owner" />;
