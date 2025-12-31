@@ -121,6 +121,10 @@ export function NativeCameraUpload({
 
     setIsProcessing(true);
     try {
+      // Accumulate new files and previews locally
+      const newFiles: File[] = [];
+      const newPreviews: string[] = [];
+
       for (const file of selectedFiles) {
         // Validate file size
         if (file.size > maxSizeMB * 1024 * 1024) {
@@ -135,10 +139,10 @@ export function NativeCameraUpload({
         );
         const preview = await fileToDataUrl(compressedFile);
 
-        if (multiple) {
-          setFiles((prev) => [...prev, compressedFile]);
-          setPreviews((prev) => [...prev, preview]);
-        } else {
+        newFiles.push(compressedFile);
+        newPreviews.push(preview);
+
+        if (!multiple) {
           setFiles([compressedFile]);
           setPreviews([preview]);
           onImageCaptured(compressedFile, preview);
@@ -146,8 +150,12 @@ export function NativeCameraUpload({
         }
       }
 
-      if (multiple && files.length > 0) {
-        onMultipleImages?.(files, previews);
+      // Update state with new files and notify parent
+      if (multiple && newFiles.length > 0) {
+        setFiles((prev) => [...prev, ...newFiles]);
+        setPreviews((prev) => [...prev, ...newPreviews]);
+        // Notify parent with the complete new lists
+        onMultipleImages?.([...files, ...newFiles], [...previews, ...newPreviews]);
       }
     } finally {
       setIsProcessing(false);
