@@ -212,13 +212,13 @@ function FooterContent() {
           </div>
 
           {/* Newsletter & Contact */}
-          <div>
-            <h3 className="text-white font-bold text-lg mb-6">Restez informé</h3>
+          <div className="flex flex-col h-full">
+            <h3 className="text-white font-bold text-lg mb-4">Restez informé</h3>
             <p className="text-[#E8D4C5]/70 text-sm mb-4">
               Recevez nos dernières offres exclusives.
             </p>
 
-            <form onSubmit={handleNewsletterSubmit} className="space-y-3 mb-8">
+            <form onSubmit={handleNewsletterSubmit} className="space-y-2 mb-6">
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none z-10">
                   <Mail className="w-4 h-4 text-[#E8D4C5]/50" />
@@ -227,9 +227,9 @@ function FooterContent() {
                   type="email"
                   value={email}
                   onChange={handleEmailChange}
-                  placeholder="      Votre email"
+                  placeholder="    Votre email"
                   required
-                  className={`w-full bg-white/5 border rounded  text-sm text-white placeholder:text-[#E8D4C5]/30 focus:outline-none focus:ring-2 transition-all ${
+                  className={`w-full bg-white/5 border rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-[#E8D4C5]/30 focus:outline-none focus:ring-2 transition-all ${
                     emailError
                       ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/30'
                       : 'border-white/10 focus:border-[#F16522] focus:ring-[#F16522]/30'
@@ -247,36 +247,36 @@ function FooterContent() {
 
               <button
                 type="submit"
-                className={`w-full rounded-xl py-3 font-semibold flex items-center justify-center gap-2 transition-all duration-300 group ${
+                className={`w-full rounded-lg py-2.5 text-sm font-medium flex items-center justify-center gap-2 transition-all duration-300 group ${
                   subscribed
                     ? 'bg-green-500 text-white'
-                    : 'bg-[#F16522] hover:bg-[#d95a1d] text-white shadow-lg shadow-[#F16522]/20 hover:shadow-[#F16522]/40'
+                    : 'bg-[#F16522] hover:bg-[#d95a1d] text-white shadow-md hover:shadow-lg'
                 }`}
               >
                 <span>{subscribed ? 'Inscrit !' : "S'inscrire"}</span>
                 {!subscribed && (
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                 )}
               </button>
             </form>
 
-            <div className="space-y-3 pt-6 border-t border-white/10">
+            <div className="space-y-2 pt-4 border-t border-white/10">
               <a
                 href={`tel:${SAFE_CONTACT.PHONE}`}
-                className="flex items-center gap-3 text-[#E8D4C5]/80 hover:text-white transition-colors text-sm"
+                className="flex items-center gap-2.5 text-[#E8D4C5]/70 hover:text-white transition-colors text-sm"
               >
-                <Phone className="w-4 h-4 text-[#F16522]" />
+                <Phone className="w-3.5 h-3.5 text-[#F16522]" />
                 {SAFE_CONTACT.PHONE_DISPLAY}
               </a>
               <a
                 href={`mailto:${SAFE_CONTACT.EMAIL}`}
-                className="flex items-center gap-3 text-[#E8D4C5]/80 hover:text-white transition-colors text-sm"
+                className="flex items-center gap-2.5 text-[#E8D4C5]/70 hover:text-white transition-colors text-sm"
               >
-                <Mail className="w-4 h-4 text-[#F16522]" />
+                <Mail className="w-3.5 h-3.5 text-[#F16522]" />
                 {SAFE_CONTACT.EMAIL}
               </a>
-              <div className="flex items-center gap-3 text-[#E8D4C5]/80 text-sm">
-                <MapPin className="w-4 h-4 text-[#F16522]" />
+              <div className="flex items-center gap-2.5 text-[#E8D4C5]/70 text-sm">
+                <MapPin className="w-3.5 h-3.5 text-[#F16522]" />
                 {SAFE_CONTACT.ADDRESS}
               </div>
             </div>
@@ -284,10 +284,10 @@ function FooterContent() {
         </div>
 
         {/* Copyright */}
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#E8D4C5]/40">
+        <div className="pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-[#E8D4C5]/30">
           <p>© {currentYear} Mon Toit. Tous droits réservés.</p>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-5">
             {[
               { label: 'Aide', href: '/aide' },
               { label: 'FAQ', href: '/faq' },
@@ -304,9 +304,9 @@ function FooterContent() {
           </div>
         </div>
 
-        {/* Badge Certifié + Version */}
-        <div className="mt-6 flex flex-col md:flex-row justify-center items-center gap-4">
-          <span className="text-xs text-[#E8D4C5]/40">Fait avec ♥ à Abidjan</span>
+        {/* Badge Certifié + Version - Plus discret */}
+        <div className="mt-4 flex flex-col md:flex-row justify-center items-center gap-3 text-[#E8D4C5]/20">
+          <span className="text-[10px]">Fait avec ♥ à Abidjan</span>
           <span className="text-xs text-[#E8D4C5]/30 font-mono">v{APP_CONFIG.version}</span>
         </div>
       </div>
