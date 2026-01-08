@@ -32,20 +32,12 @@ export default function EnhancedSearch({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
-  useEffect(() => {
-    const saved = localStorage.getItem('recentSearches');
-    if (saved) {
-      setRecentSearches(JSON.parse(saved));
-    }
-  }, []);
-
   const handleSearch = () => {
     if (filters.city) {
       const searches = [filters.city, ...recentSearches.filter((s) => s !== filters.city)].slice(
         0,
         5
       );
-      localStorage.setItem('recentSearches', JSON.stringify(searches));
       setRecentSearches(searches);
     }
 

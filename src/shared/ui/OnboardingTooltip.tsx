@@ -21,14 +21,7 @@ export default function OnboardingTooltip({
   storageKey,
 }: OnboardingTooltipProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const hasCompletedOnboarding = localStorage.getItem(storageKey);
-    if (!hasCompletedOnboarding) {
-      setIsVisible(true);
-    }
-  }, [storageKey]);
+  const [isVisible, setIsVisible] = useState(true); // Always show in production
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -43,7 +36,6 @@ export default function OnboardingTooltip({
   };
 
   const handleComplete = () => {
-    localStorage.setItem(storageKey, 'true');
     setIsVisible(false);
     onComplete();
   };

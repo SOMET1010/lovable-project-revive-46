@@ -93,8 +93,6 @@ class IndexedDBService {
         }
       },
     });
-
-    if (import.meta.env.DEV) console.log('✅ IndexedDB initialized');
   }
 
   // === FAVORIS ===

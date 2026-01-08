@@ -11,35 +11,26 @@ export interface CookieConsentProps {
 }
 
 export function CookieConsent({ onAccept, onDecline }: CookieConsentProps) {
-  const [status, setStatus] = useState<ConsentStatus>('pending');
+  // Production mode: always show consent banner once, no localStorage
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const savedConsent = localStorage.getItem(COOKIE_CONSENT_KEY);
-    if (savedConsent) {
-      setStatus(savedConsent as ConsentStatus);
-      return;
-    }
     // Show banner after a small delay for better UX
     const timer = setTimeout(() => setIsVisible(true), 1500);
     return () => clearTimeout(timer);
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
-    setStatus('accepted');
     setIsVisible(false);
     onAccept?.();
   };
 
   const handleDecline = () => {
-    localStorage.setItem(COOKIE_CONSENT_KEY, 'declined');
-    setStatus('declined');
     setIsVisible(false);
     onDecline?.();
   };
 
-  if (status !== 'pending' || !isVisible) {
+  if (!isVisible) {
     return null;
   }
 
@@ -122,15 +113,15 @@ export function CookieConsent({ onAccept, onDecline }: CookieConsentProps) {
   );
 }
 
-// Utility to check consent status
+// Utility functions (production mode - no localStorage)
 export function getCookieConsent(): ConsentStatus | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(COOKIE_CONSENT_KEY) as ConsentStatus | null;
+  // Always return null in production (show banner once)
+  return null;
 }
 
-// Utility to reset consent (for testing or settings page)
+// No-op in production (no localStorage)
 export function resetCookieConsent(): void {
-  localStorage.removeItem(COOKIE_CONSENT_KEY);
+  // No-op in production
 }
 
 export default CookieConsent;
