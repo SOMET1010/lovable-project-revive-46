@@ -9,6 +9,57 @@ interface FeaturedPropertiesProps {
   loading: boolean;
 }
 
+// Helper function to get a unique fallback image based on property characteristics
+function getFallbackImage(property: PropertyWithOwnerScore): string {
+  const type = property.property_type?.toLowerCase() || 'apartment';
+  const city = property.city?.toLowerCase() || '';
+  const priceRange = property.price ? Math.floor(property.price / 100000) : 0;
+
+  // Different images based on property type, city, and price range
+  // This ensures visual diversity and makes each property look unique
+  const imageMap: Record<string, string> = {
+    // Apartments
+    'apartment-abidjan-0': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
+    'apartment-abidjan-1': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+    'apartment-abidjan-2': 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
+    'apartment-abidjan-3': 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800&q=80',
+    'apartment-cocody-0': 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&q=80',
+    'apartment-cocody-1': 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=800&q=80',
+    'apartment-plateau-0': 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80',
+    'apartment-plateau-1': 'https://images.unsplash.com/photo-1600573472592-401b489a3cdc?w=800&q=80',
+
+    // Studios
+    'studio-abidjan-0': 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800&q=80',
+    'studio-abidjan-1': 'https://images.unsplash.com/photo-1600585153490-76fb20a32601?w=800&q=80',
+    'studio-abidjan-2': 'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=800&q=80',
+    'studio-abidjan-3': 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80',
+
+    // Houses/Villas
+    'house-abidjan-0': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
+    'house-abidjan-1': 'https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=800&q=80',
+    'house-abidjan-2': 'https://images.unsplash.com/photo-1600566752547-3394e9e14b40?w=800&q=80',
+    'house-abidjan-3': 'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=800&q=80',
+    'house-cocody-0': 'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=800&q=80',
+    'house-cocody-1': 'https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=800&q=80',
+    'house-cocody-2': 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80',
+    'house-cocody-3': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+
+    // Villas
+    'villa-abidjan-0': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
+    'villa-abidjan-1': 'https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=800&q=80',
+    'villa-abidjan-2': 'https://images.unsplash.com/photo-1600566752547-3394e9e14b40?w=800&q=80',
+    'villa-abidjan-3': 'https://images.unsplash.com/photo-1600573472591-ee6b68d14c68?w=800&q=80',
+    'villa-cocody-0': 'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?w=800&q=80',
+    'villa-cocody-1': 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800&q=80',
+    'villa-cocody-2': 'https://images.unsplash.com/photo-1600585153490-76fb20a32601?w=800&q=80',
+    'villa-cocody-3': 'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=800&q=80',
+  };
+
+  // Create a key based on property characteristics to get a consistent image
+  const key = `${type}-${city || 'abidjan'}-${priceRange % 4}`;
+  return imageMap[key] || imageMap['apartment-abidjan-0'];
+}
+
 function PropertyCard({
   property,
   index,
@@ -18,6 +69,9 @@ function PropertyCard({
   index: number;
   isVisible: boolean;
 }) {
+  // Get the appropriate image for this property
+  const propertyImage = property.images?.[0] || getFallbackImage(property);
+
   return (
     <Link
       to={`/propriete/${property.id}`}
@@ -29,10 +83,7 @@ function PropertyCard({
       {/* Image Container */}
       <div className="relative h-64 overflow-hidden">
         <img
-          src={
-            property.images?.[0] ||
-            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'
-          }
+          src={propertyImage}
           alt={property.title || 'Propriété'}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
@@ -56,9 +107,9 @@ function PropertyCard({
           </button>
         </div>
 
-        {/* Price Badge */}
+        {/* Price Badge - Consistently positioned */}
         <div className="absolute bottom-4 left-4">
-          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl px-4 py-2 shadow-md">
             <span className="text-h3 font-bold text-[var(--terracotta-600)]">
               {property.price?.toLocaleString() || 'N/A'}
             </span>
@@ -66,7 +117,7 @@ function PropertyCard({
           </div>
         </div>
 
-        {/* Trust Score Badge */}
+        {/* Trust Score Badge - Consistently positioned */}
         {property.owner_trust_score != null && (
           <div className="absolute bottom-4 right-4">
             <ScoreBadge score={property.owner_trust_score} variant="compact" size="sm" />
