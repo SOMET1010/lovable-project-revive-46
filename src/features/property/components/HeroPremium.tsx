@@ -277,7 +277,7 @@ export default function HeroPremium() {
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
             </div>
 
-            {/* Floating testimonial card */}
+            {/* Floating testimonial card - Platform testimonial (not property-specific) */}
             <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-5 max-w-xs">
               <div className="flex items-start gap-4">
                 <img
@@ -292,7 +292,7 @@ export default function HeroPremium() {
                     ))}
                   </div>
                   <p className="text-sm text-neutral-600 leading-snug">
-                    "Logement trouvé en 48h ! Service exceptionnel."
+                    "Plateforme fiable avec des logements de qualité. Service excellent !"
                   </p>
                   <p className="text-xs text-neutral-400 mt-2">Marie K. — Cocody</p>
                 </div>
