@@ -74,7 +74,7 @@ class SearchErrorBoundary extends Component<Props, State> {
                 notifiées et travaillent sur une solution.
               </p>
 
-              {process.env['NODE_ENV'] === 'development' && this.state.error && (
+              {import.meta.env.DEV && this.state.error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 text-left">
                   <h3 className="font-semibold text-red-900 mb-2">
                     Détails de l'erreur (dev only)

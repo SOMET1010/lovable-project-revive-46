@@ -238,18 +238,18 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
           <div className="flex items-center gap-2">
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <MapPin className="w-4 h-4 inline mr-2 text-terracotta-600" />
+                <MapPin className="w-4 h-4 inline-flex mr-2 text-terracotta-600" />
                 {city === 'Abidjan' ? 'Ville' : 'Localisation'}
               </label>
               {useGeolocation ? (
-                <div className="flex items-center justify-between px-4 py-3 border-2 border-cyan-500 bg-cyan-50 rounded-xl">
-                  <div className="flex items-center space-x-2">
-                    <Navigation className="w-5 h-5 text-cyan-600" />
+                <div className="flex items-center justify-between px-4 py-3 h-12 border-2 border-cyan-500 bg-cyan-50 rounded-xl">
+                  <div className="flex items-center gap-2">
+                    <Navigation className="w-5 h-5 text-cyan-600 flex-shrink-0" />
                     <span className="font-medium text-cyan-900">Ma position actuelle</span>
                   </div>
                   <button
                     onClick={handleClearLocation}
-                    className="text-cyan-600 hover:text-cyan-800 transition-colors"
+                    className="text-cyan-600 hover:text-cyan-800 transition-colors flex-shrink-0"
                     title="Effacer la localisation"
                   >
                     <span className="text-sm">✕</span>
@@ -260,7 +260,7 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   disabled={useGeolocation}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-terracotta-200 focus:border-terracotta-500 transition-all bg-white appearance-none cursor-pointer font-medium disabled:opacity-50"
+                  className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-terracotta-200 focus:border-terracotta-500 transition-all bg-white appearance-none cursor-pointer font-medium disabled:opacity-50"
                 >
                   <option value="">Sélectionner une ville</option>
                   {cities.map((c) => (
@@ -275,10 +275,10 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
               <button
                 onClick={handleGetLocation}
                 disabled={gettingLocation}
-                className="mt-7 px-4 py-3 border-2 border-cyan-500 text-cyan-600 rounded-xl hover:bg-cyan-50 transition-all font-medium flex items-center space-x-2 disabled:opacity-50"
+                className="mt-7 h-12 px-4 border-2 border-cyan-500 text-cyan-600 rounded-xl hover:bg-cyan-50 transition-all font-medium flex items-center gap-2 disabled:opacity-50"
                 title="Utiliser ma position actuelle"
               >
-                <Navigation className="w-5 h-5" />
+                <Navigation className="w-5 h-5 flex-shrink-0" />
                 <span className="hidden sm:inline">
                   {gettingLocation ? 'Détection...' : 'Ma position'}
                 </span>
@@ -289,13 +289,13 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
           {city === 'Abidjan' && !useGeolocation && (
             <div className="relative animate-slide-down">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <MapPin className="w-4 h-4 inline mr-2 text-terracotta-600" />
+                <MapPin className="w-4 h-4 inline-flex mr-2 text-terracotta-600" />
                 Commune d'Abidjan
               </label>
               <select
                 value={commune}
                 onChange={(e) => setCommune(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-terracotta-200 focus:border-terracotta-500 transition-all bg-white appearance-none cursor-pointer font-medium"
+                className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-terracotta-200 focus:border-terracotta-500 transition-all bg-white appearance-none cursor-pointer font-medium"
               >
                 <option value="">Toutes les communes</option>
                 {ABIDJAN_COMMUNES.map((c) => (
@@ -311,13 +311,13 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
           {useGeolocation && (
             <div className="relative animate-slide-down">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <MapPin className="w-4 h-4 inline mr-2 text-cyan-600" />
+                <MapPin className="w-4 h-4 inline-flex mr-2 text-cyan-600" />
                 Rayon de recherche
               </label>
               <select
                 value={searchRadius}
                 onChange={(e) => setSearchRadius(Number(e.target.value))}
-                className="w-full px-4 py-3 border-2 border-cyan-200 rounded-xl focus:ring-2 focus:ring-cyan-200 focus:border-cyan-500 transition-all bg-white appearance-none cursor-pointer font-medium"
+                className="w-full h-12 px-4 border-2 border-cyan-200 rounded-xl focus:ring-2 focus:ring-cyan-200 focus:border-cyan-500 transition-all bg-white appearance-none cursor-pointer font-medium"
               >
                 {GEOLOCATION_SETTINGS.RADIUS_OPTIONS.map((radius) => (
                   <option key={radius} value={radius}>
@@ -331,35 +331,35 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
           <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-4">
             <div className="flex items-center justify-between mb-3">
               <label className="text-sm font-bold text-gray-800 flex items-center">
-                <HomeIcon className="w-4 h-4 inline mr-2 text-blue-600" />
+                <HomeIcon className="w-4 h-4 mr-2 text-blue-600 flex-shrink-0" />
                 Catégorie de bien
               </label>
               <p className="text-xs text-gray-600">Mon Toit = Logements résidentiels</p>
             </div>
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setPropertyCategory('residentiel')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
                   propertyCategory === 'residentiel'
                     ? 'bg-terracotta-600 text-white shadow-md'
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                 }`}
               >
-                <HomeIcon className="w-4 h-4 inline mr-1" />
+                <HomeIcon className="w-4 h-4 flex-shrink-0" />
                 Résidentiel
               </button>
               {FEATURES.COMMERCIAL_PROPERTIES && (
                 <button
                   type="button"
                   onClick={() => setPropertyCategory('commercial')}
-                  className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all ${
+                  className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
                     propertyCategory === 'commercial'
                       ? 'bg-olive-600 text-white shadow-md'
                       : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                   }`}
                 >
-                  <Building2 className="w-4 h-4 inline mr-1" />
+                  <Building2 className="w-4 h-4 flex-shrink-0" />
                   Commercial
                 </button>
               )}
@@ -374,13 +374,13 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <HomeIcon className="w-4 h-4 inline mr-2 text-terracotta-600" />
+                <HomeIcon className="w-4 h-4 inline-flex mr-2 text-terracotta-600" />
                 Type de bien
               </label>
               <select
                 value={propertyType}
                 onChange={(e) => setPropertyType(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-terracotta-200 focus:border-terracotta-500 transition-all bg-white appearance-none cursor-pointer font-medium"
+                className="w-full h-12 px-4 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-terracotta-200 focus:border-terracotta-500 transition-all bg-white appearance-none cursor-pointer font-medium"
               >
                 {propertyTypes.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -392,22 +392,22 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
 
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Coins className="w-4 h-4 inline mr-2 text-terracotta-600" />
+                <Coins className="w-4 h-4 inline-flex mr-2 text-terracotta-600" />
                 Budget max (FCFA)
               </label>
-              <div className="relative">
+              <div className="relative h-12">
                 <input
                   type="text"
                   value={maxBudget ? formatBudget(maxBudget) : ''}
                   onChange={handleBudgetChange}
                   placeholder="Ex : 200 000 FCFA"
-                  className="w-full px-4 py-3 pr-20 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-terracotta-200 focus:border-terracotta-500 transition-all bg-white font-medium"
+                  className="w-full h-full px-4 pr-16 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-terracotta-200 focus:border-terracotta-500 transition-all bg-white font-medium"
                 />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col">
                   <button
                     type="button"
                     onClick={incrementBudget}
-                    className="px-2 py-0.5 hover:bg-gray-100 rounded text-gray-600 hover:text-terracotta-600 transition-colors"
+                    className="px-2 py-0.5 hover:bg-gray-100 rounded text-gray-600 hover:text-terracotta-600 transition-colors leading-none"
                     title="Augmenter de 10 000 FCFA"
                   >
                     ▲
@@ -415,7 +415,7 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
                   <button
                     type="button"
                     onClick={decrementBudget}
-                    className="px-2 py-0.5 hover:bg-gray-100 rounded text-gray-600 hover:text-terracotta-600 transition-colors"
+                    className="px-2 py-0.5 hover:bg-gray-100 rounded text-gray-600 hover:text-terracotta-600 transition-colors leading-none"
                     title="Diminuer de 10 000 FCFA"
                   >
                     ▼
@@ -435,9 +435,9 @@ export default function QuickSearch({ onSearch }: QuickSearchProps) {
             <div className="flex items-end">
               <button
                 onClick={handleSearch}
-                className="w-full px-6 py-3 bg-terracotta-600 text-white rounded-xl hover:bg-terracotta-700 transition-all hover:scale-105 shadow-lg font-bold flex items-center justify-center space-x-2"
+                className="w-full h-12 px-6 bg-terracotta-600 text-white rounded-xl hover:bg-terracotta-700 transition-all hover:scale-105 shadow-lg font-bold flex items-center justify-center gap-2"
               >
-                <Search className="w-5 h-5" />
+                <Search className="w-5 h-5 flex-shrink-0" />
                 <span>Rechercher</span>
               </button>
             </div>

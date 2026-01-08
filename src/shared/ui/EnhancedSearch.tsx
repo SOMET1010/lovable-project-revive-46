@@ -99,12 +99,12 @@ export default function EnhancedSearch({
     <div className="space-y-6">
       <div className="glass-card rounded-3xl p-6">
         <div className="flex flex-col lg:flex-row items-stretch gap-4">
-          <div className="flex-1 flex items-center bg-white/80 rounded-2xl px-6 py-4 border-2 border-white/60 focus-within:border-terracotta-400 transition-all duration-300">
-            <MapPin className="h-6 w-6 text-terracotta-500 mr-4 flex-shrink-0" />
+          <div className="flex-1 flex items-center h-14 bg-white/80 rounded-2xl px-5 py-0 border-2 border-white/60 focus-within:border-terracotta-400 transition-all duration-300">
+            <MapPin className="h-5 w-5 text-terracotta-500 mr-3 flex-shrink-0" />
             <input
               type="text"
               placeholder="Ville ou quartier (ex: Cocody, Plateau...)"
-              className="flex-1 bg-transparent text-gray-900 placeholder-gray-600 focus:outline-none text-lg"
+              className="flex-1 h-full bg-transparent text-gray-900 placeholder-gray-600 focus:outline-none"
               value={filters.city}
               onChange={(e) => setFilters({ ...filters, city: e.target.value })}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -113,7 +113,7 @@ export default function EnhancedSearch({
             {filters.city && (
               <button
                 onClick={() => setFilters({ ...filters, city: '' })}
-                className="ml-3 text-gray-400 hover:text-gray-600 transition-colors"
+                className="ml-2 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -127,21 +127,21 @@ export default function EnhancedSearch({
 
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className={`px-8 py-4 rounded-2xl font-semibold transition-all flex items-center space-x-3 ${
+            className={`h-14 px-6 rounded-2xl font-semibold transition-all flex items-center gap-2 ${
               showAdvanced
                 ? 'bg-terracotta-500 text-white shadow-lg'
                 : 'bg-white/80 text-gray-700 hover:bg-white border border-gray-200'
             }`}
           >
-            <Filter className="h-5 w-5" />
+            <Filter className="h-5 w-5 flex-shrink-0" />
             <span>Filtres</span>
           </button>
 
           <button
             onClick={handleSearch}
-            className="btn-primary flex items-center justify-center space-x-3 px-10 py-4 text-lg font-semibold"
+            className="btn-primary h-14 flex items-center justify-center gap-2 px-8 font-semibold"
           >
-            <Search className="h-6 w-6" />
+            <Search className="h-5 w-5 flex-shrink-0" />
             <span>Rechercher</span>
           </button>
         </div>
@@ -154,7 +154,7 @@ export default function EnhancedSearch({
                 <select
                   value={filters.propertyType}
                   onChange={(e) => setFilters({ ...filters, propertyType: e.target.value })}
-                  className="w-full px-5 py-4 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
+                  className="w-full h-12 px-5 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
                 >
                   <option value="">Tous les types</option>
                   <option value="appartement">Appartement</option>
@@ -168,14 +168,14 @@ export default function EnhancedSearch({
                 <label className="block text-sm font-bold text-gray-800 mb-2">
                   Prix minimum (FCFA)
                 </label>
-                <div className="relative">
-                  <Coins className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <div className="relative h-12 flex items-center">
+                  <Coins className="absolute left-4 h-5 w-5 text-gray-400 flex-shrink-0" />
                   <input
                     type="number"
                     placeholder="Ex: 100000"
                     value={filters.minPrice}
                     onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
-                    className="w-full pl-12 pr-5 py-4 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
+                    className="w-full h-full pl-12 pr-5 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -184,14 +184,14 @@ export default function EnhancedSearch({
                 <label className="block text-sm font-bold text-gray-800 mb-2">
                   Prix maximum (FCFA)
                 </label>
-                <div className="relative">
-                  <Coins className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <div className="relative h-12 flex items-center">
+                  <Coins className="absolute left-4 h-5 w-5 text-gray-400 flex-shrink-0" />
                   <input
                     type="number"
                     placeholder="Ex: 500000"
                     value={filters.maxPrice}
                     onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
-                    className="w-full pl-12 pr-5 py-4 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
+                    className="w-full h-full pl-12 pr-5 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -203,7 +203,7 @@ export default function EnhancedSearch({
                 <select
                   value={filters.bedrooms}
                   onChange={(e) => setFilters({ ...filters, bedrooms: e.target.value })}
-                  className="w-full px-5 py-4 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
+                  className="w-full h-12 px-5 rounded-xl bg-white/80 border-2 border-white/60 focus:border-terracotta-400 focus:outline-none transition-colors"
                 >
                   <option value="">Peu importe</option>
                   <option value="1">1+ chambre</option>
@@ -220,7 +220,7 @@ export default function EnhancedSearch({
       {showQuickFilters && (
         <div className="space-y-4">
           {profile?.user_type === 'locataire' && recentSearches.length > 0 && (
-            <div className="flex items-start space-x-3 p-4 bg-white/60 rounded-2xl border border-white/40">
+            <div className="flex items-start gap-3 p-4 bg-white/60 rounded-2xl border border-white/40">
               <Sparkles className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <span className="text-sm font-semibold text-gray-800">Recherches récentes:</span>
@@ -242,7 +242,7 @@ export default function EnhancedSearch({
             </div>
           )}
 
-          <div className="flex items-start space-x-3 p-4 bg-white/60 rounded-2xl border border-white/40">
+          <div className="flex items-start gap-3 p-4 bg-white/60 rounded-2xl border border-white/40">
             <MapPin className="h-5 w-5 text-cyan-500 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <span className="text-sm font-semibold text-gray-800">Villes populaires:</span>
@@ -263,7 +263,7 @@ export default function EnhancedSearch({
             </div>
           </div>
 
-          <div className="flex items-start space-x-3 p-4 bg-white/60 rounded-2xl border border-white/40">
+          <div className="flex items-start gap-3 p-4 bg-white/60 rounded-2xl border border-white/40">
             <Coins className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
               <span className="text-sm font-semibold text-gray-800">Gammes de prix:</span>

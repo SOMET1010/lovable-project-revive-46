@@ -1,10 +1,8 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, MapPin, Wallet, Search, Star, Check } from 'lucide-react';
-import { RESIDENTIAL_PROPERTY_TYPES } from '@/lib/constants/app.constants';
+import { Home, Star, Check, HomeIcon, Wallet } from 'lucide-react';
 import { useHomeStats } from '@/hooks/shared/useHomeStats';
-import { ABIDJAN_NEIGHBORHOODS, CITY_NAMES } from '@/shared/data/cities';
-import { CITY_COORDINATES } from '@/shared/data/cityCoordinates';
+import UnifiedSearchBar from '@/shared/ui/UnifiedSearchBar';
 
 // Animated counter component
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
@@ -57,44 +55,35 @@ export default function HeroPremium() {
   const navigate = useNavigate();
   const { propertiesCount } = useHomeStats();
 
-  // Search form state
-  const [propertyType, setPropertyType] = useState('');
-  const [city, setCity] = useState('');
-  const [maxBudget, setMaxBudget] = useState('');
-  const [budgetMode, setBudgetMode] = useState<'preset' | 'custom'>('preset');
-  const [customMaxBudget, setCustomMaxBudget] = useState('');
+  // Filter states
+  const [selectedType, setSelectedType] = useState('');
+  const [selectedBudget, setSelectedBudget] = useState('');
+  const [customBudget, setCustomBudget] = useState('');
+  const [showCustomBudget, setShowCustomBudget] = useState(false);
 
-  const citySuggestions = useMemo(() => {
-    const staticCities = [
-      ...CITY_NAMES,
-      ...ABIDJAN_NEIGHBORHOODS,
-      ...Object.keys(CITY_COORDINATES),
-    ];
-    const all = staticCities.map((name) => name.trim()).filter(Boolean);
-    return Array.from(new Set(all)).sort((a, b) =>
-      a.localeCompare(b, 'fr', { sensitivity: 'base' })
-    );
-  }, []);
-
-  const handleSearch = () => {
-    const params = new URLSearchParams();
-    if (propertyType) params.set('type', propertyType);
-    if (city) params.set('city', city);
-    if (maxBudget) params.set('maxPrice', maxBudget);
-
-    navigate(`/recherche${params.toString() ? `?${params.toString()}` : ''}`);
-  };
+  const propertyTypes = [
+    { value: 'appartement', label: 'Appartements' },
+    { value: 'studio', label: 'Studios' },
+    { value: 'villa', label: 'Villas' },
+  ];
 
   const budgetOptions = [
-    { value: '50000', label: '50 000 FCFA' },
-    { value: '100000', label: '100 000 FCFA' },
-    { value: '150000', label: '150 000 FCFA' },
-    { value: '200000', label: '200 000 FCFA' },
-    { value: '300000', label: '300 000 FCFA' },
-    { value: '500000', label: '500 000 FCFA' },
-    { value: '1000000', label: '1 000 000+ FCFA' },
+    { value: '150000', label: '≤ 150k' },
+    { value: '300000', label: '≤ 300k' },
+    { value: '500000', label: '≤ 500k' },
+    { value: 'custom', label: 'Autre...' },
   ];
-  const customBudgetValue = 'custom';
+
+  const handleFilterSearch = () => {
+    const params = new URLSearchParams();
+    if (selectedType) params.set('type', selectedType);
+    if (showCustomBudget && customBudget) {
+      params.set('maxPrice', customBudget);
+    } else if (selectedBudget && selectedBudget !== 'custom') {
+      params.set('maxPrice', selectedBudget);
+    }
+    navigate(`/recherche${params.toString() ? `?${params.toString()}` : ''}`);
+  };
 
   return (
     <section className="relative bg-gradient-to-br from-[#2C1810] via-[#1a0f0a] to-[#0f0805] overflow-hidden">
@@ -151,99 +140,96 @@ export default function HeroPremium() {
               </p>
             </div>
 
-            {/* Search bar - 2x2 grid on mobile */}
-            <div className="bg-white rounded-2xl shadow-2xl p-2 sm:p-3">
-              <div className="grid grid-cols-2 sm:grid-cols-[1.1fr_1.8fr_1.1fr_1.1fr] gap-2">
-                {/* Property type select */}
-                <div className="relative min-w-0">
-                  <Home className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
-                  <select
-                    value={propertyType}
-                    onChange={(e) => setPropertyType(e.target.value)}
-                    className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
-                  >
-                    <option value="">Type</option>
-                    {RESIDENTIAL_PROPERTY_TYPES.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.icon} {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+            {/* Search bar - Modern unified search */}
+            <UnifiedSearchBar variant="hero" />
 
-                {/* City select */}
-                <div className="relative min-w-0">
-                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
-                  <input
-                    type="text"
-                    list="hero-city-suggestions"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Ville, commune ou quartier"
-                    className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-3 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-text focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
-                    aria-label="Ville, commune ou quartier"
-                  />
-                  <datalist id="hero-city-suggestions">
-                    {citySuggestions.map((cityName) => (
-                      <option key={cityName} value={cityName} />
-                    ))}
-                  </datalist>
-                </div>
-
-                {/* Budget select */}
-                <div className="min-w-0">
-                  <div className="relative min-w-0">
-                    <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-neutral-400 pointer-events-none" />
-                    <select
-                      value={budgetMode === 'custom' ? customBudgetValue : maxBudget}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === customBudgetValue) {
-                          setBudgetMode('custom');
-                          setMaxBudget(customMaxBudget || '');
-                          return;
-                        }
-                        setBudgetMode('preset');
-                        setCustomMaxBudget('');
-                        setMaxBudget(value);
-                      }}
-                      className="w-full h-11 sm:h-14 pl-9 sm:pl-10 pr-2 sm:pr-4 bg-neutral-50 border-0 rounded-xl text-sm sm:text-base text-neutral-700 font-medium appearance-none cursor-pointer focus:ring-2 focus:ring-[#FF6C2F]/20 focus:outline-none transition-all"
+            {/* Quick filters */}
+            <div className="flex flex-wrap gap-3 items-center mt-3">
+              {/* Property types */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/50">Type:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {propertyTypes.map((type) => (
+                    <button
+                      key={type.value}
+                      onClick={() => setSelectedType(selectedType === type.value ? '' : type.value)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        selectedType === type.value
+                          ? 'bg-white text-[#2C1810]'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
                     >
-                      <option value="">Budget</option>
-                      {budgetOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                      <option value={customBudgetValue}>Autre montant...</option>
-                    </select>
-                  </div>
-                  {budgetMode === 'custom' && (
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Budget */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs text-white/50">Budget:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {budgetOptions.map((budget) => (
+                    <button
+                      key={budget.value}
+                      onClick={() => {
+                        if (budget.value === 'custom') {
+                          setShowCustomBudget(!showCustomBudget);
+                          if (!showCustomBudget) {
+                            setSelectedBudget('custom');
+                          } else {
+                            setSelectedBudget('');
+                            setCustomBudget('');
+                          }
+                        } else {
+                          setShowCustomBudget(false);
+                          setSelectedBudget(selectedBudget === budget.value ? '' : budget.value);
+                          setCustomBudget('');
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        (budget.value === 'custom' && showCustomBudget) || selectedBudget === budget.value
+                          ? 'bg-green-500 text-white'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
+                    >
+                      {budget.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom budget input */}
+                {showCustomBudget && (
+                  <div className="flex items-center gap-2 mt-2">
                     <input
                       type="number"
                       inputMode="numeric"
                       min={0}
-                      value={customMaxBudget}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setCustomMaxBudget(value);
-                        setMaxBudget(value);
-                      }}
-                      placeholder="Ex : 75 000 FCFA"
-                      className="w-full h-10 sm:h-11 mt-2 px-3 sm:px-4 bg-white border border-neutral-200 rounded-xl text-sm sm:text-base text-neutral-700 font-medium focus:ring-2 focus:ring-[#FF6C2F]/20 focus:border-[#FF6C2F]/40 focus:outline-none transition-all"
+                      value={customBudget}
+                      onChange={(e) => setCustomBudget(e.target.value)}
+                      placeholder="Ex: 200000"
+                      className="px-3 py-1.5 text-sm border border-white/20 rounded-lg bg-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 w-44"
+                      onKeyDown={(e) => e.key === 'Enter' && handleFilterSearch()}
                     />
-                  )}
-                </div>
-
-                {/* Search button */}
-                <button
-                  onClick={handleSearch}
-                  className="h-11 sm:h-14 px-4 sm:px-6 bg-[#FF6C2F] hover:bg-[#e05519] text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] shadow-lg shadow-[#FF6C2F]/30"
-                >
-                  <Search className="w-5 h-5" />
-                  <span className="hidden sm:inline">Rechercher</span>
-                </button>
+                    <button
+                      onClick={handleFilterSearch}
+                      className="px-3 py-1.5 bg-green-500 text-white rounded-lg text-xs font-medium hover:bg-green-600 transition-colors"
+                    >
+                      ✓
+                    </button>
+                  </div>
+                )}
               </div>
+
+              {/* Search button */}
+              {(selectedType || selectedBudget || customBudget) && (
+                <button
+                  onClick={handleFilterSearch}
+                  className="px-4 py-2 bg-[#FF6C2F] text-white rounded-lg text-xs font-semibold hover:bg-[#e05519] transition-colors shadow-lg"
+                >
+                  Rechercher
+                </button>
+              )}
             </div>
 
             {/* Properties counter - compact on mobile */}
