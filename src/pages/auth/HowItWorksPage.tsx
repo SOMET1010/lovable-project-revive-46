@@ -14,6 +14,7 @@ import {
   MapPin,
   MessageCircle,
 } from 'lucide-react';
+import { useMemo } from 'react';
 import PageHeader from '@/shared/components/PageHeader';
 import FooterCTA from '@/shared/components/FooterCTA';
 import SEOHead from '@/shared/components/SEOHead';
@@ -79,9 +80,17 @@ function StepCard({
 
 export default function HowItWorksPage() {
   const homeStats = useHomeStats();
-  const propertiesCount = homeStats.propertiesCount || 10;
 
-  const tenantSteps = [
+  // Format properties count for display - show loading indicator if loading
+  const getPropertiesCountText = () => {
+    if (homeStats.isLoading) {
+      return 'Chargement...';
+    }
+    const count = homeStats.propertiesCount;
+    return `${count}+ logements disponibles`;
+  };
+
+  const tenantSteps = useMemo(() => [
     {
       number: 1,
       title: 'Recherchez',
@@ -90,7 +99,7 @@ export default function HowItWorksPage() {
       features: [
         'Recherche par ville, commune ou quartier',
         'Filtres par type de bien et budget',
-        `${propertiesCount}+ logements disponibles`,
+        getPropertiesCountText(),
       ],
       imagePosition: 'right' as const,
     },
@@ -132,7 +141,7 @@ export default function HowItWorksPage() {
       ],
       imagePosition: 'left' as const,
     },
-  ];
+  ], [homeStats.isLoading, homeStats.propertiesCount]);
 
   const ownerSteps = [
     {
@@ -315,7 +324,13 @@ export default function HowItWorksPage() {
         <div className="bg-[#2C1810] rounded-[24px] p-12 mb-20 text-white animate-slide-up">
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
-              <div className="text-5xl font-bold mb-2 text-[#F16522]">{propertiesCount}+</div>
+              <div className="text-5xl font-bold mb-2 text-[#F16522]">
+                {homeStats.isLoading ? (
+                  <span className="inline-block animate-pulse">--</span>
+                ) : (
+                  `${homeStats.propertiesCount}+`
+                )}
+              </div>
               <div className="text-xl text-[#E8D4C5]">Propriétés disponibles</div>
             </div>
             <div>

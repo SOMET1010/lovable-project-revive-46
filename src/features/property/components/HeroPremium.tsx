@@ -53,7 +53,7 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
 
 export default function HeroPremium() {
   const navigate = useNavigate();
-  const { propertiesCount } = useHomeStats();
+  const { propertiesCount, isLoading: isLoadingStats } = useHomeStats();
 
   // Filter states
   const [selectedType, setSelectedType] = useState('');
@@ -240,7 +240,11 @@ export default function HeroPremium() {
                 </div>
                 <div>
                   <div className="text-xl sm:text-2xl font-bold text-white">
-                    <AnimatedCounter target={propertiesCount || 150} suffix="+" />
+                    {isLoadingStats ? (
+                      <span className="inline-block animate-pulse">--</span>
+                    ) : (
+                      <AnimatedCounter target={propertiesCount} suffix="+" />
+                    )}
                   </div>
                   <div className="text-xs sm:text-sm text-white/60">Logements</div>
                 </div>
