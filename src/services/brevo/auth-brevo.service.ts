@@ -34,6 +34,8 @@ class AuthBrevoService {
    * Inscription ou connexion unifiée par OTP
    */
   async initiateAuth(data: SignUpData | SignInData): Promise<AuthResult> {
+    console.log('[auth-brevo] 🚀 initiateAuth appelé avec:', data);
+
     const { method } = data;
 
     // Déterminer le destinataire (email ou téléphone)
@@ -44,7 +46,10 @@ class AuthBrevoService {
           ? data.phone
           : (data as SignInData).recipient;
 
+    console.log('[auth-brevo] Destinataire:', recipient, 'Méthode:', method);
+
     if (!recipient) {
+      console.error('[auth-brevo] ❌ Destinataire manquant');
       return {
         success: false,
         error: 'Email ou numéro de téléphone requis',
@@ -52,32 +57,41 @@ class AuthBrevoService {
     }
 
     // Vérifier le rate limiting
+    console.log('[auth-brevo] Vérification rate limit...');
     const rateLimitCheck = await otpUnifiedService.checkRateLimit(recipient);
     if (!rateLimitCheck.allowed) {
+      console.error('[auth-brevo] ❌ Rate limit dépassé');
       return {
         success: false,
         error: `Veuillez patienter ${rateLimitCheck.remainingTime} secondes avant de réessayer`,
       };
     }
+    console.log('[auth-brevo] ✅ Rate limit OK');
 
     // Envoyer l'OTP
     const otpRequest: OTPRequest = {
       recipient,
-      method: method === 'phone' ? 'whatsapp' : 'email', // Par défaut WhatsApp pour téléphone
+      method: method === 'phone' ? 'sms' : 'email', // SMS pour téléphone (pas WhatsApp)
       userName: 'fullName' in data ? data.fullName : undefined,
       purpose: 'auth',
       expiresIn: 10,
     };
 
+    console.log('[auth-brevo] 📤 Envoi OTP avec params:', otpRequest);
+
     const otpResult = await otpUnifiedService.sendOTP(otpRequest);
 
+    console.log('[auth-brevo] Résultat OTP:', otpResult);
+
     if (!otpResult.success) {
+      console.error('[auth-brevo] ❌ Erreur envoi OTP:', otpResult.error);
       return {
         success: false,
         error: otpResult.error || "Erreur lors de l'envoi du code de vérification",
       };
     }
 
+    console.log('[auth-brevo] ✅ OTP envoyé avec succès');
     return {
       success: true,
       otpSent: true,

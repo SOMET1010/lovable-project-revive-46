@@ -6,8 +6,8 @@
  * Compatible avec send-sms-azure pour l'envoi des codes
  */
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { getCorsHeaders } from '../_shared/cors.ts';
+import { getServiceRoleClient } from '../_shared/service-role.ts';
 
 interface VerifyRequest {
   phoneNumber: string;
@@ -76,28 +76,47 @@ Deno.serve(async (req: Request) => {
 
     const redirectTo = `${cleanOrigin}/auth/callback`;
 
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    );
+    // Vérifier que les variables d'environnement sont disponibles
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    // Normaliser le numéro (format 13 chiffres: 2250XXXXXXXXX)
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error('[verify-otp-azure] ❌ Variables d\'environnement manquantes:', {
+        hasUrl: !!supabaseUrl,
+        hasKey: !!supabaseServiceKey,
+      });
+      return new Response(
+        JSON.stringify({ error: 'Configuration serveur manquante' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseAdmin = getServiceRoleClient();
+    console.log('[verify-otp-azure] ✅ Service role client créé');
+
+    // Normaliser le numéro (format E.164: +2250XXXXXXXXX)
     let normalizedPhone = phoneNumber.replace(/\D/g, '');
     if (!normalizedPhone.startsWith('225')) {
       normalizedPhone = '225' + normalizedPhone;
     }
     const e164Phone = '+' + normalizedPhone;
 
+    console.log('[verify-otp-azure] Numéro normalisé:', { original: phoneNumber, normalized: normalizedPhone, e164: e164Phone });
+    console.log('[verify-otp-azure] Recherche OTP avec recipient:', e164Phone);
+
     // Vérifier le code OTP dans la table otp_codes
+    // IMPORTANT: Utiliser e164Phone car l'OTP est stocké au format E.164
     const { data: otpRecord, error: otpError } = await supabaseAdmin
       .from('otp_codes')
       .select('*')
-      .eq('recipient', phoneNumber)
+      .eq('recipient', e164Phone)
       .eq('code', code)
       .gte('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
+
+    console.log('[verify-otp-azure] Résultat recherche OTP:', { otpRecord, otpError });
 
     if (otpError || !otpRecord) {
       return new Response(JSON.stringify({ error: 'Code invalide ou expiré' }), {

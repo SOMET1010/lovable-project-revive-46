@@ -155,23 +155,41 @@ class OTPUnifiedService {
    * Envoie un OTP par SMS via Azure MTN
    */
   private async sendSMSOTP(recipient: string, otp: string): Promise<OTPResult> {
-    try {
-      const message = `MonToit: Votre code de verification est ${otp}. Valide 10min. Ne partagez jamais ce code.`;
+    console.log('[OTP] 📤 Envoi SMS OTP:', { recipient, otp });
+    const formattedPhone = this.formatPhoneNumber(recipient);
+    console.log('[OTP] Numéro formaté:', formattedPhone);
 
+    const message = `MonToit: Votre code de verification est ${otp}. Valide 10min. Ne partagez jamais ce code.`;
+    console.log('[OTP] Message:', message);
+
+    try {
+      console.log('[OTP] Appel Edge Function send-sms-azure...');
       const { data, error } = await supabase.functions.invoke('send-sms-azure', {
         body: {
-          phone: this.formatPhoneNumber(recipient),
+          phone: formattedPhone,
           message,
           tag: 'AUTH_OTP',
         },
       });
 
+      console.log('[OTP] Réponse Edge Function:', { data, error });
+
       if (error) {
-        console.error('Erreur envoi OTP SMS:', error);
+        console.error('[OTP] ❌ Erreur envoi OTP SMS:', error);
+        console.error('[OTP] Error details:', {
+          message: error.message,
+          status: error.status,
+        });
         return {
           success: false,
           error: error.message || "Erreur lors de l'envoi du SMS",
         };
+      }
+
+      if (data?.status === 'ok') {
+        console.log('[OTP] ✅ SMS OTP envoyé avec succès:', { messageId: data.messageId });
+      } else {
+        console.error('[OTP] ❌ Statut error dans la réponse:', data);
       }
 
       return {
@@ -180,7 +198,7 @@ class OTPUnifiedService {
         messageId: data?.messageId,
       };
     } catch (error) {
-      console.error('Exception envoi OTP SMS:', error);
+      console.error('[OTP] ❌ Exception envoi OTP SMS:', error);
       return {
         success: false,
         error: "Erreur lors de l'envoi du SMS",
@@ -230,6 +248,8 @@ class OTPUnifiedService {
    * Envoie un code OTP
    */
   async sendOTP(request: OTPRequest): Promise<OTPResult> {
+    console.log('[OTP] 🚀 sendOTP appelé avec:', request);
+
     const {
       recipient,
       method,
@@ -238,8 +258,11 @@ class OTPUnifiedService {
       expiresIn = this.DEFAULT_EXPIRY,
     } = request;
 
+    console.log('[OTP] Paramètres:', { recipient, method, userName, purpose, expiresIn });
+
     // Validation de base
     if (!recipient || !method) {
+      console.error('[OTP] ❌ Destinataire ou méthode manquant');
       return {
         success: false,
         error: 'Destinataire et méthode requis',
@@ -248,7 +271,10 @@ class OTPUnifiedService {
 
     // Valider la cohérence email/méthode
     const recipientType = this.detectRecipientType(recipient);
+    console.log('[OTP] Type détecté:', recipientType);
+
     if (method === 'email' && recipientType !== 'email') {
+      console.error('[OTP] ❌ Méthode email incompatible avec le destinataire');
       return {
         success: false,
         error: 'Méthode email incompatible avec le destinataire',
@@ -256,25 +282,43 @@ class OTPUnifiedService {
     }
 
     if ((method === 'sms' || method === 'whatsapp') && recipientType !== 'phone') {
+      console.error('[OTP] ❌ Méthode SMS/WhatsApp incompatible avec le destinataire');
       return {
         success: false,
         error: 'Méthode SMS/WhatsApp incompatible avec le destinataire',
       };
     }
 
+    // Vérifier le rate limiting
+    console.log('[OTP] Vérification rate limit...');
+    const rateLimitCheck = await this.checkRateLimit(recipient, 'otp-send', 5, 3);
+    if (!rateLimitCheck.allowed) {
+      console.error('[OTP] ❌ Rate limit dépassé:', rateLimitCheck);
+      return {
+        success: false,
+        error: `Trop de tentatives. Réessayez dans ${rateLimitCheck.remainingTime} secondes.`,
+      };
+    }
+    console.log('[OTP] ✅ Rate limit OK');
+
     // Générer l'OTP
     const otp = this.generateOTP();
+    console.log('[OTP] 🔐 OTP généré (longueur:', otp.length, ')');
 
     // Stocker l'OTP
+    console.log('[OTP] 💾 Stockage OTP en base...');
     const storageResult = await this.storeOTP(recipient, otp, method, expiresIn, purpose);
     if (!storageResult.success) {
+      console.error('[OTP] ❌ Erreur stockage OTP:', storageResult.error);
       return {
         success: false,
         error: storageResult.error,
       };
     }
+    console.log('[OTP] ✅ OTP stocké avec succès');
 
     // Envoyer selon la méthode
+    console.log('[OTP] 📤 Envoi OTP par', method);
     let sendResult: OTPResult;
 
     switch (method) {
@@ -288,12 +332,14 @@ class OTPUnifiedService {
         sendResult = await this.sendWhatsAppOTP(recipient, otp);
         break;
       default:
+        console.error('[OTP] ❌ Méthode non supportée:', method);
         return {
           success: false,
           error: 'Méthode non supportée',
         };
     }
 
+    console.log('[OTP] Résultat final:', sendResult);
     return sendResult;
   }
 

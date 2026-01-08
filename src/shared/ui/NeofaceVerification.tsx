@@ -37,8 +37,9 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
 }) => {
   const hasDocument = Boolean(cniPhotoUrl);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [status, setStatus] = useState<
-    'idle' | 'uploading' | 'waiting' | 'polling' | 'success' | 'error'
+    'idle' | 'uploading' | 'waiting' | 'polling' | 'success' | 'error' | 'cancelled'
   >('idle');
   const [error, setError] = useState<string | null>(null);
   const [_documentId, setDocumentId] = useState<string | null>(null);
@@ -127,6 +128,8 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     verifyId: string
   ): Promise<StatusResponse> => {
     try {
+      console.log('[NeoFace] Checking status:', { docId, verifyId, attempts });
+
       const { data, error } = await supabase.functions.invoke('neoface-verify', {
         body: {
           action: 'check_status',
@@ -135,16 +138,22 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         },
       });
 
+      console.log('[NeoFace] Status response:', { data, error });
+
       if (error) {
         throw new Error(error.message || 'Échec de la vérification du statut');
+      }
+
+      if (!data) {
+        throw new Error('Aucune donnée reçue du serveur');
       }
 
       return data as StatusResponse;
     } catch (err) {
       console.error('[NeoFace] Erreur lors de la vérification du statut:', err);
 
-      // En cas d'erreur 403, on simule un échec temporaire
-      if (err instanceof Error && err.message.includes('403')) {
+      // En cas d'erreur 403 ou de timeout, on simule un échec après quelques tentatives
+      if (err instanceof Error && (err.message.includes('403') || err.message.includes('timeout'))) {
         // Simuler une réponse d'échec après quelques tentatives
         const maxRetries = 5;
         if (attempts >= maxRetries) {
@@ -183,8 +192,36 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         windowCheckIntervalRef.current = null;
         selfieWindowRef.current = null;
         setWindowClosed(true);
+        // Donner plus de temps pour la vérification après fermeture de la fenêtre
+        // Le selfie peut être validé après fermeture
       }
     }, 1000);
+  };
+
+  const handleCancel = () => {
+    setIsCancelling(true);
+    // Arrêter tous les timers et intervals
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    if (windowCheckIntervalRef.current) {
+      clearInterval(windowCheckIntervalRef.current);
+      windowCheckIntervalRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
+      selfieWindowRef.current.close();
+      selfieWindowRef.current = null;
+    }
+
+    setStatus('cancelled');
+    setError('Vérification annulée par l\'utilisateur');
+    setIsCancelling(false);
+    setIsVerifying(false);
   };
 
   const startPolling = (docId: string, verifyId: string) => {
@@ -193,7 +230,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     const hasWindow = Boolean(selfieWindowRef.current && !selfieWindowRef.current.closed);
     setWindowClosed(!hasWindow);
     let pollAttempts = 0;
-    const maxAttempts = 100;
+    const maxAttempts = 40; // 40 * 3 secondes = 2 minutes au lieu de 5 minutes
 
     timeoutRef.current = setTimeout(
       () => {
@@ -202,14 +239,14 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
         }
         setStatus('error');
         setError(
-          "Timeout: La vérification n'a pas été complétée dans les délais. Veuillez réessayer."
+          "Timeout: La vérification n'a pas été complétée dans les délais (2 minutes). Veuillez réessayer."
         );
         if (selfieWindowRef.current && !selfieWindowRef.current.closed) {
           selfieWindowRef.current.close();
         }
       },
-      5 * 60 * 1000
-    );
+      2 * 60 * 1000
+    ); // 2 minutes au lieu de 5 minutes
 
     if (hasWindow) {
       startWindowMonitor();
@@ -448,6 +485,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
     setProgress('');
     setIsVerifying(false);
     setWindowClosed(false);
+    setIsCancelling(false);
 
     if (pollingIntervalRef.current) {
       clearInterval(pollingIntervalRef.current);
@@ -531,7 +569,7 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           </div>
         )}
 
-        {status !== 'idle' && status !== 'success' && (
+        {status !== 'idle' && status !== 'success' && status !== 'cancelled' && (
           <div className="bg-[#F16522]/10 border border-[#F16522]/30 rounded-xl p-4">
             <div className="flex items-center gap-3">
               <Loader2 className="h-5 w-5 text-[#F16522] animate-spin flex-shrink-0" />
@@ -541,6 +579,17 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
                   <p className="text-xs text-[#F16522] mt-1">Tentative {attempts}</p>
                 )}
               </div>
+              {(status === 'polling' || status === 'waiting' || status === 'uploading') && !isCancelling && (
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  size="small"
+                  className="border-red-300 text-red-600 hover:bg-red-50 text-xs px-3 py-1.5"
+                  disabled={isCancelling}
+                >
+                  {isCancelling ? 'Annulation...' : 'Annuler'}
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -602,6 +651,18 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           </div>
         )}
 
+        {status === 'cancelled' && error && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-900">Vérification annulée</p>
+                <p className="text-sm text-amber-700 mt-1">{error}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {status === 'idle' && (
           <Button
             onClick={handleVerification}
@@ -615,7 +676,6 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
               </>
             ) : (
               <>
-                <Camera className="mr-2 h-4 w-4" />
                 {hasDocument ? 'Commencer la Vérification' : 'Ajoutez une photo pour commencer'}
               </>
             )}
@@ -630,6 +690,16 @@ const NeofaceVerification: React.FC<NeofaceVerificationProps> = ({
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             Réessayer
+          </Button>
+        )}
+
+        {status === 'cancelled' && (
+          <Button
+            onClick={handleRetry}
+            variant="outline"
+            className="w-full border-[#3C2A1E] text-[#3C2A1E] hover:bg-[#3C2A1E]/5"
+          >
+            Recommencer
           </Button>
         )}
 

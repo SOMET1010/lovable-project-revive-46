@@ -408,9 +408,10 @@ export default function EnhancedProfilePage() {
                   description="Vérification biométrique NeoFace avec contrôle de vivacité"
                   verified={facialStatus === 'verified'}
                   score={profile?.facial_verification_score}
-                  onVerify={() => navigate('/verification-biometrique')}
-                  showButton={facialStatus !== 'verified'}
+                  onVerify={() => navigate('/verification-biometrique?reset=true')}
+                  showButton={true}
                   status={facialStatus || 'pending'}
+                  allowRetry={facialStatus === 'verified'}
                 />
               </div>
 
@@ -532,6 +533,7 @@ function VerificationItem({
   onVerify,
   showButton = true,
   status = 'pending',
+  allowRetry = false,
 }: {
   title: string;
   description: string;
@@ -540,6 +542,7 @@ function VerificationItem({
   onVerify?: () => void;
   showButton?: boolean;
   status?: 'pending' | 'verified' | 'failed' | null;
+  allowRetry?: boolean;
 }) {
   const getStatusConfig = () => {
     if (verified || status === 'verified') {
@@ -589,7 +592,7 @@ function VerificationItem({
         >
           {statusConfig.label}
         </span>
-        {showButton && !verified && onVerify && (
+        {showButton && onVerify && (!verified || allowRetry) && (
           <Button
             onClick={onVerify}
             variant="outline"
@@ -604,8 +607,8 @@ function VerificationItem({
                 viewBox="0 0 24 24"
                 aria-hidden="true"
               >
-                {status === 'failed' ? (
-                  // Icône de rafraîchissement pour "Réessayer"
+                {status === 'failed' || allowRetry ? (
+                  // Icône de rafraîchissement pour "Réessayer" ou "Refaire"
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -622,7 +625,7 @@ function VerificationItem({
                   />
                 )}
               </svg>
-              <span>{status === 'failed' ? 'Réessayer' : 'Faire la vérification'}</span>
+              <span>{status === 'failed' ? 'Réessayer' : allowRetry && verified ? 'Refaire la vérification' : 'Faire la vérification'}</span>
             </span>
           </Button>
         )}

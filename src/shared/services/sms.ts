@@ -27,24 +27,38 @@ interface SmsResult {
  * @param tag - Label optionnel pour tracking (ex: "OTP", "NOTIF")
  */
 export async function sendSms(phone: string, message: string, tag?: string): Promise<SmsResult> {
+  console.log('[sms.service] 📤 Envoi SMS:', { phone, message, tag });
+  console.log('[sms.service] Longueur message:', message.length, 'caractères');
+
   try {
+    console.log('[sms.service] Appel Edge Function send-sms-azure...');
     const { data, error } = await supabase.functions.invoke('send-sms-azure', {
       body: { phone, message, tag },
     });
 
+    console.log('[sms.service] Réponse Edge Function:', { data, error });
+
     if (error) {
-      console.error('[sms.service] Edge function error:', error.message);
+      console.error('[sms.service] ❌ Edge function error:', error);
+      console.error('[sms.service] Error details:', {
+        message: error.message,
+        status: error.status,
+        statusText: error.statusText,
+      });
       return { success: false, error: error.message };
     }
 
     if (data?.status === 'ok') {
+      console.log('[sms.service] ✅ SMS envoyé avec succès:', { messageId: data.messageId });
       return { success: true, messageId: data.messageId };
     }
 
+    console.error('[sms.service] ❌ Erreur dans la réponse:', data);
     return { success: false, error: data?.reason || 'Erreur inconnue' };
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Erreur réseau';
-    console.error('[sms.service] Exception:', errorMessage);
+    console.error('[sms.service] ❌ Exception:', errorMessage);
+    console.error('[sms.service] Exception details:', err);
     return { success: false, error: errorMessage };
   }
 }

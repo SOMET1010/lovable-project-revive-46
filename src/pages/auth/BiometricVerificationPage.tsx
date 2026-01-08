@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Camera,
   FileCheck,
@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   Upload,
   AlertCircle,
+  X,
 } from 'lucide-react';
 import { FormStepper, FormStepContent, useFormStepper } from '@/shared/ui/FormStepper';
 import NeofaceVerification from '@/shared/ui/NeofaceVerification';
@@ -19,6 +20,7 @@ import { getPublicUrl, addCacheBuster } from '@/services/storage/storageService'
 
 export default function BiometricVerificationPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, profile } = useAuth();
   const { step, slideDirection, nextStep, prevStep, goToStep, resetStepper } = useFormStepper(1, 3);
 
@@ -29,11 +31,36 @@ export default function BiometricVerificationPage() {
     score?: number;
     message?: string;
   } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const hasInitialized = useRef(false);
+  const isResetting = useRef(false);
+  const [verificationAttempt, setVerificationAttempt] = useState(0);
 
+  // Réinitialiser les états quand on arrive sur la page avec reset=true
   useEffect(() => {
-    // Pre-fill with avatar if available
-    if (profile?.avatar_url) {
+    const hasResetParam = location.search.includes('reset=true');
+
+    if (hasResetParam && !isResetting.current) {
+      // Marquer le reset en cours pour éviter les boucles
+      isResetting.current = true;
+      // Réinitialiser tous les états
+      setVerificationResult(null);
+      resetStepper();
+      setCniPhotoUrl(null);
+      // Nettoyer le flag après un court délai
+      setTimeout(() => {
+        isResetting.current = false;
+      }, 100);
+    }
+  }, [location.search, resetStepper]);
+
+  // Pré-remplir avec l'avatar seulement à la première initialization
+  useEffect(() => {
+    if (!hasInitialized.current && profile?.avatar_url) {
       setCniPhotoUrl(profile.avatar_url);
+      hasInitialized.current = true;
+    } else if (!hasInitialized.current && !profile?.avatar_url) {
+      hasInitialized.current = true;
     }
   }, [profile]);
 
@@ -139,6 +166,27 @@ export default function BiometricVerificationPage() {
     });
     toast.error(`Vérification échouée: ${error}`);
     resetStepper();
+    // Incrémenter pour forcer le remontage du composant au prochain essai
+    setVerificationAttempt((prev) => prev + 1);
+  };
+
+  const handleStartVerification = () => {
+    // Réinitialiser le résultat et incrémenter la tentative avant de passer à l'étape 3
+    setVerificationResult(null);
+    setVerificationAttempt((prev) => prev + 1);
+    nextStep();
+  };
+
+  const handleChangePhoto = () => {
+    // Ouvrir directement le sélecteur de fichier sans effacer l'URL actuelle
+    // L'URL sera mise à jour seulement quand le nouveau fichier est uploadé avec succès
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/locataire/profil?tab=verification');
   };
 
   const stepLabels = ['Instructions', 'Photo CNI', 'Vérification'];
@@ -267,7 +315,7 @@ export default function BiometricVerificationPage() {
 
               {cniPhotoUrl ? (
                 <div className="space-y-4">
-                  <div className="flex justify-center">
+                  <div className="flex justify-center relative">
                     <img
                       src={cniPhotoUrl}
                       alt="Photo CNI"
@@ -278,16 +326,34 @@ export default function BiometricVerificationPage() {
                           e
                         );
                         console.error('[BiometricVerification] URL qui a échoué:', cniPhotoUrl);
+                        setCniPhotoUrl(null);
                       }}
                       onLoad={(e) => {
                         console.log('[BiometricVerification] Image CNI chargée avec succès');
                       }}
                     />
                   </div>
-                  <p className="text-center text-sm text-green-600 font-medium">
-                    ✓ Photo prête pour la vérification
-                  </p>
-                  {/* Debug info - à retirer en prod */}
+                  <div className="text-center space-y-2">
+                    <p className="text-sm text-green-600 font-medium">
+                      ✓ Photo prête pour la vérification
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleChangePhoto}
+                      className="text-sm text-[#F16522] hover:text-[#D95318] font-medium underline underline-offset-2"
+                    >
+                      Changer la photo
+                    </button>
+                  </div>
+                  {/* Input file caché pour le changement de photo */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    disabled={isUploading}
+                  />
                 </div>
               ) : (
                 <label className="block">
@@ -310,13 +376,15 @@ export default function BiometricVerificationPage() {
 
               <div className="flex gap-4 mt-8">
                 <button
-                  onClick={prevStep}
+                  type="button"
+                  onClick={handleCancel}
                   className="flex-1 py-3 border-2 border-[#3C2A1E]/20 text-[#3C2A1E] rounded-xl font-semibold hover:bg-[#3C2A1E]/5 transition-colors"
                 >
-                  Retour
+                  Annuler
                 </button>
                 <button
-                  onClick={nextStep}
+                  type="button"
+                  onClick={handleStartVerification}
                   disabled={!cniPhotoUrl}
                   className="flex-1 py-3 bg-[#F16522] text-white rounded-xl font-semibold hover:bg-[#D95318] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -355,6 +423,7 @@ export default function BiometricVerificationPage() {
               <>
                 {cniPhotoUrl && user && (
                   <NeofaceVerification
+                    key={`${cniPhotoUrl}-${verificationAttempt}`}
                     userId={user.id}
                     cniPhotoUrl={cniPhotoUrl}
                     onVerified={handleVerified}
@@ -362,6 +431,7 @@ export default function BiometricVerificationPage() {
                   />
                 )}
                 <button
+                  type="button"
                   onClick={prevStep}
                   className="w-full py-3 border-2 border-[#3C2A1E]/20 text-[#3C2A1E] rounded-xl font-semibold hover:bg-[#3C2A1E]/5 transition-colors"
                 >
