@@ -60,12 +60,42 @@ function FooterContent() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [emailError, setEmailError] = useState('');
+
+  // Email validation regex (RFC 5322 compliant pattern)
+  const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validateEmail = (emailValue: string): boolean => {
+    return EMAIL_REGEX.test(emailValue);
+  };
 
   const handleNewsletterSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Validate email format
+    if (!email.trim()) {
+      setEmailError('Veuillez saisir une adresse email.');
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setEmailError('Veuillez saisir une adresse email valide (ex: nom@exemple.com).');
+      return;
+    }
+
+    // Clear error and show success
+    setEmailError('');
     setSubscribed(true);
     setEmail('');
     setTimeout(() => setSubscribed(false), 3000);
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    // Clear error when user starts typing
+    if (emailError && e.target.value) {
+      setEmailError('');
+    }
   };
 
   const currentYear = new Date().getFullYear();
@@ -112,7 +142,11 @@ function FooterContent() {
                 { Icon: Facebook, href: 'https://facebook.com/montoit', label: 'Facebook' },
                 { Icon: Twitter, href: 'https://twitter.com/montoit', label: 'Twitter' },
                 { Icon: Instagram, href: 'https://instagram.com/montoit', label: 'Instagram' },
-                { Icon: Linkedin, href: 'https://www.linkedin.com/company/montoit', label: 'LinkedIn' },
+                {
+                  Icon: Linkedin,
+                  href: 'https://www.linkedin.com/company/montoit',
+                  label: 'LinkedIn',
+                },
               ].map(({ Icon, href, label }) => (
                 <a
                   key={label}
@@ -186,18 +220,31 @@ function FooterContent() {
 
             <form onSubmit={handleNewsletterSubmit} className="space-y-3 mb-8">
               <div className="relative">
-                <span className="absolute left-4 inset-y-0 flex items-center pointer-events-none">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center pointer-events-none z-10">
                   <Mail className="w-4 h-4 text-[#E8D4C5]/50" />
                 </span>
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Votre email"
+                  onChange={handleEmailChange}
+                  placeholder="      Votre email"
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-11 pr-4 text-sm text-white placeholder:text-[#E8D4C5]/30 focus:outline-none focus:border-[#F16522] focus:ring-1 focus:ring-[#F16522] transition-all"
+                  className={`w-full bg-white/5 border rounded  text-sm text-white placeholder:text-[#E8D4C5]/30 focus:outline-none focus:ring-2 transition-all ${
+                    emailError
+                      ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/30'
+                      : 'border-white/10 focus:border-[#F16522] focus:ring-[#F16522]/30'
+                  }`}
                 />
               </div>
+
+              {/* Error message */}
+              {emailError && (
+                <p className="text-red-400 text-xs flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  {emailError}
+                </p>
+              )}
+
               <button
                 type="submit"
                 className={`w-full rounded-xl py-3 font-semibold flex items-center justify-center gap-2 transition-all duration-300 group ${
