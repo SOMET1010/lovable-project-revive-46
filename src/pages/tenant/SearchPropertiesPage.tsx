@@ -70,9 +70,16 @@ export default function SearchPropertiesPage() {
     hasMore,
     loadMore,
     totalCount,
-  } = useInfiniteProperties({ ...appliedFilters, sortBy });
+  } = useInfiniteProperties({ ...appliedFilters, sortBy, pageSize: 99999 });
 
   const [error, setError] = useState<string | null>(null);
+
+  // Calculate geolocated vs non-geolocated properties for accurate map counter
+  const geolocatedProperties = properties.filter(
+    (p) => p.longitude !== null && p.latitude !== null
+  );
+  const nonGeolocatedCount = properties.length - geolocatedProperties.length;
+  const geolocatedCount = geolocatedProperties.length;
 
   // Sync URL params to applied filters on mount and URL change
   useEffect(() => {
@@ -86,13 +93,8 @@ export default function SearchPropertiesPage() {
   }, [searchParams]);
 
   const clearFilters = () => {
-    setAppliedFilters({
-      city: '',
-      propertyType: '',
-      minPrice: '',
-      maxPrice: '',
-      bedrooms: '',
-    });
+    // Only update URL params - let the sync useEffect update appliedFilters
+    // This avoids race conditions and ensures single source of truth
     setError(null);
     setSearchParams(new URLSearchParams());
   };
@@ -233,10 +235,31 @@ export default function SearchPropertiesPage() {
         {/* Barre d'outils (Tri & Vue) - Espacement réduit */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-5">
           <div className="flex items-center gap-2 text-sm" style={{ color: COLORS.grisTexte }}>
-            <span className="font-bold" style={{ color: COLORS.chocolat }}>
-              {totalCount}
-            </span>{' '}
-            résultats trouvés
+            {activeView === 'map' ? (
+              <>
+                <span className="font-bold" style={{ color: COLORS.chocolat }}>
+                  {geolocatedCount}
+                </span>{' '}
+                bien{geolocatedCount > 1 ? 's' : ''} sur la carte
+                {nonGeolocatedCount > 0 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                    +{nonGeolocatedCount} non géolocalisé{nonGeolocatedCount > 1 ? 's' : ''}
+                  </span>
+                )}
+              </>
+            ) : (
+              <>
+                <span className="font-bold" style={{ color: COLORS.chocolat }}>
+                  {properties.length}
+                </span>{' '}
+                bien{properties.length > 1 ? 's' : ''} trouvé{properties.length > 1 ? 's' : ''}
+                {nonGeolocatedCount > 0 && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                    ({nonGeolocatedCount} sans localisation)
+                  </span>
+                )}
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
@@ -627,17 +650,31 @@ export default function SearchPropertiesPage() {
                 </div>
               </div>
               <div
-                className="w-full h-[calc(100%-44px)] rounded-[24px] overflow-hidden shadow-inner border"
+                className="w-full h-[calc(100%-44px)] rounded-[24px] overflow-hidden shadow-inner border relative"
                 style={{ borderColor: COLORS.border }}
               >
-                {properties.filter((p) => p.longitude !== null && p.latitude !== null).length >
-                0 ? (
+                {/* Map counter badge - shows geolocated properties count */}
+                {geolocatedCount > 0 && (
+                  <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm rounded-xl shadow-lg px-4 py-2 border" style={{ borderColor: COLORS.border }}>
+                    <div className="flex items-center gap-2 text-sm">
+                      <MapPin className="w-4 h-4" style={{ color: COLORS.orange }} />
+                      <span className="font-bold" style={{ color: COLORS.chocolat }}>
+                        {geolocatedCount}
+                      </span>
+                      <span style={{ color: COLORS.grisTexte }}>
+                        bien{geolocatedCount > 1 ? 's' : ''} sur la carte
+                      </span>
+                      {nonGeolocatedCount > 0 && (
+                        <span className="text-xs ml-2 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                          +{nonGeolocatedCount} non géolocalisé{nonGeolocatedCount > 1 ? 's' : ''}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {geolocatedCount > 0 ? (
                   <MapWrapper
-                    properties={
-                      properties.filter(
-                        (p) => p.longitude !== null && p.latitude !== null
-                      ) as unknown[]
-                    }
+                    properties={geolocatedProperties as unknown[]}
                     height="100%"
                     fitBounds={properties.length > 0}
                     useClusterMode={useClusterMode}
@@ -707,16 +744,31 @@ export default function SearchPropertiesPage() {
               </div>
             </div>
             <div
-              className="h-[400px] rounded-2xl overflow-hidden shadow-lg border"
+              className="h-[400px] rounded-2xl overflow-hidden shadow-lg border relative"
               style={{ borderColor: COLORS.border }}
             >
-              {properties.filter((p) => p.longitude !== null && p.latitude !== null).length > 0 ? (
+              {/* Map counter badge - mobile */}
+              {geolocatedCount > 0 && (
+                <div className="absolute top-3 left-3 z-[1000] bg-white/95 backdrop-blur-sm rounded-lg shadow-md px-3 py-1.5 border" style={{ borderColor: COLORS.border }}>
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <MapPin className="w-3.5 h-3.5" style={{ color: COLORS.orange }} />
+                    <span className="font-bold" style={{ color: COLORS.chocolat }}>
+                      {geolocatedCount}
+                    </span>
+                    <span style={{ color: COLORS.grisTexte }}>
+                      bien{geolocatedCount > 1 ? 's' : ''} sur la carte
+                    </span>
+                    {nonGeolocatedCount > 0 && (
+                      <span className="text-[10px] ml-1.5 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                        +{nonGeolocatedCount} non géo.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+              {geolocatedCount > 0 ? (
                 <MapWrapper
-                  properties={
-                    properties.filter(
-                      (p) => p.longitude !== null && p.latitude !== null
-                    ) as unknown[]
-                  }
+                  properties={geolocatedProperties as unknown[]}
                   height="100%"
                   fitBounds={properties.length > 0}
                   useClusterMode={useClusterMode}

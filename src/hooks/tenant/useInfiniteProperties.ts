@@ -55,6 +55,7 @@ export function useInfiniteProperties(
   const pageRef = useRef(0);
   const loadingRef = useRef(false);
   const filtersRef = useRef({ city, propertyType, minPrice, maxPrice, bedrooms, sortBy });
+  const fetchRef = useRef<((page: number, isLoadMore?: boolean) => Promise<void>) | null>(null);
 
   const buildQuery = useCallback(() => {
     let query = supabase
@@ -230,6 +231,11 @@ export function useInfiniteProperties(
     [buildQuery, enrichWithOwnerData, pageSize, sortBy]
   );
 
+  // Keep fetchRef updated with the latest fetchProperties
+  useEffect(() => {
+    fetchRef.current = fetchProperties;
+  }, [fetchProperties]);
+
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore) return;
     await fetchProperties(pageRef.current + 1, true);
@@ -242,6 +248,7 @@ export function useInfiniteProperties(
   }, [fetchProperties]);
 
   // Reset and refetch when filters or sort change
+  // Note: We use fetchRef to avoid circular dependency with fetchProperties
   useEffect(() => {
     const filtersChanged =
       filtersRef.current.city !== city ||
@@ -255,9 +262,13 @@ export function useInfiniteProperties(
       filtersRef.current = { city, propertyType, minPrice, maxPrice, bedrooms, sortBy };
       pageRef.current = 0;
       setHasMore(true);
-      fetchProperties(0, false);
+      // Call fetch through ref to avoid dependency cycle
+      // fetchRef.current will be set by the useEffect above
+      if (fetchRef.current) {
+        fetchRef.current(0, false);
+      }
     }
-  }, [city, propertyType, minPrice, maxPrice, bedrooms, sortBy, fetchProperties]);
+  }, [city, propertyType, minPrice, maxPrice, bedrooms, sortBy]);
 
   // Initial load
   useEffect(() => {
