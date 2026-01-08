@@ -253,13 +253,14 @@ export function useBrevoAuth() {
         if (result.success) {
           setStateField('success', 'Profil configuré ! Redirection...');
 
-          // Redirection selon le rôle
+          // Redirection selon le rôle - IMPORTANT: Use correct routes matching roleRoutes.ts
           const dashboardRoutes = {
-            locataire: '/tenant/dashboard',
-            proprietaire: '/owner/dashboard',
-            agence: '/agency/dashboard',
+            locataire: '/locataire/dashboard',
+            proprietaire: '/proprietaire/dashboard',
+            agence: '/agences/dashboard',
           };
 
+          console.log('useBrevoAuth - Redirecting to:', dashboardRoutes[role], 'for role:', role);
           setTimeout(() => {
             navigate(dashboardRoutes[role]);
           }, 1000);

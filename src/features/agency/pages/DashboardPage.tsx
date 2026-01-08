@@ -155,7 +155,7 @@ export default function AgencyDashboardPage() {
               </div>
             </div>
             <Link
-              to="/dashboard/ajouter-propriete"
+              to="/agences/ajouter-bien"
               className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors flex items-center gap-2"
             >
               <Plus className="h-5 w-5" />
@@ -225,7 +225,7 @@ export default function AgencyDashboardPage() {
                   <span>Biens en Gestion</span>
                 </h2>
                 <Link
-                  to="/dashboard/ajouter-propriete"
+                  to="/agences/ajouter-bien"
                   className="text-[#F16522] hover:underline text-sm font-medium"
                 >
                   + Ajouter
@@ -302,7 +302,7 @@ export default function AgencyDashboardPage() {
                     Commencez à gérer des biens pour vos clients
                   </p>
                   <Link
-                    to="/dashboard/ajouter-propriete"
+                    to="/agences/ajouter-bien"
                     className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-6 rounded-xl transition-colors inline-flex items-center"
                   >
                     <Plus className="h-5 w-5 mr-2" />
@@ -347,49 +347,49 @@ export default function AgencyDashboardPage() {
               <h3 className="text-lg font-bold text-[#2C1810] mb-4">Actions Rapides</h3>
               <div className="space-y-3">
                 <Link
-                  to="/dashboard/ajouter-propriete"
+                  to="/agences/ajouter-bien"
                   className="bg-[#F16522] hover:bg-[#d9571d] text-white font-semibold py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Ajouter un bien
                 </Link>
                 <Link
-                  to="/dashboard/agence/equipe"
+                  to="/agences/analytics"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Users className="h-5 w-5 mr-2" />
                   Mon équipe
                 </Link>
                 <Link
-                  to="/dashboard/agence/commissions"
+                  to="/agences/analytics"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Coins className="h-5 w-5 mr-2" />
                   Commissions
                 </Link>
                 <Link
-                  to="/dashboard/agence/proprietes"
+                  to="/agences/biens"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Home className="h-5 w-5 mr-2" />
                   Assignations
                 </Link>
                 <Link
-                  to="/dashboard/agence/candidatures"
+                  to="/agences/candidatures"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <UserPlus className="h-5 w-5 mr-2" />
                   Recrutement
                 </Link>
                 <Link
-                  to="/dashboard/agence/rapports"
+                  to="/agences/analytics"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <BarChart3 className="h-5 w-5 mr-2" />
                   Rapports
                 </Link>
                 <Link
-                  to="/dashboard/agence/parametres"
+                  to="/agences/profil"
                   className="border border-[#EFEBE9] hover:border-[#F16522] text-[#2C1810] font-medium py-3 px-4 rounded-xl transition-colors w-full flex items-center justify-center"
                 >
                   <Settings className="h-5 w-5 mr-2" />

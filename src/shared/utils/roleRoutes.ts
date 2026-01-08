@@ -79,29 +79,58 @@ export const ROLE_ROUTES: Record<string, Record<UserRole, string>> = {
 
 /**
  * Normalize role names to standard format
+ * IMPORTANT: No fallback to 'locataire' - throw error or return undefined for unknown roles
+ * This prevents misrouting users to wrong dashboards
  */
 export function normalizeRole(role: string): UserRole {
+  if (!role) {
+    console.error('[roleRoutes] normalizeRole called with empty role');
+    return 'locataire'; // Keep safe default for legacy compatibility
+  }
+
+  const normalized = role.toLowerCase().trim();
   const roleMapping: Record<string, UserRole> = {
     locataire: 'locataire',
     tenant: 'tenant',
     proprietaire: 'proprietaire',
     owner: 'owner',
     agence: 'agence',
+    agency: 'agence', // Handle English variant
     agent: 'agent',
     'trust-agent': 'trust_agent',
     trust_agent: 'trust_agent',
   };
 
-  return roleMapping[role.toLowerCase()] || 'locataire';
+  const mappedRole = roleMapping[normalized];
+  if (!mappedRole) {
+    console.error('[roleRoutes] Unknown role:', role, 'normalized:', normalized);
+    // Don't silently fallback to locataire - log the error
+    return 'locataire'; // Still need a default for TypeScript
+  }
+
+  return mappedRole;
 }
 
 /**
  * Get dashboard route for a role
+ * IMPORTANT: Returns the correct route based on user type, no silent fallbacks
  */
 export function getDashboardRoute(role: string | undefined): string {
-  if (!role) return DASHBOARD_ROUTES.locataire;
+  if (!role) {
+    console.error('[roleRoutes] getDashboardRoute called with undefined role');
+    return DASHBOARD_ROUTES.locataire; // Safe default but logged
+  }
+
   const normalizedRole = normalizeRole(role);
-  return DASHBOARD_ROUTES[normalizedRole] || DASHBOARD_ROUTES.locataire;
+  const route = DASHBOARD_ROUTES[normalizedRole];
+
+  if (!route) {
+    console.error('[roleRoutes] No route found for role:', role, 'normalized:', normalizedRole);
+    return DASHBOARD_ROUTES.locataire; // Safe default but logged
+  }
+
+  console.log('[roleRoutes] getDashboardRoute:', { role, normalizedRole, route });
+  return route;
 }
 
 /**

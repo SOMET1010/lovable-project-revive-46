@@ -45,11 +45,23 @@ export default function DashboardRouter() {
     // Redirect based on user_type from profile using centralized logic
     const userType = profile?.user_type || profile?.active_role;
 
+    // Log profile details for debugging
+    console.log('DashboardRouter - Profile details:', {
+      profileId: profile?.id,
+      profileUserType: profile?.user_type,
+      profileActiveRole: profile?.active_role,
+      resolvedUserType: userType,
+    });
+
     // If no user type but we have a user, try to continue with a default
     if (!userType) {
       console.warn('DashboardRouter - No user type defined for user:', user.id);
       // Instead of redirecting to inscription, try to get user metadata
       const userTypeFromMetadata = user.user_metadata?.user_type || user.user_metadata?.role;
+      console.log('DashboardRouter - Checking metadata:', {
+        metadata: user.user_metadata,
+        userTypeFromMetadata,
+      });
       if (userTypeFromMetadata) {
         const fallbackRoute = getDashboardRoute(userTypeFromMetadata);
         console.log(
