@@ -61,7 +61,9 @@ export default function ContextualRoleSwitcher() {
   }
 
   // If user has neither, show a "get started" state
+  // But only show "Publish" button to owners/agencies, NOT tenants
   const hasNoRoles = !isTenant && !isOwner && !loading;
+  const canPublishProperties = profile?.user_type === 'proprietaire' || profile?.user_type === 'agence';
 
   const isActiveTab = (href: string) => {
     if (href === '/locataire/profil') return location.pathname === '/locataire/profil';
@@ -163,21 +165,25 @@ export default function ContextualRoleSwitcher() {
               <div className="flex-1">
                 <p className="text-sm font-medium text-[#2C1810]">Commencez votre parcours</p>
                 <p className="text-xs text-[#6B5A4E] mt-0.5">
-                  Recherchez un logement ou publiez une annonce
+                  {canPublishProperties
+                    ? 'Publiez votre première annonce'
+                    : 'Recherchez votre logement idéal'}
                 </p>
                 <div className="flex gap-2 mt-3">
                   <Link
-                    to="/recherche"
+                    to={canPublishProperties ? '/recherche' : '/recherche'}
                     className="flex-1 px-3 py-1.5 text-xs font-medium text-center rounded-lg border border-[#EFEBE9] text-[#6B5A4E] hover:border-[#F16522] hover:text-[#F16522] transition-colors"
                   >
-                    Rechercher
+                    {canPublishProperties ? 'Explorer' : 'Rechercher'}
                   </Link>
-                  <Link
-                    to="/ajouter-propriete"
-                    className="flex-1 px-3 py-1.5 text-xs font-medium text-center rounded-lg bg-[#F16522] text-white hover:bg-[#D95318] transition-colors"
-                  >
-                    Publier
-                  </Link>
+                  {canPublishProperties && (
+                    <Link
+                      to="/ajouter-propriete"
+                      className="flex-1 px-3 py-1.5 text-xs font-medium text-center rounded-lg bg-[#F16522] text-white hover:bg-[#D95318] transition-colors"
+                    >
+                      Publier
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

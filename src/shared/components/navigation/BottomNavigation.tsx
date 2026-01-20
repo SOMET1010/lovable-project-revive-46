@@ -9,11 +9,12 @@ interface NavItem {
   href: string;
   badge?: number;
   requiresAuth?: boolean;
+  allowedUserTypes?: Array<'proprietaire' | 'agence' | 'locataire'>;
 }
 
 export default function BottomNavigation() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { count: unreadCount } = useUnreadCount();
 
   const isActive = (href: string) => {
@@ -24,7 +25,12 @@ export default function BottomNavigation() {
   const navItems: NavItem[] = [
     { icon: Home, label: 'Accueil', href: '/' },
     { icon: Search, label: 'Recherche', href: '/recherche' },
-    { icon: PlusCircle, label: 'Publier', href: '/ajouter-propriete' },
+    {
+      icon: PlusCircle,
+      label: 'Publier',
+      href: '/ajouter-propriete',
+      allowedUserTypes: ['proprietaire', 'agence'],
+    },
     {
       icon: MessageCircle,
       label: 'Messages',
@@ -52,6 +58,8 @@ export default function BottomNavigation() {
         {navItems.map((item) => {
           // Hide auth-required items for non-authenticated users
           if (item.requiresAuth && !user) return null;
+          // Hide items restricted to specific user types
+          if (item.allowedUserTypes && profile?.user_type && !item.allowedUserTypes.includes(profile.user_type as any)) return null;
 
           const active = isActive(item.href);
           const Icon = item.icon;

@@ -148,13 +148,15 @@ export default function UnifiedDashboardPage() {
                   <Search className="h-4 w-4" />
                   <span className="font-medium">Rechercher</span>
                 </Link>
-                <Link
-                  to="/ajouter-propriete"
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors shadow-lg shadow-orange-500/20"
-                >
-                  <PlusCircle className="h-4 w-4" />
-                  <span className="font-medium">Publier</span>
-                </Link>
+                {(profile?.user_type === 'proprietaire' || profile?.user_type === 'agence') && (
+                  <Link
+                    to="/ajouter-propriete"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors shadow-lg shadow-orange-500/20"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    <span className="font-medium">Publier</span>
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -208,8 +210,9 @@ export default function UnifiedDashboardPage() {
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-[#2C1810]">Bienvenue sur Mon Toit !</h3>
                   <p className="text-[#6B5A4E] mt-1">
-                    Vous n'avez pas encore de location ni de propriété. Commencez par rechercher un
-                    logement ou publiez votre première annonce.
+                    {profile?.user_type === 'proprietaire' || profile?.user_type === 'agence'
+                      ? 'Vous n\'avez pas encore de propriété. Publiez votre première annonce pour commencer.'
+                      : 'Vous n\'avez pas encore de location. Commencez par rechercher un logement.'}
                   </p>
                   <div className="flex flex-wrap gap-3 mt-4">
                     <Link
@@ -219,13 +222,15 @@ export default function UnifiedDashboardPage() {
                       <Search className="h-4 w-4" />
                       Rechercher un logement
                     </Link>
-                    <Link
-                      to="/ajouter-propriete"
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors font-medium shadow-lg shadow-orange-500/20"
-                    >
-                      <PlusCircle className="h-4 w-4" />
-                      Publier une propriété
-                    </Link>
+                    {(profile?.user_type === 'proprietaire' || profile?.user_type === 'agence') && (
+                      <Link
+                        to="/ajouter-propriete"
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F16522] text-white hover:bg-[#D95318] transition-colors font-medium shadow-lg shadow-orange-500/20"
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                        Publier une propriété
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

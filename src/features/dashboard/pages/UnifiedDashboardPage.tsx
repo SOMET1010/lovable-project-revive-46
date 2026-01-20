@@ -215,8 +215,9 @@ export default function UnifiedDashboardPage() {
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-[#2C1810]">Bienvenue sur Mon Toit !</h3>
                   <p className="text-[#6B5A4E] mt-1">
-                    Vous n'avez pas encore de location ni de propriété. Commencez par rechercher un
-                    logement ou publiez votre première annonce.
+                    {canPublishProperty
+                      ? 'Vous n\'avez pas encore de propriété. Publiez votre première annonce pour commencer.'
+                      : 'Vous n\'avez pas encore de location. Commencez par rechercher un logement.'}
                   </p>
                   <div className="flex flex-wrap gap-3 mt-4">
                     <Link

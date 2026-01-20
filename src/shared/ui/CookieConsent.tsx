@@ -2,8 +2,14 @@ import { useState, useEffect } from 'react';
 import { X, Cookie, Shield } from 'lucide-react';
 
 const COOKIE_CONSENT_KEY = 'montoit-cookie-consent';
+const COOKIE_CONSENT_EXPIRY_DAYS = 365; // 1 an
 
 export type ConsentStatus = 'pending' | 'accepted' | 'declined';
+
+interface ConsentData {
+  status: ConsentStatus;
+  timestamp: number;
+}
 
 export interface CookieConsentProps {
   onAccept?: () => void;
@@ -11,22 +17,27 @@ export interface CookieConsentProps {
 }
 
 export function CookieConsent({ onAccept, onDecline }: CookieConsentProps) {
-  // Production mode: always show consent banner once, no localStorage
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Show banner after a small delay for better UX
-    const timer = setTimeout(() => setIsVisible(true), 1500);
-    return () => clearTimeout(timer);
+    // Vérifier si le consentement a déjà été donné et n'a pas expiré
+    const consent = getCookieConsent();
+    if (!consent) {
+      // Afficher la bannière après un délai si pas de consentement valide
+      const timer = setTimeout(() => setIsVisible(true), 1500);
+      return () => clearTimeout(timer);
+    }
   }, []);
 
   const handleAccept = () => {
     setIsVisible(false);
+    setCookieConsent('accepted');
     onAccept?.();
   };
 
   const handleDecline = () => {
     setIsVisible(false);
+    setCookieConsent('declined');
     onDecline?.();
   };
 
@@ -113,15 +124,61 @@ export function CookieConsent({ onAccept, onDecline }: CookieConsentProps) {
   );
 }
 
-// Utility functions (production mode - no localStorage)
+/**
+ * Récupère le consentement des cookies depuis localStorage
+ * Retourne null si aucun consentement ou si expiré
+ */
 export function getCookieConsent(): ConsentStatus | null {
-  // Always return null in production (show banner once)
-  return null;
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const stored = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (!stored) return null;
+
+    const data: ConsentData = JSON.parse(stored);
+    const now = Date.now();
+    const expiryMs = COOKIE_CONSENT_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+
+    // Vérifier si le consentement a expiré
+    if (now - data.timestamp > expiryMs) {
+      localStorage.removeItem(COOKIE_CONSENT_KEY);
+      return null;
+    }
+
+    return data.status;
+  } catch {
+    return null;
+  }
 }
 
-// No-op in production (no localStorage)
+/**
+ * Enregistre le consentement des cookies dans localStorage
+ */
+export function setCookieConsent(status: ConsentStatus): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    const data: ConsentData = {
+      status,
+      timestamp: Date.now(),
+    };
+    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.warn('Impossible de sauvegarder le consentement:', error);
+  }
+}
+
+/**
+ * Réinitialise le consentement des cookies
+ */
 export function resetCookieConsent(): void {
-  // No-op in production
+  if (typeof window === 'undefined') return;
+
+  try {
+    localStorage.removeItem(COOKIE_CONSENT_KEY);
+  } catch (error) {
+    console.warn('Impossible de réinitialiser le consentement:', error);
+  }
 }
 
 export default CookieConsent;
