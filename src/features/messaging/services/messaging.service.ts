@@ -15,6 +15,8 @@ export interface Conversation {
     id: string;
     full_name: string | null;
     avatar_url: string | null;
+    phone: string | null;
+    email: string | null;
   };
   property?: {
     id: string;
@@ -96,7 +98,7 @@ class MessagingService {
         // Get other participant profile
         const { data: profile } = await supabase
           .from('profiles')
-          .select('id, full_name, avatar_url')
+          .select('id, full_name, avatar_url, phone, email')
           .eq('id', otherParticipantId)
           .single();
 
@@ -114,6 +116,8 @@ class MessagingService {
             id: otherParticipantId,
             full_name: null,
             avatar_url: null,
+            phone: null,
+            email: null,
           },
           property: propertiesMap.get(conv.property_id) ?? null,
           unread_count: count ?? 0,

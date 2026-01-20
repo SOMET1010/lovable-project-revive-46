@@ -367,27 +367,20 @@ export default function OwnerProfilePage() {
         {activeTab === 'agency' && (
           <div className="space-y-6">
             {isOwnerOnly && (
-              <div className="p-4 border border-amber-200 bg-amber-50 rounded-lg">
-                <p className="font-semibold text-amber-800 mb-1">Fonctionnalité agence</p>
-                <p className="text-amber-700 text-sm">
-                  Vous êtes identifié comme propriétaire. Pour activer les fonctionnalités agence
-                  (logo, identité et coordonnées d'agence), complétez vos informations ci-dessous ou
-                  créez un compte agence dédié.
+              <div className="p-4 border border-blue-200 bg-blue-50 rounded-lg">
+                <p className="font-semibold text-blue-800 mb-1">Fonctionnalité agence</p>
+                <p className="text-blue-700 text-sm">
+                  Vous êtes identifié comme propriétaire. Vous pouvez ajouter des informations
+                  d'agence à votre profil ou gérer vos mandats avec des agences immobilières.
                 </p>
                 <div className="mt-3 flex gap-2">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => navigate('/agence/inscription')}
-                    className="whitespace-nowrap"
-                  >
-                    Créer un compte agence
-                  </Button>
-                  <Button
-                    type="button"
                     onClick={() => navigate('/proprietaire/mes-mandats')}
                     className="whitespace-nowrap"
                   >
+                    <FileText className="w-4 h-4 mr-2" />
                     Voir mes mandats
                   </Button>
                 </div>

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Home, ArrowLeft, MoreVertical, Phone, Video } from 'lucide-react';
+import { Home, ArrowLeft, MoreVertical, Phone, Video, MessageCircle } from 'lucide-react';
 import { Message, Conversation, Attachment } from '../services/messaging.service';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
@@ -72,6 +72,40 @@ export function MessageThread({
     // TODO: ouvrir un menu déroulant avec options supplémentaires
   };
 
+  const formatPhoneNumberForWhatsApp = (phone: string | null | undefined): string => {
+    if (!phone) return '';
+
+    // Remove all non-numeric characters
+    let cleaned = phone.replace(/\D/g, '');
+
+    // If number starts with 0 (local format), replace with country code for Côte d'Ivoire
+    if (cleaned.startsWith('0')) {
+      cleaned = '225' + cleaned.substring(1);
+    }
+
+    // If number doesn't have country code, add Côte d'Ivoire code
+    if (!cleaned.startsWith('225') && cleaned.length === 10) {
+      cleaned = '225' + cleaned;
+    }
+
+    return cleaned;
+  };
+
+  const handleWhatsAppReply = () => {
+    const phone = conversation.other_participant?.phone;
+    if (!phone) {
+      alert('Ce contact n\'a pas de numéro de téléphone enregistré.');
+      return;
+    }
+
+    const formattedPhone = formatPhoneNumberForWhatsApp(phone);
+    const whatsappUrl = `https://wa.me/${formattedPhone}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const hasWhatsApp = conversation.other_participant?.phone &&
+    formatPhoneNumberForWhatsApp(conversation.other_participant.phone).length >= 10;
+
   return (
     <div className="flex flex-col h-full bg-[#FAF7F4]/50 relative z-10">
       {/* Header Premium */}
@@ -101,6 +135,15 @@ export function MessageThread({
         {/* Action buttons */}
         <div className="flex items-center gap-1">
           <SoundToggle />
+          {hasWhatsApp && (
+            <button
+              onClick={handleWhatsAppReply}
+              className="p-2.5 hover:bg-[#25D366]/10 rounded-full text-[#25D366] transition-colors"
+              title="Répondre via WhatsApp"
+            >
+              <MessageCircle className="h-5 w-5" />
+            </button>
+          )}
           <button
             onClick={handleVideoCall}
             className="p-2.5 hover:bg-[#FAF7F4] rounded-full text-[#6B5A4E] transition-colors"
