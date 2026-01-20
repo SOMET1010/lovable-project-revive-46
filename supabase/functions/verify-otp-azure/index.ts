@@ -131,16 +131,63 @@ Deno.serve(async (req: Request) => {
       .update({ used: true, used_at: new Date().toISOString() })
       .eq('id', otpRecord.id);
 
-    // Chercher le profil existant
-    const { data: existingProfile } = await supabaseAdmin
+    // Chercher le profil existant - essayer plusieurs formats
+    // 1. D'abord avec le format sans + (ex: 2250556462404)
+    const { data: existingProfile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('id, full_name, email, phone')
       .eq('phone', normalizedPhone)
       .maybeSingle();
 
+    console.log('[verify-otp-azure] Recherche profil 1 (sans +):', {
+      normalizedPhone,
+      found: !!existingProfile,
+      error: profileError?.message
+    });
+
+    // 2. Si pas trouvé, essayer avec le format E.164 (ex: +2250556462404)
+    let finalProfile = existingProfile;
+    if (!existingProfile && !profileError) {
+      const { data: profileWithE164, error: e164Error } = await supabaseAdmin
+        .from('profiles')
+        .select('id, full_name, email, phone')
+        .eq('phone', e164Phone)
+        .maybeSingle();
+
+      console.log('[verify-otp-azure] Recherche profil 2 (avec +):', {
+        e164Phone,
+        found: !!profileWithE164,
+        error: e164Error?.message
+      });
+
+      if (profileWithE164) {
+        finalProfile = profileWithE164;
+      }
+    }
+
+    // 3. Si toujours pas trouvé, utiliser l'email dérivé du numéro
+    if (!finalProfile && !profileError) {
+      const derivedEmail = `${normalizedPhone}@phone.montoit.ci`;
+      const { data: profileByEmail, error: emailError } = await supabaseAdmin
+        .from('profiles')
+        .select('id, full_name, email, phone')
+        .eq('email', derivedEmail)
+        .maybeSingle();
+
+      console.log('[verify-otp-azure] Recherche profil 3 (par email):', {
+        derivedEmail,
+        found: !!profileByEmail,
+        error: emailError?.message
+      });
+
+      if (profileByEmail) {
+        finalProfile = profileByEmail;
+      }
+    }
+
     // ========== CAS 1: UTILISATEUR EXISTANT → CONNEXION ==========
-    if (existingProfile) {
-      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(existingProfile.id);
+    if (finalProfile) {
+      const { data: userData } = await supabaseAdmin.auth.admin.getUserById(finalProfile.id);
 
       if (userData?.user?.email) {
         const { data: sessionData, error: sessionError } =
@@ -163,7 +210,7 @@ Deno.serve(async (req: Request) => {
           JSON.stringify({
             success: true,
             action: 'login',
-            userId: existingProfile.id,
+            userId: finalProfile.id,
             sessionUrl,
             isNewUser: false,
           }),
@@ -211,7 +258,7 @@ Deno.serve(async (req: Request) => {
     const userId = createdUser.user.id;
 
     // Créer le profil
-    const { error: profileError } = await supabaseAdmin.from('profiles').insert({
+    const { error: insertProfileError } = await supabaseAdmin.from('profiles').insert({
       id: userId,
       phone: normalizedPhone,
       email: generatedEmail,
@@ -221,8 +268,8 @@ Deno.serve(async (req: Request) => {
       profile_setup_completed: false,
     });
 
-    if (profileError) {
-      console.error('Error creating profile:', profileError);
+    if (insertProfileError) {
+      console.error('Error creating profile:', insertProfileError);
     }
 
     // Générer le magic link
