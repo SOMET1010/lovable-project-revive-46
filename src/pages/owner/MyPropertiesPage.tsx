@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Home, MapPin, Users, Calendar, Edit, Eye, Plus, Building2, Trash2 } from 'lucide-react';
+import { Home, MapPin, Users, Calendar, Edit, Eye, Plus, Building2, Trash2, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
 
@@ -15,6 +15,9 @@ interface Property {
   created_at: string;
   applications_count?: number;
   views_count: number;
+  main_image: string | null;
+  images_count?: number;
+  has_image?: boolean;
 }
 
 export default function MyPropertiesPage() {
@@ -31,7 +34,7 @@ export default function MyPropertiesPage() {
   const fetchProperties = async () => {
     if (!user) return;
 
-    // First, fetch properties
+    // First, fetch properties with main_image (if column exists)
     const { data: propertiesData, error: propertiesError } = await supabase
       .from('properties')
       .select('*')
@@ -44,18 +47,42 @@ export default function MyPropertiesPage() {
       return;
     }
 
-    // Then, for each property, count applications separately
+    // Then, for each property, count applications and images separately
     if (propertiesData) {
       const propertiesWithCounts = await Promise.all(
-        propertiesData.map(async (property) => {
-          const { count, error: countError } = await supabase
+        propertiesData.map(async (property: any) => {
+          // Count applications
+          const { count: appsCount, error: appsError } = await supabase
             .from('rental_applications')
             .select('*', { count: 'exact', head: true })
             .eq('property_id', property.id);
 
+          // Try to count total images from property_images table (may not exist)
+          let imagesCount = 0;
+          try {
+            const { count, error } = await supabase
+              .from('property_images')
+              .select('*', { count: 'exact', head: true })
+              .eq('property_id', property.id);
+            if (!error && count) {
+              imagesCount = count;
+            }
+          } catch {
+            // Table property_images doesn't exist, use 0 as default
+            imagesCount = 0;
+          }
+
+          // Determine if property has any image (from main_image or images count)
+          const hasImage = !!(property.main_image || property.image_url || imagesCount > 0);
+
           return {
             ...property,
-            applications_count: countError ? 0 : count || 0,
+            applications_count: appsError ? 0 : appsCount || 0,
+            images_count: imagesCount,
+            // Handle main_image field compatibility
+            main_image: property.main_image || property.image_url || null,
+            // Helper to determine if we should show image badge
+            has_image: hasImage,
           };
         })
       );
@@ -276,6 +303,7 @@ export default function MyPropertiesPage() {
               <table className="w-full">
                 <thead className="bg-[#FBFAF9] border-b border-[#EFEBE9]">
                   <tr>
+                    <th className="text-left p-6 font-semibold text-[#2C1810]">Image</th>
                     <th className="text-left p-6 font-semibold text-[#2C1810]">Propriété</th>
                     <th className="text-left p-6 font-semibold text-[#2C1810]">Localisation</th>
                     <th className="text-left p-6 font-semibold text-[#2C1810]">Loyer</th>
@@ -291,6 +319,35 @@ export default function MyPropertiesPage() {
                       key={property.id}
                       className="border-b border-[#EFEBE9] hover:bg-[#FBFAF9] transition-colors"
                     >
+                      <td className="p-6">
+                        <div className="relative">
+                          {property.main_image ? (
+                            <div className="relative group">
+                              <img
+                                src={property.main_image}
+                                alt={property.title}
+                                className="w-20 h-20 rounded-xl object-cover border border-[#EFEBE9]"
+                              />
+                              {/* Badge showing number of images if more than 1 */}
+                              {property.images_count && property.images_count > 1 && (
+                                <div className="absolute -top-2 -right-2 bg-[#F16522] text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg border-2 border-white">
+                                  {property.images_count}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="w-20 h-20 rounded-xl bg-[#FAF7F4] border border-[#EFEBE9] flex items-center justify-center relative">
+                              <ImageIcon className="w-8 h-8 text-[#A69B95]" />
+                              {/* Badge showing number of images if any */}
+                              {property.images_count && property.images_count > 0 && (
+                                <div className="absolute -top-2 -right-2 bg-[#F16522] text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg border-2 border-white">
+                                  {property.images_count}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </td>
                       <td className="p-6">
                         <div>
                           <h4 className="font-semibold text-[#2C1810]">{property.title}</h4>

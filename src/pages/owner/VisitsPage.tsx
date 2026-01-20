@@ -12,6 +12,8 @@ import {
   X,
   MoreVertical,
   ChevronRight,
+  ChevronDown,
+  Filter,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +21,24 @@ import { formatAddress } from '@/shared/utils/address';
 
 type VisitsMode = 'owner' | 'agency';
 type Filter = 'all' | 'upcoming' | 'past';
+
+// Period filter for visits
+type PeriodFilter = 'all' | 'last_7_days' | 'last_30_days' | 'last_3_months' | 'last_6_months' | 'last_year' | 'custom';
+
+interface PeriodFilterOption {
+  value: PeriodFilter;
+  label: string;
+}
+
+const PERIOD_FILTERS: PeriodFilterOption[] = [
+  { value: 'all', label: 'Toutes les périodes' },
+  { value: 'last_7_days', label: '7 derniers jours' },
+  { value: 'last_30_days', label: '30 derniers jours' },
+  { value: 'last_3_months', label: '3 derniers mois' },
+  { value: 'last_6_months', label: '6 derniers mois' },
+  { value: 'last_year', label: 'Dernière année' },
+  { value: 'custom', label: 'Personnalisé' },
+];
 
 interface VisitRow {
   id: string;
@@ -78,6 +98,12 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>('all');
   const [visits, setVisits] = useState<VisitRow[]>([]);
+
+  // Period filter states
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -168,6 +194,48 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
       return visitDate < now || visit.status === 'terminee' || visit.status === 'annulee';
     });
   }, [filter, visits]);
+
+  // Filter visits by period
+  const filteredByPeriod = useMemo(() => {
+    if (periodFilter === 'all') return filteredVisits;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    return filteredVisits.filter((visit) => {
+      const visitDate = new Date(`${visit.visit_date}T${visit.visit_time || '12:00'}`);
+
+      switch (periodFilter) {
+        case 'last_7_days':
+          return visitDate >= new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000) &&
+                 visitDate <= now;
+        case 'last_30_days':
+          return visitDate >= new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000) &&
+                 visitDate <= now;
+        case 'last_3_months':
+          return visitDate >= new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000) &&
+                 visitDate <= now;
+        case 'last_6_months':
+          return visitDate >= new Date(today.getTime() - 180 * 24 * 60 * 60 * 1000) &&
+                 visitDate <= now;
+        case 'last_year':
+          return visitDate >= new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000) &&
+                 visitDate <= now;
+        case 'custom':
+          if (!customStartDate || !customEndDate) return true;
+          const start = new Date(customStartDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(customEndDate);
+          end.setHours(23, 59, 59, 999);
+          return visitDate >= start && visitDate <= end;
+        default:
+          return true;
+      }
+    });
+  }, [filteredVisits, periodFilter, customStartDate, customEndDate]);
+
+  // Final displayed visits combining all filters
+  const displayedVisits = filteredByPeriod;
 
   const stats = useMemo(() => {
     const upcoming = visits.filter((v) => {
@@ -288,13 +356,109 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
         <StatCard label="Annulées" value={stats.cancelled} icon={<X className="h-5 w-5" />} color="red" />
       </div>
 
+      {/* Period Filter */}
+      <div className="bg-white rounded-[20px] border border-[#EFEBE9] p-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-5 w-5 text-[#6B5A4E]" />
+            <span className="text-sm font-medium text-[#2C1810]">Filtrer par période :</span>
+          </div>
+          <div className="relative flex-1 sm:flex-none">
+            <button
+              onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#EFEBE9] rounded-xl hover:bg-[#FBFAF9] transition-colors min-w-[200px] justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-[#6B5A4E]" />
+                <span className="text-sm text-[#2C1810]">
+                  {periodFilter !== 'all'
+                    ? PERIOD_FILTERS.find((f) => f.value === periodFilter)?.label || 'Période'
+                    : 'Toutes les périodes'}
+                </span>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-[#6B5A4E] transition-transform ${showPeriodDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showPeriodDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-[#EFEBE9] rounded-xl shadow-lg z-50">
+                <div className="p-2 space-y-1">
+                  {PERIOD_FILTERS.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setPeriodFilter(option.value);
+                        setShowPeriodDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodFilter === option.value
+                          ? 'bg-[#FFF5F0] text-[#F16522]'
+                          : 'text-[#2C1810] hover:bg-[#FBFAF9]'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom date range inputs */}
+                {periodFilter === 'custom' && (
+                  <div className="p-4 border-t border-[#EFEBE9] space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-[#2C1810] mb-1">
+                        Date de début
+                      </label>
+                      <input
+                        type="date"
+                        value={customStartDate}
+                        onChange={(e) => setCustomStartDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-[#EFEBE9] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[#2C1810] mb-1">
+                        Date de fin
+                      </label>
+                      <input
+                        type="date"
+                        value={customEndDate}
+                        onChange={(e) => setCustomEndDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-[#EFEBE9] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#F16522]/20 focus:border-[#F16522]"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Active filters display */}
+          {periodFilter !== 'all' && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-[#FFF5F0] border border-[#F16522]/10 rounded-xl">
+              <span className="text-sm font-medium text-[#F16522]">
+                {PERIOD_FILTERS.find((f) => f.value === periodFilter)?.label}
+              </span>
+              <button
+                onClick={() => {
+                  setPeriodFilter('all');
+                  setCustomStartDate('');
+                  setCustomEndDate('');
+                }}
+                className="text-[#F16522] hover:text-[#d9571d]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* List */}
       <div className="bg-white rounded-[20px] border border-[#EFEBE9] overflow-hidden shadow-sm">
         <div className="p-6 border-b border-[#EFEBE9] flex items-center justify-between bg-gradient-to-r from-[#FBFAF9] to-white">
           <div>
             <h2 className="text-xl font-bold text-[#2C1810]">Visites programmées</h2>
             <p className="text-[#6B5A4E] mt-1">
-              {filteredVisits.length} visite{filteredVisits.length > 1 ? 's' : ''} affichée{filteredVisits.length > 1 ? 's' : ''}
+              {displayedVisits.length} visite{displayedVisits.length > 1 ? 's' : ''} affichée{displayedVisits.length > 1 ? 's' : ''}
             </p>
           </div>
         </div>
@@ -303,23 +467,21 @@ function VisitsPage({ mode }: { mode: VisitsMode }) {
           <div className="flex items-center justify-center p-16">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F16522]" />
           </div>
-        ) : filteredVisits.length === 0 ? (
+        ) : displayedVisits.length === 0 ? (
           <div className="text-center py-16 px-6">
             <div className="w-20 h-20 bg-[#FFF5F0] rounded-full flex items-center justify-center mx-auto mb-6">
               <Calendar className="h-10 w-10 text-[#F16522]" />
             </div>
             <h3 className="text-xl font-semibold text-[#2C1810] mb-3">Aucune visite</h3>
             <p className="text-[#6B5A4E] max-w-md mx-auto">
-              {filter === 'upcoming'
-                ? 'Aucune visite programmée pour le moment.'
-                : filter === 'all'
-                  ? 'Vous n\'avez aucune visite programmée.'
-                  : 'Aucune visite correspondant à ce filtre.'}
+              {filter !== 'all' || periodFilter !== 'all'
+                ? 'Aucune visite ne correspond aux critères de filtration'
+                : 'Vous n\'avez aucune visite programmée.'}
             </p>
           </div>
         ) : (
           <div className="divide-y divide-[#EFEBE9]">
-            {filteredVisits.map((visit) => {
+            {displayedVisits.map((visit) => {
               const statusKey = visit.status || 'en_attente';
               const upcoming = isUpcoming(visit);
               const formattedDate = new Date(

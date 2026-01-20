@@ -73,7 +73,7 @@ export default function MyMandatesPage() {
 
       const { data } = await supabase
         .from('properties')
-        .select('id, title, city')
+        .select('id, title, city, monthly_rent')
         .eq('owner_id', user.id);
 
       setMyProperties((data || []) as Property[]);
@@ -116,7 +116,8 @@ export default function MyMandatesPage() {
     total: baseMandates.length,
     pending: baseMandates.filter((m) => m.status === 'pending').length,
     active: baseMandates.filter((m) => m.status === 'active').length,
-    expired: baseMandates.filter((m) => m.status === 'expired' || m.status === 'cancelled').length,
+    expired: baseMandates.filter((m) => m.status === 'expired').length,
+    cancelled: baseMandates.filter((m) => m.status === 'cancelled').length,
   };
 
   const handleInvite = async (params: Parameters<typeof createMandate>[0]) => {
@@ -199,7 +200,7 @@ export default function MyMandatesPage() {
       </div>
 
       <div className="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <div className="bg-card rounded-2xl p-4 border border-border">
             <div className="flex items-center gap-2 text-muted-foreground mb-1">
               <FileText className="h-4 w-4" />
@@ -222,11 +223,18 @@ export default function MyMandatesPage() {
             <p className="text-2xl font-bold text-foreground">{stats.active}</p>
           </div>
           <div className="bg-card rounded-2xl p-4 border border-border">
-            <div className="flex items-center gap-2 text-neutral-500 mb-1">
-              <XCircle className="h-4 w-4" />
-              <span className="text-sm">Terminés</span>
+            <div className="flex items-center gap-2 text-orange-500 mb-1">
+              <Clock className="h-4 w-4" />
+              <span className="text-sm">Expirés</span>
             </div>
             <p className="text-2xl font-bold text-foreground">{stats.expired}</p>
+          </div>
+          <div className="bg-card rounded-2xl p-4 border border-border">
+            <div className="flex items-center gap-2 text-red-600 mb-1">
+              <XCircle className="h-4 w-4" />
+              <span className="text-sm">Résiliés</span>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{stats.cancelled}</p>
           </div>
         </div>
 
@@ -253,7 +261,7 @@ export default function MyMandatesPage() {
               <option value="pending">En attente</option>
               <option value="active">Actifs</option>
               <option value="expired">Expirés</option>
-              <option value="cancelled">Annulés</option>
+              <option value="cancelled">Résiliés</option>
             </select>
           </div>
         </div>

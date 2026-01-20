@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Users,
   Search,
@@ -10,6 +10,8 @@ import {
   AlertCircle,
   Calendar,
   X,
+  ChevronDown,
+  Building2,
 } from 'lucide-react';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +41,24 @@ interface VisitFormData {
   notes: string;
 }
 
+// Period filter type
+type PeriodFilter = 'all' | 'last_7_days' | 'last_30_days' | 'last_3_months' | 'last_6_months' | 'last_year' | 'custom';
+
+interface PeriodFilterOption {
+  value: PeriodFilter;
+  label: string;
+}
+
+const PERIOD_FILTERS: PeriodFilterOption[] = [
+  { value: 'all', label: 'Toutes les périodes' },
+  { value: 'last_7_days', label: '7 derniers jours' },
+  { value: 'last_30_days', label: '30 derniers jours' },
+  { value: 'last_3_months', label: '3 derniers mois' },
+  { value: 'last_6_months', label: '6 derniers mois' },
+  { value: 'last_year', label: 'Dernière année' },
+  { value: 'custom', label: 'Personnalisé' },
+];
+
 export default function OwnerApplicationsPage() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
@@ -59,6 +79,12 @@ export default function OwnerApplicationsPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [propertyFilter, setPropertyFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Period filter states
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>('all');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+  const [showPeriodDropdown, setShowPeriodDropdown] = useState(false);
 
   // Modals
   const [selectedApplication, setSelectedApplication] = useState<ApplicationWithDetails | null>(
@@ -86,6 +112,44 @@ export default function OwnerApplicationsPage() {
 
     loadData();
   }, [user, profile, navigate, statusFilter, propertyFilter, searchTerm]);
+
+  // Filter applications by period
+  const filteredByPeriod = useMemo(() => {
+    if (periodFilter === 'all') return applications;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    return applications.filter((app) => {
+      const submittedDate = app.created_at ? new Date(app.created_at) : null;
+      if (!submittedDate) return false;
+
+      switch (periodFilter) {
+        case 'last_7_days':
+          return submittedDate >= new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+        case 'last_30_days':
+          return submittedDate >= new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        case 'last_3_months':
+          return submittedDate >= new Date(today.getTime() - 90 * 24 * 60 * 60 * 1000);
+        case 'last_6_months':
+          return submittedDate >= new Date(today.getTime() - 180 * 24 * 60 * 60 * 1000);
+        case 'last_year':
+          return submittedDate >= new Date(today.getTime() - 365 * 24 * 60 * 60 * 1000);
+        case 'custom':
+          if (!customStartDate || !customEndDate) return true;
+          const start = new Date(customStartDate);
+          start.setHours(0, 0, 0, 0);
+          const end = new Date(customEndDate);
+          end.setHours(23, 59, 59, 999);
+          return submittedDate >= start && submittedDate <= end;
+        default:
+          return true;
+      }
+    });
+  }, [applications, periodFilter, customStartDate, customEndDate]);
+
+  // Combine all filters for the final displayed applications
+  const displayedApplications = filteredByPeriod;
 
   const loadData = async () => {
     if (!user) return;
@@ -310,12 +374,146 @@ export default function OwnerApplicationsPage() {
               ))}
             </select>
           </div>
+          <div className="relative">
+            <button
+              onClick={() => setShowPeriodDropdown(!showPeriodDropdown)}
+              className="flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 hover:bg-neutral-50 transition-colors min-w-[200px] justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-neutral-400" />
+                <span className="text-sm text-neutral-700">
+                  {periodFilter !== 'all'
+                    ? PERIOD_FILTERS.find((f) => f.value === periodFilter)?.label || 'Période'
+                    : 'Période'}
+                </span>
+              </div>
+              <ChevronDown className={`h-4 w-4 text-neutral-400 transition-transform ${showPeriodDropdown ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showPeriodDropdown && (
+              <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-neutral-200 rounded-xl shadow-lg z-50">
+                <div className="p-2 space-y-1">
+                  {PERIOD_FILTERS.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setPeriodFilter(option.value);
+                        setShowPeriodDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        periodFilter === option.value
+                          ? 'bg-primary-50 text-primary-700'
+                          : 'text-neutral-700 hover:bg-neutral-50'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom date range inputs */}
+                {periodFilter === 'custom' && (
+                  <div className="p-4 border-t border-neutral-100 space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-700 mb-1">
+                        Date de début
+                      </label>
+                      <input
+                        type="date"
+                        value={customStartDate}
+                        onChange={(e) => setCustomStartDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-neutral-700 mb-1">
+                        Date de fin
+                      </label>
+                      <input
+                        type="date"
+                        value={customEndDate}
+                        onChange={(e) => setCustomEndDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Active Filters Display */}
+        {(statusFilter !== 'all' || propertyFilter !== 'all' || searchTerm !== '' || periodFilter !== 'all') && (
+          <div className="bg-primary-50 border border-primary-200 rounded-xl p-3 mb-6 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-primary-700 font-medium">Filtres actifs :</span>
+            {statusFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-primary-300 rounded-full text-sm text-primary-700">
+                <Clock className="h-3 w-3" />
+                {statusFilter === 'en_attente'
+                  ? 'En attente'
+                  : statusFilter === 'en_cours'
+                    ? 'En cours'
+                    : statusFilter === 'acceptee'
+                      ? 'Acceptées'
+                      : statusFilter === 'refusee'
+                        ? 'Refusées'
+                        : statusFilter}
+                <button
+                  onClick={() => setStatusFilter('all')}
+                  className="ml-1 text-primary-400 hover:text-primary-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {propertyFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-primary-300 rounded-full text-sm text-primary-700">
+                <Building2 className="h-3 w-3" />
+                {properties.find((p) => p.id === propertyFilter)?.title || 'Propriété'}
+                <button
+                  onClick={() => setPropertyFilter('all')}
+                  className="ml-1 text-primary-400 hover:text-primary-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {searchTerm !== '' && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-primary-300 rounded-full text-sm text-primary-700">
+                <Search className="h-3 w-3" />
+                "{searchTerm}"
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="ml-1 text-primary-400 hover:text-primary-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {periodFilter !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-primary-300 rounded-full text-sm text-primary-700">
+                <Calendar className="h-3 w-3" />
+                {PERIOD_FILTERS.find((f) => f.value === periodFilter)?.label || 'Période'}
+                <button
+                  onClick={() => {
+                    setPeriodFilter('all');
+                    setCustomStartDate('');
+                    setCustomEndDate('');
+                  }}
+                  className="ml-1 text-primary-400 hover:text-primary-600"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Applications List */}
-        {applications.length > 0 ? (
+        {displayedApplications.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {applications.map((application) => (
+            {displayedApplications.map((application) => (
               <ApplicationCard
                 key={application.id}
                 application={application}
@@ -334,8 +532,8 @@ export default function OwnerApplicationsPage() {
             </div>
             <h3 className="text-lg font-semibold text-neutral-900 mb-2">Aucune candidature</h3>
             <p className="text-neutral-500">
-              {statusFilter !== 'all'
-                ? `Aucune candidature avec le statut "${statusFilter === 'en_attente' ? 'En attente' : statusFilter === 'en_cours' ? 'En cours' : statusFilter === 'acceptee' ? 'Acceptée' : 'Refusée'}"`
+              {statusFilter !== 'all' || propertyFilter !== 'all' || searchTerm !== '' || periodFilter !== 'all'
+                ? 'Aucune candidature ne correspond aux critères de filtration'
                 : "Vous n'avez pas encore reçu de candidatures pour vos biens."}
             </p>
           </div>

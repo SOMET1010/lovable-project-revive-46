@@ -24,6 +24,7 @@ import {
   CreditCard,
   Wallet,
   Info,
+  Ban,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -38,6 +39,7 @@ import { toast } from '@/hooks/shared/useSafeToast';
 import { format, addYears, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui';
+import TerminatedContractsTab from './TerminatedContractsTab';
 
 // Types
 interface Contract {
@@ -161,6 +163,13 @@ const FILTER_OPTIONS = [
   { value: 'expire', label: 'Expirés' },
 ];
 
+// Tab options
+type TabValue = 'actifs' | 'resilies';
+const TAB_OPTIONS: { value: TabValue; label: string; icon: typeof CheckCircle }[] = [
+  { value: 'actifs', label: 'Contrats Actifs', icon: CheckCircle },
+  { value: 'resilies', label: 'Résiliés', icon: Ban },
+];
+
 // Taux d'indexation légal en Côte d'Ivoire (exemple)
 const LEGAL_INDEXATION_RATE = 0.02; // 2% annuel
 
@@ -179,6 +188,7 @@ export default function OwnerContractsPage() {
     expire: 0,
     resilie: 0,
   });
+  const [activeTab, setActiveTab] = useState<TabValue>('actifs');
   const [filter, setFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -654,7 +664,44 @@ export default function OwnerContractsPage() {
       </div>
 
       <div className="w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-8 space-y-8">
-        {/* Stats Dashboard */}
+        {/* Tabs Navigation */}
+        <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100 inline-flex gap-2">
+          {TAB_OPTIONS.map((tab) => {
+            const TabIcon = tab.icon;
+            const isActive = activeTab === tab.value;
+            return (
+              <button
+                key={tab.value}
+                onClick={() => setActiveTab(tab.value)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                  isActive
+                    ? 'bg-[#F16522] text-white shadow-md'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <TabIcon className="h-4 w-4" />
+                {tab.label}
+                {tab.value === 'actifs' && (
+                  <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                    {stats.actif}
+                  </span>
+                )}
+                {tab.value === 'resilies' && (
+                  <span className="ml-1 px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                    {stats.resilie}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'resilies' ? (
+          <TerminatedContractsTab stats={stats} onRefresh={loadContracts} />
+        ) : (
+          <>
+        {/* Stats Dashboard - Only show for Actifs tab */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
@@ -1120,9 +1167,14 @@ export default function OwnerContractsPage() {
             })}
           </div>
         )}
+        </>
+        )}
       </div>
 
-      {/* Renewal Modal */}
+      {/* Modals - Only show for Actifs tab */}
+      {activeTab === 'actifs' && (
+        <>
+      {/* Renewal Modal - Only show for Actifs tab */}
       <Dialog open={showRenewalModal} onOpenChange={setShowRenewalModal}>
         <DialogContent className="rounded-2xl">
           <DialogHeader>
@@ -1422,6 +1474,8 @@ export default function OwnerContractsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </>
+      )}
     </>
   );
 }
