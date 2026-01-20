@@ -36,8 +36,8 @@ export default function AuthCallback() {
         // Si oui, DashboardRouter redirigera vers le bon dashboard
         // Si non, l'utilisateur doit choisir son rôle
         if (profile?.user_type) {
-          console.log('[CallbackPage] user_type trouvé:', profile.user_type, '-> /');
-          navigate('/');
+          console.log('[CallbackPage] user_type trouvé:', profile.user_type, '-> /dashboard');
+          navigate('/dashboard');
           return;
         }
 
