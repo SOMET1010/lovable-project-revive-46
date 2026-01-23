@@ -246,26 +246,162 @@ CRÉATION → VÉRIFICATION → PUBLICATION → CANDIDATURES → CONTRAT → OCC
 
 ## 6. Paiements & Contrats
 
-### Moyens de Paiement
+### Moyens de Paiement Mobile Money
 
-- **Orange Money**
-- **MTN Mobile Money**
-- **Moov Money**
-- **Wave**
+| Opérateur | Logo | Disponibilité |
+|-----------|------|---------------|
+| **Orange Money** | 🟠 | Tout le pays |
+| **MTN Mobile Money** | 🟡 | Tout le pays |
+| **Moov Money** | 🔵 | Tout le pays |
+| **Wave** | 🌊 | Zones urbaines |
 
-### Signature Électronique
-
-Intégration **CryptoNeo** pour :
-- Signature des baux
-- États des lieux
-- Avenants
-
-### Pénalités de Retard
+### Architecture du Système de Paiement
 
 ```
-Formule: montant × (taux_pénalité / 100) × jours_retard
-Plafond: penalty_cap (défini dans le contrat)
+┌────────────────────────────────────────────────────────────┐
+│              SYSTÈME DE PAIEMENT MON TOIT                   │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📅 PAIEMENT PONCTUEL                                       │
+│  └─ Locataire initie le paiement                           │
+│  └─ Choix de l'opérateur Mobile Money                      │
+│  └─ Validation OTP sur téléphone                           │
+│  └─ Confirmation instantanée                               │
+│                                                             │
+│  🔄 PAIEMENT RÉCURRENT (Prélèvement Automatique)           │
+│  └─ Autorisation préalable du locataire                    │
+│  └─ CRON quotidien vérifie les échéances                   │
+│  └─ Débit automatique le jour J                            │
+│  └─ Jusqu'à 3 tentatives en cas d'échec                    │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
 ```
+
+### Intégration InTouch API
+
+Mon Toit utilise **InTouch** comme passerelle de paiement :
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| **Collecte** | Réception des paiements locataires |
+| **Disbursement** | Transfert aux propriétaires |
+| **SMS/WhatsApp** | Notifications automatiques |
+
+### Cycle de Paiement Mensuel
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  CYCLE DE PAIEMENT                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  J-5  📱 Rappel SMS/WhatsApp                                │
+│       "Votre loyer de 150 000 FCFA est dû dans 5 jours"    │
+│                                                              │
+│  J-3  📱 Second rappel                                       │
+│       "N'oubliez pas votre paiement dans 3 jours"          │
+│                                                              │
+│  J    💰 Jour d'échéance                                    │
+│       - Prélèvement auto si autorisé                        │
+│       - Ou rappel pour paiement manuel                      │
+│                                                              │
+│  J+1  ⚠️ Premier retard                                     │
+│       "Votre paiement est en retard. Pénalités applicables" │
+│                                                              │
+│  J+X  📈 Pénalités cumulées                                 │
+│       0.5% par jour (plafond 10% du loyer)                  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Calcul des Pénalités de Retard
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  FORMULE PÉNALITÉS                                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Pénalité = Loyer × (0.5% × Jours de retard)               │
+│                                                              │
+│  Exemple: Loyer 150 000 FCFA, 10 jours de retard           │
+│  Pénalité = 150 000 × 0.005 × 10 = 7 500 FCFA              │
+│                                                              │
+│  ⚠️ PLAFOND: Maximum 10% du loyer mensuel                   │
+│  Exemple: Max 15 000 FCFA pour un loyer de 150 000 FCFA    │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Quittances et Reçus
+
+| Document | Génération | Envoi |
+|----------|------------|-------|
+| **Quittance PDF** | Automatique après paiement | Email + SMS |
+| **Numéro de reçu** | Format: `REC-YYYYMMDD-XXXX` | Dans la quittance |
+| **Historique** | Accessible dans `/mes-paiements` | Téléchargeable |
+
+### Tableau de Bord Paiements (Propriétaire)
+
+| Indicateur | Description |
+|------------|-------------|
+| **Revenus du mois** | Total des loyers perçus |
+| **Impayés** | Montant des retards en cours |
+| **Taux de recouvrement** | % des loyers payés à temps |
+| **Prochaines échéances** | Paiements attendus |
+
+### Signature Électronique CryptoNeo
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              SIGNATURE ÉLECTRONIQUE                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  📄 Documents signables:                                    │
+│     • Contrats de bail                                      │
+│     • États des lieux (entrée/sortie)                       │
+│     • Avenants au contrat                                   │
+│     • Mandats de gestion (agences)                          │
+│                                                              │
+│  ✍️ Processus:                                              │
+│     1. Génération du document PDF                           │
+│     2. Envoi via CryptoNeo API                              │
+│     3. Notification aux signataires                         │
+│     4. Signature via OTP mobile                             │
+│     5. Document certifié retourné                           │
+│                                                              │
+│  ✅ Valeur légale:                                          │
+│     Conforme à la réglementation UEMOA                      │
+│     Horodatage certifié                                     │
+│     Archivage sécurisé                                      │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 7. Notifications & Communications
+
+### Canaux de Communication
+
+| Canal | Usage | Fournisseur |
+|-------|-------|-------------|
+| **SMS** | Rappels paiement, OTP | InTouch (principal) |
+| **WhatsApp** | Notifications enrichies | InTouch |
+| **Email** | Documents, récapitulatifs | Brevo (fallback) |
+| **In-App** | Temps réel | Supabase Realtime |
+
+### Types de Notifications
+
+| Événement | Destinataire | Canal |
+|-----------|--------------|-------|
+| Nouvelle candidature | Propriétaire | Push + Email |
+| Candidature acceptée | Locataire | SMS + Email |
+| Visite planifiée | Les 2 parties | SMS |
+| Contrat à signer | Les 2 parties | Email + SMS |
+| Paiement reçu | Propriétaire | Push |
+| Paiement effectué | Locataire | SMS + PDF |
+| Retard de paiement | Locataire | SMS |
+| Demande maintenance | Propriétaire | Push |
+| Mission assignée | Trust Agent | Email |
 
 ---
 
