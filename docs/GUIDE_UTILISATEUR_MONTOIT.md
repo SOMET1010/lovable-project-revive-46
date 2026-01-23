@@ -2,16 +2,86 @@
 
 ## Table des Matières
 
-1. [Système de Rôles](#1-système-de-rôles)
-2. [Dashboards par Rôle](#2-dashboards-par-rôle)
-3. [Trust Agent (Tiers de Confiance)](#3-trust-agent-tiers-de-confiance)
-4. [Fonctionnalités Métier](#4-fonctionnalités-métier)
-5. [Sécurité & Vérification](#5-sécurité--vérification)
-6. [Paiements & Contrats](#6-paiements--contrats)
+1. [Authentification](#1-authentification)
+2. [Système de Rôles](#2-système-de-rôles)
+3. [Dashboards par Rôle](#3-dashboards-par-rôle)
+4. [Trust Agent (Tiers de Confiance)](#4-trust-agent-tiers-de-confiance)
+5. [NeoFace - Vérification Biométrique](#5-neoface---vérification-biométrique)
+6. [Publication de Propriété](#6-publication-de-propriété)
+7. [Fonctionnalités Métier](#7-fonctionnalités-métier)
+8. [Sécurité & Vérification](#8-sécurité--vérification)
+9. [Paiements & Contrats](#9-paiements--contrats)
+10. [Notifications & Communications](#10-notifications--communications)
 
 ---
 
-## 1. Système de Rôles
+## 1. Authentification
+
+### Méthodes de Connexion
+
+Mon Toit privilégie l'authentification par **téléphone** (SMS/OTP), adaptée au marché ivoirien où l'email est peu utilisé.
+
+| Méthode | Description | Recommandé |
+|---------|-------------|------------|
+| **Téléphone + OTP** | Code SMS à usage unique | ✅ Primaire |
+| **Email + Mot de passe** | Authentification classique | Secondaire |
+
+### Flux d'Inscription par Téléphone
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              INSCRIPTION PAR TÉLÉPHONE                       │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. SAISIE                                                   │
+│     └─ Nom complet + Numéro de téléphone                    │
+│     └─ Format: +225 07 XX XX XX XX                          │
+│                                                              │
+│  2. ENVOI OTP                                                │
+│     └─ Code 6 chiffres envoyé par SMS                       │
+│     └─ Fournisseur: InTouch API                             │
+│     └─ Validité: 5 minutes                                  │
+│                                                              │
+│  3. VÉRIFICATION                                             │
+│     └─ Saisie du code OTP                                   │
+│     └─ Création du compte si valide                         │
+│                                                              │
+│  4. COMPLÉTION PROFIL                                        │
+│     └─ Redirection vers /completer-profil                   │
+│     └─ Type d'utilisateur (locataire/propriétaire/agence)   │
+│     └─ Informations complémentaires                         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Flux de Connexion
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CONNEXION                                 │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  📱 PAR TÉLÉPHONE                                            │
+│     └─ Numéro → OTP SMS → Connexion                         │
+│                                                              │
+│  📧 PAR EMAIL                                                │
+│     └─ Email + Mot de passe → Connexion                     │
+│                                                              │
+│  🔄 REDIRECTION POST-CONNEXION                               │
+│     └─ DashboardRouter analyse le profil                    │
+│     └─ Redirige vers le dashboard approprié                 │
+│        • Admin → /admin                                     │
+│        • Trust Agent → /trust-agent/dashboard               │
+│        • Propriétaire → /dashboard/proprietaire             │
+│        • Agence → /dashboard/agence                         │
+│        • Locataire → /dashboard/locataire                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Système de Rôles
 
 ### Architecture Multi-Rôle Dynamique
 
@@ -224,27 +294,269 @@ CRÉATION → VÉRIFICATION → PUBLICATION → CANDIDATURES → CONTRAT → OCC
 
 ---
 
-## 5. Sécurité & Vérification
+## 5. NeoFace - Vérification Biométrique
 
-### Méthodes de Vérification
+### Présentation
 
-| Méthode | Description | Points |
-|---------|-------------|--------|
-| **NeoFace** | Comparaison CNI/Selfie | 60 |
-| **Documents** | Validation par Trust Agent | 40 |
+**NeoFace** est le système de vérification d'identité biométrique de Mon Toit. Il compare une photo de CNI (Carte Nationale d'Identité) avec un selfie en temps réel pour confirmer l'identité de l'utilisateur.
 
-### Niveaux de Confiance
+### Architecture du Système
 
-| Score | Niveau | Badge |
-|-------|--------|-------|
-| 0-30 | Non vérifié | 🔴 |
-| 31-60 | Partiellement vérifié | 🟡 |
-| 61-80 | Vérifié | 🟢 |
-| 81-100 | Très fiable | ⭐ |
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    NEOFACE WORKFLOW                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ÉTAPE 1: UPLOAD CNI                                         │
+│  └─ Photo recto de la CNI                                   │
+│  └─ Validation client (face-api.js)                         │
+│     • Visage détecté ?                                      │
+│     • Taille suffisante (>3% de l'image) ?                  │
+│                                                              │
+│  ÉTAPE 2: DÉTECTION DE VIE (LIVENESS)                        │
+│  └─ Caméra frontale activée                                 │
+│  └─ 4 défis aléatoires parmi:                               │
+│     • Cligner des yeux (blink)                              │
+│     • Tourner la tête à gauche (turn_left)                  │
+│     • Tourner la tête à droite (turn_right)                 │
+│     • Lever la tête (look_up)                               │
+│  └─ Timer 10 secondes par défi                              │
+│                                                              │
+│  ÉTAPE 3: TEST ANTI-REFLET (Flash)                           │
+│  └─ Écran flashe couleur aléatoire (blanc/vert/rouge)       │
+│  └─ Mesure delta luminosité sur le visage                   │
+│  └─ Distingue peau réelle vs écran/photo                    │
+│                                                              │
+│  ÉTAPE 4: COMPARAISON                                        │
+│  └─ Selfie capturé envoyé à l'API NeoFace                   │
+│  └─ Comparaison avec photo CNI                              │
+│  └─ Seuil de correspondance: 85%                            │
+│                                                              │
+│  ÉTAPE 5: RÉSULTAT                                           │
+│  └─ Score ≥ 60 → Vérifié ✓ (+60 pts Trust Score)           │
+│  └─ Score < 60 → Échec (nouvelle tentative possible)        │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Système Anti-Fraude
+
+| Menace | Détection | Pénalité Score |
+|--------|-----------|----------------|
+| **Photo statique** | Variance EAR < 0.005 (yeux immobiles) | -50 pts |
+| **Deepfake** | Variance rotation < 2.0° (mouvement linéaire) | -20 pts |
+| **Injection vidéo** | Gaps de détection > 3 frames | -30 pts |
+| **Écran/Projection** | Delta flash insuffisant | -10 pts |
+| **Temps excessif** | Complétion trop lente | -10 pts |
+
+### Calcul du Liveness Score
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              LIVENESS SCORE (0-100)                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  Score initial: 100 points                                  │
+│                                                              │
+│  DÉDUCTIONS:                                                 │
+│  - Yeux statiques (EAR variance < 0.005)    → -50 pts       │
+│  - Mouvement linéaire (yaw variance < 2.0)  → -20 pts       │
+│  - Gaps de détection (> 3 frames)           → -30 pts       │
+│  - Échec test flash                          → -10 pts       │
+│  - Temps excessif                            → -10 pts       │
+│                                                              │
+│  SEUIL DE VALIDATION: Score ≥ 60                            │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Interface Utilisateur Premium
+
+| Élément | Description |
+|---------|-------------|
+| **Guide Ovale** | Cadre animé pour positionner le visage |
+| **Timer Circulaire** | SVG vert→rouge, 10 secondes par défi |
+| **Barre de Progression** | Chargement du modèle face-api.js |
+| **Animation Succès** | Cercles concentriques + confettis |
+
+### Stockage des Données
+
+| Donnée | Table | Champ |
+|--------|-------|-------|
+| URL Selfie | `facial_verification_attempts` | `selfie_url` |
+| URL Document | `facial_verification_attempts` | `document_url` |
+| Score Matching | `facial_verification_attempts` | `matching_score` |
+| Statut | `facial_verification_attempts` | `status` |
+| Liveness détecté | `facial_verification_attempts` | `is_live` |
 
 ---
 
-## 6. Paiements & Contrats
+## 6. Publication de Propriété
+
+### Workflow en 3 Phases
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│           PUBLICATION DE PROPRIÉTÉ                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ══════════════════════════════════════════════════════════ │
+│  PHASE 1: DÉTAILS DE LA PROPRIÉTÉ                            │
+│  ══════════════════════════════════════════════════════════ │
+│                                                              │
+│  Étape 1: Informations de base                              │
+│  └─ Type (appartement, maison, studio...)                   │
+│  └─ Titre et description                                    │
+│  └─ Nombre de pièces, surface                               │
+│                                                              │
+│  Étape 2: Localisation                                       │
+│  └─ Adresse complète                                        │
+│  └─ Ville, quartier, commune                                │
+│  └─ Coordonnées GPS (optionnel)                             │
+│                                                              │
+│  Étape 3: Prix et conditions                                 │
+│  └─ Loyer mensuel (FCFA)                                    │
+│  └─ Caution                                                 │
+│  └─ Charges incluses ou non                                 │
+│                                                              │
+│  ══════════════════════════════════════════════════════════ │
+│  PHASE 2: VÉRIFICATION D'IDENTITÉ                            │
+│  ══════════════════════════════════════════════════════════ │
+│                                                              │
+│  Étape 4: Upload CNI                                         │
+│  └─ Photo de la pièce d'identité                            │
+│  └─ Déclenche automatiquement NeoFace                       │
+│                                                              │
+│  Étape 5: Vérification biométrique                           │
+│  └─ Liveness detection (défis)                              │
+│  └─ Comparaison CNI ↔ Selfie                                │
+│  └─ Score ≥ 85% requis                                      │
+│                                                              │
+│  ══════════════════════════════════════════════════════════ │
+│  PHASE 3: DOCUMENTS & SOUMISSION                             │
+│  ══════════════════════════════════════════════════════════ │
+│                                                              │
+│  Étape 6: Documents complémentaires                          │
+│  └─ Titre de propriété (obligatoire)                        │
+│  └─ Justificatif de domicile                                │
+│  └─ Mandat de gestion (si agence)                           │
+│                                                              │
+│  Étape 7: Soumission                                         │
+│  └─ Statut → 'en_verification'                              │
+│  └─ Notification envoyée aux admins                         │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Validation Administrative
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│        VALIDATION PAR ADMIN (/admin/validation-documents)   │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  📋 PROPRIÉTÉS EN ATTENTE                                    │
+│  └─ Liste des propriétés status='en_verification'           │
+│                                                              │
+│  🔍 EXAMEN DES DOCUMENTS                                     │
+│  └─ CNI du propriétaire                                     │
+│  └─ Titre de propriété                                      │
+│  └─ Résultat NeoFace                                        │
+│                                                              │
+│  ✅ APPROBATION                                              │
+│  └─ Statut → 'disponible'                                   │
+│  └─ Propriété visible publiquement                          │
+│  └─ +40 pts Trust Score propriétaire                        │
+│  └─ Notification au propriétaire                            │
+│                                                              │
+│  ❌ REJET                                                    │
+│  └─ Statut → 'rejete'                                       │
+│  └─ Motif du rejet stocké                                   │
+│  └─ Notification au propriétaire                            │
+│  └─ Possibilité de resoumettre                              │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Statuts de Propriété
+
+| Statut | Description | Visibilité |
+|--------|-------------|------------|
+| `brouillon` | En cours de création | Propriétaire seul |
+| `en_verification` | Soumise, en attente validation | Propriétaire + Admin |
+| `disponible` | Validée, publiée | Public |
+| `louee` | Occupée par un locataire | Public (marquée) |
+| `rejete` | Refusée par admin | Propriétaire seul |
+| `archivee` | Retirée du marché | Propriétaire seul |
+
+---
+
+## 8. Fonctionnalités Métier
+
+### Cycle de Vie d'une Propriété
+
+```
+CRÉATION → VÉRIFICATION → PUBLICATION → CANDIDATURES → CONTRAT → OCCUPATION
+    │           │              │              │            │          │
+    └─ Brouillon└─ NeoFace     └─ Visible     └─ Scoring   └─ Signé   └─ Actif
+              └─ Admin
+```
+
+### Processus de Candidature
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              CANDIDATURE LOCATAIRE                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  1. DÉCOUVERTE                                               │
+│     └─ Recherche sur /recherche                             │
+│     └─ Consultation détails propriété                       │
+│     └─ Ajout aux favoris (optionnel)                        │
+│                                                              │
+│  2. CANDIDATURE                                              │
+│     └─ Formulaire de candidature                            │
+│     └─ Documents: CNI, bulletins salaire, contrat travail   │
+│     └─ Informations garant (si requis)                      │
+│                                                              │
+│  3. SCORING AUTOMATIQUE                                      │
+│     └─ Trust Score calculé                                  │
+│     └─ Historique locatif vérifié                           │
+│     └─ Solvabilité évaluée                                  │
+│                                                              │
+│  4. EXAMEN PROPRIÉTAIRE                                      │
+│     └─ Notification nouvelle candidature                    │
+│     └─ Consultation du dossier + score                      │
+│     └─ Décision: accepter / refuser                         │
+│                                                              │
+│  5. SI ACCEPTÉ                                               │
+│     └─ Planification visite                                 │
+│     └─ Visite du bien                                       │
+│     └─ Création du contrat                                  │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Système de Scoring Global
+
+| Facteur | Points | Description |
+|---------|--------|-------------|
+| **NeoFace** | 60 pts | Vérification biométrique réussie |
+| **Validation Admin** | 40 pts | Documents validés par admin/Trust Agent |
+| **Total** | 100 pts | Trust Score global |
+
+### Niveaux de Confiance
+
+| Score | Niveau | Badge | Signification |
+|-------|--------|-------|---------------|
+| 0-30 | Non vérifié | 🔴 | Aucune vérification |
+| 31-60 | Partiel | 🟡 | NeoFace seul ou docs seuls |
+| 61-80 | Vérifié | 🟢 | NeoFace + docs basiques |
+| 81-100 | Très fiable | ⭐ | Vérification complète |
+
+---
+
+## 9. Paiements & Contrats
 
 ### Moyens de Paiement Mobile Money
 
@@ -378,7 +690,7 @@ Mon Toit utilise **InTouch** comme passerelle de paiement :
 
 ---
 
-## 7. Notifications & Communications
+## 10. Notifications & Communications
 
 ### Canaux de Communication
 
@@ -405,7 +717,7 @@ Mon Toit utilise **InTouch** comme passerelle de paiement :
 
 ---
 
-## Navigation Rapide
+## 11. Navigation Rapide
 
 ### URLs Principales
 
@@ -421,12 +733,57 @@ Mon Toit utilise **InTouch** comme passerelle de paiement :
 
 | Action | URL |
 |--------|-----|
+| Connexion | `/connexion` |
+| Inscription | `/inscription` |
 | Ajouter propriété | `/dashboard/ajouter-propriete` |
 | Rechercher | `/recherche` |
+| Mon profil | `/profil` |
 | Mon score | `/mon-score` |
 | Mes contrats | `/mes-contrats` |
 | Mes paiements | `/mes-paiements` |
+| Planifier visite | `/visiter/:id` |
+| Vérification biométrique | `/profil?tab=verification` |
+
+### Routes Admin
+
+| Section | URL |
+|---------|-----|
+| Tableau de bord | `/admin/tableau-de-bord` |
+| Utilisateurs | `/admin/utilisateurs` |
+| Validation documents | `/admin/validation-documents` |
+| Trust Agents | `/admin/trust-agents` |
+| Clés API | `/admin/api-keys` |
+| Monitoring | `/admin/service-monitoring` |
+
+### Routes Trust Agent
+
+| Section | URL |
+|---------|-----|
+| Dashboard | `/trust-agent/dashboard` |
+| Modération | `/trust-agent/moderation` |
+| Médiation | `/trust-agent/mediation` |
+| Analytiques | `/trust-agent/analytics` |
 
 ---
 
-*Documentation générée pour Mon Toit - Plateforme immobilière Côte d'Ivoire*
+## 12. Glossaire
+
+| Terme | Définition |
+|-------|------------|
+| **CNI** | Carte Nationale d'Identité |
+| **CEV** | Certificat d'Enregistrement Vérifiable |
+| **CryptoNeo** | Fournisseur de signature électronique |
+| **EAR** | Eye Aspect Ratio (ratio d'ouverture des yeux) |
+| **InTouch** | Passerelle SMS/Mobile Money |
+| **Liveness** | Détection de vie (anti-fraude) |
+| **NeoFace** | Système de vérification biométrique |
+| **OTP** | One-Time Password (code à usage unique) |
+| **RLS** | Row Level Security (sécurité Supabase) |
+| **Trust Score** | Score de confiance utilisateur (0-100) |
+| **UEMOA** | Union Économique Ouest Africaine |
+
+---
+
+*Documentation complète Mon Toit v1.0*  
+*Plateforme immobilière - Côte d'Ivoire*  
+*Dernière mise à jour: Janvier 2026*
