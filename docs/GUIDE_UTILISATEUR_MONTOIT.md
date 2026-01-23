@@ -766,24 +766,965 @@ Mon Toit utilise **InTouch** comme passerelle de paiement :
 
 ---
 
-## 12. Glossaire
+## 12. Système de Favoris & Alertes
 
-| Terme | Définition |
-|-------|------------|
-| **CNI** | Carte Nationale d'Identité |
-| **CEV** | Certificat d'Enregistrement Vérifiable |
-| **CryptoNeo** | Fournisseur de signature électronique |
-| **EAR** | Eye Aspect Ratio (ratio d'ouverture des yeux) |
-| **InTouch** | Passerelle SMS/Mobile Money |
-| **Liveness** | Détection de vie (anti-fraude) |
-| **NeoFace** | Système de vérification biométrique |
-| **OTP** | One-Time Password (code à usage unique) |
-| **RLS** | Row Level Security (sécurité Supabase) |
-| **Trust Score** | Score de confiance utilisateur (0-100) |
-| **UEMOA** | Union Économique Ouest Africaine |
+### Favoris
+
+Les utilisateurs peuvent sauvegarder des propriétés pour les consulter ultérieurement.
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| **Ajouter aux favoris** | Clic sur ❤️ sur une propriété |
+| **Accès** | `/dashboard/locataire/favoris` |
+| **Limite** | Illimitée |
+| **Synchronisation** | Multi-appareils via compte |
+
+### Recherches Sauvegardées
+
+```
+┌────────────────────────────────────────────────────────────┐
+│               RECHERCHES SAUVEGARDÉES                       │
+├────────────────────────────────────────────────────────────┤
+│ 1. CRÉER UNE RECHERCHE                                      │
+│    └─ Définir critères: ville, type, prix, chambres        │
+│    └─ Nommer la recherche                                  │
+│    └─ Activer les alertes (optionnel)                      │
+│                                                             │
+│ 2. STOCKAGE                                                 │
+│    └─ Table: saved_searches                                │
+│    └─ Champs: filters (JSON), notify_enabled               │
+│                                                             │
+│ 3. UTILISATION                                              │
+│    └─ Réexécuter en 1 clic                                 │
+│    └─ Modifier les critères                                │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Système d'Alertes Propriétés
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                 ALERTES PROPRIÉTÉS                          │
+├────────────────────────────────────────────────────────────┤
+│ 📊 LIMITE: 5 alertes actives par utilisateur               │
+│                                                             │
+│ WORKFLOW:                                                   │
+│ 1. Utilisateur crée une alerte avec critères               │
+│ 2. CRON job `check-property-alerts` s'exécute              │
+│ 3. Compare nouvelles propriétés aux critères               │
+│ 4. Envoie notification si match trouvé                     │
+│                                                             │
+│ CANAUX DE NOTIFICATION:                                     │
+│ • Push notification (in-app)                               │
+│ • Email (si activé)                                        │
+│ • SMS (propriétés premium uniquement)                      │
+│                                                             │
+│ TABLE: property_alerts                                      │
+│ └─ user_id, criteria (JSON), is_active, last_triggered     │
+└────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-*Documentation complète Mon Toit v1.0*  
-*Plateforme immobilière - Côte d'Ivoire*  
-*Dernière mise à jour: Janvier 2026*
+## 13. Planification de Visites
+
+### Types de Visites
+
+| Type | Description | Disponibilité |
+|------|-------------|---------------|
+| **Physique** | Visite sur place avec propriétaire/agent | Par défaut |
+| **Vidéo** | Appel vidéo guidé | Sur demande |
+| **Virtuelle 360°** | Visite autonome pré-enregistrée | Si disponible |
+
+### Workflow Complet
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                 PLANIFICATION DE VISITE                     │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ÉTAPE 1: DEMANDE                                           │
+│  └─ Locataire clique "Planifier une visite"                │
+│  └─ Route: /visiter/:propertyId                            │
+│  └─ Choisit date/heure parmi créneaux disponibles          │
+│                                                             │
+│  ÉTAPE 2: NOTIFICATION PROPRIÉTAIRE                         │
+│  └─ SMS + Email + Push                                     │
+│  └─ 24h pour confirmer ou proposer alternative             │
+│                                                             │
+│  ÉTAPE 3: CONFIRMATION                                      │
+│  └─ Statut → confirmed                                     │
+│  └─ QR Code généré pour le locataire                       │
+│  └─ Rappel J-1 aux deux parties                            │
+│                                                             │
+│  ÉTAPE 4: JOUR J                                            │
+│  └─ Rappel 2h avant                                        │
+│  └─ Locataire scanne QR Code à l'arrivée                   │
+│  └─ Confirmation de présence                               │
+│                                                             │
+│  ÉTAPE 5: POST-VISITE                                       │
+│  └─ Demande de feedback                                    │
+│  └─ Possibilité de candidater directement                  │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Gestion des Annulations
+
+| Délai | Action | Conséquence |
+|-------|--------|-------------|
+| > 24h avant | Annulation libre | Aucune pénalité |
+| < 24h avant | Annulation avec motif | Alerte propriétaire |
+| No-show | Non-présentation | -5 pts Trust Score |
+| Report | Proposition nouvelle date | Aucune pénalité |
+
+### Calendrier Locataire
+
+**Accès:** `/dashboard/locataire/calendrier`
+
+| Vue | Description |
+|-----|-------------|
+| **Agenda** | Toutes les visites planifiées |
+| **Historique** | Visites passées avec notes |
+| **À venir** | Prochaines 7 jours |
+
+---
+
+## 14. Demandes de Maintenance
+
+### Processus de Signalement
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                 DEMANDE DE MAINTENANCE                      │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📝 ÉTAPE 1: SIGNALEMENT                                    │
+│  └─ Route: /dashboard/locataire/maintenance                │
+│  └─ Catégorie: plomberie, électricité, serrurerie...       │
+│  └─ Description du problème                                │
+│  └─ Photos (max 5)                                         │
+│  └─ Niveau d'urgence: normal, urgent, critique             │
+│                                                             │
+│  📤 ÉTAPE 2: TRANSMISSION                                   │
+│  └─ Notification propriétaire instantanée                  │
+│  └─ Copie agence (si sous mandat)                          │
+│  └─ Statut: pending                                        │
+│                                                             │
+│  👷 ÉTAPE 3: ATTRIBUTION                                    │
+│  └─ Propriétaire assigne un prestataire                    │
+│  └─ Ou utilise MonArtisan (marketplace)                    │
+│  └─ Date d'intervention planifiée                          │
+│                                                             │
+│  🔧 ÉTAPE 4: INTERVENTION                                   │
+│  └─ Prestataire effectue les travaux                       │
+│  └─ Photos avant/après                                     │
+│  └─ Rapport d'intervention                                 │
+│                                                             │
+│  ✅ ÉTAPE 5: CLÔTURE                                        │
+│  └─ Locataire confirme la résolution                       │
+│  └─ Évaluation du prestataire                              │
+│  └─ Statut: completed                                      │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Catégories de Maintenance
+
+| Catégorie | Exemples | Urgence par défaut |
+|-----------|----------|-------------------|
+| **Plomberie** | Fuite, WC bouché | Urgent |
+| **Électricité** | Panne, disjoncteur | Critique |
+| **Serrurerie** | Clé cassée, porte bloquée | Critique |
+| **Chauffage/Clim** | Panne AC, pas d'eau chaude | Normal |
+| **Menuiserie** | Fenêtre cassée, porte abîmée | Normal |
+| **Ménage** | Nettoyage professionnel | Normal |
+| **Autre** | Divers | Normal |
+
+### Statuts de Suivi
+
+| Statut | Description |
+|--------|-------------|
+| `pending` | En attente de prise en charge |
+| `acknowledged` | Vu par le propriétaire |
+| `assigned` | Prestataire assigné |
+| `scheduled` | Date d'intervention fixée |
+| `in_progress` | Travaux en cours |
+| `completed` | Résolu |
+| `cancelled` | Annulé |
+
+---
+
+## 15. Historique Locatif
+
+### Données Enregistrées
+
+| Information | Source | Impact Trust Score |
+|-------------|--------|-------------------|
+| **Baux précédents** | lease_contracts | +5 pts/bail complet |
+| **Paiements** | payments | +10 pts si 0 retard |
+| **Évaluations reçues** | reviews | +/- selon note |
+| **Litiges** | disputes | -20 pts si responsable |
+| **Durée moyenne** | Calcul automatique | Stabilité valorisée |
+
+### Affichage pour Propriétaires
+
+```
+┌────────────────────────────────────────────────────────────┐
+│          HISTORIQUE LOCATIF - Konan Yao                     │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📊 STATISTIQUES                                            │
+│  └─ 3 locations précédentes                                │
+│  └─ Durée moyenne: 18 mois                                 │
+│  └─ Taux de paiement à temps: 95%                          │
+│  └─ 0 litige                                               │
+│                                                             │
+│  ⭐ ÉVALUATIONS (anonymisées)                               │
+│  └─ "Locataire exemplaire" - 5/5                           │
+│  └─ "Paiements ponctuels" - 4/5                            │
+│  └─ "Bon entretien du logement" - 5/5                      │
+│                                                             │
+│  🏆 BADGES                                                  │
+│  └─ 🎯 Ponctuel (95%+ paiements à temps)                   │
+│  └─ 🏠 Stable (>12 mois en moyenne)                        │
+│  └─ ✨ Soigneux (bonnes évaluations entretien)             │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 16. Gestion des Mandats (Agence)
+
+### Types de Mandats
+
+| Type | Description | Permissions |
+|------|-------------|-------------|
+| **Gestion complète** | Tout inclus | Toutes les permissions |
+| **Location seule** | Recherche locataires | Candidatures, visites, contrats |
+| **Vente seule** | Mise en vente | Publication, négociation |
+
+### Workflow de Signature
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                 SIGNATURE DE MANDAT                         │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. CRÉATION                                                │
+│     └─ Agence crée le mandat                               │
+│     └─ Définit: scope, commissions, permissions            │
+│     └─ Table: agency_mandates                              │
+│                                                             │
+│  2. ENVOI AU PROPRIÉTAIRE                                   │
+│     └─ Notification + lien de signature                    │
+│     └─ Route: /signer-mandat/:mandateId                    │
+│                                                             │
+│  3. SIGNATURE ÉLECTRONIQUE                                  │
+│     └─ Propriétaire signe via CryptoNeo                    │
+│     └─ owner_signed_at renseigné                           │
+│                                                             │
+│  4. CONTRE-SIGNATURE                                        │
+│     └─ Agence signe à son tour                             │
+│     └─ agency_signed_at renseigné                          │
+│                                                             │
+│  5. ACTIVATION                                              │
+│     └─ Statut: active                                      │
+│     └─ Permissions appliquées                              │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Permissions Granulaires
+
+| Permission | Description |
+|------------|-------------|
+| `can_view_properties` | Voir les propriétés |
+| `can_create_properties` | Ajouter des propriétés |
+| `can_edit_properties` | Modifier les propriétés |
+| `can_delete_properties` | Supprimer des propriétés |
+| `can_view_applications` | Voir les candidatures |
+| `can_manage_applications` | Accepter/refuser candidatures |
+| `can_create_leases` | Créer des contrats |
+| `can_view_financials` | Voir les revenus |
+| `can_manage_maintenance` | Gérer la maintenance |
+| `can_manage_documents` | Gérer les documents |
+| `can_communicate_tenants` | Contacter les locataires |
+
+### Système de Commissions
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                 CALCUL COMMISSIONS                          │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📊 EXEMPLE: Loyer 250,000 FCFA                             │
+│                                                             │
+│  Commission agence: 8% = 20,000 FCFA                        │
+│  └─ Part agence: 70% = 14,000 FCFA                         │
+│  └─ Part agent: 30% = 6,000 FCFA                           │
+│                                                             │
+│  STOCKAGE:                                                  │
+│  └─ Table: agency_transactions                             │
+│  └─ Champs: gross_amount, agency_share, agent_share        │
+│                                                             │
+│  VALIDATION:                                                │
+│  └─ Transaction créée à chaque paiement de loyer           │
+│  └─ Statut pending → validated par comptabilité            │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Gestion d'Équipe
+
+| Fonctionnalité | Description |
+|----------------|-------------|
+| **Agents** | Liste des agents de l'agence |
+| **Attributions** | Assigner des propriétés à des agents |
+| **Objectifs** | Définir des targets mensuels/annuels |
+| **Performance** | Suivi KPIs par agent |
+| **Commission Split** | Répartition personnalisée |
+
+---
+
+## 17. Gestion des Candidatures Avancée
+
+### Workflow Propriétaire
+
+```
+┌────────────────────────────────────────────────────────────┐
+│              GESTION CANDIDATURES                           │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📥 RÉCEPTION                                               │
+│  └─ Nouvelle candidature reçue                             │
+│  └─ Notification push + email                              │
+│  └─ Route: /dashboard/proprietaire/candidatures            │
+│                                                             │
+│  📊 EXAMEN                                                  │
+│  └─ Voir profil complet du candidat                        │
+│  └─ Trust Score, historique, documents                     │
+│  └─ Garant(s) associé(s) si applicable                     │
+│                                                             │
+│  ✅ ACTIONS DISPONIBLES                                     │
+│  └─ Accepter → Planifier visite                            │
+│  └─ Refuser → Motif obligatoire                            │
+│  └─ Mettre en attente → Revenir plus tard                  │
+│  └─ Demander infos → Message au candidat                   │
+│                                                             │
+│  🏠 POST-VISITE                                             │
+│  └─ Confirmer l'acceptation                                │
+│  └─ Créer contrat directement                              │
+│  └─ Lien: /dashboard/creer-contrat?applicationId=xxx       │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Notifications Automatiques
+
+| Événement | Destinataire | Message |
+|-----------|--------------|---------|
+| Candidature reçue | Propriétaire | "Nouvelle candidature de [Nom]" |
+| Candidature acceptée | Locataire | "Votre candidature a été acceptée !" |
+| Candidature refusée | Locataire | "Candidature refusée: [motif]" |
+| Visite planifiée | Les deux | "Visite confirmée le [date]" |
+| Contrat prêt | Les deux | "Contrat à signer disponible" |
+
+---
+
+## 18. Création de Contrats
+
+### Depuis une Candidature
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                 CRÉATION DE CONTRAT                         │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  PRÉREQUIS:                                                 │
+│  └─ Candidature acceptée                                   │
+│  └─ Visite effectuée (recommandé)                          │
+│  └─ Locataire vérifié (Trust Score ≥ 60)                   │
+│                                                             │
+│  ÉTAPE 1: SÉLECTION                                         │
+│  └─ Route: /dashboard/creer-contrat                        │
+│  └─ Choisir propriété + locataire (pré-rempli si depuis    │
+│     candidature)                                           │
+│                                                             │
+│  ÉTAPE 2: PARAMÈTRES DU BAIL                                │
+│  └─ Date de début                                          │
+│  └─ Durée: 6, 12, 24 ou 36 mois                            │
+│  └─ Loyer mensuel                                          │
+│  └─ Caution (généralement 2 mois)                          │
+│  └─ Charges incluses ou non                                │
+│                                                             │
+│  ÉTAPE 3: GÉNÉRATION PDF                                    │
+│  └─ Edge function: generate-lease-pdf                      │
+│  └─ Template: lease_templates                              │
+│  └─ Articles pré-définis + clauses personnalisées          │
+│                                                             │
+│  ÉTAPE 4: SIGNATURE ÉLECTRONIQUE                            │
+│  └─ Envoi via CryptoNeo                                    │
+│  └─ Propriétaire signe en premier                          │
+│  └─ Locataire reçoit lien de signature                     │
+│  └─ Double signature → Contrat actif                       │
+│                                                             │
+│  ÉTAPE 5: ACTIVATION                                        │
+│  └─ Statut: active                                         │
+│  └─ Paiements récurrents configurés                        │
+│  └─ Notifications activées                                 │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Structure du Contrat PDF
+
+| Article | Contenu |
+|---------|---------|
+| **Article 1** | Désignation des parties |
+| **Article 2** | Description du bien |
+| **Article 3** | Durée et conditions |
+| **Article 4** | Loyer et charges |
+| **Article 5** | Caution et garanties |
+| **Article 6** | Obligations des parties |
+| **Annexes** | État des lieux, diagnostics |
+
+---
+
+## 19. Intelligence Artificielle (SUTA)
+
+### Présentation
+
+**SUTA** (Assistant Intelligent Mon Toit) est un chatbot IA intégré à la plateforme, propulsé par **Lovable AI** (Google Gemini).
+
+### Capacités
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                    SUTA - ASSISTANT IA                      │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  🔍 RECHERCHE INTELLIGENTE                                  │
+│  └─ "Trouve-moi un 3 pièces à Cocody < 200k FCFA"          │
+│  └─ Analyse les critères en langage naturel                │
+│  └─ Propose des propriétés correspondantes                 │
+│                                                             │
+│  🛡️ CONSEIL ANTI-ARNAQUE                                    │
+│  └─ "Cette annonce est-elle fiable ?"                      │
+│  └─ Analyse les signaux d'alerte                           │
+│  └─ Vérifie le Trust Score du propriétaire                 │
+│                                                             │
+│  📚 AIDE CONTEXTUELLE                                       │
+│  └─ "Comment fonctionne la vérification ?"                 │
+│  └─ "Quels documents pour une candidature ?"               │
+│  └─ Répond aux questions sur Mon Toit                      │
+│                                                             │
+│  📊 RECOMMANDATIONS                                         │
+│  └─ Suggestions personnalisées selon l'historique          │
+│  └─ Propriétés similaires à celles consultées              │
+│  └─ Alertes sur opportunités                               │
+│                                                             │
+│  💬 CONVERSATION NATURELLE                                  │
+│  └─ Comprend le français ivoirien                          │
+│  └─ Contexte de conversation maintenu                      │
+│  └─ Réponses en temps réel (streaming)                     │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Architecture Technique
+
+| Composant | Technologie |
+|-----------|-------------|
+| **Modèle** | google/gemini-2.5-flash |
+| **Gateway** | Lovable AI Gateway |
+| **Edge Function** | ai-chatbot |
+| **Stockage conversations** | chatbot_conversations, chatbot_messages |
+| **Streaming** | SSE (Server-Sent Events) |
+
+### Accès
+
+| Méthode | Description |
+|---------|-------------|
+| **Bulle flottante** | Présente sur toutes les pages |
+| **Page dédiée** | `/chatbot` ou `/assistant` |
+| **Intégration recherche** | Suggestions dans la barre de recherche |
+
+---
+
+## 20. États des Lieux Détaillé
+
+### Types d'États des Lieux
+
+| Type | Moment | Responsable |
+|------|--------|-------------|
+| **Entrée** | Début de bail | Trust Agent + Locataire + Propriétaire |
+| **Sortie** | Fin de bail | Trust Agent + Locataire + Propriétaire |
+| **Intermédiaire** | Inspection périodique | Trust Agent |
+
+### Processus Complet
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                 ÉTAT DES LIEUX                              │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📅 PLANIFICATION                                           │
+│  └─ Mission CEV créée                                      │
+│  └─ Trust Agent assigné                                    │
+│  └─ Date/heure fixée avec toutes les parties               │
+│                                                             │
+│  📸 RÉALISATION                                             │
+│  └─ Visite pièce par pièce                                 │
+│  └─ Photos systématiques                                   │
+│  └─ Checklist normalisée:                                  │
+│     • Sols, murs, plafonds                                 │
+│     • Menuiseries, vitres                                  │
+│     • Plomberie, électricité                               │
+│     • Équipements (cuisine, SDB)                           │
+│     • Extérieurs si applicable                             │
+│                                                             │
+│  📝 RAPPORT                                                 │
+│  └─ Document PDF généré                                    │
+│  └─ Photos annotées                                        │
+│  └─ Observations détaillées                                │
+│  └─ Compteurs relevés                                      │
+│                                                             │
+│  ✍️ SIGNATURES                                              │
+│  └─ Signature électronique Trust Agent                     │
+│  └─ Signature Propriétaire                                 │
+│  └─ Signature Locataire                                    │
+│  └─ Document archivé dans inventory_reports                │
+│                                                             │
+│  📊 IMPACT                                                  │
+│  └─ +40 points Trust Score propriétaire                    │
+│  └─ Base pour retenue caution (sortie)                     │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Comparaison Entrée/Sortie
+
+| Élément | État entrée | État sortie | Différence |
+|---------|-------------|-------------|------------|
+| Peinture salon | Bon | Usure normale | OK |
+| Robinet cuisine | Neuf | Fuite | Réparation à charge locataire |
+| Parquet chambre | Bon | Rayures | Retenue caution possible |
+
+---
+
+## 21. Certifications
+
+### Certification Utilisateur
+
+| Niveau | Critères | Badge |
+|--------|----------|-------|
+| **Basique** | Email vérifié | 🔵 |
+| **Vérifié** | NeoFace validé (60 pts) | 🟢 |
+| **Certifié** | Documents admin validés (+40 pts) | 🏆 |
+
+### Certification Propriété
+
+```
+┌────────────────────────────────────────────────────────────┐
+│             CERTIFICATION PROPRIÉTÉ                         │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ✅ DOCUMENTS VALIDÉS                                       │
+│  └─ Titre de propriété                                     │
+│  └─ Attestation de résidence                               │
+│  └─ Taxe foncière à jour                                   │
+│                                                             │
+│  ✅ VÉRIFICATION TERRAIN                                    │
+│  └─ Mission CEV effectuée                                  │
+│  └─ Photos conformes à l'annonce                           │
+│  └─ Adresse confirmée                                      │
+│                                                             │
+│  ✅ PROPRIÉTAIRE VÉRIFIÉ                                    │
+│  └─ NeoFace validé                                         │
+│  └─ CNI correspondante au titre                            │
+│                                                             │
+│  🏆 BADGE OBTENU: "Propriété Certifiée ANSUT"              │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 22. Réseau de Prestataires (MonArtisan)
+
+### Présentation
+
+**MonArtisan** est le marketplace intégré de prestataires de services pour la maintenance et les travaux.
+
+### Catégories de Prestataires
+
+| Catégorie | Services | Délai moyen |
+|-----------|----------|-------------|
+| **Plomberie** | Fuites, débouchage, installation | 2-4h |
+| **Électricité** | Pannes, installation, dépannage | 2-4h |
+| **Serrurerie** | Ouverture, changement serrure | 1-2h |
+| **Climatisation** | Installation, maintenance, réparation | 24h |
+| **Ménage** | Nettoyage, désinfection | 24h |
+| **Peinture** | Rafraîchissement, rénovation | 48h+ |
+| **Déménagement** | Transport, manutention | Sur devis |
+
+### Workflow MonArtisan
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                    MONARTISAN                               │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. DEMANDE                                                 │
+│     └─ Créée depuis maintenance ou directement             │
+│     └─ Edge function: monartisan-request                   │
+│                                                             │
+│  2. MATCHING                                                │
+│     └─ Algorithme trouve prestataires disponibles          │
+│     └─ Critères: localisation, spécialité, notes           │
+│                                                             │
+│  3. DEVIS                                                   │
+│     └─ Prestataires envoient leurs propositions            │
+│     └─ Comparaison prix/délai/notes                        │
+│                                                             │
+│  4. SÉLECTION                                               │
+│     └─ Client choisit un prestataire                       │
+│     └─ Paiement sécurisé (Mobile Money)                    │
+│                                                             │
+│  5. INTERVENTION                                            │
+│     └─ Prestataire effectue le travail                     │
+│     └─ Confirmation par le client                          │
+│                                                             │
+│  6. ÉVALUATION                                              │
+│     └─ Note sur 5 étoiles                                  │
+│     └─ Commentaire optionnel                               │
+│     └─ Impact sur classement prestataire                   │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 23. Feature Flags (Admin)
+
+### Présentation
+
+Les **Feature Flags** permettent d'activer/désactiver des fonctionnalités sans redéploiement.
+
+### Configuration Actuelle
+
+| Feature | Statut | Description |
+|---------|--------|-------------|
+| `CNAM_VERIFICATION` | ❌ Désactivé | Vérification CNAM (hors périmètre) |
+| `ONECI_VERIFICATION` | ✅ Activé | Vérification ONECI/SNEDAI |
+| `FACE_VERIFICATION` | ✅ Activé | Biométrie NeoFace |
+| `ADVANCED_SEARCH` | ✅ Activé | Recherche avancée |
+| `AI_SEARCH` | ❌ Désactivé | Recherche IA (en développement) |
+| `MAP_SEARCH` | ✅ Activé | Recherche par carte |
+| `COMMERCIAL_PROPERTIES` | ❌ Désactivé | Biens commerciaux |
+| `RESIDENTIAL_PROPERTIES` | ✅ Activé | Biens résidentiels |
+| `MOBILE_MONEY_PAYMENT` | ✅ Activé | Paiement Mobile Money |
+| `CARD_PAYMENT` | ❌ Désactivé | Paiement carte (à venir) |
+| `CRYPTONEO_SIGNATURE` | ✅ Activé | Signature électronique |
+| `SUTA_CHATBOT` | ✅ Activé | Assistant IA |
+| `EMAIL_NOTIFICATIONS` | ✅ Activé | Notifications email |
+| `SMS_NOTIFICATIONS` | ❌ Désactivé | Notifications SMS (à venir) |
+| `WHATSAPP_NOTIFICATIONS` | ✅ Activé | OTP WhatsApp |
+
+### Interface Admin
+
+**Accès:** `/admin/feature-flags`
+
+| Action | Description |
+|--------|-------------|
+| **Toggle** | Activer/désactiver une feature |
+| **Config** | Paramètres avancés (JSON) |
+| **Historique** | Qui a changé quoi et quand |
+
+---
+
+## 24. Règles Business (Admin)
+
+### Présentation
+
+Les **Business Rules** définissent les paramètres métier configurables.
+
+### Exemples de Règles
+
+| Catégorie | Règle | Valeur |
+|-----------|-------|--------|
+| **Pénalités** | Retard de paiement (% par jour) | 0.5% |
+| **Pénalités** | Maximum pénalité | 10% du loyer |
+| **Commissions** | Commission agence par défaut | 8% |
+| **Limites** | Alertes max par utilisateur | 5 |
+| **Limites** | Images max par propriété | 10 |
+| **Scoring** | Seuil NeoFace | 85% |
+| **Scoring** | Points NeoFace | 60 pts |
+| **Scoring** | Points validation admin | 40 pts |
+| **Délais** | Validité OTP | 5 min |
+| **Délais** | Rappel paiement J- | 3 jours |
+
+### Table
+
+```sql
+business_rules
+├── id
+├── rule_key (unique)
+├── rule_name
+├── category
+├── rule_type (number, boolean, json)
+├── value_number
+├── value_boolean
+├── value_json
+├── min_value
+├── max_value
+├── is_enabled
+└── description
+```
+
+---
+
+## 25. Analytics & Reporting (Admin)
+
+### KPIs Plateforme
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                TABLEAU DE BORD ADMIN                        │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📊 UTILISATEURS                                            │
+│  └─ Total inscrits: 12,450                                 │
+│  └─ Actifs (30j): 3,200                                    │
+│  └─ Nouveaux (7j): 145                                     │
+│  └─ Taux vérification: 78%                                 │
+│                                                             │
+│  🏠 PROPRIÉTÉS                                              │
+│  └─ Total publiées: 1,234                                  │
+│  └─ En attente validation: 23                              │
+│  └─ Taux occupation: 89%                                   │
+│                                                             │
+│  💰 TRANSACTIONS                                            │
+│  └─ Volume mensuel: 45M FCFA                               │
+│  └─ Loyers perçus: 892                                     │
+│  └─ Taux recouvrement: 94%                                 │
+│                                                             │
+│  ⚖️ LITIGES                                                 │
+│  └─ Ouverts: 12                                            │
+│  └─ Résolus (30j): 34                                      │
+│  └─ Temps moyen résolution: 4.2 jours                      │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Rapports Automatiques
+
+| Rapport | Fréquence | Destinataires |
+|---------|-----------|---------------|
+| **Synthèse quotidienne** | Tous les jours | Admin |
+| **Rapport mensuel** | 1er du mois | Direction |
+| **Alertes anomalies** | Temps réel | Admin + DevOps |
+| **Performances agents** | Hebdomadaire | Managers agences |
+
+### Edge Functions Analytics
+
+| Function | Description |
+|----------|-------------|
+| `generate-monthly-report` | Génère le rapport PDF mensuel |
+| `service-health-check` | Vérifie l'état des services |
+| `analyze-market-trends` | Analyse tendances du marché |
+
+---
+
+## 26. Système de Garants
+
+### Présentation
+
+Le **garant** est une personne qui se porte caution pour un locataire, garantissant le paiement du loyer en cas de défaillance.
+
+### Workflow Complet
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                 SYSTÈME DE GARANT                           │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. INVITATION                                              │
+│     └─ Locataire invite un garant (email/téléphone)        │
+│     └─ Lien d'invitation envoyé                            │
+│                                                             │
+│  2. INSCRIPTION GARANT                                      │
+│     └─ Garant crée un compte Mon Toit                      │
+│     └─ Type de compte: "garant"                            │
+│                                                             │
+│  3. VÉRIFICATION BIOMÉTRIQUE                                │
+│     └─ NeoFace obligatoire (CNI + selfie)                  │
+│     └─ Seuil: 85% minimum                                  │
+│                                                             │
+│  4. INFORMATIONS FINANCIÈRES                                │
+│     └─ Profession                                          │
+│     └─ Employeur                                           │
+│     └─ Revenu mensuel                                      │
+│     └─ Ratio revenu/loyer vérifié (>3x recommandé)         │
+│                                                             │
+│  5. DOCUMENTS                                               │
+│     └─ CNI (obligatoire)                                   │
+│     └─ Certificat de travail                               │
+│     └─ 3 derniers bulletins de salaire                     │
+│     └─ Relevé bancaire récent                              │
+│                                                             │
+│  6. CALCUL SCORE GARANT                                     │
+│     └─ Score indépendant du locataire                      │
+│     └─ Visible par le propriétaire                         │
+│                                                             │
+│  7. ASSOCIATION                                             │
+│     └─ Garant lié à la candidature                         │
+│     └─ Signature engagement de caution                     │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Impact sur Candidature
+
+| Score Garant | Impact Candidature |
+|--------------|-------------------|
+| ≥ 80 | Très favorable |
+| 60-79 | Favorable |
+| 40-59 | Neutre |
+| < 40 | Défavorable |
+
+---
+
+## 27. Géolocalisation & Cartes
+
+### Fonctionnalités
+
+| Fonctionnalité | Description | Technologie |
+|----------------|-------------|-------------|
+| **Carte propriétés** | Affichage des biens sur carte | Mapbox |
+| **Géocodage** | Adresse → Coordonnées | geocode-address |
+| **Recherche par zone** | Dessiner une zone sur la carte | Mapbox Draw |
+| **Itinéraire** | Calculer le trajet vers une propriété | Mapbox Directions |
+| **Points d'intérêt** | Écoles, commerces, transports à proximité | Mapbox POI |
+
+### Configuration
+
+```
+┌────────────────────────────────────────────────────────────┐
+│                   MAPBOX INTEGRATION                        │
+├────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📍 GÉOCODAGE                                               │
+│  └─ Edge function: geocode-address                         │
+│  └─ Convertit adresse textuelle en lat/lng                 │
+│  └─ Stocké dans properties.location                        │
+│                                                             │
+│  🗺️ AFFICHAGE CARTE                                         │
+│  └─ Composant: MapSearch.tsx                               │
+│  └─ Style: mapbox://styles/mapbox/streets-v12             │
+│  └─ Marqueurs clusterisés pour performance                 │
+│                                                             │
+│  🔍 RECHERCHE PAR ZONE                                      │
+│  └─ Outil de dessin polygone                               │
+│  └─ Filtre propriétés dans la zone                         │
+│  └─ Rayons prédéfinis: 5km, 10km, 20km, 50km              │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
+```
+
+### Paramètres Géolocalisation
+
+| Paramètre | Valeur | Description |
+|-----------|--------|-------------|
+| `defaultRadius` | 5 km | Rayon de recherche par défaut |
+| `radiusOptions` | 5, 10, 20, 50 km | Options disponibles |
+| `timeout` | 10 000 ms | Timeout géolocalisation |
+| `maxAge` | 300 000 ms | Cache position (5 min) |
+
+---
+
+## 28. Glossaire Complet
+
+| Terme | Définition |
+|-------|------------|
+| **ANSUT** | Agence Nationale du Service Universel des Télécommunications |
+| **CEV** | Certificat d'Enregistrement Vérifiable (mission terrain) |
+| **CNI** | Carte Nationale d'Identité |
+| **CryptoNeo** | Fournisseur de signature électronique certifiée |
+| **EAR** | Eye Aspect Ratio - ratio d'ouverture des yeux pour détection de clignement |
+| **Feature Flag** | Interrupteur pour activer/désactiver une fonctionnalité |
+| **Garant** | Personne se portant caution pour un locataire |
+| **InTouch** | Passerelle SMS et Mobile Money (Orange, MTN, Moov, Wave) |
+| **Liveness** | Détection de vie - vérification que l'utilisateur est réellement présent |
+| **Mandat** | Contrat de délégation de gestion entre propriétaire et agence |
+| **MonArtisan** | Marketplace de prestataires de services intégré |
+| **NeoFace** | Système de vérification biométrique faciale |
+| **OTP** | One-Time Password - code à usage unique pour authentification |
+| **RLS** | Row Level Security - sécurité au niveau des lignes (Supabase) |
+| **SUTA** | Assistant IA intégré à Mon Toit |
+| **Trust Agent** | Tiers de confiance chargé des vérifications terrain et médiation |
+| **Trust Score** | Score de confiance utilisateur (0-100 points) |
+| **UEMOA** | Union Économique et Monétaire Ouest Africaine |
+
+---
+
+## 29. Navigation Rapide
+
+### URLs Principales
+
+| Dashboard | URL |
+|-----------|-----|
+| Locataire | `/dashboard/locataire` |
+| Propriétaire | `/dashboard/proprietaire` |
+| Agence | `/dashboard/agence` |
+| Admin | `/admin` |
+| Trust Agent | `/trust-agent/dashboard` |
+
+### Actions Courantes
+
+| Action | URL |
+|--------|-----|
+| Connexion | `/connexion` |
+| Inscription | `/inscription` |
+| Ajouter propriété | `/dashboard/ajouter-propriete` |
+| Rechercher | `/recherche` |
+| Mon profil | `/profil` |
+| Mon score | `/mon-score` |
+| Mes contrats | `/mes-contrats` |
+| Mes paiements | `/mes-paiements` |
+| Planifier visite | `/visiter/:id` |
+| Vérification biométrique | `/profil?tab=verification` |
+| Mes favoris | `/dashboard/locataire/favoris` |
+| Ma maintenance | `/dashboard/locataire/maintenance` |
+| Mon calendrier | `/dashboard/locataire/calendrier` |
+| Chatbot SUTA | `/chatbot` |
+
+### Routes Admin
+
+| Section | URL |
+|---------|-----|
+| Tableau de bord | `/admin/tableau-de-bord` |
+| Utilisateurs | `/admin/utilisateurs` |
+| Validation documents | `/admin/validation-documents` |
+| Trust Agents | `/admin/trust-agents` |
+| Clés API | `/admin/api-keys` |
+| Monitoring | `/admin/service-monitoring` |
+| Feature Flags | `/admin/feature-flags` |
+
+### Routes Trust Agent
+
+| Section | URL |
+|---------|-----|
+| Dashboard | `/trust-agent/dashboard` |
+| Modération | `/trust-agent/moderation` |
+| Médiation | `/trust-agent/mediation` |
+| Analytiques | `/trust-agent/analytics` |
+
+---
+
+*Documentation complète Mon Toit v2.0*  
+*Plateforme immobilière sécurisée - Côte d'Ivoire*  
+*Dernière mise à jour: Janvier 2026*  
+*Sections: 29 | Lignes: ~1600*
