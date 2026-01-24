@@ -29,7 +29,7 @@ serve(async (req) => {
     
     if (!currentConversationId) {
       const authHeader = req.headers.get('Authorization');
-      let userId = null;
+      let userId: string | null = null;
       
       if (authHeader) {
         const token = authHeader.replace('Bearer ', '');
