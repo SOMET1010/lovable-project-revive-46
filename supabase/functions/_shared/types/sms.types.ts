@@ -75,8 +75,27 @@ export type SMSProviderHandler = (
 export type SMSHandlers = {
   intouch?: SMSProviderHandler;
   azure?: SMSProviderHandler;
-  brevo?: SMSProviderHandler;
+  ansut?: SMSProviderHandler;
+  brevo?: SMSProviderHandler; // Deprecated - remplacé par ANSUT
 };
+
+// ANSUT SMS Gateway types
+export interface ANSUTSMSRequest {
+  phone: string;
+  message: string;
+  sender?: string;
+  // TODO: Champs additionnels selon doc API ANSUT
+}
+
+export interface ANSUTSMSResponse {
+  success?: boolean;
+  message_id?: string;
+  id?: string;
+  transaction_id?: string;
+  error?: string;
+  status?: string;
+  // TODO: Champs additionnels selon doc API ANSUT
+}
 
 // OTP types
 export interface OTPRequest {
